@@ -106,3 +106,30 @@ def test_gui_translation_allows_explicit_cloud_candidate_with_session_key(tmp_pa
 
     assert outcome["final"] is False
     assert seen == [("openrouter", {"OPENROUTER_API_KEY": "session-secret"})]
+
+
+def test_gui_translation_checks_exact_cloud_provider_without_source_text(tmp_path: Path) -> None:
+    seen: list[object] = []
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    service = GuiTranslationController(
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        resolve_path=paths.resolve_allowed_path,
+        preflight=lambda provider, environment: seen.append((provider.provider_id, environment)),
+    )
+
+    outcome = service.check_provider(
+        provider_name="openrouter",
+        model="google/gemini-2.5-flash",
+        endpoint="https://openrouter.ai/api/v1",
+        allow_remote_endpoint=False,
+        reasoning_max_tokens=0,
+        api_key="session-secret",
+    )
+
+    assert outcome == {
+        "status": "ok",
+        "provider": "openrouter",
+        "model": "google/gemini-2.5-flash",
+        "endpoint_kind": "cloud",
+    }
+    assert seen == [("openrouter", {"OPENROUTER_API_KEY": "session-secret"})]

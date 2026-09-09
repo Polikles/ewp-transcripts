@@ -58,6 +58,35 @@ class GuiTranslationController:
         self._preflight = preflight or _preflight_provider
         self._lock = operation_lock or threading.Lock()
 
+    def check_provider(
+        self,
+        *,
+        provider_name: str,
+        model: str,
+        endpoint: str,
+        allow_remote_endpoint: bool,
+        reasoning_max_tokens: int | None,
+        api_key: str = "",
+    ) -> dict[str, Any]:
+        """Check one exact translation backend without transferring transcript text."""
+
+        provider, environment = self._create_provider(
+            provider_name=provider_name,
+            model=model,
+            endpoint=endpoint,
+            allow_remote_endpoint=allow_remote_endpoint,
+            reasoning_max_tokens=reasoning_max_tokens,
+            output_mode="json-schema",
+            api_key=api_key,
+        )
+        self._preflight(provider, environment)
+        return {
+            "status": "ok",
+            "provider": provider.provider_id,
+            "model": provider.model_id,
+            "endpoint_kind": provider.endpoint_kind,
+        }
+
     def generate(
         self,
         *,
@@ -86,12 +115,6 @@ class GuiTranslationController:
             raise GuiTranslationError(
                 "GUI_TRANSLATION_LANGUAGE_INVALID", "Target language must be pl or en."
             )
-        if not model.strip():
-            raise GuiTranslationError("GUI_TRANSLATION_MODEL_REQUIRED", "Model is required.")
-        if provider_name not in {"lm-studio", "openrouter"}:
-            raise GuiTranslationError(
-                "GUI_TRANSLATION_PROVIDER_INVALID", "Unknown translation provider."
-            )
         if provider_name == "openrouter" and not allow_cloud:
             raise GuiTranslationError(
                 "GUI_TRANSLATION_CLOUD_OPT_IN_REQUIRED",
@@ -111,35 +134,15 @@ class GuiTranslationController:
             dictionary, dictionary_sha256 = load_project_translation_dictionary(
                 self._resolve_path(dictionary_path)
             )
-        environment: Mapping[str, str] | None = None
-        provider: AutomatedTranslationProvider
-        if provider_name == "lm-studio":
-            provider = LmStudioTranslationProvider(
-                LmStudioTranslationConfig(
-                    model_id=model.strip(),
-                    endpoint=endpoint.strip(),
-                    allow_remote_endpoint=allow_remote_endpoint,
-                    output_mode=cast(
-                        Literal["json-schema", "json-text", "plain-text"], output_mode
-                    ),
-                    temperature=0.0,
-                )
-            )
-        else:
-            if api_key:
-                environment = {"OPENROUTER_API_KEY": api_key}
-            provider = OpenRouterTranslationProvider(
-                OpenRouterTranslationConfig(
-                    model_id=model.strip(),
-                    endpoint=endpoint.strip(),
-                    output_mode=cast(
-                        Literal["json-schema", "json-text", "plain-text"], output_mode
-                    ),
-                    temperature=0.0,
-                    reasoning_max_tokens=reasoning_max_tokens,
-                ),
-                environment=environment,
-            )
+        provider, environment = self._create_provider(
+            provider_name=provider_name,
+            model=model,
+            endpoint=endpoint,
+            allow_remote_endpoint=allow_remote_endpoint,
+            reasoning_max_tokens=reasoning_max_tokens,
+            output_mode=output_mode,
+            api_key=api_key,
+        )
         self._preflight(provider, environment)
         execution_config = self._config.model_copy(
             update={
@@ -195,6 +198,59 @@ class GuiTranslationController:
             ),
             "final": False,
         }
+
+    @staticmethod
+    def _create_provider(
+        *,
+        provider_name: str,
+        model: str,
+        endpoint: str,
+        allow_remote_endpoint: bool,
+        reasoning_max_tokens: int | None,
+        output_mode: str,
+        api_key: str,
+    ) -> tuple[AutomatedTranslationProvider, Mapping[str, str] | None]:
+        if provider_name not in {"lm-studio", "openrouter"}:
+            raise GuiTranslationError(
+                "GUI_TRANSLATION_PROVIDER_INVALID", "Unknown translation provider."
+            )
+        if not model.strip():
+            raise GuiTranslationError("GUI_TRANSLATION_MODEL_REQUIRED", "Model is required.")
+        if reasoning_max_tokens is not None and (
+            isinstance(reasoning_max_tokens, bool) or reasoning_max_tokens < 0
+        ):
+            raise GuiTranslationError(
+                "GUI_TRANSLATION_REASONING_INVALID",
+                "Reasoning-token budget must be a non-negative integer.",
+            )
+        normalized_mode = cast(Literal["json-schema", "json-text", "plain-text"], output_mode)
+        if provider_name == "lm-studio":
+            return (
+                LmStudioTranslationProvider(
+                    LmStudioTranslationConfig(
+                        model_id=model.strip(),
+                        endpoint=endpoint.strip(),
+                        allow_remote_endpoint=allow_remote_endpoint,
+                        output_mode=normalized_mode,
+                        temperature=0.0,
+                    )
+                ),
+                None,
+            )
+        environment = {"OPENROUTER_API_KEY": api_key} if api_key else None
+        return (
+            OpenRouterTranslationProvider(
+                OpenRouterTranslationConfig(
+                    model_id=model.strip(),
+                    endpoint=endpoint.strip(),
+                    output_mode=normalized_mode,
+                    temperature=0.0,
+                    reasoning_max_tokens=reasoning_max_tokens,
+                ),
+                environment=environment,
+            ),
+            environment,
+        )
 
 
 def _preflight_provider(provider: Any, environment: Mapping[str, str] | None = None) -> None:

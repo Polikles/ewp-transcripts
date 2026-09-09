@@ -135,13 +135,17 @@ The v0.2.0 defaults are:
 ```toml
 [revision]
 anchor_target_words = 200
+anchor_target_speaker_blocks = 5
 long_gap_warning_ms = 2000
 generate_audit = false
 editor = ""
 ```
 
-- `anchor_target_words` is an approximate review/alignment window size. Writers should
-  prefer a nearby canonical segment, pause, or speaker boundary when practical.
+- `anchor_target_speaker_blocks` is the preferred number of consecutive speaker blocks shown in
+  one GUI review section. The final section can contain fewer blocks. Set it to a positive value
+  to keep review navigation consistent; it defaults to `5`.
+- `anchor_target_words` is retained as the approximate review/alignment window size for callers
+  that deliberately disable speaker-block grouping.
 - `long_gap_warning_ms` controls the warning for inserted text positioned between
   canonical source words separated by a large pause. It does not move canonical timing.
 - `generate_audit` controls optional detailed audit persistence; compact provenance and

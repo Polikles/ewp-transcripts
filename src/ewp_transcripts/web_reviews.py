@@ -56,6 +56,7 @@ class GuiReviewController:
             output_directory=output_path,
             source_revision_path=source_path,
             anchor_target_words=self._config.revision.anchor_target_words,
+            anchor_target_speaker_blocks=self._config.revision.anchor_target_speaker_blocks,
             lock_timeout_seconds=self._config.runtime.lock_timeout_seconds,
         )
         return {

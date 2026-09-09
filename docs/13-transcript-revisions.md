@@ -435,6 +435,7 @@ Initial planned keys:
 ```toml
 [revision]
 anchor_target_words = 200
+anchor_target_speaker_blocks = 5
 long_gap_warning_ms = 2000
 generate_audit = false
 editor = ""

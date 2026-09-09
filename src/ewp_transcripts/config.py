@@ -215,6 +215,7 @@ class OutputsConfig(StrictConfigModel):
 
 class RevisionConfig(StrictConfigModel):
     anchor_target_words: int = Field(default=200, ge=1)
+    anchor_target_speaker_blocks: int = Field(default=5, ge=1)
     long_gap_warning_ms: int = Field(default=2000, ge=0)
     generate_audit: bool = False
     editor: str = ""

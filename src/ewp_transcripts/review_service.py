@@ -68,9 +68,34 @@ def _canonical_units(base: CanonicalResult) -> tuple[tuple[CanonicalWord, str], 
     return tuple(units)
 
 
-def _anchor_ranges(base: CanonicalResult, *, target_words: int) -> tuple[tuple[int, int], ...]:
+def _anchor_ranges(
+    base: CanonicalResult,
+    *,
+    target_words: int,
+    target_speaker_blocks: int | None,
+) -> tuple[tuple[int, int], ...]:
     if target_words < 1:
         raise ValueError("anchor_target_words must be positive")
+    if target_speaker_blocks is not None and target_speaker_blocks < 1:
+        raise ValueError("anchor_target_speaker_blocks must be positive when configured")
+    if target_speaker_blocks is not None:
+        units = _canonical_units(base)
+        speaker_ranges: list[tuple[int, int]] = []
+        start = 0
+        blocks_in_range = 1
+        previous_speaker_id = units[0][1]
+        for index, (_, speaker_id) in enumerate(units[1:], start=1):
+            if speaker_id == previous_speaker_id:
+                continue
+            if blocks_in_range == target_speaker_blocks:
+                speaker_ranges.append((start, index))
+                start = index
+                blocks_in_range = 1
+            else:
+                blocks_in_range += 1
+            previous_speaker_id = speaker_id
+        speaker_ranges.append((start, len(units)))
+        return tuple(speaker_ranges)
     segment_sizes = [len(segment.words) for segment in base.transcript.segments if segment.words]
     ranges: list[tuple[int, int]] = []
     start = 0
@@ -106,6 +131,7 @@ def prepare_review(
     *,
     source_revision_path: Path | None = None,
     anchor_target_words: int = 200,
+    anchor_target_speaker_blocks: int | None = 5,
     generated_at: datetime | None = None,
     application_version: str = __version__,
 ) -> TranscriptReview:
@@ -144,7 +170,11 @@ def prepare_review(
                 "REVISION_BASE_HASH_MISMATCH",
                 "Cannot use an incompatible source revision for review preparation",
             ) from error
-    ranges = _anchor_ranges(base, target_words=anchor_target_words)
+    ranges = _anchor_ranges(
+        base,
+        target_words=anchor_target_words,
+        target_speaker_blocks=anchor_target_speaker_blocks,
+    )
     if source_revision is not None:
         ranges = _revision_safe_ranges(ranges, source_revision, units)
     anchors = tuple(

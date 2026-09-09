@@ -930,6 +930,7 @@ def prepare_review_file(
     output_directory: Path | None = None,
     source_revision_path: Path | None = None,
     anchor_target_words: int = 200,
+    anchor_target_speaker_blocks: int | None = 5,
     lock_timeout_seconds: float = 0,
 ) -> ReviewPreparationOutcome:
     """Prepare and non-destructively publish one review without loading models or audio."""
@@ -938,6 +939,7 @@ def prepare_review_file(
         result_path,
         source_revision_path=source_revision_path,
         anchor_target_words=anchor_target_words,
+        anchor_target_speaker_blocks=anchor_target_speaker_blocks,
     )
     path = publish_review(
         review,
@@ -1451,6 +1453,7 @@ def prepare_review_batch(
     source_revision_path: Path | None = None,
     recursive: bool = False,
     anchor_target_words: int = 200,
+    anchor_target_speaker_blocks: int | None = 5,
 ) -> BatchReviewPreparationOutcome:
     """Prepare discovered canonical results sequentially with per-file failure isolation."""
 
@@ -1475,6 +1478,7 @@ def prepare_review_batch(
                 output_directory=destination,
                 source_revision_path=source_revision_path,
                 anchor_target_words=anchor_target_words,
+                anchor_target_speaker_blocks=anchor_target_speaker_blocks,
                 lock_timeout_seconds=config.runtime.lock_timeout_seconds,
             )
             jobs.append(

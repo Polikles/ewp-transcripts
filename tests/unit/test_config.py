@@ -35,6 +35,7 @@ def test_packaged_defaults_match_mvp_decisions(tmp_path: Path) -> None:
     assert config.outputs.generate_vtt is False
     assert config.outputs.generate_segments_json is True
     assert config.revision.anchor_target_words == 200
+    assert config.revision.anchor_target_speaker_blocks == 5
     assert config.revision.long_gap_warning_ms == 2000
     assert config.revision.generate_audit is False
     assert config.revision.editor == ""

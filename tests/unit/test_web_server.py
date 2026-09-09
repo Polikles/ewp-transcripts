@@ -93,6 +93,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"GUI_TRANSLATION_REVIEW_SAVE_REQUIRED" in script_response.body
     assert b"translation-provider" in script_response.body
     assert b"translation-set-openrouter-key" in script_response.body
+    assert b"translation-check-provider" in script_response.body
     stylesheet_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )

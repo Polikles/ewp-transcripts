@@ -1335,6 +1335,7 @@ def revise_prepare_command(
             source_revision_path=_optional_user_path(source_revision),
             recursive=recursive,
             anchor_target_words=config.revision.anchor_target_words,
+            anchor_target_speaker_blocks=config.revision.anchor_target_speaker_blocks,
         )
     except ApplicationError as error:
         _expected_error(error)
@@ -2022,6 +2023,7 @@ def revise_edit_command(
             normalized_result,
             output_directory=review_directory,
             anchor_target_words=config.revision.anchor_target_words,
+            anchor_target_speaker_blocks=config.revision.anchor_target_speaker_blocks,
             lock_timeout_seconds=config.runtime.lock_timeout_seconds,
         )
         original_review = prepared.path.read_bytes()

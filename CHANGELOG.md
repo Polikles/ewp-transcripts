@@ -4,9 +4,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.13.0`.
+The next internal-beta version is `0.14.0`.
 
 ### Added
+
+- Translation provider controls now mirror correction controls: they are collapsed by default,
+  keep the endpoint input directly below its label, and provide an exact-model **Check
+  connection** action that verifies the selected backend without sending transcript text.
+- Review preparation now groups five speaker blocks per section by default (with a shorter final
+  section when needed). The count is configurable through
+  `revision.anchor_target_speaker_blocks`.
 
 - Added explicit OpenRouter cloud translation candidates alongside local LM Studio. The adapter
   requires a session-only API key, authenticated exact-model readiness checks, explicit cloud

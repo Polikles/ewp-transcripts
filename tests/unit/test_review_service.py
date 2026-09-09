@@ -1,5 +1,6 @@
 """Tests for model-free review preparation from canonical results."""
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -34,6 +35,7 @@ def test_small_anchor_target_splits_only_at_segment_boundaries() -> None:
     review = prepare_review(
         RESULT_EXAMPLE,
         anchor_target_words=4,
+        anchor_target_speaker_blocks=None,
         generated_at=NOW,
     )
 
@@ -41,6 +43,19 @@ def test_small_anchor_target_splits_only_at_segment_boundaries() -> None:
         ("word_000001", "word_000004"),
         ("word_000005", "word_000008"),
     ]
+
+
+def test_default_review_groups_five_speaker_blocks_per_section(tmp_path: Path) -> None:
+    document = json.loads(RESULT_EXAMPLE.read_text(encoding="utf-8"))
+    words = [word for segment in document["transcript"]["segments"] for word in segment["words"]]
+    for index, word in enumerate(words):
+        word["speaker_id"] = "speaker_001" if index % 2 == 0 else "speaker_002"
+    result = tmp_path / RESULT_EXAMPLE.name
+    result.write_text(json.dumps(document), encoding="utf-8")
+
+    review = prepare_review(result, generated_at=NOW)
+
+    assert [len(anchor.speaker_blocks) for anchor in review.anchors] == [5, 3]
 
 
 def test_prepared_review_round_trips_without_changing_canonical_file() -> None:

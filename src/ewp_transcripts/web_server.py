@@ -718,7 +718,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
             return
-        if path == "/api/v1/translations/generate":
+        if path in {"/api/v1/translations/check", "/api/v1/translations/generate"}:
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
                 self._write_response(
@@ -736,9 +736,13 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             try:
-                if document.get("provider") == "lm-studio" and any(
-                    job.status in {"queued", "running"}
-                    for job in self.server.gui_transcriptions.jobs()
+                if (
+                    path == "/api/v1/translations/generate"
+                    and document.get("provider") == "lm-studio"
+                    and any(
+                        job.status in {"queued", "running"}
+                        for job in self.server.gui_transcriptions.jobs()
+                    )
                 ):
                     raise GuiTranslationError(
                         "GUI_GPU_BUSY",
@@ -749,23 +753,38 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     not isinstance(reasoning, int) or isinstance(reasoning, bool) or reasoning < 0
                 ):
                     raise ValueError("Reasoning-token budget must be a non-negative integer")
-                payload = self.server.gui_translations.generate(
-                    result=str(document.get("result_path", "")),
-                    source_revision=str(document.get("source_revision_path", "")),
-                    output_directory=str(document.get("output_directory", "")),
-                    resume_directory=str(document.get("resume_directory", "")),
-                    target_language=str(document.get("target_language", "")),
-                    provider_name=str(document.get("provider", "")),
-                    model=str(document.get("model", "")),
-                    endpoint=str(document.get("endpoint", "")),
-                    allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
-                    allow_cloud=document.get("allow_cloud") is True,
-                    reasoning_max_tokens=reasoning,
-                    output_mode=str(document.get("output_mode", "")),
-                    dictionary_path=str(document.get("dictionary_path", "")),
-                    confirmed=document.get("confirmed") is True,
-                    api_key=self.server.gui_openrouter_api_key,
-                )
+                provider_name = str(document.get("provider", ""))
+                model = str(document.get("model", ""))
+                endpoint = str(document.get("endpoint", ""))
+                allow_remote_endpoint = document.get("allow_remote_endpoint") is True
+                api_key = self.server.gui_openrouter_api_key
+                if path == "/api/v1/translations/check":
+                    payload = self.server.gui_translations.check_provider(
+                        provider_name=provider_name,
+                        model=model,
+                        endpoint=endpoint,
+                        allow_remote_endpoint=allow_remote_endpoint,
+                        reasoning_max_tokens=reasoning,
+                        api_key=api_key,
+                    )
+                else:
+                    payload = self.server.gui_translations.generate(
+                        result=str(document.get("result_path", "")),
+                        source_revision=str(document.get("source_revision_path", "")),
+                        output_directory=str(document.get("output_directory", "")),
+                        resume_directory=str(document.get("resume_directory", "")),
+                        target_language=str(document.get("target_language", "")),
+                        provider_name=provider_name,
+                        model=model,
+                        endpoint=endpoint,
+                        allow_remote_endpoint=allow_remote_endpoint,
+                        allow_cloud=document.get("allow_cloud") is True,
+                        reasoning_max_tokens=reasoning,
+                        output_mode=str(document.get("output_mode", "")),
+                        dictionary_path=str(document.get("dictionary_path", "")),
+                        confirmed=document.get("confirmed") is True,
+                        api_key=api_key,
+                    )
             except ApplicationError as error:
                 self._write_response(
                     _json_response(
