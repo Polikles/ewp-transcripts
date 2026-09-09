@@ -1,0 +1,7 @@
+.review-bottom-navigation {
+  align-items: center;
+  margin: 1rem 0 1.35rem;
+}
+
+/* Review text should grow with its content; manual resize remains available. */
+#review-editor textarea { overflow: hidden; }

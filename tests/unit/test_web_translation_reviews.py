@@ -33,6 +33,8 @@ def test_gui_translation_review_prepare_save_preview_apply_and_export(tmp_path: 
         parent=str(candidate.translation_path),
         output=str(tmp_path / "reviews"),
     )
+    loaded = controller.document(review["review_path"], result, None, candidate.translation_path)
+    assert loaded["review_sha256"] == review["review_sha256"]
     targets = [
         {"unit_id": unit["unit_id"], "target_text": unit["target_text"]} for unit in review["units"]
     ]

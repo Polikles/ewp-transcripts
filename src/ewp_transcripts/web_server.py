@@ -137,8 +137,12 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
     if name == "app.js":
         body += b"\n" + assets.joinpath("review_speakers.js").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_recovery.js").read_bytes()
+        body += b"\n" + assets.joinpath("review_editor_display.js").read_bytes()
+        body += b"\n" + assets.joinpath("translation_review_editor.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
+        body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
+        body += b"\n" + assets.joinpath("translation_review_editor.css").read_bytes()
     return WebResponse(HTTPStatus.OK, content_type, body)
 
 
@@ -805,6 +809,13 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         revision=common["revision"],
                         parent=common["parent"],
                         output=str(document.get("review_output_directory", "")),
+                    )
+                elif path.endswith("/load"):
+                    payload = self.server.gui_translation_reviews.document(
+                        common["review"],
+                        common["result"],
+                        common["revision"] or None,
+                        common["parent"],
                     )
                 elif path.endswith("/save"):
                     targets = document.get("targets")

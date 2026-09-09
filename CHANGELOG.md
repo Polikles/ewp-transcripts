@@ -4,10 +4,17 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.11.1`.
+The next internal-beta version is `0.12.0`.
 
 ### Added
 
+- Added a recoverable semantic-translation editor in the GUI: one-unit or all-unit display,
+  mirrored previous/next navigation above and below the review, bounded local Undo/Redo, and
+  restoration of the last saved translation draft after a browser refresh or later GUI process.
+  Translation text is persisted only by **Save translation draft** and must be previewed again
+  before immutable application.
+- Transcript-review text areas now expand to show their full text, with matching section
+  navigation below the editor as well as above it.
 - Added revision-scoped GUI speaker display names. They are stored in the editable review and
   immutable child revision, inherit into child review preparation, and override only exports
   resolved from that revision; canonical speaker IDs and canonical ASR artifacts stay unchanged.

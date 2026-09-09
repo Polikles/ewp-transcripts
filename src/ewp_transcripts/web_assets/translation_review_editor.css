@@ -1,0 +1,17 @@
+.translation-review-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: .9rem 0;
+}
+
+.translation-review-navigation > label { margin: 0; }
+.translation-review-navigation select { font: inherit; padding: .4rem; }
+.translation-review-navigation .actions { margin: 0; }
+.translation-target-label { font-weight: 400; }
+
+@media (max-width: 42rem) {
+  .translation-review-navigation { align-items: stretch; }
+  .translation-review-navigation .actions { width: 100%; }
+}
