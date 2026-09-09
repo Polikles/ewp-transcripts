@@ -78,9 +78,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"beforeunload" in script_response.body
     assert b"not manually verified" in script_response.body
     assert b"Separate selected text" in script_response.body
-    assert b"Merge with previous block" in script_response.body
+    assert b"Merge entire block with previous" in script_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
-    assert b"captureSelection" in script_response.body
+    assert b"separatedByPointer" in script_response.body
     assert b"Only pending" in script_response.body
     assert b"Previous occurrence" in script_response.body
     assert b"Versioned project dictionary published" in script_response.body
