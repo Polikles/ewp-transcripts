@@ -81,6 +81,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Merge entire block with previous" in script_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
     assert b"separatedByPointer" in script_response.body
+    assert b"/\\\\s" not in script_response.body
+    assert b"/\\s" in script_response.body
     assert b"Only pending" in script_response.body
     assert b"Previous occurrence" in script_response.body
     assert b"Versioned project dictionary published" in script_response.body
