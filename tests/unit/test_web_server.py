@@ -45,6 +45,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Status: connecting" in response.body
     assert b'id="clear-workflow"' in response.body
     assert b"Add to queue" in response.body
+    assert b'id="clear-browser-state"' in response.body
     assert b"Start queue" in response.body
     assert b"Review and export" in response.body
     assert b"LLM-assisted transcript correction" in response.body
@@ -91,6 +92,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"translation-review-navigation" in script_response.body
     assert b"ewp-active-translation-review-v1" in script_response.body
     assert b"GUI_TRANSLATION_REVIEW_SAVE_REQUIRED" in script_response.body
+    assert b"clearEwpBrowserState" in script_response.body
     assert b"translation-provider" in script_response.body
     assert b"translation-set-openrouter-key" in script_response.body
     assert b"translation-check-provider" in script_response.body

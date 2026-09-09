@@ -4,9 +4,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.14.0`.
+The next internal-beta version is `0.14.1`.
 
 ### Added
+
+- Added a footer **Clear EWP browser state** troubleshooting control. After confirmation, it
+  clears only this GUI origin's `ewp-*` browser-state keys and reloads; it never deletes saved
+  reviews, revisions, exports, dictionaries, server-side queued jobs, or other files on disk.
 
 - Translation provider controls now mirror correction controls: they are collapsed by default,
   keep the endpoint input directly below its label, and provide an exact-model **Check

@@ -161,6 +161,9 @@ does not delete artifacts. One project output root SHOULD derive separate `revie
 A small versioned, non-secret pointer file under that root SHOULD allow explicit restoration
 across browsers and application restarts. It identifies the last review and applied revision;
 it is not a transcript/revision artifact and MUST remain subject to allowed-root validation.
+A troubleshooting control MAY clear only EWP-owned browser-state keys after a clear warning that
+it is not an HTTP-cache purge and does not delete server-side or on-disk artifacts. It MUST not
+clear unrelated origin keys or browser-held credentials.
 A later full-workspace state MUST allow the operator to deliberately save and restore all
 non-secret workflow fields, staged artifact identities, open review identity, and current
 step after the browser, GUI process, VM, or workstation has stopped. Restore revalidates every
