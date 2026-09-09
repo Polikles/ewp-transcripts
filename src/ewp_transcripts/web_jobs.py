@@ -17,6 +17,7 @@ from ewp_transcripts.application import transcribe_one
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.domain.revision import sha256_file
 
 
 class GuiTranscriptionJob(BaseModel):
@@ -51,9 +52,9 @@ class GuiTranscriptionQueue:
     ) -> None:
         self._config = config
         self._service = service
-        self._pending: Queue[tuple[str, Path, Path, LanguageMode, Literal["auto"] | int] | None] = (
-            Queue()
-        )
+        self._pending: Queue[
+            tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int] | None
+        ] = Queue()
         self._jobs: dict[str, GuiTranscriptionJob] = {}
         self._order: deque[str] = deque(maxlen=50)
         self._lock = threading.Lock()
@@ -97,7 +98,7 @@ class GuiTranscriptionQueue:
     def start(self) -> int:
         """Queue every staged job in stable insertion order."""
 
-        pending: list[tuple[str, Path, Path, LanguageMode, Literal["auto"] | int]] = []
+        pending: list[tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int]] = []
         with self._lock:
             for job_id in reversed(self._order):
                 job = self._jobs[job_id]
@@ -111,6 +112,7 @@ class GuiTranscriptionQueue:
                         job_id,
                         Path(job.input_path),
                         Path(job.output_directory),
+                        job.source_sha256,
                         job.language,
                         job.speaker_count,
                     )
@@ -175,7 +177,20 @@ class GuiTranscriptionQueue:
             item = self._pending.get()
             if item is None:
                 return
-            job_id, input_path, output_directory, language, speaker_count = item
+            job_id, input_path, output_directory, source_sha256, language, speaker_count = item
+            if source_sha256 and not _matches_staged_source(input_path, source_sha256):
+                self._replace(
+                    job_id,
+                    status="failed",
+                    error={
+                        "code": "GUI_SOURCE_FINGERPRINT_MISMATCH",
+                        "message": (
+                            "The staged source changed after dry-run. Inspect and stage the "
+                            "current file again."
+                        ),
+                    },
+                )
+                continue
             self._replace(job_id, status="running")
             try:
                 config = self._config.model_copy(
@@ -211,3 +226,12 @@ class GuiTranscriptionQueue:
                         "message": "Transcription failed unexpectedly; inspect retained job state.",
                     },
                 )
+
+
+def _matches_staged_source(path: Path, expected_sha256: str) -> bool:
+    """Check the dry-run source bytes immediately before opening them for transcription."""
+
+    try:
+        return path.is_file() and sha256_file(path) == expected_sha256
+    except OSError:
+        return False

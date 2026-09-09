@@ -4,9 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.14.1`.
+The next internal-beta version is `0.15.0`.
 
 ### Added
+
+- GUI transcription now recomputes each staged source SHA-256 immediately before starting the
+  transcription service. A changed or missing source fails with
+  `GUI_SOURCE_FINGERPRINT_MISMATCH` before the decoder opens it; the operator must inspect and
+  stage the current file again.
 
 - Added a footer **Clear EWP browser state** troubleshooting control. After confirmation, it
   clears only this GUI origin's `ewp-*` browser-state keys and reloads; it never deletes saved

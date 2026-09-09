@@ -704,8 +704,10 @@ Planned capabilities:
   unable to grant themselves broader filesystem authority;
 - content-aware input validation and time-of-check/time-of-use protection: retain strict JSON
   parsing and FFprobe decoding, then compare exact source fingerprints again when a staged job
-  starts. Evaluate an optional owned immutable input snapshot for workflows where files may change
-  during processing; do not rely on filename extensions or non-portable long-lived locks alone;
+  starts. This pre-open fingerprint check is implemented; evaluate an optional owned immutable
+  input snapshot for workflows where files may change during processing, because a check alone
+  cannot eliminate every race before a decoder opens the file. Do not rely on filename extensions
+  or non-portable long-lived locks alone;
 - warning display and job queue;
 - an explicit visible workflow progression: transcription, transcript review (or provisional
   export), apply and verified export, then optional translation, translation review (or

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_jobs import GuiTranscriptionQueue
 
 
@@ -114,6 +115,38 @@ def test_staged_job_can_be_removed_before_start(tmp_path: Path) -> None:
         assert queue.start() == 0
     finally:
         queue.close()
+
+
+def test_queue_rejects_source_changed_after_dry_run_before_transcription(tmp_path: Path) -> None:
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"dry-run bytes")
+    calls = []
+    queue = GuiTranscriptionQueue(
+        config=ApplicationConfig(),
+        service=lambda *args, **kwargs: calls.append((args, kwargs)),
+    )
+    try:
+        queue.stage(
+            source,
+            tmp_path / "output",
+            planned_job_id="episode",
+            planned_result_path=str(tmp_path / "output/episode_results.json"),
+            source_sha256=sha256_file(source),
+        )
+        source.write_bytes(b"changed after dry-run")
+        queue.start()
+        failed = wait_for_terminal(queue)
+    finally:
+        queue.close()
+
+    assert failed.status == "failed"
+    assert failed.error == {
+        "code": "GUI_SOURCE_FINGERPRINT_MISMATCH",
+        "message": (
+            "The staged source changed after dry-run. Inspect and stage the current file again."
+        ),
+    }
+    assert calls == []
 
 
 def test_active_queue_exposes_shared_output_and_rejectable_job_identity(tmp_path: Path) -> None:

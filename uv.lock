@@ -238,7 +238,7 @@ wheels = [
 
 [[package]]
 name = "ewp-transcripts"
-version = "0.14.1"
+version = "0.15.0"
 source = { editable = "." }
 dependencies = [
     { name = "pyannote-audio" },
