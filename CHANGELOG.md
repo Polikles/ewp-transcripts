@@ -4,7 +4,7 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.10.0`.
+The next internal-beta version is `0.11.0`.
 
 ### Added
 
@@ -14,6 +14,8 @@ The next internal-beta version is `0.10.0`.
 - Added revision-local GUI speakers for manually separated transcript text. They have stable
   `speaker_NNN` identifiers and labels only in the review/revision lineage, enabling recovery
   from missing diarization speakers or shared channels without changing canonical ASR evidence.
+- Added bounded draft-only Undo/Redo history and grouped review-editor controls. Split, merge,
+  and revision-local-speaker edits checkpoint any dirty draft before changing block structure.
 
 ### Fixed
 

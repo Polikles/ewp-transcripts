@@ -83,6 +83,12 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"review-speaker-labels" in response.body
     assert b"Add revision-only speaker" in script_response.body
     assert b"reviewSpeakerNamesPanel" in script_response.body
+    assert b"Draft and history" in script_response.body
+    assert b"Undo applied to the current draft" in script_response.body
+    stylesheet_response = dispatch_get(
+        config, server_port=8765, host="localhost:8765", target="/assets/app.css"
+    )
+    assert b"review-control-groups" in stylesheet_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
     assert b"speaker_labels: reviewDocument.speaker_labels" in script_response.body
     assert b"startsWithTerminalPunctuation" in script_response.body

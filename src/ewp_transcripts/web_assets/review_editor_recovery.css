@@ -1,0 +1,30 @@
+.review-control-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.review-control-group {
+  border: 1px solid #d9d5cb;
+  border-radius: .5rem;
+  padding: .75rem;
+}
+
+.review-control-group h3 {
+  margin: 0 0 .6rem;
+  font-size: 1rem;
+}
+
+.review-control-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.review-control-line:first-of-type { margin-top: 0; }
+
+@media (max-width: 42rem) {
+  .review-control-groups { grid-template-columns: 1fr; }
+}

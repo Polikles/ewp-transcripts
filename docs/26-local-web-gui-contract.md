@@ -205,6 +205,10 @@ and speakers not defined by the canonical result or the revision-local display-n
 rejected. It supports project/revision-scoped speaker display-name replacement when canonical
 speaker labels are absent or wrong, plus manually added revision-local speakers; neither feature
 may silently rewrite canonical results.
+Separating text or adding a revision-local speaker likewise saves a dirty draft before changing
+block structure. The current editor maintains a bounded Undo/Redo history that never writes an
+artifact; undoing or redoing a change makes the draft dirty and therefore still requires Save and
+Preview before Apply.
 
 Equivalent rules apply to translation units: source text remains visible, target text is
 editable, source ownership is immutable, and apply uses the existing translation service.

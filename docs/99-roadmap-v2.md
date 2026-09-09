@@ -528,13 +528,13 @@ display-name editing and revision-local speaker addition are implemented pending
 qualification for recordings whose canonical result lacks useful names, misses a speaker, or
 combines multiple speakers on one source channel.
 
-After the current split/whole-block-merge slice is fully qualified, improve editor recovery and
-comfort without weakening immutable publication rules: save the mutable draft automatically
-before each block-edit operation; offer explicit Undo and Redo for the current editor history;
-and group controls by workflow. The left group should present **Prepare** then **Preview**. The
-right group should present **Save** and **Restore**, then **Clear**, then **Undo** and **Redo**.
-Undo/Redo affects only the mutable review draft, keeps protected anchors/lineage intact, and
-still requires an explicit save plus preview before immutable application.
+The next editor-recovery/comfort slice is implemented pending browser qualification: it saves a
+dirty mutable draft before each structural block-edit operation, offers explicit bounded Undo and
+Redo for the current editor history, and groups controls by workflow. The left group presents
+**Prepare** then **Preview**. The right group presents **Save** and **Restore**, then **Clear**,
+then **Undo** and **Redo**. Undo/Redo affects only the mutable review draft, keeps protected
+anchors/lineage intact, and still requires an explicit save plus preview before immutable
+application.
 
 Every dataset requires a pinned version/configuration, source and license record,
 download/preparation hashes, official split preservation, normalization declaration,

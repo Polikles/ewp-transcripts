@@ -46,17 +46,25 @@ function renderReviewSpeakerLabels(document) {
   add.className = "review-add-speaker";
   add.textContent = "Add revision-only speaker";
   add.title = "Add a speaker available only in this editable review and its descendant revision.";
-  add.addEventListener("click", () => {
+  add.addEventListener("click", async () => {
     if (!reviewDocument) return;
-    const speakerId = nextRevisionSpeakerId(reviewDocument.speakers);
-    const number = Number(speakerId.slice("speaker_".length));
-    reviewDocument.speakers = [...reviewDocument.speakers, speakerId];
-    reviewDocument.speaker_labels[speakerId] = `Speaker ${number}`;
-    markReviewDirty();
-    renderReview(reviewDocument, true);
-    setReviewStatus(
-      `${speakerId} added for this revision only. Rename it if needed, then assign it to isolated text and save the draft.`,
-    );
+    try {
+      const savedBeforeAdd = reviewDirty;
+      if (savedBeforeAdd) await saveReviewDraft();
+      const speakerId = nextRevisionSpeakerId(reviewDocument.speakers);
+      const number = Number(speakerId.slice("speaker_".length));
+      reviewDocument.speakers = [...reviewDocument.speakers, speakerId];
+      reviewDocument.speaker_labels[speakerId] = `Speaker ${number}`;
+      markReviewDirty();
+      renderReview(reviewDocument, true);
+      setReviewStatus(
+        savedBeforeAdd
+          ? `Draft saved before adding ${speakerId}. Rename it if needed, assign it to isolated text, then save again.`
+          : `${speakerId} added for this revision only. Rename it if needed, then assign it to isolated text and save the draft.`,
+      );
+    } catch (error) {
+      setReviewStatus(error.message);
+    }
   });
   container.append(add);
   panel.hidden = document.speakers.length === 0;

@@ -4,7 +4,7 @@ Last updated: **2026-08-28**.
 
 ## Checkpoint
 
-Version `0.10.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.11.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
@@ -187,6 +187,10 @@ editing and revision-local speaker addition are now implemented pending browser 
 names and added `speaker_NNN` IDs are persisted in the review and immutable revision, inherited
 by a child review, and override only exports from that revision without altering the canonical
 result.
+The next review-editor recovery/comfort slice is implemented pending browser qualification:
+structural edits checkpoint a dirty draft first, the active editor maintains a bounded local
+Undo/Redo history, and Prepare/Preview plus Save/Restore/Clear/Undo/Redo are grouped by purpose.
+Undo/Redo never write artifacts and still requires a later Save plus Preview before Apply.
 The same acceptance pass found that refresh discarded the active editor pointer and that
 separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
 from its authoritative disk file using only non-secret path pointers in browser storage,

@@ -136,6 +136,9 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
     body = assets.joinpath(name).read_bytes()
     if name == "app.js":
         body += b"\n" + assets.joinpath("review_speakers.js").read_bytes()
+        body += b"\n" + assets.joinpath("review_editor_recovery.js").read_bytes()
+    if name == "app.css":
+        body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
     return WebResponse(HTTPStatus.OK, content_type, body)
 
 
