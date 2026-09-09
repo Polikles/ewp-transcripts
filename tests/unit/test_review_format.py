@@ -84,6 +84,18 @@ def test_literal_directive_prefix_is_unescaped_and_reescaped() -> None:
     assert "@@@ literal directive-like text" in render_review(review)
 
 
+def test_revision_scoped_speaker_labels_round_trip() -> None:
+    text = _review_text().replace(
+        "# application_version: 0.2.0",
+        '# application_version: 0.2.0\n# speaker_labels: {"speaker_001":"Szymon"}',
+    )
+
+    review = parse_review(text)
+
+    assert review.header.speaker_labels == {"speaker_001": "Szymon"}
+    assert '# speaker_labels: {"speaker_001":"Szymon"}' in render_review(review)
+
+
 @pytest.mark.parametrize(
     ("old", "new", "code"),
     [

@@ -100,6 +100,11 @@ The revision MAY assign a different `speaker_id` from the canonical word mapping
 This supports correction of short interjections assigned to the surrounding speaker.
 Creating a new speaker identity is outside the v0.2.0 revision contract.
 
+An optional immutable revision-scoped display-name map may override the rendered name for a
+known speaker ID. It is intended for manual review when diarization supplies anonymous or wrong
+names. The map travels through child review preparation and applies only to exports resolved from
+that revision; it never changes the canonical ASR result or creates a cross-recording identity.
+
 ## 7. Sentence boundaries and punctuation
 
 Reviewers edit ordinary punctuation in text. They do not maintain a parallel sentence

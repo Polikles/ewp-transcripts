@@ -282,7 +282,11 @@ def build_revision(
         ),
         parent_revision=parent,
         provenance=provenance or RevisionProvenance(method="manual", interface="cli"),
-        transcript=RevisionTranscript(language=review.header.language, tokens=tuple(tokens)),
+        transcript=RevisionTranscript(
+            language=review.header.language,
+            tokens=tuple(tokens),
+            speaker_labels=review.header.speaker_labels,
+        ),
         alignment=RevisionAlignment(
             strategy="anchored-token-v1",
             review_format_version=1,

@@ -145,6 +145,22 @@ def export_result(
             base_path=results_path if selected_revision is not None else None,
         )
         rendered_result = effective_canonical_result(result, effective)
+        if selected_revision is not None and selected_revision.transcript.speaker_labels:
+            labels = selected_revision.transcript.speaker_labels
+            rendered_result = rendered_result.model_copy(
+                update={
+                    "speakers": tuple(
+                        speaker.model_copy(
+                            update={
+                                "speaker_label": labels.get(
+                                    speaker.speaker_id, speaker.speaker_label
+                                )
+                            }
+                        )
+                        for speaker in rendered_result.speakers
+                    )
+                }
+            )
     except (ValidationError, ValueError) as error:
         if selected_revision is not None:
             raise InvalidCanonicalResultError(

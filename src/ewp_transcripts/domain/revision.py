@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.errors import InvalidRevisionError
@@ -105,6 +106,7 @@ class RevisionToken(RevisionModel):
 class RevisionTranscript(RevisionModel):
     language: Literal["pl", "en"]
     tokens: tuple[RevisionToken, ...]
+    speaker_labels: dict[str, str] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_token_ids(self) -> Self:
@@ -112,6 +114,19 @@ class RevisionTranscript(RevisionModel):
         if len(token_ids) != len(set(token_ids)):
             raise ValueError("revision token IDs must be unique")
         return self
+
+    @field_validator("speaker_labels")
+    @classmethod
+    def require_revision_scoped_speaker_labels(cls, value: dict[str, str]) -> dict[str, str]:
+        normalized: dict[str, str] = {}
+        for speaker_id, label in value.items():
+            if re.fullmatch(r"speaker_[0-9]{3,}", speaker_id) is None:
+                raise ValueError("speaker label keys must be speaker identifiers")
+            cleaned = " ".join(label.split())
+            if not cleaned or not cleaned.isprintable():
+                raise ValueError("speaker labels must be printable and non-empty")
+            normalized[speaker_id] = cleaned
+        return dict(sorted(normalized.items()))
 
 
 class RevisionAlignment(RevisionModel):
@@ -216,6 +231,12 @@ def validate_revision_base(
             raise InvalidRevisionError("Canonical result contains duplicate word IDs")
         word_positions[word.word_id] = position
     speaker_ids = {speaker.speaker_id for speaker in base.speakers}
+
+    unknown_labels = set(revision.transcript.speaker_labels) - speaker_ids
+    if unknown_labels:
+        raise InvalidRevisionError(
+            f"Revision references unknown speaker label: {sorted(unknown_labels)[0]}"
+        )
 
     mapped_positions: list[int] = []
     for token in revision.transcript.tokens:

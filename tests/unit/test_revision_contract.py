@@ -42,6 +42,14 @@ def test_revision_example_matches_schema() -> None:
     ).validate(example)
 
 
+def test_revision_schema_accepts_revision_scoped_speaker_labels() -> None:
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    example = json.loads(EXAMPLE_PATH.read_text(encoding="utf-8"))
+    example["transcript"]["speaker_labels"] = {"speaker_001": "Szymon"}
+
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(example)
+
+
 def test_review_example_contains_required_contract_structure() -> None:
     lines = REVIEW_PATH.read_text(encoding="utf-8").splitlines()
     assert lines[0] == "# EWP-REVIEW 1"

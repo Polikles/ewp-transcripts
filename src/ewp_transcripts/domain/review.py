@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Literal, Self
 from uuid import UUID
@@ -42,6 +43,7 @@ class ReviewHeader(ReviewModel):
     source_revision_id: UUID | None = None
     source_revision_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     source_revision_number: int | None = Field(default=None, ge=1)
+    speaker_labels: dict[str, str] = Field(default_factory=dict)
     extensions: tuple[ReviewExtensionHeader, ...] = ()
 
     @field_validator(
@@ -55,6 +57,19 @@ class ReviewHeader(ReviewModel):
         if not value.isprintable() or "\n" in value or "\r" in value:
             raise ValueError("review header values must be printable single lines")
         return value
+
+    @field_validator("speaker_labels")
+    @classmethod
+    def require_revision_scoped_speaker_labels(cls, value: dict[str, str]) -> dict[str, str]:
+        normalized: dict[str, str] = {}
+        for speaker_id, label in value.items():
+            if re.fullmatch(r"speaker_[0-9]{3,}", speaker_id) is None:
+                raise ValueError("speaker label keys must be speaker identifiers")
+            cleaned = " ".join(label.split())
+            if not cleaned or not cleaned.isprintable():
+                raise ValueError("speaker labels must be printable and non-empty")
+            normalized[speaker_id] = cleaned
+        return dict(sorted(normalized.items()))
 
     @model_validator(mode="after")
     def validate_optional_revision_identity(self) -> Self:
@@ -167,6 +182,12 @@ def validate_review_base(
         )
 
     speaker_ids = {speaker.speaker_id for speaker in base.speakers}
+    unknown_labels = set(header.speaker_labels) - speaker_ids
+    if unknown_labels:
+        raise InvalidReviewError(
+            "REVISION_SPEAKER_INVALID",
+            f"Review references unknown speaker label: {sorted(unknown_labels)[0]}",
+        )
     for anchor in review.anchors:
         for block in anchor.speaker_blocks:
             if block.speaker_id not in speaker_ids:

@@ -175,6 +175,7 @@ def prepare_review(
                 sha256_file(source_revision_path) if source_revision_path else None
             ),
             source_revision_number=(source_revision.revision_number if source_revision else None),
+            speaker_labels=(source_revision.transcript.speaker_labels if source_revision else {}),
             extensions=(
                 (
                     ReviewExtensionHeader(

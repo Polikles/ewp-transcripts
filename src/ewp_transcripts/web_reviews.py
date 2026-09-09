@@ -77,6 +77,7 @@ class GuiReviewController:
             "canonical_asr" if parsed.header.source_revision_number is None else "revision",
         )
         speakers = [speaker.speaker_id for speaker in base.speakers]
+        base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
         return {
             "review_path": str(review_path),
             "result_path": str(result_path),
@@ -86,7 +87,8 @@ class GuiReviewController:
             "source_verification": verification,
             "speakers": speakers,
             "speaker_labels": {
-                speaker.speaker_id: speaker.speaker_label for speaker in base.speakers
+                speaker_id: parsed.header.speaker_labels.get(speaker_id, label)
+                for speaker_id, label in base_labels.items()
             },
             "anchors": [
                 {
@@ -105,6 +107,7 @@ class GuiReviewController:
         *,
         expected_sha256: str,
         anchors: list[dict[str, Any]],
+        speaker_labels: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         review_path = self._resolve_path(review)
         result_path = self._resolve_path(result)
@@ -116,6 +119,27 @@ class GuiReviewController:
         parsed = load_review(review_path)
         base = load_canonical_result(result_path)
         known_speakers = {speaker.speaker_id for speaker in base.speakers}
+        base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
+        revised_labels = dict(parsed.header.speaker_labels)
+        if speaker_labels is not None:
+            if not isinstance(speaker_labels, dict):
+                raise GuiReviewError(
+                    "GUI_REVIEW_STRUCTURE_INVALID", "Speaker labels must be an object"
+                )
+            for speaker_id, label in speaker_labels.items():
+                if speaker_id not in known_speakers or not isinstance(label, str):
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "A speaker label is malformed"
+                    )
+                normalized = " ".join(label.split())
+                if not normalized:
+                    raise GuiReviewError(
+                        "GUI_REVIEW_STRUCTURE_INVALID", "Speaker labels cannot be empty"
+                    )
+                if normalized == base_labels[speaker_id]:
+                    revised_labels.pop(speaker_id, None)
+                else:
+                    revised_labels[speaker_id] = normalized
         if len(anchors) != len(parsed.anchors):
             raise GuiReviewError("GUI_REVIEW_STRUCTURE_INVALID", "Review anchors cannot change")
         updated: list[ReviewAnchor] = []
@@ -157,7 +181,12 @@ class GuiReviewController:
                     )
                 blocks.append(parsed_block)
             updated.append(original.model_copy(update={"speaker_blocks": tuple(blocks)}))
-        revised = parsed.model_copy(update={"anchors": tuple(updated)})
+        revised = parsed.model_copy(
+            update={
+                "header": parsed.header.model_copy(update={"speaker_labels": revised_labels}),
+                "anchors": tuple(updated),
+            }
+        )
         self._atomic_replace(review_path, render_review(revised).encode("utf-8"))
         self._previewed.pop(str(review_path), None)
         return self.document(review_path, result_path)

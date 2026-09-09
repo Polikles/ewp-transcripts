@@ -547,11 +547,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     anchors = document.get("anchors")
                     if not isinstance(anchors, list):
                         raise ValueError("Review anchors must be an array")
+                    speaker_labels = document.get("speaker_labels")
+                    if speaker_labels is not None and not isinstance(speaker_labels, dict):
+                        raise ValueError("Speaker labels must be an object")
                     payload = self.server.gui_reviews.save(
                         str(document.get("review_path", "")),
                         result,
                         expected_sha256=str(document.get("review_sha256", "")),
                         anchors=anchors,
+                        speaker_labels=speaker_labels,
                     )
                 elif path == "/api/v1/reviews/preview":
                     payload = self.server.gui_reviews.preview(

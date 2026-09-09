@@ -183,7 +183,8 @@ independent block, assigning it to another known speaker, and deliberately mergi
 blocks without modifying the canonical result. A sentence selected with its immediately leading
 terminal punctuation retains that punctuation in the preceding block; a dirty draft is saved as
 a recovery checkpoint before a whole-block merge. Project/revision-scoped speaker display-name
-editing remains a later editor requirement.
+editing is now implemented pending browser qualification: names are persisted in the review and
+immutable revision, inherited by a child review, and override only exports from that revision.
 The same acceptance pass found that refresh discarded the active editor pointer and that
 separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
 from its authoritative disk file using only non-secret path pointers in browser storage,

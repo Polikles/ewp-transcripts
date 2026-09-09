@@ -523,8 +523,9 @@ Artifacts may retain ordinary anonymous `speaker_NNN` assignments and audit para
 the temporary embeddings/fingerprints are discarded when the job finishes.
 
 Extend the browser review editor with safe block splitting/merging so a word or sentence can
-be reassigned to the correct speaker without moving unrelated text. Add revision-scoped
-speaker display-name editing for recordings whose canonical result lacks useful names.
+be reassigned to the correct speaker without moving unrelated text. Revision-scoped speaker
+display-name editing is implemented pending browser qualification for recordings whose canonical
+result lacks useful names.
 
 After the current split/whole-block-merge slice is fully qualified, improve editor recovery and
 comfort without weakening immutable publication rules: save the mutable draft automatically

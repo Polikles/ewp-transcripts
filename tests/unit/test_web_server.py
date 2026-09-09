@@ -79,7 +79,10 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"not manually verified" in script_response.body
     assert b"Separate selected text" in script_response.body
     assert b"Merge entire block with previous" in script_response.body
+    assert b"Speaker names for this revision" in response.body
+    assert b"review-speaker-labels" in response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
+    assert b"speaker_labels: reviewDocument.speaker_labels" in script_response.body
     assert b"startsWithTerminalPunctuation" in script_response.body
     assert b"Draft saved before merge" in script_response.body
     assert b"mergeReviewBlock" in script_response.body

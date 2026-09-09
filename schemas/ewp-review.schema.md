@@ -59,6 +59,16 @@ Optional fields reserved for review files prepared from a previous revision:
 # source_revision_number: <positive integer>
 ```
 
+An optional revision-scoped display-name map may be added by the GUI:
+
+```text
+# speaker_labels: {"speaker_001":"Szymon","speaker_002":"Damian"}
+```
+
+The value is one compact JSON object. It may name only speakers already present in the canonical
+result. It is an override for the editable review and any immutable revision created from it;
+it never changes canonical speaker IDs or the canonical ASR artifact.
+
 `base_result_file` is a resolution hint only. `base_result_sha256` is authoritative.
 
 Unknown header keys beginning with `x_` MAY be preserved by readers. Unknown non-extension
@@ -238,6 +248,10 @@ corrections that were not present in raw ASR.
 Anchors still refer to base canonical word ranges. A later full snapshot continues to map
 corrected tokens to base words or insertion anchors, so the parent revision is not needed
 to render the child.
+
+When the source revision contains revision-scoped speaker labels, preparation carries them into
+the child review header. A reviewer may replace them again in the GUI; a later immutable child
+then records its own exact label map.
 
 ## 14. Alignment input
 

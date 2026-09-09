@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime
 from pathlib import Path
@@ -32,11 +33,12 @@ _REQUIRED_HEADERS = (
     "generated_at",
     "application_version",
 )
-_OPTIONAL_HEADERS = (
+_SOURCE_REVISION_HEADERS = (
     "source_revision_id",
     "source_revision_sha256",
     "source_revision_number",
 )
+_OPTIONAL_HEADERS = (*_SOURCE_REVISION_HEADERS, "speaker_labels")
 
 
 def _invalid(message: str, *, code: str = "REVISION_REVIEW_INVALID") -> InvalidReviewError:
@@ -57,6 +59,20 @@ def _parse_positive_integer(key: str, value: str) -> int:
     if not value.isdigit() or int(value) < 1:
         raise _invalid(f"{key} must be a positive integer")
     return int(value)
+
+
+def _parse_speaker_labels(value: str | None) -> dict[str, str]:
+    if value is None:
+        return {}
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as error:
+        raise _invalid("speaker_labels must be one JSON object") from error
+    if not isinstance(parsed, dict) or not all(
+        isinstance(key, str) and isinstance(label, str) for key, label in parsed.items()
+    ):
+        raise _invalid("speaker_labels must map speaker IDs to labels")
+    return parsed
 
 
 def _parse_header(lines: list[str]) -> ReviewHeader:
@@ -80,7 +96,7 @@ def _parse_header(lines: list[str]) -> ReviewHeader:
     missing = [key for key in _REQUIRED_HEADERS if key not in values]
     if missing:
         raise _invalid(f"Missing required review header: {missing[0]}")
-    source_present = [key in values for key in _OPTIONAL_HEADERS]
+    source_present = [key in values for key in _SOURCE_REVISION_HEADERS]
     if any(source_present) and not all(source_present):
         raise _invalid("Source revision headers must be provided together")
     for key in sorted(key for key in values if key.startswith("x_")):
@@ -105,6 +121,7 @@ def _parse_header(lines: list[str]) -> ReviewHeader:
                 if source_present[2]
                 else None
             ),
+            speaker_labels=_parse_speaker_labels(values.get("speaker_labels")),
             extensions=tuple(extensions),
         )
     except (ValidationError, ValueError) as error:
@@ -250,6 +267,11 @@ def render_review(review: TranscriptReview) -> str:
                 f"# source_revision_sha256: {header.source_revision_sha256}",
                 f"# source_revision_number: {header.source_revision_number}",
             )
+        )
+    if header.speaker_labels:
+        lines.append(
+            "# speaker_labels: "
+            + json.dumps(header.speaker_labels, ensure_ascii=False, separators=(",", ":"))
         )
     lines.extend(
         f"# {item.key}: {item.value}" for item in sorted(header.extensions, key=lambda x: x.key)

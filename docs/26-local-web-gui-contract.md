@@ -141,6 +141,11 @@ hidden visually, but the GUI MUST NOT discard or invent them. Applying changes r
 preview produced by the existing revision validation/alignment path and an explicit user
 action.
 
+The GUI MAY expose editable display names for known speaker IDs. A changed name is stored only
+in the mutable review and immutable child revision, is inherited by a review prepared from that
+revision, and overrides that revision's exports. It MUST NOT rename canonical speaker IDs,
+modify the canonical result, or create a reusable cross-recording identity.
+
 Preview is a non-publishing validation step: it parses the exact saved review, verifies its
 base hash and protected anchors, runs alignment, and reports revision statistics and warnings
 without writing a revision. The GUI MUST label that state as unpublished and show a readable
