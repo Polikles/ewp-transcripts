@@ -11,6 +11,9 @@ The next internal-beta version is `0.10.0`.
 - Added revision-scoped GUI speaker display names. They are stored in the editable review and
   immutable child revision, inherit into child review preparation, and override only exports
   resolved from that revision; canonical speaker IDs and canonical ASR artifacts stay unchanged.
+- Added revision-local GUI speakers for manually separated transcript text. They have stable
+  `speaker_NNN` identifiers and labels only in the review/revision lineage, enabling recovery
+  from missing diarization speakers or shared channels without changing canonical ASR evidence.
 - Added GUI manual-review selected-text separation and adjacent-block merging. Each resulting
   editable block can be assigned independently to a known speaker while protected anchors and
   the canonical result remain unchanged.

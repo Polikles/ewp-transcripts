@@ -141,9 +141,10 @@ hidden visually, but the GUI MUST NOT discard or invent them. Applying changes r
 preview produced by the existing revision validation/alignment path and an explicit user
 action.
 
-The GUI MAY expose editable display names for known speaker IDs. A changed name is stored only
-in the mutable review and immutable child revision, is inherited by a review prepared from that
-revision, and overrides that revision's exports. It MUST NOT rename canonical speaker IDs,
+The GUI MAY expose editable display names for known speaker IDs and may add a revision-local
+speaker ID for manually reassigned text. A changed or added name is stored only in the mutable
+review and immutable child revision, is inherited by a review prepared from that revision, and
+overrides that revision's exports. It MUST NOT rename canonical speaker IDs,
 modify the canonical result, or create a reusable cross-recording identity.
 
 Preview is a non-publishing validation step: it parses the exact saved review, verifies its
@@ -200,9 +201,10 @@ lineage. Merging one entire adjacent block into the previous block saves any dir
 creating a recoverable checkpoint before the visible merge; the merge itself remains editable
 and must be saved again before preview. A selected leading `.`, `!`, or `?` immediately before
 a new sentence remains with the preceding block when the new sentence is isolated. Empty blocks
-and unknown speakers are rejected. It MUST later permit
-project/revision-scoped speaker display-name replacement when canonical speaker labels are
-absent or wrong; neither feature may silently rewrite canonical results.
+and speakers not defined by the canonical result or the revision-local display-name map are
+rejected. It supports project/revision-scoped speaker display-name replacement when canonical
+speaker labels are absent or wrong, plus manually added revision-local speakers; neither feature
+may silently rewrite canonical results.
 
 Equivalent rules apply to translation units: source text remains visible, target text is
 editable, source ownership is immutable, and apply uses the existing translation service.

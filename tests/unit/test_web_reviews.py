@@ -123,6 +123,49 @@ def test_browser_review_persists_revision_scoped_speaker_labels(tmp_path: Path) 
     assert '"speaker_label": "Szymon"' in contents[".json"]
 
 
+def test_browser_review_can_add_a_revision_local_speaker(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    blocks = prepared["anchors"][0]["blocks"]
+    first = blocks[0]
+    blocks.insert(1, {"speaker_id": "speaker_003", "text": "another episode."})
+    first["text"] = "Welcome to"
+
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+        speaker_labels={"speaker_003": "Guest"},
+    )
+    assert saved["speakers"] == ["speaker_001", "speaker_002", "speaker_003"]
+    assert saved["speaker_labels"]["speaker_003"] == "Guest"
+
+    service.preview(saved["review_path"], str(result))
+    applied = service.apply(saved["review_path"], str(result), str(tmp_path / "revisions"))
+    revision = load_transcript_revision(Path(applied["revision_path"]))
+    assert revision.transcript.speaker_labels["speaker_003"] == "Guest"
+    assert any(token.speaker_id == "speaker_003" for token in revision.transcript.tokens)
+
+    child = service.prepare(
+        str(result), str(tmp_path / "child-reviews"), str(applied["revision_path"])
+    )
+    assert child["speakers"] == ["speaker_001", "speaker_002", "speaker_003"]
+    assert child["speaker_labels"]["speaker_003"] == "Guest"
+
+    exported = service.export(
+        str(result), applied["revision_path"], str(tmp_path / "exports"), ["txt", "segments"]
+    )
+    contents = {
+        path.suffix: path.read_text(encoding="utf-8") for path in map(Path, exported["written"])
+    }
+    assert "Guest:" in contents[".txt"]
+    assert '"speaker_id": "speaker_003"' in contents[".json"]
+    assert '"speaker_label": "Guest"' in contents[".json"]
+
+
 def test_browser_review_rejects_empty_split_blocks(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())

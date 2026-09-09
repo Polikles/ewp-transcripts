@@ -182,15 +182,10 @@ def validate_review_base(
         )
 
     speaker_ids = {speaker.speaker_id for speaker in base.speakers}
-    unknown_labels = set(header.speaker_labels) - speaker_ids
-    if unknown_labels:
-        raise InvalidReviewError(
-            "REVISION_SPEAKER_INVALID",
-            f"Review references unknown speaker label: {sorted(unknown_labels)[0]}",
-        )
+    allowed_speaker_ids = speaker_ids | set(header.speaker_labels)
     for anchor in review.anchors:
         for block in anchor.speaker_blocks:
-            if block.speaker_id not in speaker_ids:
+            if block.speaker_id not in allowed_speaker_ids:
                 raise InvalidReviewError(
                     "REVISION_SPEAKER_INVALID",
                     f"Review references unknown speaker: {block.speaker_id}",

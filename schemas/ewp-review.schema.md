@@ -65,9 +65,10 @@ An optional revision-scoped display-name map may be added by the GUI:
 # speaker_labels: {"speaker_001":"Szymon","speaker_002":"Damian"}
 ```
 
-The value is one compact JSON object. It may name only speakers already present in the canonical
-result. It is an override for the editable review and any immutable revision created from it;
-it never changes canonical speaker IDs or the canonical ASR artifact.
+The value is one compact JSON object. It may override a speaker already present in the canonical
+result or introduce a revision-local `speaker_NNN` identifier for text manually reassigned during
+review. It applies only to the editable review and any immutable revision created from it; it
+never changes canonical speaker IDs or the canonical ASR artifact.
 
 `base_result_file` is a resolution hint only. `base_result_sha256` is authoritative.
 

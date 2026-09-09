@@ -15,7 +15,7 @@ from uuid import uuid4
 from pydantic import ValidationError
 
 from ewp_transcripts.config import SubtitlesConfig
-from ewp_transcripts.domain.canonical import CanonicalResult
+from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalSpeaker
 from ewp_transcripts.domain.errors import (
     ApplicationError,
     InvalidCanonicalResultError,
@@ -147,6 +147,24 @@ def export_result(
         rendered_result = effective_canonical_result(result, effective)
         if selected_revision is not None and selected_revision.transcript.speaker_labels:
             labels = selected_revision.transcript.speaker_labels
+            existing_speakers = {speaker.speaker_id for speaker in rendered_result.speakers}
+            additional_speakers = tuple(
+                CanonicalSpeaker(
+                    speaker_id=speaker_id,
+                    speaker_label=label,
+                    speaker_source="default",
+                    first_seen_ms=next(
+                        (
+                            token.start_ms
+                            for token in effective.tokens
+                            if token.speaker_id == speaker_id
+                        ),
+                        0,
+                    ),
+                )
+                for speaker_id, label in labels.items()
+                if speaker_id not in existing_speakers
+            )
             rendered_result = rendered_result.model_copy(
                 update={
                     "speakers": tuple(
@@ -159,6 +177,7 @@ def export_result(
                         )
                         for speaker in rendered_result.speakers
                     )
+                    + additional_speakers
                 }
             )
     except (ValidationError, ValueError) as error:

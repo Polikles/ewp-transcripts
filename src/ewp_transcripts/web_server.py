@@ -132,9 +132,11 @@ def dispatch_get(
 
 
 def _asset_response(name: str, content_type: str) -> WebResponse:
-    return WebResponse(
-        HTTPStatus.OK, content_type, files("ewp_transcripts.web_assets").joinpath(name).read_bytes()
-    )
+    assets = files("ewp_transcripts.web_assets")
+    body = assets.joinpath(name).read_bytes()
+    if name == "app.js":
+        body += b"\n" + assets.joinpath("review_speakers.js").read_bytes()
+    return WebResponse(HTTPStatus.OK, content_type, body)
 
 
 def _json_response(status: HTTPStatus, document: dict[str, object]) -> WebResponse:

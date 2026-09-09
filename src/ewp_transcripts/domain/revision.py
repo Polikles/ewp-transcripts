@@ -232,15 +232,11 @@ def validate_revision_base(
         word_positions[word.word_id] = position
     speaker_ids = {speaker.speaker_id for speaker in base.speakers}
 
-    unknown_labels = set(revision.transcript.speaker_labels) - speaker_ids
-    if unknown_labels:
-        raise InvalidRevisionError(
-            f"Revision references unknown speaker label: {sorted(unknown_labels)[0]}"
-        )
+    allowed_speaker_ids = speaker_ids | set(revision.transcript.speaker_labels)
 
     mapped_positions: list[int] = []
     for token in revision.transcript.tokens:
-        if token.speaker_id not in speaker_ids:
+        if token.speaker_id not in allowed_speaker_ids:
             raise InvalidRevisionError(f"Revision references unknown speaker: {token.speaker_id}")
         references = list(token.source_word_ids)
         if token.insertion_anchor is not None:
