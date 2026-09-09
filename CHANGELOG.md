@@ -14,6 +14,11 @@ The next internal-beta version is `0.10.0`.
 - Added revision-local GUI speakers for manually separated transcript text. They have stable
   `speaker_NNN` identifiers and labels only in the review/revision lineage, enabling recovery
   from missing diarization speakers or shared channels without changing canonical ASR evidence.
+
+### Fixed
+
+- GUI filesystem fields now trim accidental leading or trailing paste whitespace while preserving
+  whitespace that is part of the actual path.
 - Added GUI manual-review selected-text separation and adjacent-block merging. Each resulting
   editable block can be assigned independently to a known speaker while protected anchors and
   the canonical result remain unchanged.

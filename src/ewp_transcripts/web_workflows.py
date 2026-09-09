@@ -175,7 +175,9 @@ class GuiWorkflowController:
         return language, speaker_count
 
     def resolve_allowed_path(self, raw_path: str, *, directory: bool = False) -> Path:
-        candidate = normalize_input_path(raw_path)
+        # Browser copy/paste commonly carries an accidental outer space. Trim only the GUI
+        # field boundary: whitespace within a path and filesystem names remains significant.
+        candidate = normalize_input_path(raw_path.strip())
         if candidate.is_symlink():
             raise ValueError("Symbolic-link paths are not allowed")
         resolved = candidate.resolve(strict=not directory)

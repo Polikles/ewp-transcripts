@@ -37,6 +37,22 @@ def test_inspect_calls_injected_application_service_and_records_result(tmp_path:
     assert controller.operations() == (operation,)
 
 
+def test_gui_paths_trim_accidental_outer_whitespace(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    seen: list[Path] = []
+
+    def inspect(path: Path, **kwargs: Any) -> BaseModel:
+        seen.append(path)
+        return StubResult(selected=str(path), mode="inspect")
+
+    controller = GuiWorkflowController((tmp_path.resolve(),), inspect_service=inspect)
+    operation = controller.run("inspect", {"path": f"  {media}  "})
+
+    assert operation.status == "completed"
+    assert seen == [media]
+
+
 def test_dry_run_passes_allowed_output_directory(tmp_path: Path) -> None:
     media = tmp_path / "episode.wav"
     media.write_bytes(b"audio")
