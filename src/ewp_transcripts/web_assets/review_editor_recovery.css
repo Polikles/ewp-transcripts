@@ -3,11 +3,15 @@
   grid-template-columns: repeat(2, minmax(15rem, 1fr));
   gap: 1rem;
   margin-block: 1rem;
+  align-items: stretch;
 }
 
 .review-control-group {
+  box-sizing: border-box;
   border: 1px solid #d9d5cb;
   border-radius: .5rem;
+  display: grid;
+  grid-template-rows: auto 1fr 1fr auto;
   padding: .75rem;
 }
 
@@ -24,6 +28,28 @@
 }
 
 .review-control-line:first-of-type { margin-top: 0; }
+
+.review-control-spacer { min-height: 2.75rem; }
+
+.review-clear-line {
+  align-items: end;
+  justify-content: end;
+}
+
+.review-speaker-label-row {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.review-speaker-label-row label {
+  flex: 1 1 16rem;
+}
+
+.review-remove-speaker {
+  margin-top: 1rem;
+}
 
 @media (max-width: 42rem) {
   .review-control-groups { grid-template-columns: 1fr; }

@@ -31,6 +31,8 @@ function renderReviewSpeakerLabels(document) {
   const container = window.document.querySelector("#review-speaker-labels");
   container.replaceChildren();
   for (const speakerId of document.speakers) {
+    const row = window.document.createElement("div");
+    row.className = "review-speaker-label-row";
     const label = window.document.createElement("label");
     label.textContent = `${speakerId} display name`;
     const input = window.document.createElement("input");
@@ -39,7 +41,43 @@ function renderReviewSpeakerLabels(document) {
     input.dataset.speakerId = speakerId;
     input.autocomplete = "off";
     label.append(input);
-    container.append(label);
+    row.append(label);
+    if (!document.canonical_speakers?.includes(speakerId)) {
+      const remove = window.document.createElement("button");
+      remove.type = "button";
+      remove.className = "review-remove-speaker";
+      remove.textContent = `Remove ${speakerId}`;
+      remove.title = "Remove this unused revision-only speaker from the current draft.";
+      remove.addEventListener("click", async () => {
+        if (!reviewDocument) return;
+        const inUse = reviewDocument.anchors.some(anchor =>
+          anchor.blocks.some(block => block.speaker_id === speakerId),
+        );
+        if (inUse) {
+          setReviewStatus(
+            `GUI_REVIEW_SPEAKER_IN_USE: Reassign or merge every ${speakerId} block before removing it.`,
+          );
+          return;
+        }
+        try {
+          const savedBeforeRemove = reviewDirty;
+          if (savedBeforeRemove) await saveReviewDraft();
+          reviewDocument.speakers = reviewDocument.speakers.filter(id => id !== speakerId);
+          delete reviewDocument.speaker_labels[speakerId];
+          markReviewDirty();
+          renderReview(reviewDocument, true);
+          setReviewStatus(
+            savedBeforeRemove
+              ? `Draft saved before removing ${speakerId}. Save again when the current review is ready.`
+              : `${speakerId} removed from this revision-only speaker list. Save the draft when ready.`,
+          );
+        } catch (error) {
+          setReviewStatus(error.message);
+        }
+      });
+      row.append(remove);
+    }
+    container.append(row);
   }
   const add = window.document.createElement("button");
   add.type = "button";

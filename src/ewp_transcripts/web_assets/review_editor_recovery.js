@@ -17,10 +17,10 @@ function arrangeReviewControls() {
   const originalActions = prepare.parentElement;
   const layout = document.createElement("div");
   layout.className = "review-control-groups";
-  const preparation = document.createElement("section");
+  const preparation = document.createElement("div");
   preparation.className = "review-control-group";
   preparation.innerHTML = "<h3>Prepare and validate</h3>";
-  const editing = document.createElement("section");
+  const editing = document.createElement("div");
   editing.className = "review-control-group";
   editing.innerHTML = "<h3>Draft and history</h3>";
   const prepareLine = document.createElement("div");
@@ -29,12 +29,14 @@ function arrangeReviewControls() {
   const previewLine = document.createElement("div");
   previewLine.className = "review-control-line";
   previewLine.append(preview);
-  preparation.append(prepareLine, previewLine);
+  const spacer = document.createElement("div");
+  spacer.className = "review-control-spacer";
+  preparation.append(prepareLine, previewLine, spacer);
   const saveLine = document.createElement("div");
   saveLine.className = "review-control-line";
   saveLine.append(save, restore);
   const clearLine = document.createElement("div");
-  clearLine.className = "review-control-line";
+  clearLine.className = "review-control-line review-clear-line";
   clearLine.append(clear);
   const historyLine = document.createElement("div");
   historyLine.className = "review-control-line";
@@ -49,7 +51,7 @@ function arrangeReviewControls() {
   redo.textContent = "Redo";
   redo.title = "Redo a current-editor change. This does not change saved files.";
   historyLine.append(undo, redo);
-  editing.append(saveLine, clearLine, historyLine);
+  editing.append(saveLine, historyLine, clearLine);
   layout.append(preparation, editing);
   originalActions.replaceWith(layout);
   undo.addEventListener("click", () => restoreReviewHistory(-1));

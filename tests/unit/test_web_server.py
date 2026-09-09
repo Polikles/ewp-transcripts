@@ -85,6 +85,8 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"reviewSpeakerNamesPanel" in script_response.body
     assert b"Draft and history" in script_response.body
     assert b"Undo applied to the current draft" in script_response.body
+    assert b"Remove ${speakerId}" in script_response.body
+    assert b"GUI_REVIEW_SPEAKER_IN_USE" in script_response.body
     stylesheet_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )

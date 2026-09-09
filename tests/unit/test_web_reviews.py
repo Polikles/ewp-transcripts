@@ -31,6 +31,7 @@ def test_browser_review_prepare_edit_preview_and_apply(tmp_path: Path) -> None:
     prepared = service.prepare(str(result), str(reviews))
     assert prepared["source_verification"] == "canonical_asr"
     assert prepared["review_path"].endswith("S01E01.review.txt")
+    assert prepared["canonical_speakers"] == ["speaker_001", "speaker_002"]
     assert prepared["speaker_labels"] == {"speaker_001": "jan", "speaker_002": "anna"}
     prepared["anchors"][0]["blocks"][0]["text"] += " corrected"
 
@@ -164,6 +165,32 @@ def test_browser_review_can_add_a_revision_local_speaker(tmp_path: Path) -> None
     assert "Guest:" in contents[".txt"]
     assert '"speaker_id": "speaker_003"' in contents[".json"]
     assert '"speaker_label": "Guest"' in contents[".json"]
+
+
+def test_browser_review_can_remove_an_unused_revision_local_speaker(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+        speaker_labels={"speaker_003": "Unused guest"},
+    )
+    assert saved["speakers"] == ["speaker_001", "speaker_002", "speaker_003"]
+
+    removed = service.save(
+        saved["review_path"],
+        str(result),
+        expected_sha256=saved["review_sha256"],
+        anchors=saved["anchors"],
+        speaker_labels={},
+    )
+    assert removed["speakers"] == ["speaker_001", "speaker_002"]
+    assert removed["speaker_labels"] == {"speaker_001": "jan", "speaker_002": "anna"}
+    assert "speaker_003" not in Path(removed["review_path"]).read_text(encoding="utf-8")
 
 
 def test_browser_review_rejects_empty_split_blocks(tmp_path: Path) -> None:

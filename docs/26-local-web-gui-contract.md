@@ -205,6 +205,9 @@ and speakers not defined by the canonical result or the revision-local display-n
 rejected. It supports project/revision-scoped speaker display-name replacement when canonical
 speaker labels are absent or wrong, plus manually added revision-local speakers; neither feature
 may silently rewrite canonical results.
+The GUI MAY remove an unused revision-local speaker from the mutable review. It MUST refuse
+removal while any visible block still references that identifier; the reviewer must reassign or
+merge those blocks first.
 Separating text or adding a revision-local speaker likewise saves a dirty draft before changing
 block structure. The current editor maintains a bounded Undo/Redo history that never writes an
 artifact; undoing or redoing a change makes the draft dirty and therefore still requires Save and

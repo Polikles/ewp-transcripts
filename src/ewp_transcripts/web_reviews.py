@@ -90,6 +90,7 @@ class GuiReviewController:
             "job_id": parsed.header.job_id,
             "language": parsed.header.language,
             "source_verification": verification,
+            "canonical_speakers": base_speakers,
             "speakers": speakers,
             "speaker_labels": {
                 **base_labels,
@@ -125,12 +126,12 @@ class GuiReviewController:
         base = load_canonical_result(result_path)
         known_speakers = {speaker.speaker_id for speaker in base.speakers}
         base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
-        revised_labels = dict(parsed.header.speaker_labels)
         if speaker_labels is not None:
             if not isinstance(speaker_labels, dict):
                 raise GuiReviewError(
                     "GUI_REVIEW_STRUCTURE_INVALID", "Speaker labels must be an object"
                 )
+            revised_labels: dict[str, str] = {}
             for speaker_id, label in speaker_labels.items():
                 if re.fullmatch(r"speaker_[0-9]{3,}", speaker_id) is None or not isinstance(
                     label, str
@@ -147,6 +148,8 @@ class GuiReviewController:
                     revised_labels.pop(speaker_id, None)
                 else:
                     revised_labels[speaker_id] = normalized
+        else:
+            revised_labels = dict(parsed.header.speaker_labels)
         allowed_speakers = known_speakers | set(revised_labels)
         if len(anchors) != len(parsed.anchors):
             raise GuiReviewError("GUI_REVIEW_STRUCTURE_INVALID", "Review anchors cannot change")
