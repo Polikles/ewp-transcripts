@@ -526,6 +526,14 @@ Extend the browser review editor with safe block splitting/merging so a word or 
 be reassigned to the correct speaker without moving unrelated text. Add revision-scoped
 speaker display-name editing for recordings whose canonical result lacks useful names.
 
+After the current split/whole-block-merge slice is fully qualified, improve editor recovery and
+comfort without weakening immutable publication rules: save the mutable draft automatically
+before each block-edit operation; offer explicit Undo and Redo for the current editor history;
+and group controls by workflow. The left group should present **Prepare** then **Preview**. The
+right group should present **Save** and **Restore**, then **Clear**, then **Undo** and **Redo**.
+Undo/Redo affects only the mutable review draft, keeps protected anchors/lineage intact, and
+still requires an explicit save plus preview before immutable application.
+
 Every dataset requires a pinned version/configuration, source and license record,
 download/preparation hashes, official split preservation, normalization declaration,
 language/subset selection, and a report of exclusions. WER/CER comparisons must not mix
