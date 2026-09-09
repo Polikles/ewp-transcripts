@@ -38,6 +38,11 @@ The next internal-beta version is `0.10.0`.
 
 ### Changed
 
+- Refined GUI transcript-block editing: a selected sentence may include its immediately leading
+  terminal punctuation without moving that punctuation to the new block, and whole-block merge
+  now writes any dirty draft as a recoverable checkpoint before changing the visible draft.
+  The unnecessary merge confirmation is removed; the merged result remains unsaved until the
+  reviewer deliberately saves it again.
 - Clarified that GUI-entered API keys are shared only within the active GUI server process and
   disappear when it stops; they are never saved in projects, workspaces, or browsers.
 - Clarified the intentional single-user/single-organization credential boundary, aligned the

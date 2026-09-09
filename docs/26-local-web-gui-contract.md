@@ -191,8 +191,11 @@ Long reviews MUST support both a sequential previous/next-section view and a con
 all-sections view, with the presentation preference retained locally. A visible speaker block
 can be reassigned as a whole. The reviewer can also select complete words or a sentence inside
 a visible block, isolate that selected text, and reassign it while retaining the original anchor
-lineage. An explicit confirmation is required before merging one entire adjacent block into the
-previous block. Empty blocks and unknown speakers are rejected. It MUST later permit
+lineage. Merging one entire adjacent block into the previous block saves any dirty draft first,
+creating a recoverable checkpoint before the visible merge; the merge itself remains editable
+and must be saved again before preview. A selected leading `.`, `!`, or `?` immediately before
+a new sentence remains with the preceding block when the new sentence is isolated. Empty blocks
+and unknown speakers are rejected. It MUST later permit
 project/revision-scoped speaker display-name replacement when canonical speaker labels are
 absent or wrong; neither feature may silently rewrite canonical results.
 

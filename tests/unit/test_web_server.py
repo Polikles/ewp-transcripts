@@ -80,6 +80,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Separate selected text" in script_response.body
     assert b"Merge entire block with previous" in script_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
+    assert b"startsWithTerminalPunctuation" in script_response.body
+    assert b"Draft saved before merge" in script_response.body
+    assert b"mergeReviewBlock" in script_response.body
     assert b"separatedByPointer" in script_response.body
     assert b"/\\\\s" not in script_response.body
     assert b"/\\s" in script_response.body
