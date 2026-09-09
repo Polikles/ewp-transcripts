@@ -528,6 +528,7 @@ def preview_review_file(
     *,
     results_directory: Path | None = None,
     revisions_directory: Path | None = None,
+    parent_revision_path: Path | None = None,
     long_gap_warning_ms: int = 2000,
 ) -> RevisionPreviewOutcome:
     """Run the complete review parse, base verification, and alignment path without writes."""
@@ -539,12 +540,15 @@ def preview_review_file(
     parent_revision = None
     parent_path = None
     if review.header.source_revision_number is not None:
-        parent_name = revision_filename(
-            job_id=base.job_id,
-            result_version=base.result_version,
-            revision_number=review.header.source_revision_number,
-        )
-        parent_path = (revisions_directory or results_directory or base_path.parent) / parent_name
+        parent_path = parent_revision_path
+        if parent_path is None:
+            parent_name = revision_filename(
+                job_id=base.job_id,
+                result_version=base.result_version,
+                revision_number=review.header.source_revision_number,
+            )
+            parent_directory = revisions_directory or results_directory or base_path.parent
+            parent_path = parent_directory / parent_name
         if not parent_path.is_file():
             raise InvalidReviewError(
                 "REVISION_BASE_HASH_MISMATCH",
@@ -568,6 +572,7 @@ def apply_review_file(
     config: ApplicationConfig,
     results_directory: Path | None = None,
     revisions_directory: Path | None = None,
+    parent_revision_path: Path | None = None,
     output_directory: Path | None = None,
 ) -> RevisionApplyOutcome:
     """Validate one review through preview and atomically publish its full snapshot."""
@@ -576,6 +581,7 @@ def apply_review_file(
         review_path,
         results_directory=results_directory,
         revisions_directory=revisions_directory,
+        parent_revision_path=parent_revision_path,
         long_gap_warning_ms=config.revision.long_gap_warning_ms,
     )
     revision, path = publish_next_revision(

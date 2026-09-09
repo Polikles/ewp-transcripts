@@ -543,6 +543,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         ),
                         export_output_directory=str(document.get("export_output_directory", "")),
                         applied_revision=str(document.get("applied_revision_path", "")),
+                        source_revision=str(document.get("source_revision_path", "")),
                     )
                 elif path == "/api/v1/reviews/session/restore":
                     payload = self.server.gui_reviews.restore_session(
@@ -564,7 +565,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 elif path == "/api/v1/reviews/preview":
                     payload = self.server.gui_reviews.preview(
-                        str(document.get("review_path", "")), result
+                        str(document.get("review_path", "")),
+                        result,
+                        str(document.get("source_revision_path", "")),
                     )
                 elif path == "/api/v1/reviews/apply":
                     if document.get("confirmed") is not True:
@@ -573,6 +576,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         str(document.get("review_path", "")),
                         result,
                         str(document.get("revision_output_directory", "")),
+                        str(document.get("source_revision_path", "")),
                     )
                 elif path == "/api/v1/reviews/export":
                     formats = document.get("formats")

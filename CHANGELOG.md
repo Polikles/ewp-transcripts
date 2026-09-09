@@ -4,7 +4,7 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.11.0`.
+The next internal-beta version is `0.11.1`.
 
 ### Added
 
@@ -21,6 +21,10 @@ The next internal-beta version is `0.11.0`.
 
 ### Fixed
 
+- Candidate-backed GUI reviews now retain their exact automated-correction parent through
+  Preview, Apply, browser restoration, and saved review sessions. This prevents a valid
+  correction candidate in a separate `correction-candidates` directory from failing with
+  `REVISION_BASE_HASH_MISMATCH` during manual review.
 - GUI filesystem fields now trim accidental leading or trailing paste whitespace while preserving
   whitespace that is part of the actual path.
 - Added GUI manual-review selected-text separation and adjacent-block merging. Each resulting

@@ -251,6 +251,7 @@ def test_browser_review_session_restores_from_project_root(tmp_path: Path) -> No
     assert Path(remembered["session_path"]).name == ".ewp-gui-review-session.json"
     assert restored["review_path"] == prepared["review_path"]
     assert restored["session"]["result_path"] == str(result)
+    assert restored["session"]["source_revision_path"] == ""
 
 
 def test_browser_review_session_requires_saved_pointer(tmp_path: Path) -> None:
@@ -272,8 +273,51 @@ def test_browser_review_can_start_from_automated_candidate(tmp_path: Path) -> No
         output_directory=tmp_path / "candidates",
     )
 
-    prepared = controller(tmp_path).prepare(
-        str(result), str(tmp_path / "reviews"), str(automated.revision_path)
-    )
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"), str(automated.revision_path))
 
     assert prepared["source_verification"] == "automated_candidate"
+    assert prepared["source_revision_path"] == str(automated.revision_path)
+
+    preview = service.preview(
+        prepared["review_path"], str(result), prepared["source_revision_path"]
+    )
+    assert preview["revision_number"] == 1
+    applied = service.apply(
+        prepared["review_path"],
+        str(result),
+        str(tmp_path / "revisions"),
+        prepared["source_revision_path"],
+    )
+    assert load_transcript_revision(Path(applied["revision_path"])).parent_revision is not None
+
+
+def test_browser_review_restores_automated_candidate_parent_from_session(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    automated = apply_mock_correction(
+        result,
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        provider=DeterministicMockCorrectionProvider(),
+        output_directory=tmp_path / "candidates",
+    )
+    project = tmp_path / "project"
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(project / "reviews"), str(automated.revision_path))
+    service.remember_session(
+        project_output_directory=str(project),
+        result=str(result),
+        review=prepared["review_path"],
+        review_output_directory=str(project / "reviews"),
+        revision_output_directory=str(project / "revisions"),
+        export_output_directory=str(project / "exports"),
+        source_revision=prepared["source_revision_path"],
+    )
+
+    restored = controller(tmp_path).restore_session(str(project))
+
+    assert restored["session"]["source_revision_path"] == str(automated.revision_path)
+    preview = controller(tmp_path).preview(
+        restored["review_path"], str(result), restored["session"]["source_revision_path"]
+    )
+    assert preview["revision_number"] == 1

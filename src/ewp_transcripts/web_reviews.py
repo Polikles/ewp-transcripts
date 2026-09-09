@@ -48,16 +48,20 @@ class GuiReviewController:
     ) -> dict[str, Any]:
         result_path = self._resolve_path(result)
         output_path = self._resolve_path(output_directory, directory=True)
+        source_path = self._resolve_path(source_revision) if source_revision else None
         if not result_path.is_file():
             raise GuiReviewError("GUI_REVIEW_RESULT_INVALID", "Result path must be one file")
         outcome = prepare_review_file(
             result_path,
             output_directory=output_path,
-            source_revision_path=(self._resolve_path(source_revision) if source_revision else None),
+            source_revision_path=source_path,
             anchor_target_words=self._config.revision.anchor_target_words,
             lock_timeout_seconds=self._config.runtime.lock_timeout_seconds,
         )
-        return self.document(outcome.path, result_path)
+        return {
+            **self.document(outcome.path, result_path),
+            "source_revision_path": str(source_path) if source_path is not None else "",
+        }
 
     def document(self, review: str | Path, result: str | Path) -> dict[str, Any]:
         review_path = self._resolve_path(str(review))
@@ -202,12 +206,14 @@ class GuiReviewController:
         self._previewed.pop(str(review_path), None)
         return self.document(review_path, result_path)
 
-    def preview(self, review: str, result: str) -> dict[str, Any]:
+    def preview(self, review: str, result: str, source_revision: str = "") -> dict[str, Any]:
         review_path = self._resolve_path(review)
         result_path = self._resolve_path(result)
+        source_path = self._resolve_path(source_revision) if source_revision else None
         outcome = preview_review_file(
             review_path,
             results_directory=result_path.parent,
+            parent_revision_path=source_path,
             long_gap_warning_ms=self._config.revision.long_gap_warning_ms,
         )
         digest = sha256_file(review_path)
@@ -221,10 +227,13 @@ class GuiReviewController:
             "warnings": [warning.model_dump(mode="json") for warning in outcome.revision.warnings],
         }
 
-    def apply(self, review: str, result: str, output_directory: str) -> dict[str, Any]:
+    def apply(
+        self, review: str, result: str, output_directory: str, source_revision: str = ""
+    ) -> dict[str, Any]:
         review_path = self._resolve_path(review)
         result_path = self._resolve_path(result)
         output_path = self._resolve_path(output_directory, directory=True)
+        source_path = self._resolve_path(source_revision) if source_revision else None
         digest = sha256_file(review_path)
         if self._previewed.get(str(review_path)) != digest:
             raise GuiReviewError(
@@ -235,6 +244,7 @@ class GuiReviewController:
             review_path,
             config=self._config,
             results_directory=result_path.parent,
+            parent_revision_path=source_path,
             output_directory=output_path,
         )
         return {
@@ -281,6 +291,7 @@ class GuiReviewController:
         revision_output_directory: str,
         export_output_directory: str,
         applied_revision: str = "",
+        source_revision: str = "",
     ) -> dict[str, Any]:
         """Persist one non-secret review pointer set inside its project output root."""
 
@@ -301,6 +312,9 @@ class GuiReviewController:
             ),
             "applied_revision_path": (
                 str(self._resolve_path(applied_revision)) if applied_revision else ""
+            ),
+            "source_revision_path": (
+                str(self._resolve_path(source_revision)) if source_revision else ""
             ),
         }
         path = root / ".ewp-gui-review-session.json"
@@ -349,6 +363,13 @@ class GuiReviewController:
             )
         if applied:
             self._resolve_path(applied)
+        source_revision = session.get("source_revision_path", "")
+        if not isinstance(source_revision, str):
+            raise GuiReviewError(
+                "GUI_REVIEW_SESSION_INVALID", "The saved GUI review session is invalid."
+            )
+        if source_revision:
+            self._resolve_path(source_revision)
         return {**review_document, "session": session, "session_path": str(path)}
 
     @staticmethod
