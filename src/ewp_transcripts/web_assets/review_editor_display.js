@@ -56,6 +56,13 @@ new MutationObserver(() => {
   resizeTranscriptReviewTextareas();
   syncBottomReviewNavigation();
 }).observe(document.querySelector("#review-editor"), {childList: true, subtree: true});
+new MutationObserver(() => {
+  window.requestAnimationFrame(resizeTranscriptReviewTextareas);
+}).observe(document.querySelector("#review-editor"), {
+  attributes: true,
+  attributeFilter: ["hidden"],
+  subtree: true,
+});
 new MutationObserver(syncBottomReviewNavigation).observe(document.querySelector("#review-navigation"), {
   attributes: true,
   childList: true,

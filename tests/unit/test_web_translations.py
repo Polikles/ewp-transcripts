@@ -35,7 +35,7 @@ def controller(tmp_path: Path) -> GuiTranslationController:
         config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
         resolve_path=paths.resolve_allowed_path,
         runner=mock_runner,
-        preflight=lambda provider: None,
+        preflight=lambda provider, environment: None,
     )
 
 
@@ -46,9 +46,12 @@ def request(tmp_path: Path, result: Path) -> dict[str, Any]:
         "output_directory": str(tmp_path / "candidates"),
         "resume_directory": str(tmp_path / "state"),
         "target_language": "pl",
+        "provider_name": "lm-studio",
         "model": "bielik-test",
         "endpoint": "http://127.0.0.1:1234/v1",
         "allow_remote_endpoint": False,
+        "allow_cloud": False,
+        "reasoning_max_tokens": None,
         "output_mode": "plain-text",
         "dictionary_path": "",
     }
@@ -74,3 +77,32 @@ def test_gui_translation_requires_confirmation(tmp_path: Path) -> None:
         controller(tmp_path).generate(**request(tmp_path, result), confirmed=False)
 
     assert missing.value.code == "GUI_TRANSLATION_CONFIRMATION_REQUIRED"
+
+
+def test_gui_translation_allows_explicit_cloud_candidate_with_session_key(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    seen: list[object] = []
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    service = GuiTranslationController(
+        config=ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work")),
+        resolve_path=paths.resolve_allowed_path,
+        runner=mock_runner,
+        preflight=lambda provider, environment: seen.append((provider.provider_id, environment)),
+    )
+
+    outcome = service.generate(
+        **{
+            **request(tmp_path, result),
+            "provider_name": "openrouter",
+            "model": "google/gemini-2.5-flash",
+            "endpoint": "https://openrouter.ai/api/v1",
+            "allow_cloud": True,
+            "reasoning_max_tokens": 0,
+        },
+        confirmed=True,
+        api_key="session-secret",
+    )
+
+    assert outcome["final"] is False
+    assert seen == [("openrouter", {"OPENROUTER_API_KEY": "session-secret"})]

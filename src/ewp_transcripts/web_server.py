@@ -139,6 +139,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("review_editor_recovery.js").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.js").read_bytes()
         body += b"\n" + assets.joinpath("translation_review_editor.js").read_bytes()
+        body += b"\n" + assets.joinpath("translation_provider_controls.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -735,7 +736,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             try:
-                if any(
+                if document.get("provider") == "lm-studio" and any(
                     job.status in {"queued", "running"}
                     for job in self.server.gui_transcriptions.jobs()
                 ):
@@ -743,18 +744,27 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         "GUI_GPU_BUSY",
                         "Wait for active transcription before using local translation.",
                     )
+                reasoning = document.get("reasoning_max_tokens")
+                if reasoning is not None and (
+                    not isinstance(reasoning, int) or isinstance(reasoning, bool) or reasoning < 0
+                ):
+                    raise ValueError("Reasoning-token budget must be a non-negative integer")
                 payload = self.server.gui_translations.generate(
                     result=str(document.get("result_path", "")),
                     source_revision=str(document.get("source_revision_path", "")),
                     output_directory=str(document.get("output_directory", "")),
                     resume_directory=str(document.get("resume_directory", "")),
                     target_language=str(document.get("target_language", "")),
+                    provider_name=str(document.get("provider", "")),
                     model=str(document.get("model", "")),
                     endpoint=str(document.get("endpoint", "")),
                     allow_remote_endpoint=document.get("allow_remote_endpoint") is True,
+                    allow_cloud=document.get("allow_cloud") is True,
+                    reasoning_max_tokens=reasoning,
                     output_mode=str(document.get("output_mode", "")),
                     dictionary_path=str(document.get("dictionary_path", "")),
                     confirmed=document.get("confirmed") is True,
+                    api_key=self.server.gui_openrouter_api_key,
                 )
             except ApplicationError as error:
                 self._write_response(

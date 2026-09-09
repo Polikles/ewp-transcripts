@@ -2,19 +2,28 @@
 
 from __future__ import annotations
 
+import json
+import os
 import threading
-from collections.abc import Callable
+import urllib.error
+import urllib.request
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, Literal, cast
 
 from ewp_transcripts.application import AutomatedTranslationOutcome, apply_automated_translation
 from ewp_transcripts.config import ApplicationConfig
+from ewp_transcripts.domain.automated_translation import AutomatedTranslationProvider
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.translation import Language, TranslationStyle
 from ewp_transcripts.translation_dictionary import load_project_translation_dictionary
 from ewp_transcripts.translation_lm_studio import (
     LmStudioTranslationConfig,
     LmStudioTranslationProvider,
+)
+from ewp_transcripts.translation_openrouter import (
+    OpenRouterTranslationConfig,
+    OpenRouterTranslationProvider,
 )
 
 
@@ -28,11 +37,11 @@ class GuiTranslationError(ApplicationError):
 
 PathResolver = Callable[..., Path]
 TranslationRunner = Callable[..., AutomatedTranslationOutcome]
-ProviderPreflight = Callable[[LmStudioTranslationProvider], None]
+ProviderPreflight = Callable[[Any, Mapping[str, str] | None], None]
 
 
 class GuiTranslationController:
-    """Create one immutable, explicitly non-final LM Studio candidate."""
+    """Create one immutable, explicitly non-final local or cloud translation candidate."""
 
     def __init__(
         self,
@@ -57,12 +66,16 @@ class GuiTranslationController:
         output_directory: str,
         resume_directory: str,
         target_language: str,
+        provider_name: str,
         model: str,
         endpoint: str,
         allow_remote_endpoint: bool,
+        allow_cloud: bool,
+        reasoning_max_tokens: int | None,
         output_mode: str,
         dictionary_path: str,
         confirmed: bool,
+        api_key: str = "",
     ) -> dict[str, Any]:
         if not confirmed:
             raise GuiTranslationError(
@@ -75,6 +88,15 @@ class GuiTranslationController:
             )
         if not model.strip():
             raise GuiTranslationError("GUI_TRANSLATION_MODEL_REQUIRED", "Model is required.")
+        if provider_name not in {"lm-studio", "openrouter"}:
+            raise GuiTranslationError(
+                "GUI_TRANSLATION_PROVIDER_INVALID", "Unknown translation provider."
+            )
+        if provider_name == "openrouter" and not allow_cloud:
+            raise GuiTranslationError(
+                "GUI_TRANSLATION_CLOUD_OPT_IN_REQUIRED",
+                "OpenRouter requires explicit cloud opt-in.",
+            )
         if output_mode not in {"json-schema", "json-text", "plain-text"}:
             raise GuiTranslationError(
                 "GUI_TRANSLATION_OUTPUT_MODE_INVALID", "Unknown translation output mode."
@@ -89,16 +111,43 @@ class GuiTranslationController:
             dictionary, dictionary_sha256 = load_project_translation_dictionary(
                 self._resolve_path(dictionary_path)
             )
-        provider = LmStudioTranslationProvider(
-            LmStudioTranslationConfig(
-                model_id=model.strip(),
-                endpoint=endpoint.strip(),
-                allow_remote_endpoint=allow_remote_endpoint,
-                output_mode=cast(Literal["json-schema", "json-text", "plain-text"], output_mode),
-                temperature=0.0,
+        environment: Mapping[str, str] | None = None
+        provider: AutomatedTranslationProvider
+        if provider_name == "lm-studio":
+            provider = LmStudioTranslationProvider(
+                LmStudioTranslationConfig(
+                    model_id=model.strip(),
+                    endpoint=endpoint.strip(),
+                    allow_remote_endpoint=allow_remote_endpoint,
+                    output_mode=cast(
+                        Literal["json-schema", "json-text", "plain-text"], output_mode
+                    ),
+                    temperature=0.0,
+                )
             )
+        else:
+            if api_key:
+                environment = {"OPENROUTER_API_KEY": api_key}
+            provider = OpenRouterTranslationProvider(
+                OpenRouterTranslationConfig(
+                    model_id=model.strip(),
+                    endpoint=endpoint.strip(),
+                    output_mode=cast(
+                        Literal["json-schema", "json-text", "plain-text"], output_mode
+                    ),
+                    temperature=0.0,
+                    reasoning_max_tokens=reasoning_max_tokens,
+                ),
+                environment=environment,
+            )
+        self._preflight(provider, environment)
+        execution_config = self._config.model_copy(
+            update={
+                "general": self._config.general.model_copy(
+                    update={"offline": not allow_cloud, "interactive": False}
+                )
+            }
         )
-        self._preflight(provider)
         if not self._lock.acquire(blocking=False):
             raise GuiTranslationError(
                 "GUI_TRANSLATION_BUSY", "Another GUI translation is already running."
@@ -106,7 +155,7 @@ class GuiTranslationController:
         try:
             outcome = self._runner(
                 result_path,
-                config=self._config,
+                config=execution_config,
                 provider=provider,
                 target_language=cast(Language, target_language),
                 revision_path=revision_path,
@@ -148,5 +197,64 @@ class GuiTranslationController:
         }
 
 
-def _preflight_provider(provider: LmStudioTranslationProvider) -> None:
-    provider.preflight(timeout_seconds=3.0)
+def _preflight_provider(provider: Any, environment: Mapping[str, str] | None = None) -> None:
+    """Fail before source transfer unless the selected backend and model are usable."""
+
+    if isinstance(provider, LmStudioTranslationProvider):
+        provider.preflight(timeout_seconds=3.0)
+        return
+    source = environment if environment is not None else os.environ
+    key = source.get("OPENROUTER_API_KEY", "").strip()
+    if not key:
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_CREDENTIAL_MISSING",
+            "OpenRouter API key is missing for this active GUI server process.",
+        )
+    headers = {"Accept": "application/json", "Authorization": f"Bearer {key}"}
+    key_document = _read_provider_document(f"{provider.endpoint_identity}/key", headers)
+    if not isinstance(key_document.get("data"), dict):
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_CREDENTIAL_REJECTED",
+            "Provider connection succeeded, but the API key response was invalid.",
+        )
+    document = _read_provider_document(f"{provider.endpoint_identity}/models", headers)
+    models = document.get("data") if isinstance(document, dict) else None
+    identifiers = {
+        item.get("id") for item in models or () if isinstance(item, dict) and item.get("id")
+    }
+    if provider.model_id not in identifiers:
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_MODEL_UNAVAILABLE",
+            "The selected exact model is not available from the translation backend.",
+        )
+
+
+def _read_provider_document(url: str, headers: dict[str, str]) -> dict[str, Any]:
+    request = urllib.request.Request(url, headers=headers, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=3.0) as response:  # noqa: S310
+            payload = response.read(1_048_577)
+            if len(payload) > 1_048_576:
+                raise ValueError("Provider readiness response is too large")
+            document = json.loads(payload)
+    except urllib.error.HTTPError as error:
+        if error.code in {401, 403}:
+            raise GuiTranslationError(
+                "GUI_TRANSLATION_CREDENTIAL_REJECTED",
+                f"Provider connection succeeded, but the API key was rejected (HTTP {error.code}).",
+            ) from error
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_BACKEND_REJECTED",
+            f"Translation backend rejected the readiness check (HTTP {error.code}).",
+        ) from error
+    except (OSError, ValueError, urllib.error.URLError) as error:
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_BACKEND_UNAVAILABLE",
+            "Translation backend did not pass the three-second readiness check.",
+        ) from error
+    if not isinstance(document, dict):
+        raise GuiTranslationError(
+            "GUI_TRANSLATION_BACKEND_UNAVAILABLE",
+            "Translation backend returned an invalid readiness document.",
+        )
+    return document

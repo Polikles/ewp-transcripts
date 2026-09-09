@@ -249,6 +249,7 @@ def _parse_chat_response(
     request: AutomatedTranslationRequest,
     *,
     output_mode: Literal["json-schema", "json-text", "plain-text"],
+    provider_label: str = "LM Studio",
 ) -> AutomatedTranslationResponse:
     try:
         choice = document["choices"][0]
@@ -287,15 +288,15 @@ def _parse_chat_response(
         )
     except ValidationError as error:
         raise InvalidTranslationResponseError(
-            "LM Studio returned an invalid translation response"
+            f"{provider_label} returned an invalid translation response"
         ) from error
     except ValueError as error:
         raise InvalidTranslationResponseError(
-            "LM Studio returned an invalid translation response"
+            f"{provider_label} returned an invalid translation response"
         ) from error
     except (IndexError, KeyError, TypeError) as error:
         raise InvalidTranslationResponseError(
-            "LM Studio returned an invalid translation response"
+            f"{provider_label} returned an invalid translation response"
         ) from error
 
 

@@ -4,10 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.12.0`.
+The next internal-beta version is `0.13.0`.
 
 ### Added
 
+- Added explicit OpenRouter cloud translation candidates alongside local LM Studio. The adapter
+  requires a session-only API key, authenticated exact-model readiness checks, explicit cloud
+  consent, disabled provider fallback, and cloud/parameter provenance without a secret. The GUI
+  now selects the provider and exposes the shared session-only key action for OpenRouter.
 - Added a recoverable semantic-translation editor in the GUI: one-unit or all-unit display,
   mirrored previous/next navigation above and below the review, bounded local Undo/Redo, and
   restoration of the last saved translation draft after a browser refresh or later GUI process.
@@ -64,6 +68,10 @@ The next internal-beta version is `0.12.0`.
 
 ### Changed
 
+- Semantic translation review now shows five units at a time by default, matching the transcript
+  review's bounded-section workflow; reviewers can still choose the all-units view.
+- Transcript-review fields retain a visible scrollbar as a safe fallback while expanding whenever
+  their containing review section becomes visible.
 - Refined GUI transcript-block editing: a selected sentence may include its immediately leading
   terminal punctuation without moving that punctuation to the new block, and whole-block merge
   now writes any dirty draft as a recoverable checkpoint before changing the visible draft.

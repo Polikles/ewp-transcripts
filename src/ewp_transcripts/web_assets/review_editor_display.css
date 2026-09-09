@@ -3,5 +3,5 @@
   margin: 1rem 0 1.35rem;
 }
 
-/* Review text should grow with its content; manual resize remains available. */
-#review-editor textarea { overflow: hidden; }
+/* Review text grows when visible; manual scrolling remains available as a safe fallback. */
+#review-editor textarea { overflow: auto; }

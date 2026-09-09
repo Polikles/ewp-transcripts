@@ -96,22 +96,27 @@ function updateTranslationReviewRestoreControl() {
 
 function updateTranslationReviewSections() {
   const units = [...document.querySelectorAll("#translation-review-editor .translation-unit")];
-  const layout = document.querySelector(".translation-review-layout")?.value || "one";
+  const layout = document.querySelector(".translation-review-layout")?.value || "few";
   if (!units.length) return;
-  translationReviewSectionIndex = Math.max(0, Math.min(translationReviewSectionIndex, units.length - 1));
+  const chunkSize = 5;
+  const chunkCount = Math.ceil(units.length / chunkSize);
+  translationReviewSectionIndex = Math.max(0, Math.min(translationReviewSectionIndex, chunkCount - 1));
   units.forEach((unit, index) => {
-    unit.hidden = layout === "one" && index !== translationReviewSectionIndex;
+    unit.hidden = layout === "few"
+      && Math.floor(index / chunkSize) !== translationReviewSectionIndex;
   });
   document.querySelectorAll(".translation-review-position").forEach(element => {
-    element.textContent = layout === "one"
-      ? `Unit ${translationReviewSectionIndex + 1} of ${units.length}`
+    const first = translationReviewSectionIndex * chunkSize + 1;
+    const last = Math.min(first + chunkSize - 1, units.length);
+    element.textContent = layout === "few"
+      ? `Units ${first}–${last} of ${units.length}`
       : `${units.length} units`;
   });
   document.querySelectorAll(".previous-translation-review-unit").forEach(button => {
-    button.disabled = layout !== "one" || translationReviewSectionIndex === 0;
+    button.disabled = layout !== "few" || translationReviewSectionIndex === 0;
   });
   document.querySelectorAll(".next-translation-review-unit").forEach(button => {
-    button.disabled = layout !== "one" || translationReviewSectionIndex === units.length - 1;
+    button.disabled = layout !== "few" || translationReviewSectionIndex === chunkCount - 1;
   });
 }
 
@@ -331,7 +336,7 @@ function addTranslationReviewNavigation() {
   navigation.id = "translation-review-navigation";
   navigation.className = "translation-review-navigation";
   navigation.hidden = true;
-  navigation.innerHTML = '<label>Display <select class="translation-review-layout"><option value="one">One unit at a time</option><option value="all">All units</option></select></label><div class="actions"><button type="button" class="previous-translation-review-unit">Previous unit</button><span class="translation-review-position"></span><button type="button" class="next-translation-review-unit">Next unit</button></div>';
+  navigation.innerHTML = '<label>Display <select class="translation-review-layout"><option value="few">Five units at a time</option><option value="all">All units</option></select></label><div class="actions"><button type="button" class="previous-translation-review-unit">Previous units</button><span class="translation-review-position"></span><button type="button" class="next-translation-review-unit">Next units</button></div>';
   heading.after(navigation);
   const bottom = navigation.cloneNode(true);
   bottom.id = "translation-review-bottom-navigation";
@@ -359,7 +364,8 @@ function addTranslationReviewNavigation() {
       updateTranslationReviewSections();
     });
   });
-  const savedLayout = localStorage.getItem("ewp-translation-review-layout") || "one";
+  const storedLayout = localStorage.getItem("ewp-translation-review-layout");
+  const savedLayout = storedLayout === "all" ? "all" : "few";
   document.querySelectorAll(".translation-review-layout").forEach(select => {
     select.value = savedLayout;
   });

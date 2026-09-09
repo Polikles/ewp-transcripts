@@ -319,7 +319,8 @@ baseline first.
 
 After manual translation establishes ground truth:
 
-- add local/cloud API translation providers;
+- local LM Studio and OpenRouter cloud translation providers are implemented for the GUI; expand
+  CLI provider parity only with a separately qualified operator workflow and benchmark evidence;
 - benchmark local instruction models as first-class translation candidates rather than
   assuming correction-pipeline rankings transfer to translation. Translation quality may
   differ materially because a verified source removes many ASR/proper-name ambiguities
@@ -711,6 +712,9 @@ Planned capabilities:
   provisional export), apply, and verified translated export;
 - transcript correction and speaker-attribution editing;
 - hide review anchors while retaining the same internal revision mapping;
+- rebalance transcript-review anchors around a target number of visible speaker blocks while
+  preserving revision-safe word boundaries and immutable source mapping; this is an ergonomics
+  improvement, not permission to alter canonical timing or text;
 - preview revision changes without applying them;
 - re-export raw or selected revision without ASR;
 - translation and translated-text revision after those pipelines exist;
