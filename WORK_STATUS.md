@@ -178,10 +178,10 @@ labels preview as validation-only, summarizes it in a readable table with expand
 protects an open draft from accidental Prepare replacement, distinguishes disabled actions,
 and offers both sequential and continuous section layouts. The supplied fixture was English;
 an earlier instruction describing it as Polish was incorrect. Whole-block speaker reassignment
-is available now. The GUI also supports isolating selected complete words or a sentence into an
-independent block, assigning it to another known speaker, and deliberately merging adjacent
-blocks without modifying the canonical result. Project/revision-scoped speaker display-name
-editing remains a later editor requirement.
+is available now. The GUI also supports isolating a complete word group or sentence marked with
+transient `[[double brackets]]` into an independent block, assigning it to another known
+speaker, and deliberately merging adjacent blocks without modifying the canonical result.
+Project/revision-scoped speaker display-name editing remains a later editor requirement.
 The same acceptance pass found that refresh discarded the active editor pointer and that
 separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
 from its authoritative disk file using only non-secret path pointers in browser storage,

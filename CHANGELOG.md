@@ -8,9 +8,9 @@ The next internal-beta version is `0.10.0`.
 
 ### Added
 
-- Added GUI manual-review selected-text separation and adjacent-block merging. Each resulting
+- Added GUI manual-review marked-text separation and adjacent-block merging. Each resulting
   editable block can be assigned independently to a known speaker while protected anchors and
-  the canonical result remain unchanged.
+  the canonical result remain unchanged; transient `[[double brackets]]` are removed before save.
 - Added explicit named GUI workspace save/load for allowlisted non-secret fields and current-step
   context in an application-owned user-state catalog. Paths are revalidated, stale work is listed
   unavailable, and credentials, confirmations, transcript text, and unsaved edits are excluded.
