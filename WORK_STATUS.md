@@ -183,14 +183,15 @@ independent block, assigning it to another known speaker, and deliberately mergi
 blocks without modifying the canonical result. A sentence selected with its immediately leading
 terminal punctuation retains that punctuation in the preceding block; a dirty draft is saved as
 a recovery checkpoint before a whole-block merge. Project/revision-scoped speaker display-name
-editing and revision-local speaker addition are now implemented pending browser qualification:
-names and added `speaker_NNN` IDs are persisted in the review and immutable revision, inherited
-by a child review, and override only exports from that revision without altering the canonical
-result.
-The next review-editor recovery/comfort slice is implemented pending browser qualification:
-structural edits checkpoint a dirty draft first, the active editor maintains a bounded local
-Undo/Redo history, and Prepare/Preview plus Save/Restore/Clear/Undo/Redo are grouped by purpose.
-Undo/Redo never write artifacts and still requires a later Save plus Preview before Apply.
+editing and revision-local speaker addition are externally qualified: names and added
+`speaker_NNN` IDs are persisted in the review and immutable revision, inherited by a child
+review, and override only exports from that revision without altering the canonical result.
+Unused revision-local speakers can be removed, while a speaker assigned to text is protected
+until its blocks are reassigned or merged. The review-editor recovery/comfort slice is likewise
+externally qualified: structural edits checkpoint a dirty draft first, the active editor
+maintains a bounded local Undo/Redo history, and Prepare/Preview plus
+Save/Restore/Clear/Undo/Redo are grouped by purpose. Undo/Redo never write artifacts and still
+requires a later Save plus Preview before Apply.
 The same acceptance pass found that refresh discarded the active editor pointer and that
 separate output-path entry was unnecessarily repetitive. The follow-up restores a saved review
 from its authoritative disk file using only non-secret path pointers in browser storage,

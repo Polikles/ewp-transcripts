@@ -524,17 +524,18 @@ the temporary embeddings/fingerprints are discarded when the job finishes.
 
 Extend the browser review editor with safe block splitting/merging so a word or sentence can
 be reassigned to the correct speaker without moving unrelated text. Revision-scoped speaker
-display-name editing and revision-local speaker addition are implemented pending browser
-qualification for recordings whose canonical result lacks useful names, misses a speaker, or
-combines multiple speakers on one source channel.
+display-name editing and revision-local speaker addition are externally qualified for recordings
+whose canonical result lacks useful names, misses a speaker, or combines multiple speakers on
+one source channel. Unused local speakers can be removed, while text-assigned speakers require
+reassignment or merging before removal.
 
-The next editor-recovery/comfort slice is implemented pending browser qualification: it saves a
-dirty mutable draft before each structural block-edit operation, offers explicit bounded Undo and
-Redo for the current editor history, and groups controls by workflow. The left group presents
-**Prepare** then **Preview**. The right group presents **Save** and **Restore**, then **Clear**,
-then **Undo** and **Redo**. Undo/Redo affects only the mutable review draft, keeps protected
-anchors/lineage intact, and still requires an explicit save plus preview before immutable
-application.
+The editor-recovery/comfort slice is externally qualified: it saves a dirty mutable draft before
+each structural block-edit operation, offers explicit bounded Undo and Redo for the current
+editor history, and groups controls by workflow. The left group presents **Prepare** then
+**Preview**. The right group presents **Save** and **Restore**, then **Undo** and **Redo**, with
+the destructive **Clear** control in the lower-right. Undo/Redo affects only the mutable review
+draft, keeps protected anchors/lineage intact, and still requires an explicit save plus preview
+before immutable application.
 
 Every dataset requires a pinned version/configuration, source and license record,
 download/preparation hashes, official split preservation, normalization declaration,
