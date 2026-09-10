@@ -1,0 +1,36 @@
+{
+  "dictionary_version": "1.0",
+  "dictionary_id": "ethics-in-the-loop-pl-en-v2",
+  "project_id": "ethics-in-the-loop",
+  "job_ids": [
+    "*"
+  ],
+  "source_language": "pl",
+  "target_language": "en",
+  "entries": [
+    {
+      "source": "Szymon",
+      "target": "Szymon"
+    },
+    {
+      "source": "Damian",
+      "target": "Damian"
+    },
+    {
+      "source": "Etyka w Pętli",
+      "target": "Ethics in the Loop"
+    },
+    {
+      "source": "etykawpetli.pl",
+      "target": "ethicsintheloop.eu"
+    },
+    {
+      "source": "etykawpętli.pl",
+      "target": "ethicsintheloop.eu"
+    },
+    {
+      "source": "ethicsintheloop.eu",
+      "target": "ethicsintheloop.eu"
+    }
+  ]
+}

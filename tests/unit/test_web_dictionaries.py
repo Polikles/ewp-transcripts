@@ -88,8 +88,9 @@ def test_gui_dictionary_catalog_ignores_proposals_and_unrelated_json() -> None:
         str(ROOT / "dictionaries")
     )
 
-    assert catalog["count"] == 2
+    assert catalog["count"] == 3
     assert {item["dictionary_id"] for item in catalog["items"]} == {
         "ethics-in-the-loop-pl-v1",
         "ethics-in-the-loop-pl-en-v1",
+        "ethics-in-the-loop-pl-en-v2",
     }

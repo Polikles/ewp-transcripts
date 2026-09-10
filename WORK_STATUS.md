@@ -250,6 +250,9 @@ verified revision, 79 units, 867 source tokens, 1,051 target tokens, zero warnin
 `ethics-in-the-loop-pl-en-v1` dictionary ID/project/hash provenance. Translation generation is
 therefore externally qualified. Browser semantic review/apply/audit/export is the next GUI
 slice; this candidate is not accepted publication text.
+The audited v1 dictionary remains immutable, while the explicitly selected project-wide
+`ethics-in-the-loop-pl-en-v2` now maps both Polish owned-domain forms to the English project
+address `ethicsintheloop.eu`; it does not add episode-specific correction rules.
 That next model-free browser slice is now implemented pending external qualification. A
 generated candidate opens as an exact parent with immutable source units and editable target
 text; save invalidates preview, apply requires the exact preview hash plus explicit semantic
