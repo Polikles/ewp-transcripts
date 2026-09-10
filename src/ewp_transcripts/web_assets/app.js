@@ -5,6 +5,8 @@ let jobsSignature = "";
 let openRouterKeyConfigured = false;
 let guiPendingRequests = 0;
 const inlineWorkingIndicators = new Map();
+let lastClickedButton = null;
+document.addEventListener("click", event => { if (event.target instanceof Element) lastClickedButton = event.target.closest("button"); }, true);
 const guiWorking = document.createElement("p");
 guiWorking.id = "gui-working";
 guiWorking.hidden = true;
@@ -18,7 +20,7 @@ function clearEwpBrowserState() { if (!window.confirm("Clear EWP browser state a
 document.querySelector("#clear-browser-state").addEventListener("click", clearEwpBrowserState);
 function shortName(path) { return path ? path.split(/[\\/]/).pop() : "—"; }
 function showSummary(kind, result, operation = {}) { const summary = document.querySelector("#operation-summary"); summary.replaceChildren(); let entries; const speakers = operation.speaker_count === "auto" ? "Auto-detect" : operation.speaker_count ?? "—"; const language = operation.language === "auto" ? `${result.language || "auto"} (auto)` : operation.language || result.language || "—"; if (kind === "inspect") { entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0], ["Language", language], ["Speakers", speakers]]; } else { const jobs = result.jobs || []; const identities = jobs.map(job => job.job_id).join(", "); const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", "); entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"], ["Language", language], ["Speakers", speakers]]; } for (const [label, value] of entries) { const card = document.createElement("div"); card.className = "result-card"; const heading = document.createElement("strong"); heading.textContent = label; card.append(heading, String(value)); summary.append(card); } if (kind === "dry-run" && result.jobs?.length) { const table = document.createElement("table"); table.className = "queue-table plan-table"; table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>"; const body = document.createElement("tbody"); for (const job of result.jobs) { const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id); const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—"; const row = document.createElement("tr"); for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); } body.append(row); } table.append(body); summary.append(table); } }
-async function queuePost(path, body) { const trigger = document.activeElement; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json", "X-EWP-CSRF": csrfToken}, body: JSON.stringify(body)}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); return payload; } finally { setGuiWorking(false, trigger); } }
+async function queuePost(path, body) { const trigger = lastClickedButton; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json", "X-EWP-CSRF": csrfToken}, body: JSON.stringify(body)}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); return payload; } finally { setGuiWorking(false, trigger); } }
 function diagnosticCode(error) { const message = String(error?.message || "GUI_WORKFLOW_OPERATION_FAILED"); return message.split(":", 1)[0] || "GUI_WORKFLOW_OPERATION_FAILED"; }
 async function reportWorkflowError(resultPath, stage, error) { if (!resultPath) return; try { await queuePost("/api/v1/transcriptions/workflow-error", {result_path: resultPath, stage, code: diagnosticCode(error)}); jobsSignature = ""; await refreshJobs(); } catch (_) { /* the operation's original error remains the primary status */ } }
 async function reportWorkflowSkip(resultPath, stage) { await queuePost("/api/v1/transcriptions/workflow-skip", {result_path: resultPath, stage}); jobsSignature = ""; await refreshJobs(); }
@@ -46,7 +48,7 @@ const skipCorrection = document.createElement("button");
 skipCorrection.type = "button";
 skipCorrection.id = "skip-correction";
 skipCorrection.textContent = "Skip LLM-assisted correction";
-document.querySelector("#generate-correction").after(skipCorrection);
+correctionForm.prepend(skipCorrection);
 skipCorrection.addEventListener("click", async () => { const resultPath = String(correctionForm.elements.namedItem("result_path").value || ""); if (!resultPath) { document.querySelector("#correction-status").textContent = "GUI_CORRECTION_RESULT_REQUIRED: Choose a canonical result before skipping correction."; return; } try { await reportWorkflowSkip(resultPath, "correction"); document.querySelector("#correction-status").textContent = "LLM-assisted correction skipped for this queue output. Continue to manual review."; } catch (error) { document.querySelector("#correction-status").textContent = error.message; } });
 function updateCorrectionProvider() { const cloud = correctionForm.elements.namedItem("provider").value === "openrouter"; document.querySelector("#openrouter-options").hidden = !cloud; correctionForm.elements.namedItem("allow_remote_endpoint").closest("label").hidden = cloud; correctionForm.elements.namedItem("model").value = cloud ? "google/gemini-2.5-flash" : ""; correctionForm.elements.namedItem("endpoint").value = cloud ? "https://openrouter.ai/api/v1" : "http://127.0.0.1:1234/v1"; }
 correctionForm.elements.namedItem("provider").addEventListener("change", updateCorrectionProvider);
@@ -120,7 +122,7 @@ const skipTranslation = document.createElement("button");
 skipTranslation.type = "button";
 skipTranslation.id = "skip-translation";
 skipTranslation.textContent = "Skip LLM-assisted translation";
-document.querySelector("#generate-translation").after(skipTranslation);
+translationForm.prepend(skipTranslation);
 skipTranslation.addEventListener("click", async () => { const resultPath = String(translationForm.elements.namedItem("result_path").value || ""); if (!resultPath) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_RESULT_REQUIRED: Choose a canonical result before skipping translation."; return; } try { await reportWorkflowSkip(resultPath, "translation"); document.querySelector("#translation-status").textContent = "LLM-assisted translation skipped for this queue output."; } catch (error) { document.querySelector("#translation-status").textContent = error.message; } });
 let translationCandidate = null;
 let translationReview = null;
