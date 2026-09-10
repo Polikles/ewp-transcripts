@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -99,3 +100,65 @@ def test_workspace_retains_only_hash_bound_staged_queue_identity(tmp_path: Path)
 
     assert saved.staged_jobs[0]["planned_job_id"] == "episode"
     assert workspaces.load(saved.workspace_id).staged_jobs == saved.staged_jobs
+
+
+def test_workspace_retains_terminal_queue_history_without_credentials(tmp_path: Path) -> None:
+    workspaces, allowed = controller(tmp_path)
+    media = allowed / "episode.wav"
+    media.write_bytes(b"audio")
+    output = allowed / "output"
+    output.mkdir()
+    result = output / "episode_results.json"
+    result.write_text("{}", encoding="utf-8")
+    now = datetime.now(UTC)
+    saved = workspaces.save(
+        name="Completed episode",
+        current_step="translation-heading",
+        fields={"input-path": str(media), "output-path": str(output)},
+        terminal_jobs=[
+            {
+                "job_id": "ec6d26a5-709a-487b-b459-87f85d64a81d",
+                "status": "completed",
+                "input_path": str(media),
+                "output_directory": str(output),
+                "planned_job_id": "episode",
+                "planned_result_path": str(result),
+                "source_sha256": "a" * 64,
+                "language": "pl",
+                "speaker_count": "auto",
+                "created_at": now,
+                "updated_at": now,
+                "result_path": str(result),
+                "error": None,
+                "workflow_errors": {"translation": "INVALID_TRANSLATION_RESPONSE"},
+                "workflow_skips": ["correction"],
+            },
+            {
+                "job_id": "f2a7fdd3-4bdb-4c84-9156-b4177df5670f",
+                "status": "failed",
+                "input_path": str(media),
+                "output_directory": str(output),
+                "planned_job_id": "failed-episode",
+                "planned_result_path": str(output / "failed-episode_results.json"),
+                "source_sha256": "b" * 64,
+                "language": "pl",
+                "speaker_count": "auto",
+                "created_at": now,
+                "updated_at": now,
+                "result_path": None,
+                "error": {"code": "GUI_TRANSCRIPTION_FAILED", "message": "Retained failure."},
+                "workflow_errors": {},
+                "workflow_skips": [],
+            },
+        ],
+    )
+
+    restored = workspaces.load(saved.workspace_id)
+
+    assert restored.workspace_version == 2
+    assert len(restored.terminal_jobs) == 2
+    assert restored.terminal_jobs[0].workflow_skips == {"correction"}
+    assert restored.terminal_jobs[0].workflow_errors == {
+        "translation": "INVALID_TRANSLATION_RESPONSE"
+    }
+    assert restored.terminal_jobs[1].status == "failed"

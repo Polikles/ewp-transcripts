@@ -282,3 +282,36 @@ def test_queue_marks_optional_stages_skipped_for_its_matching_result(tmp_path: P
     assert progress.correction.state == "skipped"
     assert progress.translation.state == "skipped"
     assert progress.translated_export.state == "skipped"
+
+
+def test_queue_restores_only_terminal_history_from_saved_workspace(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    result = output / "episode_results.json"
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    restored_queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        staged = queue.stage(
+            tmp_path / "episode.wav",
+            output,
+            planned_job_id="episode",
+            planned_result_path=str(result),
+            source_sha256="a" * 64,
+        )
+        terminal = staged.model_copy(
+            update={
+                "status": "completed",
+                "result_path": str(result),
+                "workflow_skips": {"correction"},
+                "workflow_errors": {"translation": "INVALID_TRANSLATION_RESPONSE"},
+            }
+        )
+        assert restored_queue.replace_terminal_jobs((terminal,)) == 1
+        restored = restored_queue.jobs()
+    finally:
+        queue.close()
+        restored_queue.close()
+
+    assert restored == (terminal,)
+    progress = workflow_progress(restored[0])
+    assert progress.correction.state == "skipped"
+    assert progress.translation.state == "failed"

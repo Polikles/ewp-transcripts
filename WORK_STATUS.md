@@ -4,7 +4,7 @@ Last updated: **2026-09-10**.
 
 ## Checkpoint
 
-Version `0.17.0` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.18.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
@@ -14,9 +14,10 @@ The GUI now shows an artifact-derived completion tracker for every queued record
 states correspond to immutable correction, revision, and export artifacts on disk, so they remain
 accurate after a browser or GUI restart. A single context-aware **Next step** action moves a queue
 item through the workflow; optional LLM correction and translation can be explicitly marked
-skipped. The current GUI process also shows failed or skipped optional stages red or blue,
-respectively. Those transient red/blue annotations are intentionally not persisted until the
-workflow journal is designed; immutable artifact-derived green states remain durable.
+skipped. A saved workspace now also retains completed/failed queue history and its non-secret
+skip/error annotations, then validates and restores that history after a GUI restart. Interrupted
+GPU work is never revived: only the existing source-hash-validated staged-job recovery path can
+resume it. Immutable artifact-derived green states remain independently durable.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated

@@ -14,6 +14,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ewp_transcripts.web_jobs import GuiTranscriptionJob
+
 _FIELD_NAMES = frozenset(
     {
         "input-path",
@@ -101,13 +103,14 @@ class GuiWorkspaceSummary(BaseModel):
 class GuiWorkspaceDocument(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    workspace_version: Literal[1] = 1
+    workspace_version: Literal[1, 2] = 2
     workspace_id: str
     name: str
     saved_at: datetime
     current_step: str
     fields: dict[str, str | bool | int]
     staged_jobs: tuple[dict[str, str | int], ...] = ()
+    terminal_jobs: tuple[GuiTranscriptionJob, ...] = ()
 
 
 ResolvePath = Callable[..., Path]
@@ -133,6 +136,7 @@ class GuiWorkspaceController:
         current_step: str,
         fields: dict[str, Any],
         staged_jobs: builtin_list[dict[str, Any]] | None = None,
+        terminal_jobs: builtin_list[dict[str, Any]] | None = None,
         workspace_id: str = "",
     ) -> GuiWorkspaceDocument:
         clean_name = name.strip()
@@ -140,6 +144,7 @@ class GuiWorkspaceController:
             raise ValueError("Workspace name must contain 1 to 100 characters")
         clean_fields = self._validate_fields(fields)
         clean_staged_jobs = self._validate_staged_jobs(staged_jobs or [])
+        clean_terminal_jobs = self._validate_terminal_jobs(terminal_jobs or [])
         identifier = (
             self._normalize_workspace_id(workspace_id) if workspace_id.strip() else str(uuid4())
         )
@@ -150,6 +155,7 @@ class GuiWorkspaceController:
             current_step=current_step[:100],
             fields=clean_fields,
             staged_jobs=clean_staged_jobs,
+            terminal_jobs=clean_terminal_jobs,
         )
         self._state_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         destination = self._state_directory / f"{identifier}.json"
@@ -175,7 +181,9 @@ class GuiWorkspaceController:
         for path in self._state_directory.glob("*.json"):
             try:
                 document = self._read(path)
-                available = self._paths_available(document.fields, document.staged_jobs)
+                available = self._paths_available(
+                    document.fields, document.staged_jobs, document.terminal_jobs
+                )
                 summaries.append(
                     GuiWorkspaceSummary(
                         workspace_id=document.workspace_id,
@@ -195,6 +203,9 @@ class GuiWorkspaceController:
         document = self._read(path)
         self._validate_fields(document.fields)
         self._validate_staged_jobs(list(document.staged_jobs))
+        self._validate_terminal_jobs(
+            [job.model_dump(mode="json") for job in document.terminal_jobs]
+        )
         return document
 
     def _validate_fields(self, fields: dict[str, Any]) -> dict[str, str | bool | int]:
@@ -244,14 +255,47 @@ class GuiWorkspaceController:
             clean.append({key: item[key] for key in required})
         return tuple(clean)
 
+    def _validate_terminal_jobs(
+        self,
+        terminal_jobs: builtin_list[dict[str, Any]],
+    ) -> tuple[GuiTranscriptionJob, ...]:
+        if not isinstance(terminal_jobs, builtin_list) or len(terminal_jobs) > 50:
+            raise ValueError("Workspace completed jobs are invalid")
+        clean: builtin_list[GuiTranscriptionJob] = []
+        seen_job_ids: set[str] = set()
+        for item in terminal_jobs:
+            try:
+                job = GuiTranscriptionJob.model_validate(item)
+            except ValueError:
+                raise ValueError("Workspace completed job is invalid") from None
+            if job.status not in {"completed", "failed"} or job.job_id in seen_job_ids:
+                raise ValueError("Workspace completed job is invalid")
+            if not job.source_sha256 or len(job.source_sha256) != 64:
+                raise ValueError("Workspace completed job is invalid")
+            self._resolve_path(job.input_path)
+            output = self._resolve_path(job.output_directory, directory=True)
+            planned = self._resolve_path(job.planned_result_path, directory=job.status == "failed")
+            if planned.parent != output:
+                raise ValueError("Workspace completed job has an invalid result location")
+            if job.status == "completed":
+                if not job.result_path or self._resolve_path(job.result_path) != planned:
+                    raise ValueError("Workspace completed job has an invalid result")
+            elif job.result_path is not None:
+                raise ValueError("Workspace failed job cannot have a result")
+            clean.append(job)
+            seen_job_ids.add(job.job_id)
+        return tuple(clean)
+
     def _paths_available(
         self,
         fields: dict[str, str | bool | int],
         staged_jobs: tuple[dict[str, str | int], ...],
+        terminal_jobs: tuple[GuiTranscriptionJob, ...],
     ) -> bool:
         try:
             self._validate_fields(fields)
             self._validate_staged_jobs(list(staged_jobs))
+            self._validate_terminal_jobs([job.model_dump(mode="json") for job in terminal_jobs])
         except (FileNotFoundError, OSError, ValueError):
             return False
         return True

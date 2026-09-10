@@ -23,7 +23,12 @@ from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_filesystem import GuiFilesystemController
-from ewp_transcripts.web_jobs import GuiTranscriptionQueue, WorkflowStageName, workflow_progress
+from ewp_transcripts.web_jobs import (
+    GuiTranscriptionJob,
+    GuiTranscriptionQueue,
+    WorkflowStageName,
+    workflow_progress,
+)
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
@@ -396,15 +401,22 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                             for job in self.server.gui_transcriptions.jobs()
                             if job.status == "staged"
                         ],
+                        terminal_jobs=[
+                            job.model_dump(mode="json")
+                            for job in self.server.gui_transcriptions.jobs()
+                            if job.status in {"completed", "failed"}
+                        ],
                         workspace_id=str(document.get("workspace_id", "")),
                     )
                     payload = {"workspace": saved.model_dump(mode="json")}
                 elif path == "/api/v1/workspaces/load":
                     loaded = self.server.gui_workspaces.load(str(document.get("workspace_id", "")))
+                    restored_terminal = self._restore_workspace_terminal_jobs(loaded.terminal_jobs)
                     restored = self._restore_workspace_staged_jobs(loaded.staged_jobs)
                     payload = {
                         "workspace": loaded.model_dump(mode="json"),
                         "restored_staged_jobs": restored,
+                        "restored_terminal_jobs": restored_terminal,
                     }
                 else:
                     self._write_response(
@@ -1332,6 +1344,31 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 speaker_count=speaker_count,
             )
         return len(staged_jobs)
+
+    def _restore_workspace_terminal_jobs(
+        self, terminal_jobs: tuple[GuiTranscriptionJob, ...]
+    ) -> int:
+        """Restore validated completed/failed queue history before staged jobs are rebuilt."""
+
+        if not terminal_jobs:
+            return 0
+        # Workspace validation already restricts these records. Re-validate at the boundary that
+        # mutates the live queue, so an internal caller cannot bypass the persisted contract.
+        jobs = tuple(
+            GuiTranscriptionJob.model_validate(item.model_dump(mode="json"))
+            for item in terminal_jobs
+        )
+        for job in jobs:
+            self.server.gui_workflows.resolve_allowed_path(job.input_path)
+            self.server.gui_workflows.resolve_allowed_path(job.output_directory, directory=True)
+            self.server.gui_workflows.resolve_allowed_path(
+                job.planned_result_path, directory=job.status == "failed"
+            )
+            if job.status == "completed":
+                if not job.result_path:
+                    raise ValueError("A completed saved queue job lacks its result")
+                self.server.gui_workflows.resolve_allowed_path(job.result_path)
+        return self.server.gui_transcriptions.replace_terminal_jobs(jobs)
 
     def log_message(self, format: str, *args: object) -> None:
         return

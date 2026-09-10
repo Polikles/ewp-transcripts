@@ -221,6 +221,27 @@ class GuiTranscriptionQueue:
                 return True
         return False
 
+    def replace_terminal_jobs(self, jobs: tuple[GuiTranscriptionJob, ...]) -> int:
+        """Replace inactive queue history from a validated saved workspace.
+
+        Only terminal entries can cross a GUI-process boundary.  Never revive an interrupted
+        GPU operation: staged, queued, and running entries require their separate hash-bound
+        restoration path.
+        """
+
+        if any(job.status not in {"completed", "failed"} for job in jobs):
+            raise ValueError("Only completed or failed jobs can be restored as queue history")
+        with self._lock:
+            if any(job.status in {"staged", "queued", "running"} for job in self._jobs.values()):
+                raise ValueError(
+                    "An active transcription queue cannot be replaced by saved history"
+                )
+            if len({job.job_id for job in jobs}) != len(jobs):
+                raise ValueError("Saved queue history contains duplicate job IDs")
+            self._jobs = {job.job_id: job for job in jobs}
+            self._order = deque((job.job_id for job in jobs), maxlen=50)
+        return len(jobs)
+
     def close(self) -> None:
         self._pending.put(None)
         self._worker.join()

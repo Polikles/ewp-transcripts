@@ -760,8 +760,10 @@ Planned capabilities:
   include or omit custom dictionaries and no secret/API-key export;
 - add explicit Save current work state and Load previous work state actions. A versioned
   server-side workspace record should restore all non-secret fields, staged artifact paths,
-  open saved review, and current workflow step after a full workstation/VM restart, while
-  revalidating allowed roots and hashes and never persisting credentials or unsaved edits;
+  terminal queue history, open saved review, and current workflow step after a full
+  workstation/VM restart, while revalidating allowed roots and hashes and never persisting
+  credentials or unsaved edits. Terminal history and hash-bound staged jobs are implemented;
+  interrupted GPU work remains intentionally non-resumable;
 - when functional GUI work is complete or nearly complete, qualify one full cross-directory
   workflow with several inputs and one shared output root: transcription, optional correction,
   manual verification/export, translation, semantic review, and translated export;

@@ -282,7 +282,7 @@ let activeWorkspaceId = "";
 let lastWorkspaceFingerprint = "";
 let workspaceAutosaveBusy = false;
 function collectWorkspaceFields() { const fields = {}; for (const id of workspaceFieldIds) { const element = document.getElementById(id); if (!element) continue; fields[id] = element.type === "checkbox" ? element.checked : element.value; } return fields; }
-function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}); }
+function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), queue: jobsSignature}); }
 function activateWorkspace(workspace) { activeWorkspaceId = workspace.workspace_id; workspaceAutosave.disabled = false; lastWorkspaceFingerprint = workspaceFingerprint(); workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; }
 function showWorkspacePendingState() { if (activeWorkspaceId && workspaceAutosave.checked && !workspaceAutosave.disabled && workspaceFingerprint() !== lastWorkspaceFingerprint) workspaceAutosaveStatus.textContent = "Changes pending for auto-save. They will be validated at the next 60-second check."; }
 for (const section of document.querySelectorAll("main > section")) { if (section === workspaceSection) continue; section.addEventListener("focusin", () => { lastWorkspaceStep = section.getAttribute("aria-labelledby") || lastWorkspaceStep; showWorkspacePendingState(); }); section.addEventListener("click", () => { lastWorkspaceStep = section.getAttribute("aria-labelledby") || lastWorkspaceStep; showWorkspacePendingState(); }); }
@@ -309,4 +309,11 @@ restoredReviewButton.addEventListener("click", () => {
   }
   openManualReviewForResult(resultPath, outputRoot, reviewSourceRevisionPath);
 });
+const refreshJobsForWorkspace = refreshJobs;
+refreshJobs = async function() {
+  const previousSignature = jobsSignature;
+  const payload = await refreshJobsForWorkspace();
+  if (jobsSignature !== previousSignature) showWorkspacePendingState();
+  return payload;
+};
 start();
