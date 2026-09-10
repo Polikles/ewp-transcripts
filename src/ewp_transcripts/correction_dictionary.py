@@ -9,7 +9,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Literal, cast
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ewp_transcripts.domain.canonical import load_canonical_result
 from ewp_transcripts.domain.correction import CorrectionDictionaryTerm
@@ -41,6 +41,16 @@ class CorrectionDictionaryCandidate(BaseModel):
     status: Literal["pending", "approved", "rejected"] = "pending"
 
 
+class CorrectionDictionaryManualConvention(BaseModel):
+    """One human-owned project convention outside lexical corpus extraction."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
+
+    source: str = Field(min_length=1)
+    target: str = Field(min_length=1)
+    rationale: str = Field(min_length=1)
+
+
 class CorrectionDictionaryProposal(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
@@ -54,6 +64,7 @@ class CorrectionDictionaryProposal(BaseModel):
     minimum_occurrences: int = Field(ge=1)
     previous_dictionary_sha256: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     candidates: tuple[CorrectionDictionaryCandidate, ...]
+    manual_conventions: tuple[CorrectionDictionaryManualConvention, ...] = ()
 
 
 class CorrectionDictionaryEntry(BaseModel):
@@ -72,6 +83,15 @@ class ProjectCorrectionDictionary(BaseModel):
     job_ids: tuple[str, ...] = Field(min_length=1)
     proposal_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     entries: tuple[CorrectionDictionaryEntry, ...] = Field(min_length=1)
+    manual_conventions: tuple[CorrectionDictionaryManualConvention, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_source_terms(self) -> ProjectCorrectionDictionary:
+        sources = [entry.source.casefold() for entry in self.entries]
+        sources.extend(item.source.casefold() for item in self.manual_conventions)
+        if len(sources) != len(set(sources)):
+            raise ValueError("correction dictionary source terms must be unique")
+        return self
 
 
 def propose_correction_dictionary(
@@ -197,6 +217,9 @@ def propose_correction_dictionary(
         minimum_occurrences=minimum_occurrences,
         previous_dictionary_sha256=previous_dictionary_sha256,
         candidates=tuple(candidates),
+        manual_conventions=(
+            previous_dictionary.manual_conventions if previous_dictionary is not None else ()
+        ),
     )
 
 
@@ -230,6 +253,7 @@ def approve_correction_dictionary(
         job_ids=proposal.job_ids,
         proposal_sha256=hashlib.sha256(payload).hexdigest(),
         entries=decisions,
+        manual_conventions=proposal.manual_conventions,
     )
     if output_path.exists():
         raise ValueError(f"Correction dictionary output already exists: {output_path}")
@@ -261,6 +285,12 @@ def select_correction_dictionary_terms(
         pattern = rf"(?<!\w){re.escape(entry.source)}(?!\w)"
         if re.search(pattern, editable_text, flags=re.IGNORECASE):
             selected.append(CorrectionDictionaryTerm(source=entry.source, target=entry.target))
+    for convention in dictionary.manual_conventions:
+        pattern = rf"(?<!\w){re.escape(convention.source)}(?!\w)"
+        if re.search(pattern, editable_text, flags=re.IGNORECASE):
+            selected.append(
+                CorrectionDictionaryTerm(source=convention.source, target=convention.target)
+            )
     return tuple(selected)
 
 

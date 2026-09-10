@@ -22,8 +22,7 @@ from ewp_transcripts.translation_review_service import prepare_translation_revie
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
 PROJECT_TRANSLATION_V2 = (
-    ROOT
-    / "dictionaries/ethics-in-the-loop/translation/pl-en/ethics-in-the-loop-pl-en-v2.json"
+    ROOT / "dictionaries/ethics-in-the-loop/translation/pl-en/ethics-in-the-loop-pl-en-v2.json"
 )
 
 

@@ -4,9 +4,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.18.1`.
+The next internal-beta version is `0.19.0`.
 
 ### Added
+
+- Correction dictionaries can retain explicitly documented `manual_conventions` alongside
+  conservative corpus-derived entries. They are immutable, source-bound provider context with a
+  human rationale, carry forward through future proposal refreshes, and never become a hidden
+  post-processing rewrite. The bundled Ethics in the Loop correction v2 adds the stable quoted
+  and capitalized Polish show-title convention while preserving every v1 approved and rejected
+  decision.
 
 - Saved GUI workspaces now retain terminal queue history: completed or failed transcription jobs,
   their exact result identity, and non-secret optional-stage skip/error state. Loading validates

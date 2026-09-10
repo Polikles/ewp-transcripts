@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.correction_dictionary import (
+    CorrectionDictionaryManualConvention,
+    ProjectCorrectionDictionary,
     _strip_boundary_punctuation,
     approve_correction_dictionary,
     load_project_correction_dictionary,
@@ -98,6 +100,27 @@ def test_proposal_extracts_consistent_manual_lexical_mapping(tmp_path: Path) -> 
     assert carried.previous_dictionary_sha256 == "c" * 64
     assert carried.candidates[0].status == "approved"
 
+    manual_dictionary = dictionary.model_copy(
+        update={
+            "manual_conventions": (
+                CorrectionDictionaryManualConvention(
+                    source="Project title",
+                    target="Project Title",
+                    rationale="Stable project convention.",
+                ),
+            )
+        }
+    )
+    carried_manual = propose_correction_dictionary(
+        canonical_directory=canonical,
+        revision_directory=revisions,
+        project_id="example",
+        minimum_occurrences=1,
+        previous_dictionary=manual_dictionary,
+        previous_dictionary_sha256="d" * 64,
+    )
+    assert carried_manual.manual_conventions == manual_dictionary.manual_conventions
+
     rejected_payload = json.loads(proposal_path.read_text(encoding="utf-8"))
     rejected_payload["candidates"][0]["status"] = "rejected"
     rejected_path = tmp_path / "rejected-proposal.json"
@@ -115,6 +138,35 @@ def test_dictionary_keys_discard_boundary_quotes_and_punctuation() -> None:
     assert _strip_boundary_punctuation("Anthropic,") == "Anthropic"
     assert _strip_boundary_punctuation('"akceptuję",') == "akceptuję"
     assert _strip_boundary_punctuation("etykawpetli.pl") == "etykawpetli.pl"
+
+
+def test_manual_project_conventions_are_auditable_and_source_bound() -> None:
+    dictionary = ProjectCorrectionDictionary(
+        dictionary_id="example-pl-v2",
+        project_id="example",
+        job_ids=("case",),
+        proposal_sha256="a" * 64,
+        entries=(
+            {
+                "source": "podcastu",
+                "target": "podkastu",
+                "status": "approved",
+            },
+        ),
+        manual_conventions=(
+            CorrectionDictionaryManualConvention(
+                source="Etyka w pętli",
+                target='"Etyka w Pętli"',
+                rationale="Project-owned podcast title capitalization and quotation convention.",
+            ),
+        ),
+    )
+
+    assert [
+        (term.source, term.target)
+        for term in select_correction_dictionary_terms(dictionary, "Witamy w Etyka w pętli.")
+    ] == [("Etyka w pętli", '"Etyka w Pętli"')]
+    assert select_correction_dictionary_terms(dictionary, "Niepowiązany tekst") == ()
 
 
 def test_published_project_dictionary_retains_exact_review_lineage() -> None:

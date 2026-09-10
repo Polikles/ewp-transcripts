@@ -4,11 +4,16 @@ Last updated: **2026-09-10**.
 
 ## Checkpoint
 
-Version `0.18.1` is the next internal beta on `main`; it is not tagged or published as a public
+Version `0.19.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public
 release is reserved for the checkpoint immediately before Docker-image implementation; an
 internal version number never implies publication. The repository is public and licensed
 under `AGPL-3.0-only`.
+
+Correction dictionaries now distinguish evidence-backed lexical entries from immutable,
+human-documented project conventions. The latter remain source-bound LLM context, not automatic
+text replacement; Ethics in the Loop correction v2 uses that narrow path for the quoted,
+capitalized Polish show title while preserving all v1 accepted and rejected proposal decisions.
 
 The GUI now shows an artifact-derived completion tracker for every queued recording. Its green
 states correspond to immutable correction, revision, and export artifacts on disk, so they remain

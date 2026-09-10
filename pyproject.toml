@@ -1,6 +1,6 @@
 [project]
 name = "ewp-transcripts"
-version = "0.18.1"
+version = "0.19.0"
 description = "Local-first transcription for edited podcast and training recordings"
 readme = "README.md"
 authors = [{ name = "Damian Szczech", email = "szczech.dam+ewptranscript@gmail.com" }]
