@@ -702,6 +702,10 @@ Planned capabilities:
 - persistent named media/project roots managed through an explicit local configuration or launch
   workflow, so ordinary use does not require repetitive path flags while browser requests remain
   unable to grant themselves broader filesystem authority;
+- replace the current testing-oriented allowed-root allowlist with a reviewed local-user safety
+  policy that blocks clearly dangerous system locations and path traversal without making normal
+  media locations unusable; pair it with an operating-system file/directory picker rather than
+  relying primarily on custom browser path text fields;
 - content-aware input validation and time-of-check/time-of-use protection: retain strict JSON
   parsing and FFprobe decoding, then compare exact source fingerprints again when a staged job
   starts. This pre-open fingerprint check is implemented; evaluate an optional owned immutable
@@ -709,11 +713,17 @@ Planned capabilities:
   cannot eliminate every race before a decoder opens the file. Do not rely on filename extensions
   or non-portable long-lived locks alone;
 - warning display and job queue;
+- support directory scanning and checkbox selection of recognized canonical JSON results for
+  later correction, review, and translation queues. Every workflow stage should expose a compact
+  per-item queue with the same grey/green/red/blue legend, allowing work to resume at any stage;
 - after the individual optional LLM stages are fully qualified, add explicit batch correction and
   batch translation operations for compatible queued items. They must preserve the same per-item
   consent, provenance, bounded retry, resumable state, error isolation, and manual-review gates
   as individual operations; they must not be implemented as an unbounded loop behind a cosmetic
-  bulk button;
+  bulk button. Batch correction may start per completed cloud-backed transcription while other
+  transcription jobs continue. Batch translation must list the newest accepted revision for each
+  chosen job, allow a distinct project dictionary per item, disable completed current-version
+  items, and re-enable an item when a newer verified source revision exists;
 - an explicit visible workflow progression: transcription, transcript review (or provisional
   export), apply and verified export, then optional translation, translation review (or
   provisional export), apply, and verified translated export;
@@ -733,6 +743,10 @@ Planned capabilities:
   <https://github.com/Polikles/ewp-transcripts>.
 - a manual plain-language review of all bundled and repository instructions with
   less-technical users after the workflow stabilizes; screenshots are added after that pass.
+- a floating left-side workflow navigator, designed with the eventual podcast branding, that
+  follows the page, identifies the active file, mirrors per-stage status circles, offers direct
+  step navigation, and includes a **Back to transcription queue** action. Exact visual layout is
+  deferred until functional GUI coverage is complete.
 - after functional GUI coverage, a dedicated frontend pass that aligns appearance with the
   owner's other projects and adds final responsive light/dark styles;
 - add table-of-contents navigation and collapsible top-level workflow sections as correction,
