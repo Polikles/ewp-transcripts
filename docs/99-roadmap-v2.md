@@ -738,6 +738,7 @@ Planned capabilities:
 - secure handling of optional API credentials;
 - audio-following review where useful;
 - an About section with application/version information;
+- add maintained project URL and project-website metadata when the public destination is ready;
 - a License section presenting the applicable license and warranty notice;
 - a Source Code section with a direct link to the public project repository:
   <https://github.com/Polikles/ewp-transcripts>.
@@ -747,6 +748,8 @@ Planned capabilities:
   follows the page, identifies the active file, mirrors per-stage status circles, offers direct
   step navigation, and includes a **Back to transcription queue** action. Exact visual layout is
   deferred until functional GUI coverage is complete.
+- replace interim CSS spinners and status circles with the approved project icon system during
+  that same branding pass, without making status depend on color or animation alone.
 - after functional GUI coverage, a dedicated frontend pass that aligns appearance with the
   owner's other projects and adds final responsive light/dark styles;
 - add table-of-contents navigation and collapsible top-level workflow sections as correction,
