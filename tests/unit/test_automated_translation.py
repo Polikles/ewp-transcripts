@@ -15,11 +15,16 @@ from ewp_transcripts.domain.errors import InvalidTranslationResponseError
 from ewp_transcripts.translation_dictionary import (
     ProjectTranslationDictionary,
     TranslationDictionaryEntry,
+    load_project_translation_dictionary,
 )
 from ewp_transcripts.translation_review_service import prepare_translation_review
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "examples/results.example.json"
+PROJECT_TRANSLATION_V2 = (
+    ROOT
+    / "dictionaries/ethics-in-the-loop/translation/pl-en/ethics-in-the-loop-pl-en-v2.json"
+)
 
 
 def test_request_owns_one_unit_and_context_is_read_only() -> None:
@@ -73,6 +78,21 @@ def test_project_wide_dictionary_applies_to_future_job_ids() -> None:
     )
 
     assert dictionary.applies_to("future-episode") is True
+
+
+def test_project_translation_v2_preserves_english_site_convention() -> None:
+    dictionary, _digest = load_project_translation_dictionary(PROJECT_TRANSLATION_V2)
+
+    assert dictionary.dictionary_id == "ethics-in-the-loop-pl-en-v2"
+    assert dictionary.applies_to("future-episode") is True
+    assert {
+        entry.source: entry.target
+        for entry in dictionary.entries
+        if entry.source in {"etykawpetli.pl", "etykawpętli.pl"}
+    } == {
+        "etykawpetli.pl": "ethicsintheloop.eu",
+        "etykawpętli.pl": "ethicsintheloop.eu",
+    }
 
 
 def test_project_wide_dictionary_rejects_mixed_wildcard_scope() -> None:
