@@ -237,6 +237,8 @@ function clearActiveTranslationReview(message = "Current translation review clea
   document.querySelector("#clear-translation-review").disabled = true;
   document.querySelector("#translation-review-confirmed").checked = false;
   document.querySelector("#translation-review-status").textContent = message;
+  document.querySelector("#translation-review-summary").replaceChildren();
+  document.querySelector("#translation-review-result").textContent = "";
   updateTranslationReviewHistoryControls();
 }
 
@@ -446,10 +448,11 @@ addTranslationReviewNavigation();
 addTranslationReviewRecoveryControls();
 document.querySelector("#clear-translation-review").addEventListener("click", () => {
   if (translationReview && translationReviewDirty) {
-    if (!window.confirm("Save the current translation draft before clearing it from this browser?")) return;
+    if (!window.confirm("Save the current translation draft before clearing it from this browser? Saved drafts remain on disk.")) return;
     saveEnhancedTranslationReview().then(() => clearActiveTranslationReview());
     return;
   }
+  if (translationReview && !window.confirm("Clear the current translation review from this browser? Saved drafts remain on disk.")) return;
   clearActiveTranslationReview();
 });
 replaceTranslationReviewButton("#review-translation", openEnhancedTranslationReview);
