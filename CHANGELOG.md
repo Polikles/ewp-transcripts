@@ -4,7 +4,7 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.18.0`.
+The next internal-beta version is `0.18.1`.
 
 ### Added
 
@@ -12,6 +12,11 @@ The next internal-beta version is `0.18.0`.
   their exact result identity, and non-secret optional-stage skip/error state. Loading validates
   every path before replacing inactive history; active or interrupted GPU jobs are never revived.
   Workspace auto-save detects queue-history changes as well as form-field changes.
+
+### Fixed
+
+- Loading a saved workspace in an already-running GUI now refreshes terminal history without
+  dropping its matching staged queue entries.
 
 - Added result-specific GUI review-session pointers. Switching from one queued recording to
   another automatically saves the active editable review and restores (or prepares) the selected

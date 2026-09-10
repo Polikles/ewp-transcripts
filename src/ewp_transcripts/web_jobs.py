@@ -232,14 +232,17 @@ class GuiTranscriptionQueue:
         if any(job.status not in {"completed", "failed"} for job in jobs):
             raise ValueError("Only completed or failed jobs can be restored as queue history")
         with self._lock:
-            if any(job.status in {"staged", "queued", "running"} for job in self._jobs.values()):
-                raise ValueError(
-                    "An active transcription queue cannot be replaced by saved history"
-                )
             if len({job.job_id for job in jobs}) != len(jobs):
                 raise ValueError("Saved queue history contains duplicate job IDs")
-            self._jobs = {job.job_id: job for job in jobs}
-            self._order = deque((job.job_id for job in jobs), maxlen=50)
+            active = tuple(
+                self._jobs[job_id]
+                for job_id in self._order
+                if self._jobs[job_id].status in {"staged", "queued", "running"}
+            )
+            if {job.job_id for job in active} & {job.job_id for job in jobs}:
+                raise ValueError("Saved queue history conflicts with an active job")
+            self._jobs = {job.job_id: job for job in (*active, *jobs)}
+            self._order = deque((job.job_id for job in (*active, *jobs)), maxlen=50)
         return len(jobs)
 
     def close(self) -> None:

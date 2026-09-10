@@ -315,3 +315,30 @@ def test_queue_restores_only_terminal_history_from_saved_workspace(tmp_path: Pat
     progress = workflow_progress(restored[0])
     assert progress.correction.state == "skipped"
     assert progress.translation.state == "failed"
+
+
+def test_restoring_terminal_history_preserves_active_staged_jobs(tmp_path: Path) -> None:
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        active = queue.stage(
+            tmp_path / "active.wav",
+            tmp_path / "output",
+            planned_job_id="active",
+            planned_result_path=str(tmp_path / "output/active_results.json"),
+            source_sha256="a" * 64,
+        )
+        terminal = active.model_copy(
+            update={
+                "job_id": "7d927d4e-96e0-439e-a3d7-1626d1ee89cc",
+                "status": "completed",
+                "planned_job_id": "finished",
+                "planned_result_path": str(tmp_path / "output/finished_results.json"),
+                "result_path": str(tmp_path / "output/finished_results.json"),
+            }
+        )
+        queue.replace_terminal_jobs((terminal,))
+        restored = queue.jobs()
+    finally:
+        queue.close()
+
+    assert [job.job_id for job in restored] == [active.job_id, terminal.job_id]
