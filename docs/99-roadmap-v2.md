@@ -695,6 +695,13 @@ security, accessibility, and implementation-slice contract is in
 Planned capabilities:
 
 - file, directory, and group selection;
+- add and qualify optional cloud-based speech-to-text providers for hardware-constrained
+  environments. Local transcription remains the default local-first path, but a cloud adapter
+  may let the application operate as a light orchestration/review/export client when the operator
+  explicitly accepts that media and transcript data leave the machine. It must retain provider,
+  model, endpoint, cost/usage where available, consent, source identity, and failure provenance;
+  produce the same canonical-result contract or fail closed; and receive separate accuracy,
+  timing, privacy, retry, and manual-workflow testing before it is presented as supported.
 - dry-run preview;
 - audio-stream selection;
 - per-file language selection and speaker-count selection, including clearly labeled
