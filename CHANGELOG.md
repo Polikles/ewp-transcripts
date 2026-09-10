@@ -4,9 +4,24 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.16.0`.
+The next internal-beta version is `0.17.0`.
 
 ### Added
+
+- Added result-specific GUI review-session pointers. Switching from one queued recording to
+  another automatically saves the active editable review and restores (or prepares) the selected
+  recording's own review, preventing one episode's draft from being reopened for another.
+- Replaced separate queue handoff controls with one context-aware **Next step** action. It opens
+  optional correction, an automatically prepared manual review, verified export, translation, or
+  semantic translation review according to the first unfinished stage.
+- Added explicit **Skip LLM-assisted correction** and **Skip LLM-assisted translation** controls.
+  A queue legend now distinguishes not-started (grey), completed (green), failed (red), and
+  explicitly skipped (blue) workflow stages. Skip/error annotations are process-local; immutable
+  artifact-derived completion remains durable across GUI restarts.
+- Added a visible general GUI **Working…** status while a state-changing browser operation is
+  awaiting its local service response.
+- Semantic translation review now preserves a separate saved draft for each candidate, switches
+  candidates safely, and has a clear-current-review control that does not delete saved work.
 
 - Added durable per-job GUI workflow completion indicators. The queue derives its green states
   from correction candidates, immutable verified revisions, original exports, accepted

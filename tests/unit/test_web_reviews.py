@@ -263,6 +263,35 @@ def test_browser_review_session_requires_saved_pointer(tmp_path: Path) -> None:
     assert missing.value.code == "GUI_REVIEW_SESSION_NOT_FOUND"
 
 
+def test_browser_review_sessions_are_restored_per_canonical_result(tmp_path: Path) -> None:
+    first_result = tmp_path / "first_results.json"
+    second_result = tmp_path / "second_results.json"
+    first_result.write_bytes(EXAMPLE.read_bytes())
+    second_result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    project = tmp_path / "project"
+    first = service.prepare(str(first_result), str(project / "reviews"))
+    second = service.prepare(str(second_result), str(project / "reviews"))
+    for result, prepared in ((first_result, first), (second_result, second)):
+        service.remember_session(
+            project_output_directory=str(project),
+            result=str(result),
+            review=prepared["review_path"],
+            review_output_directory=str(project / "reviews"),
+            revision_output_directory=str(project / "revisions"),
+            export_output_directory=str(project / "exports"),
+        )
+
+    assert (
+        service.restore_session(str(project), str(first_result))["review_path"]
+        == first["review_path"]
+    )
+    assert (
+        service.restore_session(str(project), str(second_result))["review_path"]
+        == second["review_path"]
+    )
+
+
 def test_browser_review_can_start_from_automated_candidate(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())

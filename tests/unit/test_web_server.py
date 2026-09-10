@@ -124,7 +124,10 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b'behavior: "smooth"' in script_response.body
     assert b"installConfirmationHighlight" in script_response.body
     assert b"confirmation is required" in script_response.body
-    assert b"Continue to correction" in script_response.body
+    assert b"Next step: correction" in script_response.body
+    assert b"Skip LLM-assisted correction" in script_response.body
+    assert b"Skip LLM-assisted translation" in script_response.body
+    assert b"Clear current translation review" in response.body
     assert b"Continue to manual review" in script_response.body
     assert b"Completed canonical transcription loaded" in script_response.body
     assert b"Provider settings" in script_response.body

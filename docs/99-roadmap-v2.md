@@ -709,6 +709,11 @@ Planned capabilities:
   cannot eliminate every race before a decoder opens the file. Do not rely on filename extensions
   or non-portable long-lived locks alone;
 - warning display and job queue;
+- after the individual optional LLM stages are fully qualified, add explicit batch correction and
+  batch translation operations for compatible queued items. They must preserve the same per-item
+  consent, provenance, bounded retry, resumable state, error isolation, and manual-review gates
+  as individual operations; they must not be implemented as an unbounded loop behind a cosmetic
+  bulk button;
 - an explicit visible workflow progression: transcription, transcript review (or provisional
   export), apply and verified export, then optional translation, translation review (or
   provisional export), apply, and verified translated export;

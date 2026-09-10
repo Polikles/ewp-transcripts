@@ -144,6 +144,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
         body += b"\n" + assets.joinpath("translation_review_editor.css").read_bytes()
+        body += b"\n" + assets.joinpath("workflow_tracker.css").read_bytes()
     return WebResponse(HTTPStatus.OK, content_type, body)
 
 
@@ -556,7 +557,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 elif path == "/api/v1/reviews/session/restore":
                     payload = self.server.gui_reviews.restore_session(
-                        str(document.get("project_output_directory", ""))
+                        str(document.get("project_output_directory", "")), result
                     )
                 elif path == "/api/v1/reviews/save":
                     anchors = document.get("anchors")
@@ -1083,6 +1084,33 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     result_path, cast(WorkflowStageName, stage), code
                 )
                 self._write_response(_json_response(HTTPStatus.OK, {"recorded": recorded}))
+                return
+            if path == "/api/v1/transcriptions/workflow-skip":
+                result_path = document.get("result_path")
+                stage = document.get("stage")
+                if (
+                    not isinstance(result_path, str)
+                    or not isinstance(stage, str)
+                    or stage not in {"correction", "translation"}
+                ):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_SKIP_INVALID",
+                                    "message": (
+                                        "Only optional correction or translation can be skipped."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                skipped = self.server.gui_transcriptions.skip_workflow_stage(
+                    result_path, cast(WorkflowStageName, stage)
+                )
+                self._write_response(_json_response(HTTPStatus.OK, {"skipped": skipped}))
                 return
             if path != "/api/v1/transcriptions":
                 self._write_response(

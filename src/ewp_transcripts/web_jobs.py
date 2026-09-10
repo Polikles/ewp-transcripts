@@ -41,6 +41,7 @@ class GuiTranscriptionJob(BaseModel):
     result_path: str | None = None
     error: dict[str, str] | None = None
     workflow_errors: dict[WorkflowStageName, str] = Field(default_factory=dict)
+    workflow_skips: set[WorkflowStageName] = Field(default_factory=set)
 
 
 class GuiWorkflowStage(BaseModel):
@@ -48,8 +49,9 @@ class GuiWorkflowStage(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    state: Literal["pending", "complete", "failed"]
+    state: Literal["pending", "complete", "failed", "skipped"]
     path: str | None = None
+    candidate_path: str | None = None
 
 
 class GuiWorkflowProgress(BaseModel):
@@ -203,6 +205,22 @@ class GuiTranscriptionQueue:
                 return True
         return False
 
+    def skip_workflow_stage(self, result_path: str, stage: WorkflowStageName) -> bool:
+        """Mark one optional workflow stage skipped for the active GUI process."""
+
+        with self._lock:
+            for job_id, job in self._jobs.items():
+                if result_path not in {job.result_path, job.planned_result_path}:
+                    continue
+                skips = {*job.workflow_skips, stage}
+                if stage == "translation":
+                    skips.add("translated_export")
+                self._jobs[job_id] = job.model_copy(
+                    update={"workflow_skips": skips, "updated_at": datetime.now(UTC)}
+                )
+                return True
+        return False
+
     def close(self) -> None:
         self._pending.put(None)
         self._worker.join()
@@ -309,13 +327,18 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
     review_path = first("revisions", f"{prefix}revision_*.json")
     original_export_path = first("exports", f"{prefix}transcript_revision_*.txt")
     translation_path = first("accepted-translations", f"{prefix}*_translation_*.json")
+    translation_candidate_path = first("translation-candidates", f"{prefix}*_translation_*.json")
     translated_export_path = first(
         "translation-exports", f"{prefix}*_translation_*.provenance.json"
     )
 
-    def stage(name: WorkflowStageName, path: str | None) -> GuiWorkflowStage:
+    def stage(
+        name: WorkflowStageName, path: str | None, candidate_path: str | None = None
+    ) -> GuiWorkflowStage:
         if path:
-            return GuiWorkflowStage(state="complete", path=path)
+            return GuiWorkflowStage(state="complete", path=path, candidate_path=candidate_path)
+        if name in job.workflow_skips:
+            return GuiWorkflowStage(state="skipped")
         return GuiWorkflowStage(state="failed" if name in job.workflow_errors else "pending")
 
     return GuiWorkflowProgress(
@@ -323,6 +346,6 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
         correction=stage("correction", correction_path),
         review=stage("review", review_path),
         original_export=stage("original_export", original_export_path),
-        translation=stage("translation", translation_path),
+        translation=stage("translation", translation_path, translation_candidate_path),
         translated_export=stage("translated_export", translated_export_path),
     )

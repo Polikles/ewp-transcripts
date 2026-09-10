@@ -6,6 +6,7 @@ import json
 import os
 import re
 from collections.abc import Callable
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -298,9 +299,10 @@ class GuiReviewController:
 
         root = self._resolve_path(project_output_directory, directory=True)
         root.mkdir(parents=True, exist_ok=True)
+        result_path = str(self._resolve_path(result))
         document = {
             "session_version": 1,
-            "result_path": str(self._resolve_path(result)),
+            "result_path": result_path,
             "review_path": str(self._resolve_path(review)),
             "review_output_directory": str(
                 self._resolve_path(review_output_directory, directory=True)
@@ -318,18 +320,23 @@ class GuiReviewController:
                 str(self._resolve_path(source_revision)) if source_revision else ""
             ),
         }
-        path = root / ".ewp-gui-review-session.json"
-        self._atomic_replace(
-            path,
-            (json.dumps(document, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
-        )
-        return {"session_path": str(path)}
+        payload = (json.dumps(document, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        latest_path = root / ".ewp-gui-review-session.json"
+        self._atomic_replace(latest_path, payload)
+        per_result = self._result_session_path(root, result_path)
+        per_result.parent.mkdir(parents=True, exist_ok=True)
+        self._atomic_replace(per_result, payload)
+        return {"session_path": str(latest_path), "result_session_path": str(per_result)}
 
-    def restore_session(self, project_output_directory: str) -> dict[str, Any]:
-        """Reload the last review pointer set recorded under one persistent output root."""
+    def restore_session(self, project_output_directory: str, result: str = "") -> dict[str, Any]:
+        """Reload the latest or result-specific review pointer under one output root."""
 
         root = self._resolve_path(project_output_directory, directory=True)
-        path = root / ".ewp-gui-review-session.json"
+        path = (
+            self._result_session_path(root, str(self._resolve_path(result)))
+            if result
+            else root / ".ewp-gui-review-session.json"
+        )
         if not path.is_file() or path.is_symlink():
             raise GuiReviewError(
                 "GUI_REVIEW_SESSION_NOT_FOUND",
@@ -372,6 +379,11 @@ class GuiReviewController:
         if source_revision:
             self._resolve_path(source_revision)
         return {**review_document, "session": session, "session_path": str(path)}
+
+    @staticmethod
+    def _result_session_path(root: Path, result_path: str) -> Path:
+        digest = sha256(result_path.encode("utf-8")).hexdigest()[:16]
+        return root / ".ewp-gui-review-sessions" / f"{digest}.json"
 
     @staticmethod
     def _atomic_replace(path: Path, payload: bytes) -> None:
