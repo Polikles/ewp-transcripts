@@ -11,13 +11,17 @@ from queue import Queue
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.application import transcribe_one
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+
+WorkflowStageName = Literal[
+    "correction", "review", "original_export", "translation", "translated_export"
+]
 
 
 class GuiTranscriptionJob(BaseModel):
@@ -36,6 +40,29 @@ class GuiTranscriptionJob(BaseModel):
     updated_at: datetime
     result_path: str | None = None
     error: dict[str, str] | None = None
+    workflow_errors: dict[WorkflowStageName, str] = Field(default_factory=dict)
+
+
+class GuiWorkflowStage(BaseModel):
+    """One artifact-derived stage in the GUI's per-job workflow tracker."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    state: Literal["pending", "complete", "failed"]
+    path: str | None = None
+
+
+class GuiWorkflowProgress(BaseModel):
+    """Compact, durable workflow progress inferred from published artifacts."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    transcription: GuiWorkflowStage
+    correction: GuiWorkflowStage
+    review: GuiWorkflowStage
+    original_export: GuiWorkflowStage
+    translation: GuiWorkflowStage
+    translated_export: GuiWorkflowStage
 
 
 TranscriptionService = Callable[..., Any]
@@ -162,6 +189,20 @@ class GuiTranscriptionQueue:
         with self._lock:
             return tuple(self._jobs[job_id] for job_id in self._order)
 
+    def record_workflow_error(self, result_path: str, stage: WorkflowStageName, code: str) -> bool:
+        """Record one non-secret later-stage error against its queue job for this GUI process."""
+
+        with self._lock:
+            for job_id, job in self._jobs.items():
+                if result_path not in {job.result_path, job.planned_result_path}:
+                    continue
+                errors = {**job.workflow_errors, stage: code}
+                self._jobs[job_id] = job.model_copy(
+                    update={"workflow_errors": errors, "updated_at": datetime.now(UTC)}
+                )
+                return True
+        return False
+
     def close(self) -> None:
         self._pending.put(None)
         self._worker.join()
@@ -235,3 +276,53 @@ def _matches_staged_source(path: Path, expected_sha256: str) -> bool:
         return path.is_file() and sha256_file(path) == expected_sha256
     except OSError:
         return False
+
+
+def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
+    """Infer completed workflow stages from immutable files below a job's output root.
+
+    This deliberately does not treat a transient browser message as progress.  A green
+    indicator always corresponds to an artifact that survives a GUI restart. Errors from
+    the transcription queue are likewise durable in the queue entry itself. Later workflow
+    failures are retained for the active GUI process without storing request contents or
+    credentials; a general cross-process operation journal remains deliberately out of scope.
+    """
+
+    root = Path(job.output_directory)
+    prefix = f"{job.planned_job_id}_"
+
+    def first(directory: str, pattern: str) -> str | None:
+        candidate_root = root / directory
+        if not candidate_root.is_dir():
+            return None
+        matches = sorted(candidate_root.glob(pattern))
+        return str(matches[-1]) if matches else None
+
+    if job.status == "failed":
+        transcription = GuiWorkflowStage(state="failed")
+    elif job.status == "completed":
+        transcription = GuiWorkflowStage(state="complete", path=job.result_path)
+    else:
+        transcription = GuiWorkflowStage(state="pending")
+
+    correction_path = first("correction-candidates", f"{prefix}revision_*.json")
+    review_path = first("revisions", f"{prefix}revision_*.json")
+    original_export_path = first("exports", f"{prefix}transcript_revision_*.txt")
+    translation_path = first("accepted-translations", f"{prefix}*_translation_*.json")
+    translated_export_path = first(
+        "translation-exports", f"{prefix}*_translation_*.provenance.json"
+    )
+
+    def stage(name: WorkflowStageName, path: str | None) -> GuiWorkflowStage:
+        if path:
+            return GuiWorkflowStage(state="complete", path=path)
+        return GuiWorkflowStage(state="failed" if name in job.workflow_errors else "pending")
+
+    return GuiWorkflowProgress(
+        transcription=transcription,
+        correction=stage("correction", correction_path),
+        review=stage("review", review_path),
+        original_export=stage("original_export", original_export_path),
+        translation=stage("translation", translation_path),
+        translated_export=stage("translated_export", translated_export_path),
+    )

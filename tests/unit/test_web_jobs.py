@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.revision import sha256_file
-from ewp_transcripts.web_jobs import GuiTranscriptionQueue
+from ewp_transcripts.web_jobs import GuiTranscriptionQueue, workflow_progress
 
 
 def wait_for_terminal(queue: GuiTranscriptionQueue, timeout: float = 1.0):
@@ -162,5 +162,89 @@ def test_active_queue_exposes_shared_output_and_rejectable_job_identity(tmp_path
         assert queue.active_output_directory() == str(output)
         assert queue.contains_active_planned_job("episode")
         assert not queue.contains_active_planned_job("different")
+    finally:
+        queue.close()
+
+
+def test_workflow_progress_is_derived_from_immutable_output_artifacts(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    output.mkdir()
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        staged = queue.stage(
+            tmp_path / "episode.wav",
+            output,
+            planned_job_id="episode",
+            planned_result_path=str(output / "episode_results.json"),
+        )
+        completed = staged.model_copy(
+            update={"status": "completed", "result_path": str(output / "episode_results.json")}
+        )
+        assert workflow_progress(completed).model_dump() == {
+            "transcription": {"state": "complete", "path": str(output / "episode_results.json")},
+            "correction": {"state": "pending", "path": None},
+            "review": {"state": "pending", "path": None},
+            "original_export": {"state": "pending", "path": None},
+            "translation": {"state": "pending", "path": None},
+            "translated_export": {"state": "pending", "path": None},
+        }
+        for directory, filename in [
+            ("correction-candidates", "episode_revision_001.json"),
+            ("revisions", "episode_revision_001.json"),
+            ("exports", "episode_transcript_revision_001.txt"),
+            ("accepted-translations", "episode_en_translation_001.json"),
+            ("translation-exports", "episode_en_translation_001.provenance.json"),
+        ]:
+            destination = output / directory
+            destination.mkdir()
+            (destination / filename).write_text("{}", encoding="utf-8")
+        progress = workflow_progress(completed)
+    finally:
+        queue.close()
+
+    assert progress.transcription.state == "complete"
+    assert progress.correction.state == "complete"
+    assert progress.review.state == "complete"
+    assert progress.original_export.state == "complete"
+    assert progress.translation.state == "complete"
+    assert progress.translated_export.state == "complete"
+
+
+def test_workflow_progress_marks_failed_transcription_red(tmp_path: Path) -> None:
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        job = queue.stage(
+            tmp_path / "episode.wav",
+            tmp_path / "output",
+            planned_job_id="episode",
+            planned_result_path=str(tmp_path / "output/episode_results.json"),
+        ).model_copy(update={"status": "failed"})
+        assert workflow_progress(job).transcription.state == "failed"
+    finally:
+        queue.close()
+
+
+def test_queue_records_later_workflow_error_for_its_matching_result(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        staged = queue.stage(
+            tmp_path / "episode.wav",
+            output,
+            planned_job_id="episode",
+            planned_result_path=str(output / "episode_results.json"),
+        )
+        queue._replace(  # noqa: SLF001 - assert the queue's immutable public job view
+            staged.job_id,
+            status="completed",
+            result_path=str(output / "episode_results.json"),
+        )
+        assert queue.record_workflow_error(
+            str(output / "episode_results.json"), "translation", "INVALID_TRANSLATION_RESPONSE"
+        )
+        assert workflow_progress(queue.jobs()[0]).translation.state == "failed"
+        assert not queue.record_workflow_error(
+            str(output / "other_results.json"), "translation", "INVALID_TRANSLATION_RESPONSE"
+        )
     finally:
         queue.close()

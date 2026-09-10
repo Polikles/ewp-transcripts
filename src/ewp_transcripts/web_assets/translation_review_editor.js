@@ -298,6 +298,7 @@ async function applyEnhancedTranslationReview() {
     document.querySelector("#apply-translation-review").disabled = true;
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;
+    await reportWorkflowError(translationReview?.result_path || translationCandidate?.result_path, "translation", error);
   }
 }
 
@@ -317,8 +318,10 @@ async function exportEnhancedTranslationReview() {
     document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2);
     document.querySelector("#translation-review-status").textContent =
       "Verified translation audited and exported.";
+    await enableProceedNextOutput();
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;
+    await reportWorkflowError(translationReview?.result_path || translationCandidate?.result_path, "translated_export", error);
   }
 }
 

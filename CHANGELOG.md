@@ -4,9 +4,17 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.15.0`.
+The next internal-beta version is `0.16.0`.
 
 ### Added
+
+- Added durable per-job GUI workflow completion indicators. The queue derives its green states
+  from correction candidates, immutable verified revisions, original exports, accepted
+  translations, and translated exports that exist on disk; a failed transcription is shown red.
+  Completion therefore survives browser and GUI restarts without trusting browser memory.
+- After audit/export of a verified translation, the GUI now offers **Proceed with next output**.
+  It returns to the transcription queue and changes to **Queue finished** when every completed
+  queued output has a verified translated export.
 
 - GUI transcription now recomputes each staged source SHA-256 immediately before starting the
   transcription service. A changed or missing source fails with
@@ -47,6 +55,10 @@ The next internal-beta version is `0.15.0`.
   protected until the reviewer reassigns or merges that text.
 
 ### Fixed
+
+- Selecting a completed queue item for correction now clears stale correction status. If that
+  canonical result already has a correction candidate in its output root, the GUI restores a
+  concise candidate summary instead of showing state from a different recording.
 
 - Candidate-backed GUI reviews now retain their exact automated-correction parent through
   Preview, Apply, browser restoration, and saved review sessions. This prevents a valid

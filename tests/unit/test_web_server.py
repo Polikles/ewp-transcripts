@@ -54,6 +54,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"LLM-assisted translation" in response.body
     assert b"Semantic translation review" in response.body
     assert b'id="review-translation"' in response.body
+    assert b'id="proceed-next-output"' in response.body
     assert b"Project correction dictionary" in response.body
     assert b'id="propose-dictionary"' in response.body
     assert b'id="review-correction"' in response.body
@@ -88,6 +89,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Undo applied to the current draft" in script_response.body
     assert b"Remove ${speakerId}" in script_response.body
     assert b"GUI_REVIEW_SPEAKER_IN_USE" in script_response.body
+    assert b"Completion:" in script_response.body
+    assert b"workflow-error" in script_response.body
+    assert b"Existing non-final correction candidate found" in script_response.body
     assert b"review-bottom-navigation" in script_response.body
     assert b"translation-review-navigation" in script_response.body
     assert b"ewp-active-translation-review-v1" in script_response.body

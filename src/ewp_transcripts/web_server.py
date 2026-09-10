@@ -13,7 +13,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, cast
 from urllib.parse import urlsplit
 
 from ewp_transcripts import __version__
@@ -23,7 +23,7 @@ from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_filesystem import GuiFilesystemController
-from ewp_transcripts.web_jobs import GuiTranscriptionQueue
+from ewp_transcripts.web_jobs import GuiTranscriptionQueue, WorkflowStageName, workflow_progress
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
@@ -243,7 +243,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             else:
                 payload = {
                     "jobs": [
-                        job.model_dump(mode="json") for job in self.server.gui_transcriptions.jobs()
+                        {
+                            **job.model_dump(mode="json"),
+                            "workflow": workflow_progress(job).model_dump(mode="json"),
+                        }
+                        for job in self.server.gui_transcriptions.jobs()
                     ]
                 }
             self._write_response(_json_response(HTTPStatus.OK, payload))
@@ -1044,6 +1048,41 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     return
                 self._write_response(_json_response(HTTPStatus.OK, {"removed": job_id}))
+                return
+            if path == "/api/v1/transcriptions/workflow-error":
+                result_path = document.get("result_path")
+                stage = document.get("stage")
+                code = document.get("code")
+                allowed_stages = {
+                    "correction",
+                    "review",
+                    "original_export",
+                    "translation",
+                    "translated_export",
+                }
+                if (
+                    not isinstance(result_path, str)
+                    or not isinstance(stage, str)
+                    or stage not in allowed_stages
+                    or not isinstance(code, str)
+                    or not code
+                ):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_ERROR_INVALID",
+                                    "message": "The workflow error report is malformed.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                recorded = self.server.gui_transcriptions.record_workflow_error(
+                    result_path, cast(WorkflowStageName, stage), code
+                )
+                self._write_response(_json_response(HTTPStatus.OK, {"recorded": recorded}))
                 return
             if path != "/api/v1/transcriptions":
                 self._write_response(
