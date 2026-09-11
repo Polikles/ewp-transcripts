@@ -855,6 +855,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         revision=common["revision"],
                         parent=common["parent"],
                         output=str(document.get("review_output_directory", "")),
+                        target_language=str(document.get("target_language", "")),
                     )
                 elif path.endswith("/load"):
                     payload = self.server.gui_translation_reviews.document(

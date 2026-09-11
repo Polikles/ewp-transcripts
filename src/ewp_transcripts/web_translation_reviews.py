@@ -18,6 +18,7 @@ from ewp_transcripts.application import (
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.domain.translation import Language, load_transcript_translation
 from ewp_transcripts.translation_review_format import (
     load_translation_review,
     render_translation_review,
@@ -39,22 +40,37 @@ class GuiTranslationReviewController:
         self._resolve_path = resolve_path
         self._previewed: dict[str, str] = {}
 
-    def prepare(self, *, result: str, revision: str, parent: str, output: str) -> dict[str, Any]:
+    def prepare(
+        self,
+        *,
+        result: str,
+        revision: str,
+        parent: str,
+        output: str,
+        target_language: str,
+    ) -> dict[str, Any]:
         result_path = self._resolve_path(result)
         revision_path = self._resolve_path(revision) if revision else None
-        parent_path = self._resolve_path(parent)
+        parent_path = self._resolve_path(parent) if parent else None
         destination = self._resolve_path(output, directory=True)
-        from ewp_transcripts.domain.translation import load_transcript_translation
-
-        candidate = load_transcript_translation(parent_path)
+        candidate = load_transcript_translation(parent_path) if parent_path else None
+        if candidate is None and target_language not in {"pl", "en"}:
+            raise GuiTranslationReviewError(
+                "GUI_TRANSLATION_REVIEW_TARGET_REQUIRED",
+                "Choose Polish or English before starting a manual translation review.",
+            )
         outcome = prepare_translation_review_file(
             result_path,
-            target_language=candidate.direction.target_language,
+            target_language=(
+                candidate.direction.target_language
+                if candidate
+                else cast(Language, target_language)
+            ),
             config=self._config,
             revision_path=revision_path,
             parent_translation_path=parent_path,
             output_directory=destination,
-            style=candidate.style,
+            style=candidate.style if candidate else None,
         )
         return self.document(outcome.path, result_path, revision_path, parent_path)
 
@@ -63,7 +79,7 @@ class GuiTranslationReviewController:
         review: str | Path,
         result: str | Path,
         revision: str | Path | None,
-        parent: str | Path,
+        parent: str | Path | None,
     ) -> dict[str, Any]:
         review_path = self._resolve_path(str(review))
         parsed = load_translation_review(review_path)
@@ -72,7 +88,7 @@ class GuiTranslationReviewController:
             "review_sha256": sha256_file(review_path),
             "result_path": str(self._resolve_path(str(result))),
             "revision_path": str(self._resolve_path(str(revision))) if revision else "",
-            "parent_translation_path": str(self._resolve_path(str(parent))),
+            "parent_translation_path": str(self._resolve_path(str(parent))) if parent else "",
             "job_id": parsed.header.job_id,
             "direction": {
                 "source_language": parsed.header.source_language,
@@ -134,7 +150,7 @@ class GuiTranslationReviewController:
             review_path,
             result_path=self._resolve_path(result),
             revision_path=self._resolve_path(revision) if revision else None,
-            parent_translation_path=self._resolve_path(parent),
+            parent_translation_path=self._resolve_path(parent) if parent else None,
         )
         digest = sha256_file(review_path)
         self._previewed[str(review_path)] = digest
@@ -159,7 +175,7 @@ class GuiTranslationReviewController:
             result_path=self._resolve_path(result),
             config=self._config,
             revision_path=self._resolve_path(revision) if revision else None,
-            parent_translation_path=self._resolve_path(parent),
+            parent_translation_path=self._resolve_path(parent) if parent else None,
             output_directory=self._resolve_path(output, directory=True),
         )
         return {

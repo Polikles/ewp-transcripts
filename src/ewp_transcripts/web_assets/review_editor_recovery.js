@@ -186,6 +186,7 @@ async function separateSelectedReviewText(button) {
 }
 
 arrangeReviewControls();
+installFeedbackSlots();
 new MutationObserver(() => {
   if (!reviewDocument) return;
   if (reviewHistoryIndex < 0) resetReviewHistory();

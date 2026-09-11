@@ -6,8 +6,20 @@ let translationReviewSectionIndex = 0;
 let translationReviewHistory = [];
 let translationReviewHistoryIndex = -1;
 
-function translationReviewStorageKeyFor(candidatePath) {
-  return `${translationReviewStorageKey}:${candidatePath}`;
+function translationReviewSourceKey(source = translationCandidate) {
+  if (!source) return "";
+  if (source.candidate_path) return `candidate:${source.candidate_path}`;
+  return `manual:${source.result_path}:${source.revision_path || ""}:${source.target_language || ""}`;
+}
+
+function translationReviewDocumentSourceKey(documentValue = translationReview) {
+  if (!documentValue) return "";
+  if (documentValue.parent_translation_path) return `candidate:${documentValue.parent_translation_path}`;
+  return `manual:${documentValue.result_path}:${documentValue.revision_path || ""}:${documentValue.direction?.target_language || ""}`;
+}
+
+function translationReviewStorageKeyFor(sourceKey) {
+  return `${translationReviewStorageKey}:${sourceKey}`;
 }
 
 function translationReviewTargets() {
@@ -80,6 +92,8 @@ function translationReviewContext() {
     revision_path: translationReview?.revision_path || translationCandidate?.revision_path || "",
     parent_translation_path: translationReview?.parent_translation_path
       || translationCandidate?.candidate_path || "",
+    target_language: translationReview?.direction?.target_language
+      || translationCandidate?.target_language || "",
   };
 }
 
@@ -91,7 +105,7 @@ function persistTranslationReview() {
     applied_translation_path: appliedTranslation,
   });
   localStorage.setItem(translationReviewStorageKey, documentValue);
-  localStorage.setItem(translationReviewStorageKeyFor(translationCandidate.candidate_path), documentValue);
+  localStorage.setItem(translationReviewStorageKeyFor(translationReviewSourceKey()), documentValue);
   updateTranslationReviewRestoreControl();
 }
 
@@ -187,12 +201,12 @@ async function openEnhancedTranslationReview() {
   if (!translationCandidate) return;
   const root = translationCandidate.output_root;
   try {
-    if (translationReview && translationReviewContext().parent_translation_path !== translationCandidate.candidate_path) {
+    if (translationReview && translationReviewDocumentSourceKey() !== translationReviewSourceKey()) {
       if (translationReviewDirty) await saveEnhancedTranslationReview();
       persistTranslationReview();
       clearActiveTranslationReview("Saved current translation draft before switching outputs.");
     }
-    const stored = localStorage.getItem(translationReviewStorageKeyFor(translationCandidate.candidate_path));
+    const stored = localStorage.getItem(translationReviewStorageKeyFor(translationReviewSourceKey()));
     if (stored) {
       const context = JSON.parse(stored);
       const payload = await queuePost("/api/v1/translation-reviews/load", context);
@@ -204,7 +218,7 @@ async function openEnhancedTranslationReview() {
         ? "Saved applied translation review restored for this output."
         : "Saved translation draft restored for this output; preview is required again.";
       document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth"});
-      return;
+      return true;
     }
     const payload = await queuePost("/api/v1/translation-reviews/prepare", {
       ...translationReviewContext(),
@@ -215,8 +229,10 @@ async function openEnhancedTranslationReview() {
     renderEnhancedTranslationReview(payload);
     persistTranslationReview();
     document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth"});
+    return true;
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;
+    return false;
   }
 }
 
@@ -273,6 +289,7 @@ async function restoreEnhancedTranslationReview() {
       revision_path: context.revision_path || "",
       candidate_path: context.parent_translation_path,
       output_root: context.output_root,
+      target_language: context.target_language || payload.direction.target_language,
     };
     appliedTranslation = context.applied_translation_path || "";
     translationReviewSectionIndex = 0;

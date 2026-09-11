@@ -32,7 +32,7 @@ workflowLegend.id = "workflow-legend";
 workflowLegend.className = "workflow-progress";
 workflowLegend.append("Legend:", workflowIndicator("not started", {state: "pending"}), workflowIndicator("completed", {state: "complete"}), workflowIndicator("error", {state: "failed"}), workflowIndicator("skipped", {state: "skipped"}));
 document.querySelector("#transcription-jobs").after(workflowLegend);
-function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
+function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; correctionForm.elements.namedItem("confirmed").checked = false; correctionForm.elements.namedItem("allow_remote_endpoint").checked = false; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
 function nextWorkflowStage(job) { const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
 function nextWorkflowLabel(stage) { return ({correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
 function advanceQueueJob(job) { const resultPath = job.result_path; const outputRoot = parentPath(resultPath); const stage = nextWorkflowStage(job); if (stage === "correction") { clearCorrectionForResult(resultPath, outputRoot, job.workflow); document.querySelector("#correction-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } if (stage === "review" || stage === "original-export") { openManualReviewForResult(resultPath, outputRoot, job.workflow?.correction?.path || ""); return; } if (stage === "translation") { translationForm.elements.namedItem("result_path").value = resultPath; translationForm.elements.namedItem("source_revision_path").value = job.workflow?.review?.path || ""; translationForm.elements.namedItem("output_root").value = outputRoot; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from this queue output."; document.querySelector("#translation-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } const candidatePath = job.workflow?.translation?.candidate_path; if (!candidatePath) { document.querySelector("#translation-review-status").textContent = "GUI_TRANSLATION_CANDIDATE_NOT_FOUND: Cannot reopen semantic review because its non-final candidate is unavailable."; document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } translationCandidate = {result_path: resultPath, revision_path: job.workflow?.review?.path || "", candidate_path: candidatePath, output_root: outputRoot}; openEnhancedTranslationReview(); }
@@ -124,7 +124,7 @@ skipTranslation.type = "button";
 skipTranslation.id = "skip-translation";
 skipTranslation.textContent = "Skip LLM-assisted translation";
 translationForm.prepend(skipTranslation);
-skipTranslation.addEventListener("click", async () => { const resultPath = String(translationForm.elements.namedItem("result_path").value || ""); if (!resultPath) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_RESULT_REQUIRED: Choose a canonical result before skipping translation."; return; } try { await reportWorkflowSkip(resultPath, "translation"); document.querySelector("#translation-status").textContent = "LLM-assisted translation skipped for this queue output."; } catch (error) { document.querySelector("#translation-status").textContent = error.message; } });
+skipTranslation.addEventListener("click", async () => { const resultPath = String(translationForm.elements.namedItem("result_path").value || ""); const root = String(translationForm.elements.namedItem("output_root").value || "").replace(/[\\/]+$/, ""); if (!resultPath) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_RESULT_REQUIRED: Choose a canonical result before starting manual translation."; return; } if (!root) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_OUTPUT_REQUIRED: Choose a translation output root before starting manual translation."; return; } translationCandidate = {result_path: resultPath, revision_path: String(translationForm.elements.namedItem("source_revision_path").value || ""), candidate_path: "", output_root: root, target_language: String(translationForm.elements.namedItem("target_language").value || "")}; document.querySelector("#translation-result").textContent = ""; document.querySelector("#translation-summary").replaceChildren(); document.querySelector("#review-translation").disabled = false; const opened = await openEnhancedTranslationReview(); if (opened) document.querySelector("#translation-status").textContent = "LLM-assisted translation skipped. An editable manual translation review is open below; save, preview, verify, apply, and optionally export it."; });
 let translationCandidate = null;
 let translationReview = null;
 let appliedTranslation = "";
@@ -318,6 +318,255 @@ refreshJobs = async function() {
   const previousSignature = jobsSignature;
   const payload = await refreshJobsForWorkspace();
   if (jobsSignature !== previousSignature) showWorkspacePendingState();
+  return payload;
+};
+const stageQueueSelections = {correction: new Set(), translation: new Set()};
+const stageQueueStateLabels = {
+  pending: "not started",
+  complete: "completed",
+  failed: "error",
+  skipped: "skipped",
+};
+let stageQueueJobs = [];
+const stageQueueDefinitions = [
+  {
+    id: "correction",
+    heading: "Correction queue",
+    description: "Choose one canonical result to reopen its optional correction stage. Selection lasts only for this page and does not start provider work.",
+    insertBefore: correctionForm,
+    selectable: true,
+    actionLabel: "Reopen correction",
+  },
+  {
+    id: "review",
+    heading: "Review and verified export queue",
+    description: "Open one recording's saved review or prepare its own editable review. This never changes another recording's draft.",
+    insertBefore: reviewForm,
+    selectable: false,
+    actionLabel: "Reopen review / export",
+  },
+  {
+    id: "translation",
+    heading: "Translation queue",
+    description: "Choose one verified source to reopen its optional translation stage. Selection lasts only for this page and does not start provider work.",
+    insertBefore: translationForm,
+    selectable: true,
+    actionLabel: "Reopen translation",
+  },
+  {
+    id: "semantic-review",
+    heading: "Semantic review and translated export queue",
+    description: "Reopen a non-final translation candidate in its own semantic review. Final publication still requires preview and manual verification.",
+    insertBefore: document.querySelector("#translation-review-editor"),
+    selectable: false,
+    actionLabel: "Reopen semantic review",
+  },
+];
+
+function installStageQueues() {
+  for (const definition of stageQueueDefinitions) {
+    const surface = document.createElement("section");
+    surface.id = `stage-queue-${definition.id}`;
+    surface.className = "stage-queue";
+    surface.setAttribute("aria-labelledby", `stage-queue-${definition.id}-heading`);
+    const heading = document.createElement("h3");
+    heading.id = `stage-queue-${definition.id}-heading`;
+    heading.textContent = definition.heading;
+    const count = document.createElement("span");
+    count.className = "stage-queue-summary";
+    count.dataset.stageQueueCount = definition.id;
+    heading.append(count);
+    const intro = document.createElement("p");
+    intro.className = "stage-queue-intro";
+    intro.textContent = definition.description;
+    const legend = document.createElement("p");
+    legend.className = "workflow-progress";
+    legend.append(
+      "Legend:",
+      workflowIndicator("not started", {state: "pending"}),
+      workflowIndicator("completed", {state: "complete"}),
+      workflowIndicator("error", {state: "failed"}),
+      workflowIndicator("skipped", {state: "skipped"}),
+    );
+    const controls = document.createElement("div");
+    controls.className = "stage-queue-controls";
+    if (definition.selectable) {
+      const selectAll = document.createElement("button");
+      selectAll.type = "button";
+      selectAll.textContent = "Select all actionable items";
+      selectAll.dataset.stageQueueSelectAll = definition.id;
+      selectAll.addEventListener("click", () => selectAllStageQueueItems(definition.id));
+      const selectionCount = document.createElement("span");
+      selectionCount.className = "stage-queue-count";
+      selectionCount.dataset.stageQueueSelectionCount = definition.id;
+      controls.append(selectAll, selectionCount);
+    }
+    const items = document.createElement("div");
+    items.className = "stage-queue-items";
+    items.dataset.stageQueueItems = definition.id;
+    surface.append(heading, intro, legend, controls, items);
+    definition.insertBefore.before(surface);
+  }
+}
+
+function queueItemsForStage(jobs, stage) {
+  return jobs.filter(job => {
+    if (job.status !== "completed" || !job.result_path) return false;
+    if (stage === "semantic-review") return Boolean(job.workflow?.translation?.candidate_path);
+    return true;
+  });
+}
+
+function stageState(job, stage) {
+  if (stage === "review") return job.workflow?.review || {state: "pending"};
+  if (stage === "semantic-review") {
+    const translation = job.workflow?.translation || {state: "pending"};
+    return {...translation, state: translation.candidate_path ? "pending" : translation.state};
+  }
+  return job.workflow?.[stage] || {state: "pending"};
+}
+
+function stageQueueItemIsActionable(job, stage) {
+  return ["pending", "failed"].includes(stageState(job, stage).state);
+}
+
+function stageQueueItemDetails(job, stage) {
+  const describe = (label, value) => {
+    const state = value?.state || "pending";
+    return workflowIndicator(`${label}: ${stageQueueStateLabels[state]}`, value);
+  };
+  if (stage === "review") {
+    return [
+      describe("Review", job.workflow?.review),
+      describe("Verified export", job.workflow?.original_export),
+    ];
+  }
+  if (stage === "semantic-review") {
+    return [
+      describe("Translation candidate", stageState(job, stage)),
+      describe("Translated export", job.workflow?.translated_export),
+    ];
+  }
+  return [describe(stage === "correction" ? "Correction" : "Translation", stageState(job, stage))];
+}
+
+function openStageQueueItem(job, stage) {
+  const resultPath = job.result_path;
+  const outputRoot = parentPath(resultPath);
+  if (stage === "correction") {
+    clearCorrectionForResult(resultPath, outputRoot, job.workflow);
+    document.querySelector("#correction-heading").scrollIntoView({behavior: "smooth", block: "start"});
+    return;
+  }
+  if (stage === "review") {
+    void openManualReviewForResult(resultPath, outputRoot, job.workflow?.correction?.path || "");
+    return;
+  }
+  if (stage === "translation") {
+    translationCandidate = null;
+    translationForm.elements.namedItem("result_path").value = resultPath;
+    translationForm.elements.namedItem("source_revision_path").value = job.workflow?.review?.path || "";
+    translationForm.elements.namedItem("output_root").value = outputRoot;
+    translationForm.elements.namedItem("confirmed").checked = false;
+    translationForm.elements.namedItem("allow_remote_endpoint").checked = false;
+    document.querySelector("#review-translation").disabled = true;
+    document.querySelector("#translation-result").textContent = "";
+    document.querySelector("#translation-summary").replaceChildren();
+    document.querySelector("#translation-status").textContent = "Selected queue output loaded; review provider settings and consent before generating a non-final translation candidate.";
+    document.querySelector("#translation-heading").scrollIntoView({behavior: "smooth", block: "start"});
+    return;
+  }
+  const candidatePath = job.workflow?.translation?.candidate_path;
+  if (!candidatePath) return;
+  translationCandidate = {
+    result_path: resultPath,
+    revision_path: job.workflow?.review?.path || "",
+    candidate_path: candidatePath,
+    output_root: outputRoot,
+  };
+  void openEnhancedTranslationReview();
+}
+
+function selectAllStageQueueItems(stage) {
+  const definition = stageQueueDefinitions.find(item => item.id === stage);
+  if (!definition) return;
+  const actionable = queueItemsForStage(stageQueueJobs, stage)
+    .filter(job => stageQueueItemIsActionable(job, stage));
+  const selected = stageQueueSelections[stage];
+  const allSelected = actionable.length > 0 && actionable.every(job => selected.has(job.job_id));
+  if (allSelected) actionable.forEach(job => selected.delete(job.job_id));
+  else actionable.forEach(job => selected.add(job.job_id));
+  renderStageQueues(stageQueueJobs);
+}
+
+function renderStageQueues(jobs) {
+  stageQueueJobs = jobs;
+  for (const definition of stageQueueDefinitions) {
+    const items = queueItemsForStage(jobs, definition.id);
+    const container = document.querySelector(`[data-stage-queue-items="${definition.id}"]`);
+    const count = document.querySelector(`[data-stage-queue-count="${definition.id}"]`);
+    count.textContent = `(${items.length} item${items.length === 1 ? "" : "s"})`;
+    container.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.className = "stage-queue-empty";
+      empty.textContent = "No completed canonical results are available in this GUI queue yet.";
+      container.append(empty);
+    }
+    for (const job of items) {
+      const item = document.createElement("article");
+      item.className = "stage-queue-item";
+      if (definition.selectable) {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `stage-queue-${definition.id}-${job.job_id}`;
+        checkbox.checked = stageQueueSelections[definition.id].has(job.job_id);
+        checkbox.disabled = !stageQueueItemIsActionable(job, definition.id);
+        checkbox.setAttribute("aria-label", `Select ${job.planned_job_id} for a future bulk ${definition.heading.toLowerCase()} operation`);
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) stageQueueSelections[definition.id].add(job.job_id);
+          else stageQueueSelections[definition.id].delete(job.job_id);
+          renderStageQueues(jobs);
+        });
+        item.append(checkbox);
+      } else {
+        const spacer = document.createElement("span");
+        spacer.setAttribute("aria-hidden", "true");
+        item.append(spacer);
+      }
+      const content = document.createElement("div");
+      const heading = document.createElement("h4");
+      heading.textContent = job.planned_job_id;
+      const path = document.createElement("p");
+      path.textContent = shortName(job.result_path);
+      const progress = document.createElement("div");
+      progress.className = "workflow-progress";
+      progress.append(...stageQueueItemDetails(job, definition.id));
+      content.append(heading, path, progress);
+      const open = document.createElement("button");
+      open.type = "button";
+      open.textContent = definition.actionLabel;
+      open.addEventListener("click", () => openStageQueueItem(job, definition.id));
+      item.append(content, open);
+      container.append(item);
+    }
+    if (definition.selectable) {
+      const actionable = items.filter(job => stageQueueItemIsActionable(job, definition.id));
+      const selectionCount = document.querySelector(`[data-stage-queue-selection-count="${definition.id}"]`);
+      const selected = actionable.filter(job => stageQueueSelections[definition.id].has(job.job_id)).length;
+      selectionCount.textContent = `${selected} selected; batch execution will remain per-item consent gated.`;
+      const selectAll = document.querySelector(`[data-stage-queue-select-all="${definition.id}"]`);
+      selectAll.disabled = actionable.length === 0;
+      selectAll.textContent = actionable.length > 0 && actionable.every(job => stageQueueSelections[definition.id].has(job.job_id)) ? "Clear selected actionable items" : "Select all actionable items";
+    }
+  }
+}
+
+installStageQueues();
+const refreshJobsForStageQueues = refreshJobs;
+refreshJobs = async function() {
+  const payload = await refreshJobsForStageQueues();
+  renderStageQueues(payload?.jobs || []);
   return payload;
 };
 function installFeedbackSlots() {

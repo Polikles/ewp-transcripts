@@ -1,11 +1,5 @@
 # Documentation Index
 
-## Active development
-
-| Document | Scope |
-|---|---|
-| [00 - Development handoff](00-development-handoff.md) | Current implementation snapshot, constraints, and the next active work item |
-
 ## Normative documents
 
 | Document | Scope |

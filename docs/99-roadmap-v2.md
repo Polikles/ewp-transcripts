@@ -29,7 +29,8 @@ items belong to one monolithic "Version 2" release.
    public-corpus WER and diarization benchmarks described in section 9.
 8. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
    based on observed value and risk.
-9. GUI after the planned core functions are stable; GUI reuses application services and
+9. **GUI workflow queues — active work:** extend the implemented transcription queue into
+   correction, review/export, and translation queues. The GUI reuses application services and
    does not implement a parallel pipeline.
 
 Cross-cutting observability is implemented in
@@ -721,8 +722,11 @@ Planned capabilities:
   or non-portable long-lived locks alone;
 - warning display and job queue;
 - support directory scanning and checkbox selection of recognized canonical JSON results for
-  later correction, review, and translation queues. Every workflow stage should expose a compact
-  per-item queue with the same grey/green/red/blue legend, allowing work to resume at any stage;
+  later correction, review, and translation queues. The first queue presentation slice now
+  derives visible per-item queues from completed GUI transcription records; directory scanning
+  remains required to include independently discovered canonical results. Every workflow stage
+  should expose a compact per-item queue with the same grey/green/red/blue legend, allowing work
+  to resume at any stage;
 - make each stage queue an expandable, visible control surface even when it contains only one
   item. It must let an operator reopen or restart that specific stage for any queued item rather
   than relying on whichever document was most recently open. Correction and translation queues

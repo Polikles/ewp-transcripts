@@ -8,6 +8,11 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- The GUI now exposes always-visible correction, review/export, translation, and semantic-review
+  queues for every completed transcription in the active queue. Each item reopens only its exact
+  workflow context; correction and translation also provide local checkbox and Select-all
+  foundations for later consent-gated batch operations.
+
 - Correction dictionaries can retain explicitly documented `manual_conventions` alongside
   conservative corpus-derived entries. They are immutable, source-bound provider context with a
   human rationale, carry forward through future proposal refreshes, and never become a hidden
@@ -21,6 +26,16 @@ The next internal-beta version is `0.19.0`.
   Workspace auto-save detects queue-history changes as well as form-field changes.
 
 ### Fixed
+
+- **Skip LLM-assisted translation** now opens an editable manual translation review instead of
+  marking translation and translated export complete. Manual translation can therefore be saved,
+  previewed, verified, applied, and optionally exported without a provider candidate.
+- Save and Preview in the transcript-review control layout again display their local
+  **Working…** and **Done!** feedback.
+
+- Opening another queued correction or translation now clears the prior item’s consent and
+  remote-endpoint confirmations, plus any in-memory translation candidate, before loading the
+  new canonical result.
 
 - Loading a saved workspace in an already-running GUI now refreshes terminal history without
   dropping its matching staged queue entries.

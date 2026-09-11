@@ -32,6 +32,7 @@ def test_gui_translation_review_prepare_save_preview_apply_and_export(tmp_path: 
         revision="",
         parent=str(candidate.translation_path),
         output=str(tmp_path / "reviews"),
+        target_language="",
     )
     loaded = controller.document(review["review_path"], result, None, candidate.translation_path)
     assert loaded["review_sha256"] == review["review_sha256"]
@@ -71,3 +72,47 @@ def test_gui_translation_review_prepare_save_preview_apply_and_export(tmp_path: 
     assert applied["final"] is True
     assert Path(exported["audit_path"]).is_file()
     assert len(exported["written"]) == 5
+
+
+def test_gui_translation_review_prepares_manual_translation_without_provider_candidate(
+    tmp_path: Path,
+) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    config = ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work"))
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    controller = GuiTranslationReviewController(
+        config=config, resolve_path=paths.resolve_allowed_path
+    )
+
+    review = controller.prepare(
+        result=str(result),
+        revision="",
+        parent="",
+        output=str(tmp_path / "reviews"),
+        target_language="pl",
+    )
+
+    assert review["parent_translation_path"] == ""
+    assert review["direction"] == {"source_language": "en", "target_language": "pl"}
+    saved = controller.save(
+        review=review["review_path"],
+        result=str(result),
+        revision="",
+        parent="",
+        expected_sha256=review["review_sha256"],
+        targets=[
+            {"unit_id": unit["unit_id"], "target_text": f"Translated {index}"}
+            for index, unit in enumerate(review["units"], start=1)
+        ],
+    )
+    controller.preview(review=saved["review_path"], result=str(result), revision="", parent="")
+    applied = controller.apply(
+        review=saved["review_path"],
+        result=str(result),
+        revision="",
+        parent="",
+        output=str(tmp_path / "accepted"),
+    )
+
+    assert applied["final"] is True

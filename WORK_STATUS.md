@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-09-10**.
+Last updated: **2026-09-11**.
 
 ## Checkpoint
 
@@ -23,6 +23,18 @@ skipped. A saved workspace now also retains completed/failed queue history and i
 skip/error annotations, then validates and restores that history after a GUI restart. Interrupted
 GPU work is never revived: only the existing source-hash-validated staged-job recovery path can
 resume it. Immutable artifact-derived green states remain independently durable.
+
+The first multi-stage queue presentation slice is now implemented. Correction, review/export,
+translation, and semantic review/export are always-visible queues derived from the
+same completed transcription records and immutable artifacts. Opening an item transfers only its
+own canonical result, lineage, and output root, preserving active drafts through the existing
+review services. Correction and translation offer page-local checkbox and Select-all
+selection foundations only; they do not batch-start providers or weaken the existing per-item
+consent, dictionary, provenance, retry, error-isolation, or manual-review gates.
+Automated GUI-asset/API coverage passes. External browser qualification is in progress: manual
+translation now has a no-provider path from the LLM-skip control, and transcript-review Save and
+Preview restore their local progress feedback after the control-layout rearrangement. Recheck the
+visible per-stage queues and this manual-translation path before catalog discovery or batch work.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
@@ -96,7 +108,7 @@ English corpus into the current scheme, applied and exported all files without e
 and reported readable SRT/VTT output. This corpus permits artistic translation freedom,
 so it validates workflow structure, not translation accuracy.
 
-The current v0.9 tree passes formatting, lint, type checks, and all **640 tests**. A fresh
+At the v0.9 checkpoint, the tree passed formatting, lint, type checks, and all **640 tests**. A fresh
 Ubuntu 24.04.4 WSL2 installation on an RTX 3090 passed environment installation, pinned-model
 setup, offline transcription, restart-safe canonical replay, Gemini 2.5 Flash correction,
 candidate-backed manual-review preparation, verified-revision export, and LM Studio/Bielik
@@ -115,8 +127,9 @@ same frontend, versioned API, application services, and immutable artifacts on W
 bare-metal Ubuntu, and the future Docker image. ADR-0021 and
 `docs/26-local-web-gui-contract.md` define loopback-only initial deployment, configured
 server-side path roots, direct service calls, single-GPU queueing, review/translation
-coverage, privacy/security controls, and the pre-Docker implementation sequence. GUI
-requirements remain planned; the existing exported HTML transcript player is not the GUI.
+coverage, privacy/security controls, and the pre-Docker implementation sequence. At that
+checkpoint the GUI requirements remained planned; the existing exported HTML transcript player
+was not the GUI.
 
 The first executable GUI slice was implemented in v0.8. `transcriber gui` starts a
 loopback-only server with bundled offline HTML/CSS/JavaScript, versioned health/about/root

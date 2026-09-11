@@ -128,8 +128,29 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"installConfirmationHighlight" in script_response.body
     assert b"confirmation is required" in script_response.body
     assert b"Next step: correction" in script_response.body
+    assert b"stage-queue-${definition.id}" in script_response.body
+    assert b'id: "correction"' in script_response.body
+    assert b'id: "review"' in script_response.body
+    assert b'id: "translation"' in script_response.body
+    assert b'id: "semantic-review"' in script_response.body
+    assert b"Select all actionable items" in script_response.body
+    assert b'workflowIndicator("not started"' in script_response.body
+    assert b"Reopen correction" in script_response.body
+    assert b"Reopen review / export" in script_response.body
+    assert b"Reopen translation" in script_response.body
+    assert b"Reopen semantic review" in script_response.body
+    assert b'correctionForm.elements.namedItem("confirmed").checked = false' in script_response.body
+    assert (
+        b'translationForm.elements.namedItem("confirmed").checked = false' in script_response.body
+    )
     assert b"Skip LLM-assisted correction" in script_response.body
     assert b"Skip LLM-assisted translation" in script_response.body
+    assert (
+        b"LLM-assisted translation skipped. An editable manual translation review is open below"
+        in script_response.body
+    )
+    assert b"translationReviewSourceKey" in script_response.body
+    assert b"installFeedbackSlots();" in script_response.body
     assert b"Clear current translation review" in response.body
     assert b"this output is now open in manual review" in script_response.body
     assert b"Completed canonical transcription loaded" in script_response.body
@@ -165,6 +186,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )
     assert b".workspace-autosave" in style_response.body
+    assert b".stage-queue" in style_response.body
     assert b"[hidden]" in style_response.body
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body
@@ -294,6 +316,50 @@ def test_workflow_skip_rejects_audio_instead_of_a_canonical_result(tmp_path: Pat
     assert response.status == 400
     assert json.loads(response.body)["error"]["code"] == "GUI_WORKFLOW_RESULT_INVALID"
     transcriptions.skip_workflow_stage.assert_not_called()
+
+
+def test_translation_review_prepare_accepts_a_manual_target_language(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    result.write_text("{}", encoding="utf-8")
+    review_directory = tmp_path / "translation-reviews"
+    body = json.dumps(
+        {
+            "result_path": str(result),
+            "revision_path": "",
+            "parent_translation_path": "",
+            "review_output_directory": str(review_directory),
+            "target_language": "pl",
+        }
+    ).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/translation-reviews/prepare"
+    handler.rfile = BytesIO(body)
+    reviews = Mock()
+    reviews.prepare.return_value = {"review_path": str(review_directory / "review.txt")}
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_translation_reviews=reviews,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    reviews.prepare.assert_called_once_with(
+        result=str(result),
+        revision="",
+        parent="",
+        output=str(review_directory),
+        target_language="pl",
+    )
+    assert write_response.call_args.args[0].status == 200
 
 
 def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None:
