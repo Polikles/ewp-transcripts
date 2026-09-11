@@ -11,7 +11,8 @@
   border: 1px solid #d9d5cb;
   border-radius: .5rem;
   display: grid;
-  grid-template-rows: auto 1fr 1fr auto;
+  grid-template-rows: auto auto auto 1fr;
+  align-content: start;
   padding: .75rem;
 }
 
@@ -23,11 +24,24 @@
 .review-control-line {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: .5rem;
   margin-top: .5rem;
+  min-height: 4.35rem;
 }
 
 .review-control-line:first-of-type { margin-top: 0; }
+
+.review-control-line > .feedback-anchor {
+  box-sizing: border-box;
+  flex: 0 1 13rem;
+  width: min(13rem, 100%);
+}
+
+.review-control-line > .feedback-anchor > button {
+  box-sizing: border-box;
+  width: 100%;
+}
 
 .review-control-spacer { min-height: 2.75rem; }
 
