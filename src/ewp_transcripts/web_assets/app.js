@@ -333,6 +333,7 @@ function installFeedbackSlots() {
     if (!button || button.parentElement?.classList.contains("feedback-anchor")) continue;
     const host = document.createElement("span");
     host.className = "feedback-anchor";
+    if (button.classList.contains("primary")) host.classList.add("feedback-primary-anchor");
     button.before(host);
     host.append(button);
   }
