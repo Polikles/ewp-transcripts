@@ -27,7 +27,7 @@
   align-items: flex-start;
   gap: .5rem;
   margin-top: .5rem;
-  min-height: 4.35rem;
+  height: 4.35rem;
 }
 
 .review-control-line:first-of-type { margin-top: 0; }
