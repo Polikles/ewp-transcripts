@@ -5,6 +5,7 @@ import pytest
 from pydantic import BaseModel
 
 from ewp_transcripts.domain.enums import LanguageMode
+from ewp_transcripts.domain.errors import MediaProbeError
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
@@ -191,4 +192,23 @@ def test_missing_path_is_a_coded_failure(tmp_path: Path) -> None:
     assert operation.error == {
         "code": "GUI_REQUEST_INVALID",
         "message": "A non-empty path is required.",
+    }
+
+
+def test_json_input_explains_that_inspection_requires_media(tmp_path: Path) -> None:
+    result = tmp_path / "results.example.json"
+    result.write_text("{}", encoding="utf-8")
+
+    def inspect(path: Path, **kwargs: Any) -> BaseModel:
+        raise MediaProbeError("ffprobe rejected the input with exit code 1")
+
+    controller = GuiWorkflowController((tmp_path.resolve(),), inspect_service=inspect)
+    operation = controller.run("inspect", {"path": str(result)})
+
+    assert operation.error == {
+        "code": "MEDIA_PROBE_FAILED",
+        "message": (
+            "This input is a transcript or result JSON document, not media. "
+            "Use it in Review and export; Inspect and plan accepts supported audio files."
+        ),
     }

@@ -51,6 +51,7 @@ class GuiWorkflowController:
         raw_path = document.get("path")
         if not isinstance(raw_path, str) or not raw_path.strip():
             return self._failure(kind, "", "GUI_REQUEST_INVALID", "A non-empty path is required.")
+        input_path: Path | None = None
         try:
             language, speaker_count = self.resolve_transcription_options(document)
         except ValueError as error:
@@ -99,11 +100,35 @@ class GuiWorkflowController:
                 result=result.model_dump(mode="json"),
             )
         except ApplicationError as error:
-            operation = self._new_failure(kind, raw_path, error.code, str(error))
+            operation = self._new_failure(
+                kind,
+                raw_path,
+                error.code,
+                self._user_facing_error_message(
+                    error,
+                    input_path,
+                ),
+            )
         except (FileNotFoundError, OSError, ValueError) as error:
             operation = self._new_failure(kind, raw_path, "GUI_PATH_REJECTED", str(error))
         self._operations.appendleft(operation)
         return operation
+
+    @staticmethod
+    def _user_facing_error_message(error: ApplicationError, input_path: Path | None) -> str:
+        """Turn low-level media-probe failures into a useful local GUI instruction."""
+
+        if error.code != "MEDIA_PROBE_FAILED":
+            return str(error)
+        if input_path is not None and input_path.suffix.lower() == ".json":
+            return (
+                "This input is a transcript or result JSON document, not media. "
+                "Use it in Review and export; Inspect and plan accepts supported audio files."
+            )
+        return (
+            "This file could not be read as supported audio. "
+            "Choose a readable audio file such as WAV or MP3, then inspect it again."
+        )
 
     def operations(self) -> tuple[GuiOperation, ...]:
         return tuple(self._operations)
