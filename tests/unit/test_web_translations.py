@@ -79,6 +79,17 @@ def test_gui_translation_requires_confirmation(tmp_path: Path) -> None:
     assert missing.value.code == "GUI_TRANSLATION_CONFIRMATION_REQUIRED"
 
 
+def test_gui_translation_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"not a canonical result")
+
+    with pytest.raises(GuiTranslationError) as invalid:
+        controller(tmp_path).generate(**request(tmp_path, media), confirmed=True)
+
+    assert invalid.value.code == "GUI_TRANSLATION_RESULT_INVALID"
+    assert "not an audio" in str(invalid.value)
+
+
 def test_gui_translation_allows_explicit_cloud_candidate_with_session_key(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())

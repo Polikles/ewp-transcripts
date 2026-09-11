@@ -58,6 +58,17 @@ def test_browser_review_prepare_edit_preview_and_apply(tmp_path: Path) -> None:
     assert len(exported["written"]) == 3
 
 
+def test_browser_review_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"not a canonical result")
+
+    with pytest.raises(GuiReviewError) as invalid:
+        controller(tmp_path).prepare(str(media), str(tmp_path / "reviews"))
+
+    assert invalid.value.code == "GUI_REVIEW_RESULT_INVALID"
+    assert "not an audio" in str(invalid.value)
+
+
 def test_browser_review_can_split_and_reassign_a_speaker_block(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())

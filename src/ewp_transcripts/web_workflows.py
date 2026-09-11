@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict
 from ewp_transcripts.application import dry_run, inspect_input
 from ewp_transcripts.config import load_config
 from ewp_transcripts.discovery import normalize_input_path
+from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 
@@ -36,6 +37,20 @@ class GuiOperation(BaseModel):
 
 
 Service = Callable[..., BaseModel]
+
+
+def require_completed_canonical_result(path: Path) -> CanonicalResult:
+    """Read one strict canonical result with a GUI-facing input error."""
+
+    if not path.is_file():
+        raise ValueError("Canonical result JSON must be one completed result file.")
+    try:
+        return load_canonical_result(path)
+    except (OSError, ValueError) as error:
+        raise ValueError(
+            "Choose a completed canonical result JSON file (for example, "
+            "episode_results.json), not an audio or subtitle file."
+        ) from error
 
 
 @dataclass

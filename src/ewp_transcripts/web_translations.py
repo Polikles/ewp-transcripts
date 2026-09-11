@@ -25,6 +25,7 @@ from ewp_transcripts.translation_openrouter import (
     OpenRouterTranslationConfig,
     OpenRouterTranslationProvider,
 )
+from ewp_transcripts.web_workflows import require_completed_canonical_result
 
 
 class GuiTranslationError(ApplicationError):
@@ -125,6 +126,10 @@ class GuiTranslationController:
                 "GUI_TRANSLATION_OUTPUT_MODE_INVALID", "Unknown translation output mode."
             )
         result_path = self._resolve_path(result)
+        try:
+            require_completed_canonical_result(result_path)
+        except ValueError as error:
+            raise GuiTranslationError("GUI_TRANSLATION_RESULT_INVALID", str(error)) from error
         revision_path = self._resolve_path(source_revision) if source_revision else None
         output_path = self._resolve_path(output_directory, directory=True)
         resume_path = self._resolve_path(resume_directory, directory=True)

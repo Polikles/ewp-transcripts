@@ -18,11 +18,12 @@ from ewp_transcripts.application import (
     preview_review_file,
 )
 from ewp_transcripts.config import ApplicationConfig
-from ewp_transcripts.domain.canonical import load_canonical_result
+from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.review_format import load_review, render_review
+from ewp_transcripts.web_workflows import require_completed_canonical_result
 
 
 class GuiReviewError(ApplicationError):
@@ -50,8 +51,7 @@ class GuiReviewController:
         result_path = self._resolve_path(result)
         output_path = self._resolve_path(output_directory, directory=True)
         source_path = self._resolve_path(source_revision) if source_revision else None
-        if not result_path.is_file():
-            raise GuiReviewError("GUI_REVIEW_RESULT_INVALID", "Result path must be one file")
+        self._require_canonical_result(result_path)
         outcome = prepare_review_file(
             result_path,
             output_directory=output_path,
@@ -69,7 +69,7 @@ class GuiReviewController:
         review_path = self._resolve_path(str(review))
         result_path = self._resolve_path(str(result))
         parsed = load_review(review_path)
-        base = load_canonical_result(result_path)
+        base = self._require_canonical_result(result_path)
         if parsed.header.base_result_sha256 != sha256_file(result_path):
             raise GuiReviewError(
                 "GUI_REVIEW_RESULT_MISMATCH",
@@ -129,7 +129,7 @@ class GuiReviewController:
                 "The review changed after it was loaded; reload before saving.",
             )
         parsed = load_review(review_path)
-        base = load_canonical_result(result_path)
+        base = self._require_canonical_result(result_path)
         known_speakers = {speaker.speaker_id for speaker in base.speakers}
         base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
         if speaker_labels is not None:
@@ -211,6 +211,7 @@ class GuiReviewController:
     def preview(self, review: str, result: str, source_revision: str = "") -> dict[str, Any]:
         review_path = self._resolve_path(review)
         result_path = self._resolve_path(result)
+        self._require_canonical_result(result_path)
         source_path = self._resolve_path(source_revision) if source_revision else None
         outcome = preview_review_file(
             review_path,
@@ -234,6 +235,7 @@ class GuiReviewController:
     ) -> dict[str, Any]:
         review_path = self._resolve_path(review)
         result_path = self._resolve_path(result)
+        self._require_canonical_result(result_path)
         output_path = self._resolve_path(output_directory, directory=True)
         source_path = self._resolve_path(source_revision) if source_revision else None
         digest = sha256_file(review_path)
@@ -264,6 +266,7 @@ class GuiReviewController:
         formats: list[str],
     ) -> dict[str, Any]:
         result_path = self._resolve_path(result)
+        self._require_canonical_result(result_path)
         revision_path = self._resolve_path(revision)
         output_path = self._resolve_path(output_directory, directory=True)
         try:
@@ -384,6 +387,13 @@ class GuiReviewController:
     def _result_session_path(root: Path, result_path: str) -> Path:
         digest = sha256(result_path.encode("utf-8")).hexdigest()[:16]
         return root / ".ewp-gui-review-sessions" / f"{digest}.json"
+
+    @staticmethod
+    def _require_canonical_result(result_path: Path) -> CanonicalResult:
+        try:
+            return require_completed_canonical_result(result_path)
+        except ValueError as error:
+            raise GuiReviewError("GUI_REVIEW_RESULT_INVALID", str(error)) from error
 
     @staticmethod
     def _atomic_replace(path: Path, payload: bytes) -> None:

@@ -19,6 +19,7 @@ from ewp_transcripts.web_server import (
     _open_browser,
     dispatch_get,
 )
+from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -262,6 +263,95 @@ def test_transcription_post_requires_active_csrf_token() -> None:
     response = write_response.call_args.args[0]
     assert response.status == 403
     assert json.loads(response.body)["error"]["code"] == "GUI_CSRF_REJECTED"
+
+
+def test_workflow_skip_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"not a canonical result")
+    body = json.dumps({"result_path": str(media), "stage": "correction"}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions/workflow-skip"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_workflows=GuiWorkflowController((tmp_path.resolve(),)),
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "GUI_WORKFLOW_RESULT_INVALID"
+    transcriptions.skip_workflow_stage.assert_not_called()
+
+
+def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    output = tmp_path / "output"
+    output.mkdir()
+    existing = output / "episode_results.json"
+    existing.write_text("{}", encoding="utf-8")
+    body = json.dumps(
+        {
+            "path": str(media),
+            "output_directory": str(output),
+            "language": "pl",
+            "speaker_count": "auto",
+            "confirmed": True,
+        }
+    ).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    transcriptions.active_output_directory.return_value = None
+    transcriptions.contains_active_input.return_value = False
+    workflow = SimpleNamespace(
+        resolve_allowed_path=lambda path, directory=False: Path(path),
+        resolve_transcription_options=lambda document: ("pl", "auto"),
+        completed_plan=lambda *args, **kwargs: {
+            "jobs": [
+                {
+                    "decision": "skip",
+                    "existing_result": {"path": str(existing)},
+                }
+            ]
+        },
+    )
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_workflows=workflow,
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 409
+    payload = json.loads(response.body)
+    assert payload["error"]["code"] == "GUI_TRANSCRIPTION_ALREADY_EXISTS"
+    assert str(existing) in payload["error"]["message"]
 
 
 def test_filesystem_listing_requires_csrf_and_returns_filtered_entries(tmp_path: Path) -> None:

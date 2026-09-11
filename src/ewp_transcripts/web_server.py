@@ -32,7 +32,7 @@ from ewp_transcripts.web_jobs import (
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
-from ewp_transcripts.web_workflows import GuiWorkflowController
+from ewp_transcripts.web_workflows import GuiWorkflowController, require_completed_canonical_result
 from ewp_transcripts.web_workspaces import GuiWorkspaceController, default_workspace_directory
 
 API_VERSION = "1.0"
@@ -1119,6 +1119,26 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
+                try:
+                    canonical_path = self.server.gui_workflows.resolve_allowed_path(result_path)
+                    require_completed_canonical_result(canonical_path)
+                except (FileNotFoundError, OSError, ValueError):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_RESULT_INVALID",
+                                    "message": (
+                                        "Choose a completed canonical result JSON file "
+                                        "(for example, "
+                                        "episode_results.json), not an audio or subtitle file."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
                 skipped = self.server.gui_transcriptions.skip_workflow_stage(
                     result_path, cast(WorkflowStageName, stage)
                 )
@@ -1217,6 +1237,25 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 planned_job = planned_jobs[0]
                 if not isinstance(planned_job, dict):
                     raise ValueError("The staged dry-run has no valid job plan")
+                if planned_job.get("decision") == "skip":
+                    existing = planned_job.get("existing_result")
+                    existing_path = existing.get("path") if isinstance(existing, dict) else None
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {
+                                "error": {
+                                    "code": "GUI_TRANSCRIPTION_ALREADY_EXISTS",
+                                    "message": (
+                                        "A completed transcript already exists for this input"
+                                        + (f": {existing_path}." if existing_path else ".")
+                                        + " Use that result or choose a different output directory."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
                 planned_outputs = planned_job.get("outputs")
                 if not isinstance(planned_outputs, dict):
                     raise ValueError("The staged dry-run has no valid output plan")

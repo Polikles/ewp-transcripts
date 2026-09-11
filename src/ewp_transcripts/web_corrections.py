@@ -17,6 +17,7 @@ from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.correction_dictionary import load_project_correction_dictionary
 from ewp_transcripts.correction_providers import create_correction_provider
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.web_workflows import require_completed_canonical_result
 
 
 class GuiCorrectionError(ApplicationError):
@@ -172,6 +173,10 @@ class GuiCorrectionController:
                 "OpenRouter requires explicit cloud opt-in.",
             )
         result_path = self._resolve_path(result)
+        try:
+            require_completed_canonical_result(result_path)
+        except ValueError as error:
+            raise GuiCorrectionError("GUI_CORRECTION_RESULT_INVALID", str(error)) from error
         output_path = self._resolve_path(output_directory, directory=True)
         resume_path = self._resolve_path(resume_directory, directory=True)
         dictionary = None

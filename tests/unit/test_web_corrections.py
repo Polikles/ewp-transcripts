@@ -95,6 +95,30 @@ def test_gui_correction_requires_consent_and_cloud_opt_in(tmp_path: Path) -> Non
     assert missing_cloud.value.code == "GUI_CORRECTION_CLOUD_OPT_IN_REQUIRED"
 
 
+def test_gui_correction_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"not a canonical result")
+
+    with pytest.raises(GuiCorrectionError) as invalid:
+        controller(tmp_path).generate(
+            result=str(media),
+            output_directory=str(tmp_path / "candidates"),
+            resume_directory=str(tmp_path / "state"),
+            provider_name="openrouter",
+            model="google/gemini-2.5-flash",
+            endpoint="https://openrouter.ai/api/v1",
+            allow_remote_endpoint=False,
+            allow_cloud=True,
+            reasoning_max_tokens=0,
+            dictionary_path="",
+            project_id="",
+            confirmed=True,
+        )
+
+    assert invalid.value.code == "GUI_CORRECTION_RESULT_INVALID"
+    assert "not an audio" in str(invalid.value)
+
+
 def test_gui_correction_passes_session_key_only_to_provider_boundary(tmp_path: Path) -> None:
     result = tmp_path / EXAMPLE.name
     result.write_bytes(EXAMPLE.read_bytes())
