@@ -1384,7 +1384,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self.send_response(response.status)
         self._headers(content_type=response.content_type, content_length=len(response.body))
         self.end_headers()
-        self.wfile.write(response.body)
+        try:
+            self.wfile.write(response.body)
+        except (BrokenPipeError, ConnectionResetError):
+            # A browser can abandon a completed request while navigating or refreshing.
+            # The response has no stateful side effect, so the disconnect is not an error.
+            return
 
 
 def serve_gui(*, port: int, allowed_roots: list[Path], open_browser: bool = True) -> None:

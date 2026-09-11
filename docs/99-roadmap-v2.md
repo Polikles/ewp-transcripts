@@ -723,6 +723,11 @@ Planned capabilities:
 - support directory scanning and checkbox selection of recognized canonical JSON results for
   later correction, review, and translation queues. Every workflow stage should expose a compact
   per-item queue with the same grey/green/red/blue legend, allowing work to resume at any stage;
+- make each stage queue an expandable, visible control surface even when it contains only one
+  item. It must let an operator reopen or restart that specific stage for any queued item rather
+  than relying on whichever document was most recently open. Correction and translation queues
+  must additionally support explicit checkbox bulk selection and **Select all**, while preserving
+  individual dictionaries, consent, provenance, retry bounds, error isolation, and review gates;
 - after the individual optional LLM stages are fully qualified, add explicit batch correction and
   batch translation operations for compatible queued items. They must preserve the same per-item
   consent, provenance, bounded retry, resumable state, error isolation, and manual-review gates

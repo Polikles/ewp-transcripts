@@ -1,6 +1,7 @@
 import json
 import subprocess
 from email.message import Message
+from http import HTTPStatus
 from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -14,6 +15,7 @@ from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
     LocalGuiRequestHandler,
     WebConfiguration,
+    WebResponse,
     _open_browser,
     dispatch_get,
 )
@@ -128,7 +130,7 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"Skip LLM-assisted correction" in script_response.body
     assert b"Skip LLM-assisted translation" in script_response.body
     assert b"Clear current translation review" in response.body
-    assert b"Continue to manual review" in script_response.body
+    assert b"this output is now open in manual review" in script_response.body
     assert b"Completed canonical transcription loaded" in script_response.body
     assert b"Provider settings" in script_response.body
     assert b"Set an OpenRouter API key" in script_response.body
@@ -205,6 +207,21 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
         "http://127.0.0.1:8765/",
     ]
     assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL
+
+
+def test_write_response_ignores_abandoned_browser_connection() -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.send_response = Mock()
+    handler.send_header = Mock()
+    handler.end_headers = Mock()
+    handler.wfile = Mock()
+    handler.wfile.write.side_effect = BrokenPipeError()
+
+    handler._write_response(WebResponse(HTTPStatus.OK, "text/plain", b"ok"))
+
+    handler.send_response.assert_called_once_with(HTTPStatus.OK)
+    handler.end_headers.assert_called_once_with()
+    handler.wfile.write.assert_called_once_with(b"ok")
 
 
 def test_post_rejects_cross_origin_before_reading_body() -> None:
