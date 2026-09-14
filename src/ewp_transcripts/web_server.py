@@ -1455,14 +1455,15 @@ def _open_browser(url: str) -> None:
     try:
         release = Path("/proc/sys/kernel/osrelease").read_text(encoding="utf-8")
         if "microsoft" in release.casefold():
-            subprocess.run(
+            completed = subprocess.run(
                 ["powershell.exe", "-NoProfile", "-Command", "Start-Process", url],
                 check=False,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            return
+            if completed.returncode == 0:
+                return
         webbrowser.open(url)
     except (OSError, subprocess.SubprocessError):
         return

@@ -693,6 +693,41 @@ bare-metal Ubuntu, and the future Docker image. The normative workflow, path, pr
 security, accessibility, and implementation-slice contract is in
 [`26-local-web-gui-contract.md`](26-local-web-gui-contract.md).
 
+### Active GUI acceptance tasks (2026-09-14)
+
+The following operator findings are tracked as separate vertical slices. Complete and manually
+qualify one task at a time; later tasks must not be folded into an unrelated fix.
+
+1. **GUI-01 — WSL browser launch:** restore automatic opening of the host default browser when
+   `gui` runs without `--no-open-browser`, while retaining a quiet failure path and the explicit
+   opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
+2. **GUI-02 — Resume from existing canonical results:** every workflow-stage queue can add one or
+   more previously completed `*_results.json` files using the browser's native file-selection
+   dialog, validates canonical identity and allowed roots, and resumes only the selected item.
+   Resolve the browser-native picker/server-path handoff without weakening the local-only path
+   boundary or silently uploading media.
+3. **GUI-03 — Review-control layout:** eliminate the Restore saved review / Undo / Redo overlap
+   at supported viewport widths. Acceptance: all controls are independently visible and clickable.
+4. **GUI-04 — Per-item correction skip:** selected correction-queue items can be explicitly
+   skipped, update only those queue records, and visibly show the blue skipped correction state.
+5. **GUI-05 — Password-manager compatibility:** remove markup and interaction patterns that cause
+   Bitwarden to disable itself, without storing credentials in browser state or reducing form
+   accessibility.
+6. **GUI-06 — Correction-operation feedback:** Generate correction candidate has the same local
+   **Working…** then **Done!** feedback as Apply, Save, and Preview.
+7. **GUI-07 — Consent-gated batch correction:** selected correction items are processed once,
+   sequentially, and failure-isolated; completed items are disabled, later selected items continue
+   after a failure, and each job retains its own consent/provenance. Add per-item dictionary
+   selection only after the basic batch path is qualified.
+8. **GUI-08 — Stage-focused progress display:** every stage queue displays the complete color-coded
+   workflow progression, while its own stage is visually prominent and other stages are subdued
+   without losing state or non-color labels.
+9. **GUI-09 — Semantic-review handoff:** Open candidate in semantic review smoothly scrolls to the
+   semantic-review section after loading its exact candidate.
+10. **GUI-10 — Semantic queue and manual-translation progress:** semantic review lists eligible
+    candidate and manual-translation reviews; manual LLM skipping and later application/export
+    update the main and stage queues from their durable artifacts or explicit optional-stage state.
+
 Planned capabilities:
 
 - file, directory, and group selection;

@@ -27,6 +27,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- The WSL GUI launcher now falls back to the configured local browser opener when the Windows
+  PowerShell bridge fails, restoring automatic browser launch for ordinary `gui` starts.
+
 - **Skip LLM-assisted translation** now opens an editable manual translation review instead of
   marking translation and translated export complete. Manual translation can therefore be saved,
   previewed, verified, applied, and optionally exported without a provider candidate.

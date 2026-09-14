@@ -218,6 +218,7 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
 ) -> None:
     monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
     run = Mock()
+    run.return_value.returncode = 0
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
 
     _open_browser("http://127.0.0.1:8765/")
@@ -230,6 +231,21 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
         "http://127.0.0.1:8765/",
     ]
     assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL
+
+
+def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
+    run = Mock()
+    run.return_value.returncode = 1
+    opened = Mock()
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+    monkeypatch.setattr("ewp_transcripts.web_server.webbrowser.open", opened)
+
+    _open_browser("http://127.0.0.1:8765/")
+
+    opened.assert_called_once_with("http://127.0.0.1:8765/")
 
 
 def test_write_response_ignores_abandoned_browser_connection() -> None:
