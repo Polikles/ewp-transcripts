@@ -251,16 +251,26 @@ class GuiTranscriptionQueue:
     def skip_workflow_stage(self, result_path: str, stage: WorkflowStageName) -> bool:
         """Mark one optional workflow stage skipped for the active GUI process."""
 
+        return bool(self.skip_workflow_stages((result_path,), stage))
+
+    def skip_workflow_stages(
+        self, result_paths: tuple[str, ...], stage: WorkflowStageName
+    ) -> tuple[str, ...]:
+        """Mark a selected set in one queue mutation, before the browser refreshes."""
+
+        changed: list[str] = []
         with self._lock:
-            for job_id, job in self._jobs.items():
-                if result_path not in {job.result_path, job.planned_result_path}:
-                    continue
-                skips = {*job.workflow_skips, stage}
-                self._jobs[job_id] = job.model_copy(
-                    update={"workflow_skips": skips, "updated_at": datetime.now(UTC)}
-                )
-                return True
-        return False
+            for result_path in result_paths:
+                for job_id, job in self._jobs.items():
+                    if result_path not in {job.result_path, job.planned_result_path}:
+                        continue
+                    skips = {*job.workflow_skips, stage}
+                    self._jobs[job_id] = job.model_copy(
+                        update={"workflow_skips": skips, "updated_at": datetime.now(UTC)}
+                    )
+                    changed.append(result_path)
+                    break
+        return tuple(changed)
 
     def reopen_workflow_stage(self, result_path: str, stage: WorkflowStageName) -> bool:
         """Make one previously skipped optional stage actionable again."""

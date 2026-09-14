@@ -16,11 +16,26 @@ from ewp_transcripts.web_server import (
     LocalGuiRequestHandler,
     WebConfiguration,
     WebResponse,
+    _is_canonical_result_filename,
     _open_browser,
     _select_local_directory,
     dispatch_get,
 )
 from ewp_transcripts.web_workflows import GuiWorkflowController
+
+
+@pytest.mark.parametrize(
+    ("filename", "expected"),
+    [
+        ("s0e00_results.json", True),
+        ("S0E02_mono_normalized_results_v003.json", True),
+        ("episode_results_v002.json", True),
+        ("episode_segments.json", False),
+        ("episode_results_v3.json", False),
+    ],
+)
+def test_canonical_picker_filename_gate(filename: str, expected: bool) -> None:
+    assert _is_canonical_result_filename(filename) is expected
 
 
 def test_output_folder_dialog_uses_local_os_picker_without_upload(
@@ -39,7 +54,7 @@ def test_output_folder_dialog_uses_local_os_picker_without_upload(
 
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
     assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt001"
-    assert calls[0][:4] == ["powershell.exe", "-NoProfile", "-STA", "-Command"]
+    assert calls[0][:4] == ["powershell.exe", "-NoProfile", "-STA", "-EncodedCommand"]
 
 
 def test_output_folder_dialog_reports_missing_desktop_picker(
@@ -48,6 +63,26 @@ def test_output_folder_dialog_reports_missing_desktop_picker(
     monkeypatch.setattr("ewp_transcripts.web_server.shutil.which", lambda _: None)
     with pytest.raises(ValueError, match="Enter the output directory path directly"):
         _select_local_directory()
+
+
+def test_output_folder_dialog_retries_through_cmd_after_direct_interop_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: name if name in {"powershell.exe", "cmd.exe"} else None,
+    )
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **kwargs: object) -> SimpleNamespace:
+        calls.append(command)
+        if command[0] == "powershell.exe":
+            raise OSError(5, "WSL interop unavailable to direct child")
+        return SimpleNamespace(returncode=0, stdout="C:\\Users\\DS\\Desktop\\tezt002")
+
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+    assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt002"
+    assert [command[0] for command in calls] == ["powershell.exe", "cmd.exe"]
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -126,7 +161,10 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"review-bottom-navigation" in script_response.body
     assert b"translation-review-navigation" in script_response.body
     assert b"ewp-active-translation-review-v1" in script_response.body
-    assert b"GUI_TRANSLATION_REVIEW_SAVE_REQUIRED" in script_response.body
+    assert (
+        b"translationReviewDirty && !(await saveEnhancedTranslationReview())"
+        in script_response.body
+    )
     assert b"clearEwpBrowserState" in script_response.body
     assert b"Choose audio file" in script_response.body
     assert b"selected-media/upload" in script_response.body
@@ -240,19 +278,17 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: name if name in {"cmd.exe", "powershell.exe"} else None,
+    )
     run = Mock()
     run.return_value.returncode = 0
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
 
     _open_browser("http://127.0.0.1:8765/")
 
-    assert run.call_args.args[0] == [
-        "powershell.exe",
-        "-NoProfile",
-        "-Command",
-        "Start-Process",
-        "http://127.0.0.1:8765/",
-    ]
+    assert run.call_args.args[0] == ["cmd.exe", "/C", "start", "", "http://127.0.0.1:8765/"]
     assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL
 
 
@@ -260,6 +296,10 @@ def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: name if name in {"cmd.exe", "powershell.exe"} else None,
+    )
     run = Mock()
     run.return_value.returncode = 1
     opened = Mock()
@@ -452,6 +492,45 @@ def test_workflow_skip_rejects_audio_instead_of_a_canonical_result(tmp_path: Pat
     assert response.status == 400
     assert json.loads(response.body)["error"]["code"] == "GUI_WORKFLOW_RESULT_INVALID"
     transcriptions.skip_workflow_stage.assert_not_called()
+
+
+def test_workflow_skip_batch_updates_both_selected_results(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    results = [tmp_path / f"episode-{number}_results.json" for number in (1, 2)]
+    for result in results:
+        result.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.require_completed_canonical_result", lambda _: None
+    )
+    result_paths = [str(result) for result in results]
+    body = json.dumps({"result_paths": result_paths, "stage": "correction"}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions/workflow-skip-batch"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    transcriptions.skip_workflow_stages.return_value = tuple(result_paths)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_workflows=GuiWorkflowController(),
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    assert json.loads(response.body) == {"skipped": result_paths, "not_found": []}
+    transcriptions.skip_workflow_stages.assert_called_once_with(tuple(result_paths), "correction")
 
 
 def test_translation_review_prepare_accepts_a_manual_target_language(tmp_path: Path) -> None:

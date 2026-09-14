@@ -34,6 +34,28 @@ def test_workspace_saves_complete_current_browser_field_set(tmp_path: Path) -> N
     assert workspaces.load(saved.workspace_id).fields == fields
 
 
+def test_workspace_drops_expired_native_picker_field_without_rejecting_save(
+    tmp_path: Path,
+) -> None:
+    temporary_root = tmp_path / "ewp-transcripts-gui-selections"
+    stale_media = temporary_root / "old-session" / "selection-123" / "episode.wav"
+    workspaces = GuiWorkspaceController(
+        state_directory=tmp_path / "saved",
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+        temporary_selection_root=temporary_root,
+    )
+
+    saved = workspaces.save(
+        name="After restart",
+        current_step="workspace-heading",
+        fields={"input-path": str(stale_media), "output-path": str(tmp_path / "durable")},
+    )
+
+    assert saved.fields["input-path"] == ""
+    assert saved.fields["output-path"] == str(tmp_path / "durable")
+    assert workspaces.list()[0].available is True
+
+
 def controller(tmp_path: Path) -> tuple[GuiWorkspaceController, Path]:
     allowed = tmp_path / "allowed"
     allowed.mkdir()

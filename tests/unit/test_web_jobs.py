@@ -167,6 +167,25 @@ def test_reopen_skipped_correction_restores_actionable_pending_state(tmp_path: P
     assert workflow_progress(reopened).correction.state == "pending"
 
 
+def test_batch_skip_changes_every_selected_job_before_refresh(tmp_path: Path) -> None:
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        paths = (tmp_path / "a_results.json", tmp_path / "b_results.json")
+        for path in paths:
+            queue.register_completed_result(
+                path,
+                output_directory=tmp_path,
+                planned_job_id=path.stem.removesuffix("_results"),
+                language=LanguageMode.POLISH,
+            )
+        skipped = queue.skip_workflow_stages(tuple(map(str, paths)), "correction")
+        states = [workflow_progress(job).correction.state for job in queue.jobs()]
+    finally:
+        queue.close()
+    assert skipped == tuple(map(str, paths))
+    assert states == ["skipped", "skipped"]
+
+
 def test_translation_candidate_progress_exposes_exact_review_parent(tmp_path: Path) -> None:
     result = tmp_path / "episode_results.json"
     output = tmp_path / "published"

@@ -52,6 +52,18 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- In WSL, GUI browser opening now tries Windows launchers before the Linux fallback and reports
+  an actionable failure; the local output-folder dialog retries through the Windows command
+  bridge and reports its actual startup error instead of a generic failure.
+- Saving work state ignores expired GUI-owned picker paths and explicitly reports session-picked
+  queue items omitted because those temporary source copies cannot survive a GUI restart.
+- The transcription queue gives filenames more room and groups completion stages in 2–3–2 rows.
+  Selecting saved results before choosing an output root now retains the selection and imports
+  it when a root is set. Versioned `_results_vNNN.json` files are accepted, with more precise
+  canonical-content validation errors.
+- Bulk correction skip updates selected queue items in one operation. Semantic translation
+  review keeps each episode's draft bound to its own source when switching or reopening; Preview
+  translation first saves dirty target edits, then validates that saved draft.
 - Saved work state accepts the current translation provider fields; its button row and all stage
   queue actions align at supported widths.
 - Imported results require the user's shared output root for correction, reviews, revisions,

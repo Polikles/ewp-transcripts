@@ -127,9 +127,26 @@ def default_workspace_directory() -> Path:
 class GuiWorkspaceController:
     """Store a bounded catalog of non-secret form values outside project artifacts."""
 
-    def __init__(self, *, state_directory: Path, resolve_path: ResolvePath) -> None:
+    def __init__(
+        self,
+        *,
+        state_directory: Path,
+        resolve_path: ResolvePath,
+        temporary_selection_root: Path | None = None,
+    ) -> None:
         self._state_directory = state_directory
         self._resolve_path = resolve_path
+        self._temporary_selection_root = temporary_selection_root
+
+    def is_temporary_selection(self, value: str) -> bool:
+        """Identify exact GUI-owned picker copies, including expired sessions."""
+
+        path = Path(value.strip())
+        return bool(
+            self._temporary_selection_root
+            and path.is_absolute()
+            and path.is_relative_to(self._temporary_selection_root)
+        )
 
     def save(
         self,
@@ -243,6 +260,9 @@ class GuiWorkspaceController:
             if isinstance(value, str) and len(value) > 4096:
                 raise ValueError("Workspace field is too long")
             if name in _PATH_FIELDS and isinstance(value, str) and value.strip():
+                if self.is_temporary_selection(value):
+                    clean[name] = ""
+                    continue
                 self._resolve_path(value, directory=name not in _FILE_FIELDS)
             clean[name] = value
         return clean

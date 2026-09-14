@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import os
+import re
 import secrets
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import webbrowser
@@ -62,35 +65,62 @@ SECURITY_HEADERS = {
 }
 
 
+def _is_canonical_result_filename(filename: str) -> bool:
+    """Accept ordinary and force-versioned canonical result filenames."""
+
+    return bool(re.search(r"_results(?:_v\d{3})?\.json\Z", filename, re.IGNORECASE))
+
+
 def _select_local_directory() -> str | None:
     """Ask the local desktop for one folder without uploading its contents."""
 
+    attempts: list[list[str]] = []
     if shutil.which("powershell.exe"):
         script = (
-            "Add-Type -AssemblyName System.Windows.Forms; "
+            "try { Add-Type -AssemblyName System.Windows.Forms; "
             "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog; "
             "$dialog.Description = 'Choose EWP output folder'; "
             "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
-            "{ [Console]::Out.Write($dialog.SelectedPath) }"
+            "{ [Console]::Out.Write($dialog.SelectedPath) } else { exit 3 } "
+            "} catch { [Console]::Error.Write($_.Exception.Message); exit 4 }"
         )
-        command = ["powershell.exe", "-NoProfile", "-STA", "-Command", script]
-    elif shutil.which("zenity"):
-        command = ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"]
-    else:
+        encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
+        arguments = ["powershell.exe", "-NoProfile", "-STA", "-EncodedCommand", encoded]
+        attempts.append(arguments)
+        if shutil.which("cmd.exe"):
+            attempts.append(["cmd.exe", "/C", *arguments])
+    if shutil.which("zenity"):
+        attempts.append(
+            ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"]
+        )
+    if not attempts:
         raise ValueError(
             "No desktop folder dialog is available. Enter the output directory path directly."
         )
-    try:
-        completed = subprocess.run(
-            command, check=False, capture_output=True, text=True, timeout=600
+    failures: list[str] = []
+    for command in attempts:
+        try:
+            completed = subprocess.run(
+                command, check=False, capture_output=True, text=True, timeout=600
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            failures.append(f"{command[0]}: {type(error).__name__} ({error})")
+            continue
+        if completed.returncode in {1, 3} and command[0] == "zenity":
+            return None
+        if completed.returncode == 3 and command[0] in {"powershell.exe", "cmd.exe"}:
+            return None
+        if completed.returncode == 0:
+            return completed.stdout.strip() or None
+        failures.append(
+            f"{command[0]}: exit {completed.returncode}"
+            + (f" ({completed.stderr.strip()[:180]})" if completed.stderr.strip() else "")
         )
-    except (OSError, subprocess.TimeoutExpired) as error:
-        raise ValueError(
-            "The local folder dialog could not complete. Enter the path directly."
-        ) from error
-    if completed.returncode != 0:
-        return None
-    return completed.stdout.strip() or None
+    raise ValueError(
+        "The local folder dialog could not start: "
+        + "; ".join(failures)
+        + ". Enter the path directly."
+    )
 
 
 class GuiSelectionCache:
@@ -100,6 +130,12 @@ class GuiSelectionCache:
         self._root = Path(tempfile.gettempdir()) / "ewp-transcripts-gui-selections"
         self._run_id = uuid4()
         self._workspaces: list[WorkDirectory] = []
+
+    @property
+    def root(self) -> Path:
+        """Top-level directory containing only browser-picked session copies."""
+
+        return self._root
 
     def store(self, *, filename: str, content_length: int, source: BufferedIOBase) -> Path:
         """Copy one explicitly selected file in bounded chunks into an owned work directory."""
@@ -256,9 +292,11 @@ class LocalGuiServer(ThreadingHTTPServer):
         local_provider_lock = threading.Lock()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
+        self.gui_selections = GuiSelectionCache()
         self.gui_workspaces = GuiWorkspaceController(
             state_directory=default_workspace_directory(),
             resolve_path=self.gui_workflows.resolve_allowed_path,
+            temporary_selection_root=self.gui_selections.root,
         )
         self.gui_reviews = GuiReviewController(
             config=application_config,
@@ -284,7 +322,6 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_csrf_token = secrets.token_urlsafe(32)
         self.gui_openrouter_api_key = ""
         self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
-        self.gui_selections = GuiSelectionCache()
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
 
@@ -303,6 +340,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         return GuiWorkspaceController(
             state_directory=directory,
             resolve_path=self.gui_workflows.resolve_allowed_path,
+            temporary_selection_root=self.gui_selections.root,
         )
 
 
@@ -458,10 +496,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             try:
                 content_length = int(self.headers.get("Content-Length", "0"))
                 filename = unquote(self.headers.get("X-EWP-Filename", ""))
-                if path == "/api/v1/import-canonical-file" and not filename.endswith(
-                    "_results.json"
+                if path == "/api/v1/import-canonical-file" and not _is_canonical_result_filename(
+                    filename
                 ):
-                    raise ValueError("Select one canonical *_results.json file.")
+                    raise ValueError(
+                        "Select a canonical *_results.json or *_results_vNNN.json file."
+                    )
                 if path == "/api/v1/import-canonical-file":
                     raw_output = unquote(self.headers.get("X-EWP-Output-Directory", ""))
                     if not raw_output.strip():
@@ -591,6 +631,21 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     fields = document.get("fields")
                     if not isinstance(fields, dict):
                         raise ValueError("Workspace fields must be an object")
+                    queue_jobs = self.server.gui_transcriptions.jobs()
+                    durable_staged = tuple(
+                        job
+                        for job in queue_jobs
+                        if job.status == "staged"
+                        and not workspaces.is_temporary_selection(job.input_path)
+                    )
+                    durable_terminal = tuple(
+                        job
+                        for job in queue_jobs
+                        if job.status in {"completed", "failed"}
+                        and job.source_sha256
+                        and not workspaces.is_temporary_selection(job.input_path)
+                        and not workspaces.is_temporary_selection(job.result_path or "")
+                    )
                     saved = workspaces.save(
                         name=str(document.get("name", "")),
                         current_step=str(document.get("current_step", "")),
@@ -605,17 +660,19 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "language": job.language.value,
                                 "speaker_count": job.speaker_count,
                             }
-                            for job in self.server.gui_transcriptions.jobs()
-                            if job.status == "staged"
+                            for job in durable_staged
                         ],
-                        terminal_jobs=[
-                            job.model_dump(mode="json")
-                            for job in self.server.gui_transcriptions.jobs()
-                            if job.status in {"completed", "failed"}
-                        ],
+                        terminal_jobs=[job.model_dump(mode="json") for job in durable_terminal],
                         workspace_id=str(document.get("workspace_id", "")),
                     )
-                    payload = {"workspace": saved.model_dump(mode="json")}
+                    payload = {
+                        "workspace": saved.model_dump(mode="json"),
+                        "temporary_jobs_omitted": sum(
+                            job.status in {"staged", "completed", "failed"} for job in queue_jobs
+                        )
+                        - len(durable_staged)
+                        - len(durable_terminal),
+                    }
                 elif path == "/api/v1/workspaces/load":
                     loaded = workspaces.load(str(document.get("workspace_id", "")))
                     restored_terminal = self._restore_workspace_terminal_jobs(loaded.terminal_jobs)
@@ -1294,6 +1351,63 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 self._write_response(_json_response(HTTPStatus.OK, {"recorded": recorded}))
                 return
+            if path == "/api/v1/transcriptions/workflow-skip-batch":
+                result_paths = document.get("result_paths")
+                stage = document.get("stage")
+                if (
+                    not isinstance(result_paths, list)
+                    or not 1 <= len(result_paths) <= 50
+                    or any(not isinstance(item, str) or not item for item in result_paths)
+                    or len(set(result_paths)) != len(result_paths)
+                    or stage not in {"correction", "assisted_translation"}
+                ):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_SKIP_INVALID",
+                                    "message": (
+                                        "Select 1–50 distinct completed canonical results "
+                                        "for one optional stage."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                try:
+                    for result_path in result_paths:
+                        canonical_path = self.server.gui_workflows.resolve_allowed_path(result_path)
+                        require_completed_canonical_result(canonical_path)
+                except (FileNotFoundError, OSError, ValueError) as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_RESULT_INVALID",
+                                    "message": str(error),
+                                }
+                            },
+                        )
+                    )
+                    return
+                skipped_paths = self.server.gui_transcriptions.skip_workflow_stages(
+                    tuple(result_paths), cast(WorkflowStageName, stage)
+                )
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.OK,
+                        {
+                            "skipped": list(skipped_paths),
+                            "not_found": [
+                                item for item in result_paths if item not in skipped_paths
+                            ],
+                        },
+                    )
+                )
+                return
             if path in {
                 "/api/v1/transcriptions/workflow-skip",
                 "/api/v1/transcriptions/workflow-reopen",
@@ -1656,20 +1770,45 @@ def serve_gui(*, port: int, open_browser: bool = True) -> None:
 
 
 def _open_browser(url: str) -> None:
-    """Open a host browser without leaking platform-launcher noise to the terminal."""
+    """Try host launchers in order and report a usable fallback URL on failure."""
 
+    failures: list[str] = []
     try:
         release = Path("/proc/sys/kernel/osrelease").read_text(encoding="utf-8")
-        if "microsoft" in release.casefold():
-            completed = subprocess.run(
-                ["powershell.exe", "-NoProfile", "-Command", "Start-Process", url],
-                check=False,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+    except OSError:
+        release = ""
+    if "microsoft" in release.casefold() or os.environ.get("WSL_INTEROP"):
+        commands = [
+            ["cmd.exe", "/C", "start", "", url],
+            ["powershell.exe", "-NoProfile", "-Command", "Start-Process", url],
+        ]
+        if shutil.which("wslview"):
+            commands.append(["wslview", url])
+        for command in commands:
+            if not shutil.which(command[0]):
+                failures.append(f"{command[0]} unavailable")
+                continue
+            try:
+                completed = subprocess.run(
+                    command,
+                    check=False,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=20,
+                )
+            except (OSError, subprocess.TimeoutExpired) as error:
+                failures.append(f"{command[0]} {type(error).__name__}: {error}")
+                continue
             if completed.returncode == 0:
                 return
-        webbrowser.open(url)
-    except (OSError, subprocess.SubprocessError):
-        return
+            failures.append(f"{command[0]} exit {completed.returncode}")
+    try:
+        if webbrowser.open(url):
+            return
+    except (OSError, subprocess.SubprocessError) as error:
+        failures.append(f"Linux browser {type(error).__name__}: {error}")
+    print(
+        f"GUI_BROWSER_OPEN_FAILED: Open {url} manually. " + "; ".join(failures),
+        file=sys.stderr,
+    )

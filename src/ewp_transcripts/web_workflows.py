@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from ewp_transcripts.application import dry_run, inspect_input
 from ewp_transcripts.config import load_config
@@ -99,12 +99,20 @@ def require_completed_canonical_result(path: Path) -> CanonicalResult:
 
     if not path.is_file():
         raise ValueError("Canonical result JSON must be one completed result file.")
+    if path.suffix.lower() != ".json":
+        raise ValueError("Choose a completed canonical result JSON, not an audio or subtitle file.")
     try:
         return load_canonical_result(path)
+    except ValidationError as error:
+        detail = error.errors(include_input=False)[0]
+        location = ".".join(str(part) for part in detail["loc"]) or "document"
+        raise ValueError(
+            f"Canonical JSON validation failed at {location}: {detail['msg']}"
+        ) from error
     except (OSError, ValueError) as error:
         raise ValueError(
-            "Choose a completed canonical result JSON file (for example, "
-            "episode_results.json), not an audio or subtitle file."
+            "The selected file is not a readable completed canonical result JSON. "
+            "Choose a *_results.json or *_results_vNNN.json file."
         ) from error
 
 

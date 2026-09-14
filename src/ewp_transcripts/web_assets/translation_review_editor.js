@@ -97,15 +97,37 @@ function translationReviewContext() {
   };
 }
 
+function currentTranslationReviewCandidate() {
+  if (!translationReview) return null;
+  return {
+    result_path: translationReview.result_path,
+    revision_path: translationReview.revision_path || "",
+    candidate_path: translationReview.parent_translation_path || "",
+    target_language: translationReview.direction.target_language,
+    output_root: parentPath(parentPath(translationReview.review_path)),
+  };
+}
+
+function translationReviewContextFor(candidate) {
+  return {
+    review_path: "",
+    result_path: candidate.result_path,
+    revision_path: candidate.revision_path || "",
+    parent_translation_path: candidate.candidate_path || "",
+    target_language: candidate.target_language || "",
+  };
+}
+
 function persistTranslationReview() {
-  if (!translationReview || !translationCandidate) return;
+  const source = currentTranslationReviewCandidate();
+  if (!source) return;
   const documentValue = JSON.stringify({
     ...translationReviewContext(),
-    output_root: translationCandidate.output_root,
+    output_root: source.output_root,
     applied_translation_path: appliedTranslation,
   });
   localStorage.setItem(translationReviewStorageKey, documentValue);
-  localStorage.setItem(translationReviewStorageKeyFor(translationReviewSourceKey()), documentValue);
+  localStorage.setItem(translationReviewStorageKeyFor(translationReviewDocumentSourceKey()), documentValue);
   updateTranslationReviewRestoreControl();
 }
 
@@ -204,19 +226,38 @@ function scrollTranslationReviewIntoView() {
   });
 }
 
-async function openEnhancedTranslationReview() {
-  if (!translationCandidate) return;
-  const root = translationCandidate.output_root;
+async function openEnhancedTranslationReview(requestedCandidate = translationCandidate) {
+  if (!requestedCandidate) return false;
+  const requestedKey = translationReviewSourceKey(requestedCandidate);
+  const currentCandidate = currentTranslationReviewCandidate();
+  const switching = Boolean(translationReview && translationReviewDocumentSourceKey() !== requestedKey);
   try {
-    if (translationReview && translationReviewDocumentSourceKey() !== translationReviewSourceKey()) {
-      if (translationReviewDirty) await saveEnhancedTranslationReview();
+    if (switching) {
+      if (translationReviewDirty && !(await saveEnhancedTranslationReview())) {
+        translationCandidate = currentCandidate;
+        return false;
+      }
       persistTranslationReview();
-      clearActiveTranslationReview("Saved current translation draft before switching outputs.");
     }
-    const stored = localStorage.getItem(translationReviewStorageKeyFor(translationReviewSourceKey()));
+    let stored = localStorage.getItem(translationReviewStorageKeyFor(requestedKey));
+    if (stored) {
+      const context = JSON.parse(stored);
+      const storedCandidate = {
+        result_path: context.result_path,
+        revision_path: context.revision_path || "",
+        candidate_path: context.parent_translation_path || "",
+        target_language: context.target_language || "",
+      };
+      if (translationReviewSourceKey(storedCandidate) !== requestedKey) {
+        localStorage.removeItem(translationReviewStorageKeyFor(requestedKey));
+        stored = null;
+      }
+    }
     if (stored) {
       const context = JSON.parse(stored);
       const payload = await queuePost("/api/v1/translation-reviews/load", context);
+      if (switching) clearActiveTranslationReview();
+      translationCandidate = requestedCandidate;
       appliedTranslation = context.applied_translation_path || "";
       translationReviewSectionIndex = 0;
       renderEnhancedTranslationReview(payload);
@@ -228,9 +269,11 @@ async function openEnhancedTranslationReview() {
       return true;
     }
     const payload = await queuePost("/api/v1/translation-reviews/prepare", {
-      ...translationReviewContext(),
-      review_output_directory: `${root}/translation-reviews`,
+      ...translationReviewContextFor(requestedCandidate),
+      review_output_directory: `${requestedCandidate.output_root}/translation-reviews`,
     });
+    if (switching) clearActiveTranslationReview();
+    translationCandidate = requestedCandidate;
     translationReviewSectionIndex = 0;
     appliedTranslation = "";
     renderEnhancedTranslationReview(payload);
@@ -238,6 +281,7 @@ async function openEnhancedTranslationReview() {
     scrollTranslationReviewIntoView();
     return true;
   } catch (error) {
+    if (currentCandidate) translationCandidate = currentCandidate;
     document.querySelector("#translation-review-status").textContent = error.message;
     return false;
   }
@@ -266,7 +310,7 @@ function clearActiveTranslationReview(message = "Current translation review clea
 }
 
 async function saveEnhancedTranslationReview() {
-  if (!translationReview) return;
+  if (!translationReview) return false;
   try {
     const payload = await queuePost("/api/v1/translation-reviews/save", {
       ...translationReviewContext(),
@@ -277,8 +321,10 @@ async function saveEnhancedTranslationReview() {
     persistTranslationReview();
     document.querySelector("#translation-review-status").textContent =
       "Translation draft saved; preview is required again.";
+    return true;
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;
+    return false;
   }
 }
 
@@ -313,11 +359,7 @@ async function restoreEnhancedTranslationReview() {
 
 async function previewEnhancedTranslationReview() {
   if (!translationReview) return;
-  if (translationReviewDirty) {
-    document.querySelector("#translation-review-status").textContent =
-      "GUI_TRANSLATION_REVIEW_SAVE_REQUIRED: Save the current draft before preview.";
-    return;
-  }
+  if (translationReviewDirty && !(await saveEnhancedTranslationReview())) return;
   try {
     const payload = await queuePost("/api/v1/translation-reviews/preview", translationReviewContext());
     document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2);
@@ -473,13 +515,13 @@ addTranslationReviewRecoveryControls();
 document.querySelector("#clear-translation-review").addEventListener("click", () => {
   if (translationReview && translationReviewDirty) {
     if (!window.confirm("Save the current translation draft before clearing it from this browser? Saved drafts remain on disk.")) return;
-    saveEnhancedTranslationReview().then(() => clearActiveTranslationReview());
+    saveEnhancedTranslationReview().then(saved => { if (saved) clearActiveTranslationReview(); });
     return;
   }
   if (translationReview && !window.confirm("Clear the current translation review from this browser? Saved drafts remain on disk.")) return;
   clearActiveTranslationReview();
 });
-replaceTranslationReviewButton("#review-translation", openEnhancedTranslationReview);
+replaceTranslationReviewButton("#review-translation", () => openEnhancedTranslationReview());
 replaceTranslationReviewButton("#save-translation-review", saveEnhancedTranslationReview);
 replaceTranslationReviewButton("#preview-translation-review", previewEnhancedTranslationReview);
 replaceTranslationReviewButton("#apply-translation-review", applyEnhancedTranslationReview);

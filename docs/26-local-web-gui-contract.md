@@ -175,6 +175,9 @@ unsaved editor contents as casual browser preferences.
 The first workspace-state slice MAY persist only allowlisted non-secret form fields and the
 current step in an application-owned user-state catalog. It must mark entries with unavailable
 paths, revalidate every path on save/load, and exclude confirmations as well as credentials.
+GUI-owned temporary picker paths are session-only, so they MUST NOT invalidate saving otherwise
+durable work state. The GUI clears such form paths and omits jobs whose only source/result is a
+temporary picker copy, reporting the omission instead of promising impossible restoration.
 An active saved workspace MAY be auto-saved. The default GUI interval is 60 seconds and the
 client MUST compare the allowlisted state before writing, so unchanged state causes no save
 request. Auto-save begins only after an explicit save or load, remains optional, and never
@@ -231,6 +234,9 @@ The semantic editor MUST keep source text and ownership immutable, invalidate pr
 every saved target change, and require explicit checks for meaning, omissions, additions,
 uncertainty, names, conventions, register, and style. Only the exact-parent manual child may
 be presented as final; audit reconstruction and translated export operate on that child.
+Opening a different semantic-review queue item MUST save any dirty target edits before changing
+the active source, then load or prepare that item's own exact draft. Preview saves dirty target
+edits before validating the saved draft; Apply and export remain explicit separate actions.
 
 Where source media is available, the GUI SHOULD provide synchronized playback, seeking from
 a transcript unit, active-unit highlighting, keyboard operation, and independently persistent
@@ -293,7 +299,10 @@ Result-import queues MUST use the browser's native picker. A selected canonical 
 only to the same-machine loopback server's owned temporary work directory, strictly parsed, and
 deleted when that GUI server stops; the picker never searches all user filesystems. Import also
 requires an explicit durable shared output root for later review, revision, and export files;
-the temporary JSON directory MUST NOT become that root. Inspect and
+the temporary JSON directory MUST NOT become that root. If the root is missing after file
+selection, the browser retains that selection during the current page session and resumes
+import when the root is supplied. Validated force-versioned canonical names
+(`*_results_vNNN.json`) are accepted alongside `*_results.json`. Inspect and
 plan likewise offers a native audio picker that makes an explicit, bounded session copy and shows
 its temporary server-side path. The associated button must show Working and Done feedback. Output
 directories allow direct path entry or a server-mediated local operating-system folder dialog.

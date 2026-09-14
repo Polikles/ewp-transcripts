@@ -6,7 +6,15 @@ from pydantic import BaseModel
 
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import MediaProbeError
-from ewp_transcripts.web_workflows import GuiWorkflowController
+from ewp_transcripts.web_workflows import GuiWorkflowController, require_completed_canonical_result
+
+
+def test_invalid_canonical_import_explains_first_schema_error(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results_v003.json"
+    result.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Canonical JSON validation failed at"):
+        require_completed_canonical_result(result)
 
 
 class StubResult(BaseModel):

@@ -698,8 +698,8 @@ security, accessibility, and implementation-slice contract is in
 The following operator findings are tracked as separate vertical slices. Complete and manually
 qualify one task at a time; later tasks must not be folded into an unrelated fix.
 
-1. **GUI-01 — WSL browser launch — implemented, pending WSL retest:** restore automatic opening of the host default browser when
-   `gui` runs without `--no-open-browser`, while retaining a quiet failure path and the explicit
+1. **GUI-01 — WSL browser launch — implemented locally, pending WSL retest (GUI-25):** restore automatic opening of the host default browser when
+   `gui` runs without `--no-open-browser`, while retaining an actionable failure path and the explicit
    opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
 2. **GUI-02 — Resume from existing canonical results — implemented, pending browser retest:** every workflow-stage queue can add one or
    more previously completed `*_results.json` files using the browser's native file-selection
@@ -740,9 +740,9 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     an optional user-space workspace storage directory so state files can be included in backups.
     A browser-native selected workspace JSON can be imported into that catalog without a
     directory-picker warning.
-14. **GUI-14 — Saved-state validation and controls — implemented, pending browser retest:** save with empty or custom user-space storage
+14. **GUI-14 — Saved-state validation and controls — implemented locally, pending WSL retest (GUI-27):** save with empty or custom user-space storage
     directory; keep the client/server field contracts in sync and align all saved-state buttons.
-15. **GUI-15 — Output-root chooser — implemented, pending WSL/Ubuntu retest:** choose the shared Inspect and plan output directory using
+15. **GUI-15 — Output-root chooser — implemented locally, pending WSL retest (GUI-26):** choose the shared Inspect and plan output directory using
     an operating-system folder dialog without the browser's upload-all-files prompt.
 16. **GUI-16 — Queue readability — implemented, pending browser retest:** align action buttons in every stage queue; show imported
     result filenames, with full paths available on hover, instead of temporary path strings.
@@ -761,6 +761,36 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     user's chosen output root, never session-local picker storage; block ambiguous output roots.
 24. **GUI-24 — Clear current state — implemented, pending browser retest:** an explicit warned confirmation clears the active queue and
     unsaved form state without deleting saved workspaces or publication artifacts.
+25. **GUI-25 — WSL launch diagnostics and fallback — implemented locally, pending WSL retest:** reproduce why automatic host-browser
+    opening regressed; use a tested WSL host opener and surface a concise actionable failure
+    rather than silently succeeding when no browser opened.
+26. **GUI-26 — Folder chooser fallback — implemented locally, pending WSL retest:** handle unavailable Windows interop/desktop dialogs
+    without cancelling the workflow. Prefer a working local OS folder picker, preserve typed
+    paths, and report why a picker could not start; never invoke a browser folder upload.
+27. **GUI-27 — Workspace save with session-picked files — implemented locally, pending WSL retest:** saving a workspace must not fail merely
+    because the form contains a GUI-owned temporary selection path. Default and custom storage
+    directories both work while preserving validation of durable referenced paths and secrets.
+28. **GUI-28 — Transcription table proportions — implemented locally, pending browser retest:** keep filename columns readable and arrange
+    completion indicators in 2–3–2 rows inside Job and settings at normal browser widths.
+29. **GUI-29 — Non-destructive import prerequisite — implemented locally, pending browser retest:** if output root is missing, retain the
+    user's selected canonical files in the browser until a root is chosen and then finish the
+    import without requiring another native file-dialog selection.
+30. **GUI-30 — Versioned canonical import names — implemented locally, pending browser retest:** accept validated canonical result files
+    whose filename has a legitimate `_results_vNNN.json` suffix, while still rejecting other
+    JSON types; explain any true validation failure precisely.
+31. **GUI-31 — Reliable bulk correction skip — implemented locally, pending browser retest:** the first click must update every selected
+    actionable item, even while queue refreshes occur, with a per-item outcome summary.
+32. **GUI-32 — Per-item semantic review identity — implemented locally, pending browser retest:** switching or reopening A/B and other
+    episodes must load each exact saved translation draft, preserving their distinct unsaved
+    edits or explicitly asking before discarding them; transient editor-layout changes must
+    not leave the previous episode on screen.
+33. **GUI-33 — Preview translation saves draft — implemented locally, pending browser retest:** Preview translation saves dirty target edits
+    first, then validates the just-saved draft; Apply remains an explicit verified action.
+34. **GUI-34 — Responsive visual overhaul — deferred:** include small/zoomed viewport
+    qualification in the later planned UI overhaul, not this functional-fix pass.
+35. **GUI-35 — Provider-batch manual qualification — waiting on GUI-25–33:** after the above
+    fixes, run the authorized two-item correction/translation provider test without duplicate
+    requests and confirm per-item semantic-review targets.
 
 Planned capabilities:
 

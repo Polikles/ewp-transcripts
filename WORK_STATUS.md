@@ -32,8 +32,18 @@ explicit durable shared output root: the selected canonical JSON remains tempora
 revision, candidate, and export artifacts use the selected root. Workspace save now recognizes all
 current form fields; an OS folder dialog chooses the shared output root without uploading folder
 contents. A confirmed clear-current-state action forgets inactive queue/browser state without
-deleting saved artifacts. Automated GUI checks pass; Chrome/Firefox and real-provider qualification
-for GUI-14 through GUI-24 in `docs/99-roadmap-v2.md` remains the next operator gate.
+deleting saved artifacts. Automated GUI checks pass; unresolved WSL/Chrome/Firefox qualification
+is tracked under GUI-25–33 in `docs/99-roadmap-v2.md`.
+
+The 2026-09-14 WSL retest reopened browser launch, output-folder selection, and workspace
+save, and found table, import, bulk-skip, and per-episode semantic-review issues. GUI-25–33
+now have local fixes: Windows bridge fallback/diagnostics, temporary-path-safe workspace save,
+readable queue proportions, retained import selection, versioned canonical names, atomic bulk
+correction skip, per-source semantic draft switching, and save-on-preview. `make check` and
+`make test-integration` pass locally. The next operator gate is a WSL Chrome/Firefox retest of
+GUI-25–33; real-provider batch qualification (GUI-35) follows only after that passes. Session-
+picked canonical and audio copies are temporary by design, so saved work state reports queue
+items it cannot restore after the GUI stops. Responsive redesign remains GUI-34, deferred.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
