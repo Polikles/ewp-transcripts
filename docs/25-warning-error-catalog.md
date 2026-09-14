@@ -97,7 +97,7 @@ may still produce a traceback and are not assigned a misleading expected-error c
 
 | Code | Meaning and likely cause | Safety implication | Operator action |
 |---|---|---|---|
-| `GUI_START_FAILED` | The loopback listener or optional search-root configuration could not be initialized. | The browser service did not start. | Check the port, directory existence/type, and permissions, then retry. |
+| `GUI_START_FAILED` | The loopback listener could not be initialized. | The browser service did not start. | Check the port and permissions, then retry. |
 | `GUI_HOST_REJECTED` | A browser request used a Host value other than the active loopback endpoint. | DNS-rebinding and unintended virtual-host access are rejected. | Open the exact URL printed by `transcriber gui`. |
 | `GUI_ROUTE_NOT_FOUND` | The browser requested an unknown API or asset route. | No filesystem fallback is attempted. | Refresh the bundled frontend; report persistent frontend/backend mismatch. |
 | `GUI_ORIGIN_REJECTED` | A POST request did not originate from the active loopback GUI. | Cross-site browser requests cannot invoke application workflows. | Use the exact printed GUI URL rather than another page or proxy. |

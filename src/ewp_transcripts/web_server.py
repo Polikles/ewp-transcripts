@@ -6,24 +6,27 @@ import json
 import os
 import secrets
 import subprocess
+import tempfile
 import threading
 import webbrowser
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
-from pathlib import Path, PurePosixPath
+from io import BufferedIOBase
+from pathlib import Path
 from typing import ClassVar, cast
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
+from uuid import uuid4
 
 from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
+from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
-from ewp_transcripts.web_filesystem import GuiFilesystemController
 from ewp_transcripts.web_jobs import (
     GuiTranscriptionJob,
     GuiTranscriptionQueue,
@@ -36,10 +39,10 @@ from ewp_transcripts.web_translations import GuiTranslationController, GuiTransl
 from ewp_transcripts.web_workflows import (
     GuiWorkflowController,
     default_gui_prohibited_roots,
-    is_gui_prohibited_path,
     require_completed_canonical_result,
 )
 from ewp_transcripts.web_workspaces import GuiWorkspaceController, default_workspace_directory
+from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
 
 API_VERSION = "1.0"
 REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
@@ -58,174 +61,53 @@ SECURITY_HEADERS = {
 }
 
 
-def _minimal_search_roots(roots: set[Path] | tuple[Path, ...] | list[Path]) -> tuple[Path, ...]:
-    """Remove duplicate/nested roots so one file cannot be reported twice."""
+class GuiSelectionCache:
+    """Own session-only copies selected through browser file controls."""
 
-    minimal: list[Path] = []
-    for root in sorted(set(roots), key=lambda path: (len(path.parts), str(path))):
-        if any(root == parent or root.is_relative_to(parent) for parent in minimal):
-            continue
-        minimal.append(root)
-    return tuple(minimal)
+    def __init__(self) -> None:
+        self._root = Path(tempfile.gettempdir()) / "ewp-transcripts-gui-selections"
+        self._run_id = uuid4()
+        self._workspaces: list[WorkDirectory] = []
 
+    def store(self, *, filename: str, content_length: int, source: BufferedIOBase) -> Path:
+        """Copy one explicitly selected file in bounded chunks into an owned work directory."""
 
-def _default_user_search_roots() -> tuple[Path, ...]:
-    """Locate native and mounted user homes without imposing a path allowlist."""
-
-    roots = {Path.cwd().resolve(), Path.home().resolve()}
-    try:
-        drives = tuple(
-            path for path in Path("/mnt").iterdir() if path.is_dir() and not path.is_symlink()
+        safe_name = Path(filename).name
+        if safe_name != filename or not safe_name or "\x00" in safe_name:
+            raise ValueError("The selected filename is invalid.")
+        if not 0 < content_length <= 16 * 1024 * 1024 * 1024:
+            raise ValueError("The selected file size is invalid or exceeds the 16 GiB local limit.")
+        workspace = allocate_work_directory(
+            self._root, run_id=self._run_id, job_id=f"selection-{uuid4().hex}"
         )
-    except OSError:
-        drives = ()
-    for drive in drives:
+        destination = workspace.path / safe_name
+        remaining = content_length
         try:
-            roots.update(
-                path.resolve()
-                for path in (drive / "Users").iterdir()
-                if path.is_dir() and not path.is_symlink()
-            )
-        except OSError:
-            continue
-    return _minimal_search_roots(roots)
+            with destination.open("xb") as handle:
+                while remaining:
+                    chunk = source.read(min(1024 * 1024, remaining))
+                    if not chunk:
+                        raise ValueError("The selected-file upload ended before all bytes arrived.")
+                    handle.write(chunk)
+                    remaining -= len(chunk)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.chmod(destination, 0o600)
+        except Exception:
+            cleanup_work_directory(workspace)
+            raise
+        self._workspaces.append(workspace)
+        return destination
 
+    def close(self) -> None:
+        """Delete only this server's owned temporary selections."""
 
-def _walk_matching_files(
-    *, roots: tuple[Path, ...], filename: str, prohibited_roots: tuple[Path, ...]
-) -> list[Path]:
-    """Find regular non-symlink files by name below ordinary user-space roots."""
-
-    matches: list[Path] = []
-    for root in roots:
-        if is_gui_prohibited_path(root, prohibited_roots=prohibited_roots):
-            continue
-        for base, directories, filenames in os.walk(
-            root, followlinks=False, onerror=lambda _error: None
-        ):
-            directory = Path(base)
-            directories[:] = [
-                name
-                for name in directories
-                if not (directory / name).is_symlink()
-                and not is_gui_prohibited_path(
-                    (directory / name).resolve(strict=False), prohibited_roots=prohibited_roots
-                )
-            ]
-            if filename not in filenames:
+        for workspace in reversed(self._workspaces):
+            try:
+                cleanup_work_directory(workspace)
+            except OSError:
                 continue
-            candidate = directory / filename
-            if candidate.is_symlink() or not candidate.is_file():
-                continue
-            matches.append(candidate.resolve(strict=True))
-    return matches
-
-
-def find_imported_canonical_result(
-    *,
-    search_roots: tuple[Path, ...],
-    filename: str,
-    sha256: str,
-    prohibited_roots: tuple[Path, ...] | None = None,
-) -> Path:
-    """Resolve a browser-selected canonical result by name and exact bytes.
-
-    Browser file inputs deliberately hide absolute local paths. The browser therefore sends only
-    the selected filename and SHA-256; this lookup never copies media or transcript contents into
-    the server. It searches user homes and optional search locations only; no file contents are
-    uploaded or copied, and operating-system directories and symlinks stay unavailable.
-    """
-
-    candidate_name = Path(filename).name
-    if candidate_name != filename or not candidate_name.endswith("_results.json"):
-        raise ValueError("Select one canonical *_results.json file.")
-    if len(sha256) != 64 or any(character not in "0123456789abcdef" for character in sha256):
-        raise ValueError("The selected canonical result has an invalid SHA-256 identity.")
-    prohibited = prohibited_roots or default_gui_prohibited_roots()
-    matches: list[Path] = []
-    for candidate in _walk_matching_files(
-        roots=_minimal_search_roots(search_roots),
-        filename=candidate_name,
-        prohibited_roots=prohibited,
-    ):
-        if sha256_file(candidate) == sha256:
-            require_completed_canonical_result(candidate)
-            matches.append(candidate)
-    if not matches:
-        raise ValueError(
-            "The selected result was not found unchanged in the accessible user locations. "
-            "Restart with --search-root for an additional mounted project location, then select "
-            "it again."
-        )
-    if len(matches) > 1:
-        raise ValueError(
-            "More than one accessible canonical result has this exact selected identity."
-        )
-    return matches[0]
-
-
-def find_selected_media_path(
-    *,
-    search_roots: tuple[Path, ...],
-    filename: str,
-    size: int,
-    prohibited_roots: tuple[Path, ...],
-) -> Path:
-    """Resolve one browser-selected media file without reading it into the browser process."""
-
-    candidate_name = Path(filename).name
-    if candidate_name != filename or not candidate_name:
-        raise ValueError("The selected media filename is invalid.")
-    if size < 0:
-        raise ValueError("The selected media size is invalid.")
-    matches = [
-        path
-        for path in _walk_matching_files(
-            roots=_minimal_search_roots(search_roots),
-            filename=candidate_name,
-            prohibited_roots=prohibited_roots,
-        )
-        if path.stat().st_size == size
-    ]
-    if not matches:
-        raise ValueError(
-            "The selected media file was not found in the accessible user locations. Restart "
-            "with --search-root for an additional mounted project location, then select it again."
-        )
-    if len(matches) > 1:
-        raise ValueError(
-            "More than one accessible file has that name and size. Enter its server-side path "
-            "directly so the exact source is unambiguous."
-        )
-    return matches[0]
-
-
-def find_selected_directory(
-    *,
-    search_roots: tuple[Path, ...],
-    filename: str,
-    size: int,
-    relative_path: str,
-    prohibited_roots: tuple[Path, ...],
-) -> Path:
-    """Derive one native-picker directory from a uniquely resolved descendant file."""
-
-    relative = PurePosixPath(relative_path)
-    parts = relative.parts
-    if relative.is_absolute() or len(parts) < 2 or any(part in {"", ".", ".."} for part in parts):
-        raise ValueError("The selected output-directory identity is invalid.")
-    selected_file = find_selected_media_path(
-        search_roots=search_roots,
-        filename=filename,
-        size=size,
-        prohibited_roots=prohibited_roots,
-    )
-    directory = selected_file
-    for _ in parts[1:]:
-        directory = directory.parent
-    if is_gui_prohibited_path(directory, prohibited_roots=prohibited_roots):
-        raise ValueError("The selected output directory is prohibited.")
-    return directory
+        self._workspaces.clear()
 
 
 @dataclass(frozen=True)
@@ -234,40 +116,18 @@ class WebConfiguration:
 
     host: str
     port: int
-    search_roots: tuple[Path, ...]
     prohibited_roots: tuple[Path, ...]
 
     @classmethod
-    def create(
-        cls,
-        *,
-        port: int,
-        search_roots: list[Path] | None = None,
-        allowed_roots: list[Path] | None = None,
-    ) -> WebConfiguration:
-        """Create configuration, accepting the legacy allow-root name as a search hint."""
+    def create(cls, *, port: int) -> WebConfiguration:
+        """Create the loopback configuration and its operating-system denylist."""
 
         if not 0 <= port <= 65535:
             raise ValueError("port must be between 0 and 65535")
-        if search_roots is not None and allowed_roots is not None:
-            raise ValueError("use --search-root instead of combining it with --allow-root")
-        roots = search_roots if search_roots is not None else allowed_roots or []
         prohibited_roots = default_gui_prohibited_roots()
-        resolved: list[Path] = []
-        for root in (*_default_user_search_roots(), *roots):
-            candidate = root.expanduser().resolve(strict=True)
-            if not candidate.is_dir():
-                raise ValueError(f"search root is not a directory: {root}")
-            if is_gui_prohibited_path(candidate, prohibited_roots=prohibited_roots):
-                raise ValueError(
-                    f"search root is inside a prohibited operating-system directory: {root}"
-                )
-            if candidate not in resolved:
-                resolved.append(candidate)
         return cls(
             host="127.0.0.1",
             port=port,
-            search_roots=tuple(resolved),
             prohibited_roots=prohibited_roots,
         )
 
@@ -323,16 +183,6 @@ def dispatch_get(
                 "license_url": LICENSE_URL,
             },
         )
-    if path == "/api/v1/roots":
-        return _json_response(
-            HTTPStatus.OK,
-            {
-                "roots": [str(root) for root in config.search_roots],
-                "policy": (
-                    "User-space paths are accessible; operating-system directories are blocked."
-                ),
-            },
-        )
     return _json_response(
         HTTPStatus.NOT_FOUND,
         {"error": {"code": "GUI_ROUTE_NOT_FOUND", "message": "No such GUI route."}},
@@ -374,7 +224,6 @@ class LocalGuiServer(ThreadingHTTPServer):
         local_provider_lock = threading.Lock()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
-        self.gui_filesystem = GuiFilesystemController(config.search_roots)
         self.gui_workspaces = GuiWorkspaceController(
             state_directory=default_workspace_directory(),
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -403,13 +252,26 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_csrf_token = secrets.token_urlsafe(32)
         self.gui_openrouter_api_key = ""
         self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
+        self.gui_selections = GuiSelectionCache()
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
 
     def server_close(self) -> None:
         self.gui_openrouter_api_key = ""
         self.gui_transcriptions.close()
+        self.gui_selections.close()
         super().server_close()
+
+    def workspace_controller(self, storage_directory: str) -> GuiWorkspaceController:
+        """Return the default or an explicitly selected user-space workspace catalog."""
+
+        if not storage_directory.strip():
+            return self.gui_workspaces
+        directory = self.gui_workflows.resolve_allowed_path(storage_directory, directory=True)
+        return GuiWorkspaceController(
+            state_directory=directory,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+        )
 
 
 class LocalGuiRequestHandler(BaseHTTPRequestHandler):
@@ -539,6 +401,73 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
             )
             return
+        path = urlsplit(self.path).path
+        if path in {
+            "/api/v1/selected-media/upload",
+            "/api/v1/import-canonical-file",
+            "/api/v1/import-workspace-file",
+        }:
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The selected-file request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                content_length = int(self.headers.get("Content-Length", "0"))
+                filename = unquote(self.headers.get("X-EWP-Filename", ""))
+                if path == "/api/v1/import-canonical-file" and not filename.endswith(
+                    "_results.json"
+                ):
+                    raise ValueError("Select one canonical *_results.json file.")
+                if path == "/api/v1/import-workspace-file" and not filename.endswith(".json"):
+                    raise ValueError("Select one saved workspace JSON file.")
+                selected_path = self.server.gui_selections.store(
+                    filename=filename, content_length=content_length, source=self.rfile
+                )
+                if path == "/api/v1/import-canonical-file":
+                    canonical = require_completed_canonical_result(selected_path)
+                    job, imported = self.server.gui_transcriptions.register_completed_result(
+                        selected_path,
+                        planned_job_id=canonical.job_id,
+                        language=LanguageMode(canonical.episode.language),
+                    )
+                    selected_payload: dict[str, object] = {
+                        "imported": imported,
+                        "job": job.model_dump(mode="json"),
+                    }
+                elif path == "/api/v1/import-workspace-file":
+                    storage_directory = unquote(self.headers.get("X-EWP-Workspace-Directory", ""))
+                    workspace = self.server.workspace_controller(storage_directory)
+                    saved = workspace.import_file(selected_path)
+                    selected_payload = {"workspace": saved.model_dump(mode="json")}
+                else:
+                    selected_payload = {"path": str(selected_path)}
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_SELECTED_FILE_REJECTED",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, selected_payload))
+            return
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if not 0 < length <= 1_048_576:
@@ -559,7 +488,6 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
             )
             return
-        path = urlsplit(self.path).path
         if path.startswith("/api/v1/workspaces/"):
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
@@ -576,18 +504,19 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             try:
+                storage_directory = document.get("storage_directory", "")
+                if not isinstance(storage_directory, str):
+                    raise ValueError("Workspace storage directory is invalid")
+                workspaces = self.server.workspace_controller(storage_directory)
                 if path == "/api/v1/workspaces/list":
                     payload: dict[str, object] = {
-                        "workspaces": [
-                            item.model_dump(mode="json")
-                            for item in self.server.gui_workspaces.list()
-                        ]
+                        "workspaces": [item.model_dump(mode="json") for item in workspaces.list()]
                     }
                 elif path == "/api/v1/workspaces/save":
                     fields = document.get("fields")
                     if not isinstance(fields, dict):
                         raise ValueError("Workspace fields must be an object")
-                    saved = self.server.gui_workspaces.save(
+                    saved = workspaces.save(
                         name=str(document.get("name", "")),
                         current_step=str(document.get("current_step", "")),
                         fields=fields,
@@ -613,7 +542,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     payload = {"workspace": saved.model_dump(mode="json")}
                 elif path == "/api/v1/workspaces/load":
-                    loaded = self.server.gui_workspaces.load(str(document.get("workspace_id", "")))
+                    loaded = workspaces.load(str(document.get("workspace_id", "")))
                     restored_terminal = self._restore_workspace_terminal_jobs(loaded.terminal_jobs)
                     restored = self._restore_workspace_staged_jobs(loaded.staged_jobs)
                     payload = {
@@ -621,6 +550,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         "restored_staged_jobs": restored,
                         "restored_terminal_jobs": restored_terminal,
                     }
+                elif path == "/api/v1/workspaces/delete":
+                    workspaces.delete(str(document.get("workspace_id", "")))
+                    payload = {"deleted": True}
                 else:
                     self._write_response(
                         _json_response(
@@ -648,116 +580,6 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
-            return
-        if path in {"/api/v1/selected-media/resolve", "/api/v1/selected-directory/resolve"}:
-            supplied = self.headers.get("X-EWP-CSRF", "")
-            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.FORBIDDEN,
-                        {
-                            "error": {
-                                "code": "GUI_CSRF_REJECTED",
-                                "message": (
-                                    "The selected-media request lacks the active session token."
-                                ),
-                            }
-                        },
-                    )
-                )
-                return
-            filename = document.get("filename")
-            size = document.get("size")
-            if not isinstance(filename, str) or not isinstance(size, int) or isinstance(size, bool):
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.BAD_REQUEST,
-                        {
-                            "error": {
-                                "code": "GUI_SELECTED_MEDIA_INVALID",
-                                "message": "The selected media identity is invalid.",
-                            }
-                        },
-                    )
-                )
-                return
-            try:
-                if path == "/api/v1/selected-directory/resolve":
-                    relative_path = document.get("relative_path")
-                    if not isinstance(relative_path, str):
-                        raise ValueError("The selected output-directory identity is invalid.")
-                    selected_path = find_selected_directory(
-                        search_roots=self.server.gui_config.search_roots,
-                        filename=filename,
-                        size=size,
-                        relative_path=relative_path,
-                        prohibited_roots=self.server.gui_config.prohibited_roots,
-                    )
-                else:
-                    selected_path = find_selected_media_path(
-                        search_roots=self.server.gui_config.search_roots,
-                        filename=filename,
-                        size=size,
-                        prohibited_roots=self.server.gui_config.prohibited_roots,
-                    )
-            except (FileNotFoundError, OSError, ValueError) as error:
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.BAD_REQUEST,
-                        {
-                            "error": {
-                                "code": "GUI_SELECTED_MEDIA_REJECTED",
-                                "message": str(error),
-                            }
-                        },
-                    )
-                )
-                return
-            self._write_response(_json_response(HTTPStatus.OK, {"path": str(selected_path)}))
-            return
-        if path == "/api/v1/filesystem/list":
-            supplied = self.headers.get("X-EWP-CSRF", "")
-            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.FORBIDDEN,
-                        {
-                            "error": {
-                                "code": "GUI_CSRF_REJECTED",
-                                "message": "The filesystem request lacks the active session token.",
-                            }
-                        },
-                    )
-                )
-                return
-            try:
-                select = document.get("select", "file")
-                if select not in {"file", "directory"}:
-                    raise ValueError("Filesystem selection kind must be file or directory")
-                raw_extensions = document.get("extensions", [])
-                if not isinstance(raw_extensions, list) or not all(
-                    isinstance(item, str) for item in raw_extensions
-                ):
-                    raise ValueError("Filesystem extensions must be an array of strings")
-                listing = self.server.gui_filesystem.list(
-                    str(document.get("path", "")),
-                    select=select,
-                    extensions=tuple(raw_extensions),
-                )
-            except (FileNotFoundError, OSError, ValueError) as error:
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.BAD_REQUEST,
-                        {
-                            "error": {
-                                "code": "GUI_FILESYSTEM_REQUEST_INVALID",
-                                "message": str(error),
-                            }
-                        },
-                    )
-                )
-                return
-            self._write_response(_json_response(HTTPStatus.OK, listing.model_dump(mode="json")))
             return
         if path == "/api/v1/credentials/openrouter":
             supplied = self.headers.get("X-EWP-CSRF", "")
@@ -1310,55 +1132,6 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 count = self.server.gui_transcriptions.start()
                 self._write_response(_json_response(HTTPStatus.ACCEPTED, {"queued": count}))
                 return
-            if path == "/api/v1/transcriptions/import-canonical":
-                filename = document.get("filename")
-                digest = document.get("sha256")
-                if not isinstance(filename, str) or not isinstance(digest, str):
-                    self._write_response(
-                        _json_response(
-                            HTTPStatus.BAD_REQUEST,
-                            {
-                                "error": {
-                                    "code": "GUI_CANONICAL_IMPORT_INVALID",
-                                    "message": "The selected canonical result identity is invalid.",
-                                }
-                            },
-                        )
-                    )
-                    return
-                try:
-                    imported_result_path = find_imported_canonical_result(
-                        search_roots=self.server.gui_config.search_roots,
-                        filename=filename,
-                        sha256=digest,
-                        prohibited_roots=self.server.gui_config.prohibited_roots,
-                    )
-                    canonical = require_completed_canonical_result(imported_result_path)
-                    job, imported = self.server.gui_transcriptions.register_completed_result(
-                        imported_result_path,
-                        planned_job_id=canonical.job_id,
-                        language=LanguageMode(canonical.episode.language),
-                    )
-                except (FileNotFoundError, OSError, ValueError) as error:
-                    self._write_response(
-                        _json_response(
-                            HTTPStatus.BAD_REQUEST,
-                            {
-                                "error": {
-                                    "code": "GUI_CANONICAL_IMPORT_REJECTED",
-                                    "message": str(error),
-                                }
-                            },
-                        )
-                    )
-                    return
-                self._write_response(
-                    _json_response(
-                        HTTPStatus.OK,
-                        {"imported": imported, "job": job.model_dump(mode="json")},
-                    )
-                )
-                return
             if path == "/api/v1/transcriptions/remove":
                 job_id = document.get("job_id")
                 removed = (
@@ -1752,10 +1525,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
 
 
-def serve_gui(*, port: int, search_roots: list[Path], open_browser: bool = True) -> None:
+def serve_gui(*, port: int, open_browser: bool = True) -> None:
     """Run the local GUI until interrupted."""
 
-    server = LocalGuiServer(WebConfiguration.create(port=port, search_roots=search_roots))
+    server = LocalGuiServer(WebConfiguration.create(port=port))
     url = f"http://127.0.0.1:{server.server_port}/"
     print(f"GUI {url}")
     print("Press Ctrl+C to stop.")

@@ -2,7 +2,6 @@
 
 import subprocess
 import sys
-from pathlib import Path
 
 from typer.testing import CliRunner
 
@@ -32,7 +31,6 @@ def test_command_help_exposes_command_specific_options() -> None:
 
     gui = runner.invoke(app, ["gui", "--help"])
     assert gui.exit_code == 0
-    assert "--allow-root" in gui.stdout
     assert "--open-browser" in gui.stdout
 
 
@@ -67,13 +65,6 @@ def test_framework_usage_errors_have_a_stable_code() -> None:
 
     assert result.exit_code == 2
     assert "CLI_USAGE_ERROR" in result.stderr
-
-
-def test_gui_rejects_invalid_allowed_root_with_stable_code(tmp_path: Path) -> None:
-    result = runner.invoke(app, ["gui", "--allow-root", str(tmp_path / "missing")])
-
-    assert result.exit_code == 2
-    assert "GUI_START_FAILED" in result.stderr
 
 
 def test_module_entry_point_reports_version() -> None:

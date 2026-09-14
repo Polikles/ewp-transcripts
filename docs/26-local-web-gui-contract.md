@@ -44,9 +44,10 @@ this rule.
 
 ## 4. Filesystem interaction
 
-Media files can be large and already exist on the server-visible filesystem. The primary GUI
-workflow therefore selects or enters server-side files and directories in ordinary user space;
-it does not upload or duplicate media through the browser.
+Media files can be large and already exist on the server-visible filesystem. Direct server-side
+path entry therefore remains available. Browser file controls deliberately hide the selected
+absolute path, so a native-picker selection creates an explicit, session-only copy on the local
+loopback server; it is deleted with the GUI process and is never sent off the machine.
 
 The web adapter MUST:
 
@@ -60,8 +61,10 @@ The web adapter MUST:
   visible inside a container;
 - never serve arbitrary source files as static web content.
 
-Browser upload MAY be designed later as an opt-in convenience, but it is not required for
-the initial GUI.
+Native directory selection is not used: Chrome and Firefox display a browser-controlled warning
+that the directory's contents will be shared with the site, even when the application would only
+need its path. The GUI therefore uses direct path entry for output directories, including new
+empty directories.
 
 ## 5. Required workflow coverage
 
@@ -286,16 +289,15 @@ tabs or equivalent routed views—transcribe, optional correction, review/export
 semantic review/export—while dictionary and settings management live in their own clearly
 separate views. Navigation must preserve current saved state and must not imply that optional
 stages are mandatory.
-Result-import queues MUST use the browser's native picker. Because browsers deliberately hide
-the selected absolute path, the browser sends only the filename and SHA-256; the loopback service
-finds the unchanged file below native or mounted user homes and optional search locations. It
-must not upload or copy the selected canonical JSON. Inspect and plan MUST likewise offer native
-audio and existing-output-directory pickers. They send only a selected descendant filename and
-size, resolve only one matching accessible file, show the resulting server-side path for review,
-and fail rather than guess when it is ambiguous. A new empty output directory remains direct path
-entry because browsers expose no reliable absolute directory path for an empty picker result.
-Direct server-side result, transcript, dictionary, and output path fields MAY retain typed entry
-while their native-picker replacements are qualified.
+Result-import queues MUST use the browser's native picker. A selected canonical JSON is copied
+only to the same-machine loopback server's owned temporary work directory, strictly parsed, and
+deleted when that GUI server stops; the picker never searches all user filesystems. Inspect and
+plan likewise offers a native audio picker that makes an explicit, bounded session copy and shows
+its temporary server-side path. The associated button must show Working and Done feedback. Output
+directories use direct path entry because browser directory selection causes an unavoidable
+browser-controlled sharing warning; it is not offered. Direct server-side result, transcript,
+dictionary, and output path fields MAY retain typed entry while their native-picker replacements
+are qualified.
 The GUI does not use a launch-time filesystem allowlist. It rejects documented operating-system
 directories and symlinks to prevent accidental system changes; this is an operator-safety policy,
 not a security boundary against the local account that starts the loopback service. Optional

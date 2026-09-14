@@ -703,9 +703,9 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
    opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
 2. **GUI-02 — Resume from existing canonical results — implemented, pending browser retest:** every workflow-stage queue can add one or
    more previously completed `*_results.json` files using the browser's native file-selection
-   dialog, validates canonical identity and the user-space path-safety policy, and resumes only the selected item.
-   Resolve the browser-native picker/server-path handoff without weakening the local-only path
-   boundary or silently uploading media.
+   dialog, copies only the explicitly selected JSON to owned temporary loopback storage, validates
+   its canonical contract, and resumes only the selected item. The file is never sent to a network
+   service and is deleted when the GUI server stops.
 3. **GUI-03 — Review-control layout — implemented, pending browser retest:** eliminate the Restore saved review / Undo / Redo overlap
    at supported viewport widths. Acceptance: all controls are independently visible and clickable.
 4. **GUI-04 — Per-item correction skip — implemented, pending browser retest:** selected correction-queue items can be explicitly
@@ -727,15 +727,19 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 10. **GUI-10 — Semantic queue and manual-translation progress — implemented, pending browser retest:** semantic review lists eligible
     candidate and manual-translation reviews; manual LLM skipping and later application/export
     update the main and stage queues from their durable artifacts or explicit optional-stage state.
-11. **GUI-11 — User-space path policy and result import — implemented, pending WSL retest:** replace launch-time
-    allowed roots with a denylist of operating-system directories and symlink rejection. Native
-    canonical-result import searches native/mounted user homes plus optional `--search-root`
-    locations and still requires exact SHA-256 identity; it must never upload the selected JSON.
-12. **GUI-12 — Native Inspect and plan pickers — implemented, pending Chrome/Firefox retest:** replace
-    the custom server filesystem picker for the inspect input and existing output directory with
-    browser-native pickers. Resolve the selected media or a selected directory descendant only
-    when filename and size identify one accessible user-space file; show the resolved path and
-    require direct entry for a new empty output directory or an ambiguous match.
+11. **GUI-11 — User-space path policy — implemented, pending WSL retest:** replace launch-time
+    allowed roots with a denylist of operating-system directories and symlink rejection. Remove
+    the obsolete visible root list and all recursive filesystem searches.
+12. **GUI-12 — Native Inspect picker — implemented, pending Chrome/Firefox retest:** replace the
+    custom server filesystem picker for the inspect input with one native audio-file picker. Copy
+    only the explicitly selected source into owned session-local work storage, show Working/Done
+    feedback, and delete it at GUI shutdown. Do not offer a native directory picker because its
+    browser-controlled all-files warning cannot be suppressed; retain direct output-path entry.
+13. **GUI-13 — Workspace removal and backup location — implemented, pending browser retest:** permit
+    deletion of one selected saved-workspace JSON without touching workflow artifacts, and accept
+    an optional user-space workspace storage directory so state files can be included in backups.
+    A browser-native selected workspace JSON can be imported into that catalog without a
+    directory-picker warning.
 
 Planned capabilities:
 
@@ -818,7 +822,8 @@ Planned capabilities:
   name plus job/input identity, so recovery does not require remembering an output root; handle
   expired temporary paths as unavailable entries;
 - replace the remaining custom Browse controls for transcript, result, dictionary, and output
-  paths with qualified native picker handoffs that preserve the no-upload local-file policy;
+  paths with qualified native picker handoffs or explicitly documented direct entry; any selected
+  file copy must remain bounded, loopback-only, session-local, and never leave the machine;
 - an explicit light/dark mode switch in that pass; automatic system preference remains an
   interim behavior rather than the final theme control.
 - add explicit next-step actions after apply/export that carry exact canonical, revision,

@@ -208,17 +208,6 @@ def gui_command(
         int,
         typer.Option("--port", min=0, max=65535, help="Loopback port; use 0 to allocate one."),
     ] = 8765,
-    search_root: Annotated[
-        list[Path] | None,
-        typer.Option(
-            "--search-root",
-            "--allow-root",
-            help=(
-                "Optional extra location for browser-selected file lookup; repeat as needed. "
-                "--allow-root is retained as a compatibility alias."
-            ),
-        ),
-    ] = None,
     open_browser: Annotated[
         bool,
         typer.Option(
@@ -230,7 +219,7 @@ def gui_command(
     """Run the loopback-only local browser interface."""
 
     try:
-        serve_gui(port=port, search_roots=search_root or [], open_browser=open_browser)
+        serve_gui(port=port, open_browser=open_browser)
     except (OSError, ValueError) as error:
         typer.echo(f"GUI_START_FAILED: {error}", err=True)
         raise typer.Exit(code=2) from error

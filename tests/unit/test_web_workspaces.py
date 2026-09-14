@@ -82,6 +82,36 @@ def test_missing_saved_path_marks_summary_unavailable(tmp_path: Path) -> None:
         workspaces.load(saved.workspace_id)
 
 
+def test_workspace_delete_removes_only_the_selected_record(tmp_path: Path) -> None:
+    workspaces, allowed = controller(tmp_path)
+    media = allowed / "episode.wav"
+    media.write_bytes(b"audio")
+    first = workspaces.save(name="First", current_step="", fields={"input-path": str(media)})
+    second = workspaces.save(name="Second", current_step="", fields={"input-path": str(media)})
+
+    workspaces.delete(first.workspace_id)
+
+    assert [item.workspace_id for item in workspaces.list()] == [second.workspace_id]
+    with pytest.raises(ValueError, match="does not exist"):
+        workspaces.load(first.workspace_id)
+
+
+def test_workspace_import_copies_a_valid_selected_state_into_the_chosen_catalog(
+    tmp_path: Path,
+) -> None:
+    workspaces, allowed = controller(tmp_path)
+    media = allowed / "episode.wav"
+    media.write_bytes(b"audio")
+    saved = workspaces.save(name="Backup", current_step="", fields={"input-path": str(media)})
+    imported = GuiWorkspaceController(
+        state_directory=tmp_path / "backup-catalog",
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+    ).import_file(tmp_path / "state" / f"{saved.workspace_id}.json")
+
+    assert imported.workspace_id == saved.workspace_id
+    assert imported.name == "Backup"
+
+
 def test_workspace_retains_only_hash_bound_staged_queue_identity(tmp_path: Path) -> None:
     workspaces, allowed = controller(tmp_path)
     media = allowed / "episode.wav"

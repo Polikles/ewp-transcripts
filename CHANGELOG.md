@@ -8,15 +8,16 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
-- The Inspect and plan section now uses native browser pickers for audio and existing output
-  directories. The loopback service receives only filename/size metadata, resolves one matching
-  user-space file, and shows the resulting path; it never uploads media. Ambiguous selections
-  fail visibly, and a new empty output directory remains direct path entry.
+- The Inspect and plan section now uses a native browser picker for audio. Its explicitly chosen
+  file is copied only into an owned, bounded loopback-server work directory for the active GUI
+  session, then deleted when the server stops. The picker button displays **Working…** and
+  **Done!**. Output directories use direct path entry, avoiding the browser-controlled warning
+  that directory pickers display about sharing every contained file.
 
 - Every GUI workflow-stage queue now has an **Add saved results…** native multi-file picker.
-  It submits only each chosen JSON filename and SHA-256 to the loopback service; the service
-  registers the existing completed canonical result only when its unchanged bytes are found under
-  an allowed root. Media and transcript contents are not uploaded or copied.
+  It copies only explicitly selected canonical JSON files into owned temporary loopback storage,
+  validates them strictly, and deletes them when the GUI server stops; it never searches all
+  user directories or sends them to the network.
 - Selected correction-queue items now run sequentially in one failure-isolated batch. Each item
   uses its own result-root candidate and resume directories; completed items are removed from the
   selection and a later item still runs after an earlier error.
@@ -40,14 +41,17 @@ The next internal-beta version is `0.19.0`.
   their exact result identity, and non-secret optional-stage skip/error state. Loading validates
   every path before replacing inactive history; active or interrupted GPU jobs are never revived.
   Workspace auto-save detects queue-history changes as well as form-field changes.
+- Saved work state now supports removing one selected workspace without touching transcripts,
+  reviews, exports, or dictionaries. An optional user-space workspace storage directory allows
+  workspace JSON files to be kept with normal backups, and a native file picker can import one
+  selected saved-workspace JSON into that catalog.
 
 ### Fixed
 
 - GUI paths no longer depend on a launch-time allowlist. Ordinary accessible user-space paths
   work across native and mounted Windows locations; symlinks and documented operating-system
-  directories remain blocked. Native canonical-result imports now search those user locations
-  and optional `--search-root` locations by exact SHA-256 rather than silently failing outside
-  the old root.
+  directories remain blocked. The obsolete visible list of “accessible user locations” and all
+  recursive picker searches are removed.
 - The session-only OpenRouter key panel now has explicit dark-mode foreground, background, and
   border colors, making it readable in Chrome dark mode.
 

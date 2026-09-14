@@ -208,6 +208,27 @@ class GuiWorkspaceController:
         )
         return document
 
+    def delete(self, workspace_id: str) -> None:
+        """Delete one exact workspace record without touching its referenced artifacts."""
+
+        path = self._workspace_path(workspace_id)
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("Saved workspace does not exist")
+        path.unlink()
+
+    def import_file(self, path: Path) -> GuiWorkspaceDocument:
+        """Validate one selected workspace document and save it in this workspace catalog."""
+
+        document = self._read(path)
+        return self.save(
+            name=document.name,
+            current_step=document.current_step,
+            fields=document.fields,
+            staged_jobs=list(document.staged_jobs),
+            terminal_jobs=[item.model_dump(mode="json") for item in document.terminal_jobs],
+            workspace_id=document.workspace_id,
+        )
+
     def _validate_fields(self, fields: dict[str, Any]) -> dict[str, str | bool | int]:
         if not isinstance(fields, dict) or len(fields) > len(_FIELD_NAMES):
             raise ValueError("Workspace fields are invalid")

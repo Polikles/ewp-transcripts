@@ -16,12 +16,13 @@ guiWorking.textContent = "Working…";
 document.querySelector("header").append(guiWorking);
 function setGuiWorking(active, trigger = null, succeeded = true) { guiPendingRequests += active ? 1 : -1; guiPendingRequests = Math.max(0, guiPendingRequests); guiWorking.classList.toggle("gui-working-idle", guiPendingRequests === 0); if (!(trigger instanceof HTMLButtonElement) || !trigger.parentElement?.classList.contains("feedback-anchor")) return; let entry = inlineWorkingIndicators.get(trigger); if (active) { if (!entry) { const indicator = document.createElement("span"); indicator.className = "inline-working"; indicator.setAttribute("role", "status"); const parent = trigger.parentElement; parent.append(indicator); entry = {indicator, count: 0, timeout: null}; inlineWorkingIndicators.set(trigger, entry); } if (entry.timeout) { window.clearTimeout(entry.timeout); entry.timeout = null; } entry.count += 1; entry.indicator.className = "inline-working"; entry.indicator.textContent = "Working…"; trigger.setAttribute("aria-busy", "true"); } else if (entry) { entry.count = Math.max(0, entry.count - 1); if (entry.count === 0) { entry.indicator.className = succeeded ? "inline-working inline-done" : "inline-working inline-error"; entry.indicator.textContent = succeeded ? "Done!" : "Error"; entry.timeout = window.setTimeout(() => { entry.indicator.remove(); inlineWorkingIndicators.delete(trigger); }, 1800); trigger.removeAttribute("aria-busy"); } } }
 async function loadJson(path) { const response = await fetch(path, {headers: {"Accept": "application/json"}}); if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); }
-async function start() { const status = document.querySelector("#compatibility"); try { const [health, about, roots, session] = await Promise.all([loadJson("/api/v1/health"), loadJson("/api/v1/about"), loadJson("/api/v1/roots"), loadJson("/api/v1/session")]); if (health.api_version !== expectedApi) throw new Error("GUI_API_VERSION_MISMATCH"); csrfToken = session.csrf_token; openRouterKeyConfigured = session.openrouter_key_configured === true; updateOpenRouterKeyStatus(); status.textContent = "Status: local service ready"; document.querySelector("#application-version").textContent = `${about.application} v${about.application_version}`; document.querySelector("#api-version").textContent = `v${about.api_version}`; for (const [id, key] of [["license", "license_url"], ["source", "repository_url"], ["issues", "issues_url"]]) document.querySelector(`#${id}`).href = about[key]; const list = document.querySelector("#roots"); list.replaceChildren(...roots.roots.map(root => { const item = document.createElement("li"); item.textContent = root; return item; })); await refreshJobs(); await restoreReview(); setInterval(refreshJobs, 2000); } catch (error) { status.textContent = `Status: GUI_API_UNAVAILABLE: ${error.message}`; } }
+async function start() { const status = document.querySelector("#compatibility"); const roots = document.querySelector("#roots"); const rootsHint = roots?.previousElementSibling; const rootsHeading = rootsHint?.previousElementSibling; roots?.remove(); rootsHint?.remove(); rootsHeading?.remove(); try { const [health, about, session] = await Promise.all([loadJson("/api/v1/health"), loadJson("/api/v1/about"), loadJson("/api/v1/session")]); if (health.api_version !== expectedApi) throw new Error("GUI_API_VERSION_MISMATCH"); csrfToken = session.csrf_token; openRouterKeyConfigured = session.openrouter_key_configured === true; updateOpenRouterKeyStatus(); status.textContent = "Status: local service ready"; document.querySelector("#application-version").textContent = `${about.application} v${about.application_version}`; document.querySelector("#api-version").textContent = `v${about.api_version}`; for (const [id, key] of [["license", "license_url"], ["source", "repository_url"], ["issues", "issues_url"]]) document.querySelector(`#${id}`).href = about[key]; await refreshJobs(); await restoreReview(); setInterval(refreshJobs, 2000); } catch (error) { status.textContent = `Status: GUI_API_UNAVAILABLE: ${error.message}`; } }
 function clearEwpBrowserState() { if (!window.confirm("Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved editor changes will be lost.")) return; for (const storage of [window.localStorage, window.sessionStorage]) { for (let index = storage.length - 1; index >= 0; index -= 1) { const key = storage.key(index); if (key?.startsWith("ewp-")) storage.removeItem(key); } } window.location.reload(); }
 document.querySelector("#clear-browser-state").addEventListener("click", clearEwpBrowserState);
 function shortName(path) { return path ? path.split(/[\\/]/).pop() : "—"; }
 function showSummary(kind, result, operation = {}) { const summary = document.querySelector("#operation-summary"); summary.replaceChildren(); let entries; const speakers = operation.speaker_count === "auto" ? "Auto-detect" : operation.speaker_count ?? "—"; const language = operation.language === "auto" ? `${result.language || "auto"} (auto)` : operation.language || result.language || "—"; if (kind === "inspect") { entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0], ["Language", language], ["Speakers", speakers]]; } else { const jobs = result.jobs || []; const identities = jobs.map(job => job.job_id).join(", "); const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", "); entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"], ["Language", language], ["Speakers", speakers]]; } for (const [label, value] of entries) { const card = document.createElement("div"); card.className = "result-card"; const heading = document.createElement("strong"); heading.textContent = label; card.append(heading, String(value)); summary.append(card); } if (kind === "dry-run" && result.jobs?.length) { const table = document.createElement("table"); table.className = "queue-table plan-table"; table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>"; const body = document.createElement("tbody"); for (const job of result.jobs) { const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id); const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—"; const row = document.createElement("tr"); for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); } body.append(row); } table.append(body); summary.append(table); } }
 async function queuePost(path, body, options = {}) { const feedback = options.feedback !== false; const trigger = options.trigger ?? lastClickedButton; let succeeded = false; if (feedback) setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json", "X-EWP-CSRF": csrfToken}, body: JSON.stringify(body)}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { if (feedback) setGuiWorking(false, trigger, succeeded); } }
+async function postSelectedFile(path, file, trigger, extraHeaders = {}) { let succeeded = false; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/octet-stream", "Accept": "application/json", "X-EWP-CSRF": csrfToken, "X-EWP-Filename": encodeURIComponent(file.name), ...extraHeaders}, body: file}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { setGuiWorking(false, trigger, succeeded); } }
 function diagnosticCode(error) { const message = String(error?.message || "GUI_WORKFLOW_OPERATION_FAILED"); return message.split(":", 1)[0] || "GUI_WORKFLOW_OPERATION_FAILED"; }
 async function reportWorkflowError(resultPath, stage, error) { if (!resultPath) return; try { await queuePost("/api/v1/transcriptions/workflow-error", {result_path: resultPath, stage, code: diagnosticCode(error)}, {feedback: false}); jobsSignature = ""; await refreshJobs(); } catch (_) { /* the operation's original error remains the primary status */ } }
 async function reportWorkflowSkip(resultPath, stage) { await queuePost("/api/v1/transcriptions/workflow-skip", {result_path: resultPath, stage}); jobsSignature = ""; await refreshJobs(); }
@@ -254,23 +255,6 @@ workflowAutoSpeakers.addEventListener("change", () => { workflowSpeakerCount.dis
 workflowSpeakerCount.addEventListener("input", () => { if (workflowSpeakerCount.value.length > 1) workflowSpeakerCount.value = workflowSpeakerCount.value.slice(0, 1); });
 document.querySelector("#workflow").addEventListener("submit", event => { const kind = event.submitter?.value; if (kind !== "dry-run" && kind !== "transcriptions") return; if (workflowOutput.value.trim()) return; event.preventDefault(); event.stopImmediatePropagation(); workflowOutput.classList.add("field-error"); workflowOutput.setAttribute("aria-invalid", "true"); document.querySelector("#operation-status").textContent = "GUI_OUTPUT_REQUIRED: Enter a shared output directory before dry-run or queue staging."; }, {capture: true});
 workflowOutput.addEventListener("input", () => { if (!workflowOutput.value.trim()) return; workflowOutput.classList.remove("field-error"); workflowOutput.setAttribute("aria-invalid", "false"); });
-const filesystemDialog = document.createElement("dialog");
-filesystemDialog.className = "filesystem-dialog";
-filesystemDialog.innerHTML = '<form method="dialog"><div class="filesystem-heading"><h2>Choose a local path</h2><button value="cancel" aria-label="Close filesystem browser">Close</button></div></form><p id="filesystem-current"></p><div class="actions"><button type="button" id="filesystem-roots">Allowed roots</button><button type="button" id="filesystem-up">Up</button><button type="button" id="filesystem-use-directory">Use this directory</button></div><p id="filesystem-status" role="status"></p><div id="filesystem-entries"></div>';
-document.body.append(filesystemDialog);
-const filesystemCurrent = filesystemDialog.querySelector("#filesystem-current");
-const filesystemStatus = filesystemDialog.querySelector("#filesystem-status");
-const filesystemEntries = filesystemDialog.querySelector("#filesystem-entries");
-const filesystemUp = filesystemDialog.querySelector("#filesystem-up");
-const filesystemUseDirectory = filesystemDialog.querySelector("#filesystem-use-directory");
-let filesystemTarget = null;
-let filesystemConfig = null;
-let filesystemListing = null;
-async function loadFilesystem(path = "") { filesystemStatus.textContent = "Loading…"; filesystemEntries.replaceChildren(); try { filesystemListing = await queuePost("/api/v1/filesystem/list", {path, select: filesystemConfig.select, extensions: filesystemConfig.extensions || []}); filesystemCurrent.textContent = filesystemListing.current_path ? `Current directory: ${filesystemListing.current_path}` : "Choose an allowed root"; filesystemUp.disabled = !filesystemListing.parent_path; filesystemUseDirectory.hidden = filesystemConfig.select !== "directory" || !filesystemListing.current_path; const list = document.createElement("ul"); list.className = "filesystem-list"; for (const entry of filesystemListing.entries) { const item = document.createElement("li"); const button = document.createElement("button"); button.type = "button"; button.textContent = `${entry.kind === "directory" ? "Directory" : "File"}: ${entry.name}`; button.addEventListener("click", () => { if (entry.kind === "directory") loadFilesystem(entry.path); else { filesystemTarget.value = entry.path; filesystemTarget.dispatchEvent(new Event("input", {bubbles: true})); filesystemDialog.close(); } }); item.append(button); list.append(item); } filesystemEntries.append(list); filesystemStatus.textContent = filesystemListing.truncated ? "Only the first 500 matching entries are shown." : `${filesystemListing.entries.length} matching item(s).`; } catch (error) { filesystemStatus.textContent = error.message; } }
-function installPathBrowser(selector, config) { const input = document.querySelector(selector); if (!input) return; const button = document.createElement("button"); button.type = "button"; button.className = "path-browser-button"; button.textContent = "Browse…"; button.addEventListener("click", async () => { filesystemTarget = input; filesystemConfig = config; filesystemDialog.showModal(); await loadFilesystem(input.value.trim()); }); input.after(button); }
-filesystemDialog.querySelector("#filesystem-roots").addEventListener("click", () => loadFilesystem(""));
-filesystemUp.addEventListener("click", () => { if (filesystemListing?.parent_path) loadFilesystem(filesystemListing.parent_path); });
-filesystemUseDirectory.addEventListener("click", () => { if (!filesystemListing?.current_path) return; filesystemTarget.value = filesystemListing.current_path; filesystemTarget.dispatchEvent(new Event("input", {bubbles: true})); filesystemDialog.close(); });
 const mediaExtensions = ["wav", "mp3", "flac", "m4a", "ogg", "opus"];
 const workflowInput = document.querySelector("#input-path");
 const nativeMediaInput = document.createElement("input");
@@ -289,66 +273,22 @@ nativeMediaInput.addEventListener("change", async () => {
   if (!file) return;
   const status = document.querySelector("#operation-status");
   nativeMediaButton.disabled = true;
-  status.textContent = "Finding the selected local audio file…";
+  status.textContent = `Copying ${file.name} into this local GUI session…`;
   try {
-    const payload = await queuePost(
-      "/api/v1/selected-media/resolve",
-      {filename: file.name, size: file.size},
-      {trigger: nativeMediaButton},
-    );
+    const payload = await postSelectedFile("/api/v1/selected-media/upload", file, nativeMediaButton);
     workflowInput.value = payload.path;
     workflowInput.dispatchEvent(new Event("input", {bubbles: true}));
-    status.textContent = `Selected ${file.name}. Review the resolved path, then inspect or dry-run.`;
+    status.textContent = `Selected ${file.name}. A temporary local session copy is ready; inspect or dry-run it.`;
   } catch (error) {
     status.textContent = error.message;
   } finally {
     nativeMediaButton.disabled = false;
   }
 });
-workflowInput.after(nativeMediaButton, nativeMediaInput);
-const nativeOutputInput = document.createElement("input");
-nativeOutputInput.type = "file";
-nativeOutputInput.multiple = true;
-nativeOutputInput.webkitdirectory = true;
-nativeOutputInput.hidden = true;
-const nativeOutputButton = document.createElement("button");
-nativeOutputButton.type = "button";
-nativeOutputButton.className = "path-browser-button";
-nativeOutputButton.textContent = "Choose existing output folder…";
-nativeOutputButton.title = "Choose a non-empty user-space output folder with the browser's native picker.";
-nativeOutputButton.addEventListener("click", () => nativeOutputInput.click());
-nativeOutputInput.addEventListener("change", async () => {
-  const file = nativeOutputInput.files?.[0];
-  nativeOutputInput.value = "";
-  if (!file) {
-    document.querySelector("#operation-status").textContent = "The native directory picker needs one existing file. Enter a new empty output directory path directly.";
-    return;
-  }
-  if (!file.webkitRelativePath) {
-    document.querySelector("#operation-status").textContent = "This browser does not expose a selected directory identity. Enter the output directory path directly.";
-    return;
-  }
-  const status = document.querySelector("#operation-status");
-  nativeOutputButton.disabled = true;
-  status.textContent = "Finding the selected local output folder…";
-  try {
-    const payload = await queuePost(
-      "/api/v1/selected-directory/resolve",
-      {filename: file.name, size: file.size, relative_path: file.webkitRelativePath},
-      {trigger: nativeOutputButton},
-    );
-    workflowOutput.value = payload.path;
-    workflowOutput.dispatchEvent(new Event("input", {bubbles: true}));
-    status.textContent = `Selected output folder for ${file.name}. Review the resolved path, then dry-run.`;
-  } catch (error) {
-    status.textContent = error.message;
-  } finally {
-    nativeOutputButton.disabled = false;
-  }
-});
-workflowOutput.after(nativeOutputButton, nativeOutputInput);
-for (const selector of ["#correction-result-path", "#correction-dictionary", "#review-result-path", "#translation-result-path", "#translation-revision-path", "#translation-dictionary", "#dictionary-previous"]) installPathBrowser(selector, {select: "file", extensions: ["json"]});
-for (const selector of ["#correction-output-root", "#review-project-path", "#review-output-path", "#revision-output-path", "#export-output-path", "#translation-output-root", "#dictionary-canonical-directory", "#dictionary-revision-directory", "#dictionary-output-root"]) installPathBrowser(selector, {select: "directory"});
+const nativeMediaFeedback = document.createElement("span");
+nativeMediaFeedback.className = "feedback-anchor";
+nativeMediaFeedback.append(nativeMediaButton, nativeMediaInput);
+workflowInput.after(nativeMediaFeedback);
 correctionForm.elements.namedItem("allow_remote_endpoint").id = "correction-allow-remote";
 translationForm.elements.namedItem("allow_remote_endpoint").id = "translation-allow-remote";
 const workspaceFieldIds = ["input-path", "output-path", "workflow-language", "workflow-speaker-count", "workflow-speaker-auto", "correction-result-path", "correction-output-root", "correction-provider", "correction-model", "correction-endpoint", "correction-reasoning", "correction-allow-remote", "correction-dictionary", "review-result-path", "review-project-path", "custom-review-paths", "review-output-path", "revision-output-path", "export-output-path", "translation-result-path", "translation-revision-path", "translation-output-root", "translation-target", "translation-model", "translation-endpoint", "translation-allow-remote", "translation-output-mode", "translation-dictionary", "dictionary-canonical-directory", "dictionary-revision-directory", "dictionary-output-root", "dictionary-project-id", "dictionary-minimum", "dictionary-previous"];
@@ -358,29 +298,62 @@ workspaceSection.innerHTML = '<h2 id="workspace-state-heading">Saved work state<
 document.querySelector("main").prepend(workspaceSection);
 const workspaceList = document.querySelector("#workspace-list");
 const workspaceName = document.querySelector("#workspace-name");
+const workspaceDirectory = document.createElement("input");
+workspaceDirectory.id = "workspace-directory";
+workspaceDirectory.autocomplete = "off";
+workspaceDirectory.placeholder = "Default GUI workspace location";
+const workspaceDirectoryLabel = document.createElement("label");
+workspaceDirectoryLabel.htmlFor = workspaceDirectory.id;
+workspaceDirectoryLabel.textContent = "Workspace storage directory (optional)";
+const workspaceDirectoryHint = document.createElement("p");
+workspaceDirectoryHint.className = "field-hint";
+workspaceDirectoryHint.textContent = "Enter a user-space directory to keep workspace JSON files with your backups. Leave blank for the private default location.";
+workspaceName.before(workspaceDirectoryLabel, workspaceDirectory, workspaceDirectoryHint);
 const workspaceStatus = document.querySelector("#workspace-status");
 const workspaceAutosave = document.querySelector("#workspace-autosave");
 const workspaceAutosaveStatus = document.querySelector("#workspace-autosave-status");
+const deleteWorkspaceButton = document.createElement("button");
+deleteWorkspaceButton.type = "button";
+deleteWorkspaceButton.id = "delete-workspace";
+deleteWorkspaceButton.className = "danger";
+deleteWorkspaceButton.textContent = "Remove selected work state";
+document.querySelector("#refresh-workspaces").before(deleteWorkspaceButton);
+const importWorkspaceInput = document.createElement("input");
+importWorkspaceInput.type = "file";
+importWorkspaceInput.accept = ".json,application/json";
+importWorkspaceInput.hidden = true;
+const importWorkspaceButton = document.createElement("button");
+importWorkspaceButton.type = "button";
+importWorkspaceButton.textContent = "Open saved work state file…";
+const importWorkspaceFeedback = document.createElement("span");
+importWorkspaceFeedback.className = "feedback-anchor";
+importWorkspaceFeedback.append(importWorkspaceButton, importWorkspaceInput);
+deleteWorkspaceButton.before(importWorkspaceFeedback);
+importWorkspaceButton.addEventListener("click", () => importWorkspaceInput.click());
 let lastWorkspaceStep = "workspace-heading";
 let activeWorkspaceId = "";
 let lastWorkspaceFingerprint = "";
 let workspaceAutosaveBusy = false;
 function collectWorkspaceFields() { const fields = {}; for (const id of workspaceFieldIds) { const element = document.getElementById(id); if (!element) continue; fields[id] = element.type === "checkbox" ? element.checked : element.value; } return fields; }
-function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), queue: jobsSignature}); }
+function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, storage_directory: workspaceDirectory.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), queue: jobsSignature}); }
 function activateWorkspace(workspace) { activeWorkspaceId = workspace.workspace_id; workspaceAutosave.disabled = false; lastWorkspaceFingerprint = workspaceFingerprint(); workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; }
 function showWorkspacePendingState() { if (activeWorkspaceId && workspaceAutosave.checked && !workspaceAutosave.disabled && workspaceFingerprint() !== lastWorkspaceFingerprint) workspaceAutosaveStatus.textContent = "Changes pending for auto-save. They will be validated at the next 60-second check."; }
 for (const section of document.querySelectorAll("main > section")) { if (section === workspaceSection) continue; section.addEventListener("focusin", () => { lastWorkspaceStep = section.getAttribute("aria-labelledby") || lastWorkspaceStep; showWorkspacePendingState(); }); section.addEventListener("click", () => { lastWorkspaceStep = section.getAttribute("aria-labelledby") || lastWorkspaceStep; showWorkspacePendingState(); }); }
 for (const id of workspaceFieldIds) { const element = document.getElementById(id); element?.addEventListener("input", showWorkspacePendingState); element?.addEventListener("change", showWorkspacePendingState); }
 workspaceName.addEventListener("input", showWorkspacePendingState);
+workspaceDirectory.addEventListener("input", showWorkspacePendingState);
 function applyWorkspaceFields(fields) { document.querySelectorAll("label.confirmation input[type=checkbox]").forEach(element => { element.checked = false; }); for (const [id, value] of Object.entries(fields)) { const element = document.getElementById(id); if (!element) continue; if (element.type === "checkbox") element.checked = value === true; else element.value = String(value); element.dispatchEvent(new Event("change", {bubbles: true})); element.dispatchEvent(new Event("input", {bubbles: true})); } void restoreWorkspaceReviewIfPresent(); }
 async function restoreWorkspaceReviewIfPresent() { const root = reviewForm.elements.namedItem("project_output_directory").value; if (!root || reviewDocument) return; try { const payload = await postReview("session/restore", {project_output_directory: root}); const session = payload.session; reviewForm.elements.namedItem("result_path").value = session.result_path; const standard = ["review_output_directory", "revision_output_directory", "export_output_directory"].every(name => session[name] === joinedPath(root, name.replace("_output_directory", "s"))); document.querySelector("#custom-review-paths").checked = !standard; for (const name of ["review_output_directory", "revision_output_directory", "export_output_directory"]) reviewForm.elements.namedItem(name).value = session[name]; updateReviewDirectories(); renderReview(payload); appliedRevisionPath = session.applied_revision_path || ""; if (appliedRevisionPath) { const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; } persistReview(); setReviewStatus(appliedRevisionPath ? "Saved applied review restored from workspace" : "Saved review restored from workspace; preview is required again", payload); showReviewSummary([["Publication", appliedRevisionPath ? "Immutable revision already written" : "None — restored editable draft"], ["Review file", shortName(payload.review_path)], ["Source", payload.source_verification]]); } catch (error) { if (!error.message.startsWith("GUI_REVIEW_SESSION_NOT_FOUND")) setReviewStatus(error.message); } }
-async function refreshWorkspaces(selected = "", options = {}) { const payload = await queuePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = item.workspace_id; option.textContent = `${item.name} · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.disabled = !item.available; option.selected = item.workspace_id === selected; workspaceList.append(option); } }
+async function workspacePost(path, body = {}, options = {}) { return queuePost(path, {...body, storage_directory: workspaceDirectory.value}, options); }
+async function refreshWorkspaces(selected = "", options = {}) { const payload = await workspacePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = item.workspace_id; option.textContent = `${item.name} · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.disabled = !item.available; option.selected = item.workspace_id === selected; workspaceList.append(option); } }
 document.querySelector("#refresh-workspaces").addEventListener("click", async () => { try { await refreshWorkspaces(workspaceList.value); workspaceStatus.textContent = "Saved workspace list refreshed."; } catch (error) { workspaceStatus.textContent = error.message; } });
-document.querySelector("#save-workspace").addEventListener("click", async () => { try { const payload = await queuePost("/api/v1/workspaces/save", {workspace_id: workspaceList.value, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}); const saved = payload.workspace; await refreshWorkspaces(saved.workspace_id, {feedback: false}); workspaceName.value = saved.name; activateWorkspace(saved); workspaceStatus.textContent = `Workspace saved: ${saved.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
-document.querySelector("#load-workspace").addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } try { const payload = await queuePost("/api/v1/workspaces/load", {workspace_id: workspaceList.value}); applyWorkspaceFields(payload.workspace.fields); workspaceName.value = payload.workspace.name; lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep; activateWorkspace(payload.workspace); workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`; const heading = document.getElementById(payload.workspace.current_step); heading?.scrollIntoView({behavior: "smooth"}); } catch (error) { workspaceStatus.textContent = error.message; } });
+document.querySelector("#save-workspace").addEventListener("click", async () => { try { const payload = await workspacePost("/api/v1/workspaces/save", {workspace_id: workspaceList.value, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}); const saved = payload.workspace; await refreshWorkspaces(saved.workspace_id, {feedback: false}); workspaceName.value = saved.name; activateWorkspace(saved); workspaceStatus.textContent = `Workspace saved: ${saved.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
+document.querySelector("#load-workspace").addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } try { const payload = await workspacePost("/api/v1/workspaces/load", {workspace_id: workspaceList.value}); applyWorkspaceFields(payload.workspace.fields); workspaceName.value = payload.workspace.name; lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep; activateWorkspace(payload.workspace); workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`; const heading = document.getElementById(payload.workspace.current_step); heading?.scrollIntoView({behavior: "smooth"}); } catch (error) { workspaceStatus.textContent = error.message; } });
+importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(workspaceDirectory.value)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(payload.workspace.workspace_id, {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
+deleteWorkspaceButton.addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } const selected = workspaceList.selectedOptions[0]?.textContent || "this saved work state"; if (!window.confirm(`Remove ${selected}? This deletes only its saved workspace JSON, not transcripts, reviews, exports, or dictionaries.`)) return; try { await workspacePost("/api/v1/workspaces/delete", {workspace_id: workspaceList.value}); activeWorkspaceId = ""; workspaceAutosave.disabled = true; workspaceName.value = ""; await refreshWorkspaces("", {feedback: false}); workspaceStatus.textContent = "Saved work state removed."; workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load a workspace first."; } catch (error) { workspaceStatus.textContent = error.message; } });
 workspaceList.addEventListener("change", () => { workspaceAutosave.disabled = workspaceList.value !== activeWorkspaceId; if (workspaceAutosave.disabled) workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load the selected workspace first."; });
 workspaceAutosave.addEventListener("change", () => { workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; });
-setInterval(async () => { if (!workspaceAutosave.checked || workspaceAutosave.disabled || workspaceAutosaveBusy || !activeWorkspaceId) return; const fingerprint = workspaceFingerprint(); if (fingerprint === lastWorkspaceFingerprint) { workspaceAutosaveStatus.textContent = "Auto-save checked: no tracked workflow-field changes to save."; return; } workspaceAutosaveBusy = true; workspaceAutosaveStatus.textContent = "Auto-save detected tracked changes; validating workspace paths…"; try { const payload = await queuePost("/api/v1/workspaces/save", {workspace_id: activeWorkspaceId, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}, {feedback: false}); workspaceName.value = payload.workspace.name; lastWorkspaceFingerprint = workspaceFingerprint(); await refreshWorkspaces(activeWorkspaceId, {feedback: false}); workspaceStatus.textContent = `Workspace auto-saved: ${payload.workspace.name}.`; workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored."; } catch (error) { workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`; } finally { workspaceAutosaveBusy = false; } }, 60000);
+setInterval(async () => { if (!workspaceAutosave.checked || workspaceAutosave.disabled || workspaceAutosaveBusy || !activeWorkspaceId) return; const fingerprint = workspaceFingerprint(); if (fingerprint === lastWorkspaceFingerprint) { workspaceAutosaveStatus.textContent = "Auto-save checked: no tracked workflow-field changes to save."; return; } workspaceAutosaveBusy = true; workspaceAutosaveStatus.textContent = "Auto-save detected tracked changes; validating workspace paths…"; try { const payload = await workspacePost("/api/v1/workspaces/save", {workspace_id: activeWorkspaceId, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}, {feedback: false}); workspaceName.value = payload.workspace.name; lastWorkspaceFingerprint = workspaceFingerprint(); await refreshWorkspaces(activeWorkspaceId, {feedback: false}); workspaceStatus.textContent = `Workspace auto-saved: ${payload.workspace.name}.`; workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored."; } catch (error) { workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`; } finally { workspaceAutosaveBusy = false; } }, 60000);
 const restoreReviewButton = document.querySelector("#restore-review");
 const restoredReviewButton = restoreReviewButton.cloneNode(true);
 restoreReviewButton.replaceWith(restoredReviewButton);
@@ -488,14 +461,8 @@ function installStageQueues() {
       let added = 0;
       try {
         for (const file of files) {
-          const bytes = await file.arrayBuffer();
-          const digest = await crypto.subtle.digest("SHA-256", bytes);
-          const sha256 = [...new Uint8Array(digest)]
-            .map(byte => byte.toString(16).padStart(2, "0")).join("");
-          const payload = await queuePost(
-            "/api/v1/transcriptions/import-canonical",
-            {filename: file.name, sha256},
-            {trigger: importButton},
+          const payload = await postSelectedFile(
+            "/api/v1/import-canonical-file", file, importButton,
           );
           if (payload.imported) added += 1;
         }
@@ -508,7 +475,10 @@ function installStageQueues() {
         status.textContent = error.message;
       }
     });
-    controls.append(importButton, importInput);
+    const importFeedback = document.createElement("span");
+    importFeedback.className = "feedback-anchor";
+    importFeedback.append(importButton, importInput);
+    controls.append(importFeedback);
     if (definition.selectable) {
       const selectAll = document.createElement("button");
       selectAll.type = "button";

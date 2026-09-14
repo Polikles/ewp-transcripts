@@ -10,24 +10,20 @@ from unittest.mock import Mock
 import pytest
 
 from ewp_transcripts import __version__
-from ewp_transcripts.domain.revision import sha256_file
-from ewp_transcripts.web_filesystem import GuiFilesystemController
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
+    GuiSelectionCache,
     LocalGuiRequestHandler,
     WebConfiguration,
     WebResponse,
     _open_browser,
     dispatch_get,
-    find_imported_canonical_result,
-    find_selected_directory,
-    find_selected_media_path,
 )
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
-    config = WebConfiguration.create(port=8765, allowed_roots=[tmp_path])
+    config = WebConfiguration.create(port=8765)
     response = dispatch_get(
         config, server_port=8765, host="127.0.0.1:8765", target="/api/v1/health"
     )
@@ -41,8 +37,8 @@ def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
     assert SECURITY_HEADERS["X-Content-Type-Options"] == "nosniff"
 
 
-def test_shell_and_accessible_user_locations_are_served(tmp_path: Path) -> None:
-    config = WebConfiguration.create(port=8765, allowed_roots=[tmp_path])
+def test_shell_is_served(tmp_path: Path) -> None:
+    config = WebConfiguration.create(port=8765)
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/")
     assert response.status == 200
     assert b"EWP Transcriber" in response.body
@@ -105,8 +101,9 @@ def test_shell_and_accessible_user_locations_are_served(tmp_path: Path) -> None:
     assert b"GUI_TRANSLATION_REVIEW_SAVE_REQUIRED" in script_response.body
     assert b"clearEwpBrowserState" in script_response.body
     assert b"Choose audio file" in script_response.body
-    assert b"Choose existing output folder" in script_response.body
-    assert b"selected-media/resolve" in script_response.body
+    assert b"selected-media/upload" in script_response.body
+    assert b"Remove selected work state" in script_response.body
+    assert b"workspace-directory" in script_response.body
     assert b"translation-provider" in script_response.body
     assert b"translation-set-openrouter-key" in script_response.body
     assert b"translation-check-provider" in script_response.body
@@ -176,9 +173,6 @@ def test_shell_and_accessible_user_locations_are_served(tmp_path: Path) -> None:
     assert b"does not send transcript text" in script_response.body
     assert b"server-session-only" not in script_response.body
     assert b"#operation-status" in script_response.body
-    assert b"/api/v1/filesystem/list" in script_response.body
-    assert b"Browse\xe2\x80\xa6" in script_response.body
-    assert b"filesystemDialog.showModal" in script_response.body
     assert b"Save current work state" in script_response.body
     assert b"/api/v1/workspaces/save" in script_response.body
     assert b"workspace-autosave" in script_response.body
@@ -197,17 +191,10 @@ def test_shell_and_accessible_user_locations_are_served(tmp_path: Path) -> None:
     assert b"[hidden]" in style_response.body
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body
-    response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
-    roots = json.loads(response.body)
-    assert str(tmp_path.resolve()) in roots["roots"]
-    assert (
-        roots["policy"]
-        == "User-space paths are accessible; operating-system directories are blocked."
-    )
 
 
 def test_untrusted_host_and_unknown_route_have_codes(tmp_path: Path) -> None:
-    config = WebConfiguration.create(port=8765, allowed_roots=[tmp_path])
+    config = WebConfiguration.create(port=8765)
     response = dispatch_get(config, server_port=8765, host="attacker.example", target="/")
     assert response.status == 421
     assert json.loads(response.body)["error"]["code"] == "GUI_HOST_REJECTED"
@@ -216,13 +203,9 @@ def test_untrusted_host_and_unknown_route_have_codes(tmp_path: Path) -> None:
     assert json.loads(response.body)["error"]["code"] == "GUI_ROUTE_NOT_FOUND"
 
 
-def test_web_configuration_rejects_files_and_missing_search_roots(tmp_path: Path) -> None:
-    source = tmp_path / "source.wav"
-    source.write_bytes(b"")
-    with pytest.raises(ValueError, match="not a directory"):
-        WebConfiguration.create(port=8765, allowed_roots=[source])
-    with pytest.raises(FileNotFoundError):
-        WebConfiguration.create(port=8765, allowed_roots=[tmp_path / "missing"])
+def test_web_configuration_rejects_invalid_port() -> None:
+    with pytest.raises(ValueError, match="port"):
+        WebConfiguration.create(port=65536)
 
 
 def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
@@ -260,84 +243,35 @@ def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
     opened.assert_called_once_with("http://127.0.0.1:8765/")
 
 
-def test_imported_canonical_result_requires_exact_allowed_file_identity(tmp_path: Path) -> None:
-    source = Path(__file__).resolve().parents[2] / "examples/results.example.json"
-    result = tmp_path / "episode_results.json"
-    result.write_bytes(source.read_bytes())
+def test_selection_cache_copies_and_cleans_an_explicitly_selected_file(tmp_path: Path) -> None:
+    cache = GuiSelectionCache()
+    cache._root = tmp_path / "cache"  # noqa: SLF001 - assert owned-workdir cleanup behavior
 
-    assert (
-        find_imported_canonical_result(
-            search_roots=(tmp_path, result.parent), filename=result.name, sha256=sha256_file(result)
-        )
-        == result
-    )
-    with pytest.raises(ValueError, match="not found unchanged"):
-        find_imported_canonical_result(
-            search_roots=(tmp_path,), filename=result.name, sha256="0" * 64
-        )
+    selected = cache.store(filename="episode.wav", content_length=5, source=BytesIO(b"audio"))
+
+    assert selected.read_bytes() == b"audio"
+    cache.close()
+    assert not selected.exists()
 
 
-def test_native_picker_media_and_directory_handoffs_resolve_one_user_file(tmp_path: Path) -> None:
-    output = tmp_path / "project" / "exports"
-    output.mkdir(parents=True)
-    media = output / "episode.wav"
-    media.write_bytes(b"audio")
-
-    assert (
-        find_selected_media_path(
-            search_roots=(tmp_path,),
-            filename=media.name,
-            size=media.stat().st_size,
-            prohibited_roots=(),
-        )
-        == media
-    )
-    assert (
-        find_selected_directory(
-            search_roots=(tmp_path,),
-            filename=media.name,
-            size=media.stat().st_size,
-            relative_path="exports/episode.wav",
-            prohibited_roots=(),
-        )
-        == output
-    )
-
-
-def test_native_picker_media_handoff_rejects_ambiguous_identity(tmp_path: Path) -> None:
-    first = tmp_path / "first"
-    second = tmp_path / "second"
-    first.mkdir()
-    second.mkdir()
-    (first / "episode.wav").write_bytes(b"audio")
-    (second / "episode.wav").write_bytes(b"audio")
-
-    with pytest.raises(ValueError, match="More than one accessible file"):
-        find_selected_media_path(
-            search_roots=(tmp_path,),
-            filename="episode.wav",
-            size=5,
-            prohibited_roots=(),
-        )
-
-
-def test_native_media_picker_route_returns_the_resolved_server_path(tmp_path: Path) -> None:
-    media = tmp_path / "episode.wav"
-    media.write_bytes(b"audio")
-    body = json.dumps({"filename": media.name, "size": media.stat().st_size}).encode()
+def test_native_media_picker_upload_route_returns_a_session_copy(tmp_path: Path) -> None:
+    cache = GuiSelectionCache()
+    cache._root = tmp_path / "cache"  # noqa: SLF001 - isolate the owned temporary workdir
+    body = b"audio"
     handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
     headers = Message()
     headers["Host"] = "127.0.0.1:8765"
     headers["Origin"] = "http://127.0.0.1:8765"
     headers["Content-Length"] = str(len(body))
     headers["X-EWP-CSRF"] = "expected"
+    headers["X-EWP-Filename"] = "episode.wav"
     handler.headers = headers
-    handler.path = "/api/v1/selected-media/resolve"
+    handler.path = "/api/v1/selected-media/upload"
     handler.rfile = BytesIO(body)
     handler.server = SimpleNamespace(
         server_port=8765,
         gui_csrf_token="expected",
-        gui_config=SimpleNamespace(search_roots=(tmp_path,), prohibited_roots=()),
+        gui_selections=cache,
     )
     write_response = Mock()
     handler._write_response = write_response
@@ -345,8 +279,10 @@ def test_native_media_picker_route_returns_the_resolved_server_path(tmp_path: Pa
     handler.do_POST()
 
     response = write_response.call_args.args[0]
+    copied = Path(json.loads(response.body)["path"])
     assert response.status == 200
-    assert json.loads(response.body) == {"path": str(media)}
+    assert copied.read_bytes() == body
+    cache.close()
 
 
 def test_write_response_ignores_abandoned_browser_connection() -> None:
@@ -535,41 +471,3 @@ def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None
     payload = json.loads(response.body)
     assert payload["error"]["code"] == "GUI_TRANSCRIPTION_ALREADY_EXISTS"
     assert str(existing) in payload["error"]["message"]
-
-
-def test_filesystem_listing_requires_csrf_and_returns_filtered_entries(tmp_path: Path) -> None:
-    (tmp_path / "nested").mkdir()
-    (tmp_path / "result.json").write_text("{}", encoding="utf-8")
-    (tmp_path / "notes.txt").write_text("notes", encoding="utf-8")
-    document = {
-        "path": str(tmp_path),
-        "select": "file",
-        "extensions": ["json"],
-    }
-    body = json.dumps(document).encode()
-    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
-    headers = Message()
-    headers["Host"] = "127.0.0.1:8765"
-    headers["Origin"] = "http://127.0.0.1:8765"
-    headers["Content-Length"] = str(len(body))
-    headers["X-EWP-CSRF"] = "expected"
-    handler.headers = headers
-    handler.path = "/api/v1/filesystem/list"
-    handler.rfile = BytesIO(body)
-    handler.server = SimpleNamespace(
-        server_port=8765,
-        gui_csrf_token="expected",
-        gui_filesystem=GuiFilesystemController((tmp_path.resolve(),)),
-    )
-    write_response = Mock()
-    handler._write_response = write_response
-
-    handler.do_POST()
-
-    response = write_response.call_args.args[0]
-    assert response.status == 200
-    payload = json.loads(response.body)
-    assert [(item["name"], item["kind"]) for item in payload["entries"]] == [
-        ("nested", "directory"),
-        ("result.json", "file"),
-    ]
