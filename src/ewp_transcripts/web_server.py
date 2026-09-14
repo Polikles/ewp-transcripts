@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 
 from ewp_transcripts import __version__
 from ewp_transcripts.config import load_config
+from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
@@ -50,6 +51,42 @@ SECURITY_HEADERS = {
     "X-Frame-Options": "DENY",
     "Cache-Control": "no-store",
 }
+
+
+def find_imported_canonical_result(
+    *, allowed_roots: tuple[Path, ...], filename: str, sha256: str
+) -> Path:
+    """Resolve a browser-selected canonical result by name and exact bytes.
+
+    Browser file inputs deliberately hide absolute local paths. The browser therefore sends only
+    the selected filename and SHA-256; this lookup never copies media or transcript contents into
+    the server. The result must already exist under an explicitly allowed root.
+    """
+
+    candidate_name = Path(filename).name
+    if candidate_name != filename or not candidate_name.endswith("_results.json"):
+        raise ValueError("Select one canonical *_results.json file.")
+    if len(sha256) != 64 or any(character not in "0123456789abcdef" for character in sha256):
+        raise ValueError("The selected canonical result has an invalid SHA-256 identity.")
+    matches: list[Path] = []
+    for root in allowed_roots:
+        for candidate in root.rglob(candidate_name):
+            if candidate.is_symlink() or not candidate.is_file():
+                continue
+            resolved = candidate.resolve(strict=True)
+            if not resolved.is_relative_to(root):
+                continue
+            if sha256_file(resolved) == sha256:
+                require_completed_canonical_result(resolved)
+                matches.append(resolved)
+    if not matches:
+        raise ValueError(
+            "The selected result was not found unchanged below an allowed root. Restart the GUI "
+            "with --allow-root for the result directory, then select it again."
+        )
+    if len(matches) > 1:
+        raise ValueError("More than one allowed canonical result has this exact selected identity.")
+    return matches[0]
 
 
 @dataclass(frozen=True)
@@ -1041,6 +1078,54 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 count = self.server.gui_transcriptions.start()
                 self._write_response(_json_response(HTTPStatus.ACCEPTED, {"queued": count}))
                 return
+            if path == "/api/v1/transcriptions/import-canonical":
+                filename = document.get("filename")
+                digest = document.get("sha256")
+                if not isinstance(filename, str) or not isinstance(digest, str):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CANONICAL_IMPORT_INVALID",
+                                    "message": "The selected canonical result identity is invalid.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                try:
+                    imported_result_path = find_imported_canonical_result(
+                        allowed_roots=self.server.gui_config.allowed_roots,
+                        filename=filename,
+                        sha256=digest,
+                    )
+                    canonical = require_completed_canonical_result(imported_result_path)
+                    job, imported = self.server.gui_transcriptions.register_completed_result(
+                        imported_result_path,
+                        planned_job_id=canonical.job_id,
+                        language=LanguageMode(canonical.episode.language),
+                    )
+                except (FileNotFoundError, OSError, ValueError) as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CANONICAL_IMPORT_REJECTED",
+                                    "message": str(error),
+                                }
+                            },
+                        )
+                    )
+                    return
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.OK,
+                        {"imported": imported, "job": job.model_dump(mode="json")},
+                    )
+                )
+                return
             if path == "/api/v1/transcriptions/remove":
                 job_id = document.get("job_id")
                 removed = (
@@ -1071,6 +1156,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     "correction",
                     "review",
                     "original_export",
+                    "assisted_translation",
                     "translation",
                     "translated_export",
                 }
@@ -1104,7 +1190,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 if (
                     not isinstance(result_path, str)
                     or not isinstance(stage, str)
-                    or stage not in {"correction", "translation"}
+                    or stage not in {"correction", "assisted_translation"}
                 ):
                     self._write_response(
                         _json_response(
@@ -1113,7 +1199,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "error": {
                                     "code": "GUI_WORKFLOW_SKIP_INVALID",
                                     "message": (
-                                        "Only optional correction or translation can be skipped."
+                                        "Only optional correction or LLM-assisted translation "
+                                        "can be skipped."
                                     ),
                                 }
                             },

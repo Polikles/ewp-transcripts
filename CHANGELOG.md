@@ -8,6 +8,17 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- Every GUI workflow-stage queue now has an **Add saved results…** native multi-file picker.
+  It submits only each chosen JSON filename and SHA-256 to the loopback service; the service
+  registers the existing completed canonical result only when its unchanged bytes are found under
+  an allowed root. Media and transcript contents are not uploaded or copied.
+- Selected correction-queue items now run sequentially in one failure-isolated batch. Each item
+  uses its own result-root candidate and resume directories; completed items are removed from the
+  selection and a later item still runs after an earlier error.
+- Workflow progress now distinguishes a non-final **LLM translation** candidate/skip from final
+  manual translation and translated export. Skipping provider assistance is blue without blocking
+  manual translation, review, application, or export.
+
 - The GUI now exposes always-visible correction, review/export, translation, and semantic-review
   queues for every completed transcription in the active queue. Each item reopens only its exact
   workflow context; correction and translation also provide local checkbox and Select-all
@@ -26,6 +37,18 @@ The next internal-beta version is `0.19.0`.
   Workspace auto-save detects queue-history changes as well as form-field changes.
 
 ### Fixed
+
+- Review-control rows expand instead of overlapping Restore saved review with Undo and Redo.
+- Each stage queue now shows the complete color-coded workflow, with its own stage emphasized and
+  other stages subdued without removing their textual labels.
+- Opening a translation candidate schedules its semantic-review scroll after editor rendering, so
+  restoration of the editor's previous scroll position cannot undo the handoff.
+- The OpenRouter key prompt no longer uses a native `dialog` top-layer element, avoiding the known
+  Bitwarden inline-menu conflict in current Chromium/Bitwarden versions.
+- **Skip LLM-assisted correction** applies to all selected actionable correction items and refreshes
+  their blue skipped state in the main and stage queues.
+- **Generate correction candidate** now has the same inline **Working…** and **Done!** feedback as
+  other state-changing workflow buttons.
 
 - The WSL GUI launcher now falls back to the configured local browser opener when the Windows
   PowerShell bridge fails, restoring automatic browser launch for ordinary `gui` starts.

@@ -117,6 +117,26 @@ def test_staged_job_can_be_removed_before_start(tmp_path: Path) -> None:
         queue.close()
 
 
+def test_queue_registers_existing_completed_result_once(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        first, imported = queue.register_completed_result(
+            result, planned_job_id="episode", language=LanguageMode.POLISH
+        )
+        second, repeated = queue.register_completed_result(
+            result, planned_job_id="episode", language=LanguageMode.POLISH
+        )
+    finally:
+        queue.close()
+
+    assert imported is True
+    assert repeated is False
+    assert first == second
+    assert first.status == "completed"
+    assert first.result_path == str(result)
+
+
 def test_queue_rejects_source_changed_after_dry_run_before_transcription(tmp_path: Path) -> None:
     source = tmp_path / "episode.wav"
     source.write_bytes(b"dry-run bytes")
@@ -189,6 +209,7 @@ def test_workflow_progress_is_derived_from_immutable_output_artifacts(tmp_path: 
             "correction": {"state": "pending", "path": None, "candidate_path": None},
             "review": {"state": "pending", "path": None, "candidate_path": None},
             "original_export": {"state": "pending", "path": None, "candidate_path": None},
+            "assisted_translation": {"state": "pending", "path": None, "candidate_path": None},
             "translation": {"state": "pending", "path": None, "candidate_path": None},
             "translated_export": {
                 "state": "pending",
@@ -274,14 +295,17 @@ def test_queue_marks_optional_stages_skipped_for_its_matching_result(tmp_path: P
             result_path=str(output / "episode_results.json"),
         )
         assert queue.skip_workflow_stage(str(output / "episode_results.json"), "correction")
-        assert queue.skip_workflow_stage(str(output / "episode_results.json"), "translation")
+        assert queue.skip_workflow_stage(
+            str(output / "episode_results.json"), "assisted_translation"
+        )
         progress = workflow_progress(queue.jobs()[0])
     finally:
         queue.close()
 
     assert progress.correction.state == "skipped"
-    assert progress.translation.state == "skipped"
-    assert progress.translated_export.state == "skipped"
+    assert progress.assisted_translation.state == "skipped"
+    assert progress.translation.state == "pending"
+    assert progress.translated_export.state == "pending"
 
 
 def test_queue_restores_only_terminal_history_from_saved_workspace(tmp_path: Path) -> None:

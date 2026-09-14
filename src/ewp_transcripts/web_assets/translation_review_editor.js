@@ -197,6 +197,13 @@ function renderEnhancedTranslationReview(documentValue, options = {}) {
   requestAnimationFrame(() => window.scrollTo(0, scrollTop));
 }
 
+function scrollTranslationReviewIntoView() {
+  requestAnimationFrame(() => {
+    document.querySelector("#translation-review-heading")
+      .scrollIntoView({behavior: "smooth", block: "start"});
+  });
+}
+
 async function openEnhancedTranslationReview() {
   if (!translationCandidate) return;
   const root = translationCandidate.output_root;
@@ -217,7 +224,7 @@ async function openEnhancedTranslationReview() {
       document.querySelector("#translation-review-status").textContent = appliedTranslation
         ? "Saved applied translation review restored for this output."
         : "Saved translation draft restored for this output; preview is required again.";
-      document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth"});
+      scrollTranslationReviewIntoView();
       return true;
     }
     const payload = await queuePost("/api/v1/translation-reviews/prepare", {
@@ -228,7 +235,7 @@ async function openEnhancedTranslationReview() {
     appliedTranslation = "";
     renderEnhancedTranslationReview(payload);
     persistTranslationReview();
-    document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth"});
+    scrollTranslationReviewIntoView();
     return true;
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;

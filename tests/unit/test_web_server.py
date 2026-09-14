@@ -10,6 +10,7 @@ from unittest.mock import Mock
 import pytest
 
 from ewp_transcripts import __version__
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_filesystem import GuiFilesystemController
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
@@ -18,6 +19,7 @@ from ewp_transcripts.web_server import (
     WebResponse,
     _open_browser,
     dispatch_get,
+    find_imported_canonical_result,
 )
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
@@ -246,6 +248,23 @@ def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
     _open_browser("http://127.0.0.1:8765/")
 
     opened.assert_called_once_with("http://127.0.0.1:8765/")
+
+
+def test_imported_canonical_result_requires_exact_allowed_file_identity(tmp_path: Path) -> None:
+    source = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    result = tmp_path / "episode_results.json"
+    result.write_bytes(source.read_bytes())
+
+    assert (
+        find_imported_canonical_result(
+            allowed_roots=(tmp_path,), filename=result.name, sha256=sha256_file(result)
+        )
+        == result
+    )
+    with pytest.raises(ValueError, match="not found unchanged"):
+        find_imported_canonical_result(
+            allowed_roots=(tmp_path,), filename=result.name, sha256="0" * 64
+        )
 
 
 def test_write_response_ignores_abandoned_browser_connection() -> None:

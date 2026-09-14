@@ -20,7 +20,12 @@ from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
 
 WorkflowStageName = Literal[
-    "correction", "review", "original_export", "translation", "translated_export"
+    "correction",
+    "review",
+    "original_export",
+    "assisted_translation",
+    "translation",
+    "translated_export",
 ]
 
 
@@ -63,6 +68,7 @@ class GuiWorkflowProgress(BaseModel):
     correction: GuiWorkflowStage
     review: GuiWorkflowStage
     original_export: GuiWorkflowStage
+    assisted_translation: GuiWorkflowStage
     translation: GuiWorkflowStage
     translated_export: GuiWorkflowStage
 
@@ -123,6 +129,42 @@ class GuiTranscriptionQueue:
             self._jobs[job.job_id] = job
             self._order.appendleft(job.job_id)
         return job
+
+    def register_completed_result(
+        self,
+        result_path: Path,
+        *,
+        planned_job_id: str,
+        language: LanguageMode,
+    ) -> tuple[GuiTranscriptionJob, bool]:
+        """Expose an existing canonical result to the local GUI workflow queues.
+
+        The caller has already validated the immutable result beneath an allowed root. This is
+        terminal queue history, never a request to rerun ASR.
+        """
+
+        normalized = str(result_path)
+        with self._lock:
+            for job in self._jobs.values():
+                if job.result_path == normalized:
+                    return job, False
+            now = datetime.now(UTC)
+            job = GuiTranscriptionJob(
+                job_id=str(uuid4()),
+                status="completed",
+                input_path=normalized,
+                output_directory=str(result_path.parent),
+                planned_job_id=planned_job_id,
+                planned_result_path=normalized,
+                language=language,
+                speaker_count="auto",
+                created_at=now,
+                updated_at=now,
+                result_path=normalized,
+            )
+            self._jobs[job.job_id] = job
+            self._order.appendleft(job.job_id)
+            return job, True
 
     def start(self) -> int:
         """Queue every staged job in stable insertion order."""
@@ -213,8 +255,6 @@ class GuiTranscriptionQueue:
                 if result_path not in {job.result_path, job.planned_result_path}:
                     continue
                 skips = {*job.workflow_skips, stage}
-                if stage == "translation":
-                    skips.add("translated_export")
                 self._jobs[job_id] = job.model_copy(
                     update={"workflow_skips": skips, "updated_at": datetime.now(UTC)}
                 )
@@ -370,6 +410,7 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
         correction=stage("correction", correction_path),
         review=stage("review", review_path),
         original_export=stage("original_export", original_export_path),
-        translation=stage("translation", translation_path, translation_candidate_path),
+        assisted_translation=stage("assisted_translation", translation_candidate_path),
+        translation=stage("translation", translation_path),
         translated_export=stage("translated_export", translated_export_path),
     )
