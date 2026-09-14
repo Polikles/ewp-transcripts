@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import ClassVar, cast
 from urllib.parse import urlsplit
 
@@ -33,7 +33,12 @@ from ewp_transcripts.web_jobs import (
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
-from ewp_transcripts.web_workflows import GuiWorkflowController, require_completed_canonical_result
+from ewp_transcripts.web_workflows import (
+    GuiWorkflowController,
+    default_gui_prohibited_roots,
+    is_gui_prohibited_path,
+    require_completed_canonical_result,
+)
 from ewp_transcripts.web_workspaces import GuiWorkspaceController, default_workspace_directory
 
 API_VERSION = "1.0"
@@ -53,14 +58,82 @@ SECURITY_HEADERS = {
 }
 
 
+def _minimal_search_roots(roots: set[Path] | tuple[Path, ...] | list[Path]) -> tuple[Path, ...]:
+    """Remove duplicate/nested roots so one file cannot be reported twice."""
+
+    minimal: list[Path] = []
+    for root in sorted(set(roots), key=lambda path: (len(path.parts), str(path))):
+        if any(root == parent or root.is_relative_to(parent) for parent in minimal):
+            continue
+        minimal.append(root)
+    return tuple(minimal)
+
+
+def _default_user_search_roots() -> tuple[Path, ...]:
+    """Locate native and mounted user homes without imposing a path allowlist."""
+
+    roots = {Path.cwd().resolve(), Path.home().resolve()}
+    try:
+        drives = tuple(
+            path for path in Path("/mnt").iterdir() if path.is_dir() and not path.is_symlink()
+        )
+    except OSError:
+        drives = ()
+    for drive in drives:
+        try:
+            roots.update(
+                path.resolve()
+                for path in (drive / "Users").iterdir()
+                if path.is_dir() and not path.is_symlink()
+            )
+        except OSError:
+            continue
+    return _minimal_search_roots(roots)
+
+
+def _walk_matching_files(
+    *, roots: tuple[Path, ...], filename: str, prohibited_roots: tuple[Path, ...]
+) -> list[Path]:
+    """Find regular non-symlink files by name below ordinary user-space roots."""
+
+    matches: list[Path] = []
+    for root in roots:
+        if is_gui_prohibited_path(root, prohibited_roots=prohibited_roots):
+            continue
+        for base, directories, filenames in os.walk(
+            root, followlinks=False, onerror=lambda _error: None
+        ):
+            directory = Path(base)
+            directories[:] = [
+                name
+                for name in directories
+                if not (directory / name).is_symlink()
+                and not is_gui_prohibited_path(
+                    (directory / name).resolve(strict=False), prohibited_roots=prohibited_roots
+                )
+            ]
+            if filename not in filenames:
+                continue
+            candidate = directory / filename
+            if candidate.is_symlink() or not candidate.is_file():
+                continue
+            matches.append(candidate.resolve(strict=True))
+    return matches
+
+
 def find_imported_canonical_result(
-    *, allowed_roots: tuple[Path, ...], filename: str, sha256: str
+    *,
+    search_roots: tuple[Path, ...],
+    filename: str,
+    sha256: str,
+    prohibited_roots: tuple[Path, ...] | None = None,
 ) -> Path:
     """Resolve a browser-selected canonical result by name and exact bytes.
 
     Browser file inputs deliberately hide absolute local paths. The browser therefore sends only
     the selected filename and SHA-256; this lookup never copies media or transcript contents into
-    the server. The result must already exist under an explicitly allowed root.
+    the server. It searches user homes and optional search locations only; no file contents are
+    uploaded or copied, and operating-system directories and symlinks stay unavailable.
     """
 
     candidate_name = Path(filename).name
@@ -68,25 +141,91 @@ def find_imported_canonical_result(
         raise ValueError("Select one canonical *_results.json file.")
     if len(sha256) != 64 or any(character not in "0123456789abcdef" for character in sha256):
         raise ValueError("The selected canonical result has an invalid SHA-256 identity.")
+    prohibited = prohibited_roots or default_gui_prohibited_roots()
     matches: list[Path] = []
-    for root in allowed_roots:
-        for candidate in root.rglob(candidate_name):
-            if candidate.is_symlink() or not candidate.is_file():
-                continue
-            resolved = candidate.resolve(strict=True)
-            if not resolved.is_relative_to(root):
-                continue
-            if sha256_file(resolved) == sha256:
-                require_completed_canonical_result(resolved)
-                matches.append(resolved)
+    for candidate in _walk_matching_files(
+        roots=_minimal_search_roots(search_roots),
+        filename=candidate_name,
+        prohibited_roots=prohibited,
+    ):
+        if sha256_file(candidate) == sha256:
+            require_completed_canonical_result(candidate)
+            matches.append(candidate)
     if not matches:
         raise ValueError(
-            "The selected result was not found unchanged below an allowed root. Restart the GUI "
-            "with --allow-root for the result directory, then select it again."
+            "The selected result was not found unchanged in the accessible user locations. "
+            "Restart with --search-root for an additional mounted project location, then select "
+            "it again."
         )
     if len(matches) > 1:
-        raise ValueError("More than one allowed canonical result has this exact selected identity.")
+        raise ValueError(
+            "More than one accessible canonical result has this exact selected identity."
+        )
     return matches[0]
+
+
+def find_selected_media_path(
+    *,
+    search_roots: tuple[Path, ...],
+    filename: str,
+    size: int,
+    prohibited_roots: tuple[Path, ...],
+) -> Path:
+    """Resolve one browser-selected media file without reading it into the browser process."""
+
+    candidate_name = Path(filename).name
+    if candidate_name != filename or not candidate_name:
+        raise ValueError("The selected media filename is invalid.")
+    if size < 0:
+        raise ValueError("The selected media size is invalid.")
+    matches = [
+        path
+        for path in _walk_matching_files(
+            roots=_minimal_search_roots(search_roots),
+            filename=candidate_name,
+            prohibited_roots=prohibited_roots,
+        )
+        if path.stat().st_size == size
+    ]
+    if not matches:
+        raise ValueError(
+            "The selected media file was not found in the accessible user locations. Restart "
+            "with --search-root for an additional mounted project location, then select it again."
+        )
+    if len(matches) > 1:
+        raise ValueError(
+            "More than one accessible file has that name and size. Enter its server-side path "
+            "directly so the exact source is unambiguous."
+        )
+    return matches[0]
+
+
+def find_selected_directory(
+    *,
+    search_roots: tuple[Path, ...],
+    filename: str,
+    size: int,
+    relative_path: str,
+    prohibited_roots: tuple[Path, ...],
+) -> Path:
+    """Derive one native-picker directory from a uniquely resolved descendant file."""
+
+    relative = PurePosixPath(relative_path)
+    parts = relative.parts
+    if relative.is_absolute() or len(parts) < 2 or any(part in {"", ".", ".."} for part in parts):
+        raise ValueError("The selected output-directory identity is invalid.")
+    selected_file = find_selected_media_path(
+        search_roots=search_roots,
+        filename=filename,
+        size=size,
+        prohibited_roots=prohibited_roots,
+    )
+    directory = selected_file
+    for _ in parts[1:]:
+        directory = directory.parent
+    if is_gui_prohibited_path(directory, prohibited_roots=prohibited_roots):
+        raise ValueError("The selected output directory is prohibited.")
+    return directory
 
 
 @dataclass(frozen=True)
@@ -95,21 +234,42 @@ class WebConfiguration:
 
     host: str
     port: int
-    allowed_roots: tuple[Path, ...]
+    search_roots: tuple[Path, ...]
+    prohibited_roots: tuple[Path, ...]
 
     @classmethod
-    def create(cls, *, port: int, allowed_roots: list[Path]) -> WebConfiguration:
+    def create(
+        cls,
+        *,
+        port: int,
+        search_roots: list[Path] | None = None,
+        allowed_roots: list[Path] | None = None,
+    ) -> WebConfiguration:
+        """Create configuration, accepting the legacy allow-root name as a search hint."""
+
         if not 0 <= port <= 65535:
             raise ValueError("port must be between 0 and 65535")
-        roots = allowed_roots or [Path.cwd()]
+        if search_roots is not None and allowed_roots is not None:
+            raise ValueError("use --search-root instead of combining it with --allow-root")
+        roots = search_roots if search_roots is not None else allowed_roots or []
+        prohibited_roots = default_gui_prohibited_roots()
         resolved: list[Path] = []
-        for root in roots:
+        for root in (*_default_user_search_roots(), *roots):
             candidate = root.expanduser().resolve(strict=True)
             if not candidate.is_dir():
-                raise ValueError(f"allowed root is not a directory: {root}")
+                raise ValueError(f"search root is not a directory: {root}")
+            if is_gui_prohibited_path(candidate, prohibited_roots=prohibited_roots):
+                raise ValueError(
+                    f"search root is inside a prohibited operating-system directory: {root}"
+                )
             if candidate not in resolved:
                 resolved.append(candidate)
-        return cls(host="127.0.0.1", port=port, allowed_roots=tuple(resolved))
+        return cls(
+            host="127.0.0.1",
+            port=port,
+            search_roots=tuple(resolved),
+            prohibited_roots=prohibited_roots,
+        )
 
 
 @dataclass(frozen=True)
@@ -165,7 +325,13 @@ def dispatch_get(
         )
     if path == "/api/v1/roots":
         return _json_response(
-            HTTPStatus.OK, {"roots": [str(root) for root in config.allowed_roots]}
+            HTTPStatus.OK,
+            {
+                "roots": [str(root) for root in config.search_roots],
+                "policy": (
+                    "User-space paths are accessible; operating-system directories are blocked."
+                ),
+            },
         )
     return _json_response(
         HTTPStatus.NOT_FOUND,
@@ -207,8 +373,8 @@ class LocalGuiServer(ThreadingHTTPServer):
         application_config = load_config()
         local_provider_lock = threading.Lock()
         self.gui_config = config
-        self.gui_workflows = GuiWorkflowController(config.allowed_roots)
-        self.gui_filesystem = GuiFilesystemController(config.allowed_roots)
+        self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
+        self.gui_filesystem = GuiFilesystemController(config.search_roots)
         self.gui_workspaces = GuiWorkspaceController(
             state_directory=default_workspace_directory(),
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -482,6 +648,72 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path in {"/api/v1/selected-media/resolve", "/api/v1/selected-directory/resolve"}:
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The selected-media request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            filename = document.get("filename")
+            size = document.get("size")
+            if not isinstance(filename, str) or not isinstance(size, int) or isinstance(size, bool):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_SELECTED_MEDIA_INVALID",
+                                "message": "The selected media identity is invalid.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                if path == "/api/v1/selected-directory/resolve":
+                    relative_path = document.get("relative_path")
+                    if not isinstance(relative_path, str):
+                        raise ValueError("The selected output-directory identity is invalid.")
+                    selected_path = find_selected_directory(
+                        search_roots=self.server.gui_config.search_roots,
+                        filename=filename,
+                        size=size,
+                        relative_path=relative_path,
+                        prohibited_roots=self.server.gui_config.prohibited_roots,
+                    )
+                else:
+                    selected_path = find_selected_media_path(
+                        search_roots=self.server.gui_config.search_roots,
+                        filename=filename,
+                        size=size,
+                        prohibited_roots=self.server.gui_config.prohibited_roots,
+                    )
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_SELECTED_MEDIA_REJECTED",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, {"path": str(selected_path)}))
             return
         if path == "/api/v1/filesystem/list":
             supplied = self.headers.get("X-EWP-CSRF", "")
@@ -1096,9 +1328,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     return
                 try:
                     imported_result_path = find_imported_canonical_result(
-                        allowed_roots=self.server.gui_config.allowed_roots,
+                        search_roots=self.server.gui_config.search_roots,
                         filename=filename,
                         sha256=digest,
+                        prohibited_roots=self.server.gui_config.prohibited_roots,
                     )
                     canonical = require_completed_canonical_result(imported_result_path)
                     job, imported = self.server.gui_transcriptions.register_completed_result(
@@ -1519,10 +1752,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
 
 
-def serve_gui(*, port: int, allowed_roots: list[Path], open_browser: bool = True) -> None:
+def serve_gui(*, port: int, search_roots: list[Path], open_browser: bool = True) -> None:
     """Run the local GUI until interrupted."""
 
-    server = LocalGuiServer(WebConfiguration.create(port=port, allowed_roots=allowed_roots))
+    server = LocalGuiServer(WebConfiguration.create(port=port, search_roots=search_roots))
     url = f"http://127.0.0.1:{server.server_port}/"
     print(f"GUI {url}")
     print("Press Ctrl+C to stop.")

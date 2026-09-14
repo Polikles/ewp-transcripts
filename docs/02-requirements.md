@@ -151,7 +151,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-L00** The GUI MUST be one local browser application with the same bundled frontend, versioned API, application services, and artifact contracts on WSL2, bare-metal Ubuntu, and the future Docker image.
 - **FR-L01** The web adapter MUST call application services directly and MUST NOT invoke CLI subprocesses or maintain alternate transcript, revision, translation, or dictionary models.
 - **FR-L02** The service MUST bind to loopback by default. Non-loopback or multi-user deployment requires a separate security contract and MUST NOT be enabled implicitly.
-- **FR-L03** The primary media workflow MUST use server-visible paths within configured allowed roots. The GUI MUST reject traversal, disallowed symlinks, and access outside those roots.
+- **FR-L03** The primary media workflow MUST use server-visible user-space paths. The GUI MUST reject symlinks and documented operating-system directories; optional picker search roots optimize lookup but do not define path authority.
 - **FR-L04** The GUI MUST expose inspect and dry-run evidence before transcription, including grouping, stream/channel choice, warnings, and resolved outputs.
 - **FR-L05** The GUI MUST expose a deterministic job queue and initially run at most one GPU-intensive job at a time. Browser refresh or closure MUST NOT corrupt active work.
 - **FR-L06** Transcript editing MUST preserve `EWP-REVIEW 1` anchors and lineage while allowing machine metadata to be hidden from the visible editor.

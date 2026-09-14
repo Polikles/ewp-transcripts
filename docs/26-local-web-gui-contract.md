@@ -45,17 +45,17 @@ this rule.
 ## 4. Filesystem interaction
 
 Media files can be large and already exist on the server-visible filesystem. The primary GUI
-workflow therefore selects or enters server-side files and directories within configured
-allowed roots; it does not upload or duplicate media through the browser.
+workflow therefore selects or enters server-side files and directories in ordinary user space;
+it does not upload or duplicate media through the browser.
 
 The web adapter MUST:
 
-- expose only explicitly configured roots and never provide a general filesystem browser;
-- normalize paths through the existing path policy and reject traversal or disallowed
-  symlink resolution;
+- reject operating-system trees and symlink resolution, while accepting accessible ordinary
+  user-space locations without a launch-time allowlist;
+- normalize paths through the existing path policy before applying that denylist;
 - show the resolved source and destination before a mutating or expensive operation;
 - preserve Unicode and spaces, and normalize Windows drive, WSL-mounted Windows, and native
-  Linux path forms before enforcing the same explicit allowed-root boundary;
+  Linux path forms before applying the same operating-system-path denial policy;
 - require explicit Docker mounts rather than implying that host paths are automatically
   visible inside a container;
 - never serve arbitrary source files as static web content.
@@ -126,7 +126,7 @@ provenance.
 Each completed workflow stage SHOULD offer a clearly named next-step action that transfers
 known canonical, revision, output-root, language, and project context without asking the user
 to re-enter it. Selecting an existing revision SHOULD resolve and prefill its exact canonical
-result where lineage and allowed-root evidence identify one unambiguously; otherwise the GUI
+result where lineage and path-safety validation identify one unambiguously; otherwise the GUI
 must request the source rather than guess. Common output roots, dictionary locations, and
 other non-secret preferences may be persisted in explicit application settings.
 Completed transcription jobs SHOULD offer both optional correction and direct manual-review
@@ -160,14 +160,14 @@ does not delete artifacts. One project output root SHOULD derive separate `revie
 `revisions/`, and `exports/` directories, with manual paths available as an explicit option.
 A small versioned, non-secret pointer file under that root SHOULD allow explicit restoration
 across browsers and application restarts. It identifies the last review and applied revision;
-it is not a transcript/revision artifact and MUST remain subject to allowed-root validation.
+it is not a transcript/revision artifact and MUST remain subject to path-safety validation.
 A troubleshooting control MAY clear only EWP-owned browser-state keys after a clear warning that
 it is not an HTTP-cache purge and does not delete server-side or on-disk artifacts. It MUST not
 clear unrelated origin keys or browser-held credentials.
 A later full-workspace state MUST allow the operator to deliberately save and restore all
 non-secret workflow fields, staged artifact identities, open review identity, and current
 step after the browser, GUI process, VM, or workstation has stopped. Restore revalidates every
-allowed-root path and exact artifact hash; it never serializes API keys, transcript text, or
+path-safe artifact path and exact artifact hash; it never serializes API keys, transcript text, or
 unsaved editor contents as casual browser preferences.
 The first workspace-state slice MAY persist only allowlisted non-secret form fields and the
 current step in an application-owned user-state catalog. It must mark entries with unavailable
@@ -286,14 +286,20 @@ tabs or equivalent routed views—transcribe, optional correction, review/export
 semantic review/export—while dictionary and settings management live in their own clearly
 separate views. Navigation must preserve current saved state and must not imply that optional
 stages are mandatory.
-Server-side result, transcript, dictionary, and output path fields SHOULD offer an allowed-root
-Browse control in addition to direct entry. It must use the constrained GUI filesystem API,
-not the browser's upload picker or an unrestricted server filesystem explorer.
-Allowed roots are operator-granted capabilities, not application-hardcoded work directories.
-Production usability SHOULD support persistent named media/project roots and a local launch or
-settings workflow for managing them. Browser requests MUST NOT silently broaden server authority;
-blacklisting a few operating-system directories is not an adequate replacement for allowlisting
-across Windows, WSL, Linux, and containers.
+Result-import queues MUST use the browser's native picker. Because browsers deliberately hide
+the selected absolute path, the browser sends only the filename and SHA-256; the loopback service
+finds the unchanged file below native or mounted user homes and optional search locations. It
+must not upload or copy the selected canonical JSON. Inspect and plan MUST likewise offer native
+audio and existing-output-directory pickers. They send only a selected descendant filename and
+size, resolve only one matching accessible file, show the resulting server-side path for review,
+and fail rather than guess when it is ambiguous. A new empty output directory remains direct path
+entry because browsers expose no reliable absolute directory path for an empty picker result.
+Direct server-side result, transcript, dictionary, and output path fields MAY retain typed entry
+while their native-picker replacements are qualified.
+The GUI does not use a launch-time filesystem allowlist. It rejects documented operating-system
+directories and symlinks to prevent accidental system changes; this is an operator-safety policy,
+not a security boundary against the local account that starts the loopback service. Optional
+search roots optimize browser-picker lookup and do not grant or remove path access.
 Unfamiliar controls, including non-loopback endpoint authorization, SHOULD have a compact
 accessible information action with a plain-language explanation and an optional link to the
 relevant bundled documentation. The local help surface SHOULD explain the intended stage-by-
@@ -303,7 +309,7 @@ stage workflow, not merely individual fields.
 
 The smallest acceptable vertical slices are:
 
-1. loopback server, bundled shell, health/version compatibility, allowed-root configuration,
+1. loopback server, bundled shell, health/version compatibility, local path-safety policy,
    coded diagnostics, About/license/source surfaces, and automated security tests;
 2. inspect/dry-run plus a persistent-in-process job view without GPU execution;
 3. transcription scheduling and result discovery;

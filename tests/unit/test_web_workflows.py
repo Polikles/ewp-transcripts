@@ -143,14 +143,16 @@ def test_dry_run_requires_explicit_output_directory(tmp_path: Path) -> None:
     }
 
 
-def test_paths_outside_roots_and_symlinks_are_rejected(tmp_path: Path) -> None:
-    allowed = tmp_path / "allowed"
-    allowed.mkdir()
-    outside = tmp_path / "outside.wav"
+def test_prohibited_paths_and_symlinks_are_rejected(tmp_path: Path) -> None:
+    user_space = tmp_path / "user-space"
+    user_space.mkdir()
+    prohibited = tmp_path / "system"
+    prohibited.mkdir()
+    outside = prohibited / "outside.wav"
     outside.write_bytes(b"audio")
-    link = allowed / "link.wav"
+    link = user_space / "link.wav"
     link.symlink_to(outside)
-    controller = GuiWorkflowController((allowed.resolve(),))
+    controller = GuiWorkflowController(prohibited_roots=(prohibited.resolve(),))
 
     outside_result = controller.run("inspect", {"path": str(outside)})
     link_result = controller.run("inspect", {"path": str(link)})
@@ -159,6 +161,13 @@ def test_paths_outside_roots_and_symlinks_are_rejected(tmp_path: Path) -> None:
     assert outside_result.error["code"] == "GUI_PATH_REJECTED"
     assert link_result.error is not None
     assert link_result.error["code"] == "GUI_PATH_REJECTED"
+
+
+def test_default_path_policy_rejects_linux_system_tree() -> None:
+    controller = GuiWorkflowController()
+
+    with pytest.raises(ValueError, match="prohibited operating-system directory"):
+        controller.resolve_allowed_path("/sys")
 
 
 def test_windows_drive_path_is_normalized_before_root_authorization(

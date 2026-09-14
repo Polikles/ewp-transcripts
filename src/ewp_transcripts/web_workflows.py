@@ -19,6 +19,61 @@ from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_res
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 
+_LINUX_PROHIBITED_ROOTS = (
+    Path("/bin"),
+    Path("/boot"),
+    Path("/dev"),
+    Path("/etc"),
+    Path("/lib"),
+    Path("/lib64"),
+    Path("/proc"),
+    Path("/root"),
+    Path("/run"),
+    Path("/sbin"),
+    Path("/snap"),
+    Path("/sys"),
+    Path("/usr"),
+    Path("/var"),
+)
+_WINDOWS_PROHIBITED_DIRECTORY_NAMES = (
+    "$Recycle.Bin",
+    "Program Files",
+    "Program Files (x86)",
+    "ProgramData",
+    "Recovery",
+    "System Volume Information",
+    "Windows",
+)
+
+
+def default_gui_prohibited_roots() -> tuple[Path, ...]:
+    """Return resolved system locations the local GUI must never operate on.
+
+    The GUI intentionally permits ordinary user-space paths without a launch-time allowlist.
+    These denylisted locations protect against accidental selection of operating-system trees;
+    they are not a security boundary against the local user who started the service.
+    """
+
+    roots = {path.resolve(strict=False) for path in _LINUX_PROHIBITED_ROOTS}
+    mount_root = Path("/mnt")
+    try:
+        drives = tuple(
+            path for path in mount_root.iterdir() if path.is_dir() and not path.is_symlink()
+        )
+    except OSError:
+        drives = ()
+    for drive in drives:
+        roots.update(
+            (drive / name).resolve(strict=False) for name in _WINDOWS_PROHIBITED_DIRECTORY_NAMES
+        )
+    return tuple(sorted(roots, key=str))
+
+
+def is_gui_prohibited_path(path: Path, *, prohibited_roots: tuple[Path, ...]) -> bool:
+    """Return whether a resolved GUI path is inside a prohibited system location."""
+
+    return any(path == root or path.is_relative_to(root) for root in prohibited_roots)
+
 
 class GuiOperation(BaseModel):
     """Bounded in-process evidence for one read-only GUI operation."""
@@ -55,9 +110,12 @@ def require_completed_canonical_result(path: Path) -> CanonicalResult:
 
 @dataclass
 class GuiWorkflowController:
-    """Authorize paths and invoke existing application services directly."""
+    """Reject unsafe system paths and invoke existing application services directly."""
 
-    allowed_roots: tuple[Path, ...]
+    # Retained as an ignored constructor argument so saved integrations using the old
+    # controller signature keep starting while the server migrates from allowlists.
+    allowed_roots: tuple[Path, ...] = ()
+    prohibited_roots: tuple[Path, ...] = field(default_factory=default_gui_prohibited_roots)
     inspect_service: Service = inspect_input
     dry_run_service: Service = dry_run
     _operations: deque[GuiOperation] = field(default_factory=lambda: deque(maxlen=50))
@@ -221,10 +279,8 @@ class GuiWorkflowController:
         if candidate.is_symlink():
             raise ValueError("Symbolic-link paths are not allowed")
         resolved = candidate.resolve(strict=not directory)
-        if not any(
-            resolved == root or resolved.is_relative_to(root) for root in self.allowed_roots
-        ):
-            raise ValueError("Path is outside the configured allowed roots")
+        if is_gui_prohibited_path(resolved, prohibited_roots=self.prohibited_roots):
+            raise ValueError("Path is inside a prohibited operating-system directory")
         if directory and resolved.exists() and not resolved.is_dir():
             raise ValueError("Output path must be a directory")
         return resolved

@@ -33,7 +33,7 @@ def test_command_help_exposes_command_specific_options() -> None:
     gui = runner.invoke(app, ["gui", "--help"])
     assert gui.exit_code == 0
     assert "--allow-root" in gui.stdout
-    assert "--no-open-browser" in gui.stdout
+    assert "--open-browser" in gui.stdout
 
 
 def test_root_and_revision_help_explain_command_specific_discovery() -> None:

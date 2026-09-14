@@ -20,6 +20,8 @@ from ewp_transcripts.web_server import (
     _open_browser,
     dispatch_get,
     find_imported_canonical_result,
+    find_selected_directory,
+    find_selected_media_path,
 )
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
@@ -39,7 +41,7 @@ def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
     assert SECURITY_HEADERS["X-Content-Type-Options"] == "nosniff"
 
 
-def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
+def test_shell_and_accessible_user_locations_are_served(tmp_path: Path) -> None:
     config = WebConfiguration.create(port=8765, allowed_roots=[tmp_path])
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/")
     assert response.status == 200
@@ -102,6 +104,9 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b"ewp-active-translation-review-v1" in script_response.body
     assert b"GUI_TRANSLATION_REVIEW_SAVE_REQUIRED" in script_response.body
     assert b"clearEwpBrowserState" in script_response.body
+    assert b"Choose audio file" in script_response.body
+    assert b"Choose existing output folder" in script_response.body
+    assert b"selected-media/resolve" in script_response.body
     assert b"translation-provider" in script_response.body
     assert b"translation-set-openrouter-key" in script_response.body
     assert b"translation-check-provider" in script_response.body
@@ -193,7 +198,12 @@ def test_shell_and_allowed_roots_are_served(tmp_path: Path) -> None:
     assert b'postReview("load"' in script_response.body
     assert b'postReview("session/restore"' in script_response.body
     response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/api/v1/roots")
-    assert json.loads(response.body) == {"roots": [str(tmp_path.resolve())]}
+    roots = json.loads(response.body)
+    assert str(tmp_path.resolve()) in roots["roots"]
+    assert (
+        roots["policy"]
+        == "User-space paths are accessible; operating-system directories are blocked."
+    )
 
 
 def test_untrusted_host_and_unknown_route_have_codes(tmp_path: Path) -> None:
@@ -206,7 +216,7 @@ def test_untrusted_host_and_unknown_route_have_codes(tmp_path: Path) -> None:
     assert json.loads(response.body)["error"]["code"] == "GUI_ROUTE_NOT_FOUND"
 
 
-def test_web_configuration_rejects_files_and_missing_roots(tmp_path: Path) -> None:
+def test_web_configuration_rejects_files_and_missing_search_roots(tmp_path: Path) -> None:
     source = tmp_path / "source.wav"
     source.write_bytes(b"")
     with pytest.raises(ValueError, match="not a directory"):
@@ -257,14 +267,86 @@ def test_imported_canonical_result_requires_exact_allowed_file_identity(tmp_path
 
     assert (
         find_imported_canonical_result(
-            allowed_roots=(tmp_path,), filename=result.name, sha256=sha256_file(result)
+            search_roots=(tmp_path, result.parent), filename=result.name, sha256=sha256_file(result)
         )
         == result
     )
     with pytest.raises(ValueError, match="not found unchanged"):
         find_imported_canonical_result(
-            allowed_roots=(tmp_path,), filename=result.name, sha256="0" * 64
+            search_roots=(tmp_path,), filename=result.name, sha256="0" * 64
         )
+
+
+def test_native_picker_media_and_directory_handoffs_resolve_one_user_file(tmp_path: Path) -> None:
+    output = tmp_path / "project" / "exports"
+    output.mkdir(parents=True)
+    media = output / "episode.wav"
+    media.write_bytes(b"audio")
+
+    assert (
+        find_selected_media_path(
+            search_roots=(tmp_path,),
+            filename=media.name,
+            size=media.stat().st_size,
+            prohibited_roots=(),
+        )
+        == media
+    )
+    assert (
+        find_selected_directory(
+            search_roots=(tmp_path,),
+            filename=media.name,
+            size=media.stat().st_size,
+            relative_path="exports/episode.wav",
+            prohibited_roots=(),
+        )
+        == output
+    )
+
+
+def test_native_picker_media_handoff_rejects_ambiguous_identity(tmp_path: Path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    (first / "episode.wav").write_bytes(b"audio")
+    (second / "episode.wav").write_bytes(b"audio")
+
+    with pytest.raises(ValueError, match="More than one accessible file"):
+        find_selected_media_path(
+            search_roots=(tmp_path,),
+            filename="episode.wav",
+            size=5,
+            prohibited_roots=(),
+        )
+
+
+def test_native_media_picker_route_returns_the_resolved_server_path(tmp_path: Path) -> None:
+    media = tmp_path / "episode.wav"
+    media.write_bytes(b"audio")
+    body = json.dumps({"filename": media.name, "size": media.stat().st_size}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/selected-media/resolve"
+    handler.rfile = BytesIO(body)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_config=SimpleNamespace(search_roots=(tmp_path,), prohibited_roots=()),
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    assert json.loads(response.body) == {"path": str(media)}
 
 
 def test_write_response_ignores_abandoned_browser_connection() -> None:

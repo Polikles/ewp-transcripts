@@ -703,7 +703,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
    opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
 2. **GUI-02 — Resume from existing canonical results — implemented, pending browser retest:** every workflow-stage queue can add one or
    more previously completed `*_results.json` files using the browser's native file-selection
-   dialog, validates canonical identity and allowed roots, and resumes only the selected item.
+   dialog, validates canonical identity and the user-space path-safety policy, and resumes only the selected item.
    Resolve the browser-native picker/server-path handoff without weakening the local-only path
    boundary or silently uploading media.
 3. **GUI-03 — Review-control layout — implemented, pending browser retest:** eliminate the Restore saved review / Undo / Redo overlap
@@ -727,6 +727,15 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 10. **GUI-10 — Semantic queue and manual-translation progress — implemented, pending browser retest:** semantic review lists eligible
     candidate and manual-translation reviews; manual LLM skipping and later application/export
     update the main and stage queues from their durable artifacts or explicit optional-stage state.
+11. **GUI-11 — User-space path policy and result import — implemented, pending WSL retest:** replace launch-time
+    allowed roots with a denylist of operating-system directories and symlink rejection. Native
+    canonical-result import searches native/mounted user homes plus optional `--search-root`
+    locations and still requires exact SHA-256 identity; it must never upload the selected JSON.
+12. **GUI-12 — Native Inspect and plan pickers — implemented, pending Chrome/Firefox retest:** replace
+    the custom server filesystem picker for the inspect input and existing output directory with
+    browser-native pickers. Resolve the selected media or a selected directory descendant only
+    when filename and size identify one accessible user-space file; show the resolved path and
+    require direct entry for a new empty output directory or an ambiguous match.
 
 Planned capabilities:
 
@@ -745,10 +754,6 @@ Planned capabilities:
 - persistent named media/project roots managed through an explicit local configuration or launch
   workflow, so ordinary use does not require repetitive path flags while browser requests remain
   unable to grant themselves broader filesystem authority;
-- replace the current testing-oriented allowed-root allowlist with a reviewed local-user safety
-  policy that blocks clearly dangerous system locations and path traversal without making normal
-  media locations unusable; pair it with an operating-system file/directory picker rather than
-  relying primarily on custom browser path text fields;
 - content-aware input validation and time-of-check/time-of-use protection: retain strict JSON
   parsing and FFprobe decoding, then compare exact source fingerprints again when a staged job
   starts. This pre-open fingerprint check is implemented; evaluate an optional owned immutable
@@ -812,15 +817,15 @@ Planned capabilities:
 - add a bounded recent-work browser for saved GUI review sessions, labeled by optional project
   name plus job/input identity, so recovery does not require remembering an output root; handle
   expired temporary paths as unavailable entries;
-- add allowed-root-constrained Browse controls for transcript/result/dictionary inputs and
-  output directories without uploading files or exposing an unrestricted filesystem browser;
+- replace the remaining custom Browse controls for transcript, result, dictionary, and output
+  paths with qualified native picker handoffs that preserve the no-upload local-file policy;
 - an explicit light/dark mode switch in that pass; automatic system preference remains an
   interim behavior rather than the final theme control.
 - add explicit next-step actions after apply/export that carry exact canonical, revision,
   language, project, and output context into the following workflow; selecting a revision
   should prefill its canonical source whenever exact lineage resolves it unambiguously;
 - make installed and custom dictionary directories discoverable through project/language/
-  version selectors, while retaining direct allowed-root path selection;
+  version selectors, while retaining direct user-space path selection;
 - add GUI dictionary proposal, preview, decision editing, versioned publication, and audit
   views with bundled plain-language workflow documentation;
 - persist non-secret preferences such as common output roots and dictionary locations;
@@ -829,7 +834,7 @@ Planned capabilities:
 - add explicit Save current work state and Load previous work state actions. A versioned
   server-side workspace record should restore all non-secret fields, staged artifact paths,
   terminal queue history, open saved review, and current workflow step after a full
-  workstation/VM restart, while revalidating allowed roots and hashes and never persisting
+  workstation/VM restart, while revalidating safe paths and hashes and never persisting
   credentials or unsaved edits. Terminal history and hash-bound staged jobs are implemented;
   interrupted GPU work remains intentionally non-resumable;
 - when functional GUI work is complete or nearly complete, qualify one full cross-directory

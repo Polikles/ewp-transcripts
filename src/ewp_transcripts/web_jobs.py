@@ -139,8 +139,8 @@ class GuiTranscriptionQueue:
     ) -> tuple[GuiTranscriptionJob, bool]:
         """Expose an existing canonical result to the local GUI workflow queues.
 
-        The caller has already validated the immutable result beneath an allowed root. This is
-        terminal queue history, never a request to rerun ASR.
+        The caller has already validated the immutable result through the GUI path-safety policy.
+        This is terminal queue history, never a request to rerun ASR.
         """
 
         normalized = str(result_path)

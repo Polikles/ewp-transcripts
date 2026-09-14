@@ -11,9 +11,10 @@ application services directly. WSL2, bare-metal Ubuntu, and the future Docker im
 same frontend, API, domain models, and artifact formats.
 
 The service binds to loopback by default and is initially single-user. Users select
-server-visible paths inside configured allowed roots, avoiding browser copies of large media.
-Docker later supplies those paths through explicit mounts. Remote multi-user hosting is not
-part of this decision.
+server-visible user-space paths, avoiding browser copies of large media. The GUI rejects
+symlinks and documented operating-system directories; optional search roots help native browser
+pickers find a selected file but do not grant path authority. Docker later supplies paths through
+explicit mounts. Remote multi-user hosting is not part of this decision.
 
 ## Context
 

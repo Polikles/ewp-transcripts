@@ -8,6 +8,11 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- The Inspect and plan section now uses native browser pickers for audio and existing output
+  directories. The loopback service receives only filename/size metadata, resolves one matching
+  user-space file, and shows the resulting path; it never uploads media. Ambiguous selections
+  fail visibly, and a new empty output directory remains direct path entry.
+
 - Every GUI workflow-stage queue now has an **Add saved results…** native multi-file picker.
   It submits only each chosen JSON filename and SHA-256 to the loopback service; the service
   registers the existing completed canonical result only when its unchanged bytes are found under
@@ -37,6 +42,14 @@ The next internal-beta version is `0.19.0`.
   Workspace auto-save detects queue-history changes as well as form-field changes.
 
 ### Fixed
+
+- GUI paths no longer depend on a launch-time allowlist. Ordinary accessible user-space paths
+  work across native and mounted Windows locations; symlinks and documented operating-system
+  directories remain blocked. Native canonical-result imports now search those user locations
+  and optional `--search-root` locations by exact SHA-256 rather than silently failing outside
+  the old root.
+- The session-only OpenRouter key panel now has explicit dark-mode foreground, background, and
+  border colors, making it readable in Chrome dark mode.
 
 - Review-control rows expand instead of overlapping Restore saved review with Undo and Redo.
 - Each stage queue now shows the complete color-coded workflow, with its own stage emphasized and

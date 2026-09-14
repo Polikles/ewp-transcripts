@@ -45,18 +45,24 @@ def test_workspace_round_trip_contains_only_allowlisted_non_secret_fields(tmp_pa
     assert (tmp_path / "state" / f"{saved.workspace_id}.json").stat().st_mode & 0o777 == 0o600
 
 
-def test_workspace_rejects_unknown_fields_and_outside_paths(tmp_path: Path) -> None:
+def test_workspace_rejects_unknown_fields_and_prohibited_paths(tmp_path: Path) -> None:
     workspaces, _ = controller(tmp_path)
 
     with pytest.raises(ValueError, match="unsupported field"):
         workspaces.save(name="Bad", current_step="", fields={"api_key": "secret"})
-    outside = tmp_path / "outside.wav"
+    prohibited = tmp_path / "system"
+    prohibited.mkdir()
+    outside = prohibited / "outside.wav"
     outside.write_bytes(b"audio")
-    with pytest.raises(ValueError, match="outside"):
-        workspaces.save(
-            name="Bad path",
-            current_step="",
-            fields={"input-path": str(outside)},
+    protected_workspaces = GuiWorkspaceController(
+        state_directory=tmp_path / "protected-state",
+        resolve_path=GuiWorkflowController(
+            prohibited_roots=(prohibited.resolve(),)
+        ).resolve_allowed_path,
+    )
+    with pytest.raises(ValueError, match="prohibited"):
+        protected_workspaces.save(
+            name="Bad path", current_step="", fields={"input-path": str(outside)}
         )
 
 

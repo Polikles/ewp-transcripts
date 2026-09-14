@@ -272,9 +272,83 @@ filesystemDialog.querySelector("#filesystem-roots").addEventListener("click", ()
 filesystemUp.addEventListener("click", () => { if (filesystemListing?.parent_path) loadFilesystem(filesystemListing.parent_path); });
 filesystemUseDirectory.addEventListener("click", () => { if (!filesystemListing?.current_path) return; filesystemTarget.value = filesystemListing.current_path; filesystemTarget.dispatchEvent(new Event("input", {bubbles: true})); filesystemDialog.close(); });
 const mediaExtensions = ["wav", "mp3", "flac", "m4a", "ogg", "opus"];
-for (const selector of ["#input-path"]) installPathBrowser(selector, {select: "file", extensions: mediaExtensions});
+const workflowInput = document.querySelector("#input-path");
+const nativeMediaInput = document.createElement("input");
+nativeMediaInput.type = "file";
+nativeMediaInput.accept = mediaExtensions.map(extension => `.${extension}`).join(",");
+nativeMediaInput.hidden = true;
+const nativeMediaButton = document.createElement("button");
+nativeMediaButton.type = "button";
+nativeMediaButton.className = "path-browser-button";
+nativeMediaButton.textContent = "Choose audio file…";
+nativeMediaButton.title = "Choose an existing user-space audio file with the browser's native picker.";
+nativeMediaButton.addEventListener("click", () => nativeMediaInput.click());
+nativeMediaInput.addEventListener("change", async () => {
+  const file = nativeMediaInput.files?.[0];
+  nativeMediaInput.value = "";
+  if (!file) return;
+  const status = document.querySelector("#operation-status");
+  nativeMediaButton.disabled = true;
+  status.textContent = "Finding the selected local audio file…";
+  try {
+    const payload = await queuePost(
+      "/api/v1/selected-media/resolve",
+      {filename: file.name, size: file.size},
+      {trigger: nativeMediaButton},
+    );
+    workflowInput.value = payload.path;
+    workflowInput.dispatchEvent(new Event("input", {bubbles: true}));
+    status.textContent = `Selected ${file.name}. Review the resolved path, then inspect or dry-run.`;
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    nativeMediaButton.disabled = false;
+  }
+});
+workflowInput.after(nativeMediaButton, nativeMediaInput);
+const nativeOutputInput = document.createElement("input");
+nativeOutputInput.type = "file";
+nativeOutputInput.multiple = true;
+nativeOutputInput.webkitdirectory = true;
+nativeOutputInput.hidden = true;
+const nativeOutputButton = document.createElement("button");
+nativeOutputButton.type = "button";
+nativeOutputButton.className = "path-browser-button";
+nativeOutputButton.textContent = "Choose existing output folder…";
+nativeOutputButton.title = "Choose a non-empty user-space output folder with the browser's native picker.";
+nativeOutputButton.addEventListener("click", () => nativeOutputInput.click());
+nativeOutputInput.addEventListener("change", async () => {
+  const file = nativeOutputInput.files?.[0];
+  nativeOutputInput.value = "";
+  if (!file) {
+    document.querySelector("#operation-status").textContent = "The native directory picker needs one existing file. Enter a new empty output directory path directly.";
+    return;
+  }
+  if (!file.webkitRelativePath) {
+    document.querySelector("#operation-status").textContent = "This browser does not expose a selected directory identity. Enter the output directory path directly.";
+    return;
+  }
+  const status = document.querySelector("#operation-status");
+  nativeOutputButton.disabled = true;
+  status.textContent = "Finding the selected local output folder…";
+  try {
+    const payload = await queuePost(
+      "/api/v1/selected-directory/resolve",
+      {filename: file.name, size: file.size, relative_path: file.webkitRelativePath},
+      {trigger: nativeOutputButton},
+    );
+    workflowOutput.value = payload.path;
+    workflowOutput.dispatchEvent(new Event("input", {bubbles: true}));
+    status.textContent = `Selected output folder for ${file.name}. Review the resolved path, then dry-run.`;
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    nativeOutputButton.disabled = false;
+  }
+});
+workflowOutput.after(nativeOutputButton, nativeOutputInput);
 for (const selector of ["#correction-result-path", "#correction-dictionary", "#review-result-path", "#translation-result-path", "#translation-revision-path", "#translation-dictionary", "#dictionary-previous"]) installPathBrowser(selector, {select: "file", extensions: ["json"]});
-for (const selector of ["#output-path", "#correction-output-root", "#review-project-path", "#review-output-path", "#revision-output-path", "#export-output-path", "#translation-output-root", "#dictionary-canonical-directory", "#dictionary-revision-directory", "#dictionary-output-root"]) installPathBrowser(selector, {select: "directory"});
+for (const selector of ["#correction-output-root", "#review-project-path", "#review-output-path", "#revision-output-path", "#export-output-path", "#translation-output-root", "#dictionary-canonical-directory", "#dictionary-revision-directory", "#dictionary-output-root"]) installPathBrowser(selector, {select: "directory"});
 correctionForm.elements.namedItem("allow_remote_endpoint").id = "correction-allow-remote";
 translationForm.elements.namedItem("allow_remote_endpoint").id = "translation-allow-remote";
 const workspaceFieldIds = ["input-path", "output-path", "workflow-language", "workflow-speaker-count", "workflow-speaker-auto", "correction-result-path", "correction-output-root", "correction-provider", "correction-model", "correction-endpoint", "correction-reasoning", "correction-allow-remote", "correction-dictionary", "review-result-path", "review-project-path", "custom-review-paths", "review-output-path", "revision-output-path", "export-output-path", "translation-result-path", "translation-revision-path", "translation-output-root", "translation-target", "translation-model", "translation-endpoint", "translation-allow-remote", "translation-output-mode", "translation-dictionary", "dictionary-canonical-directory", "dictionary-revision-directory", "dictionary-output-root", "dictionary-project-id", "dictionary-minimum", "dictionary-previous"];
