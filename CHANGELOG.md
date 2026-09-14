@@ -11,16 +11,20 @@ The next internal-beta version is `0.19.0`.
 - The Inspect and plan section now uses a native browser picker for audio. Its explicitly chosen
   file is copied only into an owned, bounded loopback-server work directory for the active GUI
   session, then deleted when the server stops. The picker button displays **Working…** and
-  **Done!**. Output directories use direct path entry, avoiding the browser-controlled warning
-  that directory pickers display about sharing every contained file.
+  **Done!**. The shared output root accepts direct path entry or a local OS folder dialog;
+  browser directory upload and its all-files warning are not used.
 
 - Every GUI workflow-stage queue now has an **Add saved results…** native multi-file picker.
   It copies only explicitly selected canonical JSON files into owned temporary loopback storage,
   validates them strictly, and deletes them when the GUI server stops; it never searches all
   user directories or sends them to the network.
 - Selected correction-queue items now run sequentially in one failure-isolated batch. Each item
-  uses its own result-root candidate and resume directories; completed items are removed from the
+  uses its chosen output-root candidate and resume directories; completed items are removed from the
   selection and a later item still runs after an earlier error.
+- Selected translation-queue items now generate non-final candidates sequentially, with per-item
+  results, failure isolation, and a semantic-review handoff for each saved candidate.
+- Saved work state has a confirmed **Clear current work state** action that forgets inactive queue
+  history and unsaved browser state without deleting workspaces or publication artifacts.
 - Workflow progress now distinguishes a non-final **LLM translation** candidate/skip from final
   manual translation and translated export. Skipping provider assistance is blue without blocking
   manual translation, review, application, or export.
@@ -47,6 +51,21 @@ The next internal-beta version is `0.19.0`.
   selected saved-workspace JSON into that catalog.
 
 ### Fixed
+
+- Saved work state accepts the current translation provider fields; its button row and all stage
+  queue actions align at supported widths.
+- Imported results require the user's shared output root for correction, reviews, revisions,
+  translation, and exports; temporary picker storage is never used as a publication directory.
+  Queue tables show filenames by default and full paths on hover, while failed imports report
+  the filename and exact error in their stage queue.
+- Reopening skipped correction or assisted translation clears the blue skip and re-enables that
+  stage. Previewing a saved transcript review scrolls to **Apply verified revision**.
+- Translation progress now exposes the candidate path needed to populate semantic review;
+  selecting several translation jobs no longer invokes only the single-file form action. Bulk
+  assistance skip updates every selected item without requiring the single-file path fields.
+- Dictionary catalog choices show the edition in the dictionary ID once; the separate JSON
+  document-format version remains available as a tooltip instead of appearing as a conflicting
+  second edition number.
 
 - GUI paths no longer depend on a launch-time allowlist. Ordinary accessible user-space paths
   work across native and mounted Windows locations; symlinks and documented operating-system

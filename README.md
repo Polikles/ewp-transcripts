@@ -91,15 +91,13 @@ verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-
 The local browser GUI can be started without loading ML models:
 
 ```bash
-uv run --locked transcriber gui \
-  --allow-root "/path/to/media" \
-  --allow-root "/path/to/project"
+uv run --locked transcriber gui
 ```
 
 It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and exposes only the named directories. Roots are operator-selected capabilities, not hardcoded
-application work directories: grant a convenient parent such as a podcast/project directory
-rather than adding every episode separately. Avoid granting an entire drive or system/home root.
+and accepts accessible user-space paths from the local operator. Operating-system directories
+and symlinks are blocked. Choose a durable shared output directory in the page before importing
+saved canonical results; a local folder dialog is available without uploading folder contents.
 Inspect and dry-run are read-only; dry-run includes its
 own inspection, so running Inspect separately is optional and intended for examining media before
 choosing output settings. Each reviewed file

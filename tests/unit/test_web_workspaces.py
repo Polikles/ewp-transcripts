@@ -1,10 +1,37 @@
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from ewp_transcripts.web_workflows import GuiWorkflowController
-from ewp_transcripts.web_workspaces import GuiWorkspaceController
+from ewp_transcripts.web_workspaces import _FIELD_NAMES, GuiWorkspaceController
+
+
+def test_browser_workspace_fields_match_server_allowlist() -> None:
+    app = (Path(__file__).parents[2] / "src/ewp_transcripts/web_assets/app.js").read_text()
+    declared = re.search(r"const workspaceFieldIds = \[(.*?)\];", app)
+    assert declared is not None
+    browser_fields = set(re.findall(r'"([a-z][a-z-]+)"', declared.group(1)))
+    translation_script = (
+        Path(__file__).parents[2]
+        / "src/ewp_transcripts/web_assets/translation_provider_controls.js"
+    ).read_text()
+    added = re.search(r"workspaceFieldIds\.push\((.*?)\);", translation_script)
+    assert added is not None
+    browser_fields.update(re.findall(r'"([a-z][a-z-]+)"', added.group(1)))
+    assert browser_fields == _FIELD_NAMES
+
+
+def test_workspace_saves_complete_current_browser_field_set(tmp_path: Path) -> None:
+    workspaces, _ = controller(tmp_path)
+    fields = {name: "" for name in _FIELD_NAMES}
+    fields["translation-provider"] = "openrouter"
+    fields["translation-reasoning"] = "0"
+
+    saved = workspaces.save(name="Full form", current_step="workspace-heading", fields=fields)
+
+    assert workspaces.load(saved.workspace_id).fields == fields
 
 
 def controller(tmp_path: Path) -> tuple[GuiWorkspaceController, Path]:

@@ -46,6 +46,8 @@ _FIELD_NAMES = frozenset(
         "translation-allow-remote",
         "translation-output-mode",
         "translation-dictionary",
+        "translation-provider",
+        "translation-reasoning",
         "dictionary-canonical-directory",
         "dictionary-revision-directory",
         "dictionary-output-root",
@@ -230,12 +232,14 @@ class GuiWorkspaceController:
         )
 
     def _validate_fields(self, fields: dict[str, Any]) -> dict[str, str | bool | int]:
-        if not isinstance(fields, dict) or len(fields) > len(_FIELD_NAMES):
-            raise ValueError("Workspace fields are invalid")
+        if not isinstance(fields, dict):
+            raise ValueError("Workspace fields must be an object")
         clean: dict[str, str | bool | int] = {}
         for name, value in fields.items():
-            if name not in _FIELD_NAMES or not isinstance(value, (str, bool, int)):
-                raise ValueError("Workspace contains an unsupported field")
+            if name not in _FIELD_NAMES:
+                raise ValueError(f"Workspace contains an unsupported field: {str(name)[:80]}")
+            if not isinstance(value, (str, bool, int)):
+                raise ValueError(f"Workspace field has an invalid value: {name}")
             if isinstance(value, str) and len(value) > 4096:
                 raise ValueError("Workspace field is too long")
             if name in _PATH_FIELDS and isinstance(value, str) and value.strip():

@@ -291,11 +291,14 @@ separate views. Navigation must preserve current saved state and must not imply 
 stages are mandatory.
 Result-import queues MUST use the browser's native picker. A selected canonical JSON is copied
 only to the same-machine loopback server's owned temporary work directory, strictly parsed, and
-deleted when that GUI server stops; the picker never searches all user filesystems. Inspect and
+deleted when that GUI server stops; the picker never searches all user filesystems. Import also
+requires an explicit durable shared output root for later review, revision, and export files;
+the temporary JSON directory MUST NOT become that root. Inspect and
 plan likewise offers a native audio picker that makes an explicit, bounded session copy and shows
 its temporary server-side path. The associated button must show Working and Done feedback. Output
-directories use direct path entry because browser directory selection causes an unavoidable
-browser-controlled sharing warning; it is not offered. Direct server-side result, transcript,
+directories allow direct path entry or a server-mediated local operating-system folder dialog.
+Browser directory selection causes an unavoidable browser-controlled sharing warning and is not
+offered. Direct server-side result, transcript,
 dictionary, and output path fields MAY retain typed entry while their native-picker replacements
 are qualified.
 The GUI does not use a launch-time filesystem allowlist. It rejects documented operating-system

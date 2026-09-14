@@ -37,16 +37,15 @@ uv run --locked transcriber --help
 The local browser interface is available on loopback:
 
 ```bash
-uv run --locked transcriber gui \
-  --allow-root "/path/to/media" \
-  --allow-root "/path/to/project"
+uv run --locked transcriber gui
 ```
 
 Use `--no-open-browser` when launching from a terminal that cannot open the host browser.
 The printed `http://127.0.0.1:PORT/` URL can then be opened manually. Only the explicitly
-allowed directories are shown. Inspect/dry-run are non-mutating. The current queue accepts one
+accessible user-space paths are accepted while system directories and symlinks are blocked.
+Inspect/dry-run are non-mutating. The current queue accepts one
 file per staged row and requires a reviewed dry-run plus explicit confirmation. Add distinct
-episode files from any allowed root to one shared output directory, review/remove the staged
+episode files to one durable shared output directory, review/remove the staged
 rows, then select **Start queue**. The bundled **GUI workflow** help page explains this without
 requiring Internet access. Closing the browser does not stop a job; stopping the server waits
 for active transcription.

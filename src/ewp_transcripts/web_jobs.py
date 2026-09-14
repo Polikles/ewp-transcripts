@@ -134,6 +134,7 @@ class GuiTranscriptionQueue:
         self,
         result_path: Path,
         *,
+        output_directory: Path,
         planned_job_id: str,
         language: LanguageMode,
     ) -> tuple[GuiTranscriptionJob, bool]:
@@ -153,7 +154,7 @@ class GuiTranscriptionQueue:
                 job_id=str(uuid4()),
                 status="completed",
                 input_path=normalized,
-                output_directory=str(result_path.parent),
+                output_directory=str(output_directory),
                 planned_job_id=planned_job_id,
                 planned_result_path=normalized,
                 language=language,
@@ -261,6 +262,25 @@ class GuiTranscriptionQueue:
                 return True
         return False
 
+    def reopen_workflow_stage(self, result_path: str, stage: WorkflowStageName) -> bool:
+        """Make one previously skipped optional stage actionable again."""
+
+        with self._lock:
+            for job_id, job in self._jobs.items():
+                if result_path not in {job.result_path, job.planned_result_path}:
+                    continue
+                self._jobs[job_id] = job.model_copy(
+                    update={
+                        "workflow_skips": job.workflow_skips - {stage},
+                        "workflow_errors": {
+                            key: value for key, value in job.workflow_errors.items() if key != stage
+                        },
+                        "updated_at": datetime.now(UTC),
+                    }
+                )
+                return True
+        return False
+
     def replace_terminal_jobs(self, jobs: tuple[GuiTranscriptionJob, ...]) -> int:
         """Replace inactive queue history from a validated saved workspace.
 
@@ -284,6 +304,17 @@ class GuiTranscriptionQueue:
             self._jobs = {job.job_id: job for job in (*active, *jobs)}
             self._order = deque((job.job_id for job in (*active, *jobs)), maxlen=50)
         return len(jobs)
+
+    def clear_current_state(self) -> int:
+        """Forget only inactive queue entries; never interrupt active GPU work."""
+
+        with self._lock:
+            if any(job.status in {"queued", "running"} for job in self._jobs.values()):
+                raise ValueError("Stop or finish active transcription jobs before clearing state")
+            count = len(self._jobs)
+            self._jobs.clear()
+            self._order.clear()
+            return count
 
     def close(self) -> None:
         self._pending.put(None)
@@ -410,7 +441,9 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
         correction=stage("correction", correction_path),
         review=stage("review", review_path),
         original_export=stage("original_export", original_export_path),
-        assisted_translation=stage("assisted_translation", translation_candidate_path),
+        assisted_translation=stage(
+            "assisted_translation", translation_candidate_path, translation_candidate_path
+        ),
         translation=stage("translation", translation_path),
         translated_export=stage("translated_export", translated_export_path),
     )

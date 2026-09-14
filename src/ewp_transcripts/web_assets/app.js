@@ -36,9 +36,42 @@ document.querySelector("#transcription-jobs").after(workflowLegend);
 function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; correctionForm.elements.namedItem("confirmed").checked = false; correctionForm.elements.namedItem("allow_remote_endpoint").checked = false; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
 function nextWorkflowStage(job) { const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
 function nextWorkflowLabel(stage) { return ({correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
-function advanceQueueJob(job) { const resultPath = job.result_path; const outputRoot = parentPath(resultPath); const stage = nextWorkflowStage(job); if (stage === "correction") { clearCorrectionForResult(resultPath, outputRoot, job.workflow); document.querySelector("#correction-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } if (stage === "review" || stage === "original-export") { openManualReviewForResult(resultPath, outputRoot, job.workflow?.correction?.path || ""); return; } if (stage === "translation") { translationForm.elements.namedItem("result_path").value = resultPath; translationForm.elements.namedItem("source_revision_path").value = job.workflow?.review?.path || ""; translationForm.elements.namedItem("output_root").value = outputRoot; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from this queue output."; document.querySelector("#translation-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } const candidatePath = job.workflow?.assisted_translation?.candidate_path; if (!candidatePath) { document.querySelector("#translation-review-status").textContent = "GUI_TRANSLATION_CANDIDATE_NOT_FOUND: Cannot reopen semantic review because its non-final candidate is unavailable."; document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } translationCandidate = {result_path: resultPath, revision_path: job.workflow?.review?.path || "", candidate_path: candidatePath, output_root: outputRoot}; openEnhancedTranslationReview(); }
+function advanceQueueJob(job) { const resultPath = job.result_path; const outputRoot = job.output_directory; const stage = nextWorkflowStage(job); if (stage === "correction") { clearCorrectionForResult(resultPath, outputRoot, job.workflow); document.querySelector("#correction-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } if (stage === "review" || stage === "original-export") { openManualReviewForResult(resultPath, outputRoot, job.workflow?.correction?.path || ""); return; } if (stage === "translation") { translationForm.elements.namedItem("result_path").value = resultPath; translationForm.elements.namedItem("source_revision_path").value = job.workflow?.review?.path || ""; translationForm.elements.namedItem("output_root").value = outputRoot; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from this queue output."; document.querySelector("#translation-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } const candidatePath = job.workflow?.assisted_translation?.candidate_path; if (!candidatePath) { document.querySelector("#translation-review-status").textContent = "GUI_TRANSLATION_CANDIDATE_NOT_FOUND: Cannot reopen semantic review because its non-final candidate is unavailable."; document.querySelector("#translation-review-heading").scrollIntoView({behavior: "smooth", block: "start"}); return; } translationCandidate = {result_path: resultPath, revision_path: job.workflow?.review?.path || "", candidate_path: candidatePath, output_root: outputRoot}; openEnhancedTranslationReview(); }
 function addJobActions(job, action) { if (job.status === "staged") { const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove"; remove.addEventListener("click", async () => { try { await queuePost("/api/v1/transcriptions/remove", {job_id: job.job_id}); jobsSignature = ""; await refreshJobs(); } catch (error) { document.querySelector("#operation-status").textContent = error.message; } }); action.append(remove); return; } if (job.status !== "completed" || !job.result_path) return; const stage = nextWorkflowStage(job); const next = document.createElement("button"); next.type = "button"; next.className = "primary"; next.textContent = nextWorkflowLabel(stage); next.disabled = stage === "finished"; next.addEventListener("click", () => advanceQueueJob(job)); action.append(next); }
-async function refreshJobs() { const payload = await loadJson("/api/v1/transcriptions"); const signature = JSON.stringify(payload.jobs); if (signature === jobsSignature) return payload; jobsSignature = signature; const container = document.querySelector("#transcription-jobs"); if (!payload.jobs.length) { container.innerHTML = "<p>No jobs in this server session.</p>"; return payload; } const table = document.createElement("table"); table.className = "queue-table"; const head = document.createElement("thead"); head.innerHTML = "<tr><th>Status</th><th>Job and settings</th><th>Input</th><th>Planned/actual result</th><th>Action</th></tr>"; const body = document.createElement("tbody"); for (const job of payload.jobs) { const row = document.createElement("tr"); const status = document.createElement("td"); status.className = `status-${job.status}`; status.textContent = job.status.toUpperCase(); const identity = document.createElement("td"); identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job)); const input = document.createElement("td"); input.textContent = job.input_path; const output = document.createElement("td"); output.textContent = job.result_path || job.error?.message || shortName(job.planned_result_path); const action = document.createElement("td"); addJobActions(job, action); row.append(status, identity, input, output, action); body.append(row); } table.append(head, body); container.replaceChildren(table); return payload; }
+async function refreshJobs() {
+  const payload = await loadJson("/api/v1/transcriptions");
+  const signature = JSON.stringify(payload.jobs);
+  if (signature === jobsSignature) return payload;
+  jobsSignature = signature;
+  const container = document.querySelector("#transcription-jobs");
+  if (!payload.jobs.length) { container.innerHTML = "<p>No jobs in this server session.</p>"; return payload; }
+  const table = document.createElement("table");
+  table.className = "queue-table";
+  const head = document.createElement("thead");
+  head.innerHTML = "<tr><th>Status</th><th>Job and settings</th><th>Input</th><th>Planned/actual result</th><th>Action</th></tr>";
+  const body = document.createElement("tbody");
+  for (const job of payload.jobs) {
+    const row = document.createElement("tr");
+    const status = document.createElement("td");
+    status.className = `status-${job.status}`;
+    status.textContent = job.status.toUpperCase();
+    const identity = document.createElement("td");
+    identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
+    const input = document.createElement("td");
+    input.textContent = shortName(job.input_path);
+    input.title = job.input_path;
+    const output = document.createElement("td");
+    output.textContent = job.error?.message || shortName(job.result_path || job.planned_result_path);
+    output.title = job.result_path || job.planned_result_path;
+    const action = document.createElement("td");
+    addJobActions(job, action);
+    row.append(status, identity, input, output, action);
+    body.append(row);
+  }
+  table.append(head, body);
+  container.replaceChildren(table);
+  return payload;
+}
 async function enableProceedNextOutput() { const button = document.querySelector("#proceed-next-output"); const payload = await refreshJobs(); const completeJobs = payload?.jobs?.filter(job => job.status === "completed") || []; const allTranslated = completeJobs.length > 0 && completeJobs.every(job => ["complete", "skipped"].includes(job.workflow?.translated_export?.state)); button.textContent = allTranslated ? "Queue finished" : "Proceed with next output"; button.title = allTranslated ? "All completed queue outputs have verified translated exports or an explicitly skipped translation. Return to the transcription queue." : "Return to the transcription queue to continue the next output."; button.disabled = false; }
 document.querySelector("#proceed-next-output").addEventListener("click", () => document.querySelector("#workspace-heading").scrollIntoView({behavior: "smooth", block: "start"}));
 document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; formElement.elements.confirmed.checked = false; result.textContent = ""; summary.replaceChildren(); await refreshJobs(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = false; } });
@@ -131,7 +164,51 @@ skipTranslation.type = "button";
 skipTranslation.id = "skip-translation";
 skipTranslation.textContent = "Skip LLM-assisted translation";
 translationForm.prepend(skipTranslation);
-skipTranslation.addEventListener("click", async () => { const resultPath = String(translationForm.elements.namedItem("result_path").value || ""); const root = String(translationForm.elements.namedItem("output_root").value || "").replace(/[\\/]+$/, ""); if (!resultPath) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_RESULT_REQUIRED: Choose a canonical result before starting manual translation."; return; } if (!root) { document.querySelector("#translation-status").textContent = "GUI_TRANSLATION_OUTPUT_REQUIRED: Choose a translation output root before starting manual translation."; return; } translationCandidate = {result_path: resultPath, revision_path: String(translationForm.elements.namedItem("source_revision_path").value || ""), candidate_path: "", output_root: root, target_language: String(translationForm.elements.namedItem("target_language").value || "")}; document.querySelector("#translation-result").textContent = ""; document.querySelector("#translation-summary").replaceChildren(); document.querySelector("#review-translation").disabled = false; await reportWorkflowSkip(resultPath, "assisted_translation"); const opened = await openEnhancedTranslationReview(); if (opened) document.querySelector("#translation-status").textContent = "LLM-assisted translation skipped. An editable manual translation review is open below; save, preview, verify, apply, and optionally export it."; });
+skipTranslation.addEventListener("click", async () => {
+  const status = document.querySelector("#translation-status");
+  const selected = stageQueueJobs.filter(job => (
+    stageQueueSelections.translation.has(job.job_id)
+    && stageQueueItemIsActionable(job, "translation")
+  ));
+  if (selected.length) {
+    const skipped = [];
+    const failed = [];
+    for (const job of selected) {
+      try {
+        await reportWorkflowSkip(job.result_path, "assisted_translation");
+        skipped.push(job);
+      } catch (error) { failed.push(`${shortName(job.result_path)}: ${error.message}`); }
+      stageQueueSelections.translation.delete(job.job_id);
+    }
+    jobsSignature = "";
+    await refreshJobs();
+    status.textContent = `Skipped LLM-assisted translation for ${skipped.length} selected output${skipped.length === 1 ? "" : "s"}. ${failed.length ? `Errors: ${failed.join("; ")}` : "Use each semantic review queue row for manual translation."}`;
+    if (!skipped.length) return;
+    const first = skipped[0];
+    translationCandidate = {
+      result_path: first.result_path,
+      revision_path: first.workflow?.review?.path || "",
+      candidate_path: "",
+      output_root: first.output_directory,
+      target_language: first.language === "pl" ? "en" : first.language === "en" ? "pl" : String(translationForm.elements.namedItem("target_language").value || ""),
+    };
+    await openEnhancedTranslationReview();
+    return;
+  }
+  const resultPath = String(translationForm.elements.namedItem("result_path").value || "");
+  const root = String(translationForm.elements.namedItem("output_root").value || "").replace(/[\\/]+$/, "");
+  if (!resultPath) { status.textContent = "GUI_TRANSLATION_RESULT_REQUIRED: Choose a canonical result before starting manual translation."; return; }
+  if (!root) { status.textContent = "GUI_TRANSLATION_OUTPUT_REQUIRED: Choose a translation output root before starting manual translation."; return; }
+  translationCandidate = {result_path: resultPath, revision_path: String(translationForm.elements.namedItem("source_revision_path").value || ""), candidate_path: "", output_root: root, target_language: String(translationForm.elements.namedItem("target_language").value || "")};
+  document.querySelector("#translation-result").textContent = "";
+  document.querySelector("#translation-summary").replaceChildren();
+  document.querySelector("#review-translation").disabled = false;
+  try {
+    await reportWorkflowSkip(resultPath, "assisted_translation");
+    const opened = await openEnhancedTranslationReview();
+    if (opened) status.textContent = "LLM-assisted translation skipped. An editable manual translation review is open below; save, preview, verify, apply, and optionally export it.";
+  } catch (error) { status.textContent = error.message; }
+});
 let translationCandidate = null;
 let translationReview = null;
 let appliedTranslation = "";
@@ -194,7 +271,21 @@ document.querySelector("#previous-review-section").addEventListener("click", () 
 document.querySelector("#next-review-section").addEventListener("click", () => { reviewSectionIndex += 1; updateReviewSections(); });
 document.querySelector("#save-review").addEventListener("click", async () => { if (!reviewDocument) return; try { const payload = await postReview("save", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, review_sha256: reviewDocument.review_sha256, anchors: reviewDocument.anchors}); renderReview(payload); persistReview(); await rememberReviewSession(); setReviewStatus("Draft saved; preview is required again", {review_path: payload.review_path, review_sha256: payload.review_sha256}); } catch (error) { setReviewStatus(error.message); } });
 new MutationObserver(() => { if (activeWorkspaceId && reviewStatus.textContent.startsWith("Draft saved;")) document.querySelector("#save-workspace").click(); }).observe(reviewStatus, {childList: true, characterData: true, subtree: true});
-document.querySelector("#preview-review").addEventListener("click", async () => { if (!reviewDocument) return; if (reviewDirty) { setReviewStatus("GUI_REVIEW_SAVE_REQUIRED: Save the current draft before preview."); return; } try { const payload = await postReview("preview", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, source_revision_path: reviewSourceRevisionPath}); const statistics = payload.statistics || {}; const changes = ["substitutions", "merges", "splits", "insertions", "deletions", "punctuation_only_changes", "speaker_changes"].reduce((total, key) => total + (statistics[key] || 0), 0); const apply = document.querySelector("#apply-review"); apply.disabled = Boolean(appliedRevisionPath); apply.title = appliedRevisionPath ? "This saved review has already been applied." : "Publish this exact previewed draft as an immutable verified revision."; setReviewStatus(appliedRevisionPath ? "Preview passed; this review is already published" : "Preview passed; review remains unpublished", payload); showReviewSummary([["Publication", appliedRevisionPath ? "Immutable revision already written" : "None — validation only"], ["Planned revision", payload.revision_number], ["Source tokens", statistics.source_tokens], ["Revision tokens", statistics.revision_tokens], ["Changes", changes], ["Speaker changes", statistics.speaker_changes || 0], ["Alignment warnings", statistics.alignment_warnings || 0], ["Warnings", payload.warnings?.length || 0]]); } catch (error) { setReviewStatus(error.message); } });
+document.querySelector("#preview-review").addEventListener("click", async () => {
+  if (!reviewDocument) return;
+  if (reviewDirty) { setReviewStatus("GUI_REVIEW_SAVE_REQUIRED: Save the current draft before preview."); return; }
+  try {
+    const payload = await postReview("preview", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, source_revision_path: reviewSourceRevisionPath});
+    const statistics = payload.statistics || {};
+    const changes = ["substitutions", "merges", "splits", "insertions", "deletions", "punctuation_only_changes", "speaker_changes"].reduce((total, key) => total + (statistics[key] || 0), 0);
+    const apply = document.querySelector("#apply-review");
+    apply.disabled = Boolean(appliedRevisionPath);
+    apply.title = appliedRevisionPath ? "This saved review has already been applied." : "Publish this exact previewed draft as an immutable verified revision.";
+    setReviewStatus(appliedRevisionPath ? "Preview passed; this review is already published" : "Preview passed; review remains unpublished", payload);
+    showReviewSummary([["Publication", appliedRevisionPath ? "Immutable revision already written" : "None — validation only"], ["Planned revision", payload.revision_number], ["Source tokens", statistics.source_tokens], ["Revision tokens", statistics.revision_tokens], ["Changes", changes], ["Speaker changes", statistics.speaker_changes || 0], ["Alignment warnings", statistics.alignment_warnings || 0], ["Warnings", payload.warnings?.length || 0]]);
+    apply.scrollIntoView({behavior: "smooth", block: "center"});
+  } catch (error) { setReviewStatus(error.message); }
+});
 document.querySelector("#apply-review").addEventListener("click", async () => { if (!reviewDocument) return; try { const payload = await postReview("apply", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, revision_output_directory: reviewValue("revision_output_directory"), source_revision_path: reviewSourceRevisionPath, confirmed: reviewForm.elements.namedItem("verified").checked}); appliedRevisionPath = payload.revision_path; const apply = document.querySelector("#apply-review"); apply.disabled = true; apply.title = "This saved review has already been applied."; const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; unlockTranslationHandoff(); persistReview(); await rememberReviewSession(); setReviewStatus("Verified immutable revision applied", payload); showReviewSummary([["Publication", "Immutable revision written"], ["Revision", payload.revision_number], ["Revision file", shortName(payload.revision_path)], ["Warnings", payload.warnings?.length || 0]]); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "review", error); } });
 document.querySelector("#export-review").addEventListener("click", async () => { if (!reviewDocument || !appliedRevisionPath) return; const formats = [...reviewForm.querySelectorAll('input[name="format"]:checked')].map(item => item.value); try { const payload = await postReview("export", {result_path: reviewDocument.result_path, revision_path: appliedRevisionPath, export_output_directory: reviewValue("export_output_directory"), formats}); setReviewStatus("Verified exports completed", payload); showReviewSummary([["Revision", shortName(appliedRevisionPath)], ["Files written", payload.written?.length || 0], ["Files skipped", payload.skipped?.length || 0]]); await refreshJobs(); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "original_export", error); } });
 proceedToTranslation.addEventListener("click", () => { if (!reviewDocument || !appliedRevisionPath) return; translationForm.elements.namedItem("result_path").value = reviewDocument.result_path; translationForm.elements.namedItem("source_revision_path").value = appliedRevisionPath; translationForm.elements.namedItem("output_root").value = reviewValue("project_output_directory"); translationForm.elements.namedItem("target_language").value = reviewDocument.language === "pl" ? "en" : "pl"; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from the completed review step."; document.querySelector("#translation-heading").scrollIntoView({behavior: "smooth", block: "start"}); });
@@ -230,7 +321,7 @@ document.querySelector("#dictionary-occurrence-layout").addEventListener("change
 new MutationObserver(() => { if (dictionaryProposal && dictionaryEditor.children.length) enhanceDictionaryProposal(); }).observe(dictionaryEditor, {childList: true});
 const dictionaryStatus = document.querySelector("#dictionary-status");
 new MutationObserver(() => { const message = dictionaryStatus.textContent; const confirmation = document.querySelector("#dictionary-publish-confirmed"); const dictionaryId = document.querySelector("#dictionary-id"); confirmation.closest("label").classList.toggle("field-error", message.includes("confirmation is required")); confirmation.setAttribute("aria-invalid", String(message.includes("confirmation is required"))); dictionaryId.classList.toggle("field-error", message.includes("Dictionary ID is required")); dictionaryId.setAttribute("aria-invalid", String(message.includes("Dictionary ID is required"))); if (message === "Versioned project dictionary published.") dictionaryStatus.scrollIntoView({behavior: "smooth", block: "center"}); }).observe(dictionaryStatus, {childList: true, characterData: true, subtree: true});
-function installDictionaryPicker(pathInputId, kind) { const pathInput = document.querySelector(pathInputId); const container = document.createElement("div"); container.className = "dictionary-picker"; const catalogLabel = document.createElement("label"); catalogLabel.textContent = "Dictionary catalog directory"; const catalogInput = document.createElement("input"); catalogInput.value = "dictionaries"; const refresh = document.createElement("button"); refresh.type = "button"; refresh.textContent = "Refresh dictionary list"; const selectLabel = document.createElement("label"); selectLabel.textContent = `Available ${kind} dictionaries`; const select = document.createElement("select"); const empty = document.createElement("option"); empty.value = ""; empty.textContent = "None / use direct path below"; select.append(empty); catalogLabel.append(catalogInput); selectLabel.append(select); container.append(catalogLabel, refresh, selectLabel); pathInput.before(container); refresh.addEventListener("click", async () => { try { const payload = await queuePost("/api/v1/dictionaries/catalog", {catalog_directory: catalogInput.value}); select.replaceChildren(empty.cloneNode(true)); payload.items.filter(item => item.kind === kind).forEach(item => { const option = document.createElement("option"); option.value = item.path; const direction = kind === "translation" ? ` · ${item.source_language}→${item.target_language}` : ` · ${item.language}`; option.textContent = `${item.project_id} · ${item.dictionary_id} · v${item.version}${direction}`; select.append(option); }); } catch (error) { dictionaryStatus.textContent = error.message; } }); select.addEventListener("change", () => { if (select.value) pathInput.value = select.value; }); }
+function installDictionaryPicker(pathInputId, kind) { const pathInput = document.querySelector(pathInputId); const container = document.createElement("div"); container.className = "dictionary-picker"; const catalogLabel = document.createElement("label"); catalogLabel.textContent = "Dictionary catalog directory"; const catalogInput = document.createElement("input"); catalogInput.value = "dictionaries"; const refresh = document.createElement("button"); refresh.type = "button"; refresh.textContent = "Refresh dictionary list"; const selectLabel = document.createElement("label"); selectLabel.textContent = `Available ${kind} dictionaries`; const select = document.createElement("select"); const empty = document.createElement("option"); empty.value = ""; empty.textContent = "None / use direct path below"; select.append(empty); catalogLabel.append(catalogInput); selectLabel.append(select); container.append(catalogLabel, refresh, selectLabel); pathInput.before(container); refresh.addEventListener("click", async () => { try { const payload = await queuePost("/api/v1/dictionaries/catalog", {catalog_directory: catalogInput.value}); select.replaceChildren(empty.cloneNode(true)); payload.items.filter(item => item.kind === kind).forEach(item => { const option = document.createElement("option"); option.value = item.path; const direction = kind === "translation" ? ` · ${item.source_language}→${item.target_language}` : ` · ${item.language}`; option.textContent = `${item.project_id} · ${item.dictionary_id}${direction}`; option.title = `Dictionary document format v${item.version}; edition is identified by the dictionary ID.`; select.append(option); }); } catch (error) { dictionaryStatus.textContent = error.message; } }); select.addEventListener("change", () => { if (select.value) pathInput.value = select.value; }); }
 installDictionaryPicker("#correction-dictionary", "correction");
 installDictionaryPicker("#translation-dictionary", "translation");
 document.querySelectorAll(".dictionary-picker").forEach(picker => { const localStatus = document.createElement("p"); localStatus.className = "field-hint"; localStatus.setAttribute("role", "status"); localStatus.textContent = "Dictionary list not loaded."; picker.append(localStatus); const select = picker.querySelector("select"); new MutationObserver(() => { const count = Math.max(0, select.options.length - 1); localStatus.textContent = count ? `${count} compatible dictionary option(s) loaded.` : "No compatible dictionaries found in this catalog."; }).observe(select, {childList: true}); new MutationObserver(() => { if (dictionaryStatus.textContent.includes("GUI_DICTIONARY")) localStatus.textContent = dictionaryStatus.textContent; }).observe(dictionaryStatus, {childList: true, characterData: true, subtree: true}); });
@@ -241,6 +332,24 @@ installConfirmationHighlight("#correction-status", '#correction-workflow input[n
 installConfirmationHighlight("#translation-status", '#translation-workflow input[name="confirmed"]');
 installConfirmationHighlight("#translation-review-status", "#translation-review-confirmed");
 const workflowOutput = document.querySelector("#output-path");
+const chooseOutputButton = document.createElement("button");
+chooseOutputButton.type = "button";
+chooseOutputButton.className = "path-browser-button";
+chooseOutputButton.textContent = "Choose output folder…";
+chooseOutputButton.title = "Open the local desktop folder dialog; no folder contents are uploaded.";
+const chooseOutputFeedback = document.createElement("span");
+chooseOutputFeedback.className = "feedback-anchor";
+chooseOutputFeedback.append(chooseOutputButton);
+workflowOutput.after(chooseOutputFeedback);
+chooseOutputButton.addEventListener("click", async () => {
+  try {
+    const payload = await queuePost("/api/v1/select-output-directory", {}, {trigger: chooseOutputButton});
+    if (!payload.path) { document.querySelector("#operation-status").textContent = "Output folder selection cancelled."; return; }
+    workflowOutput.value = payload.path;
+    workflowOutput.dispatchEvent(new Event("input", {bubbles: true}));
+    document.querySelector("#operation-status").textContent = `Shared output folder selected: ${payload.path}`;
+  } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
+});
 const workflowActions = document.querySelector("#workflow .actions");
 const workflowOptions = document.createElement("div");
 workflowOptions.className = "workflow-options";
@@ -318,6 +427,12 @@ deleteWorkspaceButton.id = "delete-workspace";
 deleteWorkspaceButton.className = "danger";
 deleteWorkspaceButton.textContent = "Remove selected work state";
 document.querySelector("#refresh-workspaces").before(deleteWorkspaceButton);
+const clearCurrentStateButton = document.createElement("button");
+clearCurrentStateButton.type = "button";
+clearCurrentStateButton.id = "clear-current-work-state";
+clearCurrentStateButton.className = "danger";
+clearCurrentStateButton.textContent = "Clear current work state";
+document.querySelector("#refresh-workspaces").after(clearCurrentStateButton);
 const importWorkspaceInput = document.createElement("input");
 importWorkspaceInput.type = "file";
 importWorkspaceInput.accept = ".json,application/json";
@@ -351,6 +466,25 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
 document.querySelector("#load-workspace").addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } try { const payload = await workspacePost("/api/v1/workspaces/load", {workspace_id: workspaceList.value}); applyWorkspaceFields(payload.workspace.fields); workspaceName.value = payload.workspace.name; lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep; activateWorkspace(payload.workspace); workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`; const heading = document.getElementById(payload.workspace.current_step); heading?.scrollIntoView({behavior: "smooth"}); } catch (error) { workspaceStatus.textContent = error.message; } });
 importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(workspaceDirectory.value)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(payload.workspace.workspace_id, {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
 deleteWorkspaceButton.addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } const selected = workspaceList.selectedOptions[0]?.textContent || "this saved work state"; if (!window.confirm(`Remove ${selected}? This deletes only its saved workspace JSON, not transcripts, reviews, exports, or dictionaries.`)) return; try { await workspacePost("/api/v1/workspaces/delete", {workspace_id: workspaceList.value}); activeWorkspaceId = ""; workspaceAutosave.disabled = true; workspaceName.value = ""; await refreshWorkspaces("", {feedback: false}); workspaceStatus.textContent = "Saved work state removed."; workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load a workspace first."; } catch (error) { workspaceStatus.textContent = error.message; } });
+clearCurrentStateButton.addEventListener("click", async () => {
+  if (!window.confirm("Clear the current queue and unsaved browser work, then start with a blank slate? Saved work states, transcripts, reviews, revisions, exports, and dictionaries will not be deleted. Active transcription must finish first.")) return;
+  try {
+    const payload = await queuePost("/api/v1/transcriptions/clear-current", {confirmed: true}, {trigger: clearCurrentStateButton});
+    activeWorkspaceId = "";
+    workspaceAutosave.disabled = true;
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+      for (let index = storage.length - 1; index >= 0; index -= 1) {
+        const key = storage.key(index);
+        if (key?.startsWith("ewp-")) storage.removeItem(key);
+      }
+    }
+    window.sessionStorage.setItem("ewp-clear-after-reload", "1");
+    workspaceStatus.textContent = `Cleared ${payload.cleared} queue item${payload.cleared === 1 ? "" : "s"}; reloading the blank work area.`;
+    reviewDirty = false;
+    translationReviewDirty = false;
+    window.location.reload();
+  } catch (error) { workspaceStatus.textContent = error.message; }
+});
 workspaceList.addEventListener("change", () => { workspaceAutosave.disabled = workspaceList.value !== activeWorkspaceId; if (workspaceAutosave.disabled) workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load the selected workspace first."; });
 workspaceAutosave.addEventListener("change", () => { workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; });
 setInterval(async () => { if (!workspaceAutosave.checked || workspaceAutosave.disabled || workspaceAutosaveBusy || !activeWorkspaceId) return; const fingerprint = workspaceFingerprint(); if (fingerprint === lastWorkspaceFingerprint) { workspaceAutosaveStatus.textContent = "Auto-save checked: no tracked workflow-field changes to save."; return; } workspaceAutosaveBusy = true; workspaceAutosaveStatus.textContent = "Auto-save detected tracked changes; validating workspace paths…"; try { const payload = await workspacePost("/api/v1/workspaces/save", {workspace_id: activeWorkspaceId, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}, {feedback: false}); workspaceName.value = payload.workspace.name; lastWorkspaceFingerprint = workspaceFingerprint(); await refreshWorkspaces(activeWorkspaceId, {feedback: false}); workspaceStatus.textContent = `Workspace auto-saved: ${payload.workspace.name}.`; workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored."; } catch (error) { workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`; } finally { workspaceAutosaveBusy = false; } }, 60000);
@@ -457,28 +591,35 @@ function installStageQueues() {
       const files = [...(importInput.files || [])];
       importInput.value = "";
       if (!files.length) return;
-      const status = document.querySelector("#operation-status");
+      const outputRoot = workflowOutput.value.trim();
+      if (!outputRoot) {
+        localStatus.textContent = "GUI_OUTPUT_REQUIRED: Choose a durable shared output folder in Inspect and plan before adding saved results.";
+        return;
+      }
       let added = 0;
-      try {
-        for (const file of files) {
+      const errors = [];
+      for (const file of files) {
+        try {
           const payload = await postSelectedFile(
             "/api/v1/import-canonical-file", file, importButton,
+            {"X-EWP-Output-Directory": encodeURIComponent(outputRoot)},
           );
           if (payload.imported) added += 1;
+        } catch (error) {
+          errors.push(`${file.name}: ${error.message}`);
         }
-        jobsSignature = "";
-        await refreshJobs();
-        status.textContent = added
-          ? `Added ${added} saved canonical result${added === 1 ? "" : "s"} to every workflow queue.`
-          : "The selected saved results are already in this GUI queue.";
-      } catch (error) {
-        status.textContent = error.message;
       }
+      jobsSignature = "";
+      await refreshJobs();
+      localStatus.textContent = `${added} saved result${added === 1 ? "" : "s"} added. ${errors.length ? `${errors.length} failed: ${errors.join("; ")}` : ""}`;
     });
     const importFeedback = document.createElement("span");
     importFeedback.className = "feedback-anchor";
     importFeedback.append(importButton, importInput);
     controls.append(importFeedback);
+    const localStatus = document.createElement("p");
+    localStatus.className = "stage-queue-status";
+    localStatus.setAttribute("role", "status");
     if (definition.selectable) {
       const selectAll = document.createElement("button");
       selectAll.type = "button";
@@ -493,7 +634,7 @@ function installStageQueues() {
     const items = document.createElement("div");
     items.className = "stage-queue-items";
     items.dataset.stageQueueItems = definition.id;
-    surface.append(heading, intro, legend, controls, items);
+    surface.append(heading, intro, legend, controls, localStatus, items);
     definition.insertBefore.before(surface);
   }
 }
@@ -508,6 +649,7 @@ function queueItemsForStage(jobs, stage) {
 
 function stageState(job, stage) {
   if (stage === "review") return job.workflow?.review || {state: "pending"};
+  if (stage === "translation") return job.workflow?.assisted_translation || {state: "pending"};
   if (stage === "semantic-review") {
     const translation = job.workflow?.translation || {state: "pending"};
     const assisted = job.workflow?.assisted_translation || {};
@@ -566,7 +708,7 @@ correctionForm.addEventListener("submit", async event => {
   summary.replaceChildren();
   try {
     for (const [index, job] of selected.entries()) {
-      const root = parentPath(job.result_path);
+      const root = job.output_directory;
       status.textContent = `Generating correction ${index + 1} of ${selected.length}: ${shortName(job.result_path)}…`;
       const request = {
         result_path: job.result_path,
@@ -619,9 +761,100 @@ correctionForm.addEventListener("submit", async event => {
   status.textContent = `Correction batch finished: ${completed.length} candidate${completed.length === 1 ? "" : "s"}, ${failed.length} error${failed.length === 1 ? "" : "s"}.`;
 }, true);
 
-function openStageQueueItem(job, stage) {
+translationForm.addEventListener("submit", async event => {
+  const selected = stageQueueJobs.filter(job => (
+    stageQueueSelections.translation.has(job.job_id)
+    && stageQueueItemIsActionable(job, "translation")
+  ));
+  if (!selected.length) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const submit = document.querySelector("#generate-translation");
+  const form = new FormData(translationForm);
+  const status = document.querySelector("#translation-status");
+  const summary = document.querySelector("#translation-summary");
+  const reasoning = String(form.get("reasoning_max_tokens") || "");
+  const completed = [];
+  const failed = [];
+  submit.disabled = true;
+  translationCandidate = null;
+  document.querySelector("#review-translation").disabled = true;
+  document.querySelector("#translation-result").textContent = "";
+  summary.replaceChildren();
+  try {
+    for (const [index, job] of selected.entries()) {
+      const root = job.output_directory;
+      status.textContent = `Generating translation ${index + 1} of ${selected.length}: ${shortName(job.result_path)}…`;
+      const request = {
+        result_path: job.result_path,
+        source_revision_path: job.workflow?.review?.path || "",
+        output_directory: `${root}/translation-candidates`,
+        resume_directory: `${root}/translation-state`,
+        target_language: form.get("target_language"),
+        provider: form.get("provider"),
+        model: form.get("model"),
+        endpoint: form.get("endpoint"),
+        allow_remote_endpoint: form.get("allow_remote_endpoint") === "on",
+        allow_cloud: form.get("provider") === "openrouter",
+        reasoning_max_tokens: reasoning === "" ? null : Number(reasoning),
+        output_mode: form.get("output_mode"),
+        dictionary_path: form.get("dictionary_path"),
+        confirmed: form.get("confirmed") === "on",
+      };
+      try {
+        const payload = await queuePost("/api/v1/translations/generate", request, {trigger: submit});
+        completed.push([shortName(job.result_path), shortName(payload.candidate_path)]);
+        translationCandidate = {
+          ...payload, revision_path: request.source_revision_path,
+          output_root: root, target_language: request.target_language,
+        };
+      } catch (error) {
+        failed.push([shortName(job.result_path), error.message]);
+        await reportWorkflowError(String(job.result_path), "assisted_translation", error);
+      } finally {
+        stageQueueSelections.translation.delete(job.job_id);
+      }
+    }
+  } finally {
+    submit.disabled = false;
+    jobsSignature = "";
+    await refreshJobs();
+  }
+  const table = document.createElement("table");
+  table.className = "review-summary-table";
+  const body = document.createElement("tbody");
+  for (const [name, outcome, detail] of [
+    ...completed.map(([name, candidate]) => [name, "Candidate", candidate]),
+    ...failed.map(([name, message]) => [name, "Error", message]),
+  ]) {
+    const row = document.createElement("tr");
+    for (const value of [name, outcome, detail]) {
+      const cell = document.createElement("td");
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    body.append(row);
+  }
+  table.append(body);
+  summary.append(table);
+  document.querySelector("#review-translation").disabled = !translationCandidate;
+  status.textContent = `Translation batch finished: ${completed.length} candidate${completed.length === 1 ? "" : "s"}, ${failed.length} error${failed.length === 1 ? "" : "s"}. Open each candidate from its semantic review queue row.`;
+}, true);
+
+async function openStageQueueItem(job, stage) {
   const resultPath = job.result_path;
-  const outputRoot = parentPath(resultPath);
+  const outputRoot = job.output_directory;
+  const optionalStage = stage === "translation" ? "assisted_translation" : stage;
+  if (["correction", "assisted_translation"].includes(optionalStage) && job.workflow?.[optionalStage]?.state === "skipped") {
+    try {
+      await queuePost("/api/v1/transcriptions/workflow-reopen", {result_path: resultPath, stage: optionalStage});
+      jobsSignature = "";
+      await refreshJobs();
+    } catch (error) {
+      document.querySelector(stage === "correction" ? "#correction-status" : "#translation-status").textContent = error.message;
+      return;
+    }
+  }
   if (stage === "correction") {
     clearCorrectionForResult(resultPath, outputRoot, job.workflow);
     document.querySelector("#correction-heading").scrollIntoView({behavior: "smooth", block: "start"});
@@ -651,7 +884,7 @@ function openStageQueueItem(job, stage) {
     revision_path: job.workflow?.review?.path || "",
     candidate_path: candidatePath,
     output_root: outputRoot,
-    target_language: String(translationForm.elements.namedItem("target_language").value || ""),
+    target_language: job.language === "pl" ? "en" : job.language === "en" ? "pl" : String(translationForm.elements.namedItem("target_language").value || ""),
   };
   void openEnhancedTranslationReview();
 }
@@ -708,10 +941,18 @@ function renderStageQueues(jobs) {
       heading.textContent = job.planned_job_id;
       const path = document.createElement("p");
       path.textContent = shortName(job.result_path);
+      path.title = job.result_path;
       const progress = document.createElement("div");
       progress.className = "workflow-progress";
       progress.append(...stageQueueItemDetails(job, definition.id));
       content.append(heading, path, progress);
+      const stageError = job.workflow_errors?.[definition.id === "translation" ? "assisted_translation" : definition.id];
+      if (stageError) {
+        const error = document.createElement("p");
+        error.className = "stage-queue-error";
+        error.textContent = `Error: ${stageError}`;
+        content.append(error);
+      }
       const open = document.createElement("button");
       open.type = "button";
       open.textContent = definition.actionLabel;
@@ -757,4 +998,10 @@ function installFeedbackSlots() {
   }
 }
 installFeedbackSlots();
+if (window.sessionStorage.getItem("ewp-clear-after-reload") === "1") {
+  window.sessionStorage.removeItem("ewp-clear-after-reload");
+  document.querySelectorAll("form").forEach(form => form.reset());
+  workspaceName.value = "";
+  workspaceDirectory.value = "";
+}
 start();

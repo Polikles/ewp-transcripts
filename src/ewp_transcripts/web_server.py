@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import secrets
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -59,6 +60,37 @@ SECURITY_HEADERS = {
     "X-Frame-Options": "DENY",
     "Cache-Control": "no-store",
 }
+
+
+def _select_local_directory() -> str | None:
+    """Ask the local desktop for one folder without uploading its contents."""
+
+    if shutil.which("powershell.exe"):
+        script = (
+            "Add-Type -AssemblyName System.Windows.Forms; "
+            "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog; "
+            "$dialog.Description = 'Choose EWP output folder'; "
+            "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
+            "{ [Console]::Out.Write($dialog.SelectedPath) }"
+        )
+        command = ["powershell.exe", "-NoProfile", "-STA", "-Command", script]
+    elif shutil.which("zenity"):
+        command = ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"]
+    else:
+        raise ValueError(
+            "No desktop folder dialog is available. Enter the output directory path directly."
+        )
+    try:
+        completed = subprocess.run(
+            command, check=False, capture_output=True, text=True, timeout=600
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ValueError(
+            "The local folder dialog could not complete. Enter the path directly."
+        ) from error
+    if completed.returncode != 0:
+        return None
+    return completed.stdout.strip() or None
 
 
 class GuiSelectionCache:
@@ -430,6 +462,16 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     "_results.json"
                 ):
                     raise ValueError("Select one canonical *_results.json file.")
+                if path == "/api/v1/import-canonical-file":
+                    raw_output = unquote(self.headers.get("X-EWP-Output-Directory", ""))
+                    if not raw_output.strip():
+                        raise ValueError(
+                            "Choose a durable shared output directory in Inspect and plan "
+                            "before adding saved results."
+                        )
+                    output_directory = self.server.gui_workflows.resolve_allowed_path(
+                        raw_output, directory=True
+                    )
                 if path == "/api/v1/import-workspace-file" and not filename.endswith(".json"):
                     raise ValueError("Select one saved workspace JSON file.")
                 selected_path = self.server.gui_selections.store(
@@ -439,6 +481,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     canonical = require_completed_canonical_result(selected_path)
                     job, imported = self.server.gui_transcriptions.register_completed_result(
                         selected_path,
+                        output_directory=output_directory,
                         planned_job_id=canonical.job_id,
                         language=LanguageMode(canonical.episode.language),
                     )
@@ -487,6 +530,38 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     },
                 )
             )
+            return
+        if path == "/api/v1/select-output-directory":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The folder request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                selected = _select_local_directory()
+                directory = (
+                    str(self.server.gui_workflows.resolve_allowed_path(selected, directory=True))
+                    if selected
+                    else None
+                )
+            except (OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_OUTPUT_DIRECTORY_INVALID", "message": str(error)}},
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, {"path": directory}))
             return
         if path.startswith("/api/v1/workspaces/"):
             supplied = self.headers.get("X-EWP-CSRF", "")
@@ -1132,6 +1207,35 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 count = self.server.gui_transcriptions.start()
                 self._write_response(_json_response(HTTPStatus.ACCEPTED, {"queued": count}))
                 return
+            if path == "/api/v1/transcriptions/clear-current":
+                if document.get("confirmed") is not True:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CLEAR_CONFIRMATION_REQUIRED",
+                                    "message": (
+                                        "Confirm clearing the current queue and unsaved "
+                                        "browser state."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                try:
+                    cleared = self.server.gui_transcriptions.clear_current_state()
+                except ValueError as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {"error": {"code": "GUI_QUEUE_ACTIVE", "message": str(error)}},
+                        )
+                    )
+                    return
+                self._write_response(_json_response(HTTPStatus.OK, {"cleared": cleared}))
+                return
             if path == "/api/v1/transcriptions/remove":
                 job_id = document.get("job_id")
                 removed = (
@@ -1190,7 +1294,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 self._write_response(_json_response(HTTPStatus.OK, {"recorded": recorded}))
                 return
-            if path == "/api/v1/transcriptions/workflow-skip":
+            if path in {
+                "/api/v1/transcriptions/workflow-skip",
+                "/api/v1/transcriptions/workflow-reopen",
+            }:
                 result_path = document.get("result_path")
                 stage = document.get("stage")
                 if (
@@ -1233,10 +1340,16 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
-                skipped = self.server.gui_transcriptions.skip_workflow_stage(
-                    result_path, cast(WorkflowStageName, stage)
-                )
-                self._write_response(_json_response(HTTPStatus.OK, {"skipped": skipped}))
+                if path.endswith("workflow-reopen"):
+                    reopened = self.server.gui_transcriptions.reopen_workflow_stage(
+                        result_path, cast(WorkflowStageName, stage)
+                    )
+                    self._write_response(_json_response(HTTPStatus.OK, {"reopened": reopened}))
+                else:
+                    skipped = self.server.gui_transcriptions.skip_workflow_stage(
+                        result_path, cast(WorkflowStageName, stage)
+                    )
+                    self._write_response(_json_response(HTTPStatus.OK, {"skipped": skipped}))
                 return
             if path != "/api/v1/transcriptions":
                 self._write_response(

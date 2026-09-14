@@ -17,9 +17,37 @@ from ewp_transcripts.web_server import (
     WebConfiguration,
     WebResponse,
     _open_browser,
+    _select_local_directory,
     dispatch_get,
 )
 from ewp_transcripts.web_workflows import GuiWorkflowController
+
+
+def test_output_folder_dialog_uses_local_os_picker_without_upload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: name if name == "powershell.exe" else None,
+    )
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **kwargs: object) -> SimpleNamespace:
+        calls.append(command)
+        assert kwargs["timeout"] == 600
+        return SimpleNamespace(returncode=0, stdout="C:\\Users\\DS\\Desktop\\tezt001")
+
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+    assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt001"
+    assert calls[0][:4] == ["powershell.exe", "-NoProfile", "-STA", "-Command"]
+
+
+def test_output_folder_dialog_reports_missing_desktop_picker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server.shutil.which", lambda _: None)
+    with pytest.raises(ValueError, match="Enter the output directory path directly"):
+        _select_local_directory()
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -338,6 +366,61 @@ def test_transcription_post_requires_active_csrf_token() -> None:
     response = write_response.call_args.args[0]
     assert response.status == 403
     assert json.loads(response.body)["error"]["code"] == "GUI_CSRF_REJECTED"
+
+
+def test_output_folder_route_returns_validated_local_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server._select_local_directory", lambda: str(tmp_path))
+    body = b"{}"
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/select-output-directory"
+    handler.rfile = BytesIO(body)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_workflows=GuiWorkflowController(),
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    assert json.loads(response.body)["path"] == str(tmp_path)
+
+
+def test_clear_current_queue_requires_confirmation() -> None:
+    body = b"{}"
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions/clear-current"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_transcriptions=transcriptions
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "GUI_CLEAR_CONFIRMATION_REQUIRED"
+    transcriptions.clear_current_state.assert_not_called()
 
 
 def test_workflow_skip_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:

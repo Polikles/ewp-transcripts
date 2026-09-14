@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-09-11**.
+Last updated: **2026-09-14**.
 
 ## Checkpoint
 
@@ -24,17 +24,16 @@ skip/error annotations, then validates and restores that history after a GUI res
 GPU work is never revived: only the existing source-hash-validated staged-job recovery path can
 resume it. Immutable artifact-derived green states remain independently durable.
 
-The first multi-stage queue presentation slice is now implemented. Correction, review/export,
-translation, and semantic review/export are always-visible queues derived from the
-same completed transcription records and immutable artifacts. Opening an item transfers only its
-own canonical result, lineage, and output root, preserving active drafts through the existing
-review services. Correction and translation offer page-local checkbox and Select-all
-selection foundations only; they do not batch-start providers or weaken the existing per-item
-consent, dictionary, provenance, retry, error-isolation, or manual-review gates.
-Automated GUI-asset/API coverage passes. External browser qualification is in progress: manual
-translation now has a no-provider path from the LLM-skip control, and transcript-review Save and
-Preview restore their local progress feedback after the control-layout rearrangement. Recheck the
-visible per-stage queues and this manual-translation path before catalog discovery or batch work.
+Correction, review/export, translation, and semantic review/export are always-visible queues
+derived from the same completed transcription records and immutable artifacts. Correction and
+translation selected-item provider actions now run sequentially, with item-specific output roots,
+consent, result/error summaries, and no automatic final publication. Native file import needs an
+explicit durable shared output root: the selected canonical JSON remains temporary, while review,
+revision, candidate, and export artifacts use the selected root. Workspace save now recognizes all
+current form fields; an OS folder dialog chooses the shared output root without uploading folder
+contents. A confirmed clear-current-state action forgets inactive queue/browser state without
+deleting saved artifacts. Automated GUI checks pass; Chrome/Firefox and real-provider qualification
+for GUI-14 through GUI-24 in `docs/99-roadmap-v2.md` remains the next operator gate.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated

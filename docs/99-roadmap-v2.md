@@ -740,6 +740,27 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     an optional user-space workspace storage directory so state files can be included in backups.
     A browser-native selected workspace JSON can be imported into that catalog without a
     directory-picker warning.
+14. **GUI-14 — Saved-state validation and controls — implemented, pending browser retest:** save with empty or custom user-space storage
+    directory; keep the client/server field contracts in sync and align all saved-state buttons.
+15. **GUI-15 — Output-root chooser — implemented, pending WSL/Ubuntu retest:** choose the shared Inspect and plan output directory using
+    an operating-system folder dialog without the browser's upload-all-files prompt.
+16. **GUI-16 — Queue readability — implemented, pending browser retest:** align action buttons in every stage queue; show imported
+    result filenames, with full paths available on hover, instead of temporary path strings.
+17. **GUI-17 — Correction reopening — implemented, pending browser retest:** reopening skipped correction clears its skip state and
+    re-enables that specific item for correction selection.
+18. **GUI-18 — Review preview handoff — implemented, pending browser retest:** after Preview, scroll to Apply verified revision.
+19. **GUI-19 — Dictionary version labels — implemented, pending browser retest:** show an English dictionary's version once, with
+    accurate, distinct versions for each installed edition.
+20. **GUI-20 — Batch translation and semantic handoff — implemented, pending provider/browser retest:** process every selected eligible item
+    once, save each translation candidate, and open each in semantic review with nonempty targets.
+21. **GUI-21 — Import diagnostics — implemented, pending browser retest:** show the specific per-item failure in correction and other
+    stage queues when an imported canonical result cannot be used.
+22. **GUI-22 — Bulk translation skip — implemented, pending browser retest:** selected queue items can skip assisted translation
+    without single-item path fields; all selected statuses update independently.
+23. **GUI-23 — Durable review output — implemented, pending WSL/browser retest:** applied revisions, saved reviews, and exports go to the
+    user's chosen output root, never session-local picker storage; block ambiguous output roots.
+24. **GUI-24 — Clear current state — implemented, pending browser retest:** an explicit warned confirmation clears the active queue and
+    unsaved form state without deleting saved workspaces or publication artifacts.
 
 Planned capabilities:
 

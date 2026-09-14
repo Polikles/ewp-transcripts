@@ -2,6 +2,8 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.revision import sha256_file
@@ -122,10 +124,16 @@ def test_queue_registers_existing_completed_result_once(tmp_path: Path) -> None:
     queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
     try:
         first, imported = queue.register_completed_result(
-            result, planned_job_id="episode", language=LanguageMode.POLISH
+            result,
+            output_directory=tmp_path / "published",
+            planned_job_id="episode",
+            language=LanguageMode.POLISH,
         )
         second, repeated = queue.register_completed_result(
-            result, planned_job_id="episode", language=LanguageMode.POLISH
+            result,
+            output_directory=tmp_path / "published",
+            planned_job_id="episode",
+            language=LanguageMode.POLISH,
         )
     finally:
         queue.close()
@@ -135,6 +143,81 @@ def test_queue_registers_existing_completed_result_once(tmp_path: Path) -> None:
     assert first == second
     assert first.status == "completed"
     assert first.result_path == str(result)
+    assert first.output_directory == str(tmp_path / "published")
+
+
+def test_reopen_skipped_correction_restores_actionable_pending_state(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        job, _ = queue.register_completed_result(
+            result,
+            output_directory=tmp_path / "published",
+            planned_job_id="episode",
+            language=LanguageMode.POLISH,
+        )
+        assert queue.skip_workflow_stage(str(result), "correction")
+        assert queue.jobs()[0].workflow_skips == {"correction"}
+        assert queue.reopen_workflow_stage(str(result), "correction")
+        reopened = queue.jobs()[0]
+    finally:
+        queue.close()
+    assert reopened.job_id == job.job_id
+    assert reopened.workflow_skips == set()
+    assert workflow_progress(reopened).correction.state == "pending"
+
+
+def test_translation_candidate_progress_exposes_exact_review_parent(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    output = tmp_path / "published"
+    candidate = output / "translation-candidates" / "episode_pl-en_translation_001.json"
+    candidate.parent.mkdir(parents=True)
+    candidate.write_text("{}")
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        job, _ = queue.register_completed_result(
+            result, output_directory=output, planned_job_id="episode", language=LanguageMode.POLISH
+        )
+    finally:
+        queue.close()
+    progress = workflow_progress(job)
+    assert progress.assisted_translation.state == "complete"
+    assert progress.assisted_translation.candidate_path == str(candidate)
+
+
+def test_clear_current_state_forgets_inactive_queue_without_deleting_files(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    result.write_text("saved artifact")
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        queue.register_completed_result(
+            result,
+            output_directory=tmp_path,
+            planned_job_id="episode",
+            language=LanguageMode.POLISH,
+        )
+        assert queue.clear_current_state() == 1
+        assert queue.jobs() == ()
+    finally:
+        queue.close()
+    assert result.read_text() == "saved artifact"
+
+
+def test_clear_current_state_refuses_active_transcription(tmp_path: Path) -> None:
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        job = queue.stage(
+            tmp_path / "episode.wav",
+            tmp_path / "output",
+            planned_job_id="episode",
+            planned_result_path=str(tmp_path / "output" / "episode_results.json"),
+        )
+        queue._replace(job.job_id, status="running")  # noqa: SLF001 - simulate active worker
+        with pytest.raises(ValueError, match="active transcription"):
+            queue.clear_current_state()
+        assert queue.jobs()[0].job_id == job.job_id
+    finally:
+        queue.close()
 
 
 def test_queue_rejects_source_changed_after_dry_run_before_transcription(tmp_path: Path) -> None:
