@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from ewp_transcripts.domain.errors import InvalidExistingResultError
-from ewp_transcripts.storage import find_existing_results, read_existing_result
+from ewp_transcripts.storage import (
+    find_existing_results,
+    is_preserved_gui_result,
+    preserve_gui_selected_source,
+    read_existing_result,
+)
 
 
 def _write_result(
@@ -28,6 +33,33 @@ def _write_result(
         ),
         encoding="utf-8",
     )
+
+
+def test_gui_selected_canonical_source_is_durable_and_content_addressed(tmp_path: Path) -> None:
+    selected = tmp_path / "selected" / "episode_results.json"
+    selected.parent.mkdir()
+    selected.write_bytes(b'{"version": 1}')
+    output = tmp_path / "output"
+
+    first, first_digest = preserve_gui_selected_source(
+        selected, output_directory=output, category="canonical"
+    )
+    repeated, repeated_digest = preserve_gui_selected_source(
+        selected, output_directory=output, category="canonical"
+    )
+    selected.write_bytes(b'{"version": 2}')
+    second, second_digest = preserve_gui_selected_source(
+        selected, output_directory=output, category="canonical"
+    )
+
+    assert first == repeated
+    assert first_digest == repeated_digest
+    assert second != first
+    assert second_digest != first_digest
+    assert first.read_bytes() == b'{"version": 1}'
+    assert second.read_bytes() == b'{"version": 2}'
+    assert is_preserved_gui_result(first, output, first_digest)
+    assert not list(output.rglob("*.tmp"))
 
 
 def test_missing_output_directory_has_no_existing_results(tmp_path: Path) -> None:

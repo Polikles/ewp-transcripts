@@ -14,6 +14,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.storage import is_preserved_gui_result
 from ewp_transcripts.web_jobs import GuiTranscriptionJob
 
 _FIELD_NAMES = frozenset(
@@ -320,11 +322,18 @@ class GuiWorkspaceController:
             self._resolve_path(job.input_path)
             output = self._resolve_path(job.output_directory, directory=True)
             planned = self._resolve_path(job.planned_result_path, directory=job.status == "failed")
-            if planned.parent != output:
+            imported = (
+                job.status == "completed"
+                and job.input_path == job.result_path == job.planned_result_path
+                and is_preserved_gui_result(planned, output, job.source_sha256)
+            )
+            if planned.parent != output and not imported:
                 raise ValueError("Workspace completed job has an invalid result location")
             if job.status == "completed":
                 if not job.result_path or self._resolve_path(job.result_path) != planned:
                     raise ValueError("Workspace completed job has an invalid result")
+                if imported and sha256_file(planned) != job.source_sha256:
+                    raise ValueError("Saved imported canonical result changed on disk")
             elif job.result_path is not None:
                 raise ValueError("Workspace failed job cannot have a result")
             clean.append(job)

@@ -178,6 +178,13 @@ paths, revalidate every path on save/load, and exclude confirmations as well as 
 GUI-owned temporary picker paths are session-only, so they MUST NOT invalidate saving otherwise
 durable work state. The GUI clears such form paths and omits jobs whose only source/result is a
 temporary picker copy, reporting the omission instead of promising impossible restoration.
+Once a user chooses a durable output root and imports a completed canonical result, the GUI MUST
+preserve a validated, content-addressed copy under that root before adding it to a resumable queue.
+Browser-picked audio MUST likewise be preserved there when the user confirms staging. Source
+copies must never overwrite different existing content, and workspace restore must verify their
+recorded hashes. Explicit Save current work state MUST save dirty transcript/translation review
+drafts to their authoritative output files before saving the non-secret workspace record;
+periodic field-only auto-save does not claim to checkpoint unsaved editor text.
 An active saved workspace MAY be auto-saved. The default GUI interval is 60 seconds and the
 client MUST compare the allowlisted state before writing, so unchanged state causes no save
 request. Auto-save begins only after an explicit save or load, remains optional, and never
@@ -295,16 +302,19 @@ tabs or equivalent routed views—transcribe, optional correction, review/export
 semantic review/export—while dictionary and settings management live in their own clearly
 separate views. Navigation must preserve current saved state and must not imply that optional
 stages are mandatory.
-Result-import queues MUST use the browser's native picker. A selected canonical JSON is copied
-only to the same-machine loopback server's owned temporary work directory, strictly parsed, and
-deleted when that GUI server stops; the picker never searches all user filesystems. Import also
-requires an explicit durable shared output root for later review, revision, and export files;
-the temporary JSON directory MUST NOT become that root. If the root is missing after file
+Result-import queues MUST use the browser's native picker. A selected canonical JSON first enters
+the same-machine loopback server's owned temporary work directory and is strictly parsed; the
+picker never searches all user filesystems. Import requires an explicit durable shared output
+root. The validated JSON is then preserved under that root in a hidden content-addressed source
+folder before it enters the queue, and the session copy is deleted when the GUI server stops.
+Review, revision, and export files also use the selected root. If the root is missing after file
 selection, the browser retains that selection during the current page session and resumes
 import when the root is supplied. Validated force-versioned canonical names
 (`*_results_vNNN.json`) are accepted alongside `*_results.json`. Inspect and
 plan likewise offers a native audio picker that makes an explicit, bounded session copy and shows
-its temporary server-side path. The associated button must show Working and Done feedback. Output
+its temporary server-side path. When staged after a reviewed dry-run, that audio is copied into
+the same durable content-addressed source folder and the queue uses the durable path. The picker
+button must show Working and Done feedback. Output
 directories allow direct path entry or a server-mediated local operating-system folder dialog.
 Browser directory selection causes an unavoidable browser-controlled sharing warning and is not
 offered. Direct server-side result, transcript,

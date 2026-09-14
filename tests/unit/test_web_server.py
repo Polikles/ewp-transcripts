@@ -10,6 +10,7 @@ from unittest.mock import Mock
 import pytest
 
 from ewp_transcripts import __version__
+from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
     GuiSelectionCache,
@@ -65,7 +66,7 @@ def test_output_folder_dialog_reports_missing_desktop_picker(
         _select_local_directory()
 
 
-def test_output_folder_dialog_retries_through_cmd_after_direct_interop_error(
+def test_output_folder_dialog_retries_through_bash_after_direct_interop_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
@@ -82,7 +83,8 @@ def test_output_folder_dialog_retries_through_cmd_after_direct_interop_error(
 
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
     assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt002"
-    assert [command[0] for command in calls] == ["powershell.exe", "cmd.exe"]
+    assert [command[0] for command in calls] == ["powershell.exe", "/bin/bash"]
+    assert "powershell.exe" in calls[1][2]
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -241,6 +243,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"#operation-status" in script_response.body
     assert b"Save current work state" in script_response.body
     assert b"/api/v1/workspaces/save" in script_response.body
+    assert b"if (reviewDocument && reviewDirty) await saveReviewDraft()" in script_response.body
     assert b"workspace-autosave" in script_response.body
     assert b"restoreWorkspaceReviewIfPresent" in script_response.body
     assert b"60000" in script_response.body
@@ -248,7 +251,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"Changes pending for auto-save" in script_response.body
     assert b"will retry" in script_response.body
     assert b"active GUI server process" in script_response.body
-    assert b"API keys, confirmations, transcript text" in script_response.body
+    assert b"workspace JSON does not embed transcript text, API keys" in script_response.body
     style_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.css"
     )
@@ -289,11 +292,33 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
     _open_browser("http://127.0.0.1:8765/")
 
     assert run.call_args.args[0] == ["cmd.exe", "/C", "start", "", "http://127.0.0.1:8765/"]
-    assert run.call_args.kwargs["stderr"] is subprocess.DEVNULL
+    assert run.call_args.kwargs["stderr"] is subprocess.PIPE
 
 
-def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
+def test_wsl_browser_open_uses_bash_after_exec_format_error(
     monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: name if name in {"cmd.exe", "powershell.exe"} else None,
+    )
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_: object) -> SimpleNamespace:
+        calls.append(command)
+        if command[0] == "cmd.exe":
+            raise OSError(8, "Exec format error")
+        return SimpleNamespace(returncode=0, stderr="")
+
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+    _open_browser("http://127.0.0.1:8765/")
+    assert [command[0] for command in calls] == ["cmd.exe", "/bin/bash"]
+    assert "cmd.exe /C start '' http://127.0.0.1:8765/" in calls[1][2]
+
+
+def test_wsl_browser_open_reports_windows_failure_without_gio(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
     monkeypatch.setattr(
@@ -302,13 +327,15 @@ def test_wsl_browser_open_falls_back_when_windows_bridge_fails(
     )
     run = Mock()
     run.return_value.returncode = 1
+    run.return_value.stderr = "interop failed"
     opened = Mock()
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
     monkeypatch.setattr("ewp_transcripts.web_server.webbrowser.open", opened)
 
     _open_browser("http://127.0.0.1:8765/")
 
-    opened.assert_called_once_with("http://127.0.0.1:8765/")
+    opened.assert_not_called()
+    assert "GUI_BROWSER_OPEN_FAILED" in capsys.readouterr().err
 
 
 def test_selection_cache_copies_and_cleans_an_explicitly_selected_file(tmp_path: Path) -> None:
@@ -351,6 +378,120 @@ def test_native_media_picker_upload_route_returns_a_session_copy(tmp_path: Path)
     assert response.status == 200
     assert copied.read_bytes() == body
     cache.close()
+
+
+def test_canonical_picker_import_remains_after_selection_cache_closes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    body = b'{"canonical":"validated by fake"}'
+    output = tmp_path / "output"
+    cache = GuiSelectionCache()
+    cache._root = tmp_path / "cache"  # noqa: SLF001 - isolate this request's cache
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.require_completed_canonical_result",
+        lambda _: SimpleNamespace(job_id="episode", episode=SimpleNamespace(language="pl")),
+    )
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    headers["X-EWP-Filename"] = "episode_results.json"
+    headers["X-EWP-Output-Directory"] = str(output)
+    handler.headers = headers
+    handler.path = "/api/v1/import-canonical-file"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    transcriptions.register_completed_result.return_value = (
+        SimpleNamespace(model_dump=lambda mode: {"status": "completed"}),
+        True,
+    )
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_selections=cache,
+        gui_workflows=GuiWorkflowController(),
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+    cache.close()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    preserved = transcriptions.register_completed_result.call_args.args[0]
+    assert preserved.read_bytes() == body
+    assert preserved.is_relative_to(output / ".ewp-gui-sources" / "canonical")
+    assert len(transcriptions.register_completed_result.call_args.kwargs["source_sha256"]) == 64
+
+
+def test_staged_browser_audio_remains_after_selection_cache_closes(tmp_path: Path) -> None:
+    cache = GuiSelectionCache()
+    cache._root = tmp_path / "cache"  # noqa: SLF001 - isolate this request's cache
+    selected = cache.store(filename="episode.wav", content_length=5, source=BytesIO(b"audio"))
+    output = tmp_path / "output"
+    base_workflows = GuiWorkflowController()
+    plan = {
+        "jobs": [
+            {
+                "job_id": "episode",
+                "decision": "process",
+                "outputs": {"results": str(output / "episode_results.json")},
+            }
+        ],
+        "inspection": {
+            "episodes": [{"sources": [{"fingerprint": {"sha256": sha256_file(selected)}}]}]
+        },
+    }
+    body = json.dumps(
+        {
+            "path": str(selected),
+            "output_directory": str(output),
+            "language": "pl",
+            "speaker_count": "auto",
+            "confirmed": True,
+        }
+    ).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    transcriptions.active_output_directory.return_value = None
+    transcriptions.contains_active_input.return_value = False
+    transcriptions.contains_active_planned_job.return_value = False
+    transcriptions.stage.return_value = SimpleNamespace(
+        model_dump=lambda mode: {"status": "staged"}
+    )
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_selections=cache,
+        gui_workflows=SimpleNamespace(
+            resolve_allowed_path=base_workflows.resolve_allowed_path,
+            resolve_transcription_options=base_workflows.resolve_transcription_options,
+            completed_plan=Mock(return_value=plan),
+        ),
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+    cache.close()
+
+    assert write_response.call_args.args[0].status == 202
+    preserved = transcriptions.stage.call_args.args[0]
+    assert preserved.read_bytes() == b"audio"
+    assert preserved.is_relative_to(output / ".ewp-gui-sources" / "media")
 
 
 def test_write_response_ignores_abandoned_browser_connection() -> None:

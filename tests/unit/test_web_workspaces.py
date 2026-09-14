@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_workflows import GuiWorkflowController
 from ewp_transcripts.web_workspaces import _FIELD_NAMES, GuiWorkspaceController
 
@@ -185,6 +186,45 @@ def test_workspace_retains_only_hash_bound_staged_queue_identity(tmp_path: Path)
 
     assert saved.staged_jobs[0]["planned_job_id"] == "episode"
     assert workspaces.load(saved.workspace_id).staged_jobs == saved.staged_jobs
+
+
+def test_workspace_restores_imported_result_after_browser_selection_expires(tmp_path: Path) -> None:
+    workspaces, allowed = controller(tmp_path)
+    selected = allowed / "episode_results.json"
+    selected.write_bytes(b'{"status":"completed"}')
+    output = allowed / "output"
+    preserved, digest = preserve_gui_selected_source(
+        selected, output_directory=output, category="canonical"
+    )
+    now = datetime.now(UTC)
+    saved = workspaces.save(
+        name="Imported episode",
+        current_step="review-heading",
+        fields={"review-result-path": str(preserved), "review-project-path": str(output)},
+        terminal_jobs=[
+            {
+                "job_id": "ec6d26a5-709a-487b-b459-87f85d64a81d",
+                "status": "completed",
+                "input_path": str(preserved),
+                "output_directory": str(output),
+                "planned_job_id": "episode",
+                "planned_result_path": str(preserved),
+                "source_sha256": digest,
+                "language": "pl",
+                "speaker_count": "auto",
+                "created_at": now,
+                "updated_at": now,
+                "result_path": str(preserved),
+            }
+        ],
+    )
+    selected.unlink()
+
+    assert workspaces.list()[0].available is True
+    assert workspaces.load(saved.workspace_id).terminal_jobs[0].result_path == str(preserved)
+    preserved.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="changed on disk"):
+        workspaces.load(saved.workspace_id)
 
 
 def test_workspace_retains_terminal_queue_history_without_credentials(tmp_path: Path) -> None:

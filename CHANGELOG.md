@@ -52,9 +52,17 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
-- In WSL, GUI browser opening now tries Windows launchers before the Linux fallback and reports
-  an actionable failure; the local output-folder dialog retries through the Windows command
-  bridge and reports its actual startup error instead of a generic failure.
+- WSL browser opening and the output-folder dialog now retry Windows executables through Bash
+  when Python receives `Exec format error`; WSL launch no longer falls through to noisy `gio`.
+- Validated browser-picked canonical JSON is preserved in a hidden, content-addressed folder
+  under the selected output root before queue import. Browser-picked audio is preserved there
+  when staged. Saved work states can therefore restore these hash-bound queue sources after a
+  GUI or VM restart; temporary `.tmp` copies are used only during atomic publication.
+- Explicit **Save current work state** now saves open dirty transcript and semantic-translation
+  drafts to their authoritative review files before writing workspace metadata, so edits do not
+  disappear when continuing in another browser. Periodic field-only auto-save remains unchanged.
+- Failed WSL Windows-launch attempts now report an actionable diagnostic instead of silently
+  opening no browser; folder-dialog startup errors include their actual cause.
 - Saving work state ignores expired GUI-owned picker paths and explicitly reports session-picked
   queue items omitted because those temporary source copies cannot survive a GUI restart.
 - The transcription queue gives filenames more room and groups completion stages in 2–3–2 rows.

@@ -137,6 +137,7 @@ class GuiTranscriptionQueue:
         output_directory: Path,
         planned_job_id: str,
         language: LanguageMode,
+        source_sha256: str = "",
     ) -> tuple[GuiTranscriptionJob, bool]:
         """Expose an existing canonical result to the local GUI workflow queues.
 
@@ -162,6 +163,7 @@ class GuiTranscriptionQueue:
                 created_at=now,
                 updated_at=now,
                 result_path=normalized,
+                source_sha256=source_sha256,
             )
             self._jobs[job.job_id] = job
             self._order.appendleft(job.job_id)

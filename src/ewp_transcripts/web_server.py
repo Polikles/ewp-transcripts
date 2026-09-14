@@ -7,6 +7,7 @@ import json
 import os
 import re
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
@@ -29,6 +30,7 @@ from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_jobs import (
@@ -68,7 +70,13 @@ SECURITY_HEADERS = {
 def _is_canonical_result_filename(filename: str) -> bool:
     """Accept ordinary and force-versioned canonical result filenames."""
 
-    return bool(re.search(r"_results(?:_v\d{3})?\.json\Z", filename, re.IGNORECASE))
+    return bool(re.search(r"_results(?:_v\d{3,})?\.json\Z", filename, re.IGNORECASE))
+
+
+def _through_wsl_shell(command: list[str]) -> list[str]:
+    """Use Bash's WSL interop path when Python cannot exec a Windows PE directly."""
+
+    return ["/bin/bash", "-lc", shlex.join(command)]
 
 
 def _select_local_directory() -> str | None:
@@ -87,8 +95,11 @@ def _select_local_directory() -> str | None:
         encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
         arguments = ["powershell.exe", "-NoProfile", "-STA", "-EncodedCommand", encoded]
         attempts.append(arguments)
+        attempts.append(_through_wsl_shell(arguments))
         if shutil.which("cmd.exe"):
-            attempts.append(["cmd.exe", "/C", *arguments])
+            command_bridge = ["cmd.exe", "/C", *arguments]
+            attempts.append(command_bridge)
+            attempts.append(_through_wsl_shell(command_bridge))
     if shutil.which("zenity"):
         attempts.append(
             ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"]
@@ -108,7 +119,7 @@ def _select_local_directory() -> str | None:
             continue
         if completed.returncode in {1, 3} and command[0] == "zenity":
             return None
-        if completed.returncode == 3 and command[0] in {"powershell.exe", "cmd.exe"}:
+        if completed.returncode == 3 and command[0] in {"powershell.exe", "cmd.exe", "/bin/bash"}:
             return None
         if completed.returncode == 0:
             return completed.stdout.strip() or None
@@ -519,11 +530,16 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 if path == "/api/v1/import-canonical-file":
                     canonical = require_completed_canonical_result(selected_path)
+                    preserved_path, digest = preserve_gui_selected_source(
+                        selected_path, output_directory=output_directory, category="canonical"
+                    )
+                    self.server.gui_workflows.resolve_allowed_path(str(preserved_path))
                     job, imported = self.server.gui_transcriptions.register_completed_result(
-                        selected_path,
+                        preserved_path,
                         output_directory=output_directory,
                         planned_job_id=canonical.job_id,
                         language=LanguageMode(canonical.episode.language),
+                        source_sha256=digest,
                     )
                     selected_payload: dict[str, object] = {
                         "imported": imported,
@@ -1615,6 +1631,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
+                if self.server.gui_selections.root in input_path.parents:
+                    input_path, preserved_sha256 = preserve_gui_selected_source(
+                        input_path, output_directory=output_path, category="media"
+                    )
+                    self.server.gui_workflows.resolve_allowed_path(str(input_path))
+                    if preserved_sha256 != source_sha256:
+                        raise ValueError("The selected audio changed since the reviewed dry-run")
+                    if self.server.gui_transcriptions.contains_active_input(input_path):
+                        raise ValueError("This selected audio is already staged or running")
                 job = self.server.gui_transcriptions.stage(
                     input_path,
                     output_path,
@@ -1788,21 +1813,35 @@ def _open_browser(url: str) -> None:
             if not shutil.which(command[0]):
                 failures.append(f"{command[0]} unavailable")
                 continue
-            try:
-                completed = subprocess.run(
-                    command,
-                    check=False,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    timeout=20,
+            attempts = (
+                (command,) if command[0] == "wslview" else (command, _through_wsl_shell(command))
+            )
+            for attempt in attempts:
+                try:
+                    completed = subprocess.run(
+                        attempt,
+                        check=False,
+                        stdin=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        errors="replace",
+                        timeout=20,
+                    )
+                except (OSError, subprocess.TimeoutExpired) as error:
+                    failures.append(f"{attempt[0]} {type(error).__name__}: {error}")
+                    continue
+                if completed.returncode == 0:
+                    return
+                failures.append(
+                    f"{attempt[0]} exit {completed.returncode}"
+                    + (f" ({completed.stderr.strip()[:180]})" if completed.stderr.strip() else "")
                 )
-            except (OSError, subprocess.TimeoutExpired) as error:
-                failures.append(f"{command[0]} {type(error).__name__}: {error}")
-                continue
-            if completed.returncode == 0:
-                return
-            failures.append(f"{command[0]} exit {completed.returncode}")
+        print(
+            f"GUI_BROWSER_OPEN_FAILED: Open {url} manually. " + "; ".join(failures),
+            file=sys.stderr,
+        )
+        return
     try:
         if webbrowser.open(url):
             return

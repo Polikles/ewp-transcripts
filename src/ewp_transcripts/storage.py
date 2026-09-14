@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
+import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from ewp_transcripts.config import OutputsConfig
 from ewp_transcripts.domain import (
@@ -19,8 +22,77 @@ from ewp_transcripts.domain import (
 )
 from ewp_transcripts.domain.enums import PlanDecision
 from ewp_transcripts.domain.errors import InvalidExistingResultError, UnsafeOutputNameError
+from ewp_transcripts.domain.revision import sha256_file
 
 _FINAL_RESULT_NAME = re.compile(r"^.+_results(?:_v[0-9]{3,})?\.json$")
+_GUI_SOURCE_CATEGORIES = frozenset({"canonical", "media"})
+
+
+def preserve_gui_selected_source(
+    source: Path,
+    *,
+    output_directory: Path,
+    category: Literal["canonical", "media"],
+) -> tuple[Path, str]:
+    """Keep an explicitly selected source in a durable, content-addressed output subfolder.
+
+    A same-hash source is reused. Different content never overwrites an existing source,
+    even when its browser-visible filename is identical. The incoming `.tmp` is published
+    atomically and removed after either success or failure.
+    """
+
+    if category not in _GUI_SOURCE_CATEGORIES or not source.name:
+        raise ValueError("Selected source category or filename is invalid")
+    digest = sha256_file(source)
+    destination_directory = output_directory / ".ewp-gui-sources" / category / digest
+    for parent in (
+        output_directory / ".ewp-gui-sources",
+        output_directory / ".ewp-gui-sources" / category,
+        destination_directory,
+    ):
+        if parent.is_symlink():
+            raise ValueError("A GUI source directory cannot be a symbolic link")
+    destination_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    destination = destination_directory / source.name
+    if destination.exists():
+        if destination.is_symlink() or sha256_file(destination) != digest:
+            raise ValueError("A saved GUI source path exists with different content")
+        return destination, digest
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".incoming-",
+        suffix=".json.tmp" if category == "canonical" else ".media.tmp",
+        dir=destination_directory,
+    )
+    try:
+        with os.fdopen(descriptor, "wb") as target, source.open("rb") as original:
+            shutil.copyfileobj(original, target, length=1024 * 1024)
+            target.flush()
+            os.fsync(target.fileno())
+        temporary = Path(temporary_name)
+        if sha256_file(temporary) != digest:
+            raise ValueError("Selected source changed while it was being saved")
+        try:
+            os.link(temporary, destination)
+        except FileExistsError:
+            if destination.is_symlink() or sha256_file(destination) != digest:
+                raise ValueError("A saved GUI source path exists with different content") from None
+    finally:
+        Path(temporary_name).unlink(missing_ok=True)
+    return destination, digest
+
+
+def is_preserved_gui_result(path: Path, output_directory: Path, digest: str) -> bool:
+    """Recognize one exact, content-addressed imported canonical location."""
+
+    root = output_directory / ".ewp-gui-sources" / "canonical"
+    if not path.is_relative_to(root):
+        return False
+    parts = path.relative_to(root).parts
+    return (
+        len(parts) == 2
+        and parts[0] == digest
+        and bool(re.fullmatch(r".+_results(?:_v[0-9]{3,})?\.json", parts[1], re.IGNORECASE))
+    )
 
 
 def resolve_output_directory(

@@ -28,22 +28,25 @@ Correction, review/export, translation, and semantic review/export are always-vi
 derived from the same completed transcription records and immutable artifacts. Correction and
 translation selected-item provider actions now run sequentially, with item-specific output roots,
 consent, result/error summaries, and no automatic final publication. Native file import needs an
-explicit durable shared output root: the selected canonical JSON remains temporary, while review,
-revision, candidate, and export artifacts use the selected root. Workspace save now recognizes all
+explicit durable shared output root: after validation, the selected canonical JSON is preserved
+in a hidden content-addressed folder under that root. Browser-picked audio likewise becomes
+durable when staged. Review, revision, candidate, and export artifacts use the selected root.
+Workspace save now recognizes all
 current form fields; an OS folder dialog chooses the shared output root without uploading folder
 contents. A confirmed clear-current-state action forgets inactive queue/browser state without
 deleting saved artifacts. Automated GUI checks pass; unresolved WSL/Chrome/Firefox qualification
 is tracked under GUI-25–33 in `docs/99-roadmap-v2.md`.
 
-The 2026-09-14 WSL retest reopened browser launch, output-folder selection, and workspace
-save, and found table, import, bulk-skip, and per-episode semantic-review issues. GUI-25–33
-now have local fixes: Windows bridge fallback/diagnostics, temporary-path-safe workspace save,
-readable queue proportions, retained import selection, versioned canonical names, atomic bulk
-correction skip, per-source semantic draft switching, and save-on-preview. `make check` and
-`make test-integration` pass locally. The next operator gate is a WSL Chrome/Firefox retest of
-GUI-25–33; real-provider batch qualification (GUI-35) follows only after that passes. Session-
-picked canonical and audio copies are temporary by design, so saved work state reports queue
-items it cannot restore after the GUI stops. Responsive redesign remains GUI-34, deferred.
+The 2026-09-14 WSL retest confirmed default/custom workspace directories, retained import
+selection after manual output-path entry, versioned canonical import, per-item semantic edits,
+and durable review/export files. It exposed `Exec format error` for Python's direct Windows
+launcher/dialog subprocesses and a major persistence gap: session-picked queue sources and dirty
+review edits were absent after restoration. GUI-36–38 now have local fixes: Bash-mediated Windows
+interop fallback without noisy `gio`, durable selected-source promotion, and draft checkpointing
+before explicit workspace save. The next operator gate is WSL Chrome/Firefox verification of
+browser opening, folder selection, and saved-workspace restoration after a full GUI restart.
+Real-provider batch qualification (GUI-35) follows only after this passes. Responsive redesign
+remains GUI-34, deferred.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
