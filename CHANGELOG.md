@@ -63,6 +63,8 @@ The next internal-beta version is `0.19.0`.
 - Translation progress now exposes the candidate path needed to populate semantic review;
   selecting several translation jobs no longer invokes only the single-file form action. Bulk
   assistance skip updates every selected item without requiring the single-file path fields.
+  Batch actions clear stale single-item paths and reject an empty repeat click before any provider
+  request, preventing accidental duplicate candidates.
 - Dictionary catalog choices show the edition in the dictionary ID once; the separate JSON
   document-format version remains available as a tooltip instead of appearing as a conflicting
   second edition number.

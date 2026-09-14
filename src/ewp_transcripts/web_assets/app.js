@@ -84,7 +84,7 @@ skipCorrection.type = "button";
 skipCorrection.id = "skip-correction";
 skipCorrection.textContent = "Skip LLM-assisted correction";
 correctionForm.prepend(skipCorrection);
-skipCorrection.addEventListener("click", async () => { const selected = stageQueueJobs.filter(job => stageQueueSelections.correction.has(job.job_id) && stageQueueItemIsActionable(job, "correction")); const resultPath = String(correctionForm.elements.namedItem("result_path").value || "").trim(); const outputRoot = String(correctionForm.elements.namedItem("output_root").value || "").trim(); try { if (selected.length) { for (const job of selected) { await reportWorkflowSkip(job.result_path, "correction"); stageQueueSelections.correction.delete(job.job_id); } await refreshJobs(); document.querySelector("#correction-status").textContent = `LLM-assisted correction skipped for ${selected.length} selected queue output${selected.length === 1 ? "" : "s"}.`; return; } if (!resultPath) { document.querySelector("#correction-status").textContent = "GUI_CORRECTION_RESULT_REQUIRED: Choose a canonical result before skipping correction."; return; } if (!outputRoot) { document.querySelector("#correction-status").textContent = "GUI_CORRECTION_OUTPUT_ROOT_REQUIRED: Choose a correction output root before skipping correction."; return; } await reportWorkflowSkip(resultPath, "correction"); await openManualReviewForResult(resultPath, outputRoot); document.querySelector("#correction-status").textContent = "LLM-assisted correction skipped; this output is now open in manual review."; } catch (error) { document.querySelector("#correction-status").textContent = error.message; } });
+skipCorrection.addEventListener("click", async () => { const selected = stageQueueJobs.filter(job => stageQueueSelections.correction.has(job.job_id) && stageQueueItemIsActionable(job, "correction")); const resultPath = String(correctionForm.elements.namedItem("result_path").value || "").trim(); const outputRoot = String(correctionForm.elements.namedItem("output_root").value || "").trim(); try { if (selected.length) { for (const job of selected) { await reportWorkflowSkip(job.result_path, "correction"); stageQueueSelections.correction.delete(job.job_id); } await refreshJobs(); correctionForm.elements.namedItem("result_path").value = ""; correctionForm.elements.namedItem("output_root").value = ""; document.querySelector("#correction-status").textContent = `LLM-assisted correction skipped for ${selected.length} selected queue output${selected.length === 1 ? "" : "s"}.`; return; } if (!resultPath) { document.querySelector("#correction-status").textContent = "GUI_CORRECTION_RESULT_REQUIRED: Choose a canonical result before skipping correction."; return; } if (!outputRoot) { document.querySelector("#correction-status").textContent = "GUI_CORRECTION_OUTPUT_ROOT_REQUIRED: Choose a correction output root before skipping correction."; return; } await reportWorkflowSkip(resultPath, "correction"); await openManualReviewForResult(resultPath, outputRoot); document.querySelector("#correction-status").textContent = "LLM-assisted correction skipped; this output is now open in manual review."; } catch (error) { document.querySelector("#correction-status").textContent = error.message; } });
 function updateCorrectionProvider() { const cloud = correctionForm.elements.namedItem("provider").value === "openrouter"; document.querySelector("#openrouter-options").hidden = !cloud; correctionForm.elements.namedItem("allow_remote_endpoint").closest("label").hidden = cloud; correctionForm.elements.namedItem("model").value = cloud ? "google/gemini-2.5-flash" : ""; correctionForm.elements.namedItem("endpoint").value = cloud ? "https://openrouter.ai/api/v1" : "http://127.0.0.1:1234/v1"; }
 correctionForm.elements.namedItem("provider").addEventListener("change", updateCorrectionProvider);
 updateCorrectionProvider();
@@ -182,6 +182,9 @@ skipTranslation.addEventListener("click", async () => {
     }
     jobsSignature = "";
     await refreshJobs();
+    translationForm.elements.namedItem("result_path").value = "";
+    translationForm.elements.namedItem("source_revision_path").value = "";
+    translationForm.elements.namedItem("output_root").value = "";
     status.textContent = `Skipped LLM-assisted translation for ${skipped.length} selected output${skipped.length === 1 ? "" : "s"}. ${failed.length ? `Errors: ${failed.join("; ")}` : "Use each semantic review queue row for manual translation."}`;
     if (!skipped.length) return;
     const first = skipped[0];
@@ -691,7 +694,14 @@ correctionForm.addEventListener("submit", async event => {
     stageQueueSelections.correction.has(job.job_id)
     && stageQueueItemIsActionable(job, "correction")
   ));
-  if (!selected.length) return;
+  if (!selected.length) {
+    if (!String(correctionForm.elements.namedItem("result_path").value || "").trim()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      document.querySelector("#correction-status").textContent = "Select actionable queue items or reopen one correction before generating a candidate.";
+    }
+    return;
+  }
   event.preventDefault();
   event.stopImmediatePropagation();
   const submit = document.querySelector("#generate-correction");
@@ -759,6 +769,8 @@ correctionForm.addEventListener("submit", async event => {
   table.append(body);
   summary.append(table);
   status.textContent = `Correction batch finished: ${completed.length} candidate${completed.length === 1 ? "" : "s"}, ${failed.length} error${failed.length === 1 ? "" : "s"}.`;
+  correctionForm.elements.namedItem("result_path").value = "";
+  correctionForm.elements.namedItem("output_root").value = "";
 }, true);
 
 translationForm.addEventListener("submit", async event => {
@@ -766,7 +778,14 @@ translationForm.addEventListener("submit", async event => {
     stageQueueSelections.translation.has(job.job_id)
     && stageQueueItemIsActionable(job, "translation")
   ));
-  if (!selected.length) return;
+  if (!selected.length) {
+    if (!String(translationForm.elements.namedItem("result_path").value || "").trim()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      document.querySelector("#translation-status").textContent = "Select actionable queue items or reopen one translation before generating a candidate.";
+    }
+    return;
+  }
   event.preventDefault();
   event.stopImmediatePropagation();
   const submit = document.querySelector("#generate-translation");
@@ -839,6 +858,9 @@ translationForm.addEventListener("submit", async event => {
   summary.append(table);
   document.querySelector("#review-translation").disabled = !translationCandidate;
   status.textContent = `Translation batch finished: ${completed.length} candidate${completed.length === 1 ? "" : "s"}, ${failed.length} error${failed.length === 1 ? "" : "s"}. Open each candidate from its semantic review queue row.`;
+  translationForm.elements.namedItem("result_path").value = "";
+  translationForm.elements.namedItem("source_revision_path").value = "";
+  translationForm.elements.namedItem("output_root").value = "";
 }, true);
 
 async function openStageQueueItem(job, stage) {
