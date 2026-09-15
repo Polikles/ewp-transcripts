@@ -52,8 +52,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
-- WSL browser opening and the output-folder dialog now retry Windows executables through Bash
-  when Python receives `Exec format error`; WSL launch no longer falls through to noisy `gio`.
+- WSL browser opening and the output-folder dialog now retry Windows host executables explicitly
+  through WSL's `/init` bridge when transparent `.exe` dispatch returns `Exec format error`;
+  WSL launch no longer falls through to noisy `gio`.
 - Validated browser-picked canonical JSON is preserved in a hidden, content-addressed folder
   under the selected output root before queue import. Browser-picked audio is preserved there
   when staged. Saved work states can therefore restore these hash-bound queue sources after a

@@ -41,7 +41,7 @@ The 2026-09-14 WSL retest confirmed default/custom workspace directories, retain
 selection after manual output-path entry, versioned canonical import, per-item semantic edits,
 and durable review/export files. It exposed `Exec format error` for Python's direct Windows
 launcher/dialog subprocesses and a major persistence gap: session-picked queue sources and dirty
-review edits were absent after restoration. GUI-36–38 now have local fixes: Bash-mediated Windows
+review edits were absent after restoration. GUI-36–38 now have local fixes: explicit WSL `/init`
 interop fallback without noisy `gio`, durable selected-source promotion, and draft checkpointing
 before explicit workspace save. The next operator gate is WSL Chrome/Firefox verification of
 browser opening, folder selection, and saved-workspace restoration after a full GUI restart.

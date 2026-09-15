@@ -7,7 +7,6 @@ import json
 import os
 import re
 import secrets
-import shlex
 import shutil
 import subprocess
 import sys
@@ -73,16 +72,23 @@ def _is_canonical_result_filename(filename: str) -> bool:
     return bool(re.search(r"_results(?:_v\d{3,})?\.json\Z", filename, re.IGNORECASE))
 
 
-def _through_wsl_shell(command: list[str]) -> list[str]:
-    """Use Bash's WSL interop path when Python cannot exec a Windows PE directly."""
+def _windows_interop_attempts(command: list[str]) -> tuple[tuple[list[str], str | None], ...]:
+    """Try normal WSL binfmt, then its `/init` interpreter explicitly."""
 
-    return ["/bin/bash", "-lc", shlex.join(command)]
+    executable = shutil.which(command[0])
+    if not executable:
+        return ()
+    resolved = [executable, *command[1:]]
+    attempts: list[tuple[list[str], str | None]] = [(resolved, None)]
+    if Path("/init").is_file():
+        attempts.append((resolved, "/init"))
+    return tuple(attempts)
 
 
 def _select_local_directory() -> str | None:
     """Ask the local desktop for one folder without uploading its contents."""
 
-    attempts: list[list[str]] = []
+    attempts: list[tuple[list[str], str | None]] = []
     if shutil.which("powershell.exe"):
         script = (
             "try { Add-Type -AssemblyName System.Windows.Forms; "
@@ -94,37 +100,42 @@ def _select_local_directory() -> str | None:
         )
         encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
         arguments = ["powershell.exe", "-NoProfile", "-STA", "-EncodedCommand", encoded]
-        attempts.append(arguments)
-        attempts.append(_through_wsl_shell(arguments))
-        if shutil.which("cmd.exe"):
-            command_bridge = ["cmd.exe", "/C", *arguments]
-            attempts.append(command_bridge)
-            attempts.append(_through_wsl_shell(command_bridge))
+        attempts.extend(_windows_interop_attempts(arguments))
     if shutil.which("zenity"):
         attempts.append(
-            ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"]
+            (
+                ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"],
+                None,
+            )
         )
     if not attempts:
         raise ValueError(
             "No desktop folder dialog is available. Enter the output directory path directly."
         )
     failures: list[str] = []
-    for command in attempts:
+    for command, interpreter in attempts:
         try:
             completed = subprocess.run(
-                command, check=False, capture_output=True, text=True, timeout=600
+                command,
+                executable=interpreter,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=600,
             )
         except (OSError, subprocess.TimeoutExpired) as error:
-            failures.append(f"{command[0]}: {type(error).__name__} ({error})")
+            launcher = f"/init → {Path(command[0]).name}" if interpreter else Path(command[0]).name
+            failures.append(f"{launcher}: {type(error).__name__} ({error})")
             continue
-        if completed.returncode in {1, 3} and command[0] == "zenity":
+        if completed.returncode in {1, 3} and Path(command[0]).name == "zenity":
             return None
-        if completed.returncode == 3 and command[0] in {"powershell.exe", "cmd.exe", "/bin/bash"}:
+        if completed.returncode == 3 and Path(command[0]).name == "powershell.exe":
             return None
         if completed.returncode == 0:
             return completed.stdout.strip() or None
         failures.append(
-            f"{command[0]}: exit {completed.returncode}"
+            f"{'/init → ' if interpreter else ''}{Path(command[0]).name}: "
+            f"exit {completed.returncode}"
             + (f" ({completed.stderr.strip()[:180]})" if completed.stderr.strip() else "")
         )
     raise ValueError(
@@ -1810,16 +1821,20 @@ def _open_browser(url: str) -> None:
         if shutil.which("wslview"):
             commands.append(["wslview", url])
         for command in commands:
-            if not shutil.which(command[0]):
+            attempts: tuple[tuple[list[str], str | None], ...]
+            if command[0] == "wslview":
+                executable = shutil.which("wslview")
+                attempts = (([executable, url], None),) if executable else ()
+            else:
+                attempts = _windows_interop_attempts(command)
+            if not attempts:
                 failures.append(f"{command[0]} unavailable")
                 continue
-            attempts = (
-                (command,) if command[0] == "wslview" else (command, _through_wsl_shell(command))
-            )
-            for attempt in attempts:
+            for attempt, interpreter in attempts:
                 try:
                     completed = subprocess.run(
                         attempt,
+                        executable=interpreter,
                         check=False,
                         stdin=subprocess.DEVNULL,
                         stdout=subprocess.DEVNULL,
@@ -1829,12 +1844,16 @@ def _open_browser(url: str) -> None:
                         timeout=20,
                     )
                 except (OSError, subprocess.TimeoutExpired) as error:
-                    failures.append(f"{attempt[0]} {type(error).__name__}: {error}")
+                    launcher = (
+                        f"/init → {Path(attempt[0]).name}" if interpreter else Path(attempt[0]).name
+                    )
+                    failures.append(f"{launcher} {type(error).__name__}: {error}")
                     continue
                 if completed.returncode == 0:
                     return
                 failures.append(
-                    f"{attempt[0]} exit {completed.returncode}"
+                    f"{'/init → ' if interpreter else ''}{Path(attempt[0]).name} "
+                    f"exit {completed.returncode}"
                     + (f" ({completed.stderr.strip()[:180]})" if completed.stderr.strip() else "")
                 )
         print(

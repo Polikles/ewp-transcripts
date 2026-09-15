@@ -66,25 +66,26 @@ def test_output_folder_dialog_reports_missing_desktop_picker(
         _select_local_directory()
 
 
-def test_output_folder_dialog_retries_through_bash_after_direct_interop_error(
+def test_output_folder_dialog_retries_through_wsl_init_after_direct_interop_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
         "ewp_transcripts.web_server.shutil.which",
         lambda name: name if name in {"powershell.exe", "cmd.exe"} else None,
     )
-    calls: list[list[str]] = []
+    monkeypatch.setattr(Path, "is_file", lambda self: str(self) == "/init")
+    calls: list[tuple[list[str], object]] = []
 
     def run(command: list[str], **kwargs: object) -> SimpleNamespace:
-        calls.append(command)
-        if command[0] == "powershell.exe":
+        calls.append((command, kwargs["executable"]))
+        if kwargs["executable"] is None:
             raise OSError(5, "WSL interop unavailable to direct child")
         return SimpleNamespace(returncode=0, stdout="C:\\Users\\DS\\Desktop\\tezt002")
 
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
     assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt002"
-    assert [command[0] for command in calls] == ["powershell.exe", "/bin/bash"]
-    assert "powershell.exe" in calls[1][2]
+    assert [executable for _, executable in calls] == [None, "/init"]
+    assert calls[1][0][0] == "powershell.exe"
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:
@@ -295,7 +296,7 @@ def test_wsl_browser_open_uses_windows_bridge_without_terminal_output(
     assert run.call_args.kwargs["stderr"] is subprocess.PIPE
 
 
-def test_wsl_browser_open_uses_bash_after_exec_format_error(
+def test_wsl_browser_open_uses_init_after_exec_format_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(Path, "read_text", lambda self, encoding: "microsoft-standard-WSL2")
@@ -303,18 +304,19 @@ def test_wsl_browser_open_uses_bash_after_exec_format_error(
         "ewp_transcripts.web_server.shutil.which",
         lambda name: name if name in {"cmd.exe", "powershell.exe"} else None,
     )
-    calls: list[list[str]] = []
+    monkeypatch.setattr(Path, "is_file", lambda self: str(self) == "/init")
+    calls: list[tuple[list[str], object]] = []
 
-    def run(command: list[str], **_: object) -> SimpleNamespace:
-        calls.append(command)
-        if command[0] == "cmd.exe":
+    def run(command: list[str], **kwargs: object) -> SimpleNamespace:
+        calls.append((command, kwargs["executable"]))
+        if kwargs["executable"] is None:
             raise OSError(8, "Exec format error")
         return SimpleNamespace(returncode=0, stderr="")
 
     monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
     _open_browser("http://127.0.0.1:8765/")
-    assert [command[0] for command in calls] == ["cmd.exe", "/bin/bash"]
-    assert "cmd.exe /C start '' http://127.0.0.1:8765/" in calls[1][2]
+    assert [executable for _, executable in calls] == [None, "/init"]
+    assert calls[1][0] == ["cmd.exe", "/C", "start", "", "http://127.0.0.1:8765/"]
 
 
 def test_wsl_browser_open_reports_windows_failure_without_gio(

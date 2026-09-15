@@ -791,10 +791,11 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 35. **GUI-35 — Provider-batch manual qualification — waiting on GUI-36–38:** after the above
     fixes, run the authorized two-item correction/translation provider test without duplicate
     requests and confirm per-item semantic-review targets.
-36. **GUI-36 — WSL shell-mediated Windows interop — implemented locally, pending WSL retest:**
+36. **GUI-36 — Explicit WSL `/init` Windows interop — implemented locally, pending WSL retest:**
     Python's direct `powershell.exe`/`cmd.exe` child launch returns `Exec format error` in the
-    operator VM. Retry through Bash for browser and folder dialogs; do not invoke noisy `gio`
-    on WSL, and report the real failure if Windows launch still does not work.
+    operator VM because its transparent binary-format registration is unavailable. Retry the
+    Windows host browser and folder dialog through WSL's `/init` bridge; do not invoke noisy
+    `gio` on WSL, and report the real failure if host launch still does not work.
 37. **GUI-37 — Durable browser-selected queue sources — implemented locally, pending restart retest:**
     validate selected canonical JSON, preserve it content-addressed under the user's output root,
     and restore its hash-bound queue entry after the GUI/VM restarts. Promote browser-picked audio
@@ -804,6 +805,10 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     explicit Save current work state first persists open dirty transcript/translation drafts to
     authoritative output files, then saves the non-secret workspace record. A failed draft save
     must not claim the workspace was saved; restore should reopen the exact saved review.
+39. **GUI-39 — Managed durable-source cleanup — planned:** provide a guarded inventory and cleanup
+    action for `.ewp-gui-sources`. It may delete a copy only after confirming that no active queue
+    or known saved workspace references it and no review/revision lineage still needs it. Until
+    that reference audit exists, durable source copies remain operator-managed project data.
 
 Planned capabilities:
 

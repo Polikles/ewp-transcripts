@@ -185,6 +185,12 @@ copies must never overwrite different existing content, and workspace restore mu
 recorded hashes. Explicit Save current work state MUST save dirty transcript/translation review
 drafts to their authoritative output files before saving the non-secret workspace record;
 periodic field-only auto-save does not claim to checkpoint unsaved editor text.
+The help surface MUST explain that workspace JSON alone is not a complete backup: the output root,
+including dot-directories, and any separate workspace catalog must be backed up together. Session
+picker copies are removed when the GUI stops and atomic incoming files after their copy attempt.
+Content-addressed sources are durable and MUST NOT be automatically deleted until a future cleanup
+operation proves that no active queue, known workspace, or required artifact lineage references
+them. In the current slice they remain until the operator archives or removes the whole project.
 An active saved workspace MAY be auto-saved. The default GUI interval is 60 seconds and the
 client MUST compare the allowlisted state before writing, so unchanged state causes no save
 request. Auto-save begins only after an explicit save or load, remains optional, and never
