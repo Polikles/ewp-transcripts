@@ -52,6 +52,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Output-folder browsing now uses deployment adapters rather than a Windows-only assumption:
+  WSL uses its host dialog; bare-metal Linux can use Zenity, KDialog, or Yad; headless/Docker
+  operation retains direct server-visible path entry for explicitly mounted volumes.
 - WSL browser opening and the output-folder dialog now retry Windows host executables explicitly
   through WSL's `/init` bridge when transparent `.exe` dispatch returns `Exec format error`;
   WSL launch no longer falls through to noisy `gio`.

@@ -61,10 +61,13 @@ The web adapter MUST:
   visible inside a container;
 - never serve arbitrary source files as static web content.
 
-Native directory selection is not used: Chrome and Firefox display a browser-controlled warning
-that the directory's contents will be shared with the site, even when the application would only
-need its path. The GUI therefore uses direct path entry for output directories, including new
-empty directories.
+Browser upload-style directory selection is not used: it returns the directory's files and
+relative names, not the server-visible path needed by application services, and browsers warn
+that the contents will be shared. `showDirectoryPicker()` instead returns a browser-owned handle;
+it does not make that directory a Python/FFmpeg path and is not uniformly available. The frontend
+therefore offers direct server-path entry plus an optional deployment adapter: a Windows host
+dialog under WSL, Zenity/KDialog/Yad on desktop Linux, and direct paths inside explicit mounts for
+headless or Docker operation. Lack of a desktop adapter MUST NOT block typed paths.
 
 ## 5. Required workflow coverage
 
@@ -321,7 +324,9 @@ plan likewise offers a native audio picker that makes an explicit, bounded sessi
 its temporary server-side path. When staged after a reviewed dry-run, that audio is copied into
 the same durable content-addressed source folder and the queue uses the durable path. The picker
 button must show Working and Done feedback. Output
-directories allow direct path entry or a server-mediated local operating-system folder dialog.
+directories allow direct path entry or a server-mediated, deployment-specific operating-system
+folder dialog. WSL, desktop Linux, and headless/container adapters may differ without changing
+the browser workflow or application API.
 Browser directory selection causes an unavoidable browser-controlled sharing warning and is not
 offered. Direct server-side result, transcript,
 dictionary, and output path fields MAY retain typed entry while their native-picker replacements

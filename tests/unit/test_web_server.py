@@ -42,6 +42,7 @@ def test_canonical_picker_filename_gate(filename: str, expected: bool) -> None:
 def test_output_folder_dialog_uses_local_os_picker_without_upload(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server._is_wsl_environment", lambda: True)
     monkeypatch.setattr(
         "ewp_transcripts.web_server.shutil.which",
         lambda name: name if name == "powershell.exe" else None,
@@ -61,6 +62,7 @@ def test_output_folder_dialog_uses_local_os_picker_without_upload(
 def test_output_folder_dialog_reports_missing_desktop_picker(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server._is_wsl_environment", lambda: False)
     monkeypatch.setattr("ewp_transcripts.web_server.shutil.which", lambda _: None)
     with pytest.raises(ValueError, match="Enter the output directory path directly"):
         _select_local_directory()
@@ -69,6 +71,7 @@ def test_output_folder_dialog_reports_missing_desktop_picker(
 def test_output_folder_dialog_retries_through_wsl_init_after_direct_interop_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server._is_wsl_environment", lambda: True)
     monkeypatch.setattr(
         "ewp_transcripts.web_server.shutil.which",
         lambda name: name if name in {"powershell.exe", "cmd.exe"} else None,
@@ -86,6 +89,22 @@ def test_output_folder_dialog_retries_through_wsl_init_after_direct_interop_erro
     assert _select_local_directory() == "C:\\Users\\DS\\Desktop\\tezt002"
     assert [executable for _, executable in calls] == [None, "/init"]
     assert calls[1][0][0] == "powershell.exe"
+
+
+def test_output_folder_dialog_uses_linux_desktop_adapter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("ewp_transcripts.web_server._is_wsl_environment", lambda: False)
+    monkeypatch.setattr(
+        "ewp_transcripts.web_server.shutil.which",
+        lambda name: "/usr/bin/kdialog" if name == "kdialog" else None,
+    )
+    run = Mock(return_value=SimpleNamespace(returncode=0, stdout="/home/user/output\n"))
+    monkeypatch.setattr("ewp_transcripts.web_server.subprocess.run", run)
+
+    assert _select_local_directory() == "/home/user/output"
+    assert run.call_args.args[0][:2] == ["/usr/bin/kdialog", "--getexistingdirectory"]
+    assert run.call_args.kwargs["executable"] is None
 
 
 def test_health_is_versioned_and_hardened(tmp_path: Path) -> None:

@@ -85,11 +85,19 @@ def _windows_interop_attempts(command: list[str]) -> tuple[tuple[list[str], str 
     return tuple(attempts)
 
 
+def _is_wsl_environment() -> bool:
+    try:
+        release = Path("/proc/sys/kernel/osrelease").read_text(encoding="utf-8")
+    except OSError:
+        release = ""
+    return "microsoft" in release.casefold() or bool(os.environ.get("WSL_INTEROP"))
+
+
 def _select_local_directory() -> str | None:
-    """Ask the local desktop for one folder without uploading its contents."""
+    """Ask the deployment's desktop for one server-visible output directory."""
 
     attempts: list[tuple[list[str], str | None]] = []
-    if shutil.which("powershell.exe"):
+    if _is_wsl_environment() and shutil.which("powershell.exe"):
         script = (
             "try { Add-Type -AssemblyName System.Windows.Forms; "
             "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog; "
@@ -101,13 +109,24 @@ def _select_local_directory() -> str | None:
         encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
         arguments = ["powershell.exe", "-NoProfile", "-STA", "-EncodedCommand", encoded]
         attempts.extend(_windows_interop_attempts(arguments))
-    if shutil.which("zenity"):
-        attempts.append(
-            (
-                ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"],
-                None,
-            )
-        )
+    linux_dialogs = (
+        (
+            "zenity",
+            ["zenity", "--file-selection", "--directory", "--title=Choose EWP output folder"],
+        ),
+        (
+            "kdialog",
+            ["kdialog", "--getexistingdirectory", ".", "--title", "Choose EWP output folder"],
+        ),
+        (
+            "yad",
+            ["yad", "--file-selection", "--directory", "--title=Choose EWP output folder"],
+        ),
+    )
+    for executable_name, command in linux_dialogs:
+        executable = shutil.which(executable_name)
+        if executable:
+            attempts.append(([executable, *command[1:]], None))
     if not attempts:
         raise ValueError(
             "No desktop folder dialog is available. Enter the output directory path directly."
@@ -127,7 +146,11 @@ def _select_local_directory() -> str | None:
             launcher = f"/init → {Path(command[0]).name}" if interpreter else Path(command[0]).name
             failures.append(f"{launcher}: {type(error).__name__} ({error})")
             continue
-        if completed.returncode in {1, 3} and Path(command[0]).name == "zenity":
+        if completed.returncode in {1, 3} and Path(command[0]).name in {
+            "zenity",
+            "kdialog",
+            "yad",
+        }:
             return None
         if completed.returncode == 3 and Path(command[0]).name == "powershell.exe":
             return None
@@ -1809,11 +1832,7 @@ def _open_browser(url: str) -> None:
     """Try host launchers in order and report a usable fallback URL on failure."""
 
     failures: list[str] = []
-    try:
-        release = Path("/proc/sys/kernel/osrelease").read_text(encoding="utf-8")
-    except OSError:
-        release = ""
-    if "microsoft" in release.casefold() or os.environ.get("WSL_INTEROP"):
+    if _is_wsl_environment():
         commands = [
             ["cmd.exe", "/C", "start", "", url],
             ["powershell.exe", "-NoProfile", "-Command", "Start-Process", url],

@@ -48,6 +48,16 @@ browser opening, folder selection, and saved-workspace restoration after a full 
 Real-provider batch qualification (GUI-35) follows only after this passes. Responsive redesign
 remains GUI-34, deferred.
 
+The WSL `/init` retest now passes for automatic browser launch and its host folder dialog. That
+dialog is intentionally a deployment adapter, not a Windows-only GUI dependency: GUI-40 adds
+Zenity, KDialog, and Yad discovery for bare-metal Linux, while headless and future Docker runs use
+direct server-visible paths inside explicit mounts. A browser directory upload cannot provide the
+path required by current Python/FFmpeg services and would expose the directory contents; a
+browser-owned writable-handle design would be a separate output architecture. GUI-37 durable
+selected-source copies and GUI-38 explicit workspace-save review checkpointing passed the WSL
+retest. GUI-39 tracks guarded reference-aware cleanup and the bundled help now specifies backup
+scope and exact temporary/durable retention behavior.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

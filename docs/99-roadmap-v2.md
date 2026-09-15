@@ -698,7 +698,7 @@ security, accessibility, and implementation-slice contract is in
 The following operator findings are tracked as separate vertical slices. Complete and manually
 qualify one task at a time; later tasks must not be folded into an unrelated fix.
 
-1. **GUI-01 — WSL browser launch — reopened by 2026-09-14 WSL retest (GUI-36):** restore automatic opening of the host default browser when
+1. **GUI-01 — WSL browser launch — WSL pass through GUI-36:** restore automatic opening of the host default browser when
    `gui` runs without `--no-open-browser`, while retaining an actionable failure path and the explicit
    opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
 2. **GUI-02 — Resume from existing canonical results — implemented, pending browser retest:** every workflow-stage queue can add one or
@@ -742,7 +742,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     directory-picker warning.
 14. **GUI-14 — Saved-state validation and controls — WSL pass for default/custom storage:** save with empty or custom user-space storage
     directory; keep the client/server field contracts in sync and align all saved-state buttons.
-15. **GUI-15 — Output-root chooser — reopened by 2026-09-14 WSL retest (GUI-36):** choose the shared Inspect and plan output directory using
+15. **GUI-15 — Output-root chooser — WSL pass; portability tracked in GUI-40:** choose the shared Inspect and plan output directory using
     an operating-system folder dialog without the browser's upload-all-files prompt.
 16. **GUI-16 — Queue readability — implemented, pending browser retest:** align action buttons in every stage queue; show imported
     result filenames, with full paths available on hover, instead of temporary path strings.
@@ -761,10 +761,10 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     user's chosen output root, never session-local picker storage; block ambiguous output roots.
 24. **GUI-24 — Clear current state — implemented, pending browser retest:** an explicit warned confirmation clears the active queue and
     unsaved form state without deleting saved workspaces or publication artifacts.
-25. **GUI-25 — WSL launch diagnostics and fallback — reopened by WSL `Exec format error` (GUI-36):** reproduce why automatic host-browser
+25. **GUI-25 — WSL launch diagnostics and fallback — WSL pass through GUI-36:** reproduce why automatic host-browser
     opening regressed; use a tested WSL host opener and surface a concise actionable failure
     rather than silently succeeding when no browser opened.
-26. **GUI-26 — Folder chooser fallback — reopened by WSL `Exec format error` (GUI-36):** handle unavailable Windows interop/desktop dialogs
+26. **GUI-26 — Folder chooser fallback — WSL pass; portability tracked in GUI-40:** handle unavailable Windows interop/desktop dialogs
     without cancelling the workflow. Prefer a working local OS folder picker, preserve typed
     paths, and report why a picker could not start; never invoke a browser folder upload.
 27. **GUI-27 — Workspace save with session-picked files — WSL pass for saving, recovery extended in GUI-37–38:** saving a workspace must not fail merely
@@ -791,17 +791,17 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 35. **GUI-35 — Provider-batch manual qualification — waiting on GUI-36–38:** after the above
     fixes, run the authorized two-item correction/translation provider test without duplicate
     requests and confirm per-item semantic-review targets.
-36. **GUI-36 — Explicit WSL `/init` Windows interop — implemented locally, pending WSL retest:**
+36. **GUI-36 — Explicit WSL `/init` Windows interop — WSL pass:**
     Python's direct `powershell.exe`/`cmd.exe` child launch returns `Exec format error` in the
     operator VM because its transparent binary-format registration is unavailable. Retry the
     Windows host browser and folder dialog through WSL's `/init` bridge; do not invoke noisy
     `gio` on WSL, and report the real failure if host launch still does not work.
-37. **GUI-37 — Durable browser-selected queue sources — implemented locally, pending restart retest:**
+37. **GUI-37 — Durable browser-selected queue sources — WSL pass:**
     validate selected canonical JSON, preserve it content-addressed under the user's output root,
     and restore its hash-bound queue entry after the GUI/VM restarts. Promote browser-picked audio
     when staged; leave existing files untouched and never use a session `/tmp` source as the only
     restorable identity.
-38. **GUI-38 — Checkpoint dirty reviews with workspace save — implemented locally, pending cross-browser retest:**
+38. **GUI-38 — Checkpoint dirty reviews with workspace save — WSL pass:**
     explicit Save current work state first persists open dirty transcript/translation drafts to
     authoritative output files, then saves the non-secret workspace record. A failed draft save
     must not claim the workspace was saved; restore should reopen the exact saved review.
@@ -809,6 +809,13 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     action for `.ewp-gui-sources`. It may delete a copy only after confirming that no active queue
     or known saved workspace references it and no review/revision lineage still needs it. Until
     that reference audit exists, durable source copies remain operator-managed project data.
+40. **GUI-40 — Cross-deployment output selection — implemented locally, pending bare-metal and
+    container qualification:** keep one browser control and server path contract while adapting
+    the dialog to the deployment: Windows host dialog for WSL; Zenity, KDialog, or Yad for a Linux
+    desktop; direct paths within explicit mounts for headless/Docker. Do not use directory upload,
+    which exposes contents rather than a usable server path. Investigate browser-owned writable
+    handles only as a separate client-managed output architecture, never as a Firefox-compatible
+    path picker for the existing server pipeline.
 
 Planned capabilities:
 
