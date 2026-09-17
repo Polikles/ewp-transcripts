@@ -873,6 +873,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         str(document.get("revision_output_directory", "")),
                         str(document.get("source_revision_path", "")),
                     )
+                    self.server.gui_transcriptions.clear_workflow_error(result, "review")
                 elif path == "/api/v1/reviews/export":
                     formats = document.get("formats")
                     if not isinstance(formats, list) or not all(
@@ -884,6 +885,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         str(document.get("revision_path", "")),
                         str(document.get("export_output_directory", "")),
                         formats,
+                    )
+                    self.server.gui_transcriptions.clear_workflow_error(
+                        result, "original_export"
                     )
                 else:
                     self._write_response(
@@ -985,6 +989,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         reasoning_max_tokens=reasoning,
                         api_key=self.server.gui_openrouter_api_key,
                     )
+                    self.server.gui_transcriptions.clear_workflow_error(
+                        str(document.get("result_path", "")), "correction"
+                    )
             except ApplicationError as error:
                 self._write_response(
                     _json_response(
@@ -1075,6 +1082,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         confirmed=document.get("confirmed") is True,
                         api_key=api_key,
                     )
+                    self.server.gui_transcriptions.clear_workflow_error(
+                        str(document.get("result_path", "")), "assisted_translation"
+                    )
             except ApplicationError as error:
                 self._write_response(
                     _json_response(
@@ -1154,6 +1164,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     payload = self.server.gui_translation_reviews.apply(
                         **common, output=str(document.get("translation_output_directory", ""))
                     )
+                    self.server.gui_transcriptions.clear_workflow_error(
+                        common["result"], "translation"
+                    )
                 elif path.endswith("/audit-export"):
                     formats = document.get("formats")
                     if not isinstance(formats, list) or not all(
@@ -1167,6 +1180,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         audit_output=str(document.get("audit_output_directory", "")),
                         export_output=str(document.get("export_output_directory", "")),
                         formats=formats,
+                    )
+                    self.server.gui_transcriptions.clear_workflow_error(
+                        common["result"], "translated_export"
                     )
                 else:
                     self._write_response(
@@ -1400,6 +1416,39 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     result_path, cast(WorkflowStageName, stage), code
                 )
                 self._write_response(_json_response(HTTPStatus.OK, {"recorded": recorded}))
+                return
+            if path == "/api/v1/transcriptions/workflow-success":
+                result_path = document.get("result_path")
+                stage = document.get("stage")
+                allowed_stages = {
+                    "correction",
+                    "review",
+                    "original_export",
+                    "assisted_translation",
+                    "translation",
+                    "translated_export",
+                }
+                if (
+                    not isinstance(result_path, str)
+                    or not isinstance(stage, str)
+                    or stage not in allowed_stages
+                ):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_WORKFLOW_SUCCESS_INVALID",
+                                    "message": "The workflow success report is malformed.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                cleared = self.server.gui_transcriptions.clear_workflow_error(
+                    result_path, cast(WorkflowStageName, stage)
+                )
+                self._write_response(_json_response(HTTPStatus.OK, {"cleared": cleared}))
                 return
             if path == "/api/v1/transcriptions/workflow-skip-batch":
                 result_paths = document.get("result_paths")

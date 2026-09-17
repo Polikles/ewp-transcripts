@@ -25,6 +25,7 @@ async function queuePost(path, body, options = {}) { const feedback = options.fe
 async function postSelectedFile(path, file, trigger, extraHeaders = {}) { let succeeded = false; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/octet-stream", "Accept": "application/json", "X-EWP-CSRF": csrfToken, "X-EWP-Filename": encodeURIComponent(file.name), ...extraHeaders}, body: file}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { setGuiWorking(false, trigger, succeeded); } }
 function diagnosticCode(error) { const message = String(error?.message || "GUI_WORKFLOW_OPERATION_FAILED"); return message.split(":", 1)[0] || "GUI_WORKFLOW_OPERATION_FAILED"; }
 async function reportWorkflowError(resultPath, stage, error) { if (!resultPath) return; try { await queuePost("/api/v1/transcriptions/workflow-error", {result_path: resultPath, stage, code: diagnosticCode(error)}, {feedback: false}); jobsSignature = ""; await refreshJobs(); } catch (_) { /* the operation's original error remains the primary status */ } }
+async function reportWorkflowSuccess(resultPath, stage) { if (!resultPath) return; try { await queuePost("/api/v1/transcriptions/workflow-success", {result_path: resultPath, stage}, {feedback: false}); jobsSignature = ""; await refreshJobs(); } catch (_) { /* completed output remains authoritative even if annotation cleanup fails */ } }
 async function reportWorkflowSkip(resultPath, stage) { await queuePost("/api/v1/transcriptions/workflow-skip", {result_path: resultPath, stage}); jobsSignature = ""; await refreshJobs(); }
 function workflowIndicator(label, stage) { const item = document.createElement("span"); const state = stage?.state || "pending"; item.className = `workflow-indicator workflow-${state}`; item.title = stage?.path ? `${label}: ${shortName(stage.path)}` : `${label}: ${state}`; const circle = document.createElement("span"); circle.className = "workflow-circle"; circle.setAttribute("aria-hidden", "true"); item.append(circle, ` ${label}`); return item; }
 function renderWorkflowProgress(job) {
@@ -851,6 +852,7 @@ correctionForm.addEventListener("submit", async event => {
       };
       try {
         const payload = await queuePost("/api/v1/corrections/generate", request, {trigger: submit});
+        await reportWorkflowSuccess(String(job.result_path), "correction");
         completed.push([shortName(job.result_path), shortName(payload.candidate_path)]);
         correctionCandidate = {...payload, output_root: root};
       } catch (error) {
@@ -937,6 +939,7 @@ translationForm.addEventListener("submit", async event => {
       };
       try {
         const payload = await queuePost("/api/v1/translations/generate", request, {trigger: submit});
+        await reportWorkflowSuccess(String(job.result_path), "assisted_translation");
         completed.push([shortName(job.result_path), shortName(payload.candidate_path)]);
         translationCandidate = {
           ...payload, revision_path: request.source_revision_path,
@@ -1083,7 +1086,10 @@ function renderStageQueues(jobs) {
       progress.className = "workflow-progress";
       progress.append(...stageQueueItemDetails(job, definition.id));
       content.append(heading, path, progress);
-      const stageError = job.workflow_errors?.[definition.id === "translation" ? "assisted_translation" : definition.id];
+      const workflowStage = job.workflow?.[definition.id === "translation" ? "assisted_translation" : definition.id];
+      const stageError = workflowStage?.state === "failed"
+        ? job.workflow_errors?.[definition.id === "translation" ? "assisted_translation" : definition.id]
+        : "";
       if (stageError) {
         const error = document.createElement("p");
         error.className = "stage-queue-error";

@@ -693,7 +693,7 @@ bare-metal Ubuntu, and the future Docker image. The normative workflow, path, pr
 security, accessibility, and implementation-slice contract is in
 [`26-local-web-gui-contract.md`](26-local-web-gui-contract.md).
 
-### Active GUI acceptance tasks (2026-09-14)
+### Active GUI acceptance tasks (2026-09-17)
 
 The following operator findings are tracked as separate vertical slices. Complete and manually
 qualify one task at a time; later tasks must not be folded into an unrelated fix.
@@ -715,7 +715,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
    accessibility.
 6. **GUI-06 — Correction-operation feedback — implemented, pending browser retest:** Generate correction candidate has the same local
    **Working…** then **Done!** feedback as Apply, Save, and Preview.
-7. **GUI-07 — Consent-gated batch correction — implemented, pending provider/browser retest:** selected correction items are processed once,
+7. **GUI-07 — Consent-gated batch correction — WSL/provider pass:** selected correction items are processed once,
    sequentially, and failure-isolated; completed items are disabled, later selected items continue
    after a failure, and each job retains its own consent/provenance. Add per-item dictionary
    selection only after the basic batch path is qualified.
@@ -751,7 +751,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 18. **GUI-18 — Review preview handoff — implemented, pending browser retest:** after Preview, scroll to Apply verified revision.
 19. **GUI-19 — Dictionary version labels — implemented, pending browser retest:** show an English dictionary's version once, with
     accurate, distinct versions for each installed edition.
-20. **GUI-20 — Batch translation and semantic handoff — implemented, pending provider/browser retest:** process every selected eligible item
+20. **GUI-20 — Batch translation and semantic handoff — WSL/provider pass:** process every selected eligible item
     once, save each translation candidate, and open each in semantic review with nonempty targets.
 21. **GUI-21 — Import diagnostics — implemented, pending browser retest:** show the specific per-item failure in correction and other
     stage queues when an imported canonical result cannot be used.
@@ -778,7 +778,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 30. **GUI-30 — Versioned canonical import names — WSL pass for S0E02:** accept validated canonical result files
     whose filename has a legitimate `_results_vNNN.json` suffix, while still rejecting other
     JSON types; explain any true validation failure precisely.
-31. **GUI-31 — Reliable bulk correction skip — implemented locally, pending browser retest:** the first click must update every selected
+31. **GUI-31 — Reliable bulk correction skip — WSL pass:** the first click must update every selected
     actionable item, even while queue refreshes occur, with a per-item outcome summary.
 32. **GUI-32 — Per-item semantic review identity — WSL pass:** switching or reopening A/B and other
     episodes must load each exact saved translation draft, preserving their distinct unsaved
@@ -788,7 +788,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     first, then validates the just-saved draft; Apply remains an explicit verified action.
 34. **GUI-34 — Responsive visual overhaul — deferred:** include small/zoomed viewport
     qualification in the later planned UI overhaul, not this functional-fix pass.
-35. **GUI-35 — Provider-batch manual qualification — waiting on GUI-36–38:** after the above
+35. **GUI-35 — Provider-batch manual qualification — WSL/provider pass:** after the above
     fixes, run the authorized two-item correction/translation provider test without duplicate
     requests and confirm per-item semantic-review targets.
 36. **GUI-36 — Explicit WSL `/init` Windows interop — WSL pass:**
@@ -816,6 +816,25 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     which exposes contents rather than a usable server path. Investigate browser-owned writable
     handles only as a separate client-managed output architecture, never as a Firefox-compatible
     path picker for the existing server pipeline.
+41. **GUI-41 — Intentional empty translation units — planned:** add an explicit, default-off
+    **Allow empty translation units** review confirmation for translations where omission is
+    intentional. Define the artifact, preview, audit, and export semantics before implementation;
+    an unchecked control must continue to fail closed on empty targets.
+42. **GUI-42 — Resolved workflow errors — implemented, pending browser retest:** clear a queue item's stage error after that
+    same operation succeeds, and do not display legacy error metadata over a stage whose durable
+    artifact proves completion. Acceptance: an initial consent or review failure disappears from
+    every queue after a successful retry.
+43. **GUI-43 — Missing durable-source diagnostic — planned:** when a referenced
+    `.ewp-gui-sources` file was removed externally, identify the missing source instead of returning
+    generic `GUI_REVIEW_REQUEST_INVALID`, stop only the affected item, and tell the operator to
+    add the original canonical result to the queue again.
+44. **GUI-44 — Remove selected queue items — planned:** provide a warned batch action that forgets
+    selected inactive queue items from the current work state without deleting their source,
+    review, revision, candidate, or export artifacts. Queued/running transcription remains
+    protected from removal.
+45. **GUI-45 — Current review/provider guidance — planned:** update Apply's disabled tooltip to
+    require only Preview now that Preview saves dirty drafts, and make OpenRouter the initial
+    translation-provider choice while preserving explicit provider controls and consent.
 
 Planned capabilities:
 

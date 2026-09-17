@@ -52,6 +52,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Successful correction, translation, review, and export retries now clear their prior queue-stage
+  error. Stage queues also ignore legacy error metadata when durable artifacts already prove that
+  the stage completed.
 - Output-folder browsing now uses deployment adapters rather than a Windows-only assumption:
   WSL uses its host dialog; bare-metal Linux can use Zenity, KDialog, or Yad; headless/Docker
   operation retains direct server-visible path entry for explicitly mounted volumes.

@@ -381,6 +381,29 @@ def test_queue_records_later_workflow_error_for_its_matching_result(tmp_path: Pa
         queue.close()
 
 
+def test_queue_clears_resolved_workflow_error_for_its_matching_result(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    result = str(output / "episode_results.json")
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        staged = queue.stage(
+            tmp_path / "episode.wav",
+            output,
+            planned_job_id="episode",
+            planned_result_path=result,
+        )
+        queue._replace(staged.job_id, status="completed", result_path=result)  # noqa: SLF001
+        assert queue.record_workflow_error(
+            result, "assisted_translation", "GUI_TRANSLATION_CONFIRMATION_REQUIRED"
+        )
+
+        assert queue.clear_workflow_error(result, "assisted_translation")
+        assert queue.jobs()[0].workflow_errors == {}
+        assert not queue.clear_workflow_error(str(output / "other_results.json"), "translation")
+    finally:
+        queue.close()
+
+
 def test_queue_marks_optional_stages_skipped_for_its_matching_result(tmp_path: Path) -> None:
     output = tmp_path / "output"
     queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)

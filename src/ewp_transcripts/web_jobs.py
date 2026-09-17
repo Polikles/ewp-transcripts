@@ -250,6 +250,24 @@ class GuiTranscriptionQueue:
                 return True
         return False
 
+    def clear_workflow_error(self, result_path: str, stage: WorkflowStageName) -> bool:
+        """Clear a resolved later-stage error from its matching queue job."""
+
+        with self._lock:
+            for job_id, job in self._jobs.items():
+                if result_path not in {job.result_path, job.planned_result_path}:
+                    continue
+                self._jobs[job_id] = job.model_copy(
+                    update={
+                        "workflow_errors": {
+                            key: value for key, value in job.workflow_errors.items() if key != stage
+                        },
+                        "updated_at": datetime.now(UTC),
+                    }
+                )
+                return True
+        return False
+
     def skip_workflow_stage(self, result_path: str, stage: WorkflowStageName) -> bool:
         """Mark one optional workflow stage skipped for the active GUI process."""
 
