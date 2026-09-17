@@ -835,7 +835,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 45. **GUI-45 — Preview-only Apply guidance — implemented, pending browser retest:** update Apply's
     disabled tooltip to require only Preview, and have transcript Preview save a dirty draft before
     validating it just as semantic-translation Preview does.
-46. **GUI-46 — Translation provider default — planned:** make OpenRouter the initial
+46. **GUI-46 — Translation provider default — implemented, pending browser retest:** make OpenRouter the initial
     translation-provider choice while preserving explicit provider controls and consent.
 
 Planned capabilities:

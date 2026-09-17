@@ -55,6 +55,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- LLM-assisted translation now initially selects OpenRouter, matching correction, and immediately
+  populates the corresponding Gemini model, cloud endpoint, JSON mode, and consent text. LM Studio
+  remains available as an explicit local-provider selection.
 - Transcript **Preview** now saves a dirty review draft before validation, and disabled Apply
   guidance consistently asks for Preview rather than the obsolete separate Save-and-Preview
   sequence.

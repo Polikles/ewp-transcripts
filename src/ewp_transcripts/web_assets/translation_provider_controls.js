@@ -6,7 +6,7 @@ translationProviderLabel.textContent = "Provider";
 const translationProvider = document.createElement("select");
 translationProvider.id = "translation-provider";
 translationProvider.name = "provider";
-translationProvider.innerHTML = '<option value="lm-studio">LM Studio (local)</option><option value="openrouter">OpenRouter (cloud)</option>';
+translationProvider.innerHTML = '<option value="openrouter">OpenRouter (cloud)</option><option value="lm-studio">LM Studio (local)</option>';
 translationProviderLabel.append(translationProvider);
 
 const translationCloudOptions = document.createElement("div");

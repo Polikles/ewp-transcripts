@@ -195,6 +195,10 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"Remove selected work state" in script_response.body
     assert b"workspace-directory" in script_response.body
     assert b"translation-provider" in script_response.body
+    assert (
+        b'<option value="openrouter">OpenRouter (cloud)</option><option value="lm-studio">'
+        in script_response.body
+    )
     assert b"translation-set-openrouter-key" in script_response.body
     assert b"translation-check-provider" in script_response.body
     stylesheet_response = dispatch_get(
