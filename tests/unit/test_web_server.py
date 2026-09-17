@@ -739,6 +739,40 @@ def test_translation_review_prepare_accepts_a_manual_target_language(tmp_path: P
     assert write_response.call_args.args[0].status == 200
 
 
+def test_review_reports_missing_source_with_reimport_instruction(tmp_path: Path) -> None:
+    missing = tmp_path / ".ewp-gui-sources" / "episode_results.json"
+    body = json.dumps(
+        {"result_path": str(missing), "review_output_directory": str(tmp_path / "reviews")}
+    ).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/reviews/prepare"
+    handler.rfile = BytesIO(body)
+    reviews = Mock()
+    reviews.prepare.side_effect = FileNotFoundError(2, "No such file", str(missing))
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_reviews=reviews,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    payload = json.loads(response.body)
+    assert response.status == 400
+    assert payload["error"]["code"] == "GUI_REVIEW_FILE_MISSING"
+    assert str(missing) in payload["error"]["message"]
+    assert "Add the original canonical *_results.json" in payload["error"]["message"]
+
+
 def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None:
     media = tmp_path / "episode.wav"
     media.write_bytes(b"audio")

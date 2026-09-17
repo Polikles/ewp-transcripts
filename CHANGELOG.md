@@ -52,6 +52,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Transcript review now reports `GUI_REVIEW_FILE_MISSING` when a required durable source was
+  removed externally, names the missing path, and directs the operator to re-add the original
+  canonical result instead of returning the generic invalid-request error.
 - Successful correction, translation, review, and export retries now clear their prior queue-stage
   error. Stage queues also ignore legacy error metadata when durable artifacts already prove that
   the stage completed.

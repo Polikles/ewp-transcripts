@@ -824,7 +824,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     same operation succeeds, and do not display legacy error metadata over a stage whose durable
     artifact proves completion. Acceptance: an initial consent or review failure disappears from
     every queue after a successful retry.
-43. **GUI-43 — Missing durable-source diagnostic — planned:** when a referenced
+43. **GUI-43 — Missing durable-source diagnostic — implemented, pending browser retest:** when a referenced
     `.ewp-gui-sources` file was removed externally, identify the missing source instead of returning
     generic `GUI_REVIEW_REQUEST_INVALID`, stop only the affected item, and tell the operator to
     add the original canonical result to the queue again.

@@ -910,7 +910,25 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 )
                 return
-            except (FileNotFoundError, OSError, ValueError) as error:
+            except FileNotFoundError as error:
+                missing = error.filename or str(error)
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_REVIEW_FILE_MISSING",
+                                "message": (
+                                    f"A required review source file no longer exists: {missing}. "
+                                    "Add the original canonical *_results.json to a workflow "
+                                    "queue again."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            except (OSError, ValueError) as error:
                 self._write_response(
                     _json_response(
                         HTTPStatus.BAD_REQUEST,
