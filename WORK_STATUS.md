@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-09-14**.
+Last updated: **2026-09-17**.
 
 ## Checkpoint
 
@@ -34,8 +34,8 @@ durable when staged. Review, revision, candidate, and export artifacts use the s
 Workspace save now recognizes all
 current form fields; an OS folder dialog chooses the shared output root without uploading folder
 contents. A confirmed clear-current-state action forgets inactive queue/browser state without
-deleting saved artifacts. Automated GUI checks pass; unresolved WSL/Chrome/Firefox qualification
-is tracked under GUI-25–33 in `docs/99-roadmap-v2.md`.
+deleting saved artifacts. Automated GUI checks pass; remaining operator qualification is tracked
+in the active GUI list in `docs/99-roadmap-v2.md`.
 
 The 2026-09-14 WSL retest confirmed default/custom workspace directories, retained import
 selection after manual output-path entry, versioned canonical import, per-item semantic edits,
@@ -43,10 +43,9 @@ and durable review/export files. It exposed `Exec format error` for Python's dir
 launcher/dialog subprocesses and a major persistence gap: session-picked queue sources and dirty
 review edits were absent after restoration. GUI-36–38 now have local fixes: explicit WSL `/init`
 interop fallback without noisy `gio`, durable selected-source promotion, and draft checkpointing
-before explicit workspace save. The next operator gate is WSL Chrome/Firefox verification of
-browser opening, folder selection, and saved-workspace restoration after a full GUI restart.
-Real-provider batch qualification (GUI-35) follows only after this passes. Responsive redesign
-remains GUI-34, deferred.
+before explicit workspace save. Later WSL retests passed browser opening, folder selection,
+saved-workspace restoration after a full GUI restart, and the real-provider batch qualification.
+Responsive redesign remains GUI-34, deferred.
 
 The WSL `/init` retest now passes for automatic browser launch and its host folder dialog. That
 dialog is intentionally a deployment adapter, not a Windows-only GUI dependency: GUI-40 adds
@@ -57,6 +56,22 @@ browser-owned writable-handle design would be a separate output architecture. GU
 selected-source copies and GUI-38 explicit workspace-save review checkpointing passed the WSL
 retest. GUI-39 tracks guarded reference-aware cleanup and the bundled help now specifies backup
 scope and exact temporary/durable retention behavior.
+
+The two-item real-provider GUI qualification now passes end to end: bulk correction skip and
+generation update both selected items without duplicate revisions; verified transcript revisions
+apply; OpenRouter translation produces two saved candidates with nonempty targets; distinct
+semantic reviews reopen correctly; and original plus translated subtitle exports are written.
+GUI-07, GUI-20, GUI-31, and GUI-35 are therefore operator-qualified. A future default-off
+intentional-empty-target control is tracked as GUI-41 because it first needs explicit artifact,
+audit, and export semantics.
+
+The resulting GUI defect pass is implemented in GUI-42–46. Successful retries clear stale
+per-stage errors; completed artifacts suppress legacy error annotations; missing review sources
+produce a specific re-import instruction; selected inactive queue rows can be forgotten without
+deleting files; transcript Preview saves a dirty draft and Apply asks only for Preview; and
+translation initially selects OpenRouter consistently with correction. The next operator gate is
+a short WSL browser regression covering these five behaviors. GUI-39 managed-source cleanup,
+GUI-40 bare-metal/container qualification, and GUI-34 responsive redesign remain planned work.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated

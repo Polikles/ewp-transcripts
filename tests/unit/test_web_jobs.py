@@ -138,9 +138,7 @@ def test_selected_inactive_jobs_can_be_forgotten_without_touching_files(tmp_path
             planned_result_path=str(tmp_path / "other_results.json"),
         )
 
-        removed, missing = queue.remove_inactive(
-            (completed.job_id, staged.job_id, "missing-job")
-        )
+        removed, missing = queue.remove_inactive((completed.job_id, staged.job_id, "missing-job"))
 
         assert removed == (completed.job_id, staged.job_id)
         assert missing == ("missing-job",)

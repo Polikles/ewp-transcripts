@@ -886,9 +886,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         str(document.get("export_output_directory", "")),
                         formats,
                     )
-                    self.server.gui_transcriptions.clear_workflow_error(
-                        result, "original_export"
-                    )
+                    self.server.gui_transcriptions.clear_workflow_error(result, "original_export")
                 else:
                     self._write_response(
                         _json_response(
@@ -1424,7 +1422,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     return
                 try:
-                    removed, not_found = self.server.gui_transcriptions.remove_inactive(
+                    removed_ids, not_found_ids = self.server.gui_transcriptions.remove_inactive(
                         tuple(job_ids)
                     )
                 except ValueError as error:
@@ -1438,7 +1436,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 self._write_response(
                     _json_response(
                         HTTPStatus.OK,
-                        {"removed": list(removed), "not_found": list(not_found)},
+                        {"removed": list(removed_ids), "not_found": list(not_found_ids)},
                     )
                 )
                 return
