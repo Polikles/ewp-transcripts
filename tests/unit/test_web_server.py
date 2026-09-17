@@ -175,6 +175,8 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"reviewSpeakerNamesPanel" in script_response.body
     assert b"Draft and history" in script_response.body
     assert b"Undo applied to the current draft" in script_response.body
+    assert b"Preview the current draft before applying." in script_response.body
+    assert b"if (reviewDirty) await saveReviewDraft();" in script_response.body
     assert b"Remove ${speakerId}" in script_response.body
     assert b"GUI_REVIEW_SPEAKER_IN_USE" in script_response.body
     assert b"Completion:" in script_response.body

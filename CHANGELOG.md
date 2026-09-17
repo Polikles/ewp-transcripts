@@ -55,6 +55,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Transcript **Preview** now saves a dirty review draft before validation, and disabled Apply
+  guidance consistently asks for Preview rather than the obsolete separate Save-and-Preview
+  sequence.
 - Transcript review now reports `GUI_REVIEW_FILE_MISSING` when a required durable source was
   removed externally, names the missing path, and directs the operator to re-add the original
   canonical result instead of returning the generic invalid-request error.

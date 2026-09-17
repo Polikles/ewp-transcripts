@@ -117,8 +117,8 @@ function restoreReviewHistory(direction) {
     renderReview(reviewDocument, true);
     setReviewStatus(
       direction < 0
-        ? "Undo applied to the current draft. Save and preview again before applying."
-        : "Redo applied to the current draft. Save and preview again before applying.",
+        ? "Undo applied to the current draft. Preview again before applying."
+        : "Redo applied to the current draft. Preview again before applying.",
     );
   } finally {
     reviewHistoryRestoring = false;
