@@ -1,3 +1,4 @@
+import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -116,6 +117,63 @@ def test_staged_job_can_be_removed_before_start(tmp_path: Path) -> None:
         assert queue.jobs() == ()
         assert queue.start() == 0
     finally:
+        queue.close()
+
+
+def test_selected_inactive_jobs_can_be_forgotten_without_touching_files(tmp_path: Path) -> None:
+    source = tmp_path / "episode_results.json"
+    source.write_text("durable", encoding="utf-8")
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    try:
+        completed, _ = queue.register_completed_result(
+            source,
+            output_directory=tmp_path,
+            planned_job_id="episode",
+            language=LanguageMode.POLISH,
+        )
+        staged = queue.stage(
+            tmp_path / "other.wav",
+            tmp_path,
+            planned_job_id="other",
+            planned_result_path=str(tmp_path / "other_results.json"),
+        )
+
+        removed, missing = queue.remove_inactive(
+            (completed.job_id, staged.job_id, "missing-job")
+        )
+
+        assert removed == (completed.job_id, staged.job_id)
+        assert missing == ("missing-job",)
+        assert queue.jobs() == ()
+        assert source.read_text(encoding="utf-8") == "durable"
+    finally:
+        queue.close()
+
+
+def test_selected_active_job_cannot_be_removed(tmp_path: Path) -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    def service(*args: object, **kwargs: object) -> object:
+        started.set()
+        release.wait(timeout=2)
+        return SimpleNamespace(result_path=tmp_path / "output" / "episode_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=service)
+    try:
+        job = queue.stage(
+            tmp_path / "episode.wav",
+            tmp_path / "output",
+            planned_job_id="episode",
+            planned_result_path=str(tmp_path / "output" / "episode_results.json"),
+        )
+        queue.start()
+        assert started.wait(timeout=2)
+
+        with pytest.raises(ValueError, match="Queued or running"):
+            queue.remove_inactive((job.job_id,))
+    finally:
+        release.set()
         queue.close()
 
 

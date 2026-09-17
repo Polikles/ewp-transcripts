@@ -206,6 +206,29 @@ class GuiTranscriptionQueue:
             self._order.remove(job_id)
             return True
 
+    def remove_inactive(self, job_ids: tuple[str, ...]) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        """Forget selected inactive jobs without deleting any referenced files."""
+
+        with self._lock:
+            active = tuple(
+                job_id
+                for job_id in job_ids
+                if (job := self._jobs.get(job_id)) is not None
+                and job.status in {"queued", "running"}
+            )
+            if active:
+                raise ValueError("Queued or running transcription jobs cannot be removed")
+            removed: list[str] = []
+            missing: list[str] = []
+            for job_id in job_ids:
+                if job_id not in self._jobs:
+                    missing.append(job_id)
+                    continue
+                del self._jobs[job_id]
+                self._order.remove(job_id)
+                removed.append(job_id)
+            return tuple(removed), tuple(missing)
+
     def active_output_directory(self) -> str | None:
         with self._lock:
             return next(

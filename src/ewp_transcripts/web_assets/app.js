@@ -53,6 +53,32 @@ workflowLegend.id = "workflow-legend";
 workflowLegend.className = "workflow-progress";
 workflowLegend.append("Legend:", workflowIndicator("not started", {state: "pending"}), workflowIndicator("completed", {state: "complete"}), workflowIndicator("error", {state: "failed"}), workflowIndicator("skipped", {state: "skipped"}));
 document.querySelector("#transcription-jobs").after(workflowLegend);
+const queueRemovalSelections = new Set();
+const queueRemovalControls = document.createElement("div");
+queueRemovalControls.className = "actions";
+const removeSelectedQueueItems = document.createElement("button");
+removeSelectedQueueItems.type = "button";
+removeSelectedQueueItems.className = "danger";
+removeSelectedQueueItems.textContent = "Remove selected queue items";
+removeSelectedQueueItems.disabled = true;
+const queueRemovalStatus = document.createElement("span");
+queueRemovalStatus.setAttribute("role", "status");
+queueRemovalControls.append(removeSelectedQueueItems, queueRemovalStatus);
+workflowLegend.after(queueRemovalControls);
+removeSelectedQueueItems.addEventListener("click", async () => {
+  const jobIds = [...queueRemovalSelections];
+  if (!jobIds.length) return;
+  if (!window.confirm(`Remove ${jobIds.length} selected inactive queue item${jobIds.length === 1 ? "" : "s"} from the current work state? No source, review, revision, candidate, or export files will be deleted.`)) return;
+  try {
+    const payload = await queuePost("/api/v1/transcriptions/remove-batch", {job_ids: jobIds, confirmed: true}, {trigger: removeSelectedQueueItems});
+    for (const jobId of [...payload.removed, ...payload.not_found]) queueRemovalSelections.delete(jobId);
+    queueRemovalStatus.textContent = `${payload.removed.length} queue item${payload.removed.length === 1 ? "" : "s"} removed. Files on disk were not changed.`;
+    jobsSignature = "";
+    await refreshJobs();
+  } catch (error) {
+    queueRemovalStatus.textContent = error.message;
+  }
+});
 function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; correctionForm.elements.namedItem("confirmed").checked = false; correctionForm.elements.namedItem("allow_remote_endpoint").checked = false; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
 function nextWorkflowStage(job) { const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
 function nextWorkflowLabel(stage) { return ({correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
@@ -98,14 +124,30 @@ async function refreshJobs() {
   if (signature === jobsSignature) return payload;
   jobsSignature = signature;
   const container = document.querySelector("#transcription-jobs");
+  const removableIds = new Set(payload.jobs.filter(job => !["queued", "running"].includes(job.status)).map(job => job.job_id));
+  for (const jobId of queueRemovalSelections) if (!removableIds.has(jobId)) queueRemovalSelections.delete(jobId);
+  removeSelectedQueueItems.disabled = queueRemovalSelections.size === 0;
   if (!payload.jobs.length) { container.innerHTML = "<p>No jobs in this server session.</p>"; return payload; }
   const table = document.createElement("table");
   table.className = "queue-table";
   const head = document.createElement("thead");
-  head.innerHTML = "<tr><th>Status</th><th>Job and settings</th><th>Input</th><th>Planned/actual result</th><th>Action</th></tr>";
+  head.innerHTML = "<tr><th scope=\"col\">Remove</th><th>Status</th><th>Job and settings</th><th>Input</th><th>Planned/actual result</th><th>Action</th></tr>";
   const body = document.createElement("tbody");
   for (const job of payload.jobs) {
     const row = document.createElement("tr");
+    const selection = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = queueRemovalSelections.has(job.job_id);
+    checkbox.disabled = ["queued", "running"].includes(job.status);
+    checkbox.setAttribute("aria-label", `Select ${job.planned_job_id} for removal from the current queue`);
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) queueRemovalSelections.add(job.job_id);
+      else queueRemovalSelections.delete(job.job_id);
+      removeSelectedQueueItems.disabled = queueRemovalSelections.size === 0;
+      queueRemovalStatus.textContent = `${queueRemovalSelections.size} selected.`;
+    });
+    selection.append(checkbox);
     const status = document.createElement("td");
     status.className = `status-${job.status}`;
     status.textContent = job.status.toUpperCase();
@@ -119,7 +161,7 @@ async function refreshJobs() {
     output.title = job.result_path || job.planned_result_path;
     const action = document.createElement("td");
     addJobActions(job, action);
-    row.append(status, identity, input, output, action);
+    row.append(selection, status, identity, input, output, action);
     body.append(row);
   }
   table.append(head, body);

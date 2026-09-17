@@ -8,6 +8,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- The transcription queue has a confirmed **Remove selected queue items** action for staged,
+  completed, or failed rows. It forgets only current work-state records, never referenced source,
+  review, revision, candidate, or export files, and refuses queued/running jobs.
 - The Inspect and plan section now uses a native browser picker for audio. Its explicitly chosen
   file is copied only into an owned, bounded loopback-server work directory for the active GUI
   session, then deleted when the server stops. The picker button displays **Working…** and

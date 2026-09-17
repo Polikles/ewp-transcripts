@@ -1399,6 +1399,49 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     return
                 self._write_response(_json_response(HTTPStatus.OK, {"removed": job_id}))
                 return
+            if path == "/api/v1/transcriptions/remove-batch":
+                job_ids = document.get("job_ids")
+                if (
+                    document.get("confirmed") is not True
+                    or not isinstance(job_ids, list)
+                    or not 1 <= len(job_ids) <= 50
+                    or any(not isinstance(item, str) or not item for item in job_ids)
+                    or len(set(job_ids)) != len(job_ids)
+                ):
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_REMOVE_INVALID",
+                                    "message": (
+                                        "Select one or more unique inactive queue items and "
+                                        "confirm removal."
+                                    ),
+                                }
+                            },
+                        )
+                    )
+                    return
+                try:
+                    removed, not_found = self.server.gui_transcriptions.remove_inactive(
+                        tuple(job_ids)
+                    )
+                except ValueError as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {"error": {"code": "GUI_QUEUE_ACTIVE", "message": str(error)}},
+                        )
+                    )
+                    return
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.OK,
+                        {"removed": list(removed), "not_found": list(not_found)},
+                    )
+                )
+                return
             if path == "/api/v1/transcriptions/workflow-error":
                 result_path = document.get("result_path")
                 stage = document.get("stage")

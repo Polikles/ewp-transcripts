@@ -625,6 +625,59 @@ def test_clear_current_queue_requires_confirmation() -> None:
     transcriptions.clear_current_state.assert_not_called()
 
 
+def test_remove_selected_queue_items_requires_confirmation() -> None:
+    body = json.dumps({"job_ids": ["job-a"]}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions/remove-batch"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_transcriptions=transcriptions
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "GUI_QUEUE_REMOVE_INVALID"
+    transcriptions.remove_inactive.assert_not_called()
+
+
+def test_remove_selected_queue_items_returns_per_item_outcome() -> None:
+    body = json.dumps({"job_ids": ["job-a", "job-b"], "confirmed": True}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/transcriptions/remove-batch"
+    handler.rfile = BytesIO(body)
+    transcriptions = Mock()
+    transcriptions.remove_inactive.return_value = (("job-a",), ("job-b",))
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_transcriptions=transcriptions
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    assert json.loads(response.body) == {"removed": ["job-a"], "not_found": ["job-b"]}
+    transcriptions.remove_inactive.assert_called_once_with(("job-a", "job-b"))
+
+
 def test_workflow_skip_rejects_audio_instead_of_a_canonical_result(tmp_path: Path) -> None:
     media = tmp_path / "episode.wav"
     media.write_bytes(b"not a canonical result")

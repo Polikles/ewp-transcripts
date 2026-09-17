@@ -828,7 +828,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     `.ewp-gui-sources` file was removed externally, identify the missing source instead of returning
     generic `GUI_REVIEW_REQUEST_INVALID`, stop only the affected item, and tell the operator to
     add the original canonical result to the queue again.
-44. **GUI-44 — Remove selected queue items — planned:** provide a warned batch action that forgets
+44. **GUI-44 — Remove selected queue items — implemented, pending browser retest:** provide a warned batch action that forgets
     selected inactive queue items from the current work state without deleting their source,
     review, revision, candidate, or export artifacts. Queued/running transcription remains
     protected from removal.
