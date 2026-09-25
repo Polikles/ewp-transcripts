@@ -96,6 +96,12 @@ latest/per-result transcript-review session pointers. Translation export provena
 the intentional-empty unit count and its placeholder-free export behavior. These changes need a
 short WSL regression.
 
+The follow-up confirmed flexible/new workspace directories and correct intentional-omission
+provenance. GUI-52 adds missing inline status to managed-source inventory/cleanup. GUI-53 makes
+workspace auto-save default-off after the test showed that its 60-second update could silently
+replace an explicit recovery snapshot and remove that workspace's source-retention reason. Both
+await a short WSL UI check.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

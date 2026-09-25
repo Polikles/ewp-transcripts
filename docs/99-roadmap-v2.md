@@ -816,7 +816,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     which exposes contents rather than a usable server path. Investigate browser-owned writable
     handles only as a separate client-managed output architecture, never as a Firefox-compatible
     path picker for the existing server pipeline.
-41. **GUI-41 — Intentional empty translation units — implemented, pending browser retest:** an
+41. **GUI-41 — Intentional empty translation units — WSL pass:** an
     explicit, default-off **Allow empty translation units** confirmation permits intentional
     omissions while unchecked review remains fail-closed. Translation schema 1.1 and audits retain
     the source-bound status; preview and Apply bind the same setting; derived exports omit the unit
@@ -847,7 +847,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 48. **GUI-48 — Non-color workflow status — WSL pass:** completed
     workflow circles contain a visible check mark and errors contain a geometrically centered X,
     in addition to their green/red color, written stage label, and state tooltip.
-49. **GUI-49 — Resilient workspace save after path changes — implemented, pending WSL retest:**
+49. **GUI-49 — Resilient workspace save after path changes — WSL pass:**
     changing the shared output directory refreshes the default correction, review, translation,
     and dictionary roots. Explicit workspace save clears unavailable dormant file fields and omits
     unavailable inactive queue history with visible counts instead of rejecting all remaining
@@ -856,9 +856,16 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     the latest and per-result hidden review-session pointers in the managed-source reference audit,
     normalize exact reference paths, and clear browser form fields that name a deliberately deleted
     managed source. A canonical copy needed by **Restore saved review** must never be selectable.
-51. **GUI-51 — Intentional-omission export provenance — implemented, pending WSL retest:** export
+51. **GUI-51 — Intentional-omission export provenance — WSL pass:** export
     provenance v2 records the intentional-empty unit count and states that derived outputs omit
     those units without placeholders.
+52. **GUI-52 — Managed-inventory action feedback — implemented, pending WSL retest:** Refresh
+    source inventory and cleanup use the same adjacent **Working…**, **Done!**, and error feedback
+    as other GUI actions instead of relying only on the page-level activity indicator.
+53. **GUI-53 — Explicit workspace auto-save — implemented, pending WSL retest:** auto-save remains
+    available after an explicit save/load but defaults off. Its label and help state that enabling
+    it replaces the recovery point after queue changes, which can remove a saved-workspace
+    retention reason from managed-source inventory.
 
 Planned capabilities:
 

@@ -208,6 +208,10 @@ An active saved workspace MAY be auto-saved. The default GUI interval is 60 seco
 client MUST compare the allowlisted state before writing, so unchanged state causes no save
 request. Auto-save begins only after an explicit save or load, remains optional, and never
 broadens the persisted field set.
+Auto-save MUST default off. Its control must explain that enabling it replaces the active saved
+recovery point after tracked queue additions or removals; consequently, a removed queue item may
+stop protecting its managed source through that workspace. Explicitly saved state remains stable
+until the operator saves again or knowingly enables auto-save.
 An API key entered through the GUI is scoped to the active GUI server process rather than one
 browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
 included in workspace state, project files, or browser storage, and stopping the server erases it.

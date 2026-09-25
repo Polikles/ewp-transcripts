@@ -24,6 +24,15 @@ def test_browser_workspace_fields_match_server_allowlist() -> None:
     assert browser_fields == _FIELD_NAMES
 
 
+def test_workspace_autosave_is_explicit_and_inventory_has_inline_feedback() -> None:
+    app = (Path(__file__).parents[2] / "src/ewp_transcripts/web_assets/app.js").read_text()
+
+    assert 'id="workspace-autosave" type="checkbox" disabled' in app
+    assert 'id="workspace-autosave" type="checkbox" checked' not in app
+    assert '"#refresh-managed-sources", "#cleanup-managed-sources"' in app
+    assert '{trigger: document.querySelector("#refresh-managed-sources")}' in app
+
+
 def test_workspace_saves_complete_current_browser_field_set(tmp_path: Path) -> None:
     workspaces, _ = controller(tmp_path)
     fields = {name: "" for name in _FIELD_NAMES}

@@ -69,6 +69,10 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Managed-source inventory and cleanup now show adjacent **Working…** and **Done!** feedback.
+  Workspace auto-save defaults off and clearly warns that enabling it replaces the saved recovery
+  point after queue changes, preventing an explicit workspace reference from disappearing after a
+  silent default auto-save.
 - Saving a workspace after changing output roots no longer fails because dormant form fields or
   inactive queue records point to files removed outside the GUI. Default workflow roots follow the
   selected shared output directory; unavailable fields/jobs are omitted with visible counts, while

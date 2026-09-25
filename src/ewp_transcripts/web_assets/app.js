@@ -542,7 +542,7 @@ translationForm.elements.namedItem("allow_remote_endpoint").id = "translation-al
 const workspaceFieldIds = ["input-path", "output-path", "workflow-language", "workflow-speaker-count", "workflow-speaker-auto", "correction-result-path", "correction-output-root", "correction-provider", "correction-model", "correction-endpoint", "correction-reasoning", "correction-allow-remote", "correction-dictionary", "review-result-path", "review-project-path", "custom-review-paths", "review-output-path", "revision-output-path", "export-output-path", "translation-result-path", "translation-revision-path", "translation-output-root", "translation-target", "translation-model", "translation-endpoint", "translation-allow-remote", "translation-output-mode", "translation-dictionary", "dictionary-canonical-directory", "dictionary-revision-directory", "dictionary-output-root", "dictionary-project-id", "dictionary-minimum", "dictionary-previous"];
 const workspaceSection = document.createElement("section");
 workspaceSection.setAttribute("aria-labelledby", "workspace-state-heading");
-workspaceSection.innerHTML = '<h2 id="workspace-state-heading">Saved work state</h2><p>Save or restore non-secret workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.</p><label for="workspace-name">Workspace name</label><input id="workspace-name" maxlength="100" autocomplete="off"><label for="workspace-list">Saved workspaces</label><select id="workspace-list"><option value="">Save as a new workspace</option></select><label class="workspace-autosave" for="workspace-autosave"><input id="workspace-autosave" type="checkbox" checked disabled><span>Auto-save the active workspace every 60 seconds when its non-secret fields change.</span></label><p id="workspace-autosave-status" class="field-hint" role="status">Auto-save becomes active after an explicit workspace save or load. Confirmations and editor text are not tracked by periodic auto-save.</p><div class="actions"><button type="button" id="save-workspace" class="primary">Save current work state</button><button type="button" id="load-workspace">Load selected work state</button><button type="button" id="refresh-workspaces">Refresh list</button></div><p id="workspace-status" role="status">No workspace state loaded.</p>';
+workspaceSection.innerHTML = '<h2 id="workspace-state-heading">Saved work state</h2><p>Save or restore non-secret workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.</p><label for="workspace-name">Workspace name</label><input id="workspace-name" maxlength="100" autocomplete="off"><label for="workspace-list">Saved workspaces</label><select id="workspace-list"><option value="">Save as a new workspace</option></select><label class="workspace-autosave" for="workspace-autosave"><input id="workspace-autosave" type="checkbox" disabled><span>Automatically replace the active saved workspace every 60 seconds when its non-secret fields or queue change.</span></label><p id="workspace-autosave-status" class="field-hint" role="status">Auto-save is off by default and becomes available after an explicit workspace save or load. Enabling it updates the saved recovery point when queue items are added or removed.</p><div class="actions"><button type="button" id="save-workspace" class="primary">Save current work state</button><button type="button" id="load-workspace">Load selected work state</button><button type="button" id="refresh-workspaces">Refresh list</button></div><p id="workspace-status" role="status">No workspace state loaded.</p>';
 document.querySelector("main").prepend(workspaceSection);
 const workspaceList = document.querySelector("#workspace-list");
 const workspaceName = document.querySelector("#workspace-name");
@@ -657,7 +657,14 @@ function renderManagedSources(payload) {
 }
 document.querySelector("#refresh-managed-sources").addEventListener("click", async () => {
   try {
-    renderManagedSources(await managedSourcesRequest("/api/v1/managed-sources/inventory"));
+    renderManagedSources(await queuePost(
+      "/api/v1/managed-sources/inventory",
+      {
+        output_directory: workflow.elements.namedItem("output_directory").value,
+        storage_directory: workspaceDirectory.value,
+      },
+      {trigger: document.querySelector("#refresh-managed-sources")},
+    ));
   } catch (error) { managedSourcesStatus.textContent = error.message; }
 });
 cleanupManagedSourcesButton.addEventListener("click", async () => {
@@ -1267,6 +1274,7 @@ function installFeedbackSlots() {
     "#skip-translation", "#generate-translation",
     "#review-translation", "#save-translation-review", "#preview-translation-review",
     "#apply-translation-review", "#export-translation-review", "#proceed-next-output",
+    "#refresh-managed-sources", "#cleanup-managed-sources",
   ];
   for (const selector of selectors) {
     const button = document.querySelector(selector);
