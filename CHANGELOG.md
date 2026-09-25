@@ -55,6 +55,9 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Workflow progress now includes the canonical result's `_vNNN` identity when discovering
+  correction candidates, accepted revisions, and original exports. Successfully applied/exported
+  work from a versioned imported result no longer remains pending in the queues.
 - LLM-assisted translation now initially selects OpenRouter, matching correction, and immediately
   populates the corresponding Gemini model, cloud endpoint, JSON mode, and consent text. LM Studio
   remains available as an explicit local-provider selection; choosing it replaces the known Gemini

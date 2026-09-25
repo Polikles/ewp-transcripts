@@ -1,5 +1,6 @@
 import threading
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,7 +9,7 @@ import pytest
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.revision import sha256_file
-from ewp_transcripts.web_jobs import GuiTranscriptionQueue, workflow_progress
+from ewp_transcripts.web_jobs import GuiTranscriptionJob, GuiTranscriptionQueue, workflow_progress
 
 
 def wait_for_terminal(queue: GuiTranscriptionQueue, timeout: float = 1.0):
@@ -393,6 +394,43 @@ def test_workflow_progress_is_derived_from_immutable_output_artifacts(tmp_path: 
     assert progress.correction.state == "complete"
     assert progress.review.state == "complete"
     assert progress.original_export.state == "complete"
+    assert progress.translation.state == "complete"
+    assert progress.translated_export.state == "complete"
+
+
+def test_workflow_progress_tracks_versioned_result_revision_artifacts(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    completed = GuiTranscriptionJob(
+        job_id="queue-job",
+        status="completed",
+        input_path=str(tmp_path / "episode.wav"),
+        output_directory=str(output),
+        planned_job_id="episode",
+        planned_result_path=str(output / "episode_results_v003.json"),
+        result_path=str(output / "episode_results_v003.json"),
+        language=LanguageMode.POLISH,
+        speaker_count="auto",
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    for directory, filename in [
+        ("correction-candidates", "episode_v003_revision_001.json"),
+        ("revisions", "episode_v003_revision_001.json"),
+        ("exports", "episode_v003_transcript_revision_001.txt"),
+        ("translation-candidates", "episode_en_translation_001.json"),
+        ("accepted-translations", "episode_en_translation_002.json"),
+        ("translation-exports", "episode_en_translation_002.provenance.json"),
+    ]:
+        destination = output / directory
+        destination.mkdir(parents=True)
+        (destination / filename).write_text("{}", encoding="utf-8")
+
+    progress = workflow_progress(completed)
+
+    assert progress.correction.state == "complete"
+    assert progress.review.state == "complete"
+    assert progress.original_export.state == "complete"
+    assert progress.assisted_translation.state == "complete"
     assert progress.translation.state == "complete"
     assert progress.translated_export.state == "complete"
 

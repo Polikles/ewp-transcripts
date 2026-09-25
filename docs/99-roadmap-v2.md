@@ -840,6 +840,10 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     preserving explicit provider controls and consent. Switching the known Gemini default to LM
     Studio resets the model field to the qualified Bielik model rather than retaining an invalid
     cloud model ID.
+47. **GUI-47 — Versioned-result workflow progress — implemented, pending browser retest:** discover
+    correction, accepted revision, and original-export artifacts using the canonical result's
+    `_vNNN` identity. Applying and exporting a revision of a versioned imported result must turn
+    the corresponding stages green rather than leaving them pending.
 
 Planned capabilities:
 

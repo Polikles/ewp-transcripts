@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import threading
 from collections import deque
 from collections.abc import Callable
@@ -456,6 +457,14 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
 
     root = Path(job.output_directory)
     prefix = f"{job.planned_job_id}_"
+    result_name = Path(job.result_path or job.planned_result_path).name
+    version_match = re.fullmatch(
+        rf"{re.escape(job.planned_job_id)}_results(?P<suffix>_v[0-9]{{3}})?\.json",
+        result_name,
+    )
+    revision_prefix = (
+        f"{job.planned_job_id}{version_match.group('suffix') or ''}_" if version_match else prefix
+    )
 
     def first(directory: str, pattern: str) -> str | None:
         candidate_root = root / directory
@@ -471,9 +480,9 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
     else:
         transcription = GuiWorkflowStage(state="pending")
 
-    correction_path = first("correction-candidates", f"{prefix}revision_*.json")
-    review_path = first("revisions", f"{prefix}revision_*.json")
-    original_export_path = first("exports", f"{prefix}transcript_revision_*.txt")
+    correction_path = first("correction-candidates", f"{revision_prefix}revision_*.json")
+    review_path = first("revisions", f"{revision_prefix}revision_*.json")
+    original_export_path = first("exports", f"{revision_prefix}transcript_revision_*.txt")
     translation_path = first("accepted-translations", f"{prefix}*_translation_*.json")
     translation_candidate_path = first("translation-candidates", f"{prefix}*_translation_*.json")
     translated_export_path = first(
