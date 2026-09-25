@@ -108,6 +108,10 @@ audited default plus custom workspace catalogs while Refresh list showed only on
 combines and labels both catalogs and keeps every workspace operation bound to its catalog; it
 awaits WSL confirmation.
 
+GUI-55 follows the unified catalog view: stale default-catalog workspaces with unavailable paths
+remain selectable for deletion while restore and auto-save stay disabled. This maintenance path
+awaits a short WSL confirmation.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

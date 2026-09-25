@@ -69,6 +69,8 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Saved workspaces with unavailable referenced paths remain selectable for confirmed removal.
+  Restore and auto-save stay disabled, and deletion still removes only the workspace JSON.
 - The Saved workspaces list now shows both the private default catalog and the currently selected
   custom catalog—the same set audited by managed-source cleanup. Entries identify their origin and
   load, overwrite, delete, import selection, and auto-save remain bound to the correct catalog,

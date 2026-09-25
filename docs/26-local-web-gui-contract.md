@@ -216,6 +216,9 @@ When a custom workspace catalog is selected, the visible workspace list MUST inc
 catalog and the private default catalog because managed-source cleanup audits both. Every entry
 identifies its catalog, and load, overwrite, delete, import selection, and auto-save target the
 entry's owning catalog. The same imported workspace ID may exist independently in both catalogs.
+An unavailable workspace remains selectable for maintenance. The GUI disables restore and
+auto-save because its referenced paths cannot be validated, but MUST still allow confirmed
+deletion of that workspace JSON without touching any transcript or workflow artifact.
 An API key entered through the GUI is scoped to the active GUI server process rather than one
 browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
 included in workspace state, project files, or browser storage, and stopping the server erases it.

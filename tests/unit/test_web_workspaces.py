@@ -34,6 +34,9 @@ def test_workspace_autosave_is_explicit_and_inventory_has_inline_feedback() -> N
     assert "function workspaceKey(workspaceId, storageDirectory)" in app
     assert "selectedWorkspace.storageDirectory" in app
     assert "item.catalog" in app
+    assert "option.dataset.available = String(item.available)" in app
+    assert "option.disabled = !item.available" not in app
+    assert "This saved workspace references unavailable paths" in app
 
 
 def test_workspace_saves_complete_current_browser_field_set(tmp_path: Path) -> None:

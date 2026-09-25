@@ -870,6 +870,9 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     workspaces list combines the private default catalog with the currently selected custom
     catalog, labels each origin, and routes load, overwrite, delete, import selection, and auto-save
     to the owning catalog. Equal imported workspace IDs in different catalogs remain distinct.
+55. **GUI-55 — Remove unavailable saved workspaces — implemented, pending WSL retest:** workspace
+    records whose referenced files no longer exist remain selectable. Restore and auto-save are
+    disabled, while confirmed deletion remains available and removes only the stale workspace JSON.
 
 Planned capabilities:
 
