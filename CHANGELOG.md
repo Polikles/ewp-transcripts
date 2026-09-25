@@ -8,6 +8,10 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- Saved work state now includes a managed-source inventory for the selected output root. It shows
+  current-queue, saved-workspace, and workflow-lineage retention reasons and permits permanent
+  deletion only for explicitly selected, freshly re-audited unreferenced copies. Referenced,
+  changed, unreadable, and unsafe copies remain protected; publication artifacts are never deleted.
 - Completed workflow circles now contain a visible check mark and failed circles a geometrically
   centered CSS-drawn X, so those states remain distinguishable without relying on their green/red
   colors or font-specific symbol alignment.

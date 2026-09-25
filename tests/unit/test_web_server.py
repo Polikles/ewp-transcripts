@@ -11,6 +11,7 @@ import pytest
 
 from ewp_transcripts import __version__
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
     GuiSelectionCache,
@@ -195,6 +196,8 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"selected-media/upload" in script_response.body
     assert b"Remove selected work state" in script_response.body
     assert b"workspace-directory" in script_response.body
+    assert b"managed-sources/inventory" in script_response.body
+    assert b"Delete selected unreferenced copies" in script_response.body
     assert b"translation-provider" in script_response.body
     assert (
         b'<option value="openrouter">OpenRouter (cloud)</option><option value="lm-studio">'
@@ -633,6 +636,56 @@ def test_clear_current_queue_requires_confirmation() -> None:
     assert response.status == 400
     assert json.loads(response.body)["error"]["code"] == "GUI_CLEAR_CONFIRMATION_REQUIRED"
     transcriptions.clear_current_state.assert_not_called()
+
+
+def test_managed_source_inventory_exposes_only_audited_copy(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"audio")
+    preserved, _ = preserve_gui_selected_source(source, output_directory=output, category="media")
+    body = json.dumps({"output_directory": str(output), "storage_directory": ""}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/managed-sources/inventory"
+    handler.rfile = BytesIO(body)
+    workspaces = Mock()
+    workspaces.documents.return_value = ()
+    transcriptions = Mock()
+    transcriptions.jobs.return_value = ()
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_workflows=GuiWorkflowController(),
+        gui_workspaces=workspaces,
+        workspace_controller=Mock(return_value=workspaces),
+        gui_transcriptions=transcriptions,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    payload = json.loads(response.body)
+    assert response.status == 200
+    assert payload["workspace_count"] == 0
+    assert payload["sources"] == [
+        {
+            "relative_path": preserved.relative_to(output / ".ewp-gui-sources").as_posix(),
+            "path": str(preserved),
+            "category": "media",
+            "filename": "episode.wav",
+            "sha256": sha256_file(preserved),
+            "size_bytes": 5,
+            "removable": True,
+            "references": [],
+        }
+    ]
 
 
 def test_remove_selected_queue_items_requires_confirmation() -> None:

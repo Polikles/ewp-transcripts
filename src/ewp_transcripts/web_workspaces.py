@@ -150,6 +150,19 @@ class GuiWorkspaceController:
             and path.is_relative_to(self._temporary_selection_root)
         )
 
+    def documents(self) -> tuple[GuiWorkspaceDocument, ...]:
+        """Return readable workspace records without requiring every referenced path to exist."""
+
+        if not self._state_directory.is_dir() or self._state_directory.is_symlink():
+            return ()
+        documents: list[GuiWorkspaceDocument] = []
+        for path in sorted(self._state_directory.glob("*.json")):
+            try:
+                documents.append(self._read(path))
+            except ValueError:
+                continue
+        return tuple(documents)
+
     def save(
         self,
         *,

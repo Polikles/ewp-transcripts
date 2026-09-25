@@ -331,6 +331,14 @@ Browser directory selection causes an unavoidable browser-controlled sharing war
 offered. Direct server-side result, transcript,
 dictionary, and output path fields MAY retain typed entry while their native-picker replacements
 are qualified.
+Durable `.ewp-gui-sources` cleanup MUST begin with a fresh inventory of the chosen output root.
+The GUI may select only copies with no reference from the current queue, the default workspace
+catalog, the explicitly selected custom workspace catalog, or review/revision/translation lineage
+under that output root. Referenced, hash-mismatched, unreadable, or structurally unsafe copies are
+not selectable. Cleanup re-runs the audit immediately before deletion, requires an explicit
+per-batch confirmation, removes only the selected exact files and empty managed-source parents,
+and never deletes publication artifacts. The interface MUST disclose that custom workspace
+catalogs stored elsewhere are unknown and must be audited separately.
 The GUI does not use a launch-time filesystem allowlist. It rejects documented operating-system
 directories and symlinks to prevent accidental system changes; this is an operator-safety policy,
 not a security boundary against the local account that starts the loopback service. Optional

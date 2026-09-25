@@ -82,6 +82,14 @@ known Gemini default with the qualified Bielik model; versioned canonical result
 circles include check/X glyphs for non-color identification. These GUI-46–48 changes need one
 short browser retest.
 
+GUI-39 managed durable-source cleanup is now implemented. Saved work state exposes a source
+inventory for the selected output root, including exact retention reasons from the current queue,
+the default and selected custom workspace catalogs, and correction/review/translation lineage.
+Only hash-valid, readable, structurally safe, unreferenced copies can be selected; cleanup repeats
+the audit before a confirmed permanent deletion and leaves publication artifacts untouched.
+Custom workspace catalogs stored elsewhere remain explicitly outside the audit and must be checked
+separately. Browser qualification is the next gate for this slice.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

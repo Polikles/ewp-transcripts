@@ -39,6 +39,11 @@ from ewp_transcripts.web_jobs import (
     workflow_progress,
 )
 from ewp_transcripts.web_reviews import GuiReviewController
+from ewp_transcripts.web_source_cleanup import (
+    GuiManagedSourceCleanupError,
+    cleanup_managed_sources,
+    inventory_managed_sources,
+)
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
 from ewp_transcripts.web_workflows import (
@@ -652,6 +657,113 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             self._write_response(_json_response(HTTPStatus.OK, {"path": directory}))
+            return
+        if path.startswith("/api/v1/managed-sources/"):
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The managed-source request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                output_value = document.get("output_directory")
+                storage_value = document.get("storage_directory", "")
+                if not isinstance(output_value, str) or not output_value.strip():
+                    raise ValueError("Choose the shared output directory to inventory")
+                if not isinstance(storage_value, str):
+                    raise ValueError("Workspace storage directory is invalid")
+                output_directory = self.server.gui_workflows.resolve_allowed_path(
+                    output_value, directory=True
+                )
+                workspace_controllers = (
+                    self.server.gui_workspaces,
+                    self.server.workspace_controller(storage_value),
+                )
+                workspace_documents = {
+                    workspace.workspace_id: workspace
+                    for controller in workspace_controllers
+                    for workspace in controller.documents()
+                }
+                managed_queue_jobs = self.server.gui_transcriptions.jobs()
+                managed_workspaces = tuple(workspace_documents.values())
+                if path == "/api/v1/managed-sources/inventory":
+                    managed_sources = inventory_managed_sources(
+                        output_directory,
+                        queue_jobs=managed_queue_jobs,
+                        workspaces=managed_workspaces,
+                    )
+                    managed_payload = {
+                        "sources": [item.model_dump(mode="json") for item in managed_sources],
+                        "workspace_count": len(workspace_documents),
+                    }
+                elif path == "/api/v1/managed-sources/cleanup":
+                    managed_relative_paths = document.get("relative_paths")
+                    if (
+                        document.get("confirmed") is not True
+                        or not isinstance(managed_relative_paths, list)
+                        or not 1 <= len(managed_relative_paths) <= 100
+                        or any(
+                            not isinstance(item, str) or not item for item in managed_relative_paths
+                        )
+                    ):
+                        raise ValueError("Select managed copies and confirm permanent cleanup")
+                    managed_removed = cleanup_managed_sources(
+                        output_directory,
+                        tuple(managed_relative_paths),
+                        queue_jobs=managed_queue_jobs,
+                        workspaces=managed_workspaces,
+                    )
+                    managed_payload = {"removed": list(managed_removed)}
+                else:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.NOT_FOUND,
+                            {
+                                "error": {
+                                    "code": "GUI_ROUTE_NOT_FOUND",
+                                    "message": "No such GUI route.",
+                                }
+                            },
+                        )
+                    )
+                    return
+            except GuiManagedSourceCleanupError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.CONFLICT,
+                        {
+                            "error": {
+                                "code": "GUI_MANAGED_SOURCE_CLEANUP_REFUSED",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            except (FileNotFoundError, OSError, ValueError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": {
+                                "code": "GUI_MANAGED_SOURCE_REQUEST_INVALID",
+                                "message": str(error),
+                            }
+                        },
+                    )
+                )
+                return
+            self._write_response(_json_response(HTTPStatus.OK, managed_payload))
             return
         if path.startswith("/api/v1/workspaces/"):
             supplied = self.headers.get("X-EWP-CSRF", "")

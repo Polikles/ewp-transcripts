@@ -590,6 +590,75 @@ workspaceDirectory.addEventListener("input", showWorkspacePendingState);
 function applyWorkspaceFields(fields) { document.querySelectorAll("label.confirmation input[type=checkbox]").forEach(element => { element.checked = false; }); for (const [id, value] of Object.entries(fields)) { const element = document.getElementById(id); if (!element) continue; if (element.type === "checkbox") element.checked = value === true; else element.value = String(value); element.dispatchEvent(new Event("change", {bubbles: true})); element.dispatchEvent(new Event("input", {bubbles: true})); } void restoreWorkspaceReviewIfPresent(); }
 async function restoreWorkspaceReviewIfPresent() { const root = reviewForm.elements.namedItem("project_output_directory").value; if (!root || reviewDocument) return; try { const payload = await postReview("session/restore", {project_output_directory: root}); const session = payload.session; reviewForm.elements.namedItem("result_path").value = session.result_path; const standard = ["review_output_directory", "revision_output_directory", "export_output_directory"].every(name => session[name] === joinedPath(root, name.replace("_output_directory", "s"))); document.querySelector("#custom-review-paths").checked = !standard; for (const name of ["review_output_directory", "revision_output_directory", "export_output_directory"]) reviewForm.elements.namedItem(name).value = session[name]; updateReviewDirectories(); renderReview(payload); appliedRevisionPath = session.applied_revision_path || ""; if (appliedRevisionPath) { const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; } persistReview(); setReviewStatus(appliedRevisionPath ? "Saved applied review restored from workspace" : "Saved review restored from workspace; preview is required again", payload); showReviewSummary([["Publication", appliedRevisionPath ? "Immutable revision already written" : "None — restored editable draft"], ["Review file", shortName(payload.review_path)], ["Source", payload.source_verification]]); } catch (error) { if (!error.message.startsWith("GUI_REVIEW_SESSION_NOT_FOUND")) setReviewStatus(error.message); } }
 async function workspacePost(path, body = {}, options = {}) { return queuePost(path, {...body, storage_directory: workspaceDirectory.value}, options); }
+const managedSourcesDetails = document.createElement("details");
+managedSourcesDetails.id = "managed-sources";
+managedSourcesDetails.innerHTML = '<summary>Managed source copies</summary><p class="field-hint">Inventory durable browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.</p><div class="actions"><button type="button" id="refresh-managed-sources">Refresh source inventory</button><button type="button" id="cleanup-managed-sources" class="danger" disabled>Delete selected unreferenced copies</button></div><p id="managed-sources-status" role="status">Inventory has not been loaded.</p><div id="managed-sources-list"></div>';
+workspaceStatus.after(managedSourcesDetails);
+const managedSourcesStatus = document.querySelector("#managed-sources-status");
+const managedSourcesList = document.querySelector("#managed-sources-list");
+const cleanupManagedSourcesButton = document.querySelector("#cleanup-managed-sources");
+const selectedManagedSources = new Set();
+function managedSourcesRequest(path, body = {}) { return queuePost(path, {output_directory: workflow.elements.namedItem("output_directory").value, storage_directory: workspaceDirectory.value, ...body}); }
+function formatManagedSourceSize(value) { if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`; return `${(value / (1024 * 1024)).toFixed(1)} MiB`; }
+function renderManagedSources(payload) {
+  selectedManagedSources.clear();
+  cleanupManagedSourcesButton.disabled = true;
+  managedSourcesList.replaceChildren();
+  if (!payload.sources.length) {
+    managedSourcesList.innerHTML = "<p>No managed source copies exist under this output directory.</p>";
+    managedSourcesStatus.textContent = `Inventory complete. ${payload.workspace_count} saved workspace${payload.workspace_count === 1 ? "" : "s"} audited.`;
+    return;
+  }
+  const table = document.createElement("table");
+  table.className = "queue-table";
+  table.innerHTML = "<thead><tr><th>Select</th><th>Type</th><th>File</th><th>Size</th><th>Retention</th></tr></thead>";
+  const body = document.createElement("tbody");
+  for (const source of payload.sources) {
+    const row = document.createElement("tr");
+    const selection = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.disabled = !source.removable;
+    checkbox.setAttribute("aria-label", `Select ${source.filename} for permanent managed-source cleanup`);
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) selectedManagedSources.add(source.relative_path);
+      else selectedManagedSources.delete(source.relative_path);
+      cleanupManagedSourcesButton.disabled = selectedManagedSources.size === 0;
+    });
+    selection.append(checkbox);
+    const type = document.createElement("td");
+    type.textContent = source.category === "canonical" ? "Canonical JSON" : "Media";
+    const file = document.createElement("td");
+    file.textContent = source.filename;
+    file.title = source.path;
+    const size = document.createElement("td");
+    size.textContent = formatManagedSourceSize(source.size_bytes);
+    const retention = document.createElement("td");
+    retention.textContent = source.removable ? "Unreferenced — eligible for cleanup" : source.references.join("; ");
+    row.append(selection, type, file, size, retention);
+    body.append(row);
+  }
+  table.append(body);
+  managedSourcesList.append(table);
+  const removable = payload.sources.filter(source => source.removable).length;
+  managedSourcesStatus.textContent = `Inventory complete: ${payload.sources.length} managed cop${payload.sources.length === 1 ? "y" : "ies"}, ${removable} eligible; ${payload.workspace_count} saved workspace${payload.workspace_count === 1 ? "" : "s"} audited.`;
+}
+document.querySelector("#refresh-managed-sources").addEventListener("click", async () => {
+  try {
+    renderManagedSources(await managedSourcesRequest("/api/v1/managed-sources/inventory"));
+  } catch (error) { managedSourcesStatus.textContent = error.message; }
+});
+cleanupManagedSourcesButton.addEventListener("click", async () => {
+  const relativePaths = [...selectedManagedSources];
+  if (!relativePaths.length) return;
+  if (!window.confirm(`Permanently delete ${relativePaths.length} selected unreferenced managed source cop${relativePaths.length === 1 ? "y" : "ies"}? This cannot be undone by EWP Transcriber. Confirm that this output directory and any separate workspace catalogs are backed up.`)) return;
+  try {
+    const payload = await managedSourcesRequest("/api/v1/managed-sources/cleanup", {relative_paths: relativePaths, confirmed: true});
+    const refreshed = await managedSourcesRequest("/api/v1/managed-sources/inventory");
+    renderManagedSources(refreshed);
+    managedSourcesStatus.textContent = `${payload.removed.length} unreferenced managed source cop${payload.removed.length === 1 ? "y" : "ies"} permanently deleted. Publication artifacts were not changed.`;
+  } catch (error) { managedSourcesStatus.textContent = error.message; }
+});
 async function refreshWorkspaces(selected = "", options = {}) { const payload = await workspacePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = item.workspace_id; option.textContent = `${item.name} · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.disabled = !item.available; option.selected = item.workspace_id === selected; workspaceList.append(option); } }
 document.querySelector("#refresh-workspaces").addEventListener("click", async () => { try { await refreshWorkspaces(workspaceList.value); workspaceStatus.textContent = "Saved workspace list refreshed."; } catch (error) { workspaceStatus.textContent = error.message; } });
 document.querySelector("#save-workspace").addEventListener("click", async () => {
