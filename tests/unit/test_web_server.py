@@ -180,6 +180,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"Remove ${speakerId}" in script_response.body
     assert b"GUI_REVIEW_SPEAKER_IN_USE" in script_response.body
     assert b"Completion:" in script_response.body
+    assert b'circle.textContent = state === "complete"' in script_response.body
     assert b"workflow-error" in script_response.body
     assert b"Existing non-final correction candidate found" in script_response.body
     assert b"review-bottom-navigation" in script_response.body
@@ -207,6 +208,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     )
     assert b"review-control-groups" in stylesheet_response.body
     assert b"translation-review-navigation" in stylesheet_response.body
+    assert b".workflow-failed .workflow-circle" in stylesheet_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
     assert b"speaker_labels: reviewDocument.speaker_labels" in script_response.body
     assert b"startsWithTerminalPunctuation" in script_response.body

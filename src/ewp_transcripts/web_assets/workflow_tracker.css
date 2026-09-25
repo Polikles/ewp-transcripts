@@ -2,3 +2,16 @@
   background: #2574c9;
   border-color: #14508e;
 }
+
+.workflow-complete .workflow-circle,
+.workflow-failed .workflow-circle {
+  align-items: center;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 900;
+  height: 0.9rem;
+  justify-content: center;
+  line-height: 1;
+  width: 0.9rem;
+}

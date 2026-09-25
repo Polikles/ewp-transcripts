@@ -8,6 +8,8 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- Completed workflow circles now contain a visible check mark and failed circles a visible X, so
+  those states remain distinguishable without relying on their green/red colors.
 - The transcription queue has a confirmed **Remove selected queue items** action for staged,
   completed, or failed rows. It forgets only current work-state records, never referenced source,
   review, revision, candidate, or export files, and refuses queued/running jobs.
