@@ -15,3 +15,25 @@
   line-height: 1;
   width: 0.9rem;
 }
+
+.workflow-failed .workflow-circle {
+  font-size: 0;
+  position: relative;
+}
+
+.workflow-failed .workflow-circle::before,
+.workflow-failed .workflow-circle::after {
+  background: currentColor;
+  border-radius: 0.08rem;
+  content: "";
+  height: 0.12rem;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 0.58rem;
+}
+
+.workflow-failed .workflow-circle::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}

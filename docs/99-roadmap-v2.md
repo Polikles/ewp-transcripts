@@ -845,8 +845,8 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     `_vNNN` identity. Applying and exporting a revision of a versioned imported result must turn
     the corresponding stages green rather than leaving them pending.
 48. **GUI-48 — Non-color workflow status — implemented, pending browser retest:** completed
-    workflow circles contain a visible check mark and errors contain a visible X, in addition to
-    their green/red color, written stage label, and state tooltip.
+    workflow circles contain a visible check mark and errors contain a geometrically centered X,
+    in addition to their green/red color, written stage label, and state tooltip.
 
 Planned capabilities:
 

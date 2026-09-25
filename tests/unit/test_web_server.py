@@ -209,6 +209,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"review-control-groups" in stylesheet_response.body
     assert b"translation-review-navigation" in stylesheet_response.body
     assert b".workflow-failed .workflow-circle" in stylesheet_response.body
+    assert b"translate(-50%, -50%) rotate(45deg)" in stylesheet_response.body
     assert b"GUI_REVIEW_SELECTION_REQUIRED" in script_response.body
     assert b"speaker_labels: reviewDocument.speaker_labels" in script_response.body
     assert b"startsWithTerminalPunctuation" in script_response.body
