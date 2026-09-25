@@ -1,6 +1,6 @@
 # EWP-transcripts work status
 
-Last updated: **2026-09-17**.
+Last updated: **2026-09-25**.
 
 ## Checkpoint
 
@@ -72,6 +72,15 @@ deleting files; transcript Preview saves a dirty draft and Apply asks only for P
 translation initially selects OpenRouter consistently with correction. The next operator gate is
 a short WSL browser regression covering these five behaviors. GUI-39 managed-source cleanup,
 GUI-40 bare-metal/container qualification, and GUI-34 responsive redesign remain planned work.
+
+The 2026-09-25 WSL regression passed automatic Chrome launch, terminal cleanliness, OpenRouter
+defaults, selected inactive queue removal, transcript Preview autosave/reopen, stale-error cleanup,
+missing managed-source diagnosis/re-import, and a successful translation retry. GUI-42–45 are now
+operator-qualified. Three follow-ups are implemented locally: selecting LM Studio replaces the
+known Gemini default with the qualified Bielik model; versioned canonical results use their
+`_vNNN` identity when discovering accepted revisions and original exports; and completion/error
+circles include check/X glyphs for non-color identification. These GUI-46–48 changes need one
+short browser retest.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated

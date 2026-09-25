@@ -820,19 +820,19 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     **Allow empty translation units** review confirmation for translations where omission is
     intentional. Define the artifact, preview, audit, and export semantics before implementation;
     an unchecked control must continue to fail closed on empty targets.
-42. **GUI-42 — Resolved workflow errors — implemented, pending browser retest:** clear a queue item's stage error after that
+42. **GUI-42 — Resolved workflow errors — WSL pass:** clear a queue item's stage error after that
     same operation succeeds, and do not display legacy error metadata over a stage whose durable
     artifact proves completion. Acceptance: an initial consent or review failure disappears from
     every queue after a successful retry.
-43. **GUI-43 — Missing durable-source diagnostic — implemented, pending browser retest:** when a referenced
+43. **GUI-43 — Missing durable-source diagnostic — WSL pass:** when a referenced
     `.ewp-gui-sources` file was removed externally, identify the missing source instead of returning
     generic `GUI_REVIEW_REQUEST_INVALID`, stop only the affected item, and tell the operator to
     add the original canonical result to the queue again.
-44. **GUI-44 — Remove selected queue items — implemented, pending browser retest:** provide a warned batch action that forgets
+44. **GUI-44 — Remove selected queue items — WSL pass:** provide a warned batch action that forgets
     selected inactive queue items from the current work state without deleting their source,
     review, revision, candidate, or export artifacts. Queued/running transcription remains
     protected from removal.
-45. **GUI-45 — Preview-only Apply guidance — implemented, pending browser retest:** update Apply's
+45. **GUI-45 — Preview-only Apply guidance — WSL pass:** update Apply's
     disabled tooltip to require only Preview, and have transcript Preview save a dirty draft before
     validating it just as semantic-translation Preview does.
 46. **GUI-46 — Translation provider default — implemented, provider default passed; local-switch
