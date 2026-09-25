@@ -212,6 +212,10 @@ Auto-save MUST default off. Its control must explain that enabling it replaces t
 recovery point after tracked queue additions or removals; consequently, a removed queue item may
 stop protecting its managed source through that workspace. Explicitly saved state remains stable
 until the operator saves again or knowingly enables auto-save.
+When a custom workspace catalog is selected, the visible workspace list MUST include both that
+catalog and the private default catalog because managed-source cleanup audits both. Every entry
+identifies its catalog, and load, overwrite, delete, import selection, and auto-save target the
+entry's owning catalog. The same imported workspace ID may exist independently in both catalogs.
 An API key entered through the GUI is scoped to the active GUI server process rather than one
 browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
 included in workspace state, project files, or browser storage, and stopping the server erases it.

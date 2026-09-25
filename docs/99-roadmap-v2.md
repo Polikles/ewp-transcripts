@@ -859,13 +859,17 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 51. **GUI-51 — Intentional-omission export provenance — WSL pass:** export
     provenance v2 records the intentional-empty unit count and states that derived outputs omit
     those units without placeholders.
-52. **GUI-52 — Managed-inventory action feedback — implemented, pending WSL retest:** Refresh
+52. **GUI-52 — Managed-inventory action feedback — WSL pass:** Refresh
     source inventory and cleanup use the same adjacent **Working…**, **Done!**, and error feedback
     as other GUI actions instead of relying only on the page-level activity indicator.
-53. **GUI-53 — Explicit workspace auto-save — implemented, pending WSL retest:** auto-save remains
+53. **GUI-53 — Explicit workspace auto-save — WSL pass:** auto-save remains
     available after an explicit save/load but defaults off. Its label and help state that enabling
     it replaces the recovery point after queue changes, which can remove a saved-workspace
     retention reason from managed-source inventory.
+54. **GUI-54 — Unified saved-workspace catalogs — implemented, pending WSL retest:** the Saved
+    workspaces list combines the private default catalog with the currently selected custom
+    catalog, labels each origin, and routes load, overwrite, delete, import selection, and auto-save
+    to the owning catalog. Equal imported workspace IDs in different catalogs remain distinct.
 
 Planned capabilities:
 

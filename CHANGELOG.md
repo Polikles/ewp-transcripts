@@ -69,6 +69,10 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- The Saved workspaces list now shows both the private default catalog and the currently selected
+  custom catalog—the same set audited by managed-source cleanup. Entries identify their origin and
+  load, overwrite, delete, import selection, and auto-save remain bound to the correct catalog,
+  including duplicate imported IDs stored in different catalogs.
 - Managed-source inventory and cleanup now show adjacent **Working…** and **Done!** feedback.
   Workspace auto-save defaults off and clearly warns that enabling it replaces the saved recovery
   point after queue changes, preventing an explicit workspace reference from disappearing after a

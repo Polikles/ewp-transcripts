@@ -140,6 +140,12 @@ class GuiWorkspaceController:
         self._resolve_path = resolve_path
         self._temporary_selection_root = temporary_selection_root
 
+    @property
+    def state_directory(self) -> Path:
+        """Return this catalog's normalized storage directory for catalog deduplication."""
+
+        return self._state_directory.resolve(strict=False)
+
     def is_temporary_selection(self, value: str) -> bool:
         """Identify exact GUI-owned picker copies, including expired sessions."""
 

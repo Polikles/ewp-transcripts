@@ -31,6 +31,9 @@ def test_workspace_autosave_is_explicit_and_inventory_has_inline_feedback() -> N
     assert 'id="workspace-autosave" type="checkbox" checked' not in app
     assert '"#refresh-managed-sources", "#cleanup-managed-sources"' in app
     assert '{trigger: document.querySelector("#refresh-managed-sources")}' in app
+    assert "function workspaceKey(workspaceId, storageDirectory)" in app
+    assert "selectedWorkspace.storageDirectory" in app
+    assert "item.catalog" in app
 
 
 def test_workspace_saves_complete_current_browser_field_set(tmp_path: Path) -> None:

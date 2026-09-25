@@ -393,6 +393,17 @@ class LocalGuiServer(ThreadingHTTPServer):
             temporary_selection_root=self.gui_selections.root,
         )
 
+    def workspace_catalogs(
+        self, storage_directory: str
+    ) -> tuple[tuple[str, str, GuiWorkspaceController], ...]:
+        """Return the default and selected custom catalogs without hiding either one."""
+
+        selected = self.workspace_controller(storage_directory)
+        catalogs = [("", "Default", self.gui_workspaces)]
+        if selected.state_directory != self.gui_workspaces.state_directory:
+            catalogs.append((storage_directory, "Custom", selected))
+        return tuple(catalogs)
+
 
 class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     """Serve the bundled shell and a small versioned read-only API."""
@@ -685,17 +696,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 output_directory = self.server.gui_workflows.resolve_allowed_path(
                     output_value, directory=True
                 )
-                workspace_controllers = (
-                    self.server.gui_workspaces,
-                    self.server.workspace_controller(storage_value),
-                )
-                workspace_documents = {
-                    workspace.workspace_id: workspace
-                    for controller in workspace_controllers
+                workspace_documents = tuple(
+                    workspace
+                    for _storage, _label, controller in self.server.workspace_catalogs(
+                        storage_value
+                    )
                     for workspace in controller.documents()
-                }
+                )
                 managed_queue_jobs = self.server.gui_transcriptions.jobs()
-                managed_workspaces = tuple(workspace_documents.values())
+                managed_workspaces = workspace_documents
                 if path == "/api/v1/managed-sources/inventory":
                     managed_sources = inventory_managed_sources(
                         output_directory,
@@ -787,7 +796,17 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 workspaces = self.server.workspace_controller(storage_directory)
                 if path == "/api/v1/workspaces/list":
                     payload: dict[str, object] = {
-                        "workspaces": [item.model_dump(mode="json") for item in workspaces.list()]
+                        "workspaces": [
+                            {
+                                **item.model_dump(mode="json"),
+                                "storage_directory": catalog_storage,
+                                "catalog": catalog_label,
+                            }
+                            for catalog_storage, catalog_label, controller in (
+                                self.server.workspace_catalogs(storage_directory)
+                            )
+                            for item in controller.list()
+                        ]
                     }
                 elif path == "/api/v1/workspaces/save":
                     fields = document.get("fields")

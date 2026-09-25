@@ -102,6 +102,12 @@ workspace auto-save default-off after the test showed that its 60-second update 
 replace an explicit recovery snapshot and remove that workspace's source-retention reason. Both
 await a short WSL UI check.
 
+The GUI-52/53 retest passed inline inventory status, stable explicit workspace retention, and the
+documented opt-in auto-save transition to an unreferenced source. It also exposed that cleanup
+audited default plus custom workspace catalogs while Refresh list showed only one. GUI-54 now
+combines and labels both catalogs and keeps every workspace operation bound to its catalog; it
+awaits WSL confirmation.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

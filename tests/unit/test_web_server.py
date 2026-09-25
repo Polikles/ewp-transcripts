@@ -663,6 +663,7 @@ def test_managed_source_inventory_exposes_only_audited_copy(tmp_path: Path) -> N
         gui_workflows=GuiWorkflowController(),
         gui_workspaces=workspaces,
         workspace_controller=Mock(return_value=workspaces),
+        workspace_catalogs=Mock(return_value=(("", "Default", workspaces),)),
         gui_transcriptions=transcriptions,
     )
     write_response = Mock()
@@ -685,6 +686,59 @@ def test_managed_source_inventory_exposes_only_audited_copy(tmp_path: Path) -> N
             "removable": True,
             "references": [],
         }
+    ]
+
+
+def test_workspace_list_combines_default_and_selected_catalogs(tmp_path: Path) -> None:
+    body = json.dumps({"storage_directory": str(tmp_path / "custom")}).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/workspaces/list"
+    handler.rfile = BytesIO(body)
+    default_summary = Mock()
+    default_summary.model_dump.return_value = {"workspace_id": "default-id", "name": "Default"}
+    custom_summary = Mock()
+    custom_summary.model_dump.return_value = {"workspace_id": "custom-id", "name": "Custom"}
+    default_catalog = Mock()
+    default_catalog.list.return_value = (default_summary,)
+    custom_catalog = Mock()
+    custom_catalog.list.return_value = (custom_summary,)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        workspace_controller=Mock(return_value=custom_catalog),
+        workspace_catalogs=Mock(
+            return_value=(
+                ("", "Default", default_catalog),
+                (str(tmp_path / "custom"), "Custom", custom_catalog),
+            )
+        ),
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    response = write_response.call_args.args[0]
+    assert response.status == 200
+    assert json.loads(response.body)["workspaces"] == [
+        {
+            "workspace_id": "default-id",
+            "name": "Default",
+            "storage_directory": "",
+            "catalog": "Default",
+        },
+        {
+            "workspace_id": "custom-id",
+            "name": "Custom",
+            "storage_directory": str(tmp_path / "custom"),
+            "catalog": "Custom",
+        },
     ]
 
 
