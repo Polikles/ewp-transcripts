@@ -701,41 +701,43 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 1. **GUI-01 — WSL browser launch — WSL pass through GUI-36:** restore automatic opening of the host default browser when
    `gui` runs without `--no-open-browser`, while retaining an actionable failure path and the explicit
    opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
-2. **GUI-02 — Resume from existing canonical results — implemented, pending browser retest:** every workflow-stage queue can add one or
-   more previously completed `*_results.json` files using the browser's native file-selection
-   dialog, copies only the explicitly selected JSON to owned temporary loopback storage, validates
-   its canonical contract, and resumes only the selected item. The file is never sent to a network
-   service and is deleted when the GUI server stops.
-3. **GUI-03 — Review-control layout — implemented, pending browser retest:** eliminate the Restore saved review / Undo / Redo overlap
+2. **GUI-02 — Resume from existing canonical results — WSL pass:** every workflow-stage queue can add one or
+    more previously completed `*_results.json` files using the browser's native file-selection
+    dialog, copies only the explicitly selected JSON to GUI-owned loopback storage, validates its
+    canonical contract, and resumes only the selected item. Once a shared output root is known, the
+    validated source is promoted to durable content-addressed storage as specified by GUI-37. It is
+    never sent to a network service.
+3. **GUI-03 — Review-control layout — WSL pass:** eliminate the Restore saved review / Undo / Redo overlap
    at supported viewport widths. Acceptance: all controls are independently visible and clickable.
-4. **GUI-04 — Per-item correction skip — implemented, pending browser retest:** selected correction-queue items can be explicitly
+4. **GUI-04 — Per-item correction skip — WSL pass:** selected correction-queue items can be explicitly
    skipped, update only those queue records, and visibly show the blue skipped correction state.
-5. **GUI-05 — Password-manager compatibility — implemented, pending Bitwarden retest:** remove markup and interaction patterns that cause
+5. **GUI-05 — Password-manager compatibility — WSL/Bitwarden pass:** remove markup and interaction patterns that cause
    Bitwarden to disable itself, without storing credentials in browser state or reducing form
    accessibility.
-6. **GUI-06 — Correction-operation feedback — implemented, pending browser retest:** Generate correction candidate has the same local
+6. **GUI-06 — Correction-operation feedback — WSL pass:** Generate correction candidate has the same local
    **Working…** then **Done!** feedback as Apply, Save, and Preview.
 7. **GUI-07 — Consent-gated batch correction — WSL/provider pass:** selected correction items are processed once,
    sequentially, and failure-isolated; completed items are disabled, later selected items continue
    after a failure, and each job retains its own consent/provenance. Add per-item dictionary
    selection only after the basic batch path is qualified.
-8. **GUI-08 — Stage-focused progress display — implemented, pending browser retest:** every stage queue displays the complete color-coded
+8. **GUI-08 — Stage-focused progress display — WSL pass:** every stage queue displays the complete color-coded
    workflow progression, while its own stage is visually prominent and other stages are subdued
    without losing state or non-color labels.
-9. **GUI-09 — Semantic-review handoff — implemented, pending browser retest:** Open candidate in semantic review smoothly scrolls to the
+9. **GUI-09 — Semantic-review handoff — WSL pass:** Open candidate in semantic review smoothly scrolls to the
    semantic-review section after loading its exact candidate.
-10. **GUI-10 — Semantic queue and manual-translation progress — implemented, pending browser retest:** semantic review lists eligible
+10. **GUI-10 — Semantic queue and manual-translation progress — WSL pass:** semantic review lists eligible
     candidate and manual-translation reviews; manual LLM skipping and later application/export
     update the main and stage queues from their durable artifacts or explicit optional-stage state.
-11. **GUI-11 — User-space path policy — implemented, pending WSL retest:** replace launch-time
+11. **GUI-11 — User-space path policy — WSL pass:** replace launch-time
     allowed roots with a denylist of operating-system directories and symlink rejection. Remove
     the obsolete visible root list and all recursive filesystem searches.
-12. **GUI-12 — Native Inspect picker — implemented, pending Chrome/Firefox retest:** replace the
+12. **GUI-12 — Native Inspect picker — WSL Chrome/Firefox pass:** replace the
     custom server filesystem picker for the inspect input with one native audio-file picker. Copy
     only the explicitly selected source into owned session-local work storage, show Working/Done
-    feedback, and delete it at GUI shutdown. Do not offer a native directory picker because its
-    browser-controlled all-files warning cannot be suppressed; retain direct output-path entry.
-13. **GUI-13 — Workspace removal and backup location — implemented, pending browser retest:** permit
+    feedback, and promote it to durable managed storage when staged as specified by GUI-37. An
+    unstaged selection is deleted at GUI shutdown. Do not offer a native directory picker because
+    its browser-controlled all-files warning cannot be suppressed; retain direct output-path entry.
+13. **GUI-13 — Workspace removal and backup location — WSL pass:** permit
     deletion of one selected saved-workspace JSON without touching workflow artifacts, and accept
     an optional user-space workspace storage directory so state files can be included in backups.
     A browser-native selected workspace JSON can be imported into that catalog without a
@@ -744,22 +746,22 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     directory; keep the client/server field contracts in sync and align all saved-state buttons.
 15. **GUI-15 — Output-root chooser — WSL pass; portability tracked in GUI-40:** choose the shared Inspect and plan output directory using
     an operating-system folder dialog without the browser's upload-all-files prompt.
-16. **GUI-16 — Queue readability — implemented, pending browser retest:** align action buttons in every stage queue; show imported
+16. **GUI-16 — Queue readability — WSL pass:** align action buttons in every stage queue; show imported
     result filenames, with full paths available on hover, instead of temporary path strings.
-17. **GUI-17 — Correction reopening — implemented, pending browser retest:** reopening skipped correction clears its skip state and
+17. **GUI-17 — Correction reopening — WSL pass:** reopening skipped correction clears its skip state and
     re-enables that specific item for correction selection.
-18. **GUI-18 — Review preview handoff — implemented, pending browser retest:** after Preview, scroll to Apply verified revision.
-19. **GUI-19 — Dictionary version labels — implemented, pending browser retest:** show an English dictionary's version once, with
+18. **GUI-18 — Review preview handoff — WSL pass:** after Preview, scroll to Apply verified revision.
+19. **GUI-19 — Dictionary version labels — WSL pass:** show an English dictionary's version once, with
     accurate, distinct versions for each installed edition.
 20. **GUI-20 — Batch translation and semantic handoff — WSL/provider pass:** process every selected eligible item
     once, save each translation candidate, and open each in semantic review with nonempty targets.
-21. **GUI-21 — Import diagnostics — implemented, pending browser retest:** show the specific per-item failure in correction and other
+21. **GUI-21 — Import diagnostics — WSL pass:** show the specific per-item failure in correction and other
     stage queues when an imported canonical result cannot be used.
-22. **GUI-22 — Bulk translation skip — implemented, pending browser retest:** selected queue items can skip assisted translation
+22. **GUI-22 — Bulk translation skip — WSL pass:** selected queue items can skip assisted translation
     without single-item path fields; all selected statuses update independently.
-23. **GUI-23 — Durable review output — implemented, pending WSL/browser retest:** applied revisions, saved reviews, and exports go to the
+23. **GUI-23 — Durable review output — WSL pass:** applied revisions, saved reviews, and exports go to the
     user's chosen output root, never session-local picker storage; block ambiguous output roots.
-24. **GUI-24 — Clear current state — implemented, pending browser retest:** an explicit warned confirmation clears the active queue and
+24. **GUI-24 — Clear current state — WSL pass:** an explicit warned confirmation clears the active queue and
     unsaved form state without deleting saved workspaces or publication artifacts.
 25. **GUI-25 — WSL launch diagnostics and fallback — WSL pass through GUI-36:** reproduce why automatic host-browser
     opening regressed; use a tested WSL host opener and surface a concise actionable failure
@@ -770,7 +772,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 27. **GUI-27 — Workspace save with session-picked files — WSL pass for saving, recovery extended in GUI-37–38:** saving a workspace must not fail merely
     because the form contains a GUI-owned temporary selection path. Default and custom storage
     directories both work while preserving validation of durable referenced paths and secrets.
-28. **GUI-28 — Transcription table proportions — implemented locally, pending browser retest:** keep filename columns readable and arrange
+28. **GUI-28 — Transcription table proportions — WSL pass:** keep filename columns readable and arrange
     completion indicators in 2–3–2 rows inside Job and settings at normal browser widths.
 29. **GUI-29 — Non-destructive import prerequisite — WSL pass after manual output-path entry:** if output root is missing, retain the
     user's selected canonical files in the browser until a root is chosen and then finish the
@@ -784,7 +786,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     episodes must load each exact saved translation draft, preserving their distinct unsaved
     edits or explicitly asking before discarding them; transient editor-layout changes must
     not leave the previous episode on screen.
-33. **GUI-33 — Preview translation saves draft — implemented locally, pending browser retest:** Preview translation saves dirty target edits
+33. **GUI-33 — Preview translation saves draft — WSL pass:** Preview translation saves dirty target edits
     first, then validates the just-saved draft; Apply remains an explicit verified action.
 34. **GUI-34 — Responsive visual overhaul — deferred:** include small/zoomed viewport
     qualification in the later planned UI overhaul, not this functional-fix pass.
@@ -805,10 +807,10 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     explicit Save current work state first persists open dirty transcript/translation drafts to
     authoritative output files, then saves the non-secret workspace record. A failed draft save
     must not claim the workspace was saved; restore should reopen the exact saved review.
-39. **GUI-39 — Managed durable-source cleanup — implemented, pending browser retest:** provide a guarded inventory and cleanup
+39. **GUI-39 — Managed durable-source cleanup — WSL pass:** provide a guarded inventory and cleanup
     action for `.ewp-gui-sources`. It may delete a copy only after confirming that no active queue
-    or known saved workspace references it and no review/revision lineage still needs it. Until
-    that reference audit exists, durable source copies remain operator-managed project data.
+    or known saved workspace references it and no review/revision lineage still needs it. Copies
+    that fail validation or remain referenced are visible but ineligible for deletion.
 40. **GUI-40 — Cross-deployment output selection — implemented locally, pending bare-metal and
     container qualification:** keep one browser control and server path contract while adapting
     the dialog to the deployment: Windows host dialog for WSL; Zenity, KDialog, or Yad for a Linux
@@ -852,7 +854,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     and dictionary roots. Explicit workspace save clears unavailable dormant file fields and omits
     unavailable inactive queue history with visible counts instead of rejecting all remaining
     state; invalid and prohibited paths still fail closed.
-50. **GUI-50 — Review-session-aware managed cleanup — implemented, pending WSL retest:** include
+50. **GUI-50 — Review-session-aware managed cleanup — WSL pass:** include
     the latest and per-result hidden review-session pointers in the managed-source reference audit,
     normalize exact reference paths, and clear browser form fields that name a deliberately deleted
     managed source. A canonical copy needed by **Restore saved review** must never be selectable.
@@ -866,7 +868,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     available after an explicit save/load but defaults off. Its label and help state that enabling
     it replaces the recovery point after queue changes, which can remove a saved-workspace
     retention reason from managed-source inventory.
-54. **GUI-54 — Unified saved-workspace catalogs — implemented, pending WSL retest:** the Saved
+54. **GUI-54 — Unified saved-workspace catalogs — WSL pass:** the Saved
     workspaces list combines the private default catalog with the currently selected custom
     catalog, labels each origin, and routes load, overwrite, delete, import selection, and auto-save
     to the owning catalog. Equal imported workspace IDs in different catalogs remain distinct.

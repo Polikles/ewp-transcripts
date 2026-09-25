@@ -63,15 +63,15 @@ apply; OpenRouter translation produces two saved candidates with nonempty target
 semantic reviews reopen correctly; and original plus translated subtitle exports are written.
 GUI-07, GUI-20, GUI-31, and GUI-35 are therefore operator-qualified. GUI-41 now implements the
 default-off intentional-empty-target control with versioned artifact, audit, and export semantics;
-it needs a short browser retest.
+its WSL browser retest passed, including placeholder-free exports and omission provenance.
 
-The resulting GUI defect pass is implemented in GUI-42–46. Successful retries clear stale
+The resulting GUI defect pass in GUI-42–48 is operator-qualified. Successful retries clear stale
 per-stage errors; completed artifacts suppress legacy error annotations; missing review sources
 produce a specific re-import instruction; selected inactive queue rows can be forgotten without
 deleting files; transcript Preview saves a dirty draft and Apply asks only for Preview; and
-translation initially selects OpenRouter consistently with correction. The next operator gate is
-a short WSL browser regression covering these five behaviors. GUI-39 managed-source cleanup,
-GUI-40 bare-metal/container qualification, and GUI-34 responsive redesign remain planned work.
+translation initially selects OpenRouter consistently with correction. Selecting LM Studio resets
+the known Gemini default to the qualified Bielik model, versioned canonical results discover their
+own revision/export artifacts, and completion/error states have non-color check/X glyphs.
 
 The 2026-09-25 WSL regression passed automatic Chrome launch, terminal cleanliness, OpenRouter
 defaults, selected inactive queue removal, transcript Preview autosave/reopen, stale-error cleanup,
@@ -81,32 +81,32 @@ Gemini default with the qualified Bielik model; versioned canonical results use 
 identity when discovering accepted revisions and original exports; and completion/error circles
 include centered check/X glyphs for non-color identification. GUI-46–48 are operator-qualified.
 
-GUI-39 managed durable-source cleanup is now implemented. Saved work state exposes a source
-inventory for the selected output root, including exact retention reasons from the current queue,
-the default and selected custom workspace catalogs, and correction/review/translation lineage.
+GUI-39 managed durable-source cleanup passed its WSL browser qualification. Saved work state
+exposes a source inventory for the selected output root, including exact retention reasons from
+the current queue, the default and selected custom workspace catalogs, and
+correction/review/translation lineage.
 Only hash-valid, readable, structurally safe, unreferenced copies can be selected; cleanup repeats
 the audit before a confirmed permanent deletion and leaves publication artifacts untouched.
-Custom workspace catalogs stored elsewhere remain explicitly outside the audit and must be checked
-separately. Browser qualification is the next gate for this slice.
+GUI-50 additionally passed the hidden latest/per-result review-session lineage check: a managed
+canonical copy required by a saved review remains protected after its queue item is removed.
 
-The first GUI-39/41 browser pass exposed three follow-ups, now implemented as GUI-49–51. Workspace
+The first GUI-39/41 browser pass exposed three follow-ups, now qualified as GUI-49–51. Workspace
 save follows the selected shared output root and omits unavailable dormant fields/history with
 visible counts rather than failing the whole checkpoint. Managed cleanup now protects hidden
 latest/per-result transcript-review session pointers. Translation export provenance v2 records
-the intentional-empty unit count and its placeholder-free export behavior. These changes need a
-short WSL regression.
+the intentional-empty unit count and its placeholder-free export behavior.
 
 The follow-up confirmed flexible/new workspace directories and correct intentional-omission
-provenance. GUI-52 adds missing inline status to managed-source inventory/cleanup. GUI-53 makes
+provenance. GUI-52 adds qualified inline status to managed-source inventory/cleanup. GUI-53 makes
 workspace auto-save default-off after the test showed that its 60-second update could silently
 replace an explicit recovery snapshot and remove that workspace's source-retention reason. Both
-await a short WSL UI check.
+passed their WSL UI checks.
 
 The GUI-52/53 retest passed inline inventory status, stable explicit workspace retention, and the
 documented opt-in auto-save transition to an unreferenced source. It also exposed that cleanup
 audited default plus custom workspace catalogs while Refresh list showed only one. GUI-54 now
 combines and labels both catalogs and keeps every workspace operation bound to its catalog; it
-awaits WSL confirmation.
+passed WSL confirmation through the combined list and catalog-routed deletion workflow.
 
 GUI-55 follows the unified catalog view: stale default-catalog workspaces with unavailable paths
 remain selectable for deletion while restore and auto-save stay disabled. This maintenance path
