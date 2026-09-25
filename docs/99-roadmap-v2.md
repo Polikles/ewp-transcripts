@@ -816,10 +816,11 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     which exposes contents rather than a usable server path. Investigate browser-owned writable
     handles only as a separate client-managed output architecture, never as a Firefox-compatible
     path picker for the existing server pipeline.
-41. **GUI-41 — Intentional empty translation units — planned:** add an explicit, default-off
-    **Allow empty translation units** review confirmation for translations where omission is
-    intentional. Define the artifact, preview, audit, and export semantics before implementation;
-    an unchecked control must continue to fail closed on empty targets.
+41. **GUI-41 — Intentional empty translation units — implemented, pending browser retest:** an
+    explicit, default-off **Allow empty translation units** confirmation permits intentional
+    omissions while unchecked review remains fail-closed. Translation schema 1.1 and audits retain
+    the source-bound status; preview and Apply bind the same setting; derived exports omit the unit
+    without blank cues or placeholders. Legacy schema 1.0 remains readable.
 42. **GUI-42 — Resolved workflow errors — WSL pass:** clear a queue item's stage error after that
     same operation succeeds, and do not display legacy error metadata over a stage whose durable
     artifact proves completion. Acceptance: an initial consent or review failure disappears from

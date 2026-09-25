@@ -159,6 +159,12 @@ without writing a revision. The GUI MUST label that state as unpublished and sho
 summary before offering expandable technical JSON. Preparing another review while one is open
 MUST require an explicit clear action so unsaved editor content cannot be replaced. Disabled
 Apply and Export actions MUST be visually distinct and explain their prerequisite.
+Semantic translation review MUST reject blank targets by default. A distinct, default-off
+**Allow empty translation units** confirmation may permit them for an intentional omission; the
+preview records the number of such units and Apply is valid only with the same setting. The
+control is a per-preview confirmation and MUST NOT be restored from workspace or browser state.
+The immutable translation and audit retain each omitted unit's source lineage and explicit
+status, while derived TXT, HTML, SRT, and VTT exports omit that unit without a blank placeholder.
 The active saved review and its non-secret filesystem identity MUST survive page refresh and
 browser restart; restoration reloads content from the authoritative review file rather than
 storing transcript text in browser storage. Clearing this pointer requires confirmation and

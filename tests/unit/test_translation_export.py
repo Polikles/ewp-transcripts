@@ -94,3 +94,35 @@ def test_english_quote_punctuation_is_preserved_in_text_and_subtitles() -> None:
 
     assert 'He said "This works."' in text
     assert 'He said "This works."' in " ".join(cues[0].lines)
+
+
+def test_intentionally_empty_units_are_omitted_from_derived_exports(tmp_path: Path) -> None:
+    translation = load_transcript_translation(EXAMPLE)
+    omitted = translation.units[0].model_copy(
+        update={"target_text": "", "target_status": "intentionally_empty"}
+    )
+    changed = type(translation).model_validate(
+        translation.model_dump()
+        | {
+            "schema_version": "1.1",
+            "units": (omitted, translation.units[1]),
+            "statistics": translation.statistics.model_copy(
+                update={"target_tokens": 4, "intentionally_empty_units": 1}
+            ),
+        }
+    )
+
+    assert "Witamy" not in render_translation_text(changed)
+    assert len(build_translation_subtitle_cues(changed)) == 1
+
+    artifact = tmp_path / "translation.json"
+    artifact.write_text(changed.model_dump_json(), encoding="utf-8")
+    output = tmp_path / "exports"
+    output.mkdir()
+    export_translation(
+        artifact,
+        formats=(TranslationExportFormat.HTML,),
+        output_directory=output,
+    )
+    rendered = (output / "S01E01_pl_translation_001.html").read_text(encoding="utf-8")
+    assert "Witamy" not in rendered

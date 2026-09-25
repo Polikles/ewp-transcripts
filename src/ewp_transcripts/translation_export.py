@@ -43,8 +43,9 @@ def render_translation_text(translation: TranscriptTranslation) -> str:
     blocks: list[str] = []
     current_speaker: str | None = None
     current_lines: list[str] = []
-    multiple_speakers = len({unit.speaker_id for unit in translation.units}) > 1
-    for unit in translation.units:
+    included_units = tuple(unit for unit in translation.units if unit.target_status == "translated")
+    multiple_speakers = len({unit.speaker_id for unit in included_units}) > 1
+    for unit in included_units:
         if unit.speaker_id != current_speaker:
             if current_lines:
                 blocks.append("\n".join(current_lines))
@@ -53,7 +54,7 @@ def render_translation_text(translation: TranscriptTranslation) -> str:
         current_lines.append(unit.target_text)
     if current_lines:
         blocks.append("\n".join(current_lines))
-    return "\n\n".join(blocks) + "\n"
+    return "\n\n".join(blocks) + ("\n" if blocks else "")
 
 
 def build_translation_subtitle_cues(
@@ -67,6 +68,8 @@ def build_translation_subtitle_cues(
     previous_speaker: str | None = None
     units = translation.units
     for unit_index, unit in enumerate(units):
+        if unit.target_status == "intentionally_empty":
+            continue
         prefix = f"{unit.speaker_id}: " if unit.speaker_id != previous_speaker else ""
         chunks = _split_target_text(unit.target_text, settings, first_prefix=prefix)
         duration = unit.end_ms - unit.start_ms
@@ -203,10 +206,15 @@ def export_translation(
                         end_ms=unit.end_ms,
                     )
                     for unit in translation.units
+                    if unit.target_status == "translated"
                 ),
                 speaker_labels={
                     speaker_id: speaker_id
-                    for speaker_id in {unit.speaker_id for unit in translation.units}
+                    for speaker_id in {
+                        unit.speaker_id
+                        for unit in translation.units
+                        if unit.target_status == "translated"
+                    }
                 },
             )
         else:

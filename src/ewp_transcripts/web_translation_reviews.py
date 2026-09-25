@@ -38,7 +38,7 @@ class GuiTranslationReviewController:
     def __init__(self, *, config: ApplicationConfig, resolve_path: PathResolver) -> None:
         self._config = config
         self._resolve_path = resolve_path
-        self._previewed: dict[str, str] = {}
+        self._previewed: dict[str, tuple[str, bool]] = {}
 
     def prepare(
         self,
@@ -144,16 +144,25 @@ class GuiTranslationReviewController:
         self._previewed.pop(str(review_path), None)
         return self.document(review_path, result, revision or None, parent)
 
-    def preview(self, *, review: str, result: str, revision: str, parent: str) -> dict[str, Any]:
+    def preview(
+        self,
+        *,
+        review: str,
+        result: str,
+        revision: str,
+        parent: str,
+        allow_empty_units: bool = False,
+    ) -> dict[str, Any]:
         review_path = self._resolve_path(review)
         outcome = preview_translation_review_file(
             review_path,
             result_path=self._resolve_path(result),
             revision_path=self._resolve_path(revision) if revision else None,
             parent_translation_path=self._resolve_path(parent) if parent else None,
+            allow_empty_units=allow_empty_units,
         )
         digest = sha256_file(review_path)
-        self._previewed[str(review_path)] = digest
+        self._previewed[str(review_path)] = (digest, allow_empty_units)
         return {
             "review_sha256": digest,
             "translation_number": outcome.translation.translation_number,
@@ -162,13 +171,24 @@ class GuiTranslationReviewController:
         }
 
     def apply(
-        self, *, review: str, result: str, revision: str, parent: str, output: str
+        self,
+        *,
+        review: str,
+        result: str,
+        revision: str,
+        parent: str,
+        output: str,
+        allow_empty_units: bool = False,
     ) -> dict[str, Any]:
         review_path = self._resolve_path(review)
-        if self._previewed.get(str(review_path)) != sha256_file(review_path):
+        if self._previewed.get(str(review_path)) != (
+            sha256_file(review_path),
+            allow_empty_units,
+        ):
             raise GuiTranslationReviewError(
                 "GUI_TRANSLATION_REVIEW_PREVIEW_REQUIRED",
-                "Preview the current saved translation review before applying it.",
+                "Preview the current saved translation review with the current empty-unit "
+                "setting before applying it.",
             )
         outcome = apply_translation_review_file(
             review_path,
@@ -177,6 +197,7 @@ class GuiTranslationReviewController:
             revision_path=self._resolve_path(revision) if revision else None,
             parent_translation_path=self._resolve_path(parent) if parent else None,
             output_directory=self._resolve_path(output, directory=True),
+            allow_empty_units=allow_empty_units,
         )
         return {
             "translation_path": str(outcome.translation_path),

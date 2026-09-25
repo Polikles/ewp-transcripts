@@ -989,6 +989,7 @@ def preview_translation_review_file(
     result_path: str | Path,
     revision_path: str | Path | None = None,
     parent_translation_path: str | Path | None = None,
+    allow_empty_units: bool = False,
 ) -> TranslationPreviewOutcome:
     """Validate exact source lineage and build a complete translation without writes."""
 
@@ -1007,7 +1008,7 @@ def preview_translation_review_file(
         revision_path=normalized_revision,
         parent_translation_path=normalized_parent,
     )
-    translation = build_manual_translation(review)
+    translation = build_manual_translation(review, allow_empty_units=allow_empty_units)
     return TranslationPreviewOutcome(normalized_review, normalized_result, translation)
 
 
@@ -1019,6 +1020,7 @@ def apply_translation_review_file(
     revision_path: str | Path | None = None,
     parent_translation_path: str | Path | None = None,
     output_directory: Path | None = None,
+    allow_empty_units: bool = False,
 ) -> TranslationApplyOutcome:
     """Validate through preview and atomically publish one translation snapshot."""
 
@@ -1027,6 +1029,7 @@ def apply_translation_review_file(
         result_path=result_path,
         revision_path=revision_path,
         parent_translation_path=parent_translation_path,
+        allow_empty_units=allow_empty_units,
     )
     translation, path = publish_next_translation(
         preview.translation,

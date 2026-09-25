@@ -1285,12 +1285,17 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         targets=targets,
                     )
                 elif path.endswith("/preview"):
-                    payload = self.server.gui_translation_reviews.preview(**common)
+                    payload = self.server.gui_translation_reviews.preview(
+                        **common,
+                        allow_empty_units=document.get("allow_empty_units") is True,
+                    )
                 elif path.endswith("/apply"):
                     if document.get("confirmed") is not True:
                         raise ValueError("Semantic manual verification confirmation is required")
                     payload = self.server.gui_translation_reviews.apply(
-                        **common, output=str(document.get("translation_output_directory", ""))
+                        **common,
+                        output=str(document.get("translation_output_directory", "")),
+                        allow_empty_units=document.get("allow_empty_units") is True,
                     )
                     self.server.gui_transcriptions.clear_workflow_error(
                         common["result"], "translation"

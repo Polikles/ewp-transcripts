@@ -95,3 +95,38 @@ def test_raw_source_cannot_claim_a_revision() -> None:
 
     with pytest.raises(ValidationError, match="raw translation source"):
         TranslationSource.model_validate(data)
+
+
+def test_schema_11_records_intentionally_empty_units() -> None:
+    translation = _translation()
+    data = translation.model_dump()
+    data["schema_version"] = "1.1"
+    data["units"] = (
+        translation.units[0].model_copy(
+            update={"target_text": "", "target_status": "intentionally_empty"}
+        ),
+    )
+    data["statistics"] = translation.statistics.model_copy(
+        update={"target_tokens": 0, "intentionally_empty_units": 1}
+    )
+
+    parsed = TranscriptTranslation.model_validate(data)
+
+    assert parsed.units[0].target_status == "intentionally_empty"
+    assert parsed.statistics.intentionally_empty_units == 1
+
+
+def test_schema_10_rejects_intentionally_empty_units() -> None:
+    translation = _translation()
+    data = translation.model_dump()
+    data["units"] = (
+        translation.units[0].model_copy(
+            update={"target_text": "", "target_status": "intentionally_empty"}
+        ),
+    )
+    data["statistics"] = translation.statistics.model_copy(
+        update={"target_tokens": 0, "intentionally_empty_units": 1}
+    )
+
+    with pytest.raises(ValidationError, match="schema 1.0"):
+        TranscriptTranslation.model_validate(data)

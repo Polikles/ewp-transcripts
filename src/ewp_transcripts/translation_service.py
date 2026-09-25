@@ -21,11 +21,12 @@ def build_manual_translation(
     review: TranslationReview,
     *,
     created_at: datetime | None = None,
+    allow_empty_units: bool = False,
 ) -> TranscriptTranslation:
     """Build an unpublished manual translation after complete target validation."""
 
     missing = [unit.unit_id for unit in review.units if not unit.target_text.strip()]
-    if missing:
+    if missing and not allow_empty_units:
         raise InvalidTranslationError(
             f"Translation review contains untranslated unit: {missing[0]}"
         )
@@ -38,11 +39,12 @@ def build_manual_translation(
             start_ms=unit.start_ms,
             end_ms=unit.end_ms,
             target_text=" ".join(unit.target_text.split()),
+            target_status=("intentionally_empty" if not unit.target_text.strip() else "translated"),
         )
         for unit in review.units
     )
     return TranscriptTranslation(
-        schema_version="1.0",
+        schema_version="1.1",
         application_version=__version__,
         translation_id=uuid4(),
         translation_number=1,
@@ -62,6 +64,7 @@ def build_manual_translation(
             unit_count=len(units),
             source_tokens=sum(len(unit.source_token_ids) for unit in units),
             target_tokens=sum(len(unit.target_text.split()) for unit in units),
+            intentionally_empty_units=len(missing),
             warning_count=0,
         ),
     )

@@ -97,6 +97,10 @@ function translationReviewContext() {
   };
 }
 
+function allowEmptyTranslationUnits() {
+  return document.querySelector("#allow-empty-translation-units")?.checked === true;
+}
+
 function currentTranslationReviewCandidate() {
   if (!translationReview) return null;
   return {
@@ -168,8 +172,9 @@ function resizeReviewTextarea(input) {
 }
 
 function renderEnhancedTranslationReview(documentValue, options = {}) {
-  const {dirty = false, preserveHistory = false} = options;
+  const {dirty = false, preserveHistory = false, preserveConfirmations = false} = options;
   const scrollTop = window.scrollY;
+  const emptyUnitsAllowed = preserveConfirmations && allowEmptyTranslationUnits();
   translationReview = documentValue;
   translationReviewDirty = dirty;
   if (!preserveHistory) resetTranslationReviewHistory();
@@ -209,6 +214,7 @@ function renderEnhancedTranslationReview(documentValue, options = {}) {
   document.querySelector("#preview-translation-review").disabled = false;
   document.querySelector("#clear-translation-review").disabled = false;
   document.querySelector("#translation-review-confirmed").checked = false;
+  document.querySelector("#allow-empty-translation-units").checked = emptyUnitsAllowed;
   document.querySelector("#apply-translation-review").disabled = true;
   document.querySelector("#export-translation-review").disabled = !appliedTranslation;
   document.querySelector("#translation-review-status").textContent =
@@ -303,6 +309,7 @@ function clearActiveTranslationReview(message = "Current translation review clea
   document.querySelector("#export-translation-review").disabled = true;
   document.querySelector("#clear-translation-review").disabled = true;
   document.querySelector("#translation-review-confirmed").checked = false;
+  document.querySelector("#allow-empty-translation-units").checked = false;
   document.querySelector("#translation-review-status").textContent = message;
   document.querySelector("#translation-review-summary").replaceChildren();
   document.querySelector("#translation-review-result").textContent = "";
@@ -317,7 +324,7 @@ async function saveEnhancedTranslationReview() {
       review_sha256: translationReview.review_sha256,
       targets: translationReviewTargets(),
     });
-    renderEnhancedTranslationReview(payload);
+    renderEnhancedTranslationReview(payload, {preserveConfirmations: true});
     persistTranslationReview();
     document.querySelector("#translation-review-status").textContent =
       "Translation draft saved; preview is required again.";
@@ -361,7 +368,10 @@ async function previewEnhancedTranslationReview() {
   if (!translationReview) return;
   if (translationReviewDirty && !(await saveEnhancedTranslationReview())) return;
   try {
-    const payload = await queuePost("/api/v1/translation-reviews/preview", translationReviewContext());
+    const payload = await queuePost("/api/v1/translation-reviews/preview", {
+      ...translationReviewContext(),
+      allow_empty_units: allowEmptyTranslationUnits(),
+    });
     document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2);
     const summary = document.querySelector("#translation-review-summary");
     const table = document.createElement("table");
@@ -372,6 +382,7 @@ async function previewEnhancedTranslationReview() {
       ["Units", payload.statistics.unit_count],
       ["Source tokens", payload.statistics.source_tokens],
       ["Target tokens", payload.statistics.target_tokens],
+      ["Intentional empty units", payload.statistics.intentionally_empty_units],
       ["Warnings", payload.warnings.length],
     ];
     const body = document.createElement("tbody");
@@ -388,7 +399,9 @@ async function previewEnhancedTranslationReview() {
     table.append(body);
     summary.replaceChildren(table);
     document.querySelector("#translation-review-status").textContent =
-      "Preview passed: exact source lineage, complete target text, and immutable unit ownership validated. No translation was published.";
+      payload.statistics.intentionally_empty_units
+        ? "Preview passed: intentional empty units were recorded and will be omitted from exports. No translation was published."
+        : "Preview passed: exact source lineage, complete target text, and immutable unit ownership validated. No translation was published.";
     document.querySelector("#apply-translation-review").disabled = false;
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;
@@ -403,6 +416,7 @@ async function applyEnhancedTranslationReview() {
       ...translationReviewContext(),
       translation_output_directory: `${root}/accepted-translations`,
       confirmed: document.querySelector("#translation-review-confirmed").checked,
+      allow_empty_units: allowEmptyTranslationUnits(),
     });
     appliedTranslation = payload.translation_path;
     persistTranslationReview();
@@ -526,3 +540,11 @@ replaceTranslationReviewButton("#save-translation-review", saveEnhancedTranslati
 replaceTranslationReviewButton("#preview-translation-review", previewEnhancedTranslationReview);
 replaceTranslationReviewButton("#apply-translation-review", applyEnhancedTranslationReview);
 replaceTranslationReviewButton("#export-translation-review", exportEnhancedTranslationReview);
+document.querySelector("#allow-empty-translation-units").addEventListener("change", () => {
+  document.querySelector("#apply-translation-review").disabled = true;
+  document.querySelector("#translation-review-summary").replaceChildren();
+  if (translationReview) {
+    document.querySelector("#translation-review-status").textContent =
+      "Empty-unit handling changed; preview the saved translation again.";
+  }
+});

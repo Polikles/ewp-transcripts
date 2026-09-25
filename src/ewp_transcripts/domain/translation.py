@@ -126,7 +126,8 @@ class TranslationUnit(TranslationModel):
     source_text_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     start_ms: int = Field(ge=0)
     end_ms: int = Field(ge=0)
-    target_text: str = Field(min_length=1, pattern=r".*\S.*")
+    target_text: str
+    target_status: Literal["translated", "intentionally_empty"] = "translated"
 
     @field_validator("source_token_ids")
     @classmethod
@@ -138,16 +139,21 @@ class TranslationUnit(TranslationModel):
         return value
 
     @model_validator(mode="after")
-    def validate_timing(self) -> Self:
+    def validate_unit(self) -> Self:
         if self.end_ms < self.start_ms:
             raise ValueError("translation unit end must not precede start")
+        if self.target_status == "translated" and not self.target_text.strip():
+            raise ValueError("translated unit target text must not be blank")
+        if self.target_status == "intentionally_empty" and self.target_text:
+            raise ValueError("intentionally empty unit target text must be empty")
         return self
 
 
 class TranslationStatistics(TranslationModel):
     unit_count: int = Field(ge=1)
     source_tokens: int = Field(ge=1)
-    target_tokens: int = Field(ge=1)
+    target_tokens: int = Field(ge=0)
+    intentionally_empty_units: int = Field(default=0, ge=0)
     warning_count: int = Field(ge=0)
 
 
@@ -158,7 +164,7 @@ class TranslationWarning(TranslationModel):
 
 
 class TranscriptTranslation(TranslationModel):
-    schema_version: Literal["1.0"]
+    schema_version: Literal["1.0", "1.1"]
     application_version: str = Field(min_length=1)
     translation_id: UUID
     translation_number: int = Field(ge=1)
@@ -193,6 +199,13 @@ class TranscriptTranslation(TranslationModel):
         target_tokens = sum(len(unit.target_text.split()) for unit in self.units)
         if self.statistics.target_tokens != target_tokens:
             raise ValueError("translation target-token statistics do not match")
+        intentionally_empty_units = sum(
+            unit.target_status == "intentionally_empty" for unit in self.units
+        )
+        if self.statistics.intentionally_empty_units != intentionally_empty_units:
+            raise ValueError("intentional-empty unit statistics do not match")
+        if self.schema_version == "1.0" and intentionally_empty_units:
+            raise ValueError("translation schema 1.0 cannot contain intentionally empty units")
         if self.statistics.warning_count != len(self.warnings):
             raise ValueError("translation warning statistics do not match")
         return self

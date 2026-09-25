@@ -34,3 +34,19 @@ def test_blank_target_fails_preview() -> None:
 
     with pytest.raises(InvalidTranslationError, match="untranslated unit"):
         build_manual_translation(prepared)
+
+
+def test_explicit_empty_target_builds_a_versioned_omission() -> None:
+    prepared = prepare_translation_review(RESULT, target_language="pl")
+    units = tuple(
+        unit.model_copy(update={"target_text": "" if index == 0 else "Przetłumaczone."})
+        for index, unit in enumerate(prepared.units)
+    )
+
+    translation = build_manual_translation(
+        prepared.model_copy(update={"units": units}), allow_empty_units=True
+    )
+
+    assert translation.schema_version == "1.1"
+    assert translation.units[0].target_status == "intentionally_empty"
+    assert translation.statistics.intentionally_empty_units == 1

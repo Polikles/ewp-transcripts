@@ -46,7 +46,7 @@ def build_translation_audit(
     audited_units: list[dict[str, object]] = []
     for source_unit, target_unit in zip(expected.units, translation.units, strict=True):
         source_fields = source_unit.model_dump(exclude={"source_text", "target_text"})
-        target_fields = target_unit.model_dump(exclude={"target_text"})
+        target_fields = target_unit.model_dump(exclude={"target_text", "target_status"})
         if source_fields != target_fields:
             raise InvalidTranslationError(
                 f"Translation unit does not match reconstructed source: {target_unit.unit_id}"
@@ -60,10 +60,11 @@ def build_translation_audit(
                 "source_token_ids": list(target_unit.source_token_ids),
                 "source_text": source_unit.source_text,
                 "target_text": target_unit.target_text,
+                "target_status": target_unit.target_status,
             }
         )
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "translation": {
             "translation_id": str(translation.translation_id),
             "translation_number": translation.translation_number,
@@ -83,6 +84,7 @@ def build_translation_audit(
             "unit_count": len(audited_units),
             "source_tokens": sum(len(unit.source_token_ids) for unit in translation.units),
             "target_tokens": translation.statistics.target_tokens,
+            "intentionally_empty_units": translation.statistics.intentionally_empty_units,
         },
     }
 

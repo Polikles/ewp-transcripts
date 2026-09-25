@@ -26,6 +26,8 @@ def test_translation_audit_reconstructs_source_and_publishes_idempotently(
     assert isinstance(units, list)
     assert units[0]["source_text"] == "Welcome to another episode."
     assert units[0]["target_text"] == "Witamy w kolejnym odcinku."
+    assert units[0]["target_status"] == "translated"
+    assert audit["schema_version"] == "1.1"
     assert audit["dictionary"] is None
     assert first_path == second_path
     assert first_written is True

@@ -304,8 +304,14 @@
           "type": "integer"
         },
         "target_tokens": {
-          "minimum": 1,
+          "minimum": 0,
           "title": "Target Tokens",
+          "type": "integer"
+        },
+        "intentionally_empty_units": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Intentionally Empty Units",
           "type": "integer"
         },
         "warning_count": {
@@ -351,6 +357,28 @@
       "type": "object"
     },
     "TranslationUnit": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "target_status": {
+                "const": "intentionally_empty"
+              }
+            },
+            "required": ["target_status"]
+          },
+          "then": {
+            "properties": {
+              "target_text": {"maxLength": 0}
+            }
+          },
+          "else": {
+            "properties": {
+              "target_text": {"minLength": 1, "pattern": ".*\\S.*"}
+            }
+          }
+        }
+      ],
       "additionalProperties": false,
       "properties": {
         "unit_id": {
@@ -387,9 +415,16 @@
           "type": "integer"
         },
         "target_text": {
-          "minLength": 1,
-          "pattern": ".*\\S.*",
           "title": "Target Text",
+          "type": "string"
+        },
+        "target_status": {
+          "default": "translated",
+          "enum": [
+            "translated",
+            "intentionally_empty"
+          ],
+          "title": "Target Status",
           "type": "string"
         }
       },
@@ -437,10 +472,51 @@
       "type": "object"
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "schema_version": {"const": "1.0"}
+        }
+      },
+      "then": {
+        "properties": {
+          "units": {
+            "items": {
+              "properties": {
+                "target_status": {"const": "translated"}
+              }
+            }
+          },
+          "statistics": {
+            "properties": {
+              "target_tokens": {"minimum": 1},
+              "intentionally_empty_units": {"const": 0}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "units": {
+            "items": {
+              "required": ["target_status"]
+            }
+          },
+          "statistics": {
+            "required": ["intentionally_empty_units"]
+          }
+        }
+      }
+    }
+  ],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },

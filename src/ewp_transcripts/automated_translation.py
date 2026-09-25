@@ -279,11 +279,12 @@ def build_automated_translation(
                 start_ms=source_unit.start_ms,
                 end_ms=source_unit.end_ms,
                 target_text=target_text,
+                target_status="translated",
             )
         )
     units = tuple(translated_units)
     return TranscriptTranslation(
-        schema_version="1.0",
+        schema_version="1.1",
         application_version=__version__,
         translation_id=uuid4(),
         translation_number=1,
@@ -328,6 +329,7 @@ def build_automated_translation(
             unit_count=len(units),
             source_tokens=sum(len(unit.source_token_ids) for unit in units),
             target_tokens=sum(len(unit.target_text.split()) for unit in units),
+            intentionally_empty_units=0,
             warning_count=len(translation_warnings),
         ),
         warnings=tuple(translation_warnings),

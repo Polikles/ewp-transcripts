@@ -8,6 +8,11 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- Semantic translation review has a default-off **Allow empty translation units** confirmation.
+  Translation schema 1.1 records each intentional omission and its aggregate count; preview and
+  Apply must use the same setting, audits retain the source-bound omission, and derived TXT,
+  HTML, SRT, and VTT exports omit it without blank placeholders. Legacy schema 1.0 translations
+  remain readable.
 - Saved work state now includes a managed-source inventory for the selected output root. It shows
   current-queue, saved-workspace, and workflow-lineage retention reasons and permits permanent
   deletion only for explicitly selected, freshly re-audited unreferenced copies. Referenced,

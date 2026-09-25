@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "application_version": "0.6.2",
   "translation_id": "12345678-1234-5678-9234-567812345678",
   "translation_number": 1,
@@ -43,7 +43,8 @@
       "source_text_sha256": "cf2dc5bae8d9e68a6163a74579869cafeae52aa9be112257a6809d2cb63c9ed1",
       "start_ms": 1240,
       "end_ms": 3900,
-      "target_text": "Witamy w kolejnym odcinku."
+      "target_text": "Witamy w kolejnym odcinku.",
+      "target_status": "translated"
     },
     {
       "unit_id": "tu_000002",
@@ -57,13 +58,15 @@
       "source_text_sha256": "6d600de8ad114593dacb6d3ac0b8922a9f2de0d515a81f739f32937fe6afa696",
       "start_ms": 4320,
       "end_ms": 6320,
-      "target_text": "Dzisiaj rozmawiamy o transkrypcji."
+      "target_text": "Dzisiaj rozmawiamy o transkrypcji.",
+      "target_status": "translated"
     }
   ],
   "statistics": {
     "unit_count": 2,
     "source_tokens": 8,
     "target_tokens": 8,
+    "intentionally_empty_units": 0,
     "warning_count": 0
   },
   "warnings": []

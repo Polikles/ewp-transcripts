@@ -1,9 +1,15 @@
 from pathlib import Path
 
+import pytest
+
 from ewp_transcripts.application import apply_automated_translation
 from ewp_transcripts.automated_translation import DeterministicMockTranslationProvider
 from ewp_transcripts.config import ApplicationConfig, RuntimeConfig
-from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
+from ewp_transcripts.domain.errors import InvalidTranslationError
+from ewp_transcripts.web_translation_reviews import (
+    GuiTranslationReviewController,
+    GuiTranslationReviewError,
+)
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -115,4 +121,63 @@ def test_gui_translation_review_prepares_manual_translation_without_provider_can
         output=str(tmp_path / "accepted"),
     )
 
+    assert applied["final"] is True
+
+
+def test_gui_empty_unit_permission_is_fail_closed_and_bound_to_preview(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    config = ApplicationConfig(runtime=RuntimeConfig(work_root=tmp_path / "work"))
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    controller = GuiTranslationReviewController(
+        config=config, resolve_path=paths.resolve_allowed_path
+    )
+    review = controller.prepare(
+        result=str(result),
+        revision="",
+        parent="",
+        output=str(tmp_path / "reviews"),
+        target_language="pl",
+    )
+    saved = controller.save(
+        review=review["review_path"],
+        result=str(result),
+        revision="",
+        parent="",
+        expected_sha256=review["review_sha256"],
+        targets=[
+            {
+                "unit_id": unit["unit_id"],
+                "target_text": "" if index == 0 else f"Translated {index}",
+            }
+            for index, unit in enumerate(review["units"])
+        ],
+    )
+
+    with pytest.raises(InvalidTranslationError, match="untranslated unit"):
+        controller.preview(review=saved["review_path"], result=str(result), revision="", parent="")
+    preview = controller.preview(
+        review=saved["review_path"],
+        result=str(result),
+        revision="",
+        parent="",
+        allow_empty_units=True,
+    )
+    assert preview["statistics"]["intentionally_empty_units"] == 1
+    with pytest.raises(GuiTranslationReviewError, match="empty-unit setting"):
+        controller.apply(
+            review=saved["review_path"],
+            result=str(result),
+            revision="",
+            parent="",
+            output=str(tmp_path / "accepted"),
+        )
+    applied = controller.apply(
+        review=saved["review_path"],
+        result=str(result),
+        revision="",
+        parent="",
+        output=str(tmp_path / "accepted"),
+        allow_empty_units=True,
+    )
     assert applied["final"] is True

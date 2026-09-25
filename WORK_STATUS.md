@@ -61,9 +61,9 @@ The two-item real-provider GUI qualification now passes end to end: bulk correct
 generation update both selected items without duplicate revisions; verified transcript revisions
 apply; OpenRouter translation produces two saved candidates with nonempty targets; distinct
 semantic reviews reopen correctly; and original plus translated subtitle exports are written.
-GUI-07, GUI-20, GUI-31, and GUI-35 are therefore operator-qualified. A future default-off
-intentional-empty-target control is tracked as GUI-41 because it first needs explicit artifact,
-audit, and export semantics.
+GUI-07, GUI-20, GUI-31, and GUI-35 are therefore operator-qualified. GUI-41 now implements the
+default-off intentional-empty-target control with versioned artifact, audit, and export semantics;
+it needs a short browser retest.
 
 The resulting GUI defect pass is implemented in GUI-42–46. Successful retries clear stale
 per-stage errors; completed artifacts suppress legacy error annotations; missing review sources

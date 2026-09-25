@@ -855,6 +855,49 @@ def test_translation_review_prepare_accepts_a_manual_target_language(tmp_path: P
     assert write_response.call_args.args[0].status == 200
 
 
+def test_translation_review_preview_forwards_explicit_empty_unit_permission(
+    tmp_path: Path,
+) -> None:
+    body = json.dumps(
+        {
+            "review_path": str(tmp_path / "review.txt"),
+            "result_path": str(tmp_path / "episode_results.json"),
+            "revision_path": "",
+            "parent_translation_path": "",
+            "allow_empty_units": True,
+        }
+    ).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    headers = Message()
+    headers["Host"] = "127.0.0.1:8765"
+    headers["Origin"] = "http://127.0.0.1:8765"
+    headers["Content-Length"] = str(len(body))
+    headers["X-EWP-CSRF"] = "expected"
+    handler.headers = headers
+    handler.path = "/api/v1/translation-reviews/preview"
+    handler.rfile = BytesIO(body)
+    reviews = Mock()
+    reviews.preview.return_value = {"statistics": {"intentionally_empty_units": 1}}
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_translation_reviews=reviews,
+    )
+    write_response = Mock()
+    handler._write_response = write_response
+
+    handler.do_POST()
+
+    reviews.preview.assert_called_once_with(
+        review=str(tmp_path / "review.txt"),
+        result=str(tmp_path / "episode_results.json"),
+        revision="",
+        parent="",
+        allow_empty_units=True,
+    )
+    assert write_response.call_args.args[0].status == 200
+
+
 def test_review_reports_missing_source_with_reimport_instruction(tmp_path: Path) -> None:
     missing = tmp_path / ".ewp-gui-sources" / "episode_results.json"
     body = json.dumps(
