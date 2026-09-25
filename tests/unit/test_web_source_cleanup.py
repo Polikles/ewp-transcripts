@@ -104,6 +104,22 @@ def test_revision_lineage_protects_managed_canonical_result(tmp_path: Path) -> N
         cleanup_managed_sources(output, (item.relative_path,), queue_jobs=(), workspaces=())
 
 
+def test_saved_review_session_protects_managed_canonical_result(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    canonical = tmp_path / "episode_results.json"
+    canonical.write_text('{"canonical": true}', encoding="utf-8")
+    preserved, _ = preserve_gui_selected_source(
+        canonical, output_directory=output, category="canonical"
+    )
+    session = output / ".ewp-gui-review-session.json"
+    session.write_text(f'{{"result_path": "{preserved.as_posix()}"}}', encoding="utf-8")
+
+    item = inventory_managed_sources(output, queue_jobs=(), workspaces=())[0]
+
+    assert not item.removable
+    assert item.references == ("workflow lineage: .ewp-gui-review-session.json",)
+
+
 def test_changed_managed_source_is_never_eligible_for_cleanup(tmp_path: Path) -> None:
     output = tmp_path / "output"
     source = tmp_path / "episode.wav"

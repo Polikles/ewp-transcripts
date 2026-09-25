@@ -172,13 +172,18 @@ class GuiWorkspaceController:
         staged_jobs: builtin_list[dict[str, Any]] | None = None,
         terminal_jobs: builtin_list[dict[str, Any]] | None = None,
         workspace_id: str = "",
+        omit_unavailable: bool = False,
     ) -> GuiWorkspaceDocument:
         clean_name = name.strip()
         if not clean_name or len(clean_name) > 100:
             raise ValueError("Workspace name must contain 1 to 100 characters")
-        clean_fields = self._validate_fields(fields)
-        clean_staged_jobs = self._validate_staged_jobs(staged_jobs or [])
-        clean_terminal_jobs = self._validate_terminal_jobs(terminal_jobs or [])
+        clean_fields = self._validate_fields(fields, omit_unavailable=omit_unavailable)
+        clean_staged_jobs = self._validate_staged_jobs(
+            staged_jobs or [], omit_unavailable=omit_unavailable
+        )
+        clean_terminal_jobs = self._validate_terminal_jobs(
+            terminal_jobs or [], omit_unavailable=omit_unavailable
+        )
         identifier = (
             self._normalize_workspace_id(workspace_id) if workspace_id.strip() else str(uuid4())
         )
@@ -263,7 +268,9 @@ class GuiWorkspaceController:
             workspace_id=document.workspace_id,
         )
 
-    def _validate_fields(self, fields: dict[str, Any]) -> dict[str, str | bool | int]:
+    def _validate_fields(
+        self, fields: dict[str, Any], *, omit_unavailable: bool = False
+    ) -> dict[str, str | bool | int]:
         if not isinstance(fields, dict):
             raise ValueError("Workspace fields must be an object")
         clean: dict[str, str | bool | int] = {}
@@ -278,13 +285,21 @@ class GuiWorkspaceController:
                 if self.is_temporary_selection(value):
                     clean[name] = ""
                     continue
-                self._resolve_path(value, directory=name not in _FILE_FIELDS)
+                try:
+                    self._resolve_path(value, directory=name not in _FILE_FIELDS)
+                except FileNotFoundError:
+                    if not omit_unavailable:
+                        raise
+                    clean[name] = ""
+                    continue
             clean[name] = value
         return clean
 
     def _validate_staged_jobs(
         self,
         staged_jobs: builtin_list[dict[str, Any]],
+        *,
+        omit_unavailable: bool = False,
     ) -> tuple[dict[str, str | int], ...]:
         if not isinstance(staged_jobs, builtin_list) or len(staged_jobs) > 50:
             raise ValueError("Workspace staged jobs are invalid")
@@ -310,7 +325,12 @@ class GuiWorkspaceController:
                 raise ValueError("Workspace staged job is invalid")
             if item["language"] not in {"pl", "en", "auto"} or len(item["source_sha256"]) != 64:
                 raise ValueError("Workspace staged job is invalid")
-            self._resolve_path(item["input_path"])
+            try:
+                self._resolve_path(item["input_path"])
+            except FileNotFoundError:
+                if omit_unavailable:
+                    continue
+                raise
             self._resolve_path(item["output_directory"], directory=True)
             clean.append({key: item[key] for key in required})
         return tuple(clean)
@@ -318,6 +338,8 @@ class GuiWorkspaceController:
     def _validate_terminal_jobs(
         self,
         terminal_jobs: builtin_list[dict[str, Any]],
+        *,
+        omit_unavailable: bool = False,
     ) -> tuple[GuiTranscriptionJob, ...]:
         if not isinstance(terminal_jobs, builtin_list) or len(terminal_jobs) > 50:
             raise ValueError("Workspace completed jobs are invalid")
@@ -332,9 +354,17 @@ class GuiWorkspaceController:
                 raise ValueError("Workspace completed job is invalid")
             if not job.source_sha256 or len(job.source_sha256) != 64:
                 raise ValueError("Workspace completed job is invalid")
-            self._resolve_path(job.input_path)
-            output = self._resolve_path(job.output_directory, directory=True)
-            planned = self._resolve_path(job.planned_result_path, directory=job.status == "failed")
+            try:
+                if job.status == "failed":
+                    self._resolve_path(job.input_path)
+                output = self._resolve_path(job.output_directory, directory=True)
+                planned = self._resolve_path(
+                    job.planned_result_path, directory=job.status == "failed"
+                )
+            except FileNotFoundError:
+                if omit_unavailable:
+                    continue
+                raise
             imported = (
                 job.status == "completed"
                 and job.input_path == job.result_path == job.planned_result_path
@@ -345,8 +375,15 @@ class GuiWorkspaceController:
             if job.status == "completed":
                 if not job.result_path or self._resolve_path(job.result_path) != planned:
                     raise ValueError("Workspace completed job has an invalid result")
-                if imported and sha256_file(planned) != job.source_sha256:
-                    raise ValueError("Saved imported canonical result changed on disk")
+                if imported:
+                    try:
+                        unchanged = sha256_file(planned) == job.source_sha256
+                    except FileNotFoundError:
+                        if omit_unavailable:
+                            continue
+                        raise
+                    if not unchanged:
+                        raise ValueError("Saved imported canonical result changed on disk")
             elif job.result_path is not None:
                 raise ValueError("Workspace failed job cannot have a result")
             clean.append(job)

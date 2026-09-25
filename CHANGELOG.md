@@ -8,6 +8,8 @@ The next internal-beta version is `0.19.0`.
 
 ### Added
 
+- Translation export provenance v2 records the number of intentional empty units and the
+  `omitted_without_placeholder` behavior alongside the exact translation identity.
 - Semantic translation review has a default-off **Allow empty translation units** confirmation.
   Translation schema 1.1 records each intentional omission and its aggregate count; preview and
   Apply must use the same setting, audits retain the source-bound omission, and derived TXT,
@@ -67,6 +69,13 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- Saving a workspace after changing output roots no longer fails because dormant form fields or
+  inactive queue records point to files removed outside the GUI. Default workflow roots follow the
+  selected shared output directory; unavailable fields/jobs are omitted with visible counts, while
+  malformed, changed, or prohibited paths still fail closed.
+- Managed-source cleanup now treats hidden latest/per-result transcript-review session pointers as
+  durable lineage. A canonical copy required by **Restore saved review** cannot be misclassified as
+  unreferenced, and deliberately deleted source paths are cleared from dormant browser forms.
 - Workflow progress now includes the canonical result's `_vNNN` identity when discovering
   correction candidates, accepted revisions, and original exports. Successfully applied/exported
   work from a versioned imported result no longer remains pending in the queues.

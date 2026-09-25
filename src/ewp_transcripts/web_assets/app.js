@@ -494,6 +494,15 @@ workflowAutoSpeakers.addEventListener("change", () => { workflowSpeakerCount.dis
 workflowSpeakerCount.addEventListener("input", () => { if (workflowSpeakerCount.value.length > 1) workflowSpeakerCount.value = workflowSpeakerCount.value.slice(0, 1); });
 document.querySelector("#workflow").addEventListener("submit", event => { const kind = event.submitter?.value; if (kind !== "dry-run" && kind !== "transcriptions") return; if (workflowOutput.value.trim()) return; event.preventDefault(); event.stopImmediatePropagation(); workflowOutput.classList.add("field-error"); workflowOutput.setAttribute("aria-invalid", "true"); document.querySelector("#operation-status").textContent = "GUI_OUTPUT_REQUIRED: Enter a shared output directory before dry-run or queue staging."; }, {capture: true});
 workflowOutput.addEventListener("input", () => { if (!workflowOutput.value.trim()) return; workflowOutput.classList.remove("field-error"); workflowOutput.setAttribute("aria-invalid", "false"); });
+function synchronizeDefaultWorkflowRoots() {
+  const root = workflowOutput.value.trim().replace(/[\\/]+$/, "");
+  correctionForm.elements.namedItem("output_root").value = root;
+  reviewForm.elements.namedItem("project_output_directory").value = root;
+  translationForm.elements.namedItem("output_root").value = root;
+  dictionaryForm.elements.namedItem("output_root").value = root;
+  if (!document.querySelector("#custom-review-paths").checked) updateReviewDirectories();
+}
+workflowOutput.addEventListener("change", synchronizeDefaultWorkflowRoots);
 const mediaExtensions = ["wav", "mp3", "flac", "m4a", "ogg", "opus"];
 const workflowInput = document.querySelector("#input-path");
 const nativeMediaInput = document.createElement("input");
@@ -598,10 +607,12 @@ const managedSourcesStatus = document.querySelector("#managed-sources-status");
 const managedSourcesList = document.querySelector("#managed-sources-list");
 const cleanupManagedSourcesButton = document.querySelector("#cleanup-managed-sources");
 const selectedManagedSources = new Set();
+const managedSourcePaths = new Map();
 function managedSourcesRequest(path, body = {}) { return queuePost(path, {output_directory: workflow.elements.namedItem("output_directory").value, storage_directory: workspaceDirectory.value, ...body}); }
 function formatManagedSourceSize(value) { if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`; return `${(value / (1024 * 1024)).toFixed(1)} MiB`; }
 function renderManagedSources(payload) {
   selectedManagedSources.clear();
+  managedSourcePaths.clear();
   cleanupManagedSourcesButton.disabled = true;
   managedSourcesList.replaceChildren();
   if (!payload.sources.length) {
@@ -614,6 +625,7 @@ function renderManagedSources(payload) {
   table.innerHTML = "<thead><tr><th>Select</th><th>Type</th><th>File</th><th>Size</th><th>Retention</th></tr></thead>";
   const body = document.createElement("tbody");
   for (const source of payload.sources) {
+    managedSourcePaths.set(source.relative_path, source.path);
     const row = document.createElement("tr");
     const selection = document.createElement("td");
     const checkbox = document.createElement("input");
@@ -654,6 +666,11 @@ cleanupManagedSourcesButton.addEventListener("click", async () => {
   if (!window.confirm(`Permanently delete ${relativePaths.length} selected unreferenced managed source cop${relativePaths.length === 1 ? "y" : "ies"}? This cannot be undone by EWP Transcriber. Confirm that this output directory and any separate workspace catalogs are backed up.`)) return;
   try {
     const payload = await managedSourcesRequest("/api/v1/managed-sources/cleanup", {relative_paths: relativePaths, confirmed: true});
+    const removedPaths = new Set(relativePaths.map(path => managedSourcePaths.get(path)).filter(Boolean));
+    for (const id of ["correction-result-path", "review-result-path", "translation-result-path"]) {
+      const input = document.getElementById(id);
+      if (input && removedPaths.has(input.value)) input.value = "";
+    }
     const refreshed = await managedSourcesRequest("/api/v1/managed-sources/inventory");
     renderManagedSources(refreshed);
     managedSourcesStatus.textContent = `${payload.removed.length} unreferenced managed source cop${payload.removed.length === 1 ? "y" : "ies"} permanently deleted. Publication artifacts were not changed.`;
@@ -672,11 +689,21 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
       current_step: lastWorkspaceStep, fields: collectWorkspaceFields(),
     });
     const saved = payload.workspace;
+    for (const [id, value] of Object.entries(saved.fields)) {
+      const element = document.getElementById(id);
+      if (value === "" && element && element.type !== "checkbox") element.value = "";
+    }
     await refreshWorkspaces(saved.workspace_id, {feedback: false});
     workspaceName.value = saved.name;
     activateWorkspace(saved);
-    const omitted = payload.temporary_jobs_omitted || 0;
-    workspaceStatus.textContent = `Workspace saved: ${saved.name}. ${omitted ? `${omitted} session-picked queue item${omitted === 1 ? "" : "s"} omitted because their temporary source cannot survive a GUI restart.` : ""}`;
+    const temporaryOmitted = payload.temporary_jobs_omitted || 0;
+    const unavailableJobsOmitted = payload.unavailable_jobs_omitted || 0;
+    const unavailableFieldsOmitted = payload.unavailable_fields_omitted || 0;
+    const omissions = [];
+    if (temporaryOmitted) omissions.push(`${temporaryOmitted} session-picked queue item${temporaryOmitted === 1 ? "" : "s"} omitted because their temporary source cannot survive a GUI restart.`);
+    if (unavailableJobsOmitted) omissions.push(`${unavailableJobsOmitted} unavailable queue item${unavailableJobsOmitted === 1 ? "" : "s"} omitted; add its original source again before resuming it.`);
+    if (unavailableFieldsOmitted) omissions.push(`${unavailableFieldsOmitted} stale file field${unavailableFieldsOmitted === 1 ? "" : "s"} cleared.`);
+    workspaceStatus.textContent = `Workspace saved: ${saved.name}. ${omissions.join(" ")}`;
   } catch (error) { workspaceStatus.textContent = error.message; }
 });
 document.querySelector("#load-workspace").addEventListener("click", async () => { if (!workspaceList.value) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } try { const payload = await workspacePost("/api/v1/workspaces/load", {workspace_id: workspaceList.value}); applyWorkspaceFields(payload.workspace.fields); workspaceName.value = payload.workspace.name; lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep; activateWorkspace(payload.workspace); workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`; const heading = document.getElementById(payload.workspace.current_step); heading?.scrollIntoView({behavior: "smooth"}); } catch (error) { workspaceStatus.textContent = error.message; } });

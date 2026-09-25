@@ -847,6 +847,18 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 48. **GUI-48 — Non-color workflow status — WSL pass:** completed
     workflow circles contain a visible check mark and errors contain a geometrically centered X,
     in addition to their green/red color, written stage label, and state tooltip.
+49. **GUI-49 — Resilient workspace save after path changes — implemented, pending WSL retest:**
+    changing the shared output directory refreshes the default correction, review, translation,
+    and dictionary roots. Explicit workspace save clears unavailable dormant file fields and omits
+    unavailable inactive queue history with visible counts instead of rejecting all remaining
+    state; invalid and prohibited paths still fail closed.
+50. **GUI-50 — Review-session-aware managed cleanup — implemented, pending WSL retest:** include
+    the latest and per-result hidden review-session pointers in the managed-source reference audit,
+    normalize exact reference paths, and clear browser form fields that name a deliberately deleted
+    managed source. A canonical copy needed by **Restore saved review** must never be selectable.
+51. **GUI-51 — Intentional-omission export provenance — implemented, pending WSL retest:** export
+    provenance v2 records the intentional-empty unit count and states that derived outputs omit
+    those units without placeholders.
 
 Planned capabilities:
 

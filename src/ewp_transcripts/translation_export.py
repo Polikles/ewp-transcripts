@@ -231,23 +231,48 @@ def export_translation(
                     f"Cannot render translated {export_format.value} export: {error}"
                 ) from error
         payloads.append((destination / f"{stem}.{export_format.value}", rendered.encode("utf-8")))
-    provenance = {
-        "schema_version": "ewp-translation-export-provenance-v1",
-        "translation": {
-            "filename": normalized.name,
-            "sha256": sha256_file(normalized),
-        },
-        "dictionary": (
-            translation.dictionary.model_dump(mode="json")
-            if translation.dictionary is not None
-            else None
-        ),
-        "exports": [path.name for path, _payload in payloads],
+    translation_identity = {
+        "filename": normalized.name,
+        "sha256": sha256_file(normalized),
     }
+    dictionary_identity = (
+        translation.dictionary.model_dump(mode="json")
+        if translation.dictionary is not None
+        else None
+    )
+    export_names = [path.name for path, _payload in payloads]
+    provenance = {
+        "schema_version": "ewp-translation-export-provenance-v2",
+        "translation": translation_identity,
+        "dictionary": dictionary_identity,
+        "intentional_omissions": {
+            "unit_count": translation.statistics.intentionally_empty_units,
+            "export_behavior": "omitted_without_placeholder",
+        },
+        "exports": export_names,
+    }
+    provenance_path = destination / f"{stem}.provenance.json"
+    provenance_payload = (json.dumps(provenance, ensure_ascii=False, indent=2) + "\n").encode(
+        "utf-8"
+    )
+    if provenance_path.is_file():
+        existing_payload = provenance_path.read_bytes()
+        try:
+            existing_document = json.loads(existing_payload)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            existing_document = None
+        legacy_document = {
+            "schema_version": "ewp-translation-export-provenance-v1",
+            "translation": translation_identity,
+            "dictionary": dictionary_identity,
+            "exports": export_names,
+        }
+        if existing_document == legacy_document:
+            provenance_payload = existing_payload
     payloads.append(
         (
-            destination / f"{stem}.provenance.json",
-            (json.dumps(provenance, ensure_ascii=False, indent=2) + "\n").encode("utf-8"),
+            provenance_path,
+            provenance_payload,
         )
     )
     written_paths: list[Path] = []

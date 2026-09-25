@@ -57,6 +57,66 @@ def test_workspace_drops_expired_native_picker_field_without_rejecting_save(
     assert workspaces.list()[0].available is True
 
 
+def test_workspace_save_omits_stale_fields_and_terminal_jobs_when_requested(
+    tmp_path: Path,
+) -> None:
+    workspaces, allowed = controller(tmp_path)
+    output = allowed / "output"
+    output.mkdir()
+    missing = allowed / "missing_results.json"
+    now = datetime.now(UTC)
+
+    saved = workspaces.save(
+        name="Recoverable remainder",
+        current_step="workspace-heading",
+        fields={"review-result-path": str(missing), "output-path": str(output)},
+        terminal_jobs=[
+            {
+                "job_id": "ec6d26a5-709a-487b-b459-87f85d64a81d",
+                "status": "completed",
+                "input_path": str(missing),
+                "output_directory": str(output),
+                "planned_job_id": "missing",
+                "planned_result_path": str(missing),
+                "source_sha256": "a" * 64,
+                "language": "pl",
+                "speaker_count": "auto",
+                "created_at": now,
+                "updated_at": now,
+                "result_path": str(missing),
+            }
+        ],
+        omit_unavailable=True,
+    )
+
+    assert saved.fields["review-result-path"] == ""
+    assert saved.fields["output-path"] == str(output)
+    assert saved.terminal_jobs == ()
+
+
+def test_workspace_save_still_rejects_unsafe_paths_when_omitting_unavailable(
+    tmp_path: Path,
+) -> None:
+    prohibited = tmp_path / "system"
+    prohibited.mkdir()
+    unsafe = prohibited / "result.json"
+    unsafe.write_text("{}", encoding="utf-8")
+    workspaces = GuiWorkspaceController(
+        state_directory=tmp_path / "state",
+        resolve_path=GuiWorkflowController(
+            prohibited_roots=(prohibited.resolve(),)
+        ).resolve_allowed_path,
+    )
+
+    with pytest.raises(ValueError, match="prohibited"):
+        workspaces.save(
+            name="Unsafe",
+            current_step="",
+            fields={"review-result-path": str(unsafe)},
+            omit_unavailable=True,
+        )
+
+
 def controller(tmp_path: Path) -> tuple[GuiWorkspaceController, Path]:
     allowed = tmp_path / "allowed"
     allowed.mkdir()

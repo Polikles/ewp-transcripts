@@ -89,6 +89,13 @@ the audit before a confirmed permanent deletion and leaves publication artifacts
 Custom workspace catalogs stored elsewhere remain explicitly outside the audit and must be checked
 separately. Browser qualification is the next gate for this slice.
 
+The first GUI-39/41 browser pass exposed three follow-ups, now implemented as GUI-49–51. Workspace
+save follows the selected shared output root and omits unavailable dormant fields/history with
+visible counts rather than failing the whole checkpoint. Managed cleanup now protects hidden
+latest/per-result transcript-review session pointers. Translation export provenance v2 records
+the intentional-empty unit count and its placeholder-free export behavior. These changes need a
+short WSL regression.
+
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
 correction remains a non-final review candidate. The accepted v0.3 evidence, provider

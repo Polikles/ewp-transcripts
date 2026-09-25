@@ -826,6 +826,19 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         ],
                         terminal_jobs=[job.model_dump(mode="json") for job in durable_terminal],
                         workspace_id=str(document.get("workspace_id", "")),
+                        omit_unavailable=True,
+                    )
+                    unavailable_fields_omitted = sum(
+                        isinstance(value, str)
+                        and bool(value.strip())
+                        and saved.fields.get(name) == ""
+                        for name, value in fields.items()
+                    )
+                    unavailable_jobs_omitted = (
+                        len(durable_staged)
+                        + len(durable_terminal)
+                        - len(saved.staged_jobs)
+                        - len(saved.terminal_jobs)
                     )
                     payload = {
                         "workspace": saved.model_dump(mode="json"),
@@ -834,6 +847,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                         - len(durable_staged)
                         - len(durable_terminal),
+                        "unavailable_fields_omitted": unavailable_fields_omitted,
+                        "unavailable_jobs_omitted": unavailable_jobs_omitted,
                     }
                 elif path == "/api/v1/workspaces/load":
                     loaded = workspaces.load(str(document.get("workspace_id", "")))

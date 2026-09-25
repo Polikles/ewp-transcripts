@@ -79,7 +79,7 @@ def inventory_managed_sources(
             for path in sorted(digest_root.iterdir()):
                 if not path.is_file() or path.is_symlink():
                     continue
-                references = list(exact_references.get(path, ()))
+                references = list(exact_references.get(path.resolve(strict=False), ()))
                 try:
                     if sha256_file(path) != digest_root.name:
                         references.append("content hash no longer matches its managed path")
@@ -168,7 +168,7 @@ def _exact_references(
             return
         path = Path(value)
         if path.is_absolute():
-            references.setdefault(path, []).append(label)
+            references.setdefault(path.resolve(strict=False), []).append(label)
 
     for queue_job in queue_jobs:
         label = f"current queue: {queue_job.planned_job_id} ({queue_job.status})"
@@ -204,25 +204,32 @@ def _lineage_references(output_directory: Path, digests: set[str]) -> dict[str, 
     if not digests:
         return {}
     encoded = {digest: digest.encode("ascii") for digest in digests}
+    lineage_files: list[Path] = []
     for directory_name in _LINEAGE_DIRECTORIES:
         directory = output_directory / directory_name
         if not directory.is_dir() or directory.is_symlink():
             continue
-        for path in directory.rglob("*"):
-            if (
-                path.is_symlink()
-                or not path.is_file()
-                or path.suffix.lower() not in _LINEAGE_SUFFIXES
-            ):
-                continue
-            try:
-                content = path.read_bytes()
-            except OSError:
-                continue
+        lineage_files.extend(directory.rglob("*"))
+    latest_review_session = output_directory / ".ewp-gui-review-session.json"
+    if latest_review_session.exists():
+        lineage_files.append(latest_review_session)
+    review_sessions = output_directory / ".ewp-gui-review-sessions"
+    if review_sessions.is_dir() and not review_sessions.is_symlink():
+        lineage_files.extend(review_sessions.glob("*.json"))
+    for path in lineage_files:
+        if path.is_symlink() or not path.is_file() or path.suffix.lower() not in _LINEAGE_SUFFIXES:
+            continue
+        try:
+            content = path.read_bytes()
+        except OSError:
+            continue
+        try:
             relative = path.relative_to(output_directory).as_posix()
-            for digest, marker in encoded.items():
-                if marker in content:
-                    references[digest].append(f"workflow lineage: {relative}")
+        except ValueError:
+            continue
+        for digest, marker in encoded.items():
+            if marker in content:
+                references[digest].append(f"workflow lineage: {relative}")
     return {digest: tuple(labels) for digest, labels in references.items() if labels}
 
 

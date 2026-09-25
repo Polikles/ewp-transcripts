@@ -37,6 +37,24 @@ def test_export_translation_text_writes_then_skips_identical(tmp_path: Path) -> 
     assert second.skipped == (expected, provenance)
     assert expected.read_text(encoding="utf-8").startswith("speaker_001:")
     assert json.loads(provenance.read_text(encoding="utf-8"))["dictionary"] is None
+    assert json.loads(provenance.read_text(encoding="utf-8"))["intentional_omissions"] == {
+        "unit_count": 0,
+        "export_behavior": "omitted_without_placeholder",
+    }
+
+
+def test_existing_matching_v1_export_provenance_remains_idempotent(tmp_path: Path) -> None:
+    export_translation_text(EXAMPLE, output_directory=tmp_path)
+    provenance = tmp_path / "S01E01_pl_translation_001.provenance.json"
+    legacy = json.loads(provenance.read_text(encoding="utf-8"))
+    legacy["schema_version"] = "ewp-translation-export-provenance-v1"
+    del legacy["intentional_omissions"]
+    provenance.write_text(json.dumps(legacy, indent=2) + "\n", encoding="utf-8")
+
+    outcome = export_translation_text(EXAMPLE, output_directory=tmp_path)
+
+    assert provenance in outcome.skipped
+    assert json.loads(provenance.read_text(encoding="utf-8"))["schema_version"].endswith("v1")
 
 
 def test_translation_subtitles_stay_inside_unit_timing_and_render(tmp_path: Path) -> None:
@@ -119,10 +137,16 @@ def test_intentionally_empty_units_are_omitted_from_derived_exports(tmp_path: Pa
     artifact.write_text(changed.model_dump_json(), encoding="utf-8")
     output = tmp_path / "exports"
     output.mkdir()
-    export_translation(
+    outcome = export_translation(
         artifact,
-        formats=(TranslationExportFormat.HTML,),
+        formats=(TranslationExportFormat.TXT, TranslationExportFormat.HTML),
         output_directory=output,
     )
     rendered = (output / "S01E01_pl_translation_001.html").read_text(encoding="utf-8")
     assert "Witamy" not in rendered
+    provenance_path = next(
+        path for path in outcome.written if path.name.endswith("provenance.json")
+    )
+    provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+    assert provenance["schema_version"] == "ewp-translation-export-provenance-v2"
+    assert provenance["intentional_omissions"]["unit_count"] == 1

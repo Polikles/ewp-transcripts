@@ -194,6 +194,10 @@ copies must never overwrite different existing content, and workspace restore mu
 recorded hashes. Explicit Save current work state MUST save dirty transcript/translation review
 drafts to their authoritative output files before saving the non-secret workspace record;
 periodic field-only auto-save does not claim to checkpoint unsaved editor text.
+Changing the shared output directory updates default workflow output roots. Explicit workspace
+save MAY clear unavailable dormant file fields and omit unavailable inactive queue rows rather
+than rejecting unrelated recoverable state, but it MUST report both counts. It MUST still reject
+malformed, changed, or prohibited paths and MUST NOT reinterpret an unavailable source as valid.
 The help surface MUST explain that workspace JSON alone is not a complete backup: the output root,
 including dot-directories, and any separate workspace catalog must be backed up together. Session
 picker copies are removed when the GUI stops and atomic incoming files after their copy attempt.
