@@ -76,11 +76,10 @@ GUI-40 bare-metal/container qualification, and GUI-34 responsive redesign remain
 The 2026-09-25 WSL regression passed automatic Chrome launch, terminal cleanliness, OpenRouter
 defaults, selected inactive queue removal, transcript Preview autosave/reopen, stale-error cleanup,
 missing managed-source diagnosis/re-import, and a successful translation retry. GUI-42–45 are now
-operator-qualified. Three follow-ups are implemented locally: selecting LM Studio replaces the
-known Gemini default with the qualified Bielik model; versioned canonical results use their
-`_vNNN` identity when discovering accepted revisions and original exports; and completion/error
-circles include check/X glyphs for non-color identification. These GUI-46–48 changes need one
-short browser retest.
+operator-qualified. The follow-up WSL checks also passed: selecting LM Studio replaces the known
+Gemini default with the qualified Bielik model; versioned canonical results use their `_vNNN`
+identity when discovering accepted revisions and original exports; and completion/error circles
+include centered check/X glyphs for non-color identification. GUI-46–48 are operator-qualified.
 
 GUI-39 managed durable-source cleanup is now implemented. Saved work state exposes a source
 inventory for the selected output root, including exact retention reasons from the current queue,

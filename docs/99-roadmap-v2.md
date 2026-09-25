@@ -836,16 +836,15 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 45. **GUI-45 — Preview-only Apply guidance — WSL pass:** update Apply's
     disabled tooltip to require only Preview, and have transcript Preview save a dirty draft before
     validating it just as semantic-translation Preview does.
-46. **GUI-46 — Translation provider default — implemented, provider default passed; local-switch
-    fix pending browser retest:** make OpenRouter the initial translation-provider choice while
+46. **GUI-46 — Translation provider default — WSL pass:** make OpenRouter the initial translation-provider choice while
     preserving explicit provider controls and consent. Switching the known Gemini default to LM
     Studio resets the model field to the qualified Bielik model rather than retaining an invalid
     cloud model ID.
-47. **GUI-47 — Versioned-result workflow progress — implemented, pending browser retest:** discover
+47. **GUI-47 — Versioned-result workflow progress — WSL pass:** discover
     correction, accepted revision, and original-export artifacts using the canonical result's
     `_vNNN` identity. Applying and exporting a revision of a versioned imported result must turn
     the corresponding stages green rather than leaving them pending.
-48. **GUI-48 — Non-color workflow status — implemented, pending browser retest:** completed
+48. **GUI-48 — Non-color workflow status — WSL pass:** completed
     workflow circles contain a visible check mark and errors contain a geometrically centered X,
     in addition to their green/red color, written stage label, and state tooltip.
 
