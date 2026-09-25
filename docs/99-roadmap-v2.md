@@ -835,8 +835,11 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
 45. **GUI-45 — Preview-only Apply guidance — implemented, pending browser retest:** update Apply's
     disabled tooltip to require only Preview, and have transcript Preview save a dirty draft before
     validating it just as semantic-translation Preview does.
-46. **GUI-46 — Translation provider default — implemented, pending browser retest:** make OpenRouter the initial
-    translation-provider choice while preserving explicit provider controls and consent.
+46. **GUI-46 — Translation provider default — implemented, provider default passed; local-switch
+    fix pending browser retest:** make OpenRouter the initial translation-provider choice while
+    preserving explicit provider controls and consent. Switching the known Gemini default to LM
+    Studio resets the model field to the qualified Bielik model rather than retaining an invalid
+    cloud model ID.
 
 Planned capabilities:
 

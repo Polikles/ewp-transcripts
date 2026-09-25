@@ -79,6 +79,9 @@ function updateTranslationProviderControls() {
     translationForm.elements.namedItem("output_mode").value = "json-schema";
     translationDisclosure.lastChild.textContent = " I understand that OpenRouter is a separately operated cloud API: transcript text leaves this application, and EWP Transcriber cannot control how the provider logs, retains, uses, or forwards it. The translation remains non-final and requires semantic manual review.";
   } else {
+    if (!translationForm.elements.namedItem("model").value.trim() || translationForm.elements.namedItem("model").value === "google/gemini-2.5-flash") {
+      translationForm.elements.namedItem("model").value = "bielik-11b-v3.0-instruct";
+    }
     translationForm.elements.namedItem("endpoint").value = "http://127.0.0.1:1234/v1";
     translationForm.elements.namedItem("output_mode").value = "plain-text";
     translationDisclosure.lastChild.textContent = " I understand that transcript text is sent to a separately operated LM Studio API whose logging, retention, or forwarding EWP Transcriber cannot control. The translation remains non-final and requires semantic manual review.";
