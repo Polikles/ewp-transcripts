@@ -788,11 +788,15 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     not leave the previous episode on screen.
 33. **GUI-33 — Preview translation saves draft — WSL pass:** Preview translation saves dirty target edits
     first, then validates the just-saved draft; Apply remains an explicit verified action.
-34. **GUI-34 — Responsive visual overhaul — in progress:** GUI-34a implements responsive access
+34. **GUI-34 — Integrated GUI preview 0.20.0 — owner qualification pending:**
+    The [integrated preview](28-integrated-gui-preview.md) adds stage navigation, PL/EN, themes,
+    branded local assets, real multi-audio selection, cursor splitting and dynamic speaker colors.
+    Use the consolidated owner plan rather than separate acceptance rounds.
+    **GUI-34a earlier slice:** GUI-34a implements responsive access
     to existing queues/review controls, retaining the locally scrollable table and existing workflow.
     Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance
-    remain pending. See [GUI-34a verification](27-gui-34a-verification.md). Branding, PL/EN, explicit
-    system/light/dark preferences and new navigation remain subsequent bounded slices.
+    remain pending. See [GUI-34a verification](27-gui-34a-verification.md). The integrated preview now includes branding, PL/EN, explicit
+    system/light/dark preferences and stage navigation, with owner qualification pending.
 35. **GUI-35 — Provider-batch manual qualification — WSL/provider pass:** after the above
     fixes, run the authorized two-item correction/translation provider test without duplicate
     requests and confirm per-item semantic-review targets.

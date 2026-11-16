@@ -1,5 +1,10 @@
 # Development Handoff
 
+Current preview: [0.20.0 integrated GUI](28-integrated-gui-preview.md), with a
+[WSL launch guide](../Instructions/GUI_QUICKSTART.md) and
+[one consolidated owner test plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md). Earlier GUI-34a
+manual gates are included there rather than blocking further implementation.
+
 Current update (2026-11-16): GUI-55 is closed on the owner’s confirmation. The historical
 manual gate below is superseded. GUI-34a is implemented with Windows/WSL acceptance pending;
 see [GUI-34a verification](27-gui-34a-verification.md). The dated snapshot below is retained

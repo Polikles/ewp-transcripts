@@ -1,5 +1,7 @@
 # EWP Transcriber
 
+**GUI preview:** [Update and launch in WSL](Instructions/GUI_QUICKSTART.md) · [Consolidated manual test plan](Instructions/GUI_PREVIEW_TEST_PLAN.md).
+
 > EWP-transcripts is a local-first CLI application for accurate transcription of audio recordings. The executable is named `transcriber`.
 
 EWP Transcriber is designed as one component in a wider media-production ecosystem, not as

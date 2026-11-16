@@ -4,7 +4,33 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-The next internal-beta version is `0.19.0`.
+No further changes are recorded after the internal preview below.
+
+## 0.20.0 — 2026-11-16 (internal GUI preview; untagged)
+
+### Added
+
+- Integrated EwP Transcripts shell with stage navigation, active-recording context, independent
+  batch selection, Polish/English UI and persistent system/light/dark preferences.
+- Bundled approved identity assets, Montserrat/Noto Sans Mono fonts and Lucide icons with separate
+  notices; no runtime CDN. Creator URL remains explicitly unverified pending the owner's real URL.
+- Multi-file audio selection through real local copying and per-file inspect/plan/stage/start.
+- Separate cursor splitting and selection isolation within protected anchors; dynamic speaker
+  names/colors through additional revision-local speakers and explicit brand-palette adoption.
+- Optional direct manual translation, visible stale-source context, and separate human-approved
+  source/translated exports. Qualified configured-production YTT remains available; color overrides
+  create new export versions without rewriting old files.
+- Workspace recovery includes exact semantic-review pointers and speaker display/export preferences;
+  restoration checkpoints dirty drafts, revalidates paths and never restores credentials/consent.
+- WSL GUI quick start and one consolidated owner test plan. The reusable model-free browser check
+  now proves restoration from an empty queue/browser state using paths, identities and draft values.
+
+### Verification boundary
+
+- Headless VM checks use synthetic/model-free fixtures. Windows/WSL, actual 200% browser zoom,
+  real GPU/provider execution and new-palette YouTube qualification remain owner acceptance work.
+
+## 0.19.0 (previous internal beta; untagged)
 
 ### Added
 

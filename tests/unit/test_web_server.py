@@ -1042,3 +1042,23 @@ def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None
     payload = json.loads(response.body)
     assert payload["error"]["code"] == "GUI_TRANSCRIPTION_ALREADY_EXISTS"
     assert str(existing) in payload["error"]["message"]
+
+
+def test_preview_resources_are_fixed_local_routes() -> None:
+    assert "font-src 'self'" in SECURITY_HEADERS["Content-Security-Policy"]
+    config = WebConfiguration.create(port=8765)
+    for asset, expected in [
+        ("brand/logo.svg", b"<svg"),
+        ("brand/montserrat.woff2", b"wOF2"),
+        ("brand/mono.woff2", b"wOF2"),
+        ("brand/NOTICE.txt", b"Cyryl"),
+    ]:
+        response = dispatch_get(
+            config, server_port=8765, host="localhost:8765", target="/assets/" + asset
+        )
+        assert response.status == 200
+        assert expected in response.body
+    for path in ["/assets/brand/../../config.py", "/assets/brand/unknown.svg"]:
+        assert (
+            dispatch_get(config, server_port=8765, host="localhost:8765", target=path).status == 404
+        )

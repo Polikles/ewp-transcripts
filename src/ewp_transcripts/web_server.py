@@ -59,10 +59,40 @@ REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
 ISSUES_URL = f"{REPOSITORY_URL}/issues"
 LICENSE_URL = f"{REPOSITORY_URL}/blob/main/LICENSE"
 _ASSET_TYPES = {"app.css": "text/css; charset=utf-8", "app.js": "text/javascript; charset=utf-8"}
+# Fixed resource manifest: never interpret a browser-supplied path as a filesystem path.
+_ASSET_TYPES.update(
+    {
+        "brand/" + name: mime
+        for name, mime in {
+            "tokens.css": "text/css; charset=utf-8",
+            "logo.svg": "image/svg+xml",
+            "montserrat.woff2": "font/woff2",
+            "mono.woff2": "font/woff2",
+            "NOTICE.txt": "text/plain; charset=utf-8",
+            "LICENSE-ASSETS.txt": "text/plain; charset=utf-8",
+            "Montserrat-OFL.txt": "text/plain; charset=utf-8",
+            "NotoSansMono-OFL.txt": "text/plain; charset=utf-8",
+            "Lucide-LICENSE.txt": "text/plain; charset=utf-8",
+            **{
+                icon + ".svg": "image/svg+xml"
+                for icon in (
+                    "file-music",
+                    "list-ordered",
+                    "settings-2",
+                    "book-open",
+                    "languages",
+                    "download",
+                    "split",
+                )
+            },
+        }.items()
+    }
+)
 SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
-        "connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+        "font-src 'self'; connect-src 'self'; base-uri 'none'; "
+        "form-action 'none'; frame-ancestors 'none'"
     ),
     "Referrer-Policy": "no-referrer",
     "X-Content-Type-Options": "nosniff",
@@ -316,11 +346,14 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("review_editor_display.js").read_bytes()
         body += b"\n" + assets.joinpath("translation_review_editor.js").read_bytes()
         body += b"\n" + assets.joinpath("translation_provider_controls.js").read_bytes()
+        body += b"\n" + assets.joinpath("ui_locale.js").read_bytes()
+        body += b"\n" + assets.joinpath("workbench.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
         body += b"\n" + assets.joinpath("translation_review_editor.css").read_bytes()
         body += b"\n" + assets.joinpath("workflow_tracker.css").read_bytes()
+        body += b"\n" + assets.joinpath("workbench.css").read_bytes()
     return WebResponse(HTTPStatus.OK, content_type, body)
 
 
@@ -1031,6 +1064,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         str(document.get("revision_path", "")),
                         str(document.get("export_output_directory", "")),
                         formats,
+                        speaker_colors=document.get("speaker_colors"),
                     )
                     self.server.gui_transcriptions.clear_workflow_error(result, "original_export")
                 else:

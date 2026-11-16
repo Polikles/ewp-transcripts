@@ -7,3 +7,7 @@
 *.jpeg binary
 *.wav binary
 *.mp3 binary
+
+# Preserve the supplied third-party OFL notices byte-for-byte (including trailing spaces).
+src/ewp_transcripts/web_assets/brand/Montserrat-OFL.txt -whitespace
+src/ewp_transcripts/web_assets/brand/NotoSansMono-OFL.txt -whitespace

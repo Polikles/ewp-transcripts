@@ -33,6 +33,8 @@ def test_browser_review_prepare_edit_preview_and_apply(tmp_path: Path) -> None:
     assert prepared["review_path"].endswith("S01E01.review.txt")
     assert prepared["canonical_speakers"] == ["speaker_001", "speaker_002"]
     assert prepared["speaker_labels"] == {"speaker_001": "jan", "speaker_002": "anna"}
+    assert prepared["anchors"][0]["start_ms"] == 1240
+    assert prepared["anchors"][0]["end_ms"] == 6320
     prepared["anchors"][0]["blocks"][0]["text"] += " corrected"
 
     saved = service.save(
@@ -361,3 +363,58 @@ def test_browser_review_restores_automated_candidate_parent_from_session(tmp_pat
         restored["review_path"], str(result), restored["session"]["source_revision_path"]
     )
     assert preview["revision_number"] == 1
+
+
+def test_gui_export_palette_preserves_production_and_real_timing(tmp_path: Path) -> None:
+    import xml.etree.ElementTree as ET
+
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    original = result.read_bytes()
+    service = controller(tmp_path)
+    review = service.prepare(str(result), str(tmp_path / "reviews"))
+    service.preview(review["review_path"], str(result))
+    applied = service.apply(review["review_path"], str(result), str(tmp_path / "revisions"))
+    production = service.export(
+        str(result), applied["revision_path"], str(tmp_path / "exports"), ["ytt"]
+    )
+    production_path = Path(production["written"][0])
+    old_bytes = production_path.read_bytes()
+    brand = service.export(
+        str(result),
+        applied["revision_path"],
+        str(tmp_path / "exports"),
+        ["ytt"],
+        speaker_colors={"speaker_001": "#F5F7FA", "speaker_002": "#BF734D"},
+    )
+    brand_path = Path(brand["written"][0])
+    assert brand_path != production_path
+    assert production_path.read_bytes() == old_bytes
+    assert result.read_bytes() == original
+    old, new = ET.fromstring(old_bytes), ET.fromstring(brand_path.read_bytes())
+    assert [pen.attrib["fc"] for pen in new.findall("./head/pen")][:2] == ["#F5F7FA", "#BF734D"]
+    assert [p.attrib for p in old.findall("./body/p")] == [
+        p.attrib for p in new.findall("./body/p")
+    ]
+    assert [p.text for p in old.findall("./body/p")] == [p.text for p in new.findall("./body/p")]
+
+
+@pytest.mark.parametrize(
+    "colors", [{"speaker_001": "red"}, {"speaker_999": "#123456"}, {"speaker_001": 123}]
+)
+def test_gui_export_rejects_invalid_palette_without_writing(tmp_path: Path, colors: dict) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    review = service.prepare(str(result), str(tmp_path / "reviews"))
+    service.preview(review["review_path"], str(result))
+    applied = service.apply(review["review_path"], str(result), str(tmp_path / "revisions"))
+    with pytest.raises(GuiReviewError, match="known speaker"):
+        service.export(
+            str(result),
+            applied["revision_path"],
+            str(tmp_path / "exports"),
+            ["ytt"],
+            speaker_colors=colors,
+        )
+    assert not (tmp_path / "exports").exists()

@@ -1,5 +1,7 @@
 # EWP Transcriber — complete CLI runbook
 
+**GUI preview:** [Update and launch in WSL](GUI_QUICKSTART.md) · [Consolidated manual test plan](GUI_PREVIEW_TEST_PLAN.md).
+
 This is the current operator entry point for the internal command-line application. It
 covers every shipped command. The application is not yet a public release.
 

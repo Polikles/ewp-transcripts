@@ -385,3 +385,14 @@ The smallest acceptable vertical slices are:
 
 Docker packaging is intentionally downstream. GUI behavior is qualified before container
 construction so the container does not become a separate product implementation.
+
+## Integrated preview 0.20.0 compatibility
+
+The stage-focused shell reuses the existing controls and application services. PL/EN and explicit
+system/light/dark are browser preferences, independent of processing languages. Multi-audio selection
+retains inspect/exact-plan/stage/start. Cursor splitting stays within protected anchors and requires
+Preview alignment; selection isolation remains a separate command. Optional export speaker-color maps
+are validated at the web boundary and version new exports without changing saved production settings.
+Workspace v2 adds allowlisted semantic-review paths and display preferences, restoring through existing
+exact-lineage validators. See [the detailed preview contract/evidence](28-integrated-gui-preview.md)
+and [the consolidated owner plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md).

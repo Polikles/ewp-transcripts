@@ -1,0 +1,13 @@
+EwP owner assets — distribution conditions
+
+Rights holder/source: Damian Szczęch / Etyka w Pętli — https://etykawpetli.pl/
+English credit: Damian Szczech / Ethics in the Loop — https://ethicsintheloop.eu/
+All rights reserved, subject to the limited permission below and applicable law.
+
+Supplied EwP-owned branding/artwork may be copied and redistributed with the relevant program, including forks, if the supplied asset files remain unmodified and owner/source and applicable creator credits are retained. The assets may not be redistributed as a standalone asset collection. A fork may replace them with independently supplied assets. Permission to modify the program does not authorize modifying the supplied owner assets.
+
+Credit the actual graphic creator by name or pseudonym and their own URL, separately from the rights holder. Current supplied artwork: Cyryl; creator URL pending in the private source register. Per-asset records may identify other creators. Do not invent missing credits.
+
+This notice covers identified EwP-owned assets only. It does not change the software license, third-party font/icon licenses, existing sample licenses or rights in ordinary user-generated outputs. Include this notice and relevant per-asset credits with a public tool distribution. The private brandbook, source transcript fixtures and draft review package are not a general public asset license.
+
+Owner-authorized production/export/reconstruction work does not create a general downstream asset-modification permission. Review draft assets before release.

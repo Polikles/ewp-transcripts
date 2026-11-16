@@ -20,6 +20,14 @@ from ewp_transcripts.web_jobs import GuiTranscriptionJob
 
 _FIELD_NAMES = frozenset(
     {
+        "gui-translation-applied-path",
+        "gui-translation-review-path",
+        "gui-translation-result-path",
+        "gui-translation-revision-path",
+        "gui-translation-parent-path",
+        "gui-translation-target",
+        "gui-speaker-colors",
+        "gui-palette-profile",
         "input-path",
         "output-path",
         "workflow-language",
@@ -60,6 +68,11 @@ _FIELD_NAMES = frozenset(
 )
 _PATH_FIELDS = frozenset(
     {
+        "gui-translation-applied-path",
+        "gui-translation-review-path",
+        "gui-translation-result-path",
+        "gui-translation-revision-path",
+        "gui-translation-parent-path",
         "input-path",
         "output-path",
         "correction-result-path",
@@ -82,6 +95,11 @@ _PATH_FIELDS = frozenset(
 )
 _FILE_FIELDS = frozenset(
     {
+        "gui-translation-applied-path",
+        "gui-translation-review-path",
+        "gui-translation-result-path",
+        "gui-translation-revision-path",
+        "gui-translation-parent-path",
         "input-path",
         "correction-result-path",
         "correction-dictionary",

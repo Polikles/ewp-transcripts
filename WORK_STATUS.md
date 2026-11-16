@@ -2,7 +2,38 @@
 
 Last updated: **2026-11-16**.
 
-## GUI-34a current increment
+## Integrated GUI preview 0.20.0
+
+The clean GUI-34a baseline was `3ce1caa5f73eb89fa0f2e6e831f90ededf43ea17` on main.
+The integrated untagged preview includes stage navigation, active-recording/draft context,
+PL/EN UI, explicit system/light/dark, local branded assets/notices, multi-file audio selection
+through the existing exact-plan contract, separate cursor split/isolation, dynamic speaker colors,
+production/brand YTT choice, direct manual translation and exact source/semantic workspace recovery.
+Source export still precedes any need for translation; dictionaries/providers remain optional.
+
+Use [GUI quick start](Instructions/GUI_QUICKSTART.md) and the single
+[consolidated owner plan](Instructions/GUI_PREVIEW_TEST_PLAN.md). Implementation/compatibility and
+content-free evidence are in [the preview record](docs/28-integrated-gui-preview.md).
+No per-slice owner acceptance is required. Windows/WSL, real 200% browser zoom, real GPU/provider
+execution and new-palette YouTube validation remain unverified until the owner runs that session.
+GUI-55 remains closed. No public release or tag is created.
+
+Executed VM outcomes: `make check` PASS (769 tests; Ruff/format/mypy), `make test-integration`
+PASS (2 passed, 4 deselected), browser-tool Ruff/format and JavaScript syntax checks PASS.
+Headless Playwright 1.65.2 / Chromium 159.0.8154.6 passed 72 stage/viewport/locale/theme cases,
+actual local font loading, real model-free audio inspect/plan/staging, cursor/isolation/Undo,
+additional speaker/custom color, source and manual translation approval/export, mixed states,
+and stale-source presentation. Recovery from an empty browser/server queue passed exact path,
+identity and saved source/target value assertions. A separate actual Linux GUI-process restart
+plus a fresh browser also passed those assertions, including the prior applied translation path.
+This does not qualify Windows/WSL, real zoom, GPU/provider execution or YouTube colors.
+
+The 0.20.0 wheel and source archive build passed; all 33 packaged frontend files match source,
+both owner guides are in the source archive, and resource serving directly from the wheel works
+without importing torch/WhisperX/pyannote. Only the project version changes in uv.lock; ML pins
+are unchanged. Runtime/build/browser evidence stays disposable under the temporary test root.
+
+## Earlier GUI-34a increment (historical context)
 
 The first bounded responsive slice is implemented; Windows/WSL visual acceptance and actual
 browser zoom to 200% remain pending. The existing table is retained with local keyboard scrolling,
@@ -12,7 +43,7 @@ JavaScript workflow bindings, palette and exporters are unchanged. PL/EN, explic
 branding and new navigation remain later slices. See [verification](docs/27-gui-34a-verification.md).
 GUI-55 is closed on the owner's confirmation; another dedicated acceptance test is not required.
 
-## Checkpoint
+## Earlier 0.19.0 checkpoint
 
 Version `0.19.0` is the next internal beta on `main`; it is not tagged or published as a public
 release. Development remains untagged while requirements work continues. The first public

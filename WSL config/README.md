@@ -1,5 +1,7 @@
 # EWP-transcripts operator guide
 
+**GUI preview:** [Update and launch in WSL](../Instructions/GUI_QUICKSTART.md) · [Consolidated manual test plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md).
+
 This directory contains only current instructions for installing and using the internal
 beta and for collecting feedback needed for later versions.
 

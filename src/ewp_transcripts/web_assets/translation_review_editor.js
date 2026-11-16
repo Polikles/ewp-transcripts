@@ -227,8 +227,7 @@ function renderEnhancedTranslationReview(documentValue, options = {}) {
 
 function scrollTranslationReviewIntoView() {
   requestAnimationFrame(() => {
-    document.querySelector("#translation-review-heading")
-      .scrollIntoView({behavior: "smooth", block: "start"});
+    guiScrollTo(document.querySelector("#translation-review-heading"), {behavior: "smooth", block: "start"});
   });
 }
 

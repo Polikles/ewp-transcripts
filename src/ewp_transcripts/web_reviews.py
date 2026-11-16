@@ -21,7 +21,7 @@ from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
-from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.review_format import load_review, render_review
 from ewp_transcripts.web_workflows import require_completed_canonical_result
 
@@ -83,6 +83,9 @@ class GuiReviewController:
             ),
             "canonical_asr" if parsed.header.source_revision_number is None else "revision",
         )
+        words = {
+            word.word_id: word for segment in base.transcript.segments for word in segment.words
+        }
         base_speakers = [speaker.speaker_id for speaker in base.speakers]
         speakers = [
             *base_speakers,
@@ -97,6 +100,12 @@ class GuiReviewController:
             "language": parsed.header.language,
             "source_verification": verification,
             "canonical_speakers": base_speakers,
+            "configured_speaker_colors": {
+                speaker_id: self._config.subtitles.ytt_speaker_palette[
+                    index % len(self._config.subtitles.ytt_speaker_palette)
+                ]
+                for index, speaker_id in enumerate(base_speakers)
+            },
             "speakers": speakers,
             "speaker_labels": {
                 **base_labels,
@@ -106,6 +115,12 @@ class GuiReviewController:
                 {
                     "first_word_id": anchor.first_word_id,
                     "last_word_id": anchor.last_word_id,
+                    "start_ms": words[anchor.first_word_id].start_ms
+                    if anchor.first_word_id in words
+                    else None,
+                    "end_ms": words[anchor.last_word_id].end_ms
+                    if anchor.last_word_id in words
+                    else None,
                     "blocks": [block.model_dump(mode="json") for block in anchor.speaker_blocks],
                 }
                 for anchor in parsed.anchors
@@ -264,11 +279,42 @@ class GuiReviewController:
         revision: str,
         output_directory: str,
         formats: list[str],
+        speaker_colors: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         result_path = self._resolve_path(result)
-        self._require_canonical_result(result_path)
+        base = self._require_canonical_result(result_path)
         revision_path = self._resolve_path(revision)
         output_path = self._resolve_path(output_directory, directory=True)
+        subtitles = self._config.subtitles
+        if speaker_colors is not None:
+            revised = load_transcript_revision(revision_path)
+            ids = list(
+                dict.fromkeys(
+                    [
+                        *(speaker.speaker_id for speaker in base.speakers),
+                        *revised.transcript.speaker_labels,
+                    ]
+                )
+            )
+            if not isinstance(speaker_colors, dict) or any(
+                key not in ids
+                or not isinstance(color, str)
+                or re.fullmatch(r"#[0-9a-fA-F]{6}", color) is None
+                for key, color in speaker_colors.items()
+            ):
+                raise GuiReviewError(
+                    "GUI_EXPORT_COLOR_INVALID", "Choose a #RRGGBB color for a known speaker."
+                )
+            palette = subtitles.ytt_speaker_palette
+            subtitles = subtitles.model_copy(
+                update={
+                    "ytt_speaker_palette": tuple(
+                        speaker_colors.get(key, palette[index % len(palette)])
+                        for index, key in enumerate(ids)
+                    )
+                    + (palette[0],)
+                }
+            )
         try:
             selected = tuple(ExportFormat(item) for item in formats)
         except ValueError as error:
@@ -277,8 +323,9 @@ class GuiReviewController:
             result_path,
             formats=selected,
             output_directory=output_path,
-            subtitles_config=self._config.subtitles,
+            subtitles_config=subtitles,
             revision=revision_path,
+            force=speaker_colors is not None,
         )
         return {
             "revision_number": outcome.revision_number,

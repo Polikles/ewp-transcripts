@@ -94,3 +94,11 @@ For purposes of these licensing notices and the project's Contributor Terms:
 The public AGPL-licensed version of `ewp-transcripts` is provided subject to the warranty disclaimer and limitation of liability contained in the GNU Affero General Public License version 3.
 
 Any separately licensed commercial version may be subject to different warranty, support, liability, or service terms specified in the applicable commercial agreement.
+
+## Bundled GUI assets
+
+`src/ewp_transcripts/web_assets/brand/` contains separately licensed distribution assets.
+EwP identity artwork remains proprietary under its included `LICENSE-ASSETS.txt`; it is not
+relicensed by the software AGPL grant. Montserrat and Noto Sans Mono retain their included OFL
+notices; Lucide icons retain their included ISC notice. See `brand/NOTICE.txt` for provenance,
+owner/source credits, creator credit and the unverified creator-URL TODO.
