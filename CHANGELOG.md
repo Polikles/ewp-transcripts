@@ -69,6 +69,11 @@ The next internal-beta version is `0.19.0`.
 
 ### Fixed
 
+- GUI-34a keeps the six-column transcription queue locally scrollable and keyboard-accessible,
+  wraps stage status markers within their own cells, and stacks speaker/text controls at narrow
+  desktop widths. Review, translation, provider, and workspace actions retain accessible wrapping
+  and growing feedback space. Existing services, artifacts, palette, and workflow gates are unchanged.
+
 - Saved workspaces with unavailable referenced paths remain selectable for confirmed removal.
   Restore and auto-save stay disabled, and deletion still removes only the workspace JSON.
 - The Saved workspaces list now shows both the private default catalog and the currently selected

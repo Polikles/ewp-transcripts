@@ -788,8 +788,11 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     not leave the previous episode on screen.
 33. **GUI-33 — Preview translation saves draft — WSL pass:** Preview translation saves dirty target edits
     first, then validates the just-saved draft; Apply remains an explicit verified action.
-34. **GUI-34 — Responsive visual overhaul — deferred:** include small/zoomed viewport
-    qualification in the later planned UI overhaul, not this functional-fix pass.
+34. **GUI-34 — Responsive visual overhaul — in progress:** GUI-34a implements responsive access
+    to existing queues/review controls, retaining the locally scrollable table and existing workflow.
+    Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance
+    remain pending. See [GUI-34a verification](27-gui-34a-verification.md). Branding, PL/EN, explicit
+    system/light/dark preferences and new navigation remain subsequent bounded slices.
 35. **GUI-35 — Provider-batch manual qualification — WSL/provider pass:** after the above
     fixes, run the authorized two-item correction/translation provider test without duplicate
     requests and confirm per-item semantic-review targets.
@@ -872,7 +875,7 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     workspaces list combines the private default catalog with the currently selected custom
     catalog, labels each origin, and routes load, overwrite, delete, import selection, and auto-save
     to the owning catalog. Equal imported workspace IDs in different catalogs remain distinct.
-55. **GUI-55 — Remove unavailable saved workspaces — implemented, pending WSL retest:** workspace
+55. **GUI-55 — Remove unavailable saved workspaces — WSL pass (owner confirmed):** workspace
     records whose referenced files no longer exist remain selectable. Restore and auto-save are
     disabled, while confirmed deletion remains available and removes only the stale workspace JSON.
 

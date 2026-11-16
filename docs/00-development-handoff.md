@@ -1,5 +1,10 @@
 # Development Handoff
 
+Current update (2026-11-16): GUI-55 is closed on the owner’s confirmation. The historical
+manual gate below is superseded. GUI-34a is implemented with Windows/WSL acceptance pending;
+see [GUI-34a verification](27-gui-34a-verification.md). The dated snapshot below is retained
+as historical context.
+
 ## Snapshot
 
 - Date: 2026-09-25

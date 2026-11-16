@@ -1,6 +1,16 @@
 # EWP-transcripts work status
 
-Last updated: **2026-09-25**.
+Last updated: **2026-11-16**.
+
+## GUI-34a current increment
+
+The first bounded responsive slice is implemented; Windows/WSL visual acceptance and actual
+browser zoom to 200% remain pending. The existing table is retained with local keyboard scrolling,
+correct six-column sizing and wrapped status markers; review speaker/text controls stack at narrow
+desktop widths, and action/feedback groups reflow without hiding functions. Services, schemas,
+JavaScript workflow bindings, palette and exporters are unchanged. PL/EN, explicit theme preferences,
+branding and new navigation remain later slices. See [verification](docs/27-gui-34a-verification.md).
+GUI-55 is closed on the owner's confirmation; another dedicated acceptance test is not required.
 
 ## Checkpoint
 
@@ -110,7 +120,7 @@ passed WSL confirmation through the combined list and catalog-routed deletion wo
 
 GUI-55 follows the unified catalog view: stale default-catalog workspaces with unavailable paths
 remain selectable for deletion while restore and auto-save stay disabled. This maintenance path
-awaits a short WSL confirmation.
+is closed based on the owner’s confirmation.
 
 The v0.1 transcription/export baseline, v0.2 immutable manual transcript revisions, and
 v0.3 local/cloud automated correction are implemented and acceptance-audited. Automated
