@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import threading
 from collections import deque
@@ -40,6 +41,7 @@ class GuiTranscriptionJob(BaseModel):
     planned_job_id: str
     planned_result_path: str
     source_sha256: str = ""
+    group_sources: dict[str, str] = Field(default_factory=dict)
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -109,6 +111,7 @@ class GuiTranscriptionQueue:
         planned_job_id: str,
         planned_result_path: str,
         source_sha256: str = "",
+        group_sources: dict[str, str] | None = None,
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
     ) -> GuiTranscriptionJob:
@@ -121,6 +124,7 @@ class GuiTranscriptionQueue:
             planned_job_id=planned_job_id,
             planned_result_path=planned_result_path,
             source_sha256=source_sha256,
+            group_sources=group_sources or {},
             language=language,
             speaker_count=speaker_count,
             created_at=now,
@@ -252,7 +256,8 @@ class GuiTranscriptionQueue:
     def contains_active_input(self, input_path: Path) -> bool:
         with self._lock:
             return any(
-                job.input_path == str(input_path) and job.status in {"staged", "queued", "running"}
+                (job.input_path == str(input_path) or str(input_path) in job.group_sources)
+                and job.status in {"staged", "queued", "running"}
                 for job in self._jobs.values()
             )
 
@@ -386,7 +391,12 @@ class GuiTranscriptionQueue:
             if item is None:
                 return
             job_id, input_path, output_directory, source_sha256, language, speaker_count = item
-            if source_sha256 and not _matches_staged_source(input_path, source_sha256):
+            job = self._jobs[job_id]
+            fingerprints = job.group_sources or {str(input_path): source_sha256}
+            if any(
+                digest and not _matches_staged_source(Path(path), digest)
+                for path, digest in fingerprints.items()
+            ):
                 self._replace(
                     job_id,
                     status="failed",
@@ -409,10 +419,19 @@ class GuiTranscriptionQueue:
                         ),
                     }
                 )
+                group_options = (
+                    {
+                        "explicit_group_paths": tuple(Path(path) for path in job.group_sources),
+                        "explicit_group_id": job.planned_job_id,
+                    }
+                    if job.group_sources
+                    else {}
+                )
                 outcome = self._service(
                     input_path,
                     config=config,
                     output_directory=output_directory,
+                    **group_options,
                 )
                 self._replace(
                     job_id,
@@ -423,7 +442,17 @@ class GuiTranscriptionQueue:
                 self._replace(
                     job_id,
                     status="failed",
-                    error={"code": error.code, "message": str(error)},
+                    error={
+                        "code": error.code,
+                        "message": str(error),
+                        **_backend_failure_detail(error),
+                        "exception_type": type(error).__name__,
+                        "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
+                        "action": (
+                            "Transcription failed. Use Test local dependencies, "
+                            "then retry after fixing failed checks."
+                        ),
+                    },
                 )
             except Exception:
                 self._replace(
@@ -431,9 +460,27 @@ class GuiTranscriptionQueue:
                     status="failed",
                     error={
                         "code": "GUI_TRANSCRIPTION_FAILED",
-                        "message": "Transcription failed unexpectedly; inspect retained job state.",
+                        "message": (
+                            "Transcription failed unexpectedly. Use Test local dependencies "
+                            "and inspect retained job state."
+                        ),
                     },
                 )
+
+
+def _backend_failure_detail(error: ApplicationError) -> dict[str, str]:
+    # Backend exception text is only shown in the local technical-details disclosure.
+    # Do not expose arbitrary unexpected exceptions or environment credentials.
+    if error.code != "SPEECH_ENGINE_ERROR" or error.__cause__ is None:
+        return {}
+    cause = error.__cause__
+    while cause.__cause__ is not None:
+        cause = cause.__cause__
+    detail = f"{type(cause).__name__}: {cause}"
+    for name, value in os.environ.items():
+        if value and any(word in name.upper() for word in ("TOKEN", "KEY", "SECRET", "PASSWORD")):
+            detail = detail.replace(value, "[redacted]")
+    return {"backend_detail": detail[:4000]}
 
 
 def _matches_staged_source(path: Path, expected_sha256: str) -> bool:

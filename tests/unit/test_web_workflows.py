@@ -229,3 +229,45 @@ def test_json_input_explains_that_inspection_requires_media(tmp_path: Path) -> N
             "Use it in Review and export; Inspect and plan accepts supported audio files."
         ),
     }
+
+
+def test_exact_plan_is_bound_to_all_group_sources_and_identity(tmp_path: Path) -> None:
+    sources = [tmp_path / f"s0e00-{name}.wav" for name in ("Szymon", "Damian", "Other")]
+    for source in sources:
+        source.write_bytes(source.name.encode())
+    output = tmp_path / "output"
+    seen = []
+
+    def plan(path, **kwargs):
+        seen.append(kwargs)
+        return StubResult(selected=str(path), mode="dry-run", output_directory=str(output))
+
+    controller = GuiWorkflowController(dry_run_service=plan)
+    paths = [str(source) for source in sources[:2]]
+    operation = controller.run(
+        "dry-run",
+        {
+            "path": paths[0],
+            "output_directory": str(output),
+            "group_paths": paths,
+            "group_id": "s0e00",
+        },
+    )
+    assert operation.status == "completed"
+    assert seen[0]["explicit_group_paths"] == tuple(sources[:2])
+    assert seen[0]["explicit_group_id"] == "s0e00"
+    assert (
+        controller.completed_plan(sources[0], output, group_paths=tuple(paths), group_id="s0e00")
+        == operation.result
+    )
+    assert controller.completed_plan(sources[0], output) is None
+    assert (
+        controller.completed_plan(
+            sources[0], output, group_paths=(paths[0], str(sources[2])), group_id="s0e00"
+        )
+        is None
+    )
+    assert (
+        controller.completed_plan(sources[0], output, group_paths=tuple(paths), group_id="other")
+        is None
+    )

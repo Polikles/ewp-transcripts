@@ -149,3 +149,48 @@ def test_doctor_fails_with_setup_guidance_when_a_model_is_missing(tmp_path) -> N
     check = next(item for item in result.checks if item.code == "asr_model")
     assert check.status is DiagnosticStatus.FAIL
     assert "WSL config/MODEL_SETUP.md" in check.message
+
+
+def test_explicit_speech_test_reports_native_failure_without_leaking_tokens(tmp_path) -> None:
+    secret = "hf-private-test-value"
+
+    def runner(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        if arguments[0] == sys.executable and "torchcodec" in arguments[-1]:
+            return subprocess.CompletedProcess(
+                arguments, 1, stdout="", stderr=f"libavutil.so.58 missing; token={secret}"
+            )
+        return _successful_runner(arguments)
+
+    result = run_doctor(
+        config=_config_with_models(tmp_path),
+        finder=_all_executables,
+        runner=runner,
+        environ={"HF_TOKEN": secret},
+        python_version=(3, 12, 3),
+        kernel_release="microsoft",
+        os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
+        test_speech_runtime=True,
+    )
+    check = next(check for check in result.checks if check.code == "speech_runtime")
+    assert not result.ready
+    assert check.status is DiagnosticStatus.FAIL
+    assert "libavutil.so.58" in check.context["detail"]
+    assert secret not in result.model_dump_json()
+    assert "torchcodec" not in sys.modules
+
+
+def test_speech_test_timeout_is_a_failed_check(tmp_path) -> None:
+    def runner(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
+        if arguments[0] == sys.executable and "torchcodec" in arguments[-1]:
+            raise subprocess.TimeoutExpired(arguments, 60)
+        return _successful_runner(arguments)
+
+    result = run_doctor(
+        config=_config_with_models(tmp_path),
+        finder=_all_executables,
+        runner=runner,
+        test_speech_runtime=True,
+    )
+    check = next(check for check in result.checks if check.code == "speech_runtime")
+    assert check.status is DiagnosticStatus.FAIL
+    assert check.context["error_type"] == "TimeoutExpired"

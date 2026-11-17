@@ -585,3 +585,88 @@ def test_restoring_terminal_history_preserves_active_staged_jobs(tmp_path: Path)
         queue.close()
 
     assert [job.job_id for job in restored] == [active.job_id, terminal.job_id]
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_group_queue_verifies_every_source_and_passes_explicit_group(
+    tmp_path: Path, changed
+) -> None:
+    sources = [tmp_path / f"s0e00-{name}.wav" for name in ("Szymon", "Damian")]
+    for source in sources:
+        source.write_bytes(source.name.encode())
+    fingerprints = {str(source): sha256_file(source) for source in sources}
+    output = tmp_path / "output"
+    seen = []
+
+    def transcribe(path, **kwargs):
+        seen.append(kwargs)
+        return SimpleNamespace(result_path=output / "s0e00_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        queue.stage(
+            sources[0],
+            output,
+            planned_job_id="s0e00",
+            planned_result_path=str(output / "s0e00_results.json"),
+            source_sha256=fingerprints[str(sources[0])],
+            group_sources=fingerprints,
+        )
+        assert queue.contains_active_input(sources[1])
+        if changed:
+            sources[1].write_bytes(b"changed second source")
+        queue.start()
+        outcome = wait_for_terminal(queue)
+    finally:
+        queue.close()
+    if changed:
+        assert outcome.status == "failed"
+        assert outcome.error["code"] == "GUI_SOURCE_FINGERPRINT_MISMATCH"
+        assert seen == []
+    else:
+        assert outcome.status == "completed"
+        assert seen[0]["explicit_group_paths"] == tuple(sources)
+        assert seen[0]["explicit_group_id"] == "s0e00"
+
+
+def test_controlled_engine_failure_keeps_code_and_action(tmp_path: Path) -> None:
+    from ewp_transcripts.domain.errors import SpeechEngineError
+
+    def fail(*args, **kwargs):
+        try:
+            raise ImportError("native library unavailable")
+        except ImportError as error:
+            raise SpeechEngineError("WhisperX ASR execution failed") from error
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=fail)
+    try:
+        queue.stage(
+            tmp_path / "episode.wav",
+            tmp_path / "output",
+            planned_job_id="episode",
+            planned_result_path=str(tmp_path / "output/episode_results.json"),
+        )
+        queue.start()
+        failed = wait_for_terminal(queue)
+    finally:
+        queue.close()
+    assert failed.error["code"] == "SPEECH_ENGINE_ERROR"
+    assert failed.error["cause_type"] == "ImportError"
+    assert "Test local dependencies" in failed.error["action"]
+
+
+def test_backend_failure_details_redact_credentials(monkeypatch) -> None:
+    from ewp_transcripts.domain.errors import SpeechEngineError
+    from ewp_transcripts.web_jobs import _backend_failure_detail
+
+    secret = "private-runtime-token"
+    monkeypatch.setenv("HF_TOKEN", secret)
+    try:
+        raise RuntimeError(f"missing native library {secret}")
+    except RuntimeError as cause:
+        error = SpeechEngineError("WhisperX ASR execution failed")
+        error.__cause__ = cause
+    detail = _backend_failure_detail(error)["backend_detail"]
+    assert "missing native library" in detail
+    assert secret not in detail
+    assert "[redacted]" in detail

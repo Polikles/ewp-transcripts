@@ -4,7 +4,18 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
-No further changes are recorded after the internal preview below.
+### Fixed
+
+- GUI header hierarchy, larger logo, local EwP light/dark background patterns and service status
+  above the stage navigation. Short Saved work/Settings pages no longer stretch header/context rows.
+- Browser audio selection groups shared-prefix speaker tracks into one reviewed episode, preserving
+  all source hashes through durable staging, workspace recovery and managed-source cleanup protection.
+  Selection now gives visible feedback; staging without an exact plan highlights and focuses Dry-run.
+- Failed queue items show diagnostic codes, backend exception details with credential redaction, and
+  recovery guidance. An explicit **Test local dependencies** action checks media tools, CUDA/GPU,
+  model paths and native speech-library loading in bounded subprocesses without downloading models.
+- WSL output-folder picker enables Windows visual styles and DPI awareness; newer dialog runtimes
+  request automatic shell upgrading where available. The host still owns the native dialog.
 
 ## 0.20.0 — 2026-11-16 (internal GUI preview; untagged)
 

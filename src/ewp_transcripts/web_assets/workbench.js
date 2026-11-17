@@ -141,6 +141,10 @@ function installGuiShell() {
   logo.alt = "EwP";
   logo.className = "gui-logo";
   header.prepend(logo);
+  const brandTitle = document.createElement("div");
+  brandTitle.className = "gui-brand-title";
+  brandTitle.append(header.querySelector("h1"), header.querySelector(".eyebrow"));
+  logo.after(brandTitle);
   const main = document.querySelector("main");
   for (const id of workspaceFieldIds.filter(id => id.startsWith("gui-"))) {
     const input = document.createElement("input"); input.type = "hidden"; input.id = id; main.append(input);
@@ -187,7 +191,7 @@ function installGuiShell() {
   const recordings = document.createElement("div");
   recordings.id = "gui-recordings";
   recordings.setAttribute("aria-label", "Recordings");
-  navigation.append(nav, recordings);
+  navigation.append(document.querySelector("#compatibility"), nav, recordings);
   main.before(navigation);
   const context = document.createElement("div");
   context.id = "gui-active-context";

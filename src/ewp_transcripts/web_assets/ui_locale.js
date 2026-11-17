@@ -16,6 +16,14 @@ const guiPolish = new Map([
   ["Number of speakers", "Liczba mówców"], ["Auto-detect", "Wykryj automatycznie"],
   ["Detect speaker count automatically", "Automatycznie wykryj liczbę mówców"],
   ["Choose audio files…", "Wybierz pliki audio…"], ["Choose output folder…", "Wybierz katalog wyników…"],
+  ["Test local dependencies", "Test lokalnych zależności"],
+  ["Dependency technical details (JSON)", "Szczegóły techniczne zależności (JSON)"],
+  ["Failure technical details (JSON)", "Szczegóły techniczne błędu (JSON)"],
+  ["Selected for inspection", "Wybrano do inspekcji"], ["Select episode", "Wybierz odcinek"],
+  ["Transcription failed. Use Test local dependencies, then retry after fixing failed checks.", "Transkrypcja nie powiodła się. Uruchom test lokalnych zależności, usuń wykryte problemy i spróbuj ponownie."],
+  ["Testing local dependencies… This can take a minute. No models are downloaded.", "Testowanie lokalnych zależności… Może to potrwać minutę. Modele nie są pobierane."],
+  ["Local dependency checks found a problem. Fix failed checks before retrying transcription.", "Test lokalnych zależności wykrył problem. Usuń przyczyny błędów przed ponowną transkrypcją."],
+  ["Local dependency checks passed. This checks library loading, CUDA visibility and local model paths; it does not run transcription.", "Test lokalnych zależności zakończony pomyślnie. Sprawdzono ładowanie bibliotek, dostępność CUDA i ścieżki modeli; transkrypcja nie została uruchomiona."],
   ["Use for inspect / plan", "Wybierz do inspekcji i planu"], ["Forget selection", "Usuń z listy wyboru"],
   ["I reviewed this exact dry-run and want to add it to the queue.", "Sprawdziłem ten konkretny plan i chcę dodać plik do kolejki."],
   ["Audio copied locally. Inspect and dry-run each file, confirm staging, then start the queue. Copies become durable only when staged.", "Audio skopiowano lokalnie. Sprawdź i zaplanuj każdy plik, potwierdź dodanie, potem uruchom kolejkę. Kopie są trwałe dopiero po dodaniu do kolejki."],
@@ -485,6 +493,7 @@ function guiUiText(value) {
       .replace(/^Workspace loaded: (.*)\. Provider credentials and confirmations were not restored\.$/, 'Wczytano obszar pracy: $1. Dane dostępowe i potwierdzenia nie zostały przywrócone.')
       .replace(/^(\d+) selected; batch execution will remain per-item consent gated\.$/, 'Wybrano: $1; zgoda na przetwarzanie pozostaje wymagana dla każdej pozycji.')
       .replace(/^\((\d+) items?\)$/, '(pozycje: $1)')
+      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom plan bez przetwarzania przed dodaniem odcinka do kolejki.')
       .replace(/^Batch selection: (\d+) correction · (\d+) translation$/, "Zaznaczenie zbiorcze: $1 korekta · $2 tłumaczenie")
       .replace(/^Units (\d+)–(\d+) of (\d+)$/, "Jednostki $1–$2 z $3")
       .replace(/^\((\d+) items?\)$/, "($1 pozycji)")
@@ -492,6 +501,7 @@ function guiUiText(value) {
       .replace(/^Workspace loaded: (.*)\. Provider credentials and confirmations were not restored\.$/, 'Wczytano obszar pracy: $1. Dane dostępowe i potwierdzenia nie zostały przywrócone.')
       .replace(/^(\d+) selected; batch execution will remain per-item consent gated\.$/, 'Wybrano: $1; zgoda na przetwarzanie pozostaje wymagana dla każdej pozycji.')
       .replace(/^\((\d+) items?\)$/, '(pozycje: $1)')
+      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom plan bez przetwarzania przed dodaniem odcinka do kolejki.')
       .replace(/^Batch selection: (\d+) correction · (\d+) translation$/, 'Wybór zbiorczy: $1 korekta · $2 tłumaczenie')
       .replace(/^Units (\d+)–(\d+) of (\d+)$/, 'Jednostki $1–$2 z $3')
       .replace(/^Transcript section (\d+)$/, "Sekcja transkrypcji $1")

@@ -84,6 +84,8 @@ class GuiOperation(BaseModel):
     kind: Literal["inspect", "dry-run"]
     status: Literal["completed", "failed"]
     input_path: str
+    group_paths: tuple[str, ...] = ()
+    group_id: str | None = None
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -144,6 +146,7 @@ class GuiWorkflowController:
             )
         try:
             input_path = self.resolve_allowed_path(raw_path)
+            group_options = self.resolve_group_options(document)
             config = load_config()
             config = config.model_copy(
                 update={
@@ -154,7 +157,7 @@ class GuiWorkflowController:
                 }
             )
             if kind == "inspect":
-                result = self.inspect_service(input_path, config=config)
+                result = self.inspect_service(input_path, config=config, **group_options)
             else:
                 raw_output = document.get("output_directory")
                 if not isinstance(raw_output, str) or not raw_output.strip():
@@ -169,12 +172,18 @@ class GuiWorkflowController:
                     if isinstance(raw_output, str) and raw_output.strip()
                     else None
                 )
-                result = self.dry_run_service(input_path, config=config, output_directory=output)
+                result = self.dry_run_service(
+                    input_path, config=config, output_directory=output, **group_options
+                )
             operation = GuiOperation(
                 operation_id=str(uuid4()),
                 kind=kind,
                 status="completed",
                 input_path=str(input_path),
+                group_paths=tuple(
+                    str(path) for path in group_options.get("explicit_group_paths", ())
+                ),
+                group_id=group_options.get("explicit_group_id"),
                 language=language,
                 speaker_count=speaker_count,
                 created_at=datetime.now(UTC),
@@ -221,6 +230,8 @@ class GuiWorkflowController:
         *,
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
+        group_paths: tuple[str, ...] = (),
+        group_id: str | None = None,
     ) -> dict[str, Any] | None:
         """Return the newest exact dry-run produced by this server session."""
 
@@ -231,6 +242,8 @@ class GuiWorkflowController:
                 if operation.kind == "dry-run"
                 and operation.status == "completed"
                 and operation.input_path == str(input_path)
+                and operation.group_paths == group_paths
+                and operation.group_id == group_id
                 and operation.language == language
                 and operation.speaker_count == speaker_count
                 and operation.result is not None
@@ -246,6 +259,8 @@ class GuiWorkflowController:
         *,
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
+        group_paths: tuple[str, ...] = (),
+        group_id: str | None = None,
     ) -> bool:
         """Confirm this server session produced the exact dry-run being authorized."""
 
@@ -255,9 +270,29 @@ class GuiWorkflowController:
                 output_directory,
                 language=language,
                 speaker_count=speaker_count,
+                group_paths=group_paths,
+                group_id=group_id,
             )
             is not None
         )
+
+    def resolve_group_options(self, document: dict[str, Any]) -> dict[str, Any]:
+        raw_paths = document.get("group_paths", [])
+        group_id = document.get("group_id")
+        if not raw_paths and group_id is None:
+            return {}
+        if (
+            not isinstance(raw_paths, list)
+            or not 2 <= len(raw_paths) <= 6
+            or not all(isinstance(path, str) for path in raw_paths)
+            or not isinstance(group_id, str)
+            or not group_id.strip()
+        ):
+            raise ValueError("A grouped episode requires two to six paths and a group ID")
+        paths = tuple(self.resolve_allowed_path(path) for path in raw_paths)
+        if len(set(paths)) != len(paths) or any(not path.is_file() for path in paths):
+            raise ValueError("Group sources must be distinct regular files")
+        return {"explicit_group_paths": paths, "explicit_group_id": group_id}
 
     @staticmethod
     def resolve_transcription_options(

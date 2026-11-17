@@ -119,11 +119,54 @@ function advanceQueueJob(job) {
   });
 }
 function addJobActions(job, action) { if (job.status === "staged") { const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove"; remove.addEventListener("click", async () => { try { await queuePost("/api/v1/transcriptions/remove", {job_id: job.job_id}); jobsSignature = ""; await refreshJobs(); } catch (error) { document.querySelector("#operation-status").textContent = error.message; } }); action.append(remove); return; } if (job.status !== "completed" || !job.result_path) return; const stage = nextWorkflowStage(job); const next = document.createElement("button"); next.type = "button"; next.className = "primary"; next.textContent = nextWorkflowLabel(stage); next.disabled = stage === "finished"; next.addEventListener("click", () => advanceQueueJob(job)); action.append(next); }
+const transcriptionErrors = document.createElement("div");
+transcriptionErrors.id = "transcription-errors";
+transcriptionErrors.hidden = true;
+transcriptionErrors.setAttribute("role", "status");
+document.querySelector("#transcription-jobs").before(transcriptionErrors);
+const dependencyPanel = document.createElement("div");
+dependencyPanel.id = "dependency-panel";
+dependencyPanel.innerHTML = '<button type="button" id="test-dependencies">Test local dependencies</button><p id="dependency-status" role="status"></p><div id="dependency-checks"></div><details><summary>Dependency technical details (JSON)</summary><pre id="dependency-result" tabindex="0"></pre></details>';
+document.querySelector("#workflow").after(dependencyPanel);
+document.querySelector("#test-dependencies").addEventListener("click", async event => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  const status = document.querySelector("#dependency-status");
+  status.textContent = "Testing local dependencies… This can take a minute. No models are downloaded.";
+  try {
+    const result = await queuePost("/api/v1/dependencies/test", {}, {trigger:button});
+    status.textContent = result.ready ? "Local dependency checks passed. This checks library loading, CUDA visibility and local model paths; it does not run transcription." : "Local dependency checks found a problem. Fix failed checks before retrying transcription.";
+    document.querySelector("#dependency-result").textContent = JSON.stringify(result, null, 2);
+    const checks = document.querySelector("#dependency-checks"); checks.replaceChildren();
+    for (const check of result.checks) {
+      const row = document.createElement("p");
+      row.textContent = `${check.status.toUpperCase()} · ${check.code}: ${check.message}`;
+      checks.append(row);
+    }
+  } catch (error) { status.textContent = error.message; }
+  finally { button.disabled = false; }
+});
+function renderTranscriptionErrors(jobs) {
+  transcriptionErrors.replaceChildren();
+  const failures = jobs.filter(job => job.status === "failed");
+  transcriptionErrors.hidden = failures.length === 0;
+  for (const job of failures) {
+    const message = document.createElement("p");
+    message.textContent = `${job.planned_job_id} · ${job.error?.code || "GUI_TRANSCRIPTION_FAILED"}: ${job.error?.message || "Transcription failed."}`;
+    const action = document.createElement("p");
+    action.textContent = job.error?.action || "Transcription failed. Use Test local dependencies, then retry after fixing failed checks.";
+    const details = document.createElement("details");
+    const summary = document.createElement("summary"); summary.textContent = "Failure technical details (JSON)";
+    const json = document.createElement("pre"); json.textContent = JSON.stringify(job.error || {code:"GUI_TRANSCRIPTION_FAILED"}, null, 2);
+    details.append(summary, json); transcriptionErrors.append(message, action, details);
+  }
+}
 async function refreshJobs() {
   const payload = await loadJson("/api/v1/transcriptions");
   const signature = JSON.stringify(payload.jobs);
   if (signature === jobsSignature) return payload;
   jobsSignature = signature;
+  renderTranscriptionErrors(payload.jobs);
   const container = document.querySelector("#transcription-jobs");
   const removableIds = new Set(payload.jobs.filter(job => !["queued", "running"].includes(job.status)).map(job => job.job_id));
   for (const jobId of queueRemovalSelections) if (!removableIds.has(jobId)) queueRemovalSelections.delete(jobId);
@@ -155,10 +198,10 @@ async function refreshJobs() {
     const identity = document.createElement("td");
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");
-    input.textContent = shortName(job.input_path);
+    input.textContent = Object.keys(job.group_sources || {}).map(shortName).join(", ") || shortName(job.input_path);
     input.title = job.input_path;
     const output = document.createElement("td");
-    output.textContent = job.error?.message || shortName(job.result_path || job.planned_result_path);
+    output.textContent = (job.error ? `${job.error.code}: ${job.error.message}` : shortName(job.result_path || job.planned_result_path));
     output.title = job.result_path || job.planned_result_path;
     const action = document.createElement("td");
     addJobActions(job, action);
@@ -171,9 +214,9 @@ async function refreshJobs() {
 }
 async function enableProceedNextOutput() { const button = document.querySelector("#proceed-next-output"); const payload = await refreshJobs(); const completeJobs = payload?.jobs?.filter(job => job.status === "completed") || []; const allTranslated = completeJobs.length > 0 && completeJobs.every(job => ["complete", "skipped"].includes(job.workflow?.translated_export?.state)); button.textContent = allTranslated ? "Queue finished" : "Proceed with next output"; button.title = allTranslated ? "All completed queue outputs have verified translated exports or an explicitly skipped translation. Return to the transcription queue." : "Return to the transcription queue to continue the next output."; button.disabled = false; }
 document.querySelector("#proceed-next-output").addEventListener("click", () => guiScrollTo(document.querySelector("#workspace-heading"), {behavior: "smooth", block: "start"}));
-document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; formElement.elements.confirmed.checked = false; if (payload.input_path) formElement.elements.path.value = payload.input_path; result.textContent = ""; summary.replaceChildren(); await refreshJobs(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = false; } });
+document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (activeGuiAudio && request.path === activeGuiAudio.paths[0] && activeGuiAudio.paths.length > 1) { request.group_paths = activeGuiAudio.paths; request.group_id = activeGuiAudio.name; } if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; formElement.elements.confirmed.checked = false; if (payload.input_path) formElement.elements.path.value = payload.input_path; if (payload.group_sources && activeGuiAudio) { for (const file of activeGuiAudio.files) { const durable = Object.keys(payload.group_sources).find(path => shortName(path) === file.name); if (durable) file.path = durable; } activeGuiAudio.paths = activeGuiAudio.files.map(file => file.path); renderGuiAudioChoices(); } result.textContent = ""; summary.replaceChildren(); await refreshJobs(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); if (payload.error.code === "GUI_DRY_RUN_REQUIRED") highlightDryRun(); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); if (kind === "dry-run") document.querySelector('#workflow button[value="dry-run"]').classList.remove("next-required"); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = false; } });
 document.querySelector("#start-queue").addEventListener("click", async event => { event.currentTarget.disabled = true; try { const payload = await queuePost("/api/v1/transcriptions/start", {}); document.querySelector("#operation-status").textContent = payload.queued ? `Started ${payload.queued} queued job(s)` : "No staged jobs to start"; await refreshJobs(); } catch (error) { document.querySelector("#operation-status").textContent = error.message; } finally { event.currentTarget.disabled = false; } });
-document.querySelector("#workflow").addEventListener("reset", () => { document.querySelector("#operation-status").textContent = ""; document.querySelector("#operation-summary").replaceChildren(); document.querySelector("#operation-result").textContent = ""; document.querySelector("#raw-result").open = false; });
+document.querySelector("#workflow").addEventListener("reset", () => { activeGuiAudio = null; selectedGuiAudio.length = 0; renderGuiAudioChoices(); document.querySelector("#operation-status").textContent = ""; document.querySelector("#operation-summary").replaceChildren(); document.querySelector("#operation-result").textContent = ""; document.querySelector("#raw-result").open = false; });
 let correctionCandidate = null;
 const correctionForm = document.querySelector("#correction-workflow");
 const skipCorrection = document.createElement("button");
@@ -518,23 +561,60 @@ nativeMediaButton.textContent = "Choose audio files…";
 nativeMediaButton.title = "Choose an existing user-space audio file with the browser's native picker.";
 nativeMediaButton.addEventListener("click", () => nativeMediaInput.click());
 const selectedGuiAudio = [];
+let activeGuiAudio = null;
 const audioChoices = document.createElement("ul");
 audioChoices.className = "gui-audio-list";
 audioChoices.id = "gui-audio-choices";
+function highlightDryRun() {
+  const button = document.querySelector('#workflow button[value="dry-run"]');
+  button.classList.add("next-required");
+  button.focus();
+  button.scrollIntoView({block:"nearest"});
+}
+function guiAudioEpisodes() {
+  const groups = new Map();
+  for (const file of selectedGuiAudio) {
+    const stem = file.name.replace(/\.[^.]+$/, "");
+    const index = stem.lastIndexOf("-");
+    const base = index > 0 && index < stem.length - 1 ? stem.slice(0, index) : stem;
+    if (!groups.has(base)) groups.set(base, []);
+    groups.get(base).push(file);
+  }
+  return [...groups].flatMap(([base, files]) => {
+    const names = files.map(file => file.name.replace(/\.[^.]+$/, "").normalize("NFC").toLowerCase());
+    if (files.length > 1 && new Set(names).size === files.length) {
+      return [{name:base, paths:files.map(file=>file.path), files}];
+    }
+    return files.map(file => ({name:file.name, paths:[file.path], files:[file]}));
+  });
+}
+function selectGuiAudio(episode, announce = true) {
+  activeGuiAudio = episode;
+  workflowInput.value = episode.paths[0];
+  workflowInput.dispatchEvent(new Event("input", {bubbles:true}));
+  document.querySelector("#workflow").elements.confirmed.checked = false;
+  document.querySelector("#operation-summary").replaceChildren();
+  document.querySelector("#operation-result").textContent = "";
+  if (announce) document.querySelector("#operation-status").textContent = `Selected: ${episode.files.map(file=>file.name).join(", ")}. Inspect, then run dry-run to review this episode before adding it to the queue.`;
+  renderGuiAudioChoices();
+}
 function renderGuiAudioChoices() {
   audioChoices.replaceChildren();
-  for (const selected of selectedGuiAudio) {
+  for (const episode of guiAudioEpisodes()) {
     const row = document.createElement("li");
-    const name = document.createElement("span"); name.textContent = selected.name;
+    const name = document.createElement("span");
+    name.textContent = episode.files.map(file => file.name).join(" + ");
     const use = document.createElement("button"); use.type = "button";
-    use.textContent = "Use for inspect / plan";
-    use.addEventListener("click", () => {
-      workflowInput.value = selected.path;
-      workflowInput.dispatchEvent(new Event("input", {bubbles:true}));
-      document.querySelector("#workflow").elements.confirmed.checked = false;
-    });
+    const active = activeGuiAudio?.paths.join("|") === episode.paths.join("|") && workflowInput.value === episode.paths[0];
+    use.textContent = active ? "Selected for inspection" : "Select episode";
+    use.setAttribute("aria-pressed", String(active));
+    use.addEventListener("click", () => { selectGuiAudio(episode); document.querySelector('#workflow button[value="inspect"]').focus(); });
     const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Forget selection";
-    remove.addEventListener("click", () => { selectedGuiAudio.splice(selectedGuiAudio.indexOf(selected), 1); renderGuiAudioChoices(); });
+    remove.addEventListener("click", () => {
+      for (const file of episode.files) selectedGuiAudio.splice(selectedGuiAudio.indexOf(file), 1);
+      if (active) { activeGuiAudio = null; workflowInput.value = ""; }
+      renderGuiAudioChoices();
+    });
     row.append(name, use, remove); audioChoices.append(row);
   }
 }
@@ -553,14 +633,14 @@ nativeMediaInput.addEventListener("change", async () => {
       selectedGuiAudio.push({name:file.name, path:payload.path});
     } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
-  renderGuiAudioChoices();
-  if (selectedGuiAudio.length) {
-    document.querySelector("#workflow").elements.confirmed.checked = false;
-    workflowInput.value = selectedGuiAudio[0].path;
-    workflowInput.dispatchEvent(new Event("input", {bubbles:true}));
-  }
-  status.textContent = errors.length ? errors.join("; ") : "Audio copied locally. Inspect and dry-run each file, confirm staging, then start the queue. Copies become durable only when staged.";
+  const episodes = guiAudioEpisodes();
+  if (episodes.length) selectGuiAudio(episodes[0]);
+  if (errors.length) status.textContent = errors.join("; ");
   nativeMediaButton.disabled = false;
+});
+workflowInput.addEventListener("input", () => {
+  if (activeGuiAudio && workflowInput.value !== activeGuiAudio.paths[0]) activeGuiAudio = null;
+  renderGuiAudioChoices();
 });
 const nativeMediaFeedback = document.createElement("span");
 nativeMediaFeedback.className = "feedback-anchor";

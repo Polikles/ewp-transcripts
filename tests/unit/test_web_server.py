@@ -512,6 +512,7 @@ def test_staged_browser_audio_remains_after_selection_cache_closes(tmp_path: Pat
         gui_workflows=SimpleNamespace(
             resolve_allowed_path=base_workflows.resolve_allowed_path,
             resolve_transcription_options=base_workflows.resolve_transcription_options,
+            resolve_group_options=base_workflows.resolve_group_options,
             completed_plan=Mock(return_value=plan),
         ),
         gui_transcriptions=transcriptions,
@@ -1017,6 +1018,7 @@ def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None
     workflow = SimpleNamespace(
         resolve_allowed_path=lambda path, directory=False: Path(path),
         resolve_transcription_options=lambda document: ("pl", "auto"),
+        resolve_group_options=GuiWorkflowController().resolve_group_options,
         completed_plan=lambda *args, **kwargs: {
             "jobs": [
                 {
@@ -1062,3 +1064,32 @@ def test_preview_resources_are_fixed_local_routes() -> None:
         assert (
             dispatch_get(config, server_port=8765, host="localhost:8765", target=path).status == 404
         )
+
+
+@pytest.mark.parametrize("token", ["expected", "wrong"])
+def test_dependency_test_is_explicit_and_requires_csrf(monkeypatch, token) -> None:
+    body = b"{}"
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(server_port=8765, gui_csrf_token="expected")
+    handler.path = "/api/v1/dependencies/test"
+    handler.headers = Message()
+    for name, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": token,
+    }.items():
+        handler.headers[name] = value
+    handler.rfile = BytesIO(body)
+    handler._write_response = Mock()
+    doctor = Mock(return_value=SimpleNamespace(model_dump=lambda mode: {"ready": False}))
+    monkeypatch.setattr("ewp_transcripts.web_server.doctor", doctor)
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    if token == "expected":
+        assert response.status == 200
+        assert json.loads(response.body) == {"ready": False}
+        assert doctor.call_args.kwargs["test_speech_runtime"] is True
+    else:
+        assert response.status == 403
+        doctor.assert_not_called()

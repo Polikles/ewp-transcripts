@@ -174,6 +174,7 @@ def _exact_references(
         label = f"current queue: {queue_job.planned_job_id} ({queue_job.status})"
         for queue_path in (
             queue_job.input_path,
+            *queue_job.group_sources,
             queue_job.planned_result_path,
             queue_job.result_path,
         ):
@@ -187,11 +188,14 @@ def _exact_references(
         for workspace_field_value in workspace.fields.values():
             add(workspace_field_value, label)
         for staged_job in workspace.staged_jobs:
+            for source_path in staged_job.get("group_sources", {}):
+                add(source_path, label)
             for key in ("input_path", "planned_result_path", "output_directory"):
                 add(staged_job.get(key), label)
         for terminal_job in workspace.terminal_jobs:
             for terminal_path in (
                 terminal_job.input_path,
+                *terminal_job.group_sources,
                 terminal_job.planned_result_path,
                 terminal_job.result_path,
             ):

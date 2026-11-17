@@ -25,7 +25,7 @@ def _run_command(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
         check=False,
         capture_output=True,
         text=True,
-        timeout=10,
+        timeout=60,
     )
 
 
@@ -180,6 +180,43 @@ def _cuda_check(runner: CommandRunner) -> DiagnosticCheck:
     )
 
 
+def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> DiagnosticCheck:
+    script = (
+        "import os; os.environ['HF_HUB_OFFLINE']='1'; "
+        "from torchcodec.decoders import AudioDecoder; "
+        "from ewp_transcripts.engines.whisperx import _load_whisperx; _load_whisperx(); "
+        "from ewp_transcripts.engines.pyannote import _load_pyannote; _load_pyannote(); "
+        "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))"
+    )
+    try:
+        completed = runner([sys.executable, "-c", script])
+    except (OSError, subprocess.SubprocessError) as error:
+        return DiagnosticCheck(
+            code="speech_runtime",
+            status=DiagnosticStatus.FAIL,
+            message=(
+                "Speech dependency test could not finish; repair the locked environment and retry."
+            ),
+            context={"error_type": type(error).__name__},
+        )
+    detail = completed.stderr[-6000:] if completed.returncode else completed.stdout[-1000:]
+    for key, value in environ.items():
+        if value and any(word in key.upper() for word in ("TOKEN", "KEY", "SECRET", "PASSWORD")):
+            detail = detail.replace(value, "[redacted]")
+    return DiagnosticCheck(
+        code="speech_runtime",
+        status=DiagnosticStatus.PASS if completed.returncode == 0 else DiagnosticStatus.FAIL,
+        message=(
+            "Speech libraries, TorchCodec/FFmpeg and CTranslate2 CUDA load successfully."
+            if completed.returncode == 0
+            else "Speech dependencies failed to load. Check the details for missing FFmpeg shared "
+            "libraries or incompatible Torch/TorchCodec/CUDA packages; follow the installation "
+            "guide and restore the locked environment before retrying."
+        ),
+        context={"exit_code": completed.returncode, "detail": detail},
+    )
+
+
 def _model_check(
     code: str,
     role: str,
@@ -237,6 +274,7 @@ def run_doctor(
     python_version: tuple[int, int, int] = sys.version_info[:3],
     kernel_release: str = platform.release(),
     os_release: Mapping[str, str] | None = None,
+    test_speech_runtime: bool = False,
 ) -> DoctorResult:
     """Run deterministic lightweight checks without importing ML backends."""
 
@@ -250,6 +288,7 @@ def run_doctor(
         _command_check("ffprobe", ["-version"], finder, runner),
         _gpu_check(finder, runner),
         _cuda_check(runner),
+        *((_speech_runtime_check(runner, environ),) if test_speech_runtime else ()),
         _model_check(
             "asr_model",
             "ASR",

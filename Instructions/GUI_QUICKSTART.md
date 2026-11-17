@@ -80,8 +80,16 @@ A stale tab should be reloaded after updating; required resources are served loc
 ## Use the preview
 
 - Choose interface **English / Polski** and **System / Light / Dark** independently of audio language.
-- **Transcribe:** choose a shared output root, select several audio files, then inspect, dry-run and
-  explicitly stage each. **Start queue** begins processing; picking files alone does not run models.
+- **Transcribe:** run **Test local dependencies** before your first real transcription. Inspect the
+  failed checks and dependency technical details if readiness fails. The test loads libraries in
+  child processes, checks model paths and CUDA visibility, and never downloads models or transcribes.
+- Choose a shared output root and select audio. Matching speaker tracks such as
+  `s0e00-Szymon.wav` and `s0e00-Damian.wav` appear as one episode. Select the episode, inspect,
+  dry-run and explicitly stage it. Check that dry-run lists both filenames under the one job ID.
+  Separate episode prefixes remain separate jobs. Tracks must share a timeline and sample rate;
+  duration differences over 100 ms warn and over 500 ms block staging. Select all tracks for an
+  episode before planning it. **Select episode** updates the input and gives visible feedback.
+  Trying **Add to queue** before planning highlights **Dry-run**. Explicitly stage each episode. **Start queue** begins processing; picking files alone does not run models.
   Direct WSL/server paths remain supported. The browser copies selected audio locally; staging makes
   the selected source durable under the chosen root.
 - Existing canonical `*_results.json` / versioned results can be imported from stage queues to skip ASR.
@@ -108,3 +116,28 @@ Server-memory provider keys must be entered again after restart. Confirmation bo
 
 If startup fails, retain the diagnostic code and a short relevant terminal excerpt without secrets or
 transcript text. Follow [the test plan](GUI_PREVIEW_TEST_PLAN.md) for one consolidated acceptance session.
+
+## Diagnose a failed transcription
+
+A failed queue item displays its diagnostic code, message and **Failure technical details (JSON)**.
+Run **Test local dependencies** and expand **Dependency technical details (JSON)** for failed native
+imports. Preserve the displayed code and technical details when reporting a failure; avoid posting
+private transcript content. The dependency test does not certify full model loading or GPU execution.
+
+A working `ffmpeg -version` does not prove that TorchCodec can load its required shared libraries.
+The locked TorchCodec 0.7 build supports FFmpeg 4–7; an Ubuntu 26.04 installation may instead have
+FFmpeg 8. Missing `libavutil.so.56` through `.59` is a native-library compatibility problem, and
+re-running `uv sync --locked` alone does not supply those OS libraries. Check `ffmpeg -version` and
+the failed import details before changing the environment. Keep the pinned Python package versions;
+repair the compatible FFmpeg shared-library installation using the installation/model setup guides.
+Never rename or symlink incompatible versioned FFmpeg libraries to make an import pass.
+See [the pinned TorchCodec installation notes](https://github.com/meta-pytorch/torchcodec/tree/v0.7.0#installing-torchcodec).
+The warning alone does not identify the terminal transcription exception: the queue details are
+needed as well. The development VM reproduces the native import warning but loads the bundled
+WhisperX VAD on CPU successfully.
+
+The output-folder chooser is a host desktop dialog, launched through PowerShell under WSL. Browser
+CSS cannot style it. DPI awareness/visual styles are enabled, and automatic shell upgrading is
+requested when supported by the host .NET runtime; Windows PowerShell's older runtime may retain
+its legacy folder dialog. The direct output-path field remains available. Check appearance and
+text sharpness on the actual Windows display; the Linux VM cannot qualify that behavior.

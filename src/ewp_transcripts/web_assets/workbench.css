@@ -3,11 +3,21 @@
 :root { font-family: Montserrat, system-ui, sans-serif; }
 :root[data-theme=light] { color-scheme: light; --gui-bg: #eef3f7; --gui-surface: #fff; --gui-ink: #1c3543; --gui-muted: #435f6c; --gui-line: #bbccd7; --gui-accent: #355880; --gui-soft: #e4eef7; }
 :root[data-theme=dark] { color-scheme: dark; --gui-bg: #10232d; --gui-surface: #182f3b; --gui-ink: #f5f7fa; --gui-muted: #bfd0dd; --gui-line: #526c7b; --gui-accent: #adc6e6; --gui-soft: #223f50; }
-.gui-workbench { background: var(--gui-bg); color: var(--gui-ink); display: grid; grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr); gap: 1rem; padding: 1rem; }
+.gui-workbench { background: var(--gui-bg); color: var(--gui-ink); display: grid; grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr); gap: 1rem; padding: 1rem; align-content: start; align-items: start; box-sizing: border-box; }
 .gui-workbench header { grid-column: 1 / -1; width: auto; margin: 0; padding: .75rem 1rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--gui-line); }
-.gui-workbench header h1 { font-size: 1.8rem; line-height: 1.2; margin: 0; }
+.gui-workbench header h1 { font-size: 2.1rem; line-height: 1.2; margin: 0; }
 .gui-workbench header > p { margin: 0; font-size: .8rem; }
-.gui-logo { width: 3.5rem; height: 3.5rem; }
+.gui-logo { width: 5rem; height: 5rem; object-fit: contain; flex-shrink: 0; }
+.gui-brand-title { display: grid; gap: .3rem; }
+.gui-brand-title .eyebrow { margin: 0; font-size: .7rem; }
+.gui-workbench #compatibility { margin: 0 0 .75rem; font-size: .75rem; }
+.gui-workbench { background-image: linear-gradient(var(--gui-pattern-veil), var(--gui-pattern-veil)), var(--gui-pattern); background-size: auto, 24rem; }
+:root[data-theme=light] { --gui-pattern: url(/assets/brand/web-pattern-light.svg); --gui-pattern-veil: #eef3f7bb; }
+:root[data-theme=dark] { --gui-pattern: url(/assets/brand/web-pattern-dark.svg); --gui-pattern-veil: #10232dbb; }
+.gui-workbench .next-required { outline: .2rem solid var(--gui-accent); outline-offset: .25rem; }
+.gui-audio-list button[aria-pressed=true] { outline: .15rem solid var(--gui-accent); }
+.gui-workbench #gui-active-context { align-self: start; }
+.gui-workbench #transcription-errors { border: 2px solid #c4302b; padding: .75rem; margin-block: .75rem; }
 .gui-preferences { display: flex; flex-wrap: wrap; gap: 1rem; margin-inline-start: auto; }
 .gui-preferences label { margin: 0; font-size: .8rem; }
 .gui-preferences select { padding: .35rem; }

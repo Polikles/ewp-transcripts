@@ -1537,10 +1537,12 @@ def application_version() -> str:
     return __version__
 
 
-def doctor(*, config: ApplicationConfig | None = None) -> DoctorResult:
-    """Return lightweight, sanitized environment diagnostics."""
+def doctor(
+    *, config: ApplicationConfig | None = None, test_speech_runtime: bool = False
+) -> DoctorResult:
+    """Return sanitized diagnostics; native speech imports require an explicit test."""
 
-    return run_doctor(config=config)
+    return run_doctor(config=config, test_speech_runtime=test_speech_runtime)
 
 
 def discover(

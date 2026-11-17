@@ -219,3 +219,18 @@ New user-visible warnings and expected errors must add a code here in the same c
 implementation and tests. Tests verify that expected exception classes have valid stable codes
 and that codes emitted directly by the CLI are present in this catalogue. Removing or renaming
 a code is a compatibility change and requires an explicit migration note.
+
+### GUI local dependency test
+
+**Test local dependencies** calls the application doctor service with an explicit native-library
+probe. It runs speech imports in a bounded child process, with Hugging Face offline, and reports
+`speech_runtime` as pass/fail alongside the existing tool, model-path and GPU/CUDA checks. A failed
+native import retains bounded diagnostic detail with environment credentials redacted. This check
+can detect missing TorchCodec-compatible FFmpeg shared libraries even when `ffmpeg -version` works.
+It downloads no models and does not prove full GPU inference or model checkpoint loading.
+
+A failed GUI queue item exposes its stable code, message and separate failure technical details.
+For `SPEECH_ENGINE_ERROR`, those details include the underlying backend exception type and a bounded,
+credential-redacted cause message. Unknown unexpected exceptions keep the sanitized
+`GUI_TRANSCRIPTION_FAILED` message. Run the dependency test, fix failed checks, and use the retained
+error details/state when a failure persists despite readiness checks.

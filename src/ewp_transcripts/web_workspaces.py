@@ -131,7 +131,7 @@ class GuiWorkspaceDocument(BaseModel):
     saved_at: datetime
     current_step: str
     fields: dict[str, str | bool | int]
-    staged_jobs: tuple[dict[str, str | int], ...] = ()
+    staged_jobs: tuple[dict[str, Any], ...] = ()
     terminal_jobs: tuple[GuiTranscriptionJob, ...] = ()
 
 
@@ -324,7 +324,7 @@ class GuiWorkspaceController:
         staged_jobs: builtin_list[dict[str, Any]],
         *,
         omit_unavailable: bool = False,
-    ) -> tuple[dict[str, str | int], ...]:
+    ) -> tuple[dict[str, Any], ...]:
         if not isinstance(staged_jobs, builtin_list) or len(staged_jobs) > 50:
             raise ValueError("Workspace staged jobs are invalid")
         required = {
@@ -336,9 +336,12 @@ class GuiWorkspaceController:
             "language",
             "speaker_count",
         }
-        clean: builtin_list[dict[str, str | int]] = []
+        clean: builtin_list[dict[str, Any]] = []
         for item in staged_jobs:
-            if not isinstance(item, dict) or set(item) != required:
+            if not isinstance(item, dict) or set(item) not in (
+                required,
+                required | {"group_sources"},
+            ):
                 raise ValueError("Workspace staged job is invalid")
             speaker_count = item["speaker_count"]
             if (
@@ -351,12 +354,32 @@ class GuiWorkspaceController:
                 raise ValueError("Workspace staged job is invalid")
             try:
                 self._resolve_path(item["input_path"])
+                group_sources = item.get("group_sources", {})
+                if not isinstance(group_sources, dict) or (
+                    group_sources and not 2 <= len(group_sources) <= 6
+                ):
+                    raise ValueError("Workspace grouped sources are invalid")
+                for path, digest in group_sources.items():
+                    if (
+                        not isinstance(path, str)
+                        or not isinstance(digest, str)
+                        or len(digest) != 64
+                    ):
+                        raise ValueError("Workspace grouped source is invalid")
+                    self._resolve_path(path)
+                if group_sources and group_sources.get(item["input_path"]) != item["source_sha256"]:
+                    raise ValueError("Workspace group primary source is invalid")
             except FileNotFoundError:
                 if omit_unavailable:
                     continue
                 raise
             self._resolve_path(item["output_directory"], directory=True)
-            clean.append({key: item[key] for key in required})
+            clean.append(
+                {
+                    **{key: item[key] for key in required},
+                    **({"group_sources": group_sources} if group_sources else {}),
+                }
+            )
         return tuple(clean)
 
     def _validate_terminal_jobs(
@@ -417,7 +440,7 @@ class GuiWorkspaceController:
     def _paths_available(
         self,
         fields: dict[str, str | bool | int],
-        staged_jobs: tuple[dict[str, str | int], ...],
+        staged_jobs: tuple[dict[str, Any], ...],
         terminal_jobs: tuple[GuiTranscriptionJob, ...],
     ) -> bool:
         try:

@@ -1,6 +1,25 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-16**.
+Last updated: **2026-11-17**.
+
+## Owner feedback follow-up (unreleased)
+
+The first owner workflow attempt stopped at failed transcription. Local fixes add compact
+content-sized shell rows, larger identity/title, smaller subtitle, local light/dark EwP patterns,
+service status above navigation, clear episode selection and missing-plan focus, exact grouped
+speaker-track staging/recovery with every source hash, cleanup protection for all group copies,
+and visible queue failure details plus an explicit native dependency test. Windows dialog DPI and
+visual styles are requested; the host runtime still determines legacy versus upgraded appearance.
+
+VM verification: `make check` passes 781 tests with Ruff/format/mypy; `make test-integration`
+passes 5 tests (4 deselected), including real synthetic two-track inspect/plan/stage, durable
+recovery, hash-change rejection, cleanup protection and timeline/sample-rate guards. Changed JS
+parses in V8; selection grouping cases run in V8. Browser layout verification could not be rerun:
+Chromium/Playwright are absent and the sandbox cannot resolve PyPI to install them. No GPU/device,
+pinned model snapshots or external corpus are available for a GPU/E2E run. No real transcription
+success is claimed. The new native check reproduces missing FFmpeg 4–7 shared libraries under this
+VM's FFmpeg 8; bundled WhisperX VAD loads on CPU despite that warning, so the owner's terminal
+failure still requires its actual backend exception. No model pins, public release or tag change.
 
 ## Integrated GUI preview 0.20.0
 

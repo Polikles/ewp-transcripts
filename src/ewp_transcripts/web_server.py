@@ -19,11 +19,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from io import BufferedIOBase
 from pathlib import Path
-from typing import ClassVar, cast
+from typing import Any, ClassVar, cast
 from urllib.parse import unquote, urlsplit
 from uuid import uuid4
 
 from ewp_transcripts import __version__
+from ewp_transcripts.application import doctor
 from ewp_transcripts.config import load_config
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
@@ -66,6 +67,8 @@ _ASSET_TYPES.update(
         for name, mime in {
             "tokens.css": "text/css; charset=utf-8",
             "logo.svg": "image/svg+xml",
+            "web-pattern-light.svg": "image/svg+xml",
+            "web-pattern-dark.svg": "image/svg+xml",
             "montserrat.woff2": "font/woff2",
             "mono.woff2": "font/woff2",
             "NOTICE.txt": "text/plain; charset=utf-8",
@@ -134,8 +137,15 @@ def _select_local_directory() -> str | None:
     attempts: list[tuple[list[str], str | None]] = []
     if _is_wsl_environment() and shutil.which("powershell.exe"):
         script = (
-            "try { Add-Type -AssemblyName System.Windows.Forms; "
+            "try { Add-Type -TypeDefinition 'using System.Runtime.InteropServices; "
+            'public class EwpDpi { [DllImport("user32.dll")] '
+            "public static extern bool SetProcessDPIAware(); }'; "
+            "[void][EwpDpi]::SetProcessDPIAware(); "
+            "Add-Type -AssemblyName System.Windows.Forms; "
+            "[System.Windows.Forms.Application]::EnableVisualStyles(); "
             "$dialog = New-Object System.Windows.Forms.FolderBrowserDialog; "
+            "if ($dialog.PSObject.Properties.Name -contains 'AutoUpgradeEnabled') "
+            "{ $dialog.AutoUpgradeEnabled = $true }; "
             "$dialog.Description = 'Choose EWP output folder'; "
             "if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) "
             "{ [Console]::Out.Write($dialog.SelectedPath) } else { exit 3 } "
@@ -873,6 +883,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "source_sha256": job.source_sha256,
                                 "language": job.language.value,
                                 "speaker_count": job.speaker_count,
+                                **(
+                                    {"group_sources": job.group_sources}
+                                    if job.group_sources
+                                    else {}
+                                ),
                             }
                             for job in durable_staged
                         ],
@@ -1506,6 +1521,24 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
             return
+        if path == "/api/v1/dependencies/test":
+            supplied = self.headers.get("X-EWP-CSRF", "")
+            if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The dependency test lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            diagnostics = doctor(config=load_config(), test_speech_runtime=True)
+            self._write_response(_json_response(HTTPStatus.OK, diagnostics.model_dump(mode="json")))
+            return
         if path == "/api/v1/inspect":
             operation = self.server.gui_workflows.run("inspect", document)
         elif path == "/api/v1/dry-run":
@@ -1825,6 +1858,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 if not input_path.is_file():
                     raise ValueError("The first transcription slice accepts one file")
+                group_options = self.server.gui_workflows.resolve_group_options(document)
+                group_paths = group_options.get("explicit_group_paths", ())
                 language, speaker_count = self.server.gui_workflows.resolve_transcription_options(
                     document
                 )
@@ -1862,6 +1897,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     output_path,
                     language=language,
                     speaker_count=speaker_count,
+                    group_paths=tuple(str(path) for path in group_paths),
+                    group_id=group_options.get("explicit_group_id"),
                 )
                 if plan is None:
                     self._write_response(
@@ -1958,7 +1995,35 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
-                if self.server.gui_selections.root in input_path.parents:
+                group_sources: dict[str, str] = {}
+                if group_paths:
+                    if group_options["explicit_group_id"] != planned_job_id:
+                        raise ValueError("The group identity differs from the reviewed plan")
+                    assert isinstance(sources, list)
+                    reviewed = {
+                        item["fingerprint"]["path"]: item["fingerprint"]["sha256"]
+                        for item in sources
+                    }
+                    if len(sources) != len(group_paths):
+                        raise ValueError("The group differs from the reviewed plan")
+                    for source_path in group_paths:
+                        digest = sha256_file(source_path)
+                        if digest != reviewed.get(str(source_path)):
+                            raise ValueError("A grouped source changed after dry-run")
+                        if self.server.gui_transcriptions.contains_active_input(source_path):
+                            raise ValueError("A grouped source is already staged or running")
+                        if self.server.gui_selections.root in source_path.parents:
+                            source_path, preserved = preserve_gui_selected_source(
+                                source_path, output_directory=output_path, category="media"
+                            )
+                            if preserved != digest:
+                                raise ValueError("A grouped source changed while preserving it")
+                        if self.server.gui_transcriptions.contains_active_input(source_path):
+                            raise ValueError("A grouped source is already staged or running")
+                        group_sources[str(source_path)] = digest
+                    input_path = Path(next(iter(group_sources)))
+                    source_sha256 = group_sources[str(input_path)]
+                if not group_paths and self.server.gui_selections.root in input_path.parents:
                     input_path, preserved_sha256 = preserve_gui_selected_source(
                         input_path, output_directory=output_path, category="media"
                     )
@@ -1973,6 +2038,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     planned_job_id=planned_job_id,
                     planned_result_path=planned_result_path,
                     source_sha256=source_sha256,
+                    group_sources=group_sources,
                     language=language,
                     speaker_count=speaker_count,
                 )
@@ -1997,7 +2063,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         status = HTTPStatus.OK if operation.status == "completed" else HTTPStatus.BAD_REQUEST
         self._write_response(_json_response(status, operation.model_dump(mode="json")))
 
-    def _restore_workspace_staged_jobs(self, staged_jobs: tuple[dict[str, str | int], ...]) -> int:
+    def _restore_workspace_staged_jobs(self, staged_jobs: tuple[dict[str, Any], ...]) -> int:
         """Rebuild only hash-validated staged jobs after a GUI restart."""
 
         if not staged_jobs:
@@ -2007,9 +2073,19 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             for job in self.server.gui_transcriptions.jobs()
             if job.status in {"staged", "queued", "running"}
         ]
-        expected = {(item["planned_job_id"], item["source_sha256"]) for item in staged_jobs}
+        expected = {
+            (
+                item["planned_job_id"],
+                item["source_sha256"],
+                tuple(sorted(item.get("group_sources", {}).items())),
+            )
+            for item in staged_jobs
+        }
         if active:
-            actual = {(job.planned_job_id, job.source_sha256) for job in active}
+            actual = {
+                (job.planned_job_id, job.source_sha256, tuple(sorted(job.group_sources.items())))
+                for job in active
+            }
             if actual == expected:
                 return 0
             raise ValueError(
@@ -2020,6 +2096,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             output_path = self.server.gui_workflows.resolve_allowed_path(
                 str(item["output_directory"]), directory=True
             )
+            group_sources = cast(dict[str, str], item.get("group_sources", {}))
+            for path, digest in group_sources.items():
+                resolved = self.server.gui_workflows.resolve_allowed_path(path)
+                if sha256_file(resolved) != digest:
+                    raise ValueError("A grouped source changed since this workspace was saved")
             if sha256_file(input_path) != item["source_sha256"]:
                 raise ValueError("A staged source changed since this workspace was saved")
             language, speaker_count = self.server.gui_workflows.resolve_transcription_options(
@@ -2032,6 +2113,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     "output_directory": str(output_path),
                     "language": language.value,
                     "speaker_count": speaker_count,
+                    **(
+                        {"group_paths": list(group_sources), "group_id": item["planned_job_id"]}
+                        if group_sources
+                        else {}
+                    ),
                 },
             )
             jobs = operation.result.get("jobs") if operation.result else None
@@ -2052,6 +2138,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 planned_job_id=str(item["planned_job_id"]),
                 planned_result_path=str(item["planned_result_path"]),
                 source_sha256=str(item["source_sha256"]),
+                group_sources=group_sources,
                 language=language,
                 speaker_count=speaker_count,
             )
