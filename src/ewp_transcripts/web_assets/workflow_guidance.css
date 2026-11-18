@@ -19,7 +19,7 @@
 #gui-task-context dt, .gui-compact-context dt { font-size: .72rem; color: var(--gui-muted); margin-top: .5rem; }
 #gui-task-context dd, .gui-compact-context dd { margin: .2rem 0 .5rem; font-size: .8rem; }
 .gui-guide-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1rem; margin: 0; font-size: .85rem; }
-#gui-stage-instructions ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1.7rem; margin: .45rem 0 0; padding-left: 1.25rem; font-size: .82rem; line-height: 1.45; }
+#gui-stage-instructions ol { display: grid; grid-template-columns: minmax(0, 1fr); gap: .3rem; margin: .45rem 0 0; padding-left: 1.25rem; font-size: .82rem; line-height: 1.45; }
 .gui-workflow-step, [id^="gui-"][id*="-step-"], .gui-workbench main :is(button, input, select, textarea, h2, h3), #review-editor, #translation-review-editor { scroll-margin-top: calc(var(--gui-context-height, 7rem) + var(--gui-nav-height, 5rem) + 1rem); }
 .gui-workbench .gui-workflow-step { margin: 1rem 0 .45rem; font-size: .95rem; }
 .gui-workbench #skip-correction, .gui-workbench #skip-translation { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-weight: 500; padding: .4rem .65rem; font-size: .85rem; }
@@ -74,3 +74,55 @@
 @media (max-width: 68rem) { #gui-stage-nav img { display: none; } }
 @media (max-width: 48rem) { #gui-stage-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 30rem) { #gui-stage-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Quiet diagnostics and support text; the workflow actions retain emphasis. */
+.gui-workbench { padding-top: .25rem; margin-top: 0; }
+.gui-workbench header { padding-block: .25rem; }
+:root[data-theme=light] { --gui-pattern-veil: #eef3f750; }
+.gui-workbench .field-hint, .gui-workbench details:has(> pre) > summary,
+.gui-workbench details:has(> .technical-details) > summary,
+#workflow-legend, .stage-queue > .workflow-progress { color: var(--gui-muted); font-size: .75rem; font-weight: 400; }
+.review-summary-table th { width: 8rem; min-width: 7rem; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+.review-control-groups { align-items: stretch; }
+.review-control-group { display: flex; flex-direction: column; }
+.review-history-line { margin-top: auto; padding-top: .35rem; }
+.review-history-line > :has(#clear-review), .review-history-line > #clear-review { margin-inline-start: auto; }
+.gui-workbench #clear-review, .gui-workbench #clear-translation-review { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; padding: .4rem .6rem; }
+.translation-clear-line { display: flex; justify-content: flex-end; margin-block: .35rem; }
+#transcription-jobs th:nth-child(1) { width: 14%; }
+#transcription-jobs th:nth-child(2) { width: 29%; }
+#transcription-jobs th:nth-child(3) { width: 20%; }
+#transcription-jobs th:nth-child(4) { width: 22%; }
+#transcription-jobs th:nth-child(5) { width: 15%; }
+@media (min-width: 100rem) {
+  .review-control-group { flex-direction: row; align-items: center; gap: .4rem; flex-wrap: wrap; }
+  .review-control-group h3 { flex-basis: 100%; }
+  .review-control-group .review-control-line { margin-top: 0; padding-top: 0; }
+  .review-control-group .review-history-line { flex: 1; }
+}
+
+.library-item { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--gui-line); padding: .4rem 0; }
+.library-item > span { flex: 1 1 12rem; overflow-wrap: anywhere; }
+.library-item button, .library-entry button { padding: .35rem .5rem; font-size: .8rem; }
+.library-entry { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 7rem auto; gap: .4rem; align-items: center; margin-top: .45rem; }
+.library-entry input, .library-entry select { min-width: 0; margin: 0; }
+#library-json { width: 100%; box-sizing: border-box; }
+.library-comparison { table-layout: fixed; overflow-wrap: anywhere; }
+#library-direction { display: flex; flex-wrap: wrap; gap: .5rem; }
+#library-direction label { flex: 1; }
+#gui-translation-directions button[aria-pressed=true] { background: var(--gui-accent); color: #fff; box-shadow: 0 0 0 2px var(--gui-ink); }
+#gui-direction-warning { padding: .6rem; border-inline-start: 3px solid #a6761c; }
+.gui-optional-dictionary { margin-block: .75rem; }
+@media (max-width: 40rem) { .library-entry { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+#library-advanced > summary { color: var(--gui-muted); font-size: .8rem; }
+.stage-queue + .feedback-anchor { min-height: 0; padding-bottom: 0; display: inline-flex; flex-direction: column; }
+.stage-queue + .feedback-anchor .inline-working { position: static; }
+.review-history-line > button { padding: .4rem .5rem; font-size: .8rem; min-height: 2.25rem; }
+#gui-translation-directions button[aria-pressed=true] { background: #355880; }
+@media (min-width: 100rem) { .review-control-groups { grid-template-columns: minmax(0, .8fr) minmax(0, 1.7fr); } }
+
+.gui-workbench #clear-review { margin: 0; }
+
+#gui-profile-swatches { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+.gui-profile-swatch { display: inline-block; width: 1.1rem; height: 1.1rem; border: 1px solid var(--gui-muted); border-radius: 50%; }

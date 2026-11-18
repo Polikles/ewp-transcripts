@@ -173,8 +173,8 @@
           "pl": "Wybierz nagranie źródłowe"
         },
         "text": {
-          "en": "Choose a recording and its verified source revision when available. Check the source identity.",
-          "pl": "Wybierz nagranie i zatwierdzoną rewizję źródła, jeśli jest dostępna. Sprawdź tożsamość źródła."
+          "en": "Choose a recording and its verified source revision. Skip LLM-assisted translation below the queue to translate manually.",
+          "pl": "Wybierz nagranie i zweryfikowaną rewizję. Pomiń tłumaczenie z LLM pod kolejką, aby tłumaczyć ręcznie."
         }
       },
       {
@@ -183,28 +183,28 @@
           "pl": "Wybierz kierunek tłumaczenia"
         },
         "text": {
-          "en": "Choose PL → EN or EN → PL, independently of the interface language.",
-          "pl": "Wybierz PL → EN lub EN → PL niezależnie od języka interfejsu."
+          "en": "The source language selects the default direction. Accept a direction change explicitly and choose a matching source recording.",
+          "pl": "Język źródła ustawia kierunek. Potwierdź zmianę kierunku i wybierz pasujące nagranie źródłowe."
         }
       },
       {
         "title": {
-          "en": "Open manual translation or generate candidate",
-          "pl": "Otwórz tłumaczenie ręczne lub wygeneruj propozycję"
+          "en": "Generate candidate",
+          "pl": "Wygeneruj kandydata"
         },
         "text": {
-          "en": "Use Open manual translation without a provider. For assistance, choose a provider/model, check readiness, consent and generate a candidate.",
-          "pl": "Użyj tłumaczenia ręcznego bez dostawcy. Dla pomocy wybierz dostawcę i model, sprawdź gotowość, wyraź zgodę i wygeneruj propozycję."
+          "en": "For API assistance, choose provider/model, check readiness, consent and generate a non-final candidate. Source details and the optional dictionary can be expanded.",
+          "pl": "Aby użyć API, wybierz dostawcę i model, sprawdź połączenie, wyraź zgodę i wygeneruj kandydata. Szczegóły źródła i słownik są rozwijane."
         }
       },
       {
         "title": {
           "en": "Continue to translation review",
-          "pl": "Przejdź do weryfikacji tłumaczenia"
+          "pl": "Przejdź do przeglądu tłumaczenia"
         },
         "text": {
-          "en": "Review meaning in Translation review & export. Skip translation when only source subtitles are needed.",
-          "pl": "Sprawdź znaczenie w Weryfikacji i eksporcie tłumaczenia. Pomiń tłumaczenie, jeśli potrzebne są tylko napisy źródłowe."
+          "en": "Review meaning and speakers in Translation review & export before applying and exporting.",
+          "pl": "Sprawdź znaczenie i mówców w przeglądzie tłumaczenia przed zastosowaniem i eksportem."
         }
       }
     ]
@@ -279,42 +279,42 @@
     "steps": [
       {
         "title": {
-          "en": "Choose project inputs",
-          "pl": "Wybierz źródła projektu"
+          "en": "Choose dictionary library",
+          "pl": "Wybierz bibliotekę słowników"
         },
         "text": {
-          "en": "Choose canonical and exact verified revision directories, project ID and output root.",
-          "pl": "Wybierz katalogi wyników i ich dokładnych zatwierdzonych rewizji, ID projektu oraz katalog wyników."
+          "en": "Refresh a catalog, add a dictionary file, create a blank dictionary or load the editable example. Removed entries can be shown and restored.",
+          "pl": "Odśwież katalog, dodaj plik, utwórz pusty słownik lub wczytaj przykład. Usunięte z listy pozycje można przywrócić."
         }
       },
       {
         "title": {
-          "en": "Generate proposal",
-          "pl": "Wygeneruj propozycję"
+          "en": "View and compare versions",
+          "pl": "Przeglądaj i porównuj wersje"
         },
         "text": {
-          "en": "Generate proposal compares source and reviewed text without calling an LLM.",
-          "pl": "Generuj propozycję porównuje źródło i sprawdzony tekst bez wywoływania LLM."
+          "en": "Choose View / edit for an edition. Select a second edition and Compare versions to see changed terms, scope and conventions.",
+          "pl": "Otwórz wersję do przeglądu i edycji. Wybierz drugą wersję i porównaj terminy, zakres i konwencje."
         }
       },
       {
         "title": {
-          "en": "Review every decision",
-          "pl": "Sprawdź każdą decyzję"
+          "en": "Edit a new version",
+          "pl": "Edytuj nową wersję"
         },
         "text": {
-          "en": "Accept, reject or edit candidates using their context; Save decisions.",
-          "pl": "Akceptuj, odrzucaj lub edytuj propozycje w kontekście i zapisz decyzje."
+          "en": "Edit project, scope and entries; keep approved/rejected decisions. Full JSON also exposes manual conventions. Use a new dictionary ID for edits.",
+          "pl": "Edytuj projekt, zakres i wpisy, zachowując decyzje. Pełny JSON udostępnia konwencje ręczne. Przy edycji użyj nowego ID."
         }
       },
       {
         "title": {
-          "en": "Publish dictionary",
-          "pl": "Opublikuj słownik"
+          "en": "Save new dictionary version",
+          "pl": "Zapisz nową wersję słownika"
         },
         "text": {
-          "en": "Choose a new dictionary ID, confirm review and Publish project dictionary.",
-          "pl": "Wybierz nowe ID słownika, potwierdź weryfikację i opublikuj słownik projektu."
+          "en": "Save a new immutable edition. Remove from list hides an edition without deleting files referenced by earlier runs. Corpus proposals remain available below.",
+          "pl": "Zapisz nową niezmienną wersję. Usunięcie z listy ukrywa wpis, zachowując pliki wcześniejszych zadań. Propozycje z nagrań są dostępne poniżej."
         }
       }
     ]

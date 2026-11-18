@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tomllib
 from collections.abc import Mapping
 from copy import deepcopy
@@ -179,6 +180,10 @@ class QualityConfig(StrictConfigModel):
     high_silence_min_ratio: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
+def _default_color_profiles() -> dict[str, tuple[str, ...]]:
+    return {"EwP brand": ("#F5F7FA", "#00AEEF", "#F2C55B", "#BF734D", "#8CFFB3", "#64D8D0")}
+
+
 class SubtitlesConfig(StrictConfigModel):
     preset: Literal["youtube"] = "youtube"
     max_lines: int = Field(default=2, ge=1)
@@ -200,6 +205,29 @@ class SubtitlesConfig(StrictConfigModel):
         "#E040FB",
         "#00E5FF",
     )
+
+    ytt_color_profiles: dict[str, tuple[str, ...]] = Field(default_factory=_default_color_profiles)
+
+    @field_validator("ytt_color_profiles")
+    @classmethod
+    def validate_color_profiles(
+        cls, profiles: dict[str, tuple[str, ...]]
+    ) -> dict[str, tuple[str, ...]]:
+        for name, colors in profiles.items():
+            if (
+                not name.strip()
+                or name != name.strip()
+                or len(name) > 80
+                or name in {"Configured production", "configured", "brand"}
+            ):
+                raise ValueError("Color profile names must be unique printable custom names")
+            if any(ord(char) < 32 for char in name):
+                raise ValueError("Color profile names must be printable")
+            if not 1 <= len(colors) <= 32 or not all(
+                re.fullmatch(r"#[0-9a-fA-F]{6}", color) for color in colors
+            ):
+                raise ValueError("Each color profile needs 1–32 #RRGGBB colors")
+        return profiles
 
 
 class OutputsConfig(StrictConfigModel):

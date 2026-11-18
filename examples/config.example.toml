@@ -79,6 +79,10 @@ min_words_per_cue = 4
 speaker_labels = "on-change"   # on-change | always | never
 ytt_speaker_palette = ["#FEFEFE", "#00AEEF", "#FFD700", "#00C853", "#E040FB", "#00E5FF"]
 
+# Additional named profiles appear in the GUI. EwP brand is supplied by default.
+# [subtitles.ytt_color_profiles]
+# "My podcast" = ["#F5F7FA", "#00AEEF", "#F2C55B"]
+
 [outputs]
 generate_txt = true
 generate_srt = false

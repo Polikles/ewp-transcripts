@@ -33,9 +33,6 @@ function arrangeReviewControls() {
   const saveLine = document.createElement("div");
   saveLine.className = "review-control-line";
   saveLine.append(save, restore);
-  const clearLine = document.createElement("div");
-  clearLine.className = "review-control-line review-clear-line";
-  clearLine.append(clear);
   const historyLine = document.createElement("div");
   historyLine.className = "review-control-line";
   const undo = document.createElement("button");
@@ -48,8 +45,9 @@ function arrangeReviewControls() {
   redo.id = "redo-review";
   redo.textContent = "Redo";
   redo.title = "Redo a current-editor change. This does not change saved files.";
-  historyLine.append(undo, redo);
-  editing.append(saveLine, historyLine, clearLine);
+  historyLine.classList.add("review-history-line");
+  historyLine.append(undo, redo, clear);
+  editing.append(saveLine, historyLine);
   layout.append(preparation, editing);
   document.querySelector('#review-workflow input[name="verified"]').closest("label").before(layout);
   originalActions.remove();

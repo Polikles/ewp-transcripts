@@ -504,6 +504,227 @@ guiPolish.set('API key is available to browsers connected to this active GUI ser
 const guiNodeSources = new WeakMap();
 const guiAttributeSources = new WeakMap();
 let guiTranslationObserver;
+for (const [en, pl] of [
+  [
+    "Remove completed tasks from the queue",
+    "Usuń ukończone zadania z kolejki"
+  ],
+  [
+    "Added to queue",
+    "Dodano do kolejki"
+  ],
+  [
+    "Custom profile name",
+    "Nazwa własnego profilu"
+  ],
+  [
+    "Preview",
+    "Podgląd"
+  ],
+  [
+    "Apply",
+    "Zastosuj"
+  ],
+  [
+    "Save",
+    "Zapisz"
+  ],
+  [
+    "Preview a profile or edit speaker colors, then Apply for this recording. Save keeps a named profile for other recordings.",
+    "Wyświetl profil lub edytuj kolory mówców, a następnie zastosuj je do nagrania. Zapisz profil, aby używać go w innych nagraniach."
+  ],
+  [
+    "Preview only. Apply to use these colors for this recording's next export.",
+    "Tylko podgląd. Zastosuj kolory, aby użyć ich przy kolejnym eksporcie tego nagrania."
+  ],
+  [
+    "Colors applied to this recording's next export. Existing exports stay unchanged.",
+    "Kolory zastosowano do kolejnego eksportu tego nagrania. Dotychczasowe eksporty pozostają bez zmian."
+  ],
+  [
+    "Custom profile saved. Apply to use it for this recording's next export.",
+    "Własny profil zapisany. Zastosuj go do kolejnego eksportu tego nagrania."
+  ],
+  [
+    "Accept direction change",
+    "Potwierdź zmianę kierunku"
+  ],
+  [
+    "Changing direction requires a matching source-language recording. Existing translations stay unchanged. Accept this change to continue.",
+    "Zmiana kierunku wymaga nagrania w pasującym języku źródłowym. Dotychczasowe tłumaczenia pozostają bez zmian. Potwierdź zmianę, aby kontynuować."
+  ],
+  [
+    "This direction needs a recording in the other source language. Choose a matching recording before generating.",
+    "Ten kierunek wymaga nagrania w drugim języku źródłowym. Wybierz pasujące nagranie przed generowaniem."
+  ],
+  [
+    "Source and target details",
+    "Szczegóły źródła i języka docelowego"
+  ],
+  [
+    "Preview the saved draft, then confirm that you verified meaning and speaker attribution before applying an immutable translation.",
+    "Wyświetl podgląd zapisanego szkicu, a następnie potwierdź sprawdzenie znaczenia i przypisania mówców przed zastosowaniem niezmiennego tłumaczenia."
+  ],
+  [
+    "Apply the verified translation first. Audit checks its source lineage before generating the selected subtitle formats.",
+    "Najpierw zastosuj zweryfikowane tłumaczenie. Audyt sprawdza zgodność ze źródłem przed wygenerowaniem wybranych formatów napisów."
+  ],
+  [
+    "Build a proposal from reviewed recordings (optional)",
+    "Utwórz propozycję ze zweryfikowanych nagrań (opcjonalnie)"
+  ],
+  [
+    "New dictionary",
+    "Nowy słownik"
+  ],
+  [
+    "Add dictionary file…",
+    "Dodaj plik słownika…"
+  ],
+  [
+    "Show removed dictionaries",
+    "Pokaż słowniki usunięte z listy"
+  ],
+  [
+    "Dictionary",
+    "Słownik"
+  ],
+  [
+    "Compare with",
+    "Porównaj z"
+  ],
+  [
+    "Choose a dictionary",
+    "Wybierz słownik"
+  ],
+  [
+    "No comparison",
+    "Bez porównania"
+  ],
+  [
+    "View / edit",
+    "Przeglądaj / edytuj"
+  ],
+  [
+    "Compare versions",
+    "Porównaj wersje"
+  ],
+  [
+    "Dictionary kind",
+    "Rodzaj słownika"
+  ],
+  [
+    "Polish correction",
+    "Korekta polska"
+  ],
+  [
+    "Translation",
+    "Tłumaczenie"
+  ],
+  [
+    "Recording scope",
+    "Zakres nagrań"
+  ],
+  [
+    "Source language",
+    "Język źródłowy"
+  ],
+  [
+    "Target language",
+    "Język docelowy"
+  ],
+  [
+    "Add entry",
+    "Dodaj wpis"
+  ],
+  [
+    "Remove entry",
+    "Usuń wpis"
+  ],
+  [
+    "Use example",
+    "Wczytaj przykład"
+  ],
+  [
+    "Source term",
+    "Termin źródłowy"
+  ],
+  [
+    "Preferred term",
+    "Preferowany termin"
+  ],
+  [
+    "Entry decision",
+    "Decyzja dla wpisu"
+  ],
+  [
+    "Approved",
+    "Zaakceptowano"
+  ],
+  [
+    "Rejected",
+    "Odrzucono"
+  ],
+  [
+    "Full dictionary document (JSON)",
+    "Pełny dokument słownika (JSON)"
+  ],
+  [
+    "Load JSON into editor",
+    "Wczytaj JSON do edytora"
+  ],
+  [
+    "Use a new ID when editing an existing dictionary. Previous files remain available to earlier runs. Remove hides an entry from this library; it does not delete its file.",
+    "Przy edycji użyj nowego ID. Pliki wcześniejszych wersji pozostają dostępne dla wcześniejszych zadań. Usunięcie z listy ukrywa wpis, zachowując jego plik."
+  ],
+  [
+    "Choose a dictionary or create a new one.",
+    "Wybierz słownik lub utwórz nowy."
+  ],
+  [
+    "Restore to list",
+    "Przywróć na listę"
+  ],
+  [
+    "Term / field",
+    "Termin / pole"
+  ],
+  [
+    "Dictionary list updated. Published files are unchanged.",
+    "Lista słowników zaktualizowana. Opublikowane pliki pozostają bez zmian."
+  ],
+  [
+    "Dictionary loaded. Save with a new ID to create an edited version.",
+    "Słownik wczytany. Zapisz z nowym ID, aby utworzyć zmienioną wersję."
+  ],
+  [
+    "New dictionary. Enter project, version ID, scope and at least one entry.",
+    "Nowy słownik. Podaj projekt, ID wersji, zakres i co najmniej jeden wpis."
+  ],
+  [
+    "Example loaded. Replace the example project and terms before saving.",
+    "Przykład wczytany. Przed zapisem zastąp przykładowy projekt i terminy."
+  ],
+  [
+    "JSON loaded into editor. Review before saving a new version.",
+    "JSON wczytany do edytora. Sprawdź go przed zapisem nowej wersji."
+  ],
+  [
+    "Dictionary file loaded. Review its entries and Save new dictionary version to add it to this catalog.",
+    "Plik słownika wczytany. Sprawdź wpisy i zapisz nową wersję, aby dodać ją do katalogu."
+  ],
+  [
+    "New dictionary version saved. Previous versions and past runs are unchanged.",
+    "Nowa wersja słownika zapisana. Wcześniejsze wersje i zadania pozostają bez zmian."
+  ]
+]) guiPolish.set(en, pl);
+guiPolish.set("Saving new dictionary version…", "Zapisywanie nowej wersji słownika…");
+guiPolish.set("Manage project dictionaries, compare editions, edit terms and save new versions. Dictionaries are optional; previous versions remain available.", "Zarządzaj słownikami projektu, porównuj wersje, edytuj terminy i zapisuj nowe wersje. Słowniki są opcjonalne, a wcześniejsze wersje pozostają dostępne.");
+guiPolish.set("Use optional API assistance or skip it to translate manually. Every candidate requires semantic review before export.", "Skorzystaj z opcjonalnej pomocy API lub pomiń ją i tłumacz ręcznie. Każdy kandydat wymaga weryfikacji znaczenia przed eksportem.");
+guiPolish.set("Current direction: PL → EN.", "Aktualny kierunek: PL → EN.");
+guiPolish.set("Current direction: EN → PL.", "Aktualny kierunek: EN → PL.");
+guiPolish.set("Preset colors", "Kolory profilu");
+guiPolish.set("Saving custom profile…", "Zapisywanie własnego profilu…");
 function guiUiText(value) {
   if (guiLocale !== "pl") return value;
   const trimmed = value.trim();
@@ -526,6 +747,9 @@ function guiUiText(value) {
       .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom plan bez przetwarzania przed dodaniem odcinka do kolejki.')
       .replace(/^Batch selection: (\d+) correction · (\d+) translation$/, 'Wybór zbiorczy: $1 korekta · $2 tłumaczenie')
       .replace(/^Units (\d+)–(\d+) of (\d+)$/, 'Jednostki $1–$2 z $3')
+      .replace(/^Inspected (\d+) \/ (\d+) episodes\. ?$/, "Sprawdzono $1 z $2 odcinków.")
+      .replace(/^(\d+) dictionaries in this view\.$/, "Słowniki w tym widoku: $1.")
+      .replace(/^(\d+) differences\. Neither dictionary was changed\.$/, "Różnice: $1. Żaden słownik nie został zmieniony.")
       .replace(/^Transcript section (\d+)$/, "Sekcja transkrypcji $1")
       .replace(/^Translation unit (\d+)$/, "Jednostka tłumaczenia $1")
       .replace(/^Section (\d+) of (\d+)$/, "Sekcja $1 z $2")
@@ -546,7 +770,7 @@ function translateGui() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentElement.closest("script, style, textarea, pre, .translation-source, .gui-path, .gui-context-speaker, .review-summary-table td, .stage-queue-item h4, .stage-queue-item p, .dictionary-candidate p, .dictionary-candidate details, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
+    if (node.parentElement.closest("script, style, textarea, pre, #library-items span, #library-comparison td, #library-comparison th, #library-select option, #library-compare option, #gui-export-palette option, .translation-source, .gui-path, .gui-context-speaker, .review-summary-table td, .stage-queue-item h4, .stage-queue-item p, .dictionary-candidate p, .dictionary-candidate details, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
     const previous = guiNodeSources.get(node);
     const source = previous && previous.last === node.nodeValue ? previous.source : node.nodeValue;
     const translated = guiUiText(source);

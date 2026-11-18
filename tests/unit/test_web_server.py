@@ -1123,3 +1123,42 @@ def test_gui_doctor_requires_a_completed_dependency_test(monkeypatch, tested) ->
         assert response.status == 409
         assert json.loads(response.body)["error"]["code"] == "GUI_DEPENDENCY_TEST_REQUIRED"
         doctor.assert_not_called()
+
+
+@pytest.mark.parametrize("token", ["expected", "wrong"])
+@pytest.mark.parametrize("route", ["profiles", "profile-save", "view", "visibility", "edition"])
+def test_library_routes_require_active_session_before_access(route: str, token: str) -> None:
+    """Even profile reads and library metadata remain inside the local session boundary."""
+    request = {
+        "name": "My profile",
+        "colors": ["#123456"],
+        "path": "dictionary.json",
+        "sha256": "0" * 64,
+        "visible": False,
+        "document": {},
+        "directory": "dictionaries",
+    }
+    body = json.dumps(request).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    service = Mock()
+    for method in ("profiles", "save_profile", "view", "visibility", "edition"):
+        getattr(service, method).return_value = {"ok": True}
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_library=service
+    )
+    handler.path = f"/api/v1/dictionaries/{route}"
+    handler.headers = Message()
+    for name, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": token,
+    }.items():
+        handler.headers[name] = value
+    handler.rfile = BytesIO(body)
+    handler._write_response = Mock()
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    assert response.status == (200 if token == "expected" else 403)
+    if token == "wrong":
+        assert not service.mock_calls

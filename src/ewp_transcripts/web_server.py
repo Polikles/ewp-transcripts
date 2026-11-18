@@ -30,6 +30,7 @@ from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
@@ -365,6 +366,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("translation_provider_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("ui_locale.js").read_bytes()
         body += b"\n" + assets.joinpath("workbench.js").read_bytes()
+        body += b"\n" + assets.joinpath("dictionary_library.js").read_bytes()
         body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
@@ -404,8 +406,13 @@ class LocalGuiServer(ThreadingHTTPServer):
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
+        self.gui_library = GuiLibrary(
+            state_directory=default_workspace_directory(),
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+            subtitles=application_config.subtitles,
+        )
         self.gui_dictionaries = GuiDictionaryController(
-            resolve_path=self.gui_workflows.resolve_allowed_path
+            resolve_path=self.gui_workflows.resolve_allowed_path, library=self.gui_library
         )
         self.gui_corrections = GuiCorrectionController(
             config=application_config,
@@ -1464,7 +1471,38 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             try:
                 if path.endswith("/catalog"):
                     payload = self.server.gui_dictionaries.catalog(
-                        str(document.get("catalog_directory", ""))
+                        str(document.get("catalog_directory", "")),
+                        include_hidden=document.get("include_hidden") is True,
+                    )
+                elif path.endswith("/view"):
+                    payload = self.server.gui_library.view(str(document.get("path", "")))
+                elif path.endswith("/visibility"):
+                    if not isinstance(document.get("visible"), bool):
+                        raise ValueError("Dictionary visibility must be true or false")
+                    payload = self.server.gui_library.visibility(
+                        path=str(document.get("path", "")),
+                        digest=str(document.get("sha256", "")),
+                        visible=document["visible"],
+                    )
+                elif path.endswith("/edition"):
+                    if not isinstance(document.get("document"), dict):
+                        raise ValueError("Dictionary document must be a JSON object")
+                    payload = self.server.gui_library.edition(
+                        document=document["document"],
+                        directory=str(document.get("directory", "")),
+                        previous_path=str(document.get("previous_path", "")),
+                        previous_sha256=str(document.get("previous_sha256", "")),
+                    )
+                elif path.endswith("/profiles"):
+                    payload = self.server.gui_library.profiles()
+                elif path.endswith("/profile-save"):
+                    colors = document.get("colors")
+                    if not isinstance(colors, list) or not all(
+                        isinstance(color, str) for color in colors
+                    ):
+                        raise ValueError("Profile colors must be an array of strings")
+                    payload = self.server.gui_library.save_profile(
+                        name=str(document.get("name", "")), colors=colors
                     )
                 elif path.endswith("/propose"):
                     minimum = document.get("minimum_occurrences", 2)
@@ -1640,6 +1678,25 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     return
                 self._write_response(_json_response(HTTPStatus.OK, {"removed": job_id}))
+                return
+            if path == "/api/v1/transcriptions/remove-completed":
+                if document.get("confirmed") is not True:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_QUEUE_REMOVE_INVALID",
+                                    "message": "Confirm completed task removal.",
+                                }
+                            },
+                        )
+                    )
+                    return
+                completed_ids = self.server.gui_transcriptions.remove_completed()
+                self._write_response(
+                    _json_response(HTTPStatus.OK, {"removed": list(completed_ids)})
+                )
                 return
             if path == "/api/v1/transcriptions/remove-batch":
                 job_ids = document.get("job_ids")

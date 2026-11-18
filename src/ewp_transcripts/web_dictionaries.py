@@ -16,6 +16,7 @@ from ewp_transcripts.correction_dictionary import (
 )
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.translation_dictionary import load_project_translation_dictionary
 
 
@@ -29,8 +30,9 @@ PathResolver = Callable[..., Path]
 
 
 class GuiDictionaryController:
-    def __init__(self, *, resolve_path: PathResolver) -> None:
+    def __init__(self, *, resolve_path: PathResolver, library: GuiLibrary | None = None) -> None:
         self._resolve_path = resolve_path
+        self._library = library
 
     def propose(
         self,
@@ -132,7 +134,7 @@ class GuiDictionaryController:
             "dictionary": dictionary.model_dump(mode="json"),
         }
 
-    def catalog(self, directory: str) -> dict[str, Any]:
+    def catalog(self, directory: str, *, include_hidden: bool = False) -> dict[str, Any]:
         root = self._resolve_path(directory, directory=True)
         paths = sorted(root.rglob("*.json"))
         if len(paths) > 1000:
@@ -176,6 +178,12 @@ class GuiDictionaryController:
                 )
             except (ApplicationError, OSError, UnicodeError, ValueError):
                 continue
+        for item in items:
+            item["hidden"] = bool(
+                self._library and self._library.hidden(item["path"], item["sha256"])
+            )
+        if not include_hidden:
+            items = [item for item in items if not item["hidden"]]
         return {"catalog_directory": str(root), "count": len(items), "items": items}
 
     @staticmethod

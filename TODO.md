@@ -5,6 +5,34 @@ Updated: 2026-11-18.
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
+## Active: GUI workflow polish and library management
+
+Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
+
+- [x] Reduce top header gap; make Quick steps vertical; strengthen light-theme artwork.
+- [x] Advance Inspect across selected episodes; prevent inspecting/planning already staged episodes.
+- [x] Remove queue selection checkboxes/bulk removal; retain per-row removal and add completed-only cleanup.
+- [x] Route recording-rail selection to that recording's current workflow step.
+- [x] Mute technical details, hints and legends; place every legend below its queue.
+- [x] Collapse optional correction dictionaries by default.
+- [x] Add dictionary viewing, version comparison, new/example creation, immutable editing and library removal.
+- [x] Replace duplicate palette choices with configured profiles and Preview / Apply / Save; support custom profiles; name preset EwP brand; remove browser confirmation.
+- [x] Equalize source review panels; align Undo/Redo/Clear at half-screen and all controls on wide screens.
+- [x] Preserve owner-confirmed cursor splitting and selected-text separation.
+- [x] Translation: move Skip below queue/legend; remove Open manual translation; rename step 3 Generate candidate.
+- [x] Translation: highlight inferred direction and show an explicit accept action when changing source direction.
+- [x] Collapse auto-filled translation inputs and optional dictionary; prevent status-label word splitting.
+- [x] Translation review: secondary right-aligned Clear below Preview; add Apply and Audit/export hover explanations.
+- [x] Update per-stage instructions, prototype comparison, changelog, roadmap and checkpoints.
+- [ ] Run required checks and model-free browser workflows; deliver verified changes for WSL retest.
+- [ ] Owner retests these changes on WSL; API/provider and YouTube qualification stay pending.
+
+## Deferred: artist reference package
+
+- [ ] After GUI fixes/tweaks are complete, create a small frontend-only GUI review package the artwork artist can open to review the interface and design replacement icons.
+
+## Completed delivery history
+
 ## GUI launch diagnosis completed; WSL launch confirmed
 
 Checkpoint: [2026-11-18 launch diagnosis](docs/checkpoints/2026-11-18-gui-launch.md).
@@ -20,7 +48,7 @@ Checkpoint: [2026-11-18 launch diagnosis](docs/checkpoints/2026-11-18-gui-launch
 - [x] Owner confirms GUI launch from the correct transcription checkout.
 - [x] Capture actual WSL queue/backend error: missing FFmpeg libraries disable TorchCodec.
 
-## Active: dependency repair and GUI feedback
+## Completed: dependency repair and GUI feedback
 
 Checkpoint: [dependency repair](docs/checkpoints/2026-11-18-gui-dependency-repair.md).
 
@@ -32,7 +60,7 @@ Checkpoint: [dependency repair](docs/checkpoints/2026-11-18-gui-dependency-repai
 - [x] Record remaining GPU/WSL qualification and exact owner retest commands.
 - [x] Owner runs repair and retries the short staged episode on the RTX 3090 (local workflow through subtitle export passed).
 
-## Active: guided workflow, review fixes and prototype comparison
+## Previous delivery: guided workflow, review fixes and prototype comparison
 
 Checkpoint: [workflow usability](docs/checkpoints/2026-11-18-guided-workflow.md).
 
@@ -60,7 +88,7 @@ Owner evidence: local-only transcription through subtitle export succeeded on WS
 API-assisted correction/translation is not qualified by that report. Reported ONNX DRM and
 WhisperX VAD terminal lines did not prevent completion. Do not reopen the resolved ASR blocker.
 
-## Following work
+## Other following work
 
 - Resume the consolidated GUI preview acceptance session after startup is understood.
 - Record WSL/browser, real GPU/provider and actual zoom results against the existing

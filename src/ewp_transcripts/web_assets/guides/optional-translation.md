@@ -2,10 +2,10 @@
 
 Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
 
-1. Choose source recording: Choose a recording and its verified source revision when available. Check the source identity.
-2. Choose translation direction: Choose PL → EN or EN → PL, independently of the interface language.
-3. Open manual translation or generate candidate: Use Open manual translation without a provider. For assistance, choose a provider/model, check readiness, consent and generate a candidate.
-4. Continue to translation review: Review meaning in Translation review & export. Skip translation when only source subtitles are needed.
+1. Choose source recording: Choose a recording and its verified source revision. Skip LLM-assisted translation below the queue to translate manually.
+2. Choose translation direction: The source language selects the default direction. Accept a direction change explicitly and choose a matching source recording.
+3. Generate candidate: For API assistance, choose provider/model, check readiness, consent and generate a non-final candidate. Source details and the optional dictionary can be expanded.
+4. Continue to translation review: Review meaning and speakers in Translation review & export before applying and exporting.
 
 ## Detailed instructions
 
@@ -18,3 +18,5 @@ Choose a recording for single-item work or explicitly check recordings for batch
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+The highlighted direction shows the current target choice. A change requires the inline Accept direction change action. If it conflicts with the immutable source language, choose a matching source recording before generation; the application never relabels the source audio. Queue-filled source/target details and the optional translation dictionary start collapsed.

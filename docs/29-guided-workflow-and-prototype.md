@@ -92,3 +92,38 @@ These are model-free VM checks. The owner-qualified local ASR/export result belo
 preceding build; this revised UI needs a WSL retest. No new real provider, Windows zoom or
 YouTube result is claimed. Only content-free evidence belongs in Git; disposable synthetic
 outputs, screenshots, browser tooling and archives are removed. No public release or tag.
+
+
+## Owner feedback follow-up — 2026-11-18
+
+The [workflow polish checkpoint](checkpoints/2026-11-18-gui-workflow-polish.md) records the
+follow-up against the same read-only handoff and prototype. The left rail now opens each
+recording's next unfinished stage, Quick steps are vertical, the header is tighter and light
+artwork is clearer. Legends follow queues; technical details and optional fields are quieter.
+Queue selection for assistance remains distinct from per-row removal and finished-only cleanup.
+
+The dictionary workspace now matches the reference's editing intent using real validated,
+immutable editions rather than browser-only demo entries: view, compare, edit, create/import,
+remove from list and restore. A corpus-derived proposal remains an optional separate panel.
+The color panel lists actual configured presets plus saved custom profiles; full swatches make
+EwP brand distinguishable even when the first two speaker colors are similar. Preview is
+explicitly separate from Apply/export and Save of a reusable custom profile.
+
+Source controls use equal-height panels and aligned history/Clear actions. Translation has
+visible direction selection, an inline accepted-change warning and a source-language mismatch
+explanation; it never relabels canonical audio to satisfy a requested direction. Skip LLM
+assistance opens manual translation, while provider generation remains scoped and consented.
+Queue-filled source fields and dictionaries collapse. No native timing, revision, provider or
+approval contract was replaced by prototype behavior. Cursor splitting and selection isolation
+remain owner-confirmed and covered by the browser checks.
+
+The artist's frontend-only review package is deferred until the GUI fixes/tweaks are accepted.
+No private prototype, reference text corpus or example runtime data is distributed in this task.
+
+
+Follow-up verification: 830 tests plus five integration cases pass; 144 browser matrix cases
+and focused library/profile/queue/direction checks pass. Fresh-server saved-work recovery and
+final screenshot comparison with the private prototype pass. At 960px Undo/Redo/Clear align;
+at 1920px all seven source controls share a single row. The wheel contains all 48 byte-matched
+frontend/guide assets and all nine help routes work without ML imports. This follow-up remains
+an internal preview requiring owner visual qualification on WSL.

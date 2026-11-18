@@ -121,8 +121,10 @@ function updateGuiRecordings() {
     button.addEventListener("click", () => {
       guiActiveJobId = job.job_id;
       guiActiveResult = job.result_path || "";
-      if (job.result_path && ["correction", "review", "translation", "semantic-review"].includes(guiActiveStage)) {
-        void openStageQueueItem(job, guiActiveStage);
+      if (job.result_path) {
+        const next = nextWorkflowStage(job);
+        const stage = next === "original-export" ? "review" : ["translated-export", "finished"].includes(next) ? "semantic-review" : next;
+        void openStageQueueItem(job, stage);
       } else { showGuiStage("workspace"); }
       updateGuiContext();
     });
@@ -283,17 +285,19 @@ function guiSavedSpeakerColors() {
   try { saved = JSON.parse(localStorage.getItem(guiPaletteKey()) || "{}"); } catch (_) { /* defaults */ }
   return saved && !Array.isArray(saved) && typeof saved === "object" ? saved : {};
 }
+let guiPreviewColors = null;
+let guiPreviewResult = "";
+let guiColorProfiles = [];
+function guiAppliedSpeakerColors() {
+  const colors = {...(reviewDocument?.configured_speaker_colors || {}), ...guiSavedSpeakerColors()};
+  return Object.fromEntries((reviewDocument?.speakers || []).map(id => {
+    const n = Number(id.match(/\d+$/)?.[0] || 1) - 1;
+    return [id, /^#[0-9a-f]{6}$/i.test(colors[id] || "") ? colors[id] : guiBrandPalette[n % guiBrandPalette.length]];
+  }));
+}
 function guiSpeakerColors() {
-  const saved = guiSavedSpeakerColors();
-  const brand = document.querySelector("#gui-export-palette")?.value === "brand";
-  const colors = brand ? {...saved} : {...(reviewDocument?.configured_speaker_colors || {})};
-  for (const id of reviewDocument?.speakers || []) {
-    if (!/^#[0-9a-f]{6}$/i.test(colors[id] || "")) {
-      const number = Number(id.match(/\d+$/)?.[0] || 1);
-      colors[id] = guiBrandPalette[(number - 1) % guiBrandPalette.length];
-    }
-  }
-  return Object.fromEntries((reviewDocument?.speakers || []).map(id => [id, colors[id]]));
+  return guiPreviewResult === reviewDocument?.result_path && guiPreviewColors
+    ? Object.fromEntries((reviewDocument?.speakers || []).map(id => [id, guiPreviewColors[id] || guiAppliedSpeakerColors()[id]])) : guiAppliedSpeakerColors();
 }
 function applyGuiSpeakerColors() {
   if (!reviewDocument) return;
@@ -306,46 +310,94 @@ function applyGuiSpeakerColors() {
     if (!id) return;
     const existing = row.querySelector("input[type=color]");
     if (existing) { existing.value = colors[id]; return; }
-    const label = document.createElement("label");
-    label.textContent = "Speaker color";
-    label.className = "gui-speaker-color";
-    const input = document.createElement("input");
-    input.type = "color";
-    input.value = colors[id];
+    const label = document.createElement("label"); label.textContent = "Speaker color"; label.className = "gui-speaker-color";
+    const input = document.createElement("input"); input.type = "color"; input.value = colors[id];
     input.setAttribute("aria-label", `Speaker color ${id}`);
     input.addEventListener("input", () => {
-      const updated = guiSpeakerColors(); updated[id] = input.value;
-      localStorage.setItem(guiPaletteKey(), JSON.stringify(updated));
-      document.querySelector("#gui-export-palette").value = "brand";
-      applyGuiSpeakerColors();
-    });
-    label.append(input); row.append(label);
+      guiPreviewColors = {...guiSpeakerColors(), [id]:input.value}; guiPreviewResult = reviewDocument.result_path;
+      document.querySelector("#gui-palette-status").textContent = "Preview only. Apply to use these colors for this recording's next export.";
+      applyGuiSpeakerColors(); updateGuiContext();
+    }); label.append(input); row.append(label);
   });
+}
+function guiProfileValue(profile) {
+  return profile.name === "Configured production" ? "configured" : profile.name === "EwP brand" ? "brand" : profile.name;
+}
+function renderGuiProfileSwatches() {
+  const host = document.querySelector("#gui-profile-swatches"); if (!host) return;
+  const profile = guiColorProfiles.find(item => guiProfileValue(item) === document.querySelector("#gui-export-palette").value);
+  host.replaceChildren();
+  for (const color of profile?.colors || []) {
+    const marker = document.createElement("span"); marker.className = "gui-profile-swatch";
+    marker.style.backgroundColor = color; marker.title = color; marker.setAttribute("aria-label", color); host.append(marker);
+  }
+}
+function renderGuiColorProfiles(payload, selected = "") {
+  guiColorProfiles = payload.profiles;
+  const select = document.querySelector("#gui-export-palette");
+  const value = selected || select.value || "configured";
+  select.replaceChildren();
+  for (const profile of guiColorProfiles) {
+    const option = document.createElement("option"); option.value = guiProfileValue(profile);
+    option.textContent = profile.name; select.append(option);
+  }
+  select.value = value;
+  if (!select.value) select.value = "configured";
+  renderGuiProfileSwatches();
+}
+async function loadGuiColorProfiles() {
+  try { renderGuiColorProfiles(await queuePost("/api/v1/dictionaries/profiles", {}, {feedback:false})); }
+  catch (error) { document.querySelector("#gui-palette-status").textContent = error.message; }
+}
+function previewGuiColorProfile() {
+  renderGuiProfileSwatches();
+  if (!reviewDocument) return;
+  const profile = guiColorProfiles.find(item => guiProfileValue(item) === document.querySelector("#gui-export-palette").value);
+  if (!profile) return;
+  guiPreviewColors = Object.fromEntries(reviewDocument.speakers.map(id => {
+    const n = Number(id.match(/\d+$/)?.[0] || 1) - 1;
+    return [id, profile.colors[n % profile.colors.length]];
+  }));
+  guiPreviewResult = reviewDocument.result_path;
+  document.querySelector("#gui-palette-status").textContent = "Preview only. Apply to use these colors for this recording's next export.";
+  applyGuiSpeakerColors(); updateGuiContext();
 }
 function installGuiPaletteControls() {
-  const panel = document.createElement("div");
-  panel.id = "gui-palette";
-  panel.innerHTML = `<label>YTT color profile<select id="gui-export-palette"><option value="configured">Configured production palette</option><option value="brand">Brand preview palette</option></select></label>
-    <p>The selected profile previews the colors used for the next YTT export. Switching profiles preserves custom colors. Existing exports stay unchanged.</p>
-    <button type="button" id="gui-adopt-brand">Adopt brand palette for this recording</button>
-    <button type="button" id="gui-production-palette">Use configured production palette</button>`;
+  const panel = document.createElement("div"); panel.id = "gui-palette";
+  panel.innerHTML = `<label>YTT color profile<select id="gui-export-palette"></select></label>
+    <div id="gui-profile-swatches" aria-label="Preset colors"></div>
+    <div class="actions"><button type="button" id="gui-preview-palette">Preview</button><button type="button" id="gui-apply-palette">Apply</button><button type="button" id="gui-save-palette">Save</button></div>
+    <label>Custom profile name<input id="gui-palette-name" maxlength="80" autocomplete="off"></label>
+    <p id="gui-palette-status" class="field-hint" role="status">Preview a profile or edit speaker colors, then Apply for this recording. Save keeps a named profile for other recordings.</p>`;
   document.querySelector("#review-speaker-labels").before(panel);
-  document.querySelector("#gui-export-palette").addEventListener("change", applyGuiSpeakerColors);
-  document.querySelector("#gui-adopt-brand").addEventListener("click", () => {
-    if (!reviewDocument || !window.confirm("Replace this recording's custom colors with the brand palette? Existing exports will stay unchanged.")) return;
-    const colors = Object.fromEntries(reviewDocument.speakers.map(id => [id, guiBrandPalette[(Number(id.match(/\d+$/)?.[0] || 1) - 1) % 6]]));
-    localStorage.setItem(guiPaletteKey(), JSON.stringify(colors));
-    document.querySelector("#gui-export-palette").value = "brand";
-    renderReviewSpeakerLabels(reviewDocument); applyGuiSpeakerColors(); updateGuiContext();
-  });
-  document.querySelector("#gui-production-palette").addEventListener("click", () => {
-    document.querySelector("#gui-export-palette").value = "configured";
+  document.querySelector("#gui-export-palette").addEventListener("change", previewGuiColorProfile);
+  document.querySelector("#gui-preview-palette").addEventListener("click", previewGuiColorProfile);
+  document.querySelector("#gui-apply-palette").addEventListener("click", () => {
+    if (!reviewDocument) return;
+    localStorage.setItem(guiPaletteKey(), JSON.stringify(guiSpeakerColors()));
+    guiPreviewColors = null; guiPreviewResult = "";
+    document.querySelector("#gui-palette-status").textContent = "Colors applied to this recording's next export. Existing exports stay unchanged.";
     applyGuiSpeakerColors(); updateGuiContext();
   });
+  document.querySelector("#gui-save-palette").addEventListener("click", async () => {
+    if (!reviewDocument) return;
+    const button = document.querySelector("#gui-save-palette"); button.disabled = true;
+    document.querySelector("#gui-palette-status").textContent = "Saving custom profile…";
+    try {
+      const name = document.querySelector("#gui-palette-name").value.trim();
+      const colors = guiSpeakerColors();
+      // Preserve numeric speaker slots, including gaps introduced by revision-only speakers.
+      const count = Math.max(...reviewDocument.speakers.map(id => Number(id.match(/\d+$/)?.[0] || 1)));
+      const palette = Array.from({length:count}, (_, index) => colors[`speaker_${String(index + 1).padStart(3,"0")}`] || guiBrandPalette[index % guiBrandPalette.length]);
+      const payload = await queuePost("/api/v1/dictionaries/profile-save", {name, colors:palette});
+      renderGuiColorProfiles(payload, name);
+      document.querySelector("#gui-palette-status").textContent = "Custom profile saved. Apply to use it for this recording's next export.";
+    } catch (error) { document.querySelector("#gui-palette-status").textContent = error.message; } finally { button.disabled = false; }
+  });
+  // Session initialization is asynchronous; wait for the session token, without a second session.
+  document.addEventListener("ewp-session-ready", () => { void loadGuiColorProfiles(); });
 }
-function guiExportPreferences() {
-  return {speaker_colors: document.querySelector("#gui-export-palette")?.value === "brand" ? guiSpeakerColors() : null};
-}
+function guiExportPreferences() { return {speaker_colors:Object.keys(guiSavedSpeakerColors()).length ? guiAppliedSpeakerColors() : null}; }
 
 installGuiPaletteControls();
 installGuiShell();
@@ -456,7 +508,9 @@ async function restoreGuiWorkspaceFields() {
       }
     } catch (_) { /* ignore malformed display preferences */ }
   }
-  document.querySelector('#gui-export-palette').value = get('gui-palette-profile') === 'brand' ? 'brand' : 'configured';
+  guiPreviewColors = null; guiPreviewResult = '';
+  document.querySelector('#gui-export-palette').value = get('gui-palette-profile') || 'configured';
+  applyGuiSpeakerColors();
   if (get('gui-translation-review-path') && get('gui-translation-result-path')) {
     const context = {review_path:get('gui-translation-review-path'), result_path:get('gui-translation-result-path'),
       revision_path:get('gui-translation-revision-path'), parent_translation_path:get('gui-translation-parent-path'), target_language:get('gui-translation-target')};
@@ -473,26 +527,53 @@ async function restoreGuiWorkspaceFields() {
   updateGuiContext();
 }
 
-const manualTranslation = document.createElement('button'); manualTranslation.type='button';
-manualTranslation.id='gui-manual-translation'; manualTranslation.textContent='Open manual translation';
-manualTranslation.addEventListener('click', () => {
-  const result=translationForm.elements.namedItem('result_path').value || guiActiveResult;
-  const job=guiKnownJobs.find(item=>item.result_path===result);
-  if (!result) { document.querySelector('#translation-status').textContent='Choose a recording first.'; return; }
-  void openEnhancedTranslationReview({result_path:result,
-    revision_path:translationForm.elements.namedItem('source_revision_path').value || job?.workflow?.review?.path || '',
-    candidate_path:'', output_root:translationForm.elements.namedItem('output_root').value || job?.output_directory || workflowOutput.value,
-    target_language:translationForm.elements.namedItem('target_language').value});
-});
-const directionActions=document.createElement('div'); directionActions.className='actions';
-for(const [source,target] of [['pl','en'],['en','pl']]) {
-  const button=document.createElement('button'); button.type='button'; button.textContent=`${source.toUpperCase()} → ${target.toUpperCase()}`;
-  button.addEventListener('click',()=>{
-    const result=translationForm.elements.namedItem('result_path').value || guiActiveResult;
-    const job=guiKnownJobs.find(item=>item.result_path===result);
-    if(job && job.language!==source) { document.querySelector('#translation-status').textContent='Choose a recording whose source language matches this direction.'; return; }
-    translationForm.elements.namedItem('target_language').value=target;
-    translationForm.elements.namedItem('target_language').dispatchEvent(new Event('change', {bubbles:true}));
+const directionActions = document.createElement("div"); directionActions.className = "actions"; directionActions.id = "gui-translation-directions";
+const directionStatus = document.createElement("p"); directionStatus.id = "gui-direction-status"; directionStatus.className = "field-hint"; directionStatus.setAttribute("role", "status");
+const directionWarning = document.createElement("p"); directionWarning.id = "gui-direction-warning";
+directionWarning.setAttribute("role", "status"); directionWarning.hidden = true;
+const acceptDirection = document.createElement("button"); acceptDirection.type = "button"; acceptDirection.textContent = "Accept direction change"; acceptDirection.hidden = true;
+let guiPendingDirection = null;
+let guiDirectionResult = "";
+function translationSourceJob() {
+  const result = translationForm.elements.namedItem("result_path").value || guiActiveResult;
+  return guiKnownJobs.find(item => item.result_path === result);
+}
+function setGuiTranslationDirection(target) {
+  translationForm.elements.namedItem("target_language").value = target;
+  translationForm.elements.namedItem("target_language").dispatchEvent(new Event("change", {bubbles:true}));
+  directionWarning.hidden = true; acceptDirection.hidden = true; guiPendingDirection = null;
+  refreshGuiTranslationDirection();
+}
+function refreshGuiTranslationDirection() {
+  const job = translationSourceJob();
+  if (job && guiDirectionResult !== job.result_path) {
+    guiDirectionResult = job.result_path;
+    translationForm.elements.namedItem("target_language").value = job.language === "en" ? "pl" : "en";
+    directionWarning.hidden = true; acceptDirection.hidden = true; guiPendingDirection = null;
+  }
+  const target = translationForm.elements.namedItem("target_language").value;
+  for (const button of directionActions.querySelectorAll("button[data-target]")) button.setAttribute("aria-pressed", String(button.dataset.target === target));
+  const mismatch = job && job.language === target;
+  const generate = document.querySelector("#generate-translation");
+  generate.dataset.directionMismatch = String(Boolean(mismatch));
+  generate.disabled = Boolean(mismatch) || generate.getAttribute("aria-busy") === "true";
+  directionStatus.textContent = mismatch
+    ? "This direction needs a recording in the other source language. Choose a matching recording before generating."
+    : `Current direction: ${target === "en" ? "PL → EN" : "EN → PL"}.`;
+  const inputs = document.querySelector("#gui-translation-inputs");
+  if (inputs && job && translationForm.elements.namedItem("result_path").value === job.result_path && inputs.dataset.result !== job.result_path) { inputs.open = false; inputs.dataset.result = job.result_path; }
+}
+for (const [source, target] of [["pl","en"], ["en","pl"]]) {
+  const button = document.createElement("button"); button.type = "button"; button.dataset.target = target;
+  button.textContent = `${source.toUpperCase()} → ${target.toUpperCase()}`;
+  button.addEventListener("click", () => {
+    if (translationForm.elements.namedItem("target_language").value === target) return;
+    guiPendingDirection = target;
+    directionWarning.textContent = "Changing direction requires a matching source-language recording. Existing translations stay unchanged. Accept this change to continue.";
+    directionWarning.hidden = false; acceptDirection.hidden = false;
   }); directionActions.append(button);
 }
-directionActions.append(manualTranslation); translationForm.before(directionActions);
+acceptDirection.addEventListener("click", () => { if (guiPendingDirection) setGuiTranslationDirection(guiPendingDirection); });
+translationForm.before(directionActions, directionStatus, directionWarning, acceptDirection);
+translationForm.elements.namedItem("target_language").addEventListener("change", refreshGuiTranslationDirection);
+document.addEventListener("ewp-stage", refreshGuiTranslationDirection);

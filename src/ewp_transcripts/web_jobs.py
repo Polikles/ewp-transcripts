@@ -211,6 +211,23 @@ class GuiTranscriptionQueue:
             self._order.remove(job_id)
             return True
 
+    def remove_completed(self) -> tuple[str, ...]:
+        """Forget fully finished workflows, preserving unfinished/failed and active entries."""
+        with self._lock:
+            finished = tuple(
+                job_id
+                for job_id in self._order
+                if self._jobs[job_id].status == "completed"
+                and all(
+                    stage["state"] in {"complete", "skipped"}
+                    for stage in workflow_progress(self._jobs[job_id]).model_dump().values()
+                )
+            )
+            for job_id in finished:
+                del self._jobs[job_id]
+                self._order.remove(job_id)
+            return finished
+
     def remove_inactive(self, job_ids: tuple[str, ...]) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """Forget selected inactive jobs without deleting any referenced files."""
 

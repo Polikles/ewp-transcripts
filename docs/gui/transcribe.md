@@ -18,3 +18,5 @@ Use Add saved results in a stage queue to work from existing canonical JSON with
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+Inspect checks all selected, unqueued episodes. Add to queue advances to the next available episode; staged inputs cannot be inspected or planned again. Each inactive queue row has Remove. Remove completed tasks from the queue appears only for recordings whose workflow is finished and preserves unfinished/failed jobs and every saved file. Recording cards on the left open that recording’s next unfinished stage.

@@ -676,3 +676,63 @@ def test_backend_failure_details_redact_credentials(monkeypatch) -> None:
     assert "missing native library" in detail
     assert secret not in detail
     assert "[redacted]" in detail
+
+
+def test_remove_completed_preserves_unfinished_failed_and_staged_workflows(tmp_path: Path) -> None:
+    """A completed ASR job is retained until its downstream workflow is finished."""
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
+    now = datetime.now(UTC)
+    root = tmp_path / "outputs"
+    for folder, name in [
+        ("revisions", "done_revision_001.json"),
+        ("exports", "done_transcript_revision_001.txt"),
+    ]:
+        path = root / folder / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("synthetic artifact", encoding="utf-8")
+    try:
+        jobs = []
+        for identifier, status in [
+            ("done", "completed"),
+            ("unfinished", "completed"),
+            ("failed", "failed"),
+        ]:
+            jobs.append(
+                GuiTranscriptionJob(
+                    job_id=identifier,
+                    planned_job_id=identifier,
+                    input_path=str(tmp_path / f"{identifier}.wav"),
+                    output_directory=str(root),
+                    language="pl",
+                    speaker_count=2,
+                    status=status,
+                    planned_result_path=str(root / f"{identifier}_results.json"),
+                    result_path=str(root / f"{identifier}_results.json")
+                    if status == "completed"
+                    else None,
+                    source_sha256="0" * 64,
+                    created_at=now,
+                    updated_at=now,
+                    workflow_skips=(
+                        "correction",
+                        "assisted_translation",
+                        "translation",
+                        "translated_export",
+                    )
+                    if identifier == "done"
+                    else (),
+                )
+            )
+        queue.replace_terminal_jobs(tuple(jobs))
+        staged = queue.stage(
+            tmp_path / "staged.wav",
+            root,
+            planned_job_id="staged",
+            planned_result_path=str(root / "staged_results.json"),
+        )
+        assert queue.remove_completed() == ("done",)
+        assert {job.job_id for job in queue.jobs()} == {"unfinished", "failed", staged.job_id}
+        assert (root / "revisions/done_revision_001.json").exists()
+        assert queue.remove_completed() == ()
+    finally:
+        queue.close()

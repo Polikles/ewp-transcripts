@@ -23,3 +23,5 @@ Only confirm I manually verified wording, speakers… after reviewing all sectio
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+Color profiles are defined in subtitles.ytt_color_profiles; Configured production uses subtitles.ytt_speaker_palette. EwP brand is a separate preset. Selecting a profile previews its speaker colors immediately. Preview does not change export preferences: Apply commits the visible colors for this recording’s next export. Save stores a named custom profile for other recordings and future sessions; use a custom name to preserve configured presets. Existing exports stay unchanged.

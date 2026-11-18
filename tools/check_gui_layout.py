@@ -66,6 +66,9 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
                     ("workspace", "#transcription-jobs"),
                     ("review", "#review-editor"),
                     ("semantic-review", "#translation-review-editor"),
+                    ("translation", "#translation-workflow"),
+                    ("correction", "#correction-workflow"),
+                    ("dictionary", "#gui-dictionary-library"),
                 ]:
                     stage(page, section)
                     page.locator(selector).evaluate("e => e.scrollIntoView({block:'start'})")
@@ -109,8 +112,8 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
 def stage_audio_without_models(page: Page, output: Path) -> None:
     stage(page, "workspace")
     files = []
-    for number in (1, 2):
-        path = output / f"audio Żółć {number}.wav"
+    for filename in ("S01E01-a.wav", "S01E01-b.wav", "S01E02.wav"):
+        path = output / filename
         with wave.open(str(path), "wb") as stream:
             stream.setnchannels(1)
             stream.setsampwidth(2)
@@ -120,15 +123,26 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.locator("#workflow input[type=file]").set_input_files(files)
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
+    page.locator("#workflow button[value=inspect]").click()
+    expect(page.locator("#operation-status")).to_contain_text("Inspected 2 / 2 episodes")
     for index in (0, 1):
-        page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]").click()
-        page.locator("#workflow button[value=inspect]").click()
-        expect(page.locator("#operation-status")).to_have_text("Inspection completed")
+        expect(
+            page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
+        ).to_have_attribute("aria-pressed", "true")
         page.locator("#workflow button[value=dry-run]").click()
         expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
         page.locator("#workflow input[name=confirmed]").check()
         page.locator("#workflow button[value=transcriptions]").click()
-        expect(page.locator("#operation-status")).to_have_text("Added to staged queue")
+        expect(page.locator("#transcription-jobs tbody tr")).to_have_count(index + 1)
+        expect(
+            page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
+        ).to_be_disabled()
+    expect(page.locator("#workflow button[value=inspect]")).to_be_disabled()
+    expect(page.locator("#workflow button[value=dry-run]")).to_be_disabled()
+    expect(page.locator("#transcription-jobs input[type=checkbox]")).to_have_count(0)
+    expect(
+        page.get_by_role("button", name="Remove selected queue items", exact=True)
+    ).to_have_count(0)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
     assert page.locator("#transcription-jobs tbody").inner_text().count("STAGED") == 2
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
@@ -250,6 +264,127 @@ def check_cursor_and_auto_height(page: Page) -> None:
     assert abs(page.evaluate("window.scrollY") - before_save) <= 2
 
 
+def check_dictionary_library(page: Page, output: Path) -> None:
+    stage(page, "dictionary")
+    catalog = output / "edited-dictionaries"
+    page.locator("#library-directory").fill(str(catalog))
+    page.locator("#library-example").click()
+    page.locator("#library-save").click()
+    expect(page.locator("#library-status")).to_contain_text("New dictionary version saved")
+    original = catalog / "example-pl-v1.json"
+    digest = hashlib.sha256(original.read_bytes()).hexdigest()
+    page.locator("#library-entries input").nth(1).fill("Preferred revised term")
+    page.locator("#library-save").click()
+    expect(page.locator("#library-status")).to_contain_text("New dictionary version saved")
+    edition = catalog / "example-pl-v2.json"
+    assert edition.exists() and hashlib.sha256(original.read_bytes()).hexdigest() == digest
+    page.locator("#library-select").select_option(str(original))
+    page.locator("#library-compare").select_option(str(edition))
+    page.locator("#library-diff").click()
+    expect(page.locator("#library-comparison")).to_contain_text("Preferred revised term")
+    expect(page.locator("#library-status")).to_contain_text("1 differences")
+    row = page.get_by_text("example-pl-v1 · correction", exact=True).locator("..")
+    row.get_by_role("button", name="Remove from list", exact=True).click()
+    expect(page.locator(".library-item")).to_have_count(1)
+    assert original.exists()
+    page.locator("#library-show-hidden").check()
+    expect(page.locator(".library-item")).to_have_count(2)
+    page.get_by_role("button", name="Restore to list", exact=True).click()
+    expect(page.get_by_role("button", name="Restore to list", exact=True)).to_have_count(0)
+    page.locator("#library-select").select_option(str(original))
+    page.locator("#library-open").click()
+    expect(page.locator("#library-status")).to_contain_text("Dictionary loaded")
+    page.locator("#library-id").fill("example-pl-v1")
+    page.locator("#library-save").click()
+    expect(page.locator("#library-status")).to_contain_text("immutable")
+    assert hashlib.sha256(original.read_bytes()).hexdigest() == digest
+    page.locator("#library-show-hidden").uncheck()
+
+
+def check_workflow_polish(page: Page) -> None:
+    page.locator("#gui-locale").select_option("en")
+    for name in ("correction", "review", "translation", "semantic-review"):
+        stage(page, name)
+        assert page.locator(f"#stage-queue-{name}").evaluate("""e =>
+          [...e.children].at(-1).classList.contains('workflow-progress')""")
+    stage(page, "correction")
+    assert not page.locator("#correction-dictionary").evaluate("e=>e.closest('details').open")
+    stage(page, "translation")
+    page.locator("#stage-queue-translation .stage-queue-item button").first.click()
+    expected = page.evaluate("translationSourceJob().language === 'pl' ? 'en' : 'pl'")
+    expect(
+        page.locator(f'#gui-translation-directions button[data-target="{expected}"]')
+    ).to_have_attribute("aria-pressed", "true")
+    assert not page.locator("#gui-translation-inputs").evaluate("e=>e.open")
+    assert not page.locator("#translation-dictionary").evaluate("e=>e.closest('details').open")
+    expect(page.locator("#gui-manual-translation")).to_have_count(0)
+    assert page.locator(
+        "#skip-translation"
+    ).evaluate("""e =>
+      e.getBoundingClientRect().top >= document.querySelector('#stage-queue-translation').getBoundingClientRect().bottom""")
+    other = "pl" if expected == "en" else "en"
+    page.locator(f'#gui-translation-directions button[data-target="{other}"]').click()
+    expect(page.locator("#gui-direction-warning")).to_be_visible()
+    assert page.locator("#translation-target").input_value() == expected
+    page.get_by_role("button", name="Accept direction change", exact=True).click()
+    expect(
+        page.locator(f'#gui-translation-directions button[data-target="{other}"]')
+    ).to_have_attribute("aria-pressed", "true")
+    expect(page.locator("#generate-translation")).to_be_disabled()
+    page.locator(f'#gui-translation-directions button[data-target="{expected}"]').click()
+    page.get_by_role("button", name="Accept direction change", exact=True).click()
+    expect(page.locator("#generate-translation")).to_be_enabled()
+    # Recording cards follow the recording's progress, independent of the screen being viewed.
+    stage(page, "dictionary")
+    page.locator("#gui-recordings button").first.click()
+    expected_stage = page.evaluate("""() => {
+      const next=nextWorkflowStage(guiKnownJobs[0]);
+      return next==='original-export'?'review':['translated-export','finished'].includes(next)?'semantic-review':next;
+    }""")
+    expect(page.locator(f'[data-gui-stage="{expected_stage}"]')).to_have_attribute(
+        "aria-current", "step"
+    )
+    stage(page, "review")
+    for width in (960, 1920):
+        page.set_viewport_size({"width": width, "height": 1080})
+        measured = page.locator(".review-control-groups").evaluate("""e => {
+          const a=e.children[0].getBoundingClientRect(), b=e.children[1].getBoundingClientRect();
+          const boxes=['#undo-review','#redo-review','#clear-review'].map(id=>document.querySelector(id).getBoundingClientRect());
+          return {height:Math.abs(a.height-b.height), row:Math.max(...boxes.map(r=>r.top))-Math.min(...boxes.map(r=>r.top))};
+        }""")
+        assert measured["height"] <= 1 and measured["row"] <= 2, measured
+    # Export the already verified source revision of the translated recording as well.
+    page.evaluate("""async () => {
+      const job=stageQueueJobs.find(item=>item.result_path===translationReview.result_path);
+      await postReview('export', {result_path:job.result_path, revision_path:job.workflow.review.path,
+        export_output_directory:`${job.output_directory}/exports`, formats:['txt']});
+      await refreshJobs();
+    }""")
+    # Completed cleanup is checked with real server annotations/artifacts, never a fake UI flag.
+    jobs = page.evaluate(
+        "stageQueueJobs.map(job=>({id:job.job_id,path:job.result_path,workflow:job.workflow}))"
+    )
+    finished = next(
+        job
+        for job in jobs
+        if all(
+            job["workflow"][key]["state"] == "complete"
+            for key in ("review", "original_export", "translation", "translated_export")
+        )
+    )
+    for optional in ("correction", "assisted_translation"):
+        page.evaluate(
+            "([path,stage])=>reportWorkflowSkip(path,stage)", [finished["path"], optional]
+        )
+    page.evaluate("refreshJobs()")
+    stage(page, "workspace")
+    expect(page.locator("#remove-completed-queue-items")).to_be_visible()
+    page.locator("#remove-completed-queue-items").click()
+    page.wait_for_function("id=>!stageQueueJobs.some(job=>job.job_id===id)", arg=finished["id"])
+    assert page.evaluate("stageQueueJobs.length") == len(jobs) - 1
+    assert Path(finished["path"]).exists()
+
+
 def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.wait_for_function("() => csrfToken.length > 0")
     page.wait_for_function("() => Object.keys(guiWorkflowTargets).length === 8")
@@ -275,6 +410,8 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
             name,
         )
     check_maintenance_controls(page)
+    check_dictionary_library(page, output)
+    stage(page, "workspace")
     page.evaluate("document.fonts.ready")
     assert page.evaluate('document.fonts.check("16px Montserrat")')
     assert page.evaluate("""document.fonts.check('16px "Noto Sans Mono"')""")
@@ -340,6 +477,8 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     panel.evaluate("e => e.open=true")
     assert panel.locator("#gui-palette").count() == 1
     page.locator("#gui-export-palette").select_option("brand")
+    expect(page.locator("#gui-profile-swatches span")).to_have_count(6)
+    assert page.locator("#gui-profile-swatches span").nth(2).get_attribute("title") == "#F2C55B"
     expect(page.locator('input[aria-label="Speaker color speaker_001"]')).to_have_value("#f5f7fa")
     page.locator("#gui-export-palette").select_option("configured")
     configured_color = page.evaluate(
@@ -365,10 +504,19 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
         page.locator('#review-speaker-labels input[data-speaker-id="speaker_007"]')
     ).to_have_count(1)
     assert page.evaluate("guiSpeakerColors().speaker_007") == "#123456"
-    page.locator("#gui-production-palette").click()
+    page.locator("#gui-palette-name").fill("Browser custom profile")
+    page.locator("#gui-save-palette").click()
+    expect(page.locator("#gui-palette-status")).to_contain_text("Custom profile saved")
+    page.locator("#gui-apply-palette").click()
+    assert page.evaluate("guiExportPreferences().speaker_colors.speaker_007") == "#123456"
     page.locator("#gui-export-palette").select_option("brand")
+    expect(page.locator('input[aria-label="Speaker color speaker_007"]')).to_have_value("#f5f7fa")
+    # Preview changes swatches while leaving applied export colors untouched.
+    assert page.evaluate("guiExportPreferences().speaker_colors.speaker_007") == "#123456"
+    page.locator("#gui-export-palette").select_option("Browser custom profile")
     expect(page.locator('input[aria-label="Speaker color speaker_007"]')).to_have_value("#123456")
-    page.locator("#gui-production-palette").click()
+    page.locator("#gui-export-palette").select_option("configured")
+    page.locator("#gui-apply-palette").click()
     # Keyboard selection isolation and stable speaker ownership, not cursor splitting.
     text.focus()
     text.evaluate("e => e.setSelectionRange(0,7)")
@@ -502,6 +650,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     checkpoint["target"] = "Testowe tłumaczenie jednostki 1."
     checkpoint["applied"] = page.evaluate("appliedTranslation")
     (output / "checkpoint.json").write_text(json.dumps(checkpoint))
+    check_workflow_polish(page)
     return measurements
 
 

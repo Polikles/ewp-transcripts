@@ -4,6 +4,29 @@ Last updated: **2026-11-18**.
 
 ## Active task and resume pointers
 
+Current request: [GUI workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
+Implementation and VM verification are complete; main delivery is the final action.
+Start with TODO.md after a context reset. The owner's latest WSL retest remains pending;
+the earlier local-only ASR/source-export success remains qualified.
+
+The GUI now inspects all selected unqueued episodes, advances after staging, follows each
+recording's workflow and offers per-row/finished-only cleanup. Dictionary management supports
+view/compare/create/import, immutable edits and reversible hiding. Configured/custom palettes
+have full preset swatches and separate Preview / Apply / Save actions. Direction controls show
+source-derived defaults and accepted-change warnings. Optional details collapse; diagnostic
+hierarchy, header, Quick steps, legends and source/translation review controls are updated.
+
+Final gates: Ruff/format/mypy and 830 tests PASS; five integration tests PASS. All 144 browser
+layout cases PASS across six stages/viewports and both locales/themes with zero page overflow,
+feedback overlap, internal transcript overflow or desktop queue scroll. Focused dictionary,
+palette, grouped staging, direction, sidebar, cleanup, cursor and export/recovery checks PASS.
+Fresh-server workspace recovery and final prototype comparison PASS; all source review buttons
+share one row at 1920px, with Undo/Redo/Clear aligned at 960px. Wheel/source builds PASS; all
+48 frontend/guide files match source and nine help routes work from the wheel without ML imports.
+The frontend-only artist review package is saved as deferred follow-up in TODO and the roadmap.
+Provider calls, real Windows zoom and YouTube palette qualification remain separate. The
+completed guided-workflow delivery below is historical context for this request.
+
 Current work: [guided workflow and prototype comparison](docs/checkpoints/2026-11-18-guided-workflow.md).
 Start with [TODO.md](TODO.md) after every context reset. Implementation and VM verification
 are complete; the new UI needs the owner's WSL retest. The owner already confirmed real

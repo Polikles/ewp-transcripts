@@ -19,3 +19,5 @@ Apply publishes an immutable manual child. Exports use the approved translation 
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+Queue legends sit below the queue. Clear current translation review is a secondary action below Preview and affects the current browser view; saved files remain available. Hover over Apply and Audit/export for their verification and lineage requirements.

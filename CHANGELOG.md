@@ -6,6 +6,20 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Inspect checks all selected unqueued episodes, staging advances selection and staged inputs
+  cannot be inspected/planned again. Recording cards open the current workflow step. Main queue
+  removal is per-row; completed-only cleanup preserves unfinished/failed work and saved files.
+- Dictionary management now supports blank/example/file creation, viewing, comparison, immutable
+  edited editions and reversible removal from lists. Existing corpus proposals remain available.
+- YTT profiles come from configuration, including EwP brand, with full preset swatches and separate
+  Preview / Apply / Save actions. Custom profiles persist; previews never silently change exports.
+- Reduced header space, vertical Quick steps, clearer light artwork, muted diagnostics/hints and
+  below-queue legends. Review panels match height and align history/Clear actions responsively.
+- Translation direction defaults to the source language, highlights selection and requires inline
+  acceptance of changes. Auto-filled source details and optional dictionaries collapse; Skip is
+  below the queue, and translation review has secondary Clear and explanatory Apply/export help.
+
+
 - Workflow stages now have numbered short instructions, matching control-group headings and
   offline per-stage guides. The prototype-aligned shell puts recordings on the left, a numbered
   stage strip over the workspace, and responsive task/speaker context beside it.

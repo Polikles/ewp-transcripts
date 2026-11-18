@@ -157,3 +157,25 @@ def test_diarization_path_must_end_with_configured_revision(tmp_path: Path) -> N
 
     with pytest.raises(InvalidConfigurationError, match="validation failed"):
         load_config(explicit_path=selected, cwd=tmp_path, home=tmp_path)
+
+
+@pytest.mark.parametrize(
+    "profiles",
+    [{"bad": ()}, {"bad": ("red",)}, {"brand": ("#123456",)}, {" spaced ": ("#123456",)}],
+)
+def test_color_profiles_reject_empty_colors_and_reserved_names(profiles) -> None:
+    from pydantic import ValidationError
+
+    from ewp_transcripts.config import SubtitlesConfig
+
+    with pytest.raises(ValidationError):
+        SubtitlesConfig(ytt_color_profiles=profiles)
+
+
+def test_color_profiles_load_from_toml(tmp_path: Path) -> None:
+    path = _write(
+        tmp_path / "profiles.toml",
+        '[subtitles.ytt_color_profiles]\n"Podcast" = ["#123456", "#abcdef"]\n',
+    )
+    config = load_config(explicit_path=path, cwd=tmp_path, home=tmp_path)
+    assert config.subtitles.ytt_color_profiles == {"Podcast": ("#123456", "#abcdef")}

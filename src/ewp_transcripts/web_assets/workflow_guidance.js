@@ -28,6 +28,16 @@ function markWorkflowStep(stage, number, target, {rename = false} = {}) {
   (guiWorkflowTargets[stage] ||= {})[number] = id;
 }
 
+function installOptionalDictionaryDetails(selector) {
+  const input = document.querySelector(selector), picker = input.previousElementSibling;
+  const label = document.querySelector(`label[for="${input.id}"]`);
+  const hint = input.nextElementSibling;
+  const details = document.createElement("details"); details.className = "gui-optional-dictionary";
+  const summary = document.createElement("summary"); summary.textContent = label.textContent;
+  label.before(details); details.append(summary, picker, label, input);
+  if (hint?.classList.contains("field-hint")) details.append(hint);
+}
+
 function numberWorkflowSections() {
   for (const stage of ["correction", "review", "translation", "semantic-review"]) {
     const heading = document.querySelector(`#stage-queue-${stage}-heading`);
@@ -57,22 +67,39 @@ function numberWorkflowSections() {
   markWorkflowStep("correction", 3, document.querySelector("#generate-correction"));
   markWorkflowStep("correction", 4, document.querySelector("#correction-status").closest(".status-panel"));
 
-  const direction = document.querySelector("#gui-manual-translation").parentElement;
+  const direction = document.querySelector("#gui-translation-directions");
   markWorkflowStep("translation", 2, direction);
-  const manualActions = document.createElement("div"); manualActions.className = "actions";
-  manualActions.append(document.querySelector("#gui-manual-translation"));
-  direction.after(manualActions);
-  markWorkflowStep("translation", 3, manualActions);
+  markWorkflowStep("translation", 3, translationForm);
+  document.querySelector("#stage-queue-translation").after(skipTranslation.closest(".feedback-anchor") || skipTranslation);
+  installOptionalDictionaryDetails("#correction-dictionary");
+  installOptionalDictionaryDetails("#translation-dictionary");
+  const translationInputs = document.createElement("details"); translationInputs.id = "gui-translation-inputs";
+  translationInputs.open = !translationForm.elements.namedItem("result_path").value;
+  translationInputs.innerHTML = "<summary>Source and target details</summary>";
+  const end = document.querySelector("#translation-target");
+  for (const node of [...translationForm.children]) {
+    translationInputs.append(node);
+    if (node === end) break;
+  }
+  translationForm.prepend(translationInputs);
+  refreshGuiTranslationDirection();
+  const clearTranslation = document.querySelector("#clear-translation-review");
+  const clearLine = document.createElement("div"); clearLine.className = "translation-clear-line";
+  const clearHost = clearTranslation.closest(".feedback-anchor") || clearTranslation;
+  document.querySelector("#save-translation-review").closest(".actions").after(clearLine);
+  clearLine.append(clearHost);
+  document.querySelector("#apply-translation-review").title = "Preview the saved draft, then confirm that you verified meaning and speaker attribution before applying an immutable translation.";
+  document.querySelector("#export-translation-review").title = "Apply the verified translation first. Audit checks its source lineage before generating the selected subtitle formats.";
   markWorkflowStep("translation", 4, document.querySelector("#translation-status").closest(".status-panel"));
   markWorkflowStep("semantic-review", 2, document.querySelector("#translation-review-editor"));
   markWorkflowStep("semantic-review", 3, document.querySelector("#save-translation-review").closest(".actions"));
   markWorkflowStep("semantic-review", 4, document.querySelector("#translation-review-confirmed").closest("label"));
   markWorkflowStep("semantic-review", 5, document.querySelector('input[name="translation-format"]').closest("fieldset").querySelector("legend"), {rename:true});
 
-  markWorkflowStep("dictionary", 1, document.querySelector("#dictionary-workflow"));
-  markWorkflowStep("dictionary", 2, document.querySelector("#propose-dictionary"));
-  markWorkflowStep("dictionary", 3, document.querySelector("#dictionary-editor"));
-  markWorkflowStep("dictionary", 4, document.querySelector('label[for="dictionary-id"]'));
+  for (let number = 1; number <= 4; number++) {
+    const heading = document.querySelector(`#gui-dictionary-step-${number}`);
+    markWorkflowStep("dictionary", number, heading, {rename:true});
+  }
   markWorkflowStep("saved", 1, document.querySelector('label[for="workspace-directory"]'));
   markWorkflowStep("saved", 2, document.querySelector('label[for="workspace-name"]'));
   markWorkflowStep("saved", 3, document.querySelector('label[for="workspace-list"]'));
