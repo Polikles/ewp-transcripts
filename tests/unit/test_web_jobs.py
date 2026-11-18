@@ -736,3 +736,36 @@ def test_remove_completed_preserves_unfinished_failed_and_staged_workflows(tmp_p
         assert queue.remove_completed() == ()
     finally:
         queue.close()
+
+
+def test_start_later_staged_work_preserves_completed_and_failed_history(tmp_path: Path) -> None:
+    calls = []
+
+    def transcribe(path, **kwargs):
+        calls.append(path.name)
+        if path.name == "bad.wav":
+            raise RuntimeError("synthetic worker failure")
+        return SimpleNamespace(result_path=tmp_path / f"{path.stem}_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        for name in ("first", "bad", "later"):
+            staged = queue.stage(
+                tmp_path / f"{name}.wav",
+                tmp_path,
+                planned_job_id=name,
+                planned_result_path=str(tmp_path / f"{name}_results.json"),
+            )
+            assert queue.start() == 1
+            deadline = time.monotonic() + 2
+            while time.monotonic() < deadline:
+                current = next(job for job in queue.jobs() if job.job_id == staged.job_id)
+                if current.status in {"completed", "failed"}:
+                    break
+                time.sleep(0.005)
+            assert current.status == ("failed" if name == "bad" else "completed")
+        assert calls == ["first.wav", "bad.wav", "later.wav"]
+        assert queue.start() == 0
+        assert len(queue.jobs()) == 3
+    finally:
+        queue.close()

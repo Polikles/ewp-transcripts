@@ -123,9 +123,25 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.locator("#workflow input[type=file]").set_input_files(files)
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
+    page.locator("#workflow-language").select_option("pl")
+    page.locator("#gui-audio-choices li").last.locator("button[aria-pressed]").click()
+    page.locator("#workflow-language").select_option("en")
+    page.locator("#gui-audio-choices li").first.locator("button[aria-pressed]").click()
+    assert page.locator("#workflow-language").input_value() == "pl"
+    inspections = []
+    page.on(
+        "request",
+        lambda request: (
+            inspections.append(request.post_data_json)
+            if request.url.endswith("/api/v1/inspect")
+            else None
+        ),
+    )
     page.locator("#workflow button[value=inspect]").click()
     expect(page.locator("#operation-status")).to_contain_text("Inspected 2 / 2 episodes")
+    assert [item["language"] for item in inspections] == ["pl", "en"]
     for index in (0, 1):
+        assert page.locator("#workflow-language").input_value() == ("pl" if index == 0 else "en")
         expect(
             page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
         ).to_have_attribute("aria-pressed", "true")
@@ -137,6 +153,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
         expect(
             page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
         ).to_be_disabled()
+    expect(page.locator("#start-queue")).to_be_enabled()
     expect(page.locator("#workflow button[value=inspect]")).to_be_disabled()
     expect(page.locator("#workflow button[value=dry-run]")).to_be_disabled()
     expect(page.locator("#transcription-jobs input[type=checkbox]")).to_have_count(0)
@@ -151,8 +168,42 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     ).click()
     expect(page.locator("#gui-audio-choices li")).to_have_count(1)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
+    # Add real completed history alongside staged work. Intercept only Start so no ASR runs.
+    history_document = json.loads((ROOT / "examples/results.example.json").read_text())
+    history_document["job_id"] = "QUEUE_HISTORY"
+    history_document["episode"]["episode_id"] = "QUEUE_HISTORY"
+    history_path = output / "QUEUE_HISTORY_results.json"
+    history_path.write_text(json.dumps(history_document), encoding="utf-8")
+    stage(page, "correction")
+    page.locator('#stage-queue-correction input[type="file"]').set_input_files(history_path)
+    expect(page.locator("#stage-queue-review .stage-queue-item")).to_have_count(1)
+    stage(page, "workspace")
+    expect(page.locator("#start-queue")).to_be_enabled()
+    page.route(
+        "**/api/v1/transcriptions/start",
+        lambda route: route.fulfill(
+            status=200, content_type="application/json", body='{"queued":2}'
+        ),
+        times=1,
+    )
+    page.locator("#start-queue").click()
+    expect(page.locator("#operation-status")).to_contain_text("Started 2 queued job(s)")
+    expect(page.locator("#start-queue")).to_be_enabled()
+    page.route(
+        "**/api/v1/transcriptions/start",
+        lambda route: route.fulfill(
+            status=409,
+            content_type="application/json",
+            body='{"error":{"code":"GUI_QUEUE_ACTIVE","message":"Synthetic start rejection"}}',
+        ),
+        times=1,
+    )
+    page.locator("#start-queue").click()
+    expect(page.locator("#operation-status")).to_contain_text("GUI_QUEUE_ACTIVE")
+    expect(page.locator("#start-queue")).to_be_enabled()
     page.evaluate("queuePost('/api/v1/transcriptions/clear-current', {confirmed:true})")
     page.evaluate("refreshJobs()")
+    expect(page.locator("#start-queue")).to_be_disabled()
 
 
 def check_maintenance_controls(page: Page) -> None:
@@ -264,6 +315,125 @@ def check_cursor_and_auto_height(page: Page) -> None:
     assert abs(page.evaluate("window.scrollY") - before_save) <= 2
 
 
+def check_localized_interface(page: Page) -> None:
+    """Audit static states and source copy without changing user text or calling providers."""
+    import ast
+    import re
+
+    page.locator("#gui-locale").select_option("pl")
+    expect(page.locator("#compatibility")).to_have_text("Stan: usługa lokalna gotowa")
+    expect(page.locator("#gui-active-context .gui-path")).not_to_contain_text("Choose a recording")
+    # The initial dictionary catalog is populated automatically; no Refresh click is needed.
+    expect(page.locator(".library-item")).not_to_have_count(0)
+    assert page.locator("#output-path").evaluate(
+        "e=>Boolean(e.compareDocumentPosition(document.querySelector('#input-path')) "
+        "& Node.DOCUMENT_POSITION_FOLLOWING)"
+    )
+    literals = set()
+    for file in (ROOT / "src/ewp_transcripts/web_assets").glob("*.js"):
+        if file.name.startswith("ui_locale"):
+            continue
+        for match in re.finditer(
+            r"\.(?:textContent|title)\s*=\s*(\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*')",
+            file.read_text(),
+        ):
+            try:
+                value = ast.literal_eval(match[1]).strip()
+            except (SyntaxError, ValueError):
+                continue
+            if re.search(r"[A-Za-z]{3}", value):
+                literals.add(value)
+    missing = page.evaluate("texts=>texts.filter(text=>guiUiText(text)===text)", sorted(literals))
+    assert set(missing) <= {"EwP Transcripts", "Model"}, missing
+    # Include conditional messages and confirmation dialogs, not only direct assignments.
+    all_literals = set()
+    for file in (ROOT / "src/ewp_transcripts/web_assets").glob("*.js"):
+        if file.name.startswith("ui_locale"):
+            continue
+        for match in re.finditer(r"\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'", file.read_text()):
+            try:
+                value = ast.literal_eval(match[0]).strip()
+            except (SyntaxError, ValueError):
+                continue
+            if re.search(r"[A-Za-z]{3} [A-Za-z]{2}", value) and not any(
+                char in value for char in "<>#{=}"
+            ):
+                all_literals.add(value)
+    missing = page.evaluate(
+        "texts=>texts.filter(text=>guiUiText(text)===text)", sorted(all_literals)
+    )
+    non_ui = {
+        "Configured production",
+        "EwP Transcripts",
+        "EwP brand",
+        "actions dictionary-evidence-navigation",
+        "confirmation is required",
+        "connection-light connection-unknown",
+        "example misspelling",
+        "inline-working inline-done",
+        "inline-working inline-error",
+        "noopener noreferrer",
+        "preferred spelling",
+        "queue-table library-comparison",
+        "queue-table plan-table",
+        "review-bottom-navigation actions",
+        "review-control-line review-prepare-line",
+        "use strict",
+    }
+    assert set(missing) <= non_ui, missing
+    original_error = "GUI_API_UNAVAILABLE: Synthetic original backend explanation"
+    page.locator("#operation-status").evaluate(
+        "(element,text)=>{element.textContent=text}", original_error
+    )
+    expect(page.locator("#operation-status")).to_contain_text(
+        "GUI_API_UNAVAILABLE: Lokalny serwer GUI"
+    )
+    expect(page.locator(".gui-error-diagnostic pre")).to_have_text(original_error)
+    page.locator("#operation-status").evaluate("element=>{element.textContent=''}")
+    expect(page.locator(".gui-error-diagnostic")).to_have_count(0)
+    samples = {
+        "Planning…": "Planowanie…",
+        "Dry-run completed": "Plan gotowy",
+        "Adding…": "Dodawanie…",
+        "Added to staged queue": "Dodano do kolejki oczekującej na uruchomienie",
+        "Correction is running; do not close the server.": "Korekta trwa; nie zamykaj serwera.",
+        ("Translation is running; do not close the server."): (
+            "Tłumaczenie trwa; nie zamykaj serwera."
+        ),
+        "Review: pending": "Weryfikacja: oczekuje",
+        "ASR: completed_results.json": "ASR: completed_results.json",
+        (
+            "WARNING: source is raw, not manually verified. The non-final translation "
+            "requires semantic manual review."
+        ): "OSTRZEŻENIE: źródło to surowe",
+        "Queue finished": "Kolejka ukończona",
+        (
+            "GUI_DRY_RUN_REQUIRED: Run and review dry-run for this exact input, output, "
+            "language, and speaker count before adding it to the queue."
+        ): ("GUI_DRY_RUN_REQUIRED: Najpierw zaplanuj"),
+    }
+    for source, expected in samples.items():
+        assert page.evaluate("source=>guiUiText(source)", source).startswith(expected)
+    stage(page, "correction")
+    expect(page.locator("#generate-correction")).to_have_text("Wygeneruj wstępną korektę")
+    expect(page.locator("#generate-translation")).to_have_text("Wygeneruj propozycję tłumaczenia")
+    expect(page.locator("#review-translation")).to_have_text("Przejdź do przeglądu tłumaczenia")
+    page.locator("#correction-workflow .provider-settings").evaluate("e=>e.open=true")
+    page.get_by_role("button", name="Ustaw klucz API OpenRouter", exact=True).click()
+    dialog = page.get_by_role("dialog")
+    expect(dialog).to_contain_text("Klucz trafia wyłącznie do tego lokalnego serwera")
+    expect(dialog.get_by_role("button", name="Ustaw klucz na tę sesję", exact=True)).to_be_visible()
+    dialog.get_by_role("button", name="Anuluj", exact=True).click()
+    stage(page, "review")
+    expect(page.locator("#preview-review")).to_have_text("Zatwierdź")
+    expect(page.locator("#prepare-review")).to_have_text("Przygotuj tekst do sprawdzenia")
+    expect(page.locator("#apply-review")).to_have_text("Zapisz i przygotuj do eksportu")
+    assert page.locator("#gui-review-step-5").evaluate("e=>e.tagName==='H3'")
+    page.locator("#gui-locale").select_option("en")
+    expect(page.locator("#preview-review")).to_have_text("Apply")
+    expect(page.locator("#prepare-review")).to_have_text("Prepare text for review")
+
+
 def check_dictionary_library(page: Page, output: Path) -> None:
     stage(page, "dictionary")
     catalog = output / "edited-dictionaries"
@@ -318,10 +488,9 @@ def check_workflow_polish(page: Page) -> None:
     assert not page.locator("#gui-translation-inputs").evaluate("e=>e.open")
     assert not page.locator("#translation-dictionary").evaluate("e=>e.closest('details').open")
     expect(page.locator("#gui-manual-translation")).to_have_count(0)
-    assert page.locator(
-        "#skip-translation"
-    ).evaluate("""e =>
-      e.getBoundingClientRect().top >= document.querySelector('#stage-queue-translation').getBoundingClientRect().bottom""")
+    assert page.locator("#skip-translation").evaluate("""e =>
+      e.getBoundingClientRect().top >=
+      document.querySelector('#stage-queue-translation').getBoundingClientRect().bottom""")
     other = "pl" if expected == "en" else "en"
     page.locator(f'#gui-translation-directions button[data-target="{other}"]').click()
     expect(page.locator("#gui-direction-warning")).to_be_visible()
@@ -339,7 +508,8 @@ def check_workflow_polish(page: Page) -> None:
     page.locator("#gui-recordings button").first.click()
     expected_stage = page.evaluate("""() => {
       const next=nextWorkflowStage(guiKnownJobs[0]);
-      return next==='original-export'?'review':['translated-export','finished'].includes(next)?'semantic-review':next;
+      return next==='original-export'?'review':
+        ['translated-export','finished'].includes(next)?'semantic-review':next;
     }""")
     expect(page.locator(f'[data-gui-stage="{expected_stage}"]')).to_have_attribute(
         "aria-current", "step"
@@ -349,14 +519,17 @@ def check_workflow_polish(page: Page) -> None:
         page.set_viewport_size({"width": width, "height": 1080})
         measured = page.locator(".review-control-groups").evaluate("""e => {
           const a=e.children[0].getBoundingClientRect(), b=e.children[1].getBoundingClientRect();
-          const boxes=['#undo-review','#redo-review','#clear-review'].map(id=>document.querySelector(id).getBoundingClientRect());
-          return {height:Math.abs(a.height-b.height), row:Math.max(...boxes.map(r=>r.top))-Math.min(...boxes.map(r=>r.top))};
+          const boxes=['#undo-review','#redo-review','#clear-review']
+            .map(id=>document.querySelector(id).getBoundingClientRect());
+          return {height:Math.abs(a.height-b.height),
+            row:Math.max(...boxes.map(r=>r.top))-Math.min(...boxes.map(r=>r.top))};
         }""")
         assert measured["height"] <= 1 and measured["row"] <= 2, measured
     # Export the already verified source revision of the translated recording as well.
     page.evaluate("""async () => {
       const job=stageQueueJobs.find(item=>item.result_path===translationReview.result_path);
-      await postReview('export', {result_path:job.result_path, revision_path:job.workflow.review.path,
+      await postReview('export', {result_path:job.result_path,
+        revision_path:job.workflow.review.path,
         export_output_directory:`${job.output_directory}/exports`, formats:['txt']});
       await refreshJobs();
     }""")
@@ -409,6 +582,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
             ".every(id => document.getElementById(id))",
             name,
         )
+    check_localized_interface(page)
     check_maintenance_controls(page)
     check_dictionary_library(page, output)
     stage(page, "workspace")
@@ -476,6 +650,10 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     panel = page.locator("#review-speaker-names")
     panel.evaluate("e => e.open=true")
     assert panel.locator("#gui-palette").count() == 1
+    assert panel.locator(".review-add-speaker").evaluate("""button => {
+      const last=button.parentElement.querySelector('.review-speaker-label-row:last-of-type');
+      return !last || button.getBoundingClientRect().top >= last.getBoundingClientRect().bottom;
+    }""")
     page.locator("#gui-export-palette").select_option("brand")
     expect(page.locator("#gui-profile-swatches span")).to_have_count(6)
     assert page.locator("#gui-profile-swatches span").nth(2).get_attribute("title") == "#F2C55B"
@@ -607,6 +785,13 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.locator("#translation-review-confirmed").check()
     page.locator("#apply-translation-review").click()
     expect(page.locator("#export-translation-review")).to_be_enabled()
+    # Reopening optional translation clears a transient candidate while the saved review remains.
+    page.evaluate("""async () => {
+      const job=stageQueueJobs.find(item=>item.result_path===translationReview.result_path);
+      await openStageQueueItem(job,'translation');
+    }""")
+    assert page.evaluate("translationCandidate === null && translationReview !== null")
+    stage(page, "semantic-review")
     page.locator("#export-translation-review").click()
     expect(page.locator("#translation-review-status")).to_contain_text("exported")
     stage(page, "workspace")

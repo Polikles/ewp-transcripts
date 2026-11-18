@@ -147,7 +147,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"Project correction dictionary" in response.body
     assert b'id="propose-dictionary"' in response.body
     assert b'id="review-correction"' in response.body
-    assert b"Apply verified revision" in response.body
+    assert b"Save and prepare for export" in response.body
     assert b'id="clear-review"' in response.body
     assert b'id="restore-review"' in response.body
     assert b"Review status" in response.body

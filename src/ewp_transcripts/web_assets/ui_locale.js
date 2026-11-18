@@ -238,7 +238,7 @@ for (const [en, pl] of [
   ],
   [
     "This optional operation sends transcript text to the selected API and writes a non-final correction candidate. Audio is never sent. Manual review remains required.",
-    "Ta opcjonalna operacja wysyła tekst transkrypcji do wybranego API i zapisuje nieostateczną propozycję korekty. Audio nie jest wysyłane. Weryfikacja przez człowieka pozostaje konieczna."
+    "Ta opcjonalna operacja wysyła tekst transkrypcji do wybranego API i zapisuje wstępną korektę. Audio nie jest wysyłane. Weryfikacja przez człowieka pozostaje konieczna."
   ],
   [
     "Choose one canonical result to reopen its optional correction stage. Selection lasts only for this page and does not start provider work.",
@@ -720,7 +720,7 @@ for (const [en, pl] of [
 ]) guiPolish.set(en, pl);
 guiPolish.set("Saving new dictionary version…", "Zapisywanie nowej wersji słownika…");
 guiPolish.set("Manage project dictionaries, compare editions, edit terms and save new versions. Dictionaries are optional; previous versions remain available.", "Zarządzaj słownikami projektu, porównuj wersje, edytuj terminy i zapisuj nowe wersje. Słowniki są opcjonalne, a wcześniejsze wersje pozostają dostępne.");
-guiPolish.set("Use optional API assistance or skip it to translate manually. Every candidate requires semantic review before export.", "Skorzystaj z opcjonalnej pomocy API lub pomiń ją i tłumacz ręcznie. Każdy kandydat wymaga weryfikacji znaczenia przed eksportem.");
+guiPolish.set("Use optional API assistance or skip it to translate manually. Every candidate requires semantic review before export.", "Skorzystaj z opcjonalnej pomocy API lub pomiń ją i tłumacz ręcznie. Każda propozycja wymaga weryfikacji znaczenia przed eksportem.");
 guiPolish.set("Current direction: PL → EN.", "Aktualny kierunek: PL → EN.");
 guiPolish.set("Current direction: EN → PL.", "Aktualny kierunek: EN → PL.");
 guiPolish.set("Preset colors", "Kolory profilu");
@@ -728,6 +728,18 @@ guiPolish.set("Saving custom profile…", "Zapisywanie własnego profilu…");
 function guiUiText(value) {
   if (guiLocale !== "pl") return value;
   const trimmed = value.trim();
+  const coded = guiDiagnosticPattern.exec(trimmed);
+  if (coded) {
+    const description = guiPolishErrorDescriptions.get(coded[1]);
+    const translatedBody = guiUiText(coded[2]);
+    return `${coded[1]}: ${description || (translatedBody !== coded[2] ? translatedBody : guiPolishFallbackError(coded[1]))}`;
+  }
+  const exact = guiPolish.get(trimmed);
+  if (exact !== undefined) return value.replace(trimmed, exact);
+  const indicator = /^(ASR|Correction|Review|Original export|LLM translation|Translation|Translated export): (.*)$/.exec(trimmed);
+  if (indicator) return `${guiUiText(indicator[1])}: ${guiUiText(indicator[2])}`;
+  const dynamic = guiPolishDynamicText(trimmed);
+  if (dynamic !== null) return value.replace(trimmed, dynamic);
   let translated = guiPolish.get(trimmed);
   if (!translated) {
     const composite = /^(completed|failed|staged|queued|running) · (.+)$/.exec(trimmed);
@@ -736,7 +748,7 @@ function guiUiText(value) {
       .replace(/^Workspace loaded: (.*)\. Provider credentials and confirmations were not restored\.$/, 'Wczytano obszar pracy: $1. Dane dostępowe i potwierdzenia nie zostały przywrócone.')
       .replace(/^(\d+) selected; batch execution will remain per-item consent gated\.$/, 'Wybrano: $1; zgoda na przetwarzanie pozostaje wymagana dla każdej pozycji.')
       .replace(/^\((\d+) items?\)$/, '(pozycje: $1)')
-      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom plan bez przetwarzania przed dodaniem odcinka do kolejki.')
+      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom zaplanuj przetwarzanie przed dodaniem pliku do kolejki.')
       .replace(/^Batch selection: (\d+) correction · (\d+) translation$/, "Zaznaczenie zbiorcze: $1 korekta · $2 tłumaczenie")
       .replace(/^Units (\d+)–(\d+) of (\d+)$/, "Jednostki $1–$2 z $3")
       .replace(/^\((\d+) items?\)$/, "($1 pozycji)")
@@ -744,7 +756,7 @@ function guiUiText(value) {
       .replace(/^Workspace loaded: (.*)\. Provider credentials and confirmations were not restored\.$/, 'Wczytano obszar pracy: $1. Dane dostępowe i potwierdzenia nie zostały przywrócone.')
       .replace(/^(\d+) selected; batch execution will remain per-item consent gated\.$/, 'Wybrano: $1; zgoda na przetwarzanie pozostaje wymagana dla każdej pozycji.')
       .replace(/^\((\d+) items?\)$/, '(pozycje: $1)')
-      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom plan bez przetwarzania przed dodaniem odcinka do kolejki.')
+      .replace(/^Selected: (.+)\. Inspect, then run dry-run to review this episode before adding it to the queue\.$/, 'Wybrano: $1. Sprawdź pliki i uruchom zaplanuj przetwarzanie przed dodaniem pliku do kolejki.')
       .replace(/^Batch selection: (\d+) correction · (\d+) translation$/, 'Wybór zbiorczy: $1 korekta · $2 tłumaczenie')
       .replace(/^Units (\d+)–(\d+) of (\d+)$/, 'Jednostki $1–$2 z $3')
       .replace(/^Inspected (\d+) \/ (\d+) episodes\. ?$/, "Sprawdzono $1 z $2 odcinków.")
@@ -766,14 +778,17 @@ function guiUiText(value) {
 }
 function translateGui() {
   guiTranslationObserver?.disconnect();
+  clearStaleGuiErrorDiagnostics();
   document.documentElement.lang = guiLocale;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentElement.closest("script, style, textarea, pre, #library-items span, #library-comparison td, #library-comparison th, #library-select option, #library-compare option, #gui-export-palette option, .translation-source, .gui-path, .gui-context-speaker, .review-summary-table td, .stage-queue-item h4, .stage-queue-item p, .dictionary-candidate p, .dictionary-candidate details, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
+    if (node.parentElement.closest("script, style, textarea, pre, [data-gui-content], #library-comparison td, #gui-export-palette option, .translation-source, .gui-context-speaker, .stage-queue-item h4, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
     const previous = guiNodeSources.get(node);
     const source = previous && previous.last === node.nodeValue ? previous.source : node.nodeValue;
-    const translated = guiUiText(source);
+    retainGuiErrorDiagnostic(node, source);
+    const translated = node.parentElement.id === "preview-review" && source.trim() === "Apply"
+      ? source.replace("Apply", guiLocale === "pl" ? "Zatwierdź" : "Apply") : guiUiText(source);
     if (node.nodeValue !== translated) node.nodeValue = translated;
     guiNodeSources.set(node, {source, last: translated});
   }
@@ -790,7 +805,7 @@ function translateGui() {
     }
     guiAttributeSources.set(element, originals);
   }
-  guiTranslationObserver?.observe(document.body, {childList: true, subtree: true, characterData: true});
+  guiTranslationObserver?.observe(document.body, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:["title", "aria-label", "placeholder", "hidden"]});
 }
 function startGuiTranslation() {
   let pending = false;

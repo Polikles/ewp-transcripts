@@ -112,7 +112,7 @@ function installGuiDictionaryLibrary() {
       const [left, right] = await Promise.all([get("select").value, get("compare").value].map(path => queuePost("/api/v1/dictionaries/view", {path})));
       const changes = document.createElement("table"); changes.className = "queue-table library-comparison";
       const head = changes.createTHead().insertRow();
-      for (const label of ["Term / field", left.document.dictionary_id, right.document.dictionary_id]) { const cell = document.createElement("th"); cell.textContent = label; head.append(cell); }
+      for (const [index, label] of ["Term / field", left.document.dictionary_id, right.document.dictionary_id].entries()) { const cell = document.createElement("th"); cell.textContent = label; if (index) cell.dataset.guiContent = "true"; head.append(cell); }
       const maps = [left, right].map(item => new Map([
         ...["project_id", "language", "source_language", "target_language", "job_ids"].map(key => [`@${key}`, JSON.stringify(item.document[key] ?? "—")]),
         ...item.document.entries.map(entry => [entry.source, `${entry.target} (${entry.status || "approved"})`]),
@@ -154,5 +154,6 @@ function installGuiDictionaryLibrary() {
     } catch (error) { status(error.message); } finally { get("save").disabled = false; }
   });
   fill({});
+  document.addEventListener("ewp-session-ready", () => { void refresh().catch(error=>status(error.message)); });
 }
 installGuiDictionaryLibrary();

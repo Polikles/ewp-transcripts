@@ -73,6 +73,7 @@ function updateGuiContext() {
   context.replaceChildren();
   const title = document.createElement("strong");
   title.textContent = job?.planned_job_id || reviewDocument?.job_id || "No active recording";
+  if (job?.planned_job_id || reviewDocument?.job_id) title.dataset.guiContent = "true";
   const stage = document.createElement("span");
   stage.textContent = guiStages.find(item => item[0] === guiActiveStage)[1];
   const path = document.createElement("span");
@@ -80,6 +81,7 @@ function updateGuiContext() {
   const activePath = guiActiveResult || job?.input_path || "";
   path.textContent = activePath ? shortName(activePath) : "Choose a recording in a stage queue.";
   path.title = activePath;
+  if (activePath) path.dataset.guiContent = "true";
   const saved = document.createElement("span");
   saved.textContent = reviewDirty || translationReviewDirty ? "Unsaved draft — navigation keeps it open" : "Draft changes saved or no draft open";
   context.append(title, stage, path, saved);

@@ -6,6 +6,21 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Start queue recovers after asynchronous success/failure and follows live job state, so later
+  staged work can run alongside completed history. Finished ASR jobs are not started again.
+- Applied translations export after visiting other stages without regenerating a candidate;
+  apply/export resolve their output root from the active saved review rather than a transient
+  provider candidate. Source lineage and explicit verification requirements remain unchanged.
+- Processing language is retained per selected recording and used by multi-recording Inspect.
+  Shared output precedes input paths and the dictionary library loads on session initialization.
+- Audited Polish UI copy now includes asynchronous statuses, summaries, decision labels, dialogs,
+  hover text and error descriptions while preserving original diagnostic codes and raw technical
+  messages. Technical text is smaller; Add speaker spacing and validation controls are corrected.
+- Source/translation action names and numbered instructions match the revised Apply / Save and
+  prepare for export / Save and export flow. Full Polish documentation is planned after owner
+  terminology approval; English remains authoritative in the repository.
+
+
 - Inspect checks all selected unqueued episodes, staging advances selection and staged inputs
   cannot be inspected/planned again. Recording cards open the current workflow step. Main queue
   removal is per-row; completed-only cleanup preserves unfinished/failed work and saved files.

@@ -3,6 +3,8 @@ const expectedApi = "1.0";
 const guiQueuedInputPaths = new Set();
 let csrfToken = "";
 let jobsSignature = "";
+let guiQueueStarting = false;
+let guiQueueJobs = [];
 let openRouterKeyConfigured = false;
 let guiPendingRequests = 0;
 const inlineWorkingIndicators = new Map();
@@ -21,7 +23,7 @@ async function start() { const status = document.querySelector("#compatibility")
 function clearEwpBrowserState() { if (!window.confirm("Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved editor changes will be lost.")) return; for (const storage of [window.localStorage, window.sessionStorage]) { for (let index = storage.length - 1; index >= 0; index -= 1) { const key = storage.key(index); if (key?.startsWith("ewp-")) storage.removeItem(key); } } window.location.reload(); }
 document.querySelector("#clear-browser-state").addEventListener("click", clearEwpBrowserState);
 function shortName(path) { return path ? path.split(/[\\/]/).pop() : "—"; }
-function showSummary(kind, result, operation = {}) { const summary = document.querySelector("#operation-summary"); summary.replaceChildren(); let entries; const speakers = operation.speaker_count === "auto" ? "Auto-detect" : operation.speaker_count ?? "—"; const language = operation.language === "auto" ? `${result.language || "auto"} (auto)` : operation.language || result.language || "—"; if (kind === "inspect") { entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0], ["Language", language], ["Speakers", speakers]]; } else { const jobs = result.jobs || []; const identities = jobs.map(job => job.job_id).join(", "); const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", "); entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"], ["Language", language], ["Speakers", speakers]]; } for (const [label, value] of entries) { const card = document.createElement("div"); card.className = "result-card"; const heading = document.createElement("strong"); heading.textContent = label; card.append(heading, String(value)); summary.append(card); } if (kind === "dry-run" && result.jobs?.length) { const table = document.createElement("table"); table.className = "queue-table plan-table"; table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>"; const body = document.createElement("tbody"); for (const job of result.jobs) { const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id); const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—"; const row = document.createElement("tr"); for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); } body.append(row); } table.append(body); summary.append(table); } }
+function showSummary(kind, result, operation = {}) { const summary = document.querySelector("#operation-summary"); summary.replaceChildren(); let entries; const speakers = operation.speaker_count === "auto" ? "Auto-detect" : operation.speaker_count ?? "—"; const language = operation.language === "auto" ? `${result.language || "auto"} (auto)` : operation.language || result.language || "—"; if (kind === "inspect") { entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0], ["Recording language", language], ["Speakers", speakers]]; } else { const jobs = result.jobs || []; const identities = jobs.map(job => job.job_id).join(", "); const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", "); entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"], ["Recording language", language], ["Speakers", speakers]]; } for (const [label, value] of entries) { const card = document.createElement("div"); card.className = "result-card"; const heading = document.createElement("strong"); heading.textContent = label; card.append(heading, String(value)); summary.append(card); } if (kind === "dry-run" && result.jobs?.length) { const table = document.createElement("table"); table.className = "queue-table plan-table"; table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>"; const body = document.createElement("tbody"); for (const job of result.jobs) { const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id); const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—"; const row = document.createElement("tr"); for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); } body.append(row); } table.append(body); summary.append(table); } }
 async function queuePost(path, body, options = {}) { const feedback = options.feedback !== false; const trigger = options.trigger ?? lastClickedButton; let succeeded = false; if (feedback) setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json", "X-EWP-CSRF": csrfToken}, body: JSON.stringify(body)}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { if (feedback) setGuiWorking(false, trigger, succeeded); } }
 async function postSelectedFile(path, file, trigger, extraHeaders = {}) { let succeeded = false; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/octet-stream", "Accept": "application/json", "X-EWP-CSRF": csrfToken, "X-EWP-Filename": encodeURIComponent(file.name), ...extraHeaders}, body: file}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { setGuiWorking(false, trigger, succeeded); } }
 function diagnosticCode(error) { const message = String(error?.message || "GUI_WORKFLOW_OPERATION_FAILED"); return message.split(":", 1)[0] || "GUI_WORKFLOW_OPERATION_FAILED"; }
@@ -210,6 +212,8 @@ function renderTranscriptionErrors(jobs) {
 }
 async function refreshJobs() {
   const payload = await loadJson("/api/v1/transcriptions");
+  guiQueueJobs = payload.jobs;
+  updateGuiQueueStart();
   const signature = JSON.stringify(payload.jobs);
   if (signature === jobsSignature) return payload;
   jobsSignature = signature;
@@ -251,7 +255,22 @@ async function refreshJobs() {
 async function enableProceedNextOutput() { const button = document.querySelector("#proceed-next-output"); const payload = await refreshJobs(); const completeJobs = payload?.jobs?.filter(job => job.status === "completed") || []; const allTranslated = completeJobs.length > 0 && completeJobs.every(job => ["complete", "skipped"].includes(job.workflow?.translated_export?.state)); button.textContent = allTranslated ? "Queue finished" : "Proceed with next output"; button.title = allTranslated ? "All completed queue outputs have verified translated exports or an explicitly skipped translation. Return to the transcription queue." : "Return to the transcription queue to continue the next output."; button.disabled = false; }
 document.querySelector("#proceed-next-output").addEventListener("click", () => guiScrollTo(document.querySelector("#workspace-heading"), {behavior: "smooth", block: "start"}));
 document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; if (guiInputAlreadyStaged()) return; if (kind === "inspect" && selectedGuiAudio.length) { await inspectGuiEpisodes(submitter); return; } const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (activeGuiAudio && request.path === activeGuiAudio.paths[0] && activeGuiAudio.paths.length > 1) { request.group_paths = activeGuiAudio.paths; request.group_id = activeGuiAudio.name; } if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; if (activeGuiAudio) activeGuiAudio.files.forEach(file => { file.staged = true; }); formElement.elements.confirmed.checked = false; if (payload.input_path) formElement.elements.path.value = payload.input_path; if (payload.group_sources && activeGuiAudio) { for (const file of activeGuiAudio.files) { const durable = activeGuiAudio.files.length === 1 ? payload.input_path : Object.keys(payload.group_sources).find(path => shortName(path) === file.name); if (durable) file.path = durable; } activeGuiAudio.paths = activeGuiAudio.files.map(file => file.path); renderGuiAudioChoices(); } result.textContent = ""; summary.replaceChildren(); await refreshJobs(); const next = guiAudioEpisodes().find(item => !item.files.some(file => file.staged)); if (next) selectGuiAudio(next); else renderGuiAudioChoices(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); if (payload.error.code === "GUI_DRY_RUN_REQUIRED") highlightDryRun(); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); if (kind === "dry-run") document.querySelector('#workflow button[value="dry-run"]').classList.remove("next-required"); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = guiInputAlreadyStaged(); } });
-document.querySelector("#start-queue").addEventListener("click", async event => { event.currentTarget.disabled = true; try { const payload = await queuePost("/api/v1/transcriptions/start", {}); document.querySelector("#operation-status").textContent = payload.queued ? `Started ${payload.queued} queued job(s)` : "No staged jobs to start"; await refreshJobs(); } catch (error) { document.querySelector("#operation-status").textContent = error.message; } finally { event.currentTarget.disabled = false; } });
+function updateGuiQueueStart() {
+  document.querySelector("#start-queue").disabled = guiQueueStarting || !guiQueueJobs.some(job => ["staged", "queued", "running"].includes(job.status));
+}
+document.querySelector("#start-queue").addEventListener("click", async () => {
+  if (guiQueueStarting) return;
+  guiQueueStarting = true; updateGuiQueueStart();
+  try {
+    const payload = await queuePost("/api/v1/transcriptions/start", {});
+    document.querySelector("#operation-status").textContent = payload.queued
+      ? `Started ${payload.queued} queued job(s)`
+      : guiQueueJobs.some(job => ["queued", "running"].includes(job.status)) ? "Queue is already running" : "No staged jobs to start";
+    await refreshJobs();
+  } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
+  finally { guiQueueStarting = false; updateGuiQueueStart(); }
+});
+
 document.querySelector("#workflow").addEventListener("reset", () => { activeGuiAudio = null; selectedGuiAudio.length = 0; renderGuiAudioChoices(); document.querySelector("#operation-status").textContent = ""; document.querySelector("#operation-summary").replaceChildren(); document.querySelector("#operation-result").textContent = ""; document.querySelector("#raw-result").open = false; });
 let correctionCandidate = null;
 const correctionForm = document.querySelector("#correction-workflow");
@@ -641,7 +660,7 @@ async function inspectGuiEpisodes(button) {
   try {
     for (const episode of episodes) {
       status.textContent = `Inspecting ${results.length + failures.length + 1} / ${episodes.length}: ${episode.name}`;
-      const request = {path:episode.paths[0], language:document.querySelector("#workflow-language").value,
+      const request = {path:episode.paths[0], language:episode.files[0].language || document.querySelector("#workflow-language").value,
         speaker_count:document.querySelector("#workflow-speaker-auto").checked ? "auto" : Number(document.querySelector("#workflow-speaker-count").value)};
       if (episode.paths.length > 1) { request.group_paths = episode.paths; request.group_id = episode.name; }
       try {
@@ -673,8 +692,15 @@ function guiAudioEpisodes() {
     return files.map(file => ({name:file.name, paths:[file.path], files:[file]}));
   });
 }
+function rememberGuiAudioLanguage() {
+  if (activeGuiAudio) activeGuiAudio.files.forEach(file => { file.language = document.querySelector("#workflow-language").value; });
+}
+document.querySelector("#workflow-language").addEventListener("change", rememberGuiAudioLanguage);
 function selectGuiAudio(episode, announce = true) {
+  rememberGuiAudioLanguage();
   activeGuiAudio = episode;
+  const language = episode.files[0].language || "pl";
+  document.querySelector("#workflow-language").value = language;
   workflowInput.value = episode.paths[0];
   workflowInput.dispatchEvent(new Event("input", {bubbles:true}));
   document.querySelector("#workflow").elements.confirmed.checked = false;
@@ -718,7 +744,7 @@ nativeMediaInput.addEventListener("change", async () => {
     status.textContent = `Copying ${file.name} into this local GUI session…`;
     try {
       const payload = await postSelectedFile("/api/v1/selected-media/upload", file, nativeMediaButton);
-      selectedGuiAudio.push({name:file.name, path:payload.path});
+      selectedGuiAudio.push({name:file.name, path:payload.path, language:document.querySelector("#workflow-language").value});
     } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
   const episodes = guiAudioEpisodes();

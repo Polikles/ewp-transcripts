@@ -261,7 +261,7 @@ async function openEnhancedTranslationReview(requestedCandidate = translationCan
       const context = JSON.parse(stored);
       const payload = await queuePost("/api/v1/translation-reviews/load", context);
       if (switching) clearActiveTranslationReview();
-      translationCandidate = requestedCandidate;
+      translationCandidate = {...requestedCandidate, output_root:context.output_root || requestedCandidate.output_root};
       appliedTranslation = context.applied_translation_path || "";
       translationReviewSectionIndex = 0;
       renderEnhancedTranslationReview(payload);
@@ -409,7 +409,7 @@ async function previewEnhancedTranslationReview() {
 async function applyEnhancedTranslationReview() {
   if (!translationReview) return;
   try {
-    const root = translationCandidate.output_root;
+    const root = currentTranslationReviewCandidate().output_root;
     const payload = await queuePost("/api/v1/translation-reviews/apply", {
       ...translationReviewContext(),
       translation_output_directory: `${root}/accepted-translations`,
@@ -431,7 +431,7 @@ async function applyEnhancedTranslationReview() {
 async function exportEnhancedTranslationReview() {
   if (!translationReview || !appliedTranslation) return;
   try {
-    const root = translationCandidate.output_root;
+    const root = currentTranslationReviewCandidate().output_root;
     const formats = [...document.querySelectorAll('input[name="translation-format"]:checked')]
       .map(item => item.value);
     const payload = await queuePost("/api/v1/translation-reviews/audit-export", {

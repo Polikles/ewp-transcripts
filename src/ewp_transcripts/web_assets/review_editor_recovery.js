@@ -24,12 +24,9 @@ function arrangeReviewControls() {
   editing.className = "review-control-group";
   editing.innerHTML = "<h3>Draft and history</h3>";
   const prepareLine = document.createElement("div");
-  prepareLine.className = "review-control-line";
-  prepareLine.append(prepare);
-  const previewLine = document.createElement("div");
-  previewLine.className = "review-control-line";
-  previewLine.append(preview);
-  preparation.append(prepareLine, previewLine);
+  prepareLine.className = "review-control-line review-prepare-line";
+  prepareLine.append(preview, prepare);
+  preparation.append(prepareLine);
   const saveLine = document.createElement("div");
   saveLine.className = "review-control-line";
   saveLine.append(save, restore);

@@ -810,6 +810,11 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     cleanup, versioned dictionary management, configured/custom palettes and translation/layout
     feedback. Keep its owner retest pending. After GUI fixes/tweaks, prepare a frontend-only
     artist review package for icon design; this is saved in TODO.md as follow-up, not yet built.
+    The [localization/recovery follow-up](checkpoints/2026-11-18-gui-localization-and-recovery.md)
+    covers the owner’s Polish UI audit, per-recording language, later queue starts and applied
+    translation recovery, plus revised EN/PL review actions. English stays authoritative.
+    Prepare full Polish user documentation only after the owner accepts the function/section
+    terminology; this is tracked separately from the artist reference package in TODO.md.
     **GUI-34a earlier slice:** GUI-34a implements responsive access
     to existing queues/review controls, retaining the locally scrollable table and existing workflow.
     Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance

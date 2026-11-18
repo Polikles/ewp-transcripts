@@ -126,3 +126,11 @@
 
 #gui-profile-swatches { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
 .gui-profile-swatch { display: inline-block; width: 1.1rem; height: 1.1rem; border: 1px solid var(--gui-muted); border-radius: 50%; }
+
+.gui-workbench pre { font-size: .72rem; line-height: 1.45; }
+.review-add-speaker { display: block; margin-top: .65rem; clear: both; }
+.review-prepare-line { flex-wrap: nowrap; align-items: flex-start; }
+.review-prepare-line > .feedback-anchor { flex: 1 1 auto; min-width: 0; }
+.review-prepare-line > .feedback-anchor > button { width: 100%; font-size: .78rem; padding: .4rem; }
+
+.gui-error-diagnostic > summary { color: var(--gui-muted); font-size: .75rem; font-weight: 400; }

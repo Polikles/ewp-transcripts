@@ -365,6 +365,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("translation_review_editor.js").read_bytes()
         body += b"\n" + assets.joinpath("translation_provider_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("ui_locale.js").read_bytes()
+        body += b"\n" + assets.joinpath("ui_locale_catalog.js").read_bytes()
         body += b"\n" + assets.joinpath("workbench.js").read_bytes()
         body += b"\n" + assets.joinpath("dictionary_library.js").read_bytes()
         body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()

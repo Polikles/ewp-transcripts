@@ -4,6 +4,33 @@ Last updated: **2026-11-18**.
 
 ## Active task and resume pointers
 
+Current request: [Polish UI audit and queue/translation recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
+Read the active TODO checklist first. Implementation and VM verification are complete;
+delivery to main follows final checks. Owner terminology approval and WSL retest remain pending.
+Full Polish user documentation is explicitly deferred until approval. English remains the
+repository's primary language. The artist package is a separate deferred TODO.
+
+Start queue now follows live job state, recovers after asynchronous success/failure and can
+start later staged work alongside terminal history. Translation Apply/export use the active
+saved review's output root, so visiting optional translation cannot break an applied export.
+Selected recordings retain their own language; multi-Inspect uses each setting. Dictionary
+catalog loads on session initialization and output is placed before input paths.
+
+The EN/PL UI audit covers direct/conditional copy, running/restored statuses, summaries,
+plan decisions, dialogs, hover text, stable error codes and original technical diagnostics.
+Source/translation action names and guides match Apply / Save and prepare for export / Save
+and export. Export subtitles is a regular section heading; technical text and speaker spacing
+are corrected. Exact translations take precedence over parameterized patterns; actual paths,
+recording/speaker names, transcript text and dictionary terms remain protected.
+
+Verification: 831 tests, Ruff/format/mypy PASS; five integration tests PASS; 144 browser layout
+cases PASS with no page errors or external requests. Focused copy, exact label, error-original,
+modal, mixed-queue start/rejection, per-recording language, Add speaker and translation-navigation
+export checks PASS. Backend worker test executes later staged work and skips terminal history.
+Browser Start requests are intercepted so no ASR runs. Wheel/source builds PASS: 49 assets/guides
+match source, nine help routes work from wheel without ML imports, combined JS parses.
+This does not qualify new real provider/GPU/Windows zoom/YouTube behavior. Earlier entries are history.
+
 Current request: [GUI workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
 Implementation and VM verification are complete. Delivered to origin/main in
 `2422d721d213f1403f33e8068f744156b97801c7`; the documentation follow-up records delivery.

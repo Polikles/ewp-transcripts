@@ -9,22 +9,22 @@
     "steps": [
       {
         "title": {
-          "en": "Choose audio and output",
-          "pl": "Wybierz audio i katalog wyników"
+          "en": "Choose output and audio",
+          "pl": "Wybierz katalog wyników i audio"
         },
         "text": {
-          "en": "Choose audio files and a shared output directory. Select all matching speaker tracks for one episode together.",
-          "pl": "Wybierz pliki audio i wspólny katalog wyników. Zaznacz razem wszystkie ścieżki mówców jednego odcinka."
+          "en": "Choose the shared output directory first, then audio files. Select matching speaker tracks for one episode together.",
+          "pl": "Najpierw wybierz wspólny katalog wyników, a następnie pliki audio. Zaznacz razem ścieżki mówców jednego nagrania."
         }
       },
       {
         "title": {
-          "en": "Inspect the episode",
-          "pl": "Sprawdź odcinek"
+          "en": "Inspect file",
+          "pl": "Sprawdź plik"
         },
         "text": {
-          "en": "Select an episode, choose language and speaker count or auto-detection, then click Inspect.",
-          "pl": "Wybierz odcinek, język oraz liczbę mówców lub wykrywanie automatyczne i kliknij Sprawdź."
+          "en": "Choose processing language separately for each selected recording and speaker count or auto-detection. Inspect checks all unqueued selections.",
+          "pl": "Ustaw język osobno dla każdego wybranego nagrania oraz liczbę mówców lub wykrywanie automatyczne. Sprawdzenie obejmuje wszystkie pozycje spoza kolejki."
         }
       },
       {
@@ -33,8 +33,8 @@
           "pl": "Zaplanuj i dodaj do kolejki"
         },
         "text": {
-          "en": "Click Dry-run, review every source and output, check the exact-plan confirmation, then Add to queue. Repeat for other episodes.",
-          "pl": "Kliknij Plan bez przetwarzania, sprawdź źródła i wyniki, potwierdź dokładny plan i dodaj do kolejki. Powtórz dla innych odcinków."
+          "en": "Run Dry-run, review the exact plan, confirm it and Add to queue. Adding advances to the next unqueued recording.",
+          "pl": "Kliknij Zaplanuj przetwarzanie, sprawdź dokładny plan, potwierdź go i dodaj plik do kolejki. Wybór przejdzie do następnego nagrania spoza kolejki."
         }
       },
       {
@@ -80,11 +80,11 @@
       {
         "title": {
           "en": "Generate correction candidate",
-          "pl": "Wygeneruj propozycję korekty"
+          "pl": "Wygeneruj wstępną korektę"
         },
         "text": {
           "en": "Give scoped consent and Generate correction candidate. Suggestions remain non-final.",
-          "pl": "Wyraź zgodę dla tego zakresu i wygeneruj propozycję korekty. Propozycje pozostają nieostateczne."
+          "pl": "Wyraź zgodę dla tego zakresu i wygeneruj wstępną korektę. Wymaga ona ręcznego sprawdzenia."
         }
       },
       {
@@ -139,12 +139,12 @@
       },
       {
         "title": {
-          "en": "Preview and apply revision",
-          "pl": "Sprawdź i zastosuj rewizję"
+          "en": "Check and save revision",
+          "pl": "Sprawdź i zapisz rewizję"
         },
         "text": {
-          "en": "Use Preview in Prepare and validate, inspect the result, confirm manual verification, then Apply verified revision.",
-          "pl": "Użyj Podglądu w Przygotowaniu i walidacji, sprawdź wynik, potwierdź ręczną weryfikację i zastosuj zatwierdzoną rewizję."
+          "en": "Use Apply to save and validate the draft. Confirm manual verification, then Save and prepare for export. Prepare text for review creates a draft when needed.",
+          "pl": "Kliknij Zatwierdź, aby zapisać i sprawdzić szkic. Potwierdź ręczne sprawdzenie, a następnie Zapisz i przygotuj do eksportu. Przygotuj tekst do sprawdzenia tworzy szkic, gdy jest potrzebny."
         }
       },
       {
@@ -190,11 +190,11 @@
       {
         "title": {
           "en": "Generate candidate",
-          "pl": "Wygeneruj kandydata"
+          "pl": "Wygeneruj propozycję tłumaczenia"
         },
         "text": {
           "en": "For API assistance, choose provider/model, check readiness, consent and generate a non-final candidate. Source details and the optional dictionary can be expanded.",
-          "pl": "Aby użyć API, wybierz dostawcę i model, sprawdź połączenie, wyraź zgodę i wygeneruj kandydata. Szczegóły źródła i słownik są rozwijane."
+          "pl": "Aby użyć API, wybierz dostawcę i model, sprawdź połączenie, wyraź zgodę i wygeneruj propozycję tłumaczenia. Szczegóły źródła i słownik są rozwijane."
         }
       },
       {
@@ -214,7 +214,7 @@
     "document": "docs/gui/translation-review.md",
     "title": {
       "en": "Translation review & export",
-      "pl": "Weryfikacja i eksport tłumaczenia"
+      "pl": "Weryfikacja tłumaczenia i eksport"
     },
     "steps": [
       {
@@ -239,32 +239,32 @@
       },
       {
         "title": {
-          "en": "Preview translation",
-          "pl": "Sprawdź tłumaczenie"
+          "en": "Apply translation",
+          "pl": "Zastosuj tłumaczenie"
         },
         "text": {
-          "en": "Save the translation draft, then Preview translation. Resolve errors and review warnings.",
-          "pl": "Zapisz szkic tłumaczenia i uruchom jego Podgląd. Usuń błędy i sprawdź ostrzeżenia."
+          "en": "Apply translation saves and validates the draft. Resolve errors and review warnings; it does not publish a final translation.",
+          "pl": "Zastosuj tłumaczenie zapisuje i sprawdza szkic. Usuń błędy i sprawdź ostrzeżenia; ta czynność nie zapisuje jeszcze wersji do eksportu."
         }
       },
       {
         "title": {
-          "en": "Apply verified translation",
-          "pl": "Zastosuj zatwierdzone tłumaczenie"
+          "en": "Save translation",
+          "pl": "Zapisz tłumaczenie"
         },
         "text": {
-          "en": "Confirm manual semantic verification and Apply verified translation.",
-          "pl": "Potwierdź ręczną weryfikację znaczenia i zastosuj zatwierdzone tłumaczenie."
+          "en": "Confirm manual semantic verification, then Save and prepare for export to publish an immutable translation.",
+          "pl": "Potwierdź ręczną weryfikację znaczenia i kliknij Zapisz i przygotuj do eksportu, aby zapisać niezmienną wersję tłumaczenia."
         }
       },
       {
         "title": {
-          "en": "Audit and export",
-          "pl": "Sprawdź i eksportuj"
+          "en": "Save and export",
+          "pl": "Zatwierdź i eksportuj"
         },
         "text": {
-          "en": "Choose formats and Audit and export verified translation. Proceed with next output returns to the queue.",
-          "pl": "Wybierz formaty i sprawdź oraz wyeksportuj zatwierdzone tłumaczenie. Przejdź do kolejnego wyniku wraca do kolejki."
+          "en": "Choose formats and Save and export. The source lineage is audited before export; Proceed with next output returns to the queue.",
+          "pl": "Wybierz formaty i kliknij Zatwierdź i eksportuj. Przed eksportem sprawdzana jest zgodność ze źródłem. Przejdź do następnego wyniku wraca do kolejki."
         }
       }
     ]

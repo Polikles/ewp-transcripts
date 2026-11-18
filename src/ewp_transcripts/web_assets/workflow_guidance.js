@@ -49,6 +49,9 @@ function numberWorkflowSections() {
   }
   const form = document.querySelector("#workflow");
   markWorkflowStep("workspace", 1, form);
+  const outputLabel = document.querySelector('label[for="output-path"]');
+  const outputInput = document.querySelector("#output-path");
+  document.querySelector('label[for="input-path"]').before(outputLabel, outputInput, chooseOutputFeedback);
   const inspectActions = form.querySelector(".actions");
   markWorkflowStep("workspace", 2, inspectActions);
   const confirmation = form.querySelector('input[name="confirmed"]').closest("label");
@@ -61,7 +64,9 @@ function numberWorkflowSections() {
   markWorkflowStep("review", 2, document.querySelector("#review-speaker-names summary, #review-speaker-names legend"), {rename:true});
   markWorkflowStep("review", 3, document.querySelector("#review-navigation"));
   markWorkflowStep("review", 4, document.querySelector(".review-control-groups"));
-  markWorkflowStep("review", 5, document.querySelector('#review-workflow .formats legend'), {rename:true});
+  const formats = document.querySelector('#review-workflow .formats');
+  formats.querySelector("legend").textContent = "Formats";
+  markWorkflowStep("review", 5, formats);
 
   markWorkflowStep("correction", 2, correctionForm);
   markWorkflowStep("correction", 3, document.querySelector("#generate-correction"));

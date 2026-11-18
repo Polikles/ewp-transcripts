@@ -5,7 +5,30 @@ Updated: 2026-11-18.
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
-## Active: GUI workflow polish and library management
+## Active: Polish UI audit and queue/translation recovery
+
+Checkpoint: [localization and recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
+
+- [x] Automatically load the dictionary catalog on first session initialization.
+- [x] Put shared output before input paths; retain processing language separately per selected episode/file.
+- [x] Fix Polish Transcribe wording: Sprawdź plik, Zaplanuj przetwarzanie, complete summaries/statuses/decision labels.
+- [x] Audit all stages, dialogs, dynamic statuses, errors and hover text in EN/PL; preserve diagnostic codes and user content.
+- [x] Translate the OpenRouter key dialog and correction/translation running/candidate states.
+- [x] Reduce technical detail font size and prevent Add speaker overlapping the preceding input.
+- [x] Rename source Prepare text for review / Apply and Polish equivalents; align Apply first on one line.
+- [x] Rename source publication Save and prepare for export; make Export subtitles a normal section heading.
+- [x] Update correction/translation generation and Continue to translation review wording.
+- [x] Rename translation stage/Apply translation/Save translation/Save and prepare for export/Save and export consistently in guides and controls.
+- [x] Fix reopening a saved/applied translation and exporting after stage navigation without regenerating a candidate.
+- [x] Fix Start queue activation whenever staged work exists; preserve completed ASR jobs and support later additions after completion/cleanup.
+- [ ] Verify regressions, complete localization audit, update changelog/roadmap/checkpoints and deliver for WSL testing.
+- [ ] Owner approves final EN/PL function and section names and qualifies this revised workflow on WSL.
+
+## Deferred: full Polish user documentation
+
+- [ ] After the owner accepts function/section terminology, prepare the complete user guide and documentation in Polish. English remains the repository's primary language; Polish documentation is explicitly supported.
+
+## Previous delivery: GUI workflow polish and library management
 
 Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
 
