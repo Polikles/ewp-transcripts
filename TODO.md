@@ -21,7 +21,7 @@ Checkpoint: [localization and recovery](docs/checkpoints/2026-11-18-gui-localiza
 - [x] Rename translation stage/Apply translation/Save translation/Save and prepare for export/Save and export consistently in guides and controls.
 - [x] Fix reopening a saved/applied translation and exporting after stage navigation without regenerating a candidate.
 - [x] Fix Start queue activation whenever staged work exists; preserve completed ASR jobs and support later additions after completion/cleanup.
-- [ ] Verify regressions, complete localization audit, update changelog/roadmap/checkpoints and deliver for WSL testing.
+- [x] Verify regressions, complete localization audit, update changelog/roadmap/checkpoints and deliver for WSL testing.
 - [ ] Owner approves final EN/PL function and section names and qualifies this revised workflow on WSL.
 
 ## Deferred: full Polish user documentation

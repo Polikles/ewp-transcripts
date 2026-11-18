@@ -6,7 +6,8 @@ Last updated: **2026-11-18**.
 
 Current request: [Polish UI audit and queue/translation recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
 Read the active TODO checklist first. Implementation and VM verification are complete;
-delivery to main follows final checks. Owner terminology approval and WSL retest remain pending.
+delivered to origin/main in af1b771872a1ed511f37dec4f3f9ea031d0413cc.
+Owner terminology approval and WSL retest remain pending.
 Full Polish user documentation is explicitly deferred until approval. English remains the
 repository's primary language. The artist package is a separate deferred TODO.
 

@@ -16,7 +16,7 @@ No paid provider calls, real ASR or model downloads are needed for these GUI fix
 ## Progress
 
 - Complete user checklist recorded before implementation.
-- Implementation and verification complete; delivery follows final checks.
+- Implementation, verification and delivery are complete. Owner retest/terminology approval remain pending.
 
 ## Diagnosis and first fixes
 
@@ -33,7 +33,7 @@ No paid provider calls, real ASR or model downloads are needed for these GUI fix
 - Initial full DOM audit plus static text/title audit found additional omissions in dialogs,
   provider controls, running/restored states, summaries and hover text. Supplementary EN→PL
   copy/error catalog and parameterized status translations added. Codes and source text stay raw.
-- Temporary verification root: /tmp/ewp-gui-locale.sVIIW3. Regression checks still pending.
+- Temporary verification root was /tmp/ewp-gui-locale.sVIIW3; removed after final verification.
 
 
 ## Acceptance and verification
@@ -69,8 +69,8 @@ No paid provider calls, real ASR or model downloads are needed for these GUI fix
   Source Add speaker no longer overlaps the preceding row. Apply precedes preparation on one line.
 - Wheel/source build PASS. All 49 frontend/guide assets byte-match source. All nine help routes
   render directly from the wheel without ML imports. Packaged combined JS passes node --check.
-- Temporary tooling/screenshots/synthetic output root: /tmp/ewp-gui-locale.sVIIW3; remove after
-  recording the final delivery evidence. No private corpus or prototype content was copied.
+- Temporary tooling, screenshots, synthetic outputs and archives under
+  /tmp/ewp-gui-locale.sVIIW3 were removed after recording delivery evidence. No private corpus or prototype content was copied.
 
 ## Remaining owner work
 
@@ -86,4 +86,5 @@ Final delivery gate: verified-delivery browser run PASS on the final catalog and
 state, including exact guide-overridden generation labels, cleared diagnostic lifecycle, ASR
 artifact hover text and source-warning handling. Error parsing requires a stable underscore code;
 ASR artifact hints and WARNING prefixes are not mislabeled as failures. Final asset/wheel check
-and packaged combined-JS syntax check PASS. Implementation commit/push is the next action.
+and packaged combined-JS syntax check PASS. Implementation delivered to origin/main in af1b771872a1ed511f37dec4f3f9ea031d0413cc.
+This documentation follow-up closes the delivery checklist; owner naming/WSL approval remains pending.
