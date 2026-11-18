@@ -5,7 +5,7 @@ usage() {
     cat <<'EOF'
 Usage: ./scripts/install-fresh-ubuntu.sh [--verify-only | --install] [--yes]
 
-Verify or prepare a fresh Ubuntu 24.04 checkout of EWP Transcriber.
+Verify or prepare a fresh Ubuntu 24.04 / 26.04 checkout of EWP Transcriber.
 
   --verify-only  Read-only prerequisite and application verification (default).
   --install      Install Ubuntu prerequisites, uv/Python, and the locked environment.
@@ -38,21 +38,21 @@ if [[ ! -f "$repo_root/pyproject.toml" || ! -f "$repo_root/uv.lock" ]]; then
 fi
 
 if [[ ! -r /etc/os-release ]]; then
-    printf 'Error: /etc/os-release is unavailable. Ubuntu 24.04 is required.\n' >&2
+    printf 'Error: /etc/os-release is unavailable. Ubuntu 24.04 or 26.04 is required.\n' >&2
     exit 2
 fi
 # shellcheck disable=SC1091
 source /etc/os-release
-if [[ "${ID:-}" != "ubuntu" || "${VERSION_ID:-}" != "24.04" ]]; then
-    printf 'Error: supported baseline is Ubuntu 24.04; detected %s %s.\n' \
+if [[ "${ID:-}" != "ubuntu" || ( "${VERSION_ID:-}" != "24.04" && "${VERSION_ID:-}" != "26.04" ) ]]; then
+    printf 'Error: supported baselines are Ubuntu 24.04 and 26.04; detected %s %s.\n' \
         "${ID:-unknown}" "${VERSION_ID:-unknown}" >&2
     exit 2
 fi
 
 if grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
-    printf 'Environment: Ubuntu 24.04 under WSL2\n'
+    printf 'Environment: Ubuntu %s under WSL2\n' "$VERSION_ID"
 else
-    printf 'Environment: Ubuntu 24.04 outside WSL2 (expected but not release-validated)\n'
+    printf 'Environment: Ubuntu %s outside WSL2 (expected but not release-validated)\n' "$VERSION_ID"
 fi
 
 available_kib="$(df -Pk "$repo_root" | awk 'NR==2 {print $4}')"
@@ -71,14 +71,15 @@ if [[ "$mode" == "install" ]]; then
     if [[ "$confirmed" != "true" ]]; then
         printf '%s\n' \
             'This will run Ubuntu package updates, install base packages and uv/Python,' \
-            'then synchronize the checkout from uv.lock. Gated models are not downloaded.'
+            'then synchronize uv.lock and repair native audio libraries if needed.' \
+            'Native repair may download/build private FFmpeg 7 libraries. No gated models.'
         read -r -p 'Continue? [y/N] ' answer
         [[ "$answer" =~ ^[Yy]$ ]] || { printf 'Cancelled.\n'; exit 4; }
     fi
 
     sudo apt update
     sudo apt upgrade
-    sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep
+    sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep xz-utils
 
     if ! command -v uv >/dev/null 2>&1; then
         uv_installer="$(mktemp /tmp/ewp-uv-install-XXXXXXXX.sh)"
@@ -90,6 +91,7 @@ if [[ "$mode" == "install" ]]; then
     fi
     uv python install 3.12
     (cd -- "$repo_root" && uv sync --locked)
+    bash "$repo_root/scripts/repair-dependencies.sh" --native-only
     printf '%s\n' \
         'Application installation completed.' \
         'If uv is unavailable after this script exits, open a new shell or run:' \

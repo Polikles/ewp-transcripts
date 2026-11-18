@@ -23,6 +23,16 @@ If it is elsewhere, enter that existing directory instead. If necessary, locate 
 `find "$HOME" -maxdepth 4 -type d -name ewp-transcripts 2>/dev/null`.
 Do not clone over an existing checkout. The VM path in development reports is not your WSL path.
 
+Confirm that this is the transcription project before running `uv`:
+
+```bash
+pwd
+sed -n '1,8p' pyproject.toml
+```
+
+The project name must be `ewp-transcripts`. In particular, `~/waveform/ewp-waveform`
+is a separate project and does not supply the `transcriber` command.
+
 ## Copy-paste update and start
 
 Run in the checkout. The guard stops the update/start if there are local changes; it never resets,
@@ -77,12 +87,31 @@ If port 8765 is occupied, use `--port 8766` and the matching printed URL. Do not
 listen publicly. Check that the banner says **EwP Transcripts** and Settings & About shows **0.20.0**.
 A stale tab should be reloaded after updating; required resources are served locally without a CDN.
 
+## If `uv` cannot find `transcriber`
+
+`error: Failed to spawn: transcriber` followed by `No such file or directory (os error 2)`
+means the command could not be started. Check the project directory first. The reported
+case ran from `~/waveform/ewp-waveform` and printed `Built ewp-waveform`; `uv` prepared
+that project's `.venv`, which does not contain `transcriber`. The GUI had not started.
+
+Switch to the existing transcription checkout, using its actual location if different:
+
+```bash
+cd "$HOME/transkrypcje/ewp-transcripts" && uv run --locked transcriber gui
+```
+
+Use the guarded update/start block above when pulling the recent changes before testing.
+No environment deletion or model setup is needed to correct the working directory. If the
+same error persists in the confirmed `ewp-transcripts` project, run `uv sync --locked`, then
+`uv run --locked --no-sync transcriber --version`, and retain any synchronization error.
+
 ## Use the preview
 
 - Choose interface **English / Polski** and **System / Light / Dark** independently of audio language.
-- **Transcribe:** run **Test local dependencies** before your first real transcription. Inspect the
-  failed checks and dependency technical details if readiness fails. The test loads libraries in
-  child processes, checks model paths and CUDA visibility, and never downloads models or transcribes.
+- **Settings & About:** optional **Test local dependencies** checks model paths, CUDA and native
+  speech-library loading without downloading models or transcribing. A completed test enables
+  **Run doctor** and **Reinstall dependencies…**. The repair button provides terminal steps to run
+  after saving work and stopping the GUI; see [native repair](../WSL%20config/TROUBLESHOOTING.md).
 - Choose a shared output root and select audio. Matching speaker tracks such as
   `s0e00-Szymon.wav` and `s0e00-Damian.wav` appear as one episode. Select the episode, inspect,
   dry-run and explicitly stage it. Check that dry-run lists both filenames under the one job ID.
@@ -120,7 +149,7 @@ transcript text. Follow [the test plan](GUI_PREVIEW_TEST_PLAN.md) for one consol
 ## Diagnose a failed transcription
 
 A failed queue item displays its diagnostic code, message and **Failure technical details (JSON)**.
-Run **Test local dependencies** and expand **Dependency technical details (JSON)** for failed native
+In **Settings & About**, run **Test local dependencies** and expand **Dependency technical details (JSON)** for failed native
 imports. Preserve the displayed code and technical details when reporting a failure; avoid posting
 private transcript content. The dependency test does not certify full model loading or GPU execution.
 
@@ -129,12 +158,15 @@ The locked TorchCodec 0.7 build supports FFmpeg 4–7; an Ubuntu 26.04 installat
 FFmpeg 8. Missing `libavutil.so.56` through `.59` is a native-library compatibility problem, and
 re-running `uv sync --locked` alone does not supply those OS libraries. Check `ffmpeg -version` and
 the failed import details before changing the environment. Keep the pinned Python package versions;
-repair the compatible FFmpeg shared-library installation using the installation/model setup guides.
+stop the GUI and run `bash scripts/repair-dependencies.sh` from the transcription checkout.
+It restores locked audio packages and builds private compatible FFmpeg 7 audio libraries only
+when needed. Restart the GUI and rerun the test in Settings & About. See
+[native repair details](../WSL%20config/TROUBLESHOOTING.md).
 Never rename or symlink incompatible versioned FFmpeg libraries to make an import pass.
 See [the pinned TorchCodec installation notes](https://github.com/meta-pytorch/torchcodec/tree/v0.7.0#installing-torchcodec).
-The warning alone does not identify the terminal transcription exception: the queue details are
-needed as well. The development VM reproduces the native import warning but loads the bundled
-WhisperX VAD on CPU successfully.
+The reported pyannote `torchcodec is not available. Cannot read audio file` queue failure
+matches this dependency issue. The repair passes actual TorchCodec and pyannote WAV decoding
+on the development VM; full model/GPU execution still needs the bounded WSL retry.
 
 The output-folder chooser is a host desktop dialog, launched through PowerShell under WSL. Browser
 CSS cannot style it. DPI awareness/visual styles are enabled, and automatic shell upgrading is

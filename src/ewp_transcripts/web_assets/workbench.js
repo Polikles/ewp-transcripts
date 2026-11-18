@@ -163,6 +163,7 @@ function installGuiShell() {
     <p><a href="/assets/brand/NOTICE.txt">Asset credits and notices</a> · <a href="/assets/brand/LICENSE-ASSETS.txt">Identity asset terms</a></p>
     <p>Artwork: Cyryl. Creator URL is an unverified placeholder (blogcyryla.pl); TODO replace when supplied.</p>`;
   main.append(settings);
+  settings.append(document.querySelector("#dependency-panel"));
   settings.append(document.querySelector("footer"));
   const bar = document.createElement("div");
   bar.className = "gui-preferences";

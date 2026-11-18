@@ -3,6 +3,11 @@
 These steps install only the non-ML foundation. Application and ML dependencies are
 installed later from the committed lockfile.
 
+Both Ubuntu 24.04 and 26.04 are accepted. On 26.04, installing the `ffmpeg` executable
+does not supply the older shared-library ABI needed by locked TorchCodec 0.7. After
+`uv sync --locked`, run `bash scripts/repair-dependencies.sh --native-only` if using
+these manual steps. The fresh-install script runs that check/repair automatically.
+
 ## 1. Update Ubuntu packages
 
 ```bash
@@ -15,7 +20,7 @@ Review the proposed changes before confirming. Restart WSL if the kernel or core
 ## 2. Install base packages
 
 ```bash
-sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep
+sudo apt install build-essential ca-certificates curl ffmpeg git ripgrep xz-utils
 ```
 
 Verify:

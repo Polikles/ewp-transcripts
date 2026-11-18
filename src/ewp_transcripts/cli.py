@@ -2059,12 +2059,19 @@ def doctor_command(
         bool,
         typer.Option("--json-output", help="Write the diagnostic result as JSON."),
     ] = False,
+    test_speech_runtime: Annotated[
+        bool,
+        typer.Option(
+            "--test-speech-runtime",
+            help="Explicitly load native speech libraries in a child process; no model download.",
+        ),
+    ] = False,
 ) -> None:
     """Check the local environment without loading transcription models."""
 
     try:
         config = load_config(explicit_path=config_path)
-        result = doctor(config=config)
+        result = doctor(config=config, test_speech_runtime=test_speech_runtime)
     except ApplicationError as error:
         _expected_error(error)
     if json_output:

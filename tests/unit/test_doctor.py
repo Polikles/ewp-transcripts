@@ -53,7 +53,8 @@ def _config_with_models(tmp_path) -> ApplicationConfig:
     )
 
 
-def test_doctor_passes_on_validated_baseline_without_importing_ml(tmp_path) -> None:
+@pytest.mark.parametrize("ubuntu_version", ["24.04", "26.04"])
+def test_doctor_passes_on_validated_baseline_without_importing_ml(tmp_path, ubuntu_version) -> None:
     result = run_doctor(
         config=_config_with_models(tmp_path),
         finder=_all_executables,
@@ -61,7 +62,7 @@ def test_doctor_passes_on_validated_baseline_without_importing_ml(tmp_path) -> N
         environ={},
         python_version=(3, 12, 3),
         kernel_release="6.18.0-microsoft-standard-WSL2",
-        os_release={"ID": "ubuntu", "VERSION_ID": "24.04"},
+        os_release={"ID": "ubuntu", "VERSION_ID": ubuntu_version},
     )
 
     assert result.ready is True
@@ -194,3 +195,31 @@ def test_speech_test_timeout_is_a_failed_check(tmp_path) -> None:
     check = next(check for check in result.checks if check.code == "speech_runtime")
     assert check.status is DiagnosticStatus.FAIL
     assert check.context["error_type"] == "TimeoutExpired"
+
+
+def test_unaccepted_distribution_still_warns(tmp_path) -> None:
+    result = run_doctor(
+        config=_config_with_models(tmp_path),
+        finder=_all_executables,
+        runner=_successful_runner,
+        os_release={"ID": "ubuntu", "VERSION_ID": "25.10"},
+    )
+    assert (
+        next(check for check in result.checks if check.code == "distribution").status
+        is DiagnosticStatus.WARNING
+    )
+
+
+def test_cli_native_check_is_explicit(monkeypatch, tmp_path) -> None:
+    calls = []
+    result = run_doctor(config=_config_with_models(tmp_path), runner=_successful_runner)
+
+    def doctor(**kwargs):
+        calls.append(kwargs["test_speech_runtime"])
+        return result
+
+    monkeypatch.setattr("ewp_transcripts.cli.doctor", doctor)
+    runner = CliRunner()
+    runner.invoke(app, ["doctor"])
+    runner.invoke(app, ["doctor", "--test-speech-runtime"])
+    assert calls == [False, True]

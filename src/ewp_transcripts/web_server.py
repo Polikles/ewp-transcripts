@@ -413,6 +413,7 @@ class LocalGuiServer(ThreadingHTTPServer):
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
         self.gui_csrf_token = secrets.token_urlsafe(32)
+        self.gui_dependencies_tested = False
         self.gui_openrouter_api_key = ""
         self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
@@ -1521,7 +1522,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
             return
-        if path == "/api/v1/dependencies/test":
+        if path in {"/api/v1/dependencies/test", "/api/v1/dependencies/doctor"}:
             supplied = self.headers.get("X-EWP-CSRF", "")
             if not secrets.compare_digest(supplied, self.server.gui_csrf_token):
                 self._write_response(
@@ -1536,7 +1537,23 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 )
                 return
-            diagnostics = doctor(config=load_config(), test_speech_runtime=True)
+            native_test = path.endswith("/test")
+            if not native_test and not getattr(self.server, "gui_dependencies_tested", False):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.CONFLICT,
+                        {
+                            "error": {
+                                "code": "GUI_DEPENDENCY_TEST_REQUIRED",
+                                "message": "Run Test local dependencies first.",
+                            }
+                        },
+                    )
+                )
+                return
+            diagnostics = doctor(config=load_config(), test_speech_runtime=native_test)
+            if native_test:
+                self.server.gui_dependencies_tested = True
             self._write_response(_json_response(HTTPStatus.OK, diagnostics.model_dump(mode="json")))
             return
         if path == "/api/v1/inspect":

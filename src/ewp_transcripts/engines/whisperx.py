@@ -63,6 +63,9 @@ class _TorchModule(Protocol):
 
 
 def _load_whisperx() -> _WhisperXModule:
+    from ewp_transcripts.engines.ffmpeg_compat import prepare_speech_libraries
+
+    prepare_speech_libraries()
     return cast(_WhisperXModule, importlib.import_module("whisperx"))
 
 

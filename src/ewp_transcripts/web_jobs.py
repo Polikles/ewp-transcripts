@@ -449,7 +449,8 @@ class GuiTranscriptionQueue:
                         "exception_type": type(error).__name__,
                         "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
                         "action": (
-                            "Transcription failed. Use Test local dependencies, "
+                            "Transcription failed. Open Settings & About and use "
+                            "Test local dependencies, "
                             "then retry after fixing failed checks."
                         ),
                     },

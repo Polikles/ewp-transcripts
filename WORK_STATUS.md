@@ -1,6 +1,35 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-17**.
+Last updated: **2026-11-18**.
+
+## Active task and resume pointers
+
+Current task: [GUI dependency repair and settings/layout feedback](docs/checkpoints/2026-11-18-gui-dependency-repair.md).
+Implementation and VM verification are complete; the owner must run the repair and retry a
+short episode on WSL. The supplied pyannote failure is caused by unavailable TorchCodec
+FFmpeg 4–7 shared libraries; WSL CUDA/GPU and pinned models already passed. The repair script
+installs private compatible FFmpeg 7.1.5 audio libraries, preserving the system FFmpeg and
+ML pins. Settings contains Test, post-test Doctor and repair instructions. Ubuntu 24.04/26.04
+are accepted, Remove from list is renamed, and queue sizing is compact.
+
+Current verification: `make check` PASS (793 tests, Ruff/format/mypy), integration PASS
+(five tests, four deselected), real TorchCodec and pyannote prepared-WAV decoding PASS,
+default locked-package repair and native-repair idempotence PASS, wheel/source build PASS.
+Chromium passed all 72 layout cases, zero queue overflow at 720–960px in EN/PL and both
+themes, post-test maintenance controls, removal, keyboard scrolling at 390px, and existing
+source/translation/recovery workflows. Real WSL/GPU transcription and actual browser zoom
+remain unqualified by this VM. See the task checkpoint for the exact repair/retest sequence.
+
+Earlier launch diagnosis from baseline `a1a2460` is complete; WSL launch is owner-confirmed.
+Read [work policy](WORK_POLICY.md), [immediate todo](TODO.md), and the
+[task checkpoint](docs/checkpoints/2026-11-18-gui-launch.md) before resuming.
+The existing [roadmap](docs/99-roadmap-v2.md) remains the product/acceptance authority.
+The owner is preparing the consolidated WSL retest of the integrated 0.20.0 preview;
+the supplied launch error ran in `~/waveform/ewp-waveform`, whose environment lacks
+`transcriber`. Launch from the existing `ewp-transcripts` checkout. Local CLI/server
+startup passes; `make check` passes 781 tests and integration passes five tests.
+The later dependency-repair checkpoint above now contains the actual WSL queue exception.
+Do not reopen GUI-55 or treat the historical 0.19.0 handoff snapshot as the next task.
 
 ## Owner feedback follow-up (unreleased)
 

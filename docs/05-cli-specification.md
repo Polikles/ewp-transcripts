@@ -32,7 +32,7 @@ verified-revision export through the same application services as the CLI.
 Checks the environment without running transcription.
 
 ```text
-transcriber doctor [--config PATH] [--json-output]
+transcriber doctor [--config PATH] [--json-output] [--test-speech-runtime]
 ```
 
 Checks include:
@@ -47,6 +47,12 @@ Checks include:
 - local model readiness for offline transcription.
 
 The CUDA check runs in a short child Python process. No transcription model is loaded.
+Ubuntu 24.04 and 26.04 are accepted baselines. `--test-speech-runtime` additionally
+loads TorchCodec, WhisperX, pyannote and CTranslate2 in a bounded child process; it never
+downloads models or transcribes. For missing FFmpeg 4–7 libraries, stop the GUI and run
+`bash scripts/repair-dependencies.sh` from the source checkout. The script restores the
+locked TorchCodec/pyannote packages and builds private compatible audio libraries only
+when a real WAV decode fails. See `WSL config/TROUBLESHOOTING.md` for repair details.
 
 ## 3. `inspect`
 

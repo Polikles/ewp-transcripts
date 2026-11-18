@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from ewp_transcripts.domain.errors import SpeechEngineError
+from ewp_transcripts.engines.ffmpeg_compat import prepare_speech_libraries
 from ewp_transcripts.engines.notices import suppress_accepted_backend_notices
 from ewp_transcripts.engines.protocols import (
     DiarizationResult,
@@ -66,6 +67,7 @@ TorchLoader = Callable[[], _TorchModule]
 
 
 def _load_pyannote() -> _PyannoteModule:
+    prepare_speech_libraries()
     return cast(_PyannoteModule, importlib.import_module("pyannote.audio"))
 
 

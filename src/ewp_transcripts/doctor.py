@@ -51,14 +51,14 @@ def _wsl_check(kernel_release: str) -> DiagnosticCheck:
 def _ubuntu_check(os_release: Mapping[str, str]) -> DiagnosticCheck:
     distribution = os_release.get("ID", "unknown")
     version = os_release.get("VERSION_ID", "unknown")
-    supported = distribution == "ubuntu" and version == "24.04"
+    supported = distribution == "ubuntu" and version in {"24.04", "26.04"}
     return DiagnosticCheck(
         code="distribution",
         status=DiagnosticStatus.PASS if supported else DiagnosticStatus.WARNING,
         message=(
-            "Ubuntu 24.04 baseline detected."
+            f"Accepted Ubuntu {version} baseline detected."
             if supported
-            else "Environment differs from the validated Ubuntu 24.04 baseline."
+            else "Environment differs from the accepted Ubuntu 24.04 / 26.04 baselines."
         ),
         context={"distribution": distribution, "version": version},
     )
@@ -183,6 +183,8 @@ def _cuda_check(runner: CommandRunner) -> DiagnosticCheck:
 def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> DiagnosticCheck:
     script = (
         "import os; os.environ['HF_HUB_OFFLINE']='1'; "
+        "from ewp_transcripts.engines.ffmpeg_compat import prepare_speech_libraries; "
+        "prepare_speech_libraries(); "
         "from torchcodec.decoders import AudioDecoder; "
         "from ewp_transcripts.engines.whisperx import _load_whisperx; _load_whisperx(); "
         "from ewp_transcripts.engines.pyannote import _load_pyannote; _load_pyannote(); "
@@ -209,9 +211,10 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
         message=(
             "Speech libraries, TorchCodec/FFmpeg and CTranslate2 CUDA load successfully."
             if completed.returncode == 0
-            else "Speech dependencies failed to load. Check the details for missing FFmpeg shared "
-            "libraries or incompatible Torch/TorchCodec/CUDA packages; follow the installation "
-            "guide and restore the locked environment before retrying."
+            else "Speech dependencies failed to load. For missing FFmpeg 4–7 shared libraries, "
+            "stop the GUI and run bash scripts/repair-dependencies.sh from the transcription "
+            "checkout. Settings & About provides the repair steps. Check technical details "
+            "for other Torch/TorchCodec/CUDA failures."
         ),
         context={"exit_code": completed.returncode, "detail": detail},
     )

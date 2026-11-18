@@ -14,7 +14,7 @@ detailed WSL setup and revision procedures linked from that runbook.
 Follow these documents in order:
 
 1. [`SYSTEM_REQUIREMENTS.md`](SYSTEM_REQUIREMENTS.md) — supported host and hardware.
-2. [`INSTALL_WSL.md`](INSTALL_WSL.md) — install Ubuntu 24.04 under WSL2.
+2. [`INSTALL_WSL.md`](INSTALL_WSL.md) — install Ubuntu 24.04 or 26.04 under WSL2.
 3. [`INSTALL_TOOLS.md`](INSTALL_TOOLS.md) — install FFmpeg, Git, uv, and Python 3.12.
 4. [`CUDA_SETUP.md`](CUDA_SETUP.md) — verify Windows-driver GPU passthrough.
 5. [`INSTALL_APPLICATION.md`](INSTALL_APPLICATION.md) — clone and synchronize the

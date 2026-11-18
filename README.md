@@ -47,7 +47,9 @@ pipeline deployment. Multi-user credential isolation is not currently on the roa
 
 ## Requirements
 
-- Ubuntu 24.04 on WSL2 is the validated environment. Bare-metal Ubuntu and an Ubuntu
+- Ubuntu 24.04 and 26.04 on WSL2 are accepted baselines. The complete historical release
+  gate passed on 24.04; the current 26.04 native repair and GUI have VM verification, with
+  the real GPU queue retry pending. Bare-metal Ubuntu and an Ubuntu
   virtual machine with working NVIDIA GPU passthrough are expected deployment shapes but
   have not yet passed the complete release gate.
 - An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
@@ -63,7 +65,7 @@ workflow and its approximate download sizes.
 
 ## How to install
 
-Create Ubuntu 24.04 under WSL2, install `git`, clone the public repository into the Linux
+Create Ubuntu 24.04 or 26.04 under WSL2, install `git`, clone the public repository into the Linux
 filesystem, then use the reviewable installer from the checkout:
 
 ```bash

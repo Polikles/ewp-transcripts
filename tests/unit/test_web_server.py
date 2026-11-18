@@ -1093,3 +1093,33 @@ def test_dependency_test_is_explicit_and_requires_csrf(monkeypatch, token) -> No
     else:
         assert response.status == 403
         doctor.assert_not_called()
+
+
+@pytest.mark.parametrize("tested", [False, True])
+def test_gui_doctor_requires_a_completed_dependency_test(monkeypatch, tested) -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_dependencies_tested=tested
+    )
+    handler.path = "/api/v1/dependencies/doctor"
+    handler.headers = Message()
+    for name, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": "2",
+        "X-EWP-CSRF": "expected",
+    }.items():
+        handler.headers[name] = value
+    handler.rfile = BytesIO(b"{}")
+    handler._write_response = Mock()
+    doctor = Mock(return_value=SimpleNamespace(model_dump=lambda mode: {"ready": False}))
+    monkeypatch.setattr("ewp_transcripts.web_server.doctor", doctor)
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    if tested:
+        assert response.status == 200
+        assert doctor.call_args.kwargs["test_speech_runtime"] is False
+    else:
+        assert response.status == 409
+        assert json.loads(response.body)["error"]["code"] == "GUI_DEPENDENCY_TEST_REQUIRED"
+        doctor.assert_not_called()

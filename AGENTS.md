@@ -108,6 +108,11 @@ Mandatory boundaries:
 Work in vertical slices. Use `WORK_STATUS.md` for the current resume point and
 `docs/99-roadmap-v2.md` for post-MVP priorities.
 
+For context recovery, also read `WORK_POLICY.md`, `TODO.md`, and the active task
+checkpoint linked from `WORK_STATUS.md`. Leave a dated checkpoint under
+`docs/checkpoints/` for each task and update its evidence, outstanding work and resume
+steps before handoff. Keep the existing roadmap authoritative for product sequencing.
+
 Before implementing a phase:
 
 1. read the relevant existing product documentation and schemas;

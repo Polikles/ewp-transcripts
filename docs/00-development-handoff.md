@@ -1,5 +1,14 @@
 # Development Handoff
 
+Active resume point (2026-11-18): [WORK_STATUS](../WORK_STATUS.md),
+[work policy](../WORK_POLICY.md), [todo](../TODO.md), and the
+[current dependency/settings checkpoint](checkpoints/2026-11-18-gui-dependency-repair.md).
+The reported pre-GUI launch failure ran in the separate `ewp-waveform` project, which
+does not provide `transcriber`. Resume the owner session from the transcription checkout.
+The later WSL queue error identifies missing compatible TorchCodec/FFmpeg libraries.
+The implemented native repair passes real audio decoding locally; use the current checkpoint's
+repair command, then retry the short episode on WSL. Settings/layout feedback is implemented.
+
 Current preview: [0.20.0 integrated GUI](28-integrated-gui-preview.md), with a
 [WSL launch guide](../Instructions/GUI_QUICKSTART.md) and
 [one consolidated owner test plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md). Earlier GUI-34a
@@ -128,5 +137,6 @@ sed -n '1,130p' WORK_STATUS.md
 UV_CACHE_DIR=/tmp/ewp-uv-cache ./scripts/check.sh
 ```
 
-Then complete GUI-55's manual gate or begin a narrowly scoped GUI-34 responsive slice. Keep
-GUI-40 open until its actual deployment environments are available.
+The checklist and GUI-55/GUI-34 implementation instructions above describe the historical
+snapshot. For current work follow the active resume links at the top; GUI-55 is closed.
+Keep GUI-40 open until its actual deployment environments are available.

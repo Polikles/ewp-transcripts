@@ -7,7 +7,7 @@ covers every shipped command. The application is not yet a public release.
 
 ## 1. Install and prepare the machine
 
-The supported environment is Ubuntu 24.04 under WSL2 with Python 3.12, FFmpeg, `uv`, and
+The supported baselines are Ubuntu 24.04 and 26.04 under WSL2 with Python 3.12, FFmpeg, `uv`, and
 an NVIDIA CUDA-capable GPU. Follow the detailed setup documents in order:
 
 The current locked environment downloads approximately 4–4.5 GB before model setup.
@@ -59,7 +59,7 @@ until the exact saved draft previews successfully and the manual-verification co
 checked. Export then uses only the newly applied immutable revision. Automated candidates and
 translation remain CLI workflows in this slice.
 
-After cloning, a fresh Ubuntu 24.04 checkout can install the base packages, uv/Python,
+After cloning, a fresh Ubuntu 24.04 or 26.04 checkout can install the base packages, uv/Python,
 locked environment, and run diagnostics through the reviewable script:
 
 ```bash

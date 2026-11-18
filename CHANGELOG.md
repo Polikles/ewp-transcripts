@@ -6,6 +6,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Settings & About now contains the optional dependency test, post-test Doctor report and
+  terminal dependency-repair instructions. Ubuntu 24.04 and 26.04 are accepted baselines.
+- A repair script restores locked speech packages and installs private FFmpeg 7.1.5 audio
+  libraries when TorchCodec cannot load Ubuntu 26.04's system FFmpeg ABI. Lazy speech imports
+  use the repaired libraries; system FFmpeg and model caches stay intact. Doctor also offers
+  an explicit `--test-speech-runtime` check. Fresh installs include the native check/repair.
+- Selected audio uses the clearer **Remove from list** label. Transcription queue columns
+  have compact spacing and a lower minimum width to avoid unnecessary half-screen scrolling.
+- WSL GUI launch instructions identify the separate `ewp-waveform` checkout as a cause
+  of `Failed to spawn: transcriber`, with project-name verification and recovery steps.
 - GUI header hierarchy, larger logo, local EwP light/dark background patterns and service status
   above the stage navigation. Short Saved work/Settings pages no longer stretch header/context rows.
 - Browser audio selection groups shared-prefix speaker tracks into one reviewed episode, preserving

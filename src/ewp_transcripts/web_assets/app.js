@@ -126,7 +126,20 @@ transcriptionErrors.setAttribute("role", "status");
 document.querySelector("#transcription-jobs").before(transcriptionErrors);
 const dependencyPanel = document.createElement("div");
 dependencyPanel.id = "dependency-panel";
-dependencyPanel.innerHTML = '<button type="button" id="test-dependencies">Test local dependencies</button><p id="dependency-status" role="status"></p><div id="dependency-checks"></div><details><summary>Dependency technical details (JSON)</summary><pre id="dependency-result" tabindex="0"></pre></details>';
+dependencyPanel.innerHTML = `<h3>Local dependencies</h3>
+  <p>Test the environment to enable Doctor and dependency repair. These tools are optional maintenance actions.</p>
+  <div class="actions"><button type="button" id="test-dependencies">Test local dependencies</button>
+  <button type="button" id="run-doctor" disabled>Run doctor</button>
+  <button type="button" id="repair-dependencies" disabled>Reinstall dependencies…</button></div>
+  <p id="dependency-status" role="status"></p><div id="dependency-checks"></div>
+  <details><summary>Dependency technical details (JSON)</summary><pre id="dependency-result" tabindex="0"></pre></details>
+  <div id="dependency-repair" hidden><h4>Repair dependencies in the terminal</h4>
+  <p>Save your work and stop the GUI with Ctrl+C. In the transcription checkout, run:</p>
+  <pre tabindex="0">bash scripts/repair-dependencies.sh</pre>
+  <p>This restores locked TorchCodec and pyannote packages. If compatible FFmpeg libraries are missing, it downloads and builds private FFmpeg 7 audio libraries. Internet access and build tools are needed; missing tools are listed with their install command. System FFmpeg and model caches are preserved.</p>
+  <p>Restart the GUI and rerun Test local dependencies before retrying the queue.</p></div>
+  <p id="doctor-status" role="status"></p>
+  <details id="doctor-details" hidden><summary>Doctor report (JSON)</summary><pre id="doctor-result" tabindex="0"></pre></details>`;
 document.querySelector("#workflow").after(dependencyPanel);
 document.querySelector("#test-dependencies").addEventListener("click", async event => {
   const button = event.currentTarget;
@@ -135,6 +148,8 @@ document.querySelector("#test-dependencies").addEventListener("click", async eve
   status.textContent = "Testing local dependencies… This can take a minute. No models are downloaded.";
   try {
     const result = await queuePost("/api/v1/dependencies/test", {}, {trigger:button});
+    document.querySelector("#run-doctor").disabled = false;
+    document.querySelector("#repair-dependencies").disabled = false;
     status.textContent = result.ready ? "Local dependency checks passed. This checks library loading, CUDA visibility and local model paths; it does not run transcription." : "Local dependency checks found a problem. Fix failed checks before retrying transcription.";
     document.querySelector("#dependency-result").textContent = JSON.stringify(result, null, 2);
     const checks = document.querySelector("#dependency-checks"); checks.replaceChildren();
@@ -146,6 +161,22 @@ document.querySelector("#test-dependencies").addEventListener("click", async eve
   } catch (error) { status.textContent = error.message; }
   finally { button.disabled = false; }
 });
+document.querySelector("#run-doctor").addEventListener("click", async event => {
+  const button = event.currentTarget; button.disabled = true;
+  const status = document.querySelector("#doctor-status"); status.textContent = "Running doctor…";
+  try {
+    const result = await queuePost("/api/v1/dependencies/doctor", {}, {trigger:button});
+    document.querySelector("#doctor-result").textContent = JSON.stringify(result, null, 2);
+    document.querySelector("#doctor-details").hidden = false;
+    document.querySelector("#doctor-details").open = true;
+    status.textContent = "Doctor finished. Native speech loading is reported separately by Test local dependencies.";
+  } catch (error) { status.textContent = error.message; }
+  finally { button.disabled = false; }
+});
+document.querySelector("#repair-dependencies").addEventListener("click", () => {
+  const steps = document.querySelector("#dependency-repair"); steps.hidden = false;
+  steps.scrollIntoView({behavior:"smooth", block:"nearest"});
+});
 function renderTranscriptionErrors(jobs) {
   transcriptionErrors.replaceChildren();
   const failures = jobs.filter(job => job.status === "failed");
@@ -154,7 +185,7 @@ function renderTranscriptionErrors(jobs) {
     const message = document.createElement("p");
     message.textContent = `${job.planned_job_id} · ${job.error?.code || "GUI_TRANSCRIPTION_FAILED"}: ${job.error?.message || "Transcription failed."}`;
     const action = document.createElement("p");
-    action.textContent = job.error?.action || "Transcription failed. Use Test local dependencies, then retry after fixing failed checks.";
+    action.textContent = job.error?.action || "Transcription failed. Open Settings & About and use Test local dependencies, then retry after fixing failed checks.";
     const details = document.createElement("details");
     const summary = document.createElement("summary"); summary.textContent = "Failure technical details (JSON)";
     const json = document.createElement("pre"); json.textContent = JSON.stringify(job.error || {code:"GUI_TRANSCRIPTION_FAILED"}, null, 2);
@@ -609,7 +640,7 @@ function renderGuiAudioChoices() {
     use.textContent = active ? "Selected for inspection" : "Select episode";
     use.setAttribute("aria-pressed", String(active));
     use.addEventListener("click", () => { selectGuiAudio(episode); document.querySelector('#workflow button[value="inspect"]').focus(); });
-    const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Forget selection";
+    const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove from list";
     remove.addEventListener("click", () => {
       for (const file of episode.files) selectedGuiAudio.splice(selectedGuiAudio.indexOf(file), 1);
       if (active) { activeGuiAudio = null; workflowInput.value = ""; }

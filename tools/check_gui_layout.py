@@ -37,6 +37,8 @@ def geometry(page: Page) -> dict:
           return b && s && b.bottom > s.top + 1; }).length;
       return {viewport: innerWidth, pageWidth: document.documentElement.scrollWidth,
         overflow, feedbackOverlaps: overlaps,
+        queueScroll: document.querySelector('#transcription-jobs').scrollWidth -
+          document.querySelector('#transcription-jobs').clientWidth,
         tableBleed: [...document.querySelectorAll('#transcription-jobs td .workflow-indicator')]
           .filter(e => e.getBoundingClientRect().right >
             e.closest('td').getBoundingClientRect().right + 1).length,
@@ -83,6 +85,8 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
                         assert not measured["feedbackOverlaps"], measured
                         if section == "workspace":
                             assert not measured["tableBleed"], measured
+                            if width >= 720:
+                                assert measured["queueScroll"] <= 1, measured
                         if section == "review":
                             assert measured["editorWidth"] >= min(260, width - 130), measured
                     expect(
@@ -113,9 +117,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
     for index in (0, 1):
-        page.locator("#gui-audio-choices li").nth(index).get_by_role(
-            "button", name="Use for inspect / plan"
-        ).click()
+        page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]").click()
         page.locator("#workflow button[value=inspect]").click()
         expect(page.locator("#operation-status")).to_have_text("Inspection completed")
         page.locator("#workflow button[value=dry-run]").click()
@@ -125,11 +127,44 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
         expect(page.locator("#operation-status")).to_have_text("Added to staged queue")
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
     assert page.locator("#transcription-jobs tbody").inner_text().count("STAGED") == 2
+    expect(page.locator("#gui-audio-choices li")).to_have_count(2)
+    page.locator("#gui-audio-choices li").first.get_by_role(
+        "button", name="Remove from list"
+    ).click()
+    expect(page.locator("#gui-audio-choices li")).to_have_count(1)
+    expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
     page.evaluate("queuePost('/api/v1/transcriptions/clear-current', {confirmed:true})")
     page.evaluate("refreshJobs()")
 
 
+def check_maintenance_controls(page: Page) -> None:
+    """Exercise explicit diagnostics and the terminal repair handoff without installing."""
+    stage(page, "workspace")
+    expect(page.locator("#test-dependencies")).not_to_be_visible()
+    stage(page, "settings")
+    expect(page.locator("#test-dependencies")).to_be_visible()
+    expect(page.locator("#run-doctor")).to_be_disabled()
+    expect(page.locator("#repair-dependencies")).to_be_disabled()
+    page.locator("#test-dependencies").click()
+    expect(page.locator("#run-doctor")).to_be_enabled(timeout=180000)
+    expect(page.locator("#repair-dependencies")).to_be_enabled()
+    expect(page.locator("#dependency-checks")).not_to_be_empty()
+    page.locator("#run-doctor").click()
+    expect(page.locator("#doctor-result")).not_to_be_empty(timeout=90000)
+    page.locator("#repair-dependencies").click()
+    expect(page.locator("#dependency-repair")).to_be_visible()
+    expect(page.locator("#dependency-repair pre")).to_have_text(
+        "bash scripts/repair-dependencies.sh"
+    )
+    page.locator("#gui-locale").select_option("pl")
+    expect(page.locator("#repair-dependencies")).to_have_text("Zainstaluj ponownie zależności…")
+    page.locator("#gui-locale").select_option("en")
+    stage(page, "workspace")
+    expect(page.locator("#test-dependencies")).not_to_be_visible()
+
+
 def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
+    check_maintenance_controls(page)
     page.wait_for_function("() => csrfToken.length > 0")
     page.evaluate("document.fonts.ready")
     assert page.evaluate('document.fonts.check("16px Montserrat")')
@@ -256,6 +291,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.reload()
     verify_recovery(page, checkpoint)
     # Keyboard access to the locally scrolling queue and its rightmost action.
+    page.set_viewport_size({"width": 390, "height": 844})
     stage(page, "workspace")
     queue = page.locator("#transcription-jobs")
     queue.focus()
@@ -274,6 +310,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     )
     action.press("Tab")
     assert page.evaluate("document.activeElement !== document.body")
+    page.set_viewport_size({"width": 720, "height": 1000})
     stage(page, "semantic-review")
     for index, textarea in enumerate(page.locator("#translation-review-editor textarea").all()):
         textarea.fill(f"Testowe tłumaczenie jednostki {index + 1}.")
@@ -394,6 +431,7 @@ def main() -> None:
             else:
                 measurements = exercise(page, args.output, args.baseline)
         except Exception:
+            page.screenshot(path=str(args.output / "failure.png"), full_page=True)
             print(
                 page.locator(
                     ".stage-queue-status, #review-status, "

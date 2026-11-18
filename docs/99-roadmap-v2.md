@@ -792,6 +792,14 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     The [integrated preview](28-integrated-gui-preview.md) adds stage navigation, PL/EN, themes,
     branded local assets, real multi-audio selection, cursor splitting and dynamic speaker colors.
     Use the consolidated owner plan rather than separate acceptance rounds.
+    The 2026-11-18 pre-GUI launch blocker was traced to running `uv` in the separate
+    waveform project; [diagnosis and retest checkpoint](checkpoints/2026-11-18-gui-launch.md).
+    Launch from the transcription checkout, then collect the actual WSL backend error
+    if transcription still fails. The owner workflow/visual qualification remains pending.
+    The subsequent [dependency/settings checkpoint](checkpoints/2026-11-18-gui-dependency-repair.md)
+    identifies the actual pyannote/TorchCodec FFmpeg ABI failure and implements private native
+    repair, Settings diagnostics, Ubuntu 26.04 acceptance and compact queue columns. VM native
+    decoding and 72 browser cases pass; the real RTX 3090 queue retry remains pending.
     **GUI-34a earlier slice:** GUI-34a implements responsive access
     to existing queues/review controls, retaining the locally scrollable table and existing workflow.
     Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance
