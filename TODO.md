@@ -24,7 +24,7 @@ Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md
 - [x] Collapse auto-filled translation inputs and optional dictionary; prevent status-label word splitting.
 - [x] Translation review: secondary right-aligned Clear below Preview; add Apply and Audit/export hover explanations.
 - [x] Update per-stage instructions, prototype comparison, changelog, roadmap and checkpoints.
-- [ ] Run required checks and model-free browser workflows; deliver verified changes for WSL retest.
+- [x] Run required checks and model-free browser workflows; deliver verified changes for WSL retest.
 - [ ] Owner retests these changes on WSL; API/provider and YouTube qualification stay pending.
 
 ## Deferred: artist reference package

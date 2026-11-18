@@ -5,7 +5,8 @@ Last updated: **2026-11-18**.
 ## Active task and resume pointers
 
 Current request: [GUI workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
-Implementation and VM verification are complete; main delivery is the final action.
+Implementation and VM verification are complete. Delivered to origin/main in
+`2422d721d213f1403f33e8068f744156b97801c7`; the documentation follow-up records delivery.
 Start with TODO.md after a context reset. The owner's latest WSL retest remains pending;
 the earlier local-only ASR/source-export success remains qualified.
 

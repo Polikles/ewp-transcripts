@@ -30,7 +30,7 @@ slice here. No provider calls or model downloads are authorized by this UI task.
 - Configured named color profiles plus persistent custom profiles; explicit preview/apply
   separation. Translation direction has active state and inline accepted-change feedback;
   source-language mismatch blocks generation rather than changing canonical language.
-- Temporary verification root: /tmp/ewp-gui-polish.gtvxFa. Browser/complete gates pending.
+- Temporary verification root was /tmp/ewp-gui-polish.gtvxFa; removed after final verification.
 
 
 ## Acceptance and decisions
@@ -72,7 +72,10 @@ slice here. No provider calls or model downloads are authorized by this UI task.
 - Fresh-server workspace recovery and actual prototype screenshot comparison: PASS. At 1920px
   all seven source-control buttons share the same top position; at 960px Undo/Redo/Clear align.
   Screenshot evidence is disposable; content-free outcomes are retained here.
-- Delivery to main follows verification; delivery SHA is recorded after push.
+- Implementation delivered to origin/main at `2422d721d213f1403f33e8068f744156b97801c7`.
+  The following documentation commit records delivery and closes the local task checklist.
+- Temporary browser/server fixtures, screenshots, synthetic outputs, wheels and archives
+  were removed after recording content-free evidence.
 - No actual provider, GPU, Windows zoom or YouTube qualification claimed by these VM checks.
 
 
