@@ -5,6 +5,8 @@ Updated: 2026-11-18. Read `AGENTS.md` first; this file supplements its rules.
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
    and `docs/99-roadmap-v2.md`. Inspect Git status before edits. Historical handoff sections
    do not override current checkpoints or reopen owner-qualified gates.
+   Start each new work request by updating the concrete task list in `TODO.md`, including
+   every user-reported issue; consult it before each slice and after context compression.
 2. Every task gets a dated file under `docs/checkpoints/` recording its objective, baseline,
    evidence, changes, verification, limitations and exact next steps. Update it after a
    meaningful discovery, before handing off, and before a context reset when possible.

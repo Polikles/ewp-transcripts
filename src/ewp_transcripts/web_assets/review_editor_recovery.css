@@ -1,23 +1,20 @@
 .review-control-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: 1rem;
-  margin-block: 1rem;
-  align-items: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+  margin-block: .65rem;
+  align-items: start;
 }
 
 .review-control-group {
   box-sizing: border-box;
   border: 1px solid #d9d5cb;
   border-radius: .5rem;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr;
-  align-content: start;
-  padding: .75rem;
+  padding: .6rem;
 }
 
 .review-control-group h3 {
-  margin: 0 0 .6rem;
+  margin: 0 0 .4rem;
   font-size: 1rem;
 }
 
@@ -25,29 +22,35 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: .5rem;
-  margin-top: .5rem;
-  min-height: 4.35rem;
+  gap: .35rem;
+  margin-top: .35rem;
+  min-height: 0;
 }
 
 .review-control-line:first-of-type { margin-top: 0; }
 
 .review-control-line > .feedback-anchor {
   box-sizing: border-box;
-  flex: 0 1 13rem;
-  width: min(13rem, 100%);
+  flex: 0 1 auto;
+  width: auto;
+  min-height: 0;
+  padding-bottom: 0;
 }
 
 .review-control-line > .feedback-anchor > button {
   box-sizing: border-box;
-  width: 100%;
+  width: auto;
+  min-height: 2.25rem;
+  margin: 0;
+  padding: .45rem .6rem;
+  font-size: .85rem;
 }
 
-.review-control-spacer { min-height: 2.75rem; }
+.review-control-line .inline-working { position: static; min-width: 0; }
 
 .review-clear-line {
-  align-items: end;
-  justify-content: end;
+  align-items: start;
+  justify-content: start;
 }
 
 .review-speaker-label-row {
@@ -65,6 +68,6 @@
   margin-top: 1rem;
 }
 
-@media (max-width: 42rem) {
+@media (max-width: 35rem) {
   .review-control-groups { grid-template-columns: 1fr; }
 }

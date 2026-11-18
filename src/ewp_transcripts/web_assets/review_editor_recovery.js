@@ -29,9 +29,7 @@ function arrangeReviewControls() {
   const previewLine = document.createElement("div");
   previewLine.className = "review-control-line";
   previewLine.append(preview);
-  const spacer = document.createElement("div");
-  spacer.className = "review-control-spacer";
-  preparation.append(prepareLine, previewLine, spacer);
+  preparation.append(prepareLine, previewLine);
   const saveLine = document.createElement("div");
   saveLine.className = "review-control-line";
   saveLine.append(save, restore);
@@ -53,7 +51,8 @@ function arrangeReviewControls() {
   historyLine.append(undo, redo);
   editing.append(saveLine, historyLine, clearLine);
   layout.append(preparation, editing);
-  originalActions.replaceWith(layout);
+  document.querySelector('#review-workflow input[name="verified"]').closest("label").before(layout);
+  originalActions.remove();
   undo.addEventListener("click", () => restoreReviewHistory(-1));
   redo.addEventListener("click", () => restoreReviewHistory(1));
 }

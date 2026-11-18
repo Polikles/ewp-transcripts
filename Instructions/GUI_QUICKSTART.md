@@ -3,6 +3,17 @@
 Use the existing working WSL installation. This preview does not require another model download,
 a new distribution, Docker, or a desktop environment. [Consolidated manual test plan](GUI_PREVIEW_TEST_PLAN.md).
 
+Every stage now has numbered Quick steps below the active-recording frame and stage strip.
+Click a step to reach its matching controls, or open Full instructions (English) in a separate
+tab. The [per-stage guides](../docs/gui/README.md) are bundled for offline use, including optional
+correction/translation and the supporting tools. The left recording queue changes the active
+editor independently of batch checkboxes. At wide widths the task context is on the right;
+at half-screen widths open Recording details in the frame.
+
+Fresh installation automatically prepares compatible native audio libraries. If a later
+Ubuntu 24.04 → 26.04 upgrade causes a dependency mismatch, use the
+[Ubuntu upgrade recovery guide](../WSL%20config/UBUNTU_UPGRADE.md) instead of reinstalling models.
+
 ## Open WSL and the existing checkout
 
 In **Windows PowerShell**, list distributions and open the existing Ubuntu 26.04 distribution:

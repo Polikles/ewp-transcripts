@@ -1,12 +1,14 @@
 /* Readable transcript-review editor sizing and local navigation controls. */
 
 function resizeTranscriptReviewTextarea(textarea) {
+  if (!textarea.getClientRects().length) return;
   textarea.style.height = "auto";
-  textarea.style.height = `${Math.max(textarea.scrollHeight, 96)}px`;
+  const border = textarea.offsetHeight - textarea.clientHeight;
+  textarea.style.height = `${Math.max(textarea.scrollHeight + border, 56)}px`;
 }
 
 function resizeTranscriptReviewTextareas() {
-  document.querySelectorAll("#review-editor textarea").forEach(resizeTranscriptReviewTextarea);
+  document.querySelectorAll("#review-editor textarea, #translation-review-editor textarea").forEach(resizeTranscriptReviewTextarea);
 }
 
 function addBottomReviewNavigation() {
@@ -70,3 +72,19 @@ new MutationObserver(syncBottomReviewNavigation).observe(document.querySelector(
 });
 resizeTranscriptReviewTextareas();
 syncBottomReviewNavigation();
+
+let reviewResizeScheduled = false;
+function scheduleTranscriptReviewResize() {
+  if (reviewResizeScheduled) return;
+  reviewResizeScheduled = true;
+  requestAnimationFrame(() => {
+    reviewResizeScheduled = false;
+    resizeTranscriptReviewTextareas();
+  });
+}
+const reviewSizeObserver = new ResizeObserver(scheduleTranscriptReviewResize);
+reviewSizeObserver.observe(document.querySelector("#review-editor"));
+reviewSizeObserver.observe(document.querySelector("#translation-review-editor"));
+window.addEventListener("resize", scheduleTranscriptReviewResize);
+document.addEventListener("ewp-stage", scheduleTranscriptReviewResize);
+document.fonts.ready.then(scheduleTranscriptReviewResize);

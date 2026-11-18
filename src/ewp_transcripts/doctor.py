@@ -214,9 +214,22 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
             else "Speech dependencies failed to load. For missing FFmpeg 4–7 shared libraries, "
             "stop the GUI and run bash scripts/repair-dependencies.sh from the transcription "
             "checkout. Settings & About provides the repair steps. Check technical details "
-            "for other Torch/TorchCodec/CUDA failures."
+            "for other Torch/TorchCodec/CUDA failures. If this started after upgrading from "
+            "Ubuntu 24.04 to Ubuntu 26.04, follow WSL config/UBUNTU_UPGRADE.md "
+            "(GUI: /help/ubuntu-upgrade)."
         ),
-        context={"exit_code": completed.returncode, "detail": detail},
+        context={
+            "exit_code": completed.returncode,
+            "detail": detail,
+            **(
+                {
+                    "help_url": "/help/ubuntu-upgrade",
+                    "instructions_file": "WSL config/UBUNTU_UPGRADE.md",
+                }
+                if completed.returncode
+                else {}
+            ),
+        },
     )
 
 

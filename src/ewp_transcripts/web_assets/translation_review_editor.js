@@ -167,8 +167,7 @@ function updateTranslationReviewSections() {
 }
 
 function resizeReviewTextarea(input) {
-  input.style.height = "auto";
-  input.style.height = `${Math.max(input.scrollHeight, 48)}px`;
+  resizeTranscriptReviewTextarea(input);
 }
 
 function renderEnhancedTranslationReview(documentValue, options = {}) {

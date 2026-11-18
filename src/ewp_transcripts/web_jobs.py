@@ -481,7 +481,16 @@ def _backend_failure_detail(error: ApplicationError) -> dict[str, str]:
     for name, value in os.environ.items():
         if value and any(word in name.upper() for word in ("TOKEN", "KEY", "SECRET", "PASSWORD")):
             detail = detail.replace(value, "[redacted]")
-    return {"backend_detail": detail[:4000]}
+    instructions = (
+        {
+            "help_url": "/help/ubuntu-upgrade",
+            "upgrade_guidance": "If this error started after upgrading Ubuntu 24.04 to Ubuntu "
+            "26.04, follow WSL config/UBUNTU_UPGRADE.md.",
+        }
+        if any(word in detail.casefold() for word in ("torchcodec", "libavutil", "ffmpeg"))
+        else {}
+    )
+    return {"backend_detail": detail[:4000], **instructions}
 
 
 def _matches_staged_source(path: Path, expected_sha256: str) -> bool:

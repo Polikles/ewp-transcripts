@@ -6,6 +6,18 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Workflow stages now have numbered short instructions, matching control-group headings and
+  offline per-stage guides. The prototype-aligned shell puts recordings on the left, a numbered
+  stage strip over the workspace, and responsive task/speaker context beside it.
+- Source review has compact side-by-side validation/history controls below the transcript,
+  Preview retains the viewport, and source/target text boxes grow on editing, navigation and resize.
+  Cursor splitting preserves real pointer/keyboard caret state and shows adjacent validation;
+  edits made during a pending save are retained rather than overwritten.
+- Speaker names and colors includes live YTT profile previews and retained custom overrides;
+  the action is named Add speaker. Stage queues and optional skip/history actions are quieter
+  and more compact while preserving existing state markers and operations.
+- Native dependency failures explain possible Ubuntu 24.04-to-26.04 upgrade incompatibility
+  and link a bundled recovery guide. Installer regression tests cover automatic native setup.
 - Settings & About now contains the optional dependency test, post-test Doctor report and
   terminal dependency-repair instructions. Ubuntu 24.04 and 26.04 are accepted baselines.
 - A repair script restores locked speech packages and installs private FFmpeg 7.1.5 audio

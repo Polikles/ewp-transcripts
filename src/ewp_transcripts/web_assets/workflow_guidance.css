@@ -1,0 +1,76 @@
+#gui-stage-instructions { padding: .6rem .8rem; margin-bottom: .7rem; border: 1px solid var(--gui-line); border-radius: .5rem; background: var(--gui-soft); }
+#gui-stage-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; margin-bottom: .65rem; position: sticky; top: calc(var(--gui-context-height, 7rem) + .3rem); z-index: 3; background: var(--gui-bg); border-radius: .4rem; }
+#gui-stage-nav button { min-width: 0; padding: .45rem .55rem; font-size: .78rem; }
+#gui-stage-nav img, #gui-tool-nav img { width: 16px; height: 16px; flex: 0 0 16px; }
+.gui-stage-order { flex: 0 0 1.2rem; text-align: center; font-size: .72rem; font-weight: 700; border: 1px solid var(--gui-line); border-radius: 50%; line-height: 1.2rem; }
+#gui-sidebar h2 { margin: .35rem 0 .6rem; font-size: 1rem; }
+#gui-add-audio { width: 100%; padding: .55rem; border-style: dashed; font-size: .85rem; }
+#gui-recordings { margin-top: .65rem; gap: .4rem; max-height: 48vh; }
+#gui-tool-nav { display: grid; gap: .35rem; margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--gui-line); }
+#gui-tool-nav button { display: flex; align-items: center; gap: .45rem; background: transparent; color: inherit; text-align: left; padding: .45rem; font-size: .8rem; }
+#gui-tool-nav button[aria-current=step] { border-color: var(--gui-accent); background: var(--gui-soft); }
+[data-theme=dark] #gui-tool-nav img { filter: invert(1); }
+#gui-task-context { display: none; }
+.gui-compact-context { flex-basis: 100%; width: 100%; }
+.gui-compact-context > div { max-height: 16rem; overflow: auto; padding-top: .5rem; }
+.gui-context-speaker { display: flex; align-items: center; gap: .4rem; overflow-wrap: anywhere; margin-block: .45rem; font-size: .8rem; }
+.gui-speaker-marker { width: .65rem; height: .65rem; border: 1px solid var(--gui-muted); border-radius: 50%; flex-shrink: 0; }
+.gui-context-draft { font-size: .75rem; line-height: 1.4; color: var(--gui-muted); }
+#gui-task-context dt, .gui-compact-context dt { font-size: .72rem; color: var(--gui-muted); margin-top: .5rem; }
+#gui-task-context dd, .gui-compact-context dd { margin: .2rem 0 .5rem; font-size: .8rem; }
+.gui-guide-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1rem; margin: 0; font-size: .85rem; }
+#gui-stage-instructions ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1.7rem; margin: .45rem 0 0; padding-left: 1.25rem; font-size: .82rem; line-height: 1.45; }
+.gui-workflow-step, [id^="gui-"][id*="-step-"], .gui-workbench main :is(button, input, select, textarea, h2, h3), #review-editor, #translation-review-editor { scroll-margin-top: calc(var(--gui-context-height, 7rem) + var(--gui-nav-height, 5rem) + 1rem); }
+.gui-workbench .gui-workflow-step { margin: 1rem 0 .45rem; font-size: .95rem; }
+.gui-workbench #skip-correction, .gui-workbench #skip-translation { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-weight: 500; padding: .4rem .65rem; font-size: .85rem; }
+.gui-workbench #gui-palette { padding: .55rem; margin-block: .5rem; }
+#gui-palette label { margin-top: 0; }
+#gui-palette button, .review-add-speaker { padding: .4rem .6rem; font-size: .85rem; }
+#gui-palette p { font-size: .8rem; margin-block: .4rem; }
+.gui-workbench .review-speaker-label-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(5rem, 8rem); align-items: end; gap: .5rem; }
+.review-speaker-label-row .gui-speaker-color { grid-column: 2; grid-row: 1; }
+.review-speaker-label-row .review-remove-speaker { grid-column: 1 / -1; justify-self: start; margin-top: 0; font-size: .8rem; }
+.gui-workbench .review-speaker-label-row label { margin-top: .4rem; font-size: .85rem; }
+.gui-workbench .review-speaker-label-row input[type="color"] { width: 100%; height: 2.5rem; padding: .2rem; }
+.gui-workbench .stage-queue { padding: .55rem .65rem; margin-bottom: .65rem; }
+.stage-queue-intro { font-size: .8rem; line-height: 1.4; margin-bottom: .35rem; }
+.stage-queue-controls { gap: .4rem; margin-block: .35rem; }
+.stage-queue-controls .feedback-anchor { min-height: 0; padding-bottom: 0; }
+.review-control-line .feedback-anchor, .stage-queue-controls .feedback-anchor { display: inline-flex; flex-direction: column; align-items: flex-start; }
+.gui-workbench #preview-review:not(:disabled) { background: #355880; color: #fff; }
+.gui-workbench .review-clear-line #clear-review { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; margin: 0; padding: .35rem .55rem; }
+.stage-queue-controls .inline-working { position: static; min-width: 0; }
+.stage-queue-controls > button, .stage-queue-controls > .feedback-anchor > button { min-height: 2.2rem; padding: .35rem .55rem; font-size: .8rem; }
+.stage-queue-item { padding: .45rem; gap: .4rem; }
+.stage-queue-item h4, .stage-queue-item p { font-size: .8rem; line-height: 1.35; }
+.stage-queue-item > button { min-height: 2.2rem; padding: .4rem .55rem; font-size: .8rem; }
+.stage-queue-item .workflow-progress { gap: .2rem .45rem; font-size: .72rem; }
+.queue-workflow-progress { display: flex; flex-wrap: wrap; gap: .2rem .45rem; }
+.queue-workflow-row { display: contents; }
+.gui-guide { width: min(58rem, calc(100% - 2rem)); margin: 1rem auto; font-family: Montserrat, system-ui, sans-serif; line-height: 1.65; }
+.gui-guide main { width: auto; margin: 0; }
+.gui-guide li { margin-block: .65rem; }
+.gui-guide pre { padding: .75rem; border: 1px solid currentColor; border-radius: .3rem; }
+@media (min-width: 90rem) {
+  .gui-workbench { grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr) minmax(11rem, 13rem); gap: .8rem; padding: .75rem; }
+  #gui-task-context { display: block; grid-column: 3; grid-row: 2 / span 2; position: sticky; top: .75rem; max-height: calc(100vh - 2rem); overflow: auto; padding: .8rem; border: 1px solid var(--gui-line); border-radius: .6rem; background: var(--gui-surface); }
+  #gui-task-context h2, #gui-task-context h3 { margin: 0 0 .6rem; font-size: .95rem; }
+  #gui-task-context h3 { margin-top: 1rem; font-size: .85rem; }
+  .gui-compact-context { display: none; }
+}
+@media (max-width: 56.25rem) {
+  #gui-tool-nav { display: flex; flex-wrap: wrap; margin-top: .5rem; padding-top: .4rem; }
+  #gui-tool-nav button { flex: 1 1 9rem; }
+  #gui-recordings { display: flex; max-height: 9rem; overflow-x: auto; margin-top: .5rem; }
+  #gui-recordings .gui-recording { flex: 0 0 13rem; }
+  #gui-stage-nav button { flex: 1 1 10rem; }
+}
+@media (max-width: 35rem) {
+  #gui-stage-instructions ol { grid-template-columns: minmax(0, 1fr); }
+  .gui-workbench .review-speaker-label-row { grid-template-columns: minmax(0, 1fr) 5rem; }
+  .review-remove-speaker { grid-column: 1 / -1; margin-top: 0; }
+}
+
+@media (max-width: 68rem) { #gui-stage-nav img { display: none; } }
+@media (max-width: 48rem) { #gui-stage-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 30rem) { #gui-stage-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

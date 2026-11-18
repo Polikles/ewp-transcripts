@@ -2,12 +2,13 @@
 
 Active resume point (2026-11-18): [WORK_STATUS](../WORK_STATUS.md),
 [work policy](../WORK_POLICY.md), [todo](../TODO.md), and the
-[current dependency/settings checkpoint](checkpoints/2026-11-18-gui-dependency-repair.md).
+[current guided-workflow checkpoint](checkpoints/2026-11-18-guided-workflow.md).
 The reported pre-GUI launch failure ran in the separate `ewp-waveform` project, which
 does not provide `transcriber`. Resume the owner session from the transcription checkout.
 The later WSL queue error identifies missing compatible TorchCodec/FFmpeg libraries.
-The implemented native repair passes real audio decoding locally; use the current checkpoint's
-repair command, then retry the short episode on WSL. Settings/layout feedback is implemented.
+The owner has now confirmed the repaired local-only workflow through subtitle export on WSL.
+Current work implements numbered instructions, source-review usability fixes and a documented
+prototype comparison. See [the reconciliation record](29-guided-workflow-and-prototype.md).
 
 Current preview: [0.20.0 integrated GUI](28-integrated-gui-preview.md), with a
 [WSL launch guide](../Instructions/GUI_QUICKSTART.md) and

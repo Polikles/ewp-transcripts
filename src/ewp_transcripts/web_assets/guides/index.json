@@ -1,0 +1,422 @@
+{
+  "workspace": {
+    "slug": "transcribe",
+    "document": "docs/gui/transcribe.md",
+    "title": {
+      "en": "Transcribe",
+      "pl": "Transkrypcja"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose audio and output",
+          "pl": "Wybierz audio i katalog wyników"
+        },
+        "text": {
+          "en": "Choose audio files and a shared output directory. Select all matching speaker tracks for one episode together.",
+          "pl": "Wybierz pliki audio i wspólny katalog wyników. Zaznacz razem wszystkie ścieżki mówców jednego odcinka."
+        }
+      },
+      {
+        "title": {
+          "en": "Inspect the episode",
+          "pl": "Sprawdź odcinek"
+        },
+        "text": {
+          "en": "Select an episode, choose language and speaker count or auto-detection, then click Inspect.",
+          "pl": "Wybierz odcinek, język oraz liczbę mówców lub wykrywanie automatyczne i kliknij Sprawdź."
+        }
+      },
+      {
+        "title": {
+          "en": "Plan and add to queue",
+          "pl": "Zaplanuj i dodaj do kolejki"
+        },
+        "text": {
+          "en": "Click Dry-run, review every source and output, check the exact-plan confirmation, then Add to queue. Repeat for other episodes.",
+          "pl": "Kliknij Plan bez przetwarzania, sprawdź źródła i wyniki, potwierdź dokładny plan i dodaj do kolejki. Powtórz dla innych odcinków."
+        }
+      },
+      {
+        "title": {
+          "en": "Start queue",
+          "pl": "Uruchom kolejkę"
+        },
+        "text": {
+          "en": "Start queue runs staged episodes in order. After completion, continue to optional correction or source review.",
+          "pl": "Uruchom kolejkę przetwarza przygotowane odcinki po kolei. Po zakończeniu przejdź do opcjonalnej korekty lub weryfikacji źródła."
+        }
+      }
+    ]
+  },
+  "correction": {
+    "slug": "optional-correction",
+    "document": "docs/gui/optional-correction.md",
+    "title": {
+      "en": "Optional correction",
+      "pl": "Opcjonalna korekta"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose recording",
+          "pl": "Wybierz nagranie"
+        },
+        "text": {
+          "en": "Open a completed recording from the queue. Batch checkboxes select independent recordings for batch actions.",
+          "pl": "Otwórz zakończone nagranie z kolejki. Pola wyboru służą osobno do operacji zbiorczych."
+        }
+      },
+      {
+        "title": {
+          "en": "Choose provider and dictionary",
+          "pl": "Wybierz dostawcę i słownik"
+        },
+        "text": {
+          "en": "For assistance, choose the exact provider, model and optional dictionary. Check readiness and read the disclosure.",
+          "pl": "Aby uzyskać pomoc, wybierz dostawcę, model i opcjonalny słownik. Sprawdź gotowość i warunki przekazania danych."
+        }
+      },
+      {
+        "title": {
+          "en": "Generate correction candidate",
+          "pl": "Wygeneruj propozycję korekty"
+        },
+        "text": {
+          "en": "Give scoped consent and Generate correction candidate. Suggestions remain non-final.",
+          "pl": "Wyraź zgodę dla tego zakresu i wygeneruj propozycję korekty. Propozycje pozostają nieostateczne."
+        }
+      },
+      {
+        "title": {
+          "en": "Continue to source review",
+          "pl": "Przejdź do weryfikacji źródła"
+        },
+        "text": {
+          "en": "Open the candidate in manual review, or Skip LLM-assisted correction to review the original ASR text.",
+          "pl": "Otwórz propozycję w ręcznej weryfikacji lub pomiń korektę LLM, aby sprawdzić oryginalną transkrypcję."
+        }
+      }
+    ]
+  },
+  "review": {
+    "slug": "source-review",
+    "document": "docs/gui/source-review.md",
+    "title": {
+      "en": "Source review & export",
+      "pl": "Weryfikacja i eksport źródła"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose recording",
+          "pl": "Wybierz nagranie"
+        },
+        "text": {
+          "en": "Choose a completed recording from the queue to prepare or reopen its own review.",
+          "pl": "Wybierz zakończone nagranie z kolejki, aby przygotować lub ponownie otworzyć jego szkic."
+        }
+      },
+      {
+        "title": {
+          "en": "Speaker names and colors",
+          "pl": "Nazwy i kolory mówców"
+        },
+        "text": {
+          "en": "Check display names, speaker assignments and the YTT color profile. Add speaker creates another editable speaker.",
+          "pl": "Sprawdź nazwy, przypisania mówców i profil kolorów YTT. Dodaj mówcę tworzy kolejnego mówcę do edycji."
+        }
+      },
+      {
+        "title": {
+          "en": "Review transcript",
+          "pl": "Sprawdź transkrypcję"
+        },
+        "text": {
+          "en": "Correct wording and speaker assignments. Place a caret between whole words for Split at cursor; use Separate selected text for a selection.",
+          "pl": "Popraw tekst i przypisania mówców. Dla podziału ustaw kursor między całymi słowami; dla zaznaczenia użyj wydzielania zaznaczonego tekstu."
+        }
+      },
+      {
+        "title": {
+          "en": "Preview and apply revision",
+          "pl": "Sprawdź i zastosuj rewizję"
+        },
+        "text": {
+          "en": "Use Preview in Prepare and validate, inspect the result, confirm manual verification, then Apply verified revision.",
+          "pl": "Użyj Podglądu w Przygotowaniu i walidacji, sprawdź wynik, potwierdź ręczną weryfikację i zastosuj zatwierdzoną rewizję."
+        }
+      },
+      {
+        "title": {
+          "en": "Export subtitles",
+          "pl": "Eksportuj napisy"
+        },
+        "text": {
+          "en": "Choose formats and Export verified revision. Translation is optional and can follow later.",
+          "pl": "Wybierz formaty i wyeksportuj zatwierdzoną rewizję. Opcjonalne tłumaczenie może nastąpić później."
+        }
+      }
+    ]
+  },
+  "translation": {
+    "slug": "optional-translation",
+    "document": "docs/gui/optional-translation.md",
+    "title": {
+      "en": "Optional translation",
+      "pl": "Opcjonalne tłumaczenie"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose source recording",
+          "pl": "Wybierz nagranie źródłowe"
+        },
+        "text": {
+          "en": "Choose a recording and its verified source revision when available. Check the source identity.",
+          "pl": "Wybierz nagranie i zatwierdzoną rewizję źródła, jeśli jest dostępna. Sprawdź tożsamość źródła."
+        }
+      },
+      {
+        "title": {
+          "en": "Choose translation direction",
+          "pl": "Wybierz kierunek tłumaczenia"
+        },
+        "text": {
+          "en": "Choose PL → EN or EN → PL, independently of the interface language.",
+          "pl": "Wybierz PL → EN lub EN → PL niezależnie od języka interfejsu."
+        }
+      },
+      {
+        "title": {
+          "en": "Open manual translation or generate candidate",
+          "pl": "Otwórz tłumaczenie ręczne lub wygeneruj propozycję"
+        },
+        "text": {
+          "en": "Use Open manual translation without a provider. For assistance, choose a provider/model, check readiness, consent and generate a candidate.",
+          "pl": "Użyj tłumaczenia ręcznego bez dostawcy. Dla pomocy wybierz dostawcę i model, sprawdź gotowość, wyraź zgodę i wygeneruj propozycję."
+        }
+      },
+      {
+        "title": {
+          "en": "Continue to translation review",
+          "pl": "Przejdź do weryfikacji tłumaczenia"
+        },
+        "text": {
+          "en": "Review meaning in Translation review & export. Skip translation when only source subtitles are needed.",
+          "pl": "Sprawdź znaczenie w Weryfikacji i eksporcie tłumaczenia. Pomiń tłumaczenie, jeśli potrzebne są tylko napisy źródłowe."
+        }
+      }
+    ]
+  },
+  "semantic-review": {
+    "slug": "translation-review",
+    "document": "docs/gui/translation-review.md",
+    "title": {
+      "en": "Translation review & export",
+      "pl": "Weryfikacja i eksport tłumaczenia"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose recording",
+          "pl": "Wybierz nagranie"
+        },
+        "text": {
+          "en": "Open the recording’s manual translation or saved candidate from its queue. Check source and direction.",
+          "pl": "Otwórz ręczne tłumaczenie nagrania lub zapisaną propozycję z kolejki. Sprawdź źródło i kierunek."
+        }
+      },
+      {
+        "title": {
+          "en": "Review source and target",
+          "pl": "Sprawdź źródło i tłumaczenie"
+        },
+        "text": {
+          "en": "Compare every source unit with the target and correct meaning, names, omissions and additions.",
+          "pl": "Porównaj każdą jednostkę źródła z tłumaczeniem i popraw znaczenie, nazwy, pominięcia i dodatki."
+        }
+      },
+      {
+        "title": {
+          "en": "Preview translation",
+          "pl": "Sprawdź tłumaczenie"
+        },
+        "text": {
+          "en": "Save the translation draft, then Preview translation. Resolve errors and review warnings.",
+          "pl": "Zapisz szkic tłumaczenia i uruchom jego Podgląd. Usuń błędy i sprawdź ostrzeżenia."
+        }
+      },
+      {
+        "title": {
+          "en": "Apply verified translation",
+          "pl": "Zastosuj zatwierdzone tłumaczenie"
+        },
+        "text": {
+          "en": "Confirm manual semantic verification and Apply verified translation.",
+          "pl": "Potwierdź ręczną weryfikację znaczenia i zastosuj zatwierdzone tłumaczenie."
+        }
+      },
+      {
+        "title": {
+          "en": "Audit and export",
+          "pl": "Sprawdź i eksportuj"
+        },
+        "text": {
+          "en": "Choose formats and Audit and export verified translation. Proceed with next output returns to the queue.",
+          "pl": "Wybierz formaty i sprawdź oraz wyeksportuj zatwierdzone tłumaczenie. Przejdź do kolejnego wyniku wraca do kolejki."
+        }
+      }
+    ]
+  },
+  "dictionary": {
+    "slug": "dictionaries",
+    "document": "docs/gui/dictionaries.md",
+    "title": {
+      "en": "Dictionaries",
+      "pl": "Słowniki"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose project inputs",
+          "pl": "Wybierz źródła projektu"
+        },
+        "text": {
+          "en": "Choose canonical and exact verified revision directories, project ID and output root.",
+          "pl": "Wybierz katalogi wyników i ich dokładnych zatwierdzonych rewizji, ID projektu oraz katalog wyników."
+        }
+      },
+      {
+        "title": {
+          "en": "Generate proposal",
+          "pl": "Wygeneruj propozycję"
+        },
+        "text": {
+          "en": "Generate proposal compares source and reviewed text without calling an LLM.",
+          "pl": "Generuj propozycję porównuje źródło i sprawdzony tekst bez wywoływania LLM."
+        }
+      },
+      {
+        "title": {
+          "en": "Review every decision",
+          "pl": "Sprawdź każdą decyzję"
+        },
+        "text": {
+          "en": "Accept, reject or edit candidates using their context; Save decisions.",
+          "pl": "Akceptuj, odrzucaj lub edytuj propozycje w kontekście i zapisz decyzje."
+        }
+      },
+      {
+        "title": {
+          "en": "Publish dictionary",
+          "pl": "Opublikuj słownik"
+        },
+        "text": {
+          "en": "Choose a new dictionary ID, confirm review and Publish project dictionary.",
+          "pl": "Wybierz nowe ID słownika, potwierdź weryfikację i opublikuj słownik projektu."
+        }
+      }
+    ]
+  },
+  "saved": {
+    "slug": "saved-work",
+    "document": "docs/gui/saved-work.md",
+    "title": {
+      "en": "Saved work & cleanup",
+      "pl": "Zapisana praca i porządkowanie"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Choose output root and catalog",
+          "pl": "Wybierz katalog wyników i zapisu"
+        },
+        "text": {
+          "en": "Use the same shared output root and workspace catalog as the recording’s durable artifacts.",
+          "pl": "Używaj wspólnego katalogu wyników i katalogu zapisu odpowiadających trwałym plikom nagrania."
+        }
+      },
+      {
+        "title": {
+          "en": "Save current work state",
+          "pl": "Zapisz bieżący stan pracy"
+        },
+        "text": {
+          "en": "Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.",
+          "pl": "Nazwij obszar pracy i zapisz jego stan przed zatrzymaniem programu. Zmienione szkice są najpierw zapisywane."
+        }
+      },
+      {
+        "title": {
+          "en": "Load saved work",
+          "pl": "Wczytaj zapisaną pracę"
+        },
+        "text": {
+          "en": "Refresh, select the workspace and Load selected work state after a restart. Re-enter provider credentials.",
+          "pl": "Odśwież listę, wybierz zapis i wczytaj stan po ponownym uruchomieniu. Wprowadź ponownie dane dostępu do dostawcy."
+        }
+      },
+      {
+        "title": {
+          "en": "Inspect cleanup before deleting",
+          "pl": "Sprawdź porządkowanie przed usunięciem"
+        },
+        "text": {
+          "en": "Refresh the managed-source inventory and read retention reasons before any explicit cleanup.",
+          "pl": "Odśwież spis zarządzanych źródeł i przeczytaj przyczyny zachowania plików przed jawnym porządkowaniem."
+        }
+      }
+    ]
+  },
+  "settings": {
+    "slug": "settings",
+    "document": "docs/gui/settings.md",
+    "title": {
+      "en": "Settings & About",
+      "pl": "Ustawienia i informacje"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Test local dependencies",
+          "pl": "Przetestuj lokalne zależności"
+        },
+        "text": {
+          "en": "Run the optional environment test to enable Doctor and repair controls.",
+          "pl": "Uruchom opcjonalny test środowiska, aby włączyć doctor i naprawę zależności."
+        }
+      },
+      {
+        "title": {
+          "en": "Read doctor report",
+          "pl": "Przeczytaj raport doctor"
+        },
+        "text": {
+          "en": "Run doctor and inspect failed checks and technical details. Missing HF_TOKEN is harmless with complete offline models.",
+          "pl": "Uruchom doctor i sprawdź błędy oraz szczegóły techniczne. Brak HF_TOKEN nie przeszkadza przy kompletnych modelach offline."
+        }
+      },
+      {
+        "title": {
+          "en": "Repair only when needed",
+          "pl": "Napraw w razie potrzeby"
+        },
+        "text": {
+          "en": "Reinstall dependencies opens terminal steps. Save work and stop the GUI before changing its environment.",
+          "pl": "Ponowna instalacja zależności pokazuje kroki w terminalu. Zapisz pracę i zatrzymaj GUI przed zmianą środowiska."
+        }
+      },
+      {
+        "title": {
+          "en": "Check application information",
+          "pl": "Sprawdź informacje o programie"
+        },
+        "text": {
+          "en": "Check version, local processing, optional providers, licenses and notices.",
+          "pl": "Sprawdź wersję, przetwarzanie lokalne, opcjonalnych dostawców, licencje i informacje o zasobach."
+        }
+      }
+    ]
+  }
+}

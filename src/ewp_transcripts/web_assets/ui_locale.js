@@ -26,6 +26,18 @@ const guiPolish = new Map([
   ["Local dependency checks passed. This checks library loading, CUDA visibility and local model paths; it does not run transcription.", "Test lokalnych zależności zakończony pomyślnie. Sprawdzono ładowanie bibliotek, dostępność CUDA i ścieżki modeli; transkrypcja nie została uruchomiona."],
   ["Use for inspect / plan", "Wybierz do inspekcji i planu"], ["Remove from list", "Usuń z listy"],
   ["Local dependencies", "Lokalne zależności"], ["Run doctor", "Uruchom doctor"],
+  ["Quick steps", "Krótkie instrukcje"], ["Full instructions (English)", "Pełne instrukcje (angielski)"],
+  ["Stage instructions", "Instrukcje etapu"], ["Add speaker", "Dodaj mówcę"],
+  ["Recording queue", "Kolejka nagrań"], ["Add audio files…", "Dodaj pliki audio…"],
+  ["Tools and settings", "Narzędzia i ustawienia"], ["Task context", "Kontekst zadania"],
+  ["Recording details", "Szczegóły nagrania"], ["Recording language", "Język nagrania"],
+  ["Translation target", "Język docelowy tłumaczenia"], ["Audio processing", "Przetwarzanie audio"],
+  ["Local · WhisperX", "Lokalnie · WhisperX"],
+  ["Speaker names and colors", "Nazwy i kolory mówców"],
+  ["The selected profile previews the colors used for the next YTT export. Switching profiles preserves custom colors. Existing exports stay unchanged.", "Wybrany profil pokazuje kolory następnego eksportu YTT. Zmiana profilu zachowuje własne kolory. Istniejące eksporty pozostają bez zmian."],
+  ["Ubuntu upgrade and dependency repair instructions", "Instrukcje aktualizacji Ubuntu i naprawy zależności"],
+  ["Open Ubuntu upgrade instructions", "Otwórz instrukcje aktualizacji Ubuntu"],
+  ["Place the cursor between complete words, then split. Select text to use Separate selected text instead.", "Ustaw kursor między całymi słowami i podziel tekst. Dla zaznaczenia użyj wydzielania zaznaczonego tekstu."],
   ["Transcription failed. Open Settings & About and use Test local dependencies, then retry after fixing failed checks.", "Transkrypcja nie powiodła się. Otwórz Ustawienia i informacje i użyj testu lokalnych zależności, a po usunięciu przyczyn błędów spróbuj ponownie."],
   ["Reinstall dependencies…", "Zainstaluj ponownie zależności…"],
   ["Test the environment to enable Doctor and dependency repair. These tools are optional maintenance actions.", "Przetestuj środowisko, aby włączyć doctor i naprawę zależności. Są to opcjonalne narzędzia konserwacji."],
@@ -534,7 +546,7 @@ function translateGui() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentElement.closest("script, style, textarea, pre, .translation-source, .gui-path, .review-summary-table td, .stage-queue-item h4, .stage-queue-item p, .dictionary-candidate p, .dictionary-candidate details, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
+    if (node.parentElement.closest("script, style, textarea, pre, .translation-source, .gui-path, .gui-context-speaker, .review-summary-table td, .stage-queue-item h4, .stage-queue-item p, .dictionary-candidate p, .dictionary-candidate details, .dictionary-candidate legend, .review-block select, #gui-recordings strong, .stage-queue-item h4")) continue;
     const previous = guiNodeSources.get(node);
     const source = previous && previous.last === node.nodeValue ? previous.source : node.nodeValue;
     const translated = guiUiText(source);

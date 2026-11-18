@@ -33,6 +33,7 @@ from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
+from ewp_transcripts.web_guides import render_guide
 from ewp_transcripts.web_jobs import (
     GuiTranscriptionJob,
     GuiTranscriptionQueue,
@@ -317,6 +318,12 @@ def dispatch_get(
         return _asset_response("index.html", "text/html; charset=utf-8")
     if path == "/help":
         return _asset_response("help.html", "text/html; charset=utf-8")
+    if path.startswith("/help/"):
+        guide = render_guide(path.removeprefix("/help/"))
+        if guide is not None:
+            return WebResponse(HTTPStatus.OK, "text/html; charset=utf-8", guide)
+    if path == "/api/v1/guides":
+        return _asset_response("guides/index.json", "application/json; charset=utf-8")
     if path == "/favicon.ico":
         return WebResponse(HTTPStatus.NO_CONTENT, None, b"")
     if path.startswith("/assets/") and path.removeprefix("/assets/") in _ASSET_TYPES:
@@ -358,12 +365,14 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("translation_provider_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("ui_locale.js").read_bytes()
         body += b"\n" + assets.joinpath("workbench.js").read_bytes()
+        body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
         body += b"\n" + assets.joinpath("translation_review_editor.css").read_bytes()
         body += b"\n" + assets.joinpath("workflow_tracker.css").read_bytes()
         body += b"\n" + assets.joinpath("workbench.css").read_bytes()
+        body += b"\n" + assets.joinpath("workflow_guidance.css").read_bytes()
     return WebResponse(HTTPStatus.OK, content_type, body)
 
 

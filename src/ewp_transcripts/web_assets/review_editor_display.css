@@ -3,5 +3,14 @@
   margin: 1rem 0 1.35rem;
 }
 
-/* Review text grows when visible; manual scrolling remains available as a safe fallback. */
-#review-editor textarea { overflow: auto; }
+/* Each visible block grows with its text; navigation and viewport changes reschedule sizing. */
+#review-editor textarea, #translation-review-editor textarea {
+  box-sizing: border-box;
+  min-height: 3.5rem;
+  max-height: none;
+  overflow: hidden;
+  resize: none;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.review-cursor-status { grid-column: 1 / -1; margin: .25rem 0; font-size: .85rem; }

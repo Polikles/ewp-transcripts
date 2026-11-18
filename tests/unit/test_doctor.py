@@ -176,6 +176,9 @@ def test_explicit_speech_test_reports_native_failure_without_leaking_tokens(tmp_
     assert not result.ready
     assert check.status is DiagnosticStatus.FAIL
     assert "libavutil.so.58" in check.context["detail"]
+    assert "after upgrading from Ubuntu 24.04 to Ubuntu 26.04" in check.message
+    assert check.context["help_url"] == "/help/ubuntu-upgrade"
+    assert check.context["instructions_file"] == "WSL config/UBUNTU_UPGRADE.md"
     assert secret not in result.model_dump_json()
     assert "torchcodec" not in sys.modules
 

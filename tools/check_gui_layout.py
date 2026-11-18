@@ -37,6 +37,9 @@ def geometry(page: Page) -> dict:
           return b && s && b.bottom > s.top + 1; }).length;
       return {viewport: innerWidth, pageWidth: document.documentElement.scrollWidth,
         overflow, feedbackOverlaps: overlaps,
+        textareaOverflow: [...document.querySelectorAll(
+          '#review-editor textarea, #translation-review-editor textarea')]
+          .filter(visible).filter(e => e.scrollHeight > e.clientHeight + 1).length,
         queueScroll: document.querySelector('#transcription-jobs').scrollWidth -
           document.querySelector('#transcription-jobs').clientWidth,
         tableBleed: [...document.querySelectorAll('#transcription-jobs td .workflow-indicator')]
@@ -83,6 +86,7 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
                         assert measured["pageWidth"] <= width + 1, measured
                         assert not measured["overflow"], measured
                         assert not measured["feedbackOverlaps"], measured
+                        assert not measured["textareaOverflow"], measured
                         if section == "workspace":
                             assert not measured["tableBleed"], measured
                             if width >= 720:
@@ -163,9 +167,114 @@ def check_maintenance_controls(page: Page) -> None:
     expect(page.locator("#test-dependencies")).not_to_be_visible()
 
 
+def check_cursor_and_auto_height(page: Page) -> None:
+    """Use real pointer/keyboard carets, including an edit during a saved-draft request."""
+    stage(page, "review")
+    page.set_viewport_size({"width": 960, "height": 1080})
+    text = page.locator("#review-editor textarea").first
+    original = text.input_value()
+    blocks = page.evaluate("reviewDocument.anchors[0].blocks.length")
+    text.focus()
+    text.press("Control+Home")
+    text.press("ArrowRight")
+    page.locator(".review-cursor-split").first.click()
+    expect(page.locator(".review-cursor-status").first).to_contain_text(
+        "GUI_REVIEW_CURSOR_BOUNDARY"
+    )
+    assert page.evaluate("reviewDocument.anchors[0].blocks.length") == blocks
+
+    # A physical textarea click immediately after the first word creates a caret.
+    text.scroll_into_view_if_needed()
+    point = text.evaluate("""e => {
+      const style=getComputedStyle(e), box=e.getBoundingClientRect();
+      const ctx=document.createElement('canvas').getContext('2d'); ctx.font=style.font;
+      return {x:box.left+parseFloat(style.paddingLeft)+ctx.measureText('Welcome').width+1,
+        y:box.top+parseFloat(style.paddingTop)+parseFloat(style.lineHeight)/2};
+    }""")
+    page.mouse.click(point["x"], point["y"])
+    caret = text.evaluate("e=>[e.selectionStart,e.selectionEnd]")
+    assert caret[0] == caret[1] and caret[0] in (7, 8), caret
+    page.locator(".review-cursor-split").first.click()
+    expect(page.locator("#review-editor textarea").first).to_have_value("Welcome")
+    page.locator("#undo-review").click()
+    expect(text).to_have_value(original)
+
+    text.focus()
+    text.press("Control+Home")
+    text.press("Control+ArrowRight")
+    text.press("Tab")
+    expect(page.locator(".review-cursor-split").first).to_be_focused()
+    page.locator(".review-cursor-split").first.press("Enter")
+    expect(page.locator("#review-editor textarea").first).to_have_value("Welcome")
+    page.locator("#undo-review").click()
+    expect(text).to_have_value(original)
+
+    # Hold a real save response; newer keystrokes must survive and abort the stale split.
+    page.evaluate("""() => {
+      window.realGuiPostReview=postReview;
+      postReview=async (operation, request) => {
+        const payload=await window.realGuiPostReview(operation,request);
+        if(operation==='save') await new Promise(resolve=>window.releaseGuiSave=resolve);
+        return payload;
+      };
+    }""")
+    text.fill(original + " saved snapshot")
+    text.press("Control+Home")
+    text.press("Control+ArrowRight")
+    page.locator(".review-cursor-split").first.click()
+    page.wait_for_function("() => typeof window.releaseGuiSave === 'function'")
+    text.fill(original + " newer edit")
+    page.evaluate("() => {postReview=window.realGuiPostReview; window.releaseGuiSave();}")
+    expect(page.locator(".review-cursor-status").first).to_contain_text(
+        "GUI_REVIEW_CHANGED_DURING_SAVE"
+    )
+    expect(text).to_have_value(original + " newer edit")
+    assert page.evaluate("reviewDocument.anchors[0].blocks.length") == blocks
+    assert page.evaluate("reviewDirty")
+
+    text.fill(("A longer transcript line with Polish words Żółć.\n") * 35)
+    stage(page, "correction")
+    page.set_viewport_size({"width": 720, "height": 1000})
+    stage(page, "review")
+    page.wait_for_function("""() => {
+      const e=document.querySelector('#review-editor textarea');
+      return e.clientHeight >= e.scrollHeight && e.clientHeight > 500;
+    }""")
+    assert text.evaluate("e=>getComputedStyle(e).resize") == "none"
+    text.fill(original)
+    page.locator("#save-review").scroll_into_view_if_needed()
+    before_save = page.evaluate("window.scrollY")
+    page.locator("#save-review").click()
+    expect(page.locator("#review-status")).to_contain_text("Draft saved; preview is required again")
+    expect(text).to_have_value(original)
+    assert abs(page.evaluate("window.scrollY") - before_save) <= 2
+
+
 def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
-    check_maintenance_controls(page)
     page.wait_for_function("() => csrfToken.length > 0")
+    page.wait_for_function("() => Object.keys(guiWorkflowTargets).length === 8")
+    for name in (
+        "workspace",
+        "correction",
+        "review",
+        "translation",
+        "semantic-review",
+        "dictionary",
+        "saved",
+        "settings",
+    ):
+        stage(page, name)
+        expected_count = page.evaluate("name => guiWorkflowGuides[name].steps.length", name)
+        expect(page.locator("#gui-stage-instructions li")).to_have_count(expected_count)
+        href = page.locator("#gui-stage-instructions a[target=_blank]").get_attribute("href")
+        response = page.request.get(page.url.rstrip("/") + href)
+        assert response.ok and "<h1>" in response.text()
+        assert page.evaluate(
+            "name => Object.values(guiWorkflowTargets[name])"
+            ".every(id => document.getElementById(id))",
+            name,
+        )
+    check_maintenance_controls(page)
     page.evaluate("document.fonts.ready")
     assert page.evaluate('document.fonts.check("16px Montserrat")')
     assert page.evaluate("""document.fonts.check('16px "Noto Sans Mono"')""")
@@ -195,6 +304,9 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     text.fill("Welcome to another episode. Żółć")
     text.evaluate("e => {e.focus(); e.setSelectionRange(0,7)}")
     identity = page.locator("#review-identity").inner_text()
+    check_cursor_and_auto_height(page)
+    text.focus()
+    text.evaluate("e => e.setSelectionRange(0,7)")
     # Manual translation for the other result, through the real application API.
     result = page.evaluate("stageQueueJobs[0].result_path")
     page.evaluate(
@@ -226,6 +338,16 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     )
     panel = page.locator("#review-speaker-names")
     panel.evaluate("e => e.open=true")
+    assert panel.locator("#gui-palette").count() == 1
+    page.locator("#gui-export-palette").select_option("brand")
+    expect(page.locator('input[aria-label="Speaker color speaker_001"]')).to_have_value("#f5f7fa")
+    page.locator("#gui-export-palette").select_option("configured")
+    configured_color = page.evaluate(
+        "reviewDocument.configured_speaker_colors.speaker_001.toLowerCase()"
+    )
+    expect(page.locator('input[aria-label="Speaker color speaker_001"]')).to_have_value(
+        configured_color
+    )
     for number in range(3, 8):
         page.locator(".review-add-speaker").click()
         expect(
@@ -244,6 +366,9 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     ).to_have_count(1)
     assert page.evaluate("guiSpeakerColors().speaker_007") == "#123456"
     page.locator("#gui-production-palette").click()
+    page.locator("#gui-export-palette").select_option("brand")
+    expect(page.locator('input[aria-label="Speaker color speaker_007"]')).to_have_value("#123456")
+    page.locator("#gui-production-palette").click()
     # Keyboard selection isolation and stable speaker ownership, not cursor splitting.
     text.focus()
     text.evaluate("e => e.setSelectionRange(0,7)")
@@ -252,8 +377,23 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     separate.press("Enter")
     expect(page.locator("#review-editor textarea").first).to_have_value("Welcome")
     page.locator("#review-editor select").first.select_option("speaker_002")
+    assert page.locator(".review-control-groups").evaluate(
+        "e => e.getBoundingClientRect().top >= "
+        "document.querySelector('#review-editor').getBoundingClientRect().bottom"
+    )
+    assert page.locator(".review-control-group").evaluate_all(
+        """es => es.length === 2 &&
+          Math.abs(es[0].getBoundingClientRect().top - es[1].getBoundingClientRect().top) < 2 &&
+          es.every(e => e.getBoundingClientRect().height < 250)"""
+    )
+    page.locator("#preview-review").scroll_into_view_if_needed()
+    before_preview = page.evaluate("window.scrollY")
     page.locator("#preview-review").click()
     expect(page.locator("#apply-review")).to_be_enabled()
+    page.wait_for_function(
+        "() => document.querySelector('#review-status').textContent.startsWith('Preview passed')"
+    )
+    assert abs(page.evaluate("window.scrollY") - before_preview) <= 2
     page.locator('#review-workflow input[name="verified"]').check()
     page.locator("#apply-review").click()
     expect(page.locator("#export-review")).to_be_enabled()

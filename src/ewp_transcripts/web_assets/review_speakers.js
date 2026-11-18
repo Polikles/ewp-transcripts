@@ -7,12 +7,16 @@ function reviewSpeakerNamesPanel() {
   const panel = window.document.createElement("details");
   panel.id = existing.id;
   panel.hidden = existing.hidden;
+  panel.open = true;
   const summary = window.document.createElement("summary");
-  summary.textContent = "Speaker names for this revision";
+  summary.id = "gui-review-step-2";
+  summary.textContent = "2. Speaker names and colors";
   const hint = existing.querySelector(".field-hint");
   const labels = existing.querySelector("#review-speaker-labels");
+  const palette = existing.querySelector("#gui-palette");
   panel.append(summary);
   if (hint) panel.append(hint);
+  if (palette) panel.append(palette);
   if (labels) panel.append(labels);
   existing.replaceWith(panel);
   return panel;
@@ -82,7 +86,7 @@ function renderReviewSpeakerLabels(document) {
   const add = window.document.createElement("button");
   add.type = "button";
   add.className = "review-add-speaker";
-  add.textContent = "Add revision-only speaker";
+  add.textContent = "Add speaker";
   add.title = "Add a speaker available only in this editable review and its descendant revision.";
   add.addEventListener("click", async () => {
     if (!reviewDocument) return;

@@ -629,12 +629,13 @@ def test_group_queue_verifies_every_source_and_passes_explicit_group(
         assert seen[0]["explicit_group_id"] == "s0e00"
 
 
-def test_controlled_engine_failure_keeps_code_and_action(tmp_path: Path) -> None:
+@pytest.mark.parametrize("cause", ["native library unavailable", "torchcodec is not available"])
+def test_controlled_engine_failure_keeps_code_and_action(tmp_path: Path, cause: str) -> None:
     from ewp_transcripts.domain.errors import SpeechEngineError
 
     def fail(*args, **kwargs):
         try:
-            raise ImportError("native library unavailable")
+            raise ImportError(cause)
         except ImportError as error:
             raise SpeechEngineError("WhisperX ASR execution failed") from error
 
@@ -653,6 +654,11 @@ def test_controlled_engine_failure_keeps_code_and_action(tmp_path: Path) -> None
     assert failed.error["code"] == "SPEECH_ENGINE_ERROR"
     assert failed.error["cause_type"] == "ImportError"
     assert "Test local dependencies" in failed.error["action"]
+    if "torchcodec" in cause:
+        assert failed.error["help_url"] == "/help/ubuntu-upgrade"
+        assert "after upgrading Ubuntu 24.04 to Ubuntu 26.04" in failed.error["upgrade_guidance"]
+    else:
+        assert "help_url" not in failed.error
 
 
 def test_backend_failure_details_redact_credentials(monkeypatch) -> None:

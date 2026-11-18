@@ -4,6 +4,29 @@ Last updated: **2026-11-18**.
 
 ## Active task and resume pointers
 
+Current work: [guided workflow and prototype comparison](docs/checkpoints/2026-11-18-guided-workflow.md).
+Start with [TODO.md](TODO.md) after every context reset. Implementation and VM verification
+are complete; the new UI needs the owner's WSL retest. The owner already confirmed real
+local-only transcription through source subtitle export on WSL/RTX 3090. The native ASR
+blocker is resolved; API-assisted stages remain unqualified by that report.
+
+The installer automatically runs native audio setup after locked sync; new tests also prove
+failure propagation. Upgrade-specific doctor/queue guidance links the bundled Ubuntu recovery
+guide. All stages have numbered EN/PL Quick steps, matching controls and offline per-stage docs.
+Review panels are compact and below the transcript, Preview retains position, source/target
+text grows, real caret splits have adjacent feedback, and newer edits survive a pending save.
+Speaker profiles update swatches while preserving custom overrides. The prototype comparison
+is [recorded here](docs/29-guided-workflow-and-prototype.md): recording rail, numbered stage
+strip, responsive task context and compact queues retain the real backend/approval contracts.
+
+Final gates: Ruff/format/mypy and 810 tests PASS; five integration tests PASS; 72 browser
+locale/theme/stage/viewport cases PASS with no page errors/external requests, no text-box
+overflow and no desktop queue overflow. Focused pointer/keyboard/concurrent-save, live context
+colors and untranslated speaker names PASS. Wheel/source builds PASS; all 47 packaged asset/
+guide files match source; all nine help routes render directly from the wheel without ML imports.
+No ML pins, canonical schema, public release or tag change. Actual Windows zoom, provider calls
+and new-palette YouTube qualification remain separate. The earlier summaries below are history.
+
 Current task: [GUI dependency repair and settings/layout feedback](docs/checkpoints/2026-11-18-gui-dependency-repair.md).
 Implementation and VM verification are complete; the owner must run the repair and retry a
 short episode on WSL. The supplied pyannote failure is caused by unavailable TorchCodec

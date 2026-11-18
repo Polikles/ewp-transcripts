@@ -799,7 +799,12 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     The subsequent [dependency/settings checkpoint](checkpoints/2026-11-18-gui-dependency-repair.md)
     identifies the actual pyannote/TorchCodec FFmpeg ABI failure and implements private native
     repair, Settings diagnostics, Ubuntu 26.04 acceptance and compact queue columns. VM native
-    decoding and 72 browser cases pass; the real RTX 3090 queue retry remains pending.
+    decoding and 72 browser cases passed; that checkpoint left the real RTX 3090 retry pending.
+    The owner subsequently passed local-only ASR through source subtitle export on WSL/RTX 3090.
+    [Guided workflow and prototype reconciliation](29-guided-workflow-and-prototype.md) adds
+    per-stage instructions, compact review/queue layout, live speaker profiles, caret/state
+    fixes, growing text fields and the recording-queue/stage/context shell. New usability
+    changes still need the owner retest; provider/zoom/YouTube qualification remains separate.
     **GUI-34a earlier slice:** GUI-34a implements responsive access
     to existing queues/review controls, retaining the locally scrollable table and existing workflow.
     Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance

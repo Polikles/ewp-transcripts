@@ -12,6 +12,7 @@ const guiStages = [
 ];
 let guiActiveStage = "workspace";
 let guiActiveResult = "";
+let guiActiveJobId = "";
 let guiKnownJobs = [];
 const guiPreferencesKey = "ewp-gui-preferences-v1";
 let guiPreferences = {};
@@ -38,6 +39,7 @@ function showGuiStage(stage, focus = false) {
   }
   const heading = document.getElementById(guiStages.find(item => item[0] === stage)[2]);
   if (focus && heading) { heading.tabIndex = -1; heading.focus({preventScroll: true}); }
+  document.dispatchEvent(new CustomEvent("ewp-stage", {detail: {stage}}));
   updateGuiContext();
 }
 
@@ -58,12 +60,15 @@ function updateGuiContext() {
     : guiActiveStage === "correction" ? correctionForm.elements.namedItem("result_path").value || guiActiveResult
     : guiActiveStage === "translation" ? translationForm.elements.namedItem("result_path").value || guiActiveResult : guiActiveResult;
   if (source) guiActiveResult = source;
-  const job = guiKnownJobs.find(item => item.result_path === guiActiveResult);
-  const signature = JSON.stringify([guiActiveStage, guiActiveResult, reviewDirty, translationReviewDirty,
+  const job = guiKnownJobs.find(item => guiActiveResult ? item.result_path === guiActiveResult : item.job_id === guiActiveJobId);
+  if (job) guiActiveJobId = job.job_id;
+  const signature = JSON.stringify([guiActiveStage, guiActiveResult, guiActiveJobId, reviewDirty, translationReviewDirty,
     job?.workflow, reviewDocument?.job_id, translationReview?.revision_path,
+    reviewDocument?.speaker_labels, guiSpeakerColors(), document.querySelector("#gui-export-palette")?.value,
+    translationForm.elements.namedItem("target_language").value,
     stageQueueSelections.correction.size, stageQueueSelections.translation.size]);
   updateGuiRecordings();
-  if (context.dataset.signature === signature) { applyGuiSpeakerColors(); return; }
+  if (context.dataset.signature === signature) { applyGuiSpeakerColors(); renderGuiTaskContext(job); return; }
   context.dataset.signature = signature;
   context.replaceChildren();
   const title = document.createElement("strong");
@@ -72,14 +77,18 @@ function updateGuiContext() {
   stage.textContent = guiStages.find(item => item[0] === guiActiveStage)[1];
   const path = document.createElement("span");
   path.className = "gui-path";
-  path.textContent = guiActiveResult ? shortName(guiActiveResult) : "Choose a recording in a stage queue.";
-  path.title = guiActiveResult;
+  const activePath = guiActiveResult || job?.input_path || "";
+  path.textContent = activePath ? shortName(activePath) : "Choose a recording in a stage queue.";
+  path.title = activePath;
   const saved = document.createElement("span");
   saved.textContent = reviewDirty || translationReviewDirty ? "Unsaved draft — navigation keeps it open" : "Draft changes saved or no draft open";
   context.append(title, stage, path, saved);
   const count = document.createElement("span");
   count.textContent = `Batch selection: ${stageQueueSelections.correction.size} correction · ${stageQueueSelections.translation.size} translation`;
   context.append(count);
+  const compact = document.createElement("details"); compact.className = "gui-compact-context";
+  const compactTitle = document.createElement("summary"); compactTitle.textContent = "Recording details";
+  compact.append(compactTitle, guiTaskContextContent(job)); context.append(compact);
   const translationJob = guiKnownJobs.find(item => item.result_path === translationReview?.result_path);
   if (translationReview && translationJob?.workflow?.review?.path && translationReview.revision_path !== translationJob.workflow.review.path) {
     const stale = document.createElement('p'); stale.className='notice';
@@ -88,12 +97,13 @@ function updateGuiContext() {
   }
   updateGuiRecordings();
   applyGuiSpeakerColors();
+  renderGuiTaskContext(job);
 }
 
 function updateGuiRecordings() {
   const list = document.getElementById("gui-recordings");
   if (!list) return;
-  const signature = JSON.stringify([guiActiveResult, guiKnownJobs.map(job => [job.job_id, job.workflow, job.status])]);
+  const signature = JSON.stringify([guiActiveResult, guiActiveJobId, guiKnownJobs.map(job => [job.job_id, job.workflow, job.status])]);
   if (list.dataset.signature === signature) return;
   list.dataset.signature = signature;
   list.replaceChildren();
@@ -101,7 +111,7 @@ function updateGuiRecordings() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "gui-recording";
-    button.setAttribute("aria-pressed", String(job.result_path === guiActiveResult));
+    button.setAttribute("aria-pressed", String(job.job_id === guiActiveJobId || Boolean(job.result_path && job.result_path === guiActiveResult)));
     const identity = document.createElement("strong");
     identity.textContent = job.planned_job_id;
     const status = document.createElement("span");
@@ -109,6 +119,7 @@ function updateGuiRecordings() {
     button.title = job.result_path || job.input_path;
     button.append(identity, status);
     button.addEventListener("click", () => {
+      guiActiveJobId = job.job_id;
       guiActiveResult = job.result_path || "";
       if (job.result_path && ["correction", "review", "translation", "semantic-review"].includes(guiActiveStage)) {
         void openStageQueueItem(job, guiActiveStage);
@@ -152,7 +163,8 @@ function installGuiShell() {
   const paths = document.createElement("details"); paths.className = "gui-source-paths";
   paths.innerHTML = "<summary>Source and output paths</summary>";
   const form = document.querySelector("#review-workflow");
-  while (form.firstElementChild && !form.firstElementChild.contains(document.querySelector("#prepare-review"))) paths.append(form.firstElementChild);
+  const reviewIdentity = document.querySelector("#review-identity").closest("p");
+  while (form.firstElementChild && form.firstElementChild !== reviewIdentity) paths.append(form.firstElementChild);
   form.prepend(paths);
   const settings = document.createElement("section");
   settings.innerHTML = `<h2 id="gui-settings-heading">Settings & About</h2>
@@ -181,43 +193,100 @@ function installGuiShell() {
   const nav = document.createElement("nav");
   nav.id = "gui-stage-nav";
   nav.setAttribute("aria-label", "Workflow stages");
-  for (const [id, title, , icon] of guiStages) {
+  const tools = document.createElement("nav"); tools.id = "gui-tool-nav";
+  tools.setAttribute("aria-label", "Tools and settings");
+  for (const [index, [id, title, , icon]] of guiStages.entries()) {
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.guiStage = id;
+    if (index < 5) {
+      const number = document.createElement("span"); number.className = "gui-stage-order";
+      number.textContent = String(index + 1); button.append(number);
+    }
     button.append(guiIcon(icon), document.createTextNode(title));
     button.addEventListener("click", () => showGuiStage(id, true));
-    nav.append(button);
+    (index < 5 ? nav : tools).append(button);
   }
   const recordings = document.createElement("div");
   recordings.id = "gui-recordings";
   recordings.setAttribute("aria-label", "Recordings");
-  navigation.append(document.querySelector("#compatibility"), nav, recordings);
+  const queueTitle = document.createElement("h2"); queueTitle.textContent = "Recording queue";
+  const addAudio = document.createElement("button"); addAudio.type = "button";
+  addAudio.id = "gui-add-audio"; addAudio.textContent = "Add audio files…";
+  addAudio.disabled = nativeMediaButton.disabled;
+  new MutationObserver(() => { addAudio.disabled = nativeMediaButton.disabled; }).observe(nativeMediaButton, {attributes:true, attributeFilter:["disabled"]});
+  addAudio.addEventListener("click", () => { if (nativeMediaButton.disabled) return; showGuiStage("workspace"); nativeMediaInput.click(); });
+  navigation.append(document.querySelector("#compatibility"), queueTitle, addAudio, recordings, tools);
+  main.prepend(nav);
   main.before(navigation);
   const context = document.createElement("div");
   context.id = "gui-active-context";
   context.setAttribute("role", "status");
   main.before(context);
+  const taskContext = document.createElement("aside"); taskContext.id = "gui-task-context";
+  taskContext.setAttribute("aria-label", "Task context"); main.after(taskContext);
   document.body.classList.add("gui-workbench");
   document.addEventListener("ewp-jobs", event => { guiKnownJobs = event.detail; updateGuiContext(); });
   for (const selector of ["#review-editor", "#translation-review-editor", "#review-status", "#translation-review-status"]) {
     new MutationObserver(updateGuiContext).observe(document.querySelector(selector), {childList: true, subtree: true});
   }
   document.addEventListener("input", event => {
-    if (event.target.closest("#review-editor, #translation-review-editor")) updateGuiContext();
+    if (event.target.closest("#review-editor, #translation-review-editor, #review-speaker-labels")) updateGuiContext();
+  });
+  document.addEventListener("change", event => {
+    if (event.target.matches('#gui-export-palette, #translation-workflow [name="target_language"]')) updateGuiContext();
   });
   applyGuiTheme();
   showGuiStage("workspace");
   startGuiTranslation();
 }
 
+function guiTaskContextContent(job) {
+  const content = document.createElement("div"), values = document.createElement("dl");
+  const source = job?.language || (reviewDocument?.result_path === guiActiveResult ? reviewDocument.language : "—");
+  const target = translationReview?.result_path === guiActiveResult ? translationReview.direction.target_language
+    : translationForm.elements.namedItem("result_path").value === guiActiveResult && guiActiveResult
+      ? translationForm.elements.namedItem("target_language").value : "—";
+  for (const [name, value] of [["Recording language", source], ["Translation target", target], ["Audio processing", "Local · WhisperX"]]) {
+    const term = document.createElement("dt"), description = document.createElement("dd");
+    term.textContent = name; description.textContent = value; values.append(term, description);
+  }
+  content.append(values);
+  if (reviewDocument?.result_path === guiActiveResult) {
+    const title = document.createElement("h3"); title.textContent = "Speaker names and colors"; content.append(title);
+    const colors = guiSpeakerColors();
+    for (const id of reviewDocument.speakers) {
+      const row = document.createElement("p"); row.className = "gui-context-speaker";
+      const marker = document.createElement("span"); marker.className = "gui-speaker-marker";
+      marker.style.backgroundColor = colors[id]; marker.setAttribute("aria-hidden", "true");
+      row.append(marker, document.createTextNode(reviewDocument.speaker_labels?.[id] || id));
+      row.title = id; row.dataset.speakerId = id; content.append(row);
+    }
+  }
+  const draft = document.createElement("p"); draft.className = "gui-context-draft";
+  draft.textContent = reviewDirty || translationReviewDirty ? "Unsaved draft — navigation keeps it open" : "Draft changes saved or no draft open";
+  content.append(draft); return content;
+}
+
+function renderGuiTaskContext(job) {
+  const panel = document.querySelector("#gui-task-context");
+  if (!panel) return;
+  const heading = document.createElement("h2"); heading.textContent = "Task context";
+  panel.replaceChildren(heading, guiTaskContextContent(job));
+}
+
 // Colors are display/export preferences, never transcript text or speaker identity.
 const guiBrandPalette = ["#F5F7FA", "#00AEEF", "#F2C55B", "#BF734D", "#8CFFB3", "#64D8D0"];
 function guiPaletteKey() { return `ewp-colors-v1:${reviewDocument?.result_path || ""}`; }
-function guiSpeakerColors() {
+function guiSavedSpeakerColors() {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(guiPaletteKey()) || "{}"); } catch (_) { /* defaults */ }
-  const colors = {...(reviewDocument?.configured_speaker_colors || {}), ...saved};
+  return saved && !Array.isArray(saved) && typeof saved === "object" ? saved : {};
+}
+function guiSpeakerColors() {
+  const saved = guiSavedSpeakerColors();
+  const brand = document.querySelector("#gui-export-palette")?.value === "brand";
+  const colors = brand ? {...saved} : {...(reviewDocument?.configured_speaker_colors || {})};
   for (const id of reviewDocument?.speakers || []) {
     if (!/^#[0-9a-f]{6}$/i.test(colors[id] || "")) {
       const number = Number(id.match(/\d+$/)?.[0] || 1);
@@ -234,9 +303,12 @@ function applyGuiSpeakerColors() {
   });
   document.querySelectorAll("#review-speaker-labels .review-speaker-label-row").forEach(row => {
     const id = row.querySelector("input[data-speaker-id]")?.dataset.speakerId;
-    if (!id || row.querySelector("input[type=color]")) return;
+    if (!id) return;
+    const existing = row.querySelector("input[type=color]");
+    if (existing) { existing.value = colors[id]; return; }
     const label = document.createElement("label");
     label.textContent = "Speaker color";
+    label.className = "gui-speaker-color";
     const input = document.createElement("input");
     input.type = "color";
     input.value = colors[id];
@@ -254,18 +326,22 @@ function installGuiPaletteControls() {
   const panel = document.createElement("div");
   panel.id = "gui-palette";
   panel.innerHTML = `<label>YTT color profile<select id="gui-export-palette"><option value="configured">Configured production palette</option><option value="brand">Brand preview palette</option></select></label>
-    <p>Existing custom colors are retained. Brand colors require a new YouTube check; existing exports are never recolored.</p>
+    <p>The selected profile previews the colors used for the next YTT export. Switching profiles preserves custom colors. Existing exports stay unchanged.</p>
     <button type="button" id="gui-adopt-brand">Adopt brand palette for this recording</button>
     <button type="button" id="gui-production-palette">Use configured production palette</button>`;
-  document.querySelector("#review-speaker-names").after(panel);
+  document.querySelector("#review-speaker-labels").before(panel);
+  document.querySelector("#gui-export-palette").addEventListener("change", applyGuiSpeakerColors);
   document.querySelector("#gui-adopt-brand").addEventListener("click", () => {
     if (!reviewDocument || !window.confirm("Replace this recording's custom colors with the brand palette? Existing exports will stay unchanged.")) return;
     const colors = Object.fromEntries(reviewDocument.speakers.map(id => [id, guiBrandPalette[(Number(id.match(/\d+$/)?.[0] || 1) - 1) % 6]]));
     localStorage.setItem(guiPaletteKey(), JSON.stringify(colors));
     document.querySelector("#gui-export-palette").value = "brand";
-    renderReviewSpeakerLabels(reviewDocument); applyGuiSpeakerColors();
+    renderReviewSpeakerLabels(reviewDocument); applyGuiSpeakerColors(); updateGuiContext();
   });
-  document.querySelector("#gui-production-palette").addEventListener("click", () => { document.querySelector("#gui-export-palette").value = "configured"; });
+  document.querySelector("#gui-production-palette").addEventListener("click", () => {
+    document.querySelector("#gui-export-palette").value = "configured";
+    applyGuiSpeakerColors(); updateGuiContext();
+  });
 }
 function guiExportPreferences() {
   return {speaker_colors: document.querySelector("#gui-export-palette")?.value === "brand" ? guiSpeakerColors() : null};
@@ -274,28 +350,57 @@ function guiExportPreferences() {
 installGuiPaletteControls();
 installGuiShell();
 
-async function splitReviewAtCursor(button) {
+const guiReviewCarets = new WeakMap();
+let guiCursorSplitPending = false;
+function rememberReviewCaret(event) {
+  const input = event?.target instanceof HTMLTextAreaElement ? event.target : document.activeElement;
+  if (!(input instanceof HTMLTextAreaElement) || !input.closest("#review-editor")) return;
+  guiReviewCarets.set(input, {start: input.selectionStart, end: input.selectionEnd, value: input.value});
+}
+for (const kind of ["input", "select", "keyup", "pointerup", "focusout"]) {
+  document.querySelector("#review-editor").addEventListener(kind, rememberReviewCaret, true);
+}
+document.addEventListener("selectionchange", rememberReviewCaret);
+
+function showReviewCursorMessage(row, message) {
+  let feedback = row.querySelector(".review-cursor-status");
+  if (!feedback) {
+    feedback = document.createElement("p"); feedback.className = "review-cursor-status";
+    feedback.setAttribute("role", "status"); row.append(feedback);
+  }
+  feedback.textContent = message;
+  setReviewStatus(message);
+}
+
+async function splitReviewAtCursor(button, captured = null) {
   const {row, anchorIndex, blockIndex} = reviewBlockPosition(button);
   const input = row?.querySelector("textarea");
-  if (!reviewDocument || !input) return;
-  const at = input.selectionStart;
+  if (!reviewDocument || !input || guiCursorSplitPending) return;
+  const caret = captured || guiReviewCarets.get(input) || {start:input.selectionStart, end:input.selectionEnd, value:input.value};
+  const at = caret.start;
   const value = input.value;
-  if (at !== input.selectionEnd || at <= 0 || at >= value.length ||
+  if (caret.value !== value || at !== caret.end || at <= 0 || at >= value.length ||
       (!/\s/.test(value[at - 1]) && !/\s/.test(value[at]))) {
-    setReviewStatus("GUI_REVIEW_CURSOR_BOUNDARY: Place the cursor between complete words inside a block. Use Separate selected text for a selection.");
-    input.focus(); return;
+    showReviewCursorMessage(row, "GUI_REVIEW_CURSOR_BOUNDARY: Place the cursor between complete words inside a block. Use Separate selected text for a selection.");
+    input.focus({preventScroll:true}); return;
   }
   const left = value.slice(0, at).trim(), right = value.slice(at).trim();
-  if (!left || !right) { setReviewStatus("GUI_REVIEW_CURSOR_BOUNDARY: Both sides must contain text."); return; }
+  if (!left || !right) { showReviewCursorMessage(row, "GUI_REVIEW_CURSOR_BOUNDARY: Both sides must contain text."); return; }
+  const reviewPath = reviewDocument.review_path;
+  guiCursorSplitPending = true; button.disabled = true;
   try {
     if (reviewDirty) await saveReviewDraft();
     const anchor = reviewDocument.anchors[anchorIndex];
+    if (reviewDocument.review_path !== reviewPath || !anchor?.blocks[blockIndex]) throw new Error("GUI_REVIEW_STRUCTURE_INVALID: The selected block changed before splitting.");
     const speaker = anchor.blocks[blockIndex].speaker_id;
     anchor.blocks.splice(blockIndex, 1, {speaker_id:speaker, text:left}, {speaker_id:speaker, text:right});
     markReviewDirty(); renderReview(reviewDocument, true);
     reviewSectionIndex = anchorIndex; updateReviewSections();
+    const rightInput = document.querySelectorAll("#review-editor .review-anchor")[anchorIndex]?.querySelectorAll("textarea")[blockIndex + 1];
+    rightInput?.focus({preventScroll:true}); rightInput?.setSelectionRange(0, 0);
     setReviewStatus("Cursor split created two editable blocks. Save and Preview to validate real word alignment before Apply.");
-  } catch (error) { setReviewStatus(error.message); }
+  } catch (error) { showReviewCursorMessage(row, error.message); }
+  finally { guiCursorSplitPending = false; button.disabled = false; }
 }
 function addCursorSplitControls() {
   document.querySelectorAll('#review-editor .review-anchor').forEach((group, index) => {
@@ -311,8 +416,15 @@ function addCursorSplitControls() {
     if (controls.querySelector(".review-cursor-split")) return;
     const button = document.createElement("button"); button.type = "button";
     button.className = "review-cursor-split"; button.textContent = "Split at cursor";
-    button.addEventListener("pointerdown", event => event.preventDefault());
-    button.addEventListener("click", () => splitReviewAtCursor(button));
+    button.title = "Place the cursor between complete words, then split. Select text to use Separate selected text instead.";
+    let captured = null;
+    button.addEventListener("pointerdown", event => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      const input = controls.closest(".review-block")?.querySelector("textarea");
+      captured = input ? {start:input.selectionStart, end:input.selectionEnd, value:input.value} : null;
+    });
+    button.addEventListener("click", () => { void splitReviewAtCursor(button, captured); captured = null; });
     controls.prepend(button);
   });
 }
@@ -327,7 +439,7 @@ function checkpointGuiWorkspaceFields() {
     'gui-translation-parent-path': context.parent_translation_path,
     'gui-translation-target': context.target_language,
     'gui-translation-applied-path': appliedTranslation || '',
-    'gui-speaker-colors': reviewDocument ? JSON.stringify(guiSpeakerColors()) : '',
+    'gui-speaker-colors': reviewDocument ? JSON.stringify(guiSavedSpeakerColors()) : '',
     'gui-palette-profile': document.querySelector('#gui-export-palette')?.value || 'configured',
   };
   for (const [id, value] of Object.entries(values)) { const input=document.getElementById(id); if(input) input.value=value || ''; }
@@ -380,6 +492,7 @@ for(const [source,target] of [['pl','en'],['en','pl']]) {
     const job=guiKnownJobs.find(item=>item.result_path===result);
     if(job && job.language!==source) { document.querySelector('#translation-status').textContent='Choose a recording whose source language matches this direction.'; return; }
     translationForm.elements.namedItem('target_language').value=target;
+    translationForm.elements.namedItem('target_language').dispatchEvent(new Event('change', {bubbles:true}));
   }); directionActions.append(button);
 }
 directionActions.append(manualTranslation); translationForm.before(directionActions);

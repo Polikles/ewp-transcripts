@@ -2,6 +2,9 @@
 
 **GUI preview:** [Update and launch in WSL](Instructions/GUI_QUICKSTART.md) · [Consolidated manual test plan](Instructions/GUI_PREVIEW_TEST_PLAN.md).
 
+Workflow help: [instructions for every GUI stage](docs/gui/README.md), also available offline
+through each stage’s Quick steps / Full instructions link.
+
 > EWP-transcripts is a local-first CLI application for accurate transcription of audio recordings. The executable is named `transcriber`.
 
 EWP Transcriber is designed as one component in a wider media-production ecosystem, not as
@@ -48,8 +51,8 @@ pipeline deployment. Multi-user credential isolation is not currently on the roa
 ## Requirements
 
 - Ubuntu 24.04 and 26.04 on WSL2 are accepted baselines. The complete historical release
-  gate passed on 24.04; the current 26.04 native repair and GUI have VM verification, with
-  the real GPU queue retry pending. Bare-metal Ubuntu and an Ubuntu
+  gate passed on 24.04; the 26.04 local-only transcription/source-export workflow is now
+  owner-qualified on WSL/RTX 3090. New guided-UI changes still need the WSL retest. Bare-metal Ubuntu and an Ubuntu
   virtual machine with working NVIDIA GPU passthrough are expected deployment shapes but
   have not yet passed the complete release gate.
 - An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
