@@ -248,23 +248,25 @@ class RuntimeProgress:
             percent = min(99, int(done / total * 100)) if total else 0
             self.max_percent = max(self.max_percent, percent)
             remaining = sum(
-                value for key, value in predictions.items() if key not in self.completed
+                value
+                for key, value in predictions.items()
+                if key not in self.completed and key != self.current
             )
             if self.current not in self.completed:
-                remaining = max(0, remaining - phase_elapsed)
+                remaining += max(expected * 0.1, expected - phase_elapsed)
             return {
                 "phase": self.phase,
                 "percent": 100 if self.finished is True else self.max_percent,
                 "estimated": True,
                 "elapsed_seconds": int(elapsed),
                 "phase_elapsed_seconds": int(phase_elapsed),
-                "eta_seconds": round(remaining)
+                "eta_seconds": max(1, round(remaining))
                 if known and not overdue and self.finished is None
                 else None,
-                "eta_min_seconds": round(remaining * 0.5)
+                "eta_min_seconds": max(1, round(remaining * 0.5))
                 if known and not overdue and self.finished is None
                 else None,
-                "eta_max_seconds": round(remaining * 1.75)
+                "eta_max_seconds": max(1, round(remaining * 1.75))
                 if known and not overdue and self.finished is None
                 else None,
                 "calibrated": known,

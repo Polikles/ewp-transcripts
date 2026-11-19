@@ -26,6 +26,8 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Late active phases retain positive remaining time without consuming later-phase estimates;
+  ETA is withdrawn on overrun instead of displaying zero before completion.
 - Source review plays a synchronized mix of all episode files/channels, so isolated guest tracks
   remain audible. Muted original-source filename hints stay independent of edited speaker labels.
 - Single-speaker reviews honor the word limit instead of becoming one unbounded text field.

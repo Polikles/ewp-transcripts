@@ -60,7 +60,8 @@ First-run phase weights are heuristics (ASR and alignment dominate; diarization 
 when actually used). For a measured phase, estimated internal completion is capped at 90% until
 its real completion event; the total stays monotonic and below 100%. If phase elapsed time exceeds
 175% of its expected duration, the stale ETA disappears. Completed phase/time remain factual.
-Unknown remaining phases omit ETA. A queue-wide ETA is not reported because pending work may
+Late active phases retain a small remaining allowance and cannot consume time reserved for future
+phases. Numeric active ETA is never rounded down to zero. Unknown profiles/phases omit ETA. A queue-wide ETA is not reported because pending work may
 have unknown profiles; no incomplete sum is presented as a complete queue prediction.
 
 ## Evidence and further qualification

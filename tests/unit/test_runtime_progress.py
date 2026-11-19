@@ -36,6 +36,9 @@ def test_progress_uses_events_then_calibrates_with_local_successful_timings(tmp_
     predicted = second.snapshot()
     assert predicted["calibrated"] and predicted["eta_seconds"] > 0
     assert predicted["eta_min_seconds"] <= predicted["eta_seconds"] <= predicted["eta_max_seconds"]
+    now[0] += 20
+    late = second.snapshot()
+    assert late["eta_seconds"] > 0 and late["eta_min_seconds"] > 0
     now[0] += 100
     overdue = second.snapshot()
     assert overdue["overdue"] and overdue["eta_seconds"] is None
