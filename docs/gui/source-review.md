@@ -14,6 +14,21 @@ Choose one recording for the editor; batch checkboxes are independent. The queue
 
 Speaker names and colors keeps stable speaker IDs. Switching the YTT profile updates visible colors for the next export and retains custom overrides. Preview tries a configured profile, Apply commits colors for this recording, and Save keeps a reusable custom profile; previous exports stay unchanged. Add speaker adds a revision-local identity, not a new ASR run or voice-recognition identity. An in-use speaker cannot be removed until its blocks are reassigned.
 
+The left recording rail contains Recording audio while this stage is open. Audio is prepared
+from the original canonical source and its selected stream/channel into a private mono preview;
+it does not change the source. Preparation can take longer for large files. Use Audio source
+for grouped recordings or split channels. Go to this fragment below a speaker selector saves
+any dirty draft, then seeks to a real source-word start and starts playback. Changed/inserted
+text may use the nearest known source timestamp, explicitly marked in the player status.
+
+Changing stages pauses playback; returning restores that recording's source and position for
+this browser session. Switching recordings keeps their playback choices independent. Original
+recordings must remain accessible at their canonical paths and match their stored SHA-256.
+If audio is unavailable, restore the original and use Reload recording audio; transcript editing
+still works. Media/decoded previews are not embedded in reviews or published exports. A server
+restart requires preparing the private preview again. On narrow screens the rail precedes the
+editor, and remains accessible through normal page navigation.
+
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 
 Prepare and validate and Draft and history are below the transcript. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Prepare text for review creates the draft when required.

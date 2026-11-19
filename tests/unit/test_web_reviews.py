@@ -418,3 +418,64 @@ def test_gui_export_rejects_invalid_palette_without_writing(tmp_path: Path, colo
             speaker_colors=colors,
         )
     assert not (tmp_path / "exports").exists()
+
+
+def test_playback_locates_split_blocks_at_real_source_word_starts(tmp_path: Path) -> None:
+    import json
+
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    assert prepared["playback_sources"][0]["source_id"] == "source_001"
+    prepared["anchors"][0]["blocks"] = [
+        {"speaker_id": "speaker_001", "text": "Welcome"},
+        {"speaker_id": "speaker_001", "text": "to another episode."},
+        prepared["anchors"][0]["blocks"][1],
+    ]
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+    )
+    words = json.loads(result.read_text())["transcript"]["segments"][0]["words"]
+    position = service.playback_position(
+        saved["review_path"], str(result), 0, 1, expected_sha256=saved["review_sha256"]
+    )
+    assert position["start_ms"] == words[1]["start_ms"]
+    assert not position["approximate"]
+    with pytest.raises(ValueError, match="existing transcript"):
+        service.playback_position(
+            saved["review_path"], str(result), 0, -1, expected_sha256=saved["review_sha256"]
+        )
+
+
+def test_playback_inserted_text_uses_disclosed_real_anchor_time(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    prepared["anchors"][0]["blocks"].insert(0, {"speaker_id": "speaker_001", "text": "Inserted."})
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+    )
+    position = service.playback_position(
+        saved["review_path"], str(result), 0, 0, expected_sha256=saved["review_sha256"]
+    )
+    assert position == {"start_ms": prepared["anchors"][0]["start_ms"], "approximate": True}
+
+
+def test_playback_rejects_an_externally_changed_review(tmp_path: Path) -> None:
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    with pytest.raises(GuiReviewError) as error:
+        service.playback_position(
+            prepared["review_path"], str(result), 0, 0, expected_sha256="0" * 64
+        )
+    assert error.value.code == "GUI_REVIEW_CONFLICT"

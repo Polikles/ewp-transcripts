@@ -123,3 +123,27 @@ def test_probe_reports_nonzero_exit_without_exposing_stderr(tmp_path: Path) -> N
         probe_media(tmp_path / "bad.bin", runner=runner)
 
     assert secret not in str(raised.value)
+
+
+@pytest.mark.parametrize(
+    ("disposition", "expected"),
+    [({}, True), ({"attached_pic": 1}, False), ({"attached_pic": 0}, True)],
+)
+def test_video_provenance_excludes_embedded_cover_art(
+    tmp_path: Path, disposition, expected
+) -> None:
+    document = {
+        "streams": [
+            {"index": 0, "codec_type": "video", "codec_name": "png", "disposition": disposition},
+            {
+                "index": 1,
+                "codec_type": "audio",
+                "codec_name": "aac",
+                "sample_rate": "16000",
+                "channels": 1,
+            },
+        ],
+        "format": {"duration": "2"},
+    }
+    result = probe_media(tmp_path / "source.mp4", runner=_runner_for(document, []))
+    assert result.has_video is expected

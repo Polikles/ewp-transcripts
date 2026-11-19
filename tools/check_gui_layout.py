@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 import wave
 from importlib.metadata import version
 from pathlib import Path
@@ -499,6 +500,113 @@ def check_motion_feedback(page: Page, output: Path) -> None:
     svg.close()
 
 
+def check_source_playback(page: Page, output: Path) -> None:
+    """Decode real synthetic source audio, seek exact words and retain grouped-track state."""
+    expect(page.locator("#gui-source-playback")).to_be_visible()
+    page.wait_for_function("() => playbackAudio.readyState >= 1")
+    expect(page.locator("#gui-playback-source option")).to_have_count(2)
+    seek = page.locator(".review-seek").nth(1)
+    assert seek.evaluate(
+        "e=>e.getBoundingClientRect().top >= "
+        "e.previousElementSibling.getBoundingClientRect().bottom"
+    )
+    seek.click()
+    page.wait_for_function("() => playbackAudio.currentTime >= 4.32 && !playbackAudio.paused")
+    page.evaluate("playbackAudio.pause()")
+    assert page.evaluate("playbackAudio.currentTime") < 5.5
+    url = page.locator("#gui-playback-audio").get_attribute("src")
+    response = page.request.get(page.url.rstrip("/") + url, headers={"Range": "bytes=0-43"})
+    assert response.status == 206 and response.body()[:4] == b"RIFF"
+    assert response.headers["content-range"].startswith("bytes 0-43/")
+    response = page.request.get(page.url.rstrip("/") + url, headers={"Range": "bytes=99999999-"})
+    assert response.status == 416
+    page.locator("#gui-playback-source").select_option("source_002")
+    page.wait_for_function(
+        "() => playbackAudio.readyState >= 1 && playbackSource.value === 'source_002'"
+    )
+    page.evaluate("playbackAudio.currentTime=2; rememberPlaybackPosition()")
+    stage(page, "workspace")
+    expect(page.locator("#gui-source-playback")).not_to_be_visible()
+    assert page.evaluate("playbackAudio.paused")
+    stage(page, "review")
+    page.wait_for_function(
+        "() => playbackAudio.readyState >= 1 && Math.abs(playbackAudio.currentTime - 2) < .1"
+    )
+    assert page.locator("#gui-playback-source").input_value() == "source_002"
+    current = page.evaluate("reviewDocument.result_path")
+    other = page.evaluate(
+        "stageQueueJobs.find(job=>job.result_path && "
+        "job.result_path!==reviewDocument.result_path).result_path"
+    )
+    for result in (other, current):
+        page.evaluate(
+            "path=>openManualReviewForResult(path, document.querySelector('#output-path').value)",
+            result,
+        )
+        page.wait_for_function("() => playbackAudio.readyState >= 1")
+    assert page.locator("#gui-playback-source").input_value() == "source_002"
+    assert abs(page.evaluate("playbackAudio.currentTime") - 2) < 0.1
+    page.locator("#gui-locale").select_option("pl")
+    expect(page.locator(".review-seek").first).to_have_text("Przejdź do tego fragmentu")
+    for width in (960, 1920):
+        page.set_viewport_size({"width": width, "height": 1080})
+        page.screenshot(path=str(output / f"playback-{width}.png"))
+    page.locator("#gui-locale").select_option("en")
+    page.set_viewport_size({"width": 1440, "height": 1000})
+
+
+def check_video_staging(page: Page, output: Path) -> None:
+    """Exercise the native video picker through real FFprobe and durable queue staging."""
+    stage(page, "workspace")
+    while page.locator("#gui-audio-choices li").count():
+        page.locator("#gui-audio-choices li").first.get_by_role(
+            "button", name="Remove from list"
+        ).click()
+    video = output / "video-input.mp4"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-nostdin",
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=s=32x32:r=10:d=2",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=sample_rate=16000:duration=2",
+            "-c:v",
+            "mpeg4",
+            "-c:a",
+            "aac",
+            str(video),
+        ],
+        check=True,
+        capture_output=True,
+        timeout=30,
+    )
+    picker = page.locator("#workflow input[type=file]")
+    assert ".mp4" in picker.get_attribute("accept")
+    picker.set_input_files(video)
+    expect(page.locator("#gui-audio-choices li")).to_have_count(1)
+    with page.expect_response("**/api/v1/inspect") as response:
+        page.locator("#workflow button[value=inspect]").click()
+    inspected = response.value.json()["result"]["episodes"][0]["sources"][0]
+    assert inspected["media_type"] == "video" and inspected["stream"]["index"] == 1
+    page.locator("#workflow button[value=dry-run]").click()
+    expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
+    page.locator("#workflow input[name=confirmed]").check()
+    page.locator("#workflow button[value=transcriptions]").click()
+    expect(page.locator("#transcription-jobs tbody tr")).to_have_count(1)
+    source = Path(page.evaluate("stageQueueJobs[0].input_path"))
+    assert source.suffix == ".mp4" and source.read_bytes() == video.read_bytes()
+    page.evaluate("queuePost('/api/v1/transcriptions/clear-current', {confirmed:true})")
+    page.evaluate("refreshJobs()")
+    expect(page.locator("#start-queue")).to_be_disabled()
+
+
 def check_dictionary_library(page: Page, output: Path) -> None:
     stage(page, "dictionary")
     catalog = output / "edited-dictionaries"
@@ -659,11 +767,27 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.locator("#output-path").fill(str(output / "project"))
     page.locator("#output-path").dispatch_event("change")
     stage_audio_without_models(page, output)
+    check_video_staging(page, output)
     fixtures = []
     for number in (1, 2):
         document = json.loads((ROOT / "examples/results.example.json").read_text())
         document["job_id"] = f"S01E0{number}"
         document["episode"]["episode_id"] = document["job_id"]
+        for source in document["sources"]:
+            audio_path = output / f"playback-{number}-{source['source_id']}.wav"
+            with wave.open(str(audio_path), "wb") as audio:
+                audio.setnchannels(1)
+                audio.setsampwidth(2)
+                audio.setframerate(16000)
+                audio.writeframes(b"\0\0" * 16000 * 8)
+            source.update(
+                input_path=str(audio_path),
+                normalized_path=str(audio_path),
+                filename=audio_path.name,
+                sha256=hashlib.sha256(audio_path.read_bytes()).hexdigest(),
+                size_bytes=audio_path.stat().st_size,
+                duration_ms=8000,
+            )
         path = output / (f"S01E0{number}_Żółć_" + "long-name-" * 8 + "_results.json")
         path.write_text(json.dumps(document), encoding="utf-8")
         fixtures.append(path)
@@ -678,6 +802,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.locator("#stage-queue-review .stage-queue-item button").last.click()
     text = page.locator("#review-editor textarea").first
     expect(text).to_have_value("Welcome to another episode.")
+    check_source_playback(page, output)
     text.fill("Welcome to another episode. Żółć")
     text.evaluate("e => {e.focus(); e.setSelectionRange(0,7)}")
     identity = page.locator("#review-identity").inner_text()

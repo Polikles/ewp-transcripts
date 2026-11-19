@@ -94,6 +94,7 @@ class MediaProbeResult(BaseModel):
     format_names: tuple[str, ...]
     duration_ms: int = Field(ge=0)
     audio_streams: tuple[AudioStream, ...]
+    has_video: bool = False
 
 
 class SourceFingerprint(BaseModel):
@@ -180,6 +181,7 @@ class InspectedSource(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     fingerprint: SourceFingerprint
+    media_type: Literal["audio", "video"] = "audio"
     stream: AudioStream
     duration_ms: int = Field(ge=0)
     channel_mode: ChannelMode

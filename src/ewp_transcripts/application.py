@@ -1556,7 +1556,10 @@ def discover(
     return discover_input(
         input_path,
         recursive=effective_config.input.recursive,
-        supported_extensions=effective_config.input.supported_audio,
+        supported_extensions=(
+            *effective_config.input.supported_audio,
+            *effective_config.input.supported_video,
+        ),
     )
 
 

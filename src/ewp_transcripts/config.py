@@ -42,6 +42,7 @@ class InputConfig(StrictConfigModel):
     recursive: bool = False
     follow_symlinks: Literal[False] = False
     supported_audio: tuple[str, ...] = ("wav", "mp3", "flac", "m4a", "ogg", "opus")
+    supported_video: tuple[str, ...] = ("mp4", "mkv", "mov", "webm", "avi", "m4v")
 
 
 class GroupingConfig(StrictConfigModel):

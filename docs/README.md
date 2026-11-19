@@ -75,3 +75,5 @@
 - `examples/segments.example.json` - example sentence-level export.
 - `examples/revision.example.json` - revision snapshot example.
 - `examples/review.example.txt` - human-editable review example.
+
+- [Queue progress and ETA assessment](30-queue-progress-and-eta.md) — current evidence, event design and calibration gates.

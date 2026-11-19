@@ -11,7 +11,7 @@ from uuid import uuid4
 from ewp_transcripts import __version__
 from ewp_transcripts.domain.canonical import CanonicalResult, CanonicalWord
 from ewp_transcripts.domain.errors import InvalidReviewError
-from ewp_transcripts.domain.review import TranscriptReview, validate_review_base
+from ewp_transcripts.domain.review import ReviewAnchor, TranscriptReview, validate_review_base
 from ewp_transcripts.domain.revision import (
     RevisionAlignment,
     RevisionBaseResult,
@@ -114,6 +114,51 @@ def _align(
     if path is None:
         raise InvalidReviewError("REVISION_ALIGNMENT_AMBIGUOUS", "Review text cannot be aligned")
     return path, counts[-1][-1] > 1
+
+
+def playback_block_positions(
+    anchor: ReviewAnchor, words: tuple[CanonicalWord, ...]
+) -> tuple[tuple[int, bool], ...]:
+    """Locate blocks using real source word starts; never synthesize playback timestamps."""
+    positions = {word.word_id: index for index, word in enumerate(words)}
+    if (
+        anchor.first_word_id not in positions
+        or anchor.last_word_id not in positions
+        or positions[anchor.first_word_id] > positions[anchor.last_word_id]
+    ):
+        raise ValueError("Transcript section has invalid source anchors.")
+    source = words[positions[anchor.first_word_id] : positions[anchor.last_word_id] + 1]
+    corrected = tuple(
+        _Corrected(text=text, speaker_id=block.speaker_id)
+        for block in anchor.speaker_blocks
+        for text in block.text.split()
+    )
+    if tuple(word.text for word in source) == tuple(item.text for item in corrected):
+        path, ambiguous = tuple(_Step(1, 1) for _ in source), False
+    else:
+        path, ambiguous = _align(source, corrected)
+    starts: list[int | None] = []
+    source_at = 0
+    for step in path:
+        starts.extend(
+            [source[source_at].start_ms if step.source_count else None] * step.corrected_count
+        )
+        source_at += step.source_count
+    result: list[tuple[int, bool]] = []
+    offset = 0
+    for block in anchor.speaker_blocks:
+        count = len(block.text.split())
+        known = next(
+            (start for start in starts[offset : offset + count] if start is not None), None
+        )
+        result.append(
+            (
+                known if known is not None else source[0].start_ms,
+                ambiguous or starts[offset] is None,
+            )
+        )
+        offset += count
+    return tuple(result)
 
 
 def build_revision(

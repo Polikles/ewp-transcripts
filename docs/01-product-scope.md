@@ -46,7 +46,8 @@ The MVP includes:
 
 ## 4. Outside the MVP scope (potentially in later versions)
 
-- a single video file with audio-track selection;
+- interactive audio-track selection for video with multiple audio streams (single-audio-stream
+  video ingestion is implemented in the current GUI increment);
 - biometric identification of people from their voices (after extracting enough samples from previously analyzed recordings);
 - automatic audio repair based on diagnostic warnings;
 - automatic denoising, normalization, or audio repair;

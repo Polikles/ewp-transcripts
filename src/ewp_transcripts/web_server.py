@@ -41,6 +41,7 @@ from ewp_transcripts.web_jobs import (
     WorkflowStageName,
     workflow_progress,
 )
+from ewp_transcripts.web_media import GuiMediaController, media_byte_range
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_source_cleanup import (
     GuiManagedSourceCleanupError,
@@ -98,7 +99,7 @@ SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'none'; script-src 'self'; style-src 'self' "
         "'sha256-+ofmwl8C0LfVC0NWIY+m/gaSyXmSOBladdCFOJyIBis='; img-src 'self'; "
-        "font-src 'self'; connect-src 'self'; base-uri 'none'; "
+        "font-src 'self'; media-src 'self'; connect-src 'self'; base-uri 'none'; "
         "form-action 'none'; frame-ancestors 'none'"
     ),
     "Referrer-Policy": "no-referrer",
@@ -372,6 +373,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("workbench.js").read_bytes()
         body += b"\n" + assets.joinpath("dictionary_library.js").read_bytes()
         body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()
+        body += b"\n" + assets.joinpath("source_playback.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -410,6 +412,7 @@ class LocalGuiServer(ThreadingHTTPServer):
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
+        self.gui_media = GuiMediaController(resolve_path=self.gui_workflows.resolve_allowed_path)
         self.gui_library = GuiLibrary(
             state_directory=default_workspace_directory(),
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -442,6 +445,7 @@ class LocalGuiServer(ThreadingHTTPServer):
     def server_close(self) -> None:
         self.gui_openrouter_api_key = ""
         self.gui_transcriptions.close()
+        self.gui_media.close()
         self.gui_selections.close()
         super().server_close()
 
@@ -478,6 +482,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     _security_headers: ClassVar[dict[str, str]] = SECURITY_HEADERS
 
     def do_GET(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path.startswith("/api/v1/review-audio/"):
+            self._stream_review_audio()
+            return
         if urlsplit(self.path).path in {"/api/v1/session", "/api/v1/transcriptions"}:
             host = self.headers.get("Host", "")
             if host not in {
@@ -560,6 +567,67 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self._headers(content_type=response.content_type, content_length=len(response.body))
         self.end_headers()
         self.wfile.write(response.body)
+
+    def do_HEAD(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path.startswith("/api/v1/review-audio/"):
+            self._stream_review_audio(head=True)
+        else:
+            self.send_error(HTTPStatus.NOT_FOUND)
+
+    def _stream_review_audio(self, *, head: bool = False) -> None:
+        if (
+            self.headers.get("Host", "")
+            not in {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+            or self.headers.get("Sec-Fetch-Site") == "cross-site"
+        ):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.FORBIDDEN,
+                    {
+                        "error": {
+                            "code": "GUI_HOST_REJECTED",
+                            "message": "The request Host is not allowed by the local GUI server.",
+                        }
+                    },
+                )
+            )
+            return
+        token = urlsplit(self.path).path.removeprefix("/api/v1/review-audio/")
+        try:
+            audio = self.server.gui_media.open(token)
+        except (OSError, ValueError):
+            self.send_error(HTTPStatus.NOT_FOUND)
+            return
+        with audio:
+            size = os.fstat(audio.fileno()).st_size
+            try:
+                start, end = media_byte_range(self.headers.get("Range"), size)
+            except ValueError:
+                self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                self._headers(content_type="audio/wav", content_length=0)
+                self.send_header("Content-Range", f"bytes */{size}")
+                self.end_headers()
+                return
+            partial = self.headers.get("Range") is not None
+            self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
+            self._headers(content_type="audio/wav", content_length=end - start + 1)
+            self.send_header("Accept-Ranges", "bytes")
+            if partial:
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+            self.end_headers()
+            if head:
+                return
+            audio.seek(start)
+            remaining = end - start + 1
+            try:
+                while remaining > 0:
+                    chunk = audio.read(min(remaining, 64 * 1024))
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    remaining -= len(chunk)
+            except (BrokenPipeError, ConnectionResetError):
+                return
 
     def do_POST(self) -> None:  # noqa: N802
         host = self.headers.get("Host", "")
@@ -1032,7 +1100,25 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             try:
                 result = str(document.get("result_path", ""))
-                if path == "/api/v1/reviews/prepare":
+                if path == "/api/v1/reviews/playback":
+                    payload = self.server.gui_media.prepare(
+                        result, str(document.get("source_id", ""))
+                    )
+                elif path == "/api/v1/reviews/playback-position":
+                    anchor_index, block_index = (
+                        document.get("anchor_index"),
+                        document.get("block_index"),
+                    )
+                    if type(anchor_index) is not int or type(block_index) is not int:
+                        raise ValueError("Choose an existing transcript block.")
+                    payload = self.server.gui_reviews.playback_position(
+                        str(document.get("review_path", "")),
+                        result,
+                        anchor_index,
+                        block_index,
+                        expected_sha256=str(document.get("review_sha256", "")),
+                    )
+                elif path == "/api/v1/reviews/prepare":
                     payload = self.server.gui_reviews.prepare(
                         result,
                         str(document.get("review_output_directory", "")),

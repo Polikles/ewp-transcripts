@@ -91,7 +91,9 @@ def _parse_probe(path: Path, serialized: str) -> MediaProbeResult:
         if isinstance(stream, Mapping) and stream.get("codec_type") == "audio"
     )
     if not streams:
-        raise NoAudioStreamError(f"No audio stream found in input: {path}")
+        raise NoAudioStreamError(
+            f"No audio stream found in input: {path}. Choose a recording with an audio track."
+        )
 
     raw_format = document.get("format")
     format_data = raw_format if isinstance(raw_format, Mapping) else {}
@@ -108,6 +110,12 @@ def _parse_probe(path: Path, serialized: str) -> MediaProbeResult:
         format_names=format_names,
         duration_ms=duration_ms,
         audio_streams=streams,
+        has_video=any(
+            isinstance(stream, Mapping)
+            and stream.get("codec_type") == "video"
+            and not (stream.get("disposition") or {}).get("attached_pic", 0)
+            for stream in raw_streams
+        ),
     )
 
 

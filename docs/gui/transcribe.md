@@ -2,7 +2,7 @@
 
 Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
 
-1. Choose output and audio: Choose the shared output directory first, then audio files. Select matching speaker tracks for one episode together.
+1. Choose output and recordings: Choose the shared output directory first, then audio or video files. Select matching speaker tracks for one episode together.
 2. Inspect file: Choose processing language separately for each selected recording and speaker count or auto-detection. Inspect checks all unqueued selections.
 3. Plan and add to queue: Run Dry-run, review the exact plan, confirm it and Add to queue. Adding advances to the next unqueued recording.
 4. Start queue: Start queue runs staged episodes in order. After completion, continue to optional correction or source review.
@@ -24,3 +24,11 @@ Inspect checks all selected, unqueued episodes. Add to queue advances to the nex
 The language selector belongs to the selected recording; switching recordings restores its language. Grouped tracks share their episode language. Inspect uses each recording’s selection. Start queue handles newly staged items alongside completed history and never reruns completed ASR. Adding later files and removing completed items do not leave Start disabled.
 
 The path help belongs directly below the server input field, before the selected-file list. The (i) control beside language selection notes an observed behavior: EN for Polish audio has sometimes produced readable English text, but this is not a guaranteed translation mode and still requires review/correction. It does not change the actual transcription task or replace the optional translation workflow.
+
+Video input supports MP4, MKV, MOV, WebM, AVI and M4V with one decodable audio stream.
+The video is retained as the original hashed source; FFmpeg extracts its selected audio stream
+into the normal private working WAV. Frame/image analysis is not performed. The normal
+Inspect → Dry-run → Add to queue → Start queue sequence is unchanged. A video without audio
+reports NO_AUDIO_STREAM. Multiple audio tracks report MULTIPLE_AUDIO_STREAMS: export the
+intended audio track to a separate file and process it. The application does not choose a
+possibly wrong track silently. Container/codec availability depends on the installed FFmpeg.

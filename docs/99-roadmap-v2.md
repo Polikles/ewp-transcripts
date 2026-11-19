@@ -33,21 +33,20 @@ items belong to one monolithic "Version 2" release.
    correction, review/export, and translation queues. The GUI reuses application services and
    does not implement a parallel pipeline.
 
-Current GUI execution priority (2026-11-19): the
-[review/identity feedback](checkpoints/2026-11-19-gui-review-and-brand-feedback.md) is implemented
-and VM-verified. Next, implement a small audio player in the left rail during source review with per-block seeking to actual
-segment starts. This audio task precedes other deferred TODO work, including the artist package.
-It requires safe seekable local media access, exact source identity and deliberate grouped-track
-selection. Next, support video inputs such as MP4 by extracting their audio through existing
-media services while retaining video-source provenance. Handle missing/multiple audio streams
-explicitly; do not disguise video as an audio-only input in provenance.
+Current GUI execution priority (2026-11-19): source-review playback and video ingestion are
+implemented and VM-verified, following the delivered review/identity fixes.
+See the [active checkpoint](checkpoints/2026-11-19-playback-video-progress.md) and TODO.md.
+The left-rail player seeks to real source-word starts and supports grouped-source selection.
+Video containers use the existing FFmpeg extraction pipeline while preserving original provenance;
+missing/multiple audio streams are explicit errors. Interactive multi-audio-track choice remains
+future work. The owner will manually review after this delivery, before other deferred GUI work.
 
-Assess queue percent/ETA separately: current canonical stages record completed durations but
-provide no live progress callback. Add real stage events before exposing percentages; base time
-estimates on measured stage duration/real-time factors and recording/model/runtime context.
-Keep an indeterminate gear when estimates lack evidence. Do not simulate continuous progress
-or report completion before the worker finishes. Full Polish documentation still follows owner
-terminology approval. See TODO.md for the concrete checklist and deferred scope.
+The requested [queue percent/ETA assessment](30-queue-progress-and-eta.md) is complete. Numeric
+progress remains a future implementation: introduce actual application/pipeline phase events,
+then collect comparable successful GPU timings and calibrate estimates. Canonical stage durations
+are historical evidence, not live progress. Keep an indeterminate gear without credible samples;
+do not drive percentages from a browser timer or claim completion before publication/cleanup.
+Full Polish documentation follows owner terminology approval; the artist package stays deferred.
 
 Cross-cutting observability is implemented in
 [`25-warning-error-catalog.md`](25-warning-error-catalog.md): domain warnings, expected

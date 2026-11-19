@@ -10,6 +10,7 @@ interactive = true
 recursive = false
 follow_symlinks = false
 supported_audio = ["wav", "mp3", "flac", "m4a", "ogg", "opus"]
+supported_video = ["mp4", "mkv", "mov", "webm", "avi", "m4v"]
 
 [grouping]
 speaker_suffix_separator = "-"

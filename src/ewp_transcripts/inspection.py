@@ -48,7 +48,9 @@ def _select_audio_stream(
         )
     if len(result.audio_streams) != 1:
         raise MultipleAudioStreamsError(
-            f"Input has multiple audio streams and requires an explicit selection: {result.path}"
+            f"Input has multiple audio streams and requires an explicit selection: {result.path}. "
+            "Export the intended audio track to a separate file, "
+            "then inspect and process that file."
         )
     return result.audio_streams[0]
 
@@ -196,6 +198,7 @@ def inspect_episode(
         inspected.append(
             InspectedSource(
                 fingerprint=grouped_source.fingerprint,
+                media_type="video" if result.has_video else "audio",
                 stream=stream,
                 duration_ms=(
                     stream.duration_ms if stream.duration_ms is not None else result.duration_ms

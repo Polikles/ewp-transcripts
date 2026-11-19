@@ -23,6 +23,7 @@ from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.review_format import load_review, render_review
+from ewp_transcripts.revision_service import playback_block_positions
 from ewp_transcripts.web_workflows import require_completed_canonical_result
 
 
@@ -98,6 +99,15 @@ class GuiReviewController:
             "review_sha256": sha256_file(review_path),
             "job_id": parsed.header.job_id,
             "language": parsed.header.language,
+            "playback_sources": [
+                {
+                    "source_id": source.source_id,
+                    "filename": source.filename,
+                    "speaker_label": source.speaker_label,
+                    "channel_selection": source.channel_selection,
+                }
+                for source in base.sources
+            ],
             "source_verification": verification,
             "canonical_speakers": base_speakers,
             "configured_speaker_colors": {
@@ -126,6 +136,33 @@ class GuiReviewController:
                 for anchor in parsed.anchors
             ],
         }
+
+    def playback_position(
+        self,
+        review: str,
+        result: str,
+        anchor_index: int,
+        block_index: int,
+        *,
+        expected_sha256: str,
+    ) -> dict[str, Any]:
+        """Resolve a saved block through the existing anchored alignment without publishing."""
+        if sha256_file(self._resolve_path(review)) != expected_sha256:
+            raise GuiReviewError(
+                "GUI_REVIEW_CONFLICT",
+                "The review changed after it was loaded; reload before saving.",
+            )
+        document = self.document(review, result)
+        if not 0 <= anchor_index < len(document["anchors"]):
+            raise ValueError("Choose an existing transcript section.")
+        parsed = load_review(self._resolve_path(review))
+        anchor = parsed.anchors[anchor_index]
+        if not 0 <= block_index < len(anchor.speaker_blocks):
+            raise ValueError("Choose an existing transcript block.")
+        base = self._require_canonical_result(self._resolve_path(result))
+        words = tuple(word for segment in base.transcript.segments for word in segment.words)
+        start, approximate = playback_block_positions(anchor, words)[block_index]
+        return {"start_ms": start, "approximate": approximate}
 
     def save(
         self,

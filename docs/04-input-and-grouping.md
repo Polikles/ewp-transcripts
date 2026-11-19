@@ -51,7 +51,13 @@ Official MVP test matrix:
 
 - audio: WAV, MP3, FLAC, M4A/AAC, OGG/Vorbis, Opus;
 
-Video containers and audio-stream selection are deferred until stage 2.
+The current GUI increment also discovers MP4, MKV, MOV, WebM, AVI and M4V video files
+with one decodable audio stream. FFprobe detects actual video streams, excluding cover art;
+canonical provenance records media_type=video, original path/hash/container and selected audio
+stream index. FFmpeg prepares mono PCM in the existing job workdir. Video frames are ignored.
+No new ML dependency is needed. Videos with no audio fail with NO_AUDIO_STREAM; multiple audio
+streams fail with MULTIPLE_AUDIO_STREAMS and guidance to export the intended track separately.
+Interactive audio-track selection remains deferred. Synchronization rules apply to video groups too.
 
 Other formats are supported on a best-effort basis when FFmpeg can decode them.
 

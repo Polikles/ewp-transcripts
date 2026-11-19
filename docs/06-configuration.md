@@ -35,7 +35,9 @@ The application should not modify project configuration automatically.
 Complete example: [`../examples/config.example.toml`](../examples/config.example.toml).
 
 - `[general]` — language, preset, offline mode, interactivity;
-- `[input]` — recursion, supported formats, symbolic links;
+- `[input]` — recursion, supported formats, symbolic links; `supported_audio` retains audio
+  extensions and additive `supported_video` defaults to mp4/mkv/mov/webm/avi/m4v. Directory
+  discovery combines both lists; existing configuration files inherit the video defaults.
 - `[grouping]` — speaker separator and duration thresholds;
 - `[channels]` — classification mode and thresholds;
 - `[models]` — models, cache paths, compute type, batch size;

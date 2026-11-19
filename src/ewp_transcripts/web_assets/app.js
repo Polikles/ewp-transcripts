@@ -625,7 +625,7 @@ function synchronizeDefaultWorkflowRoots() {
   if (!document.querySelector("#custom-review-paths").checked) updateReviewDirectories();
 }
 workflowOutput.addEventListener("change", synchronizeDefaultWorkflowRoots);
-const mediaExtensions = ["wav", "mp3", "flac", "m4a", "ogg", "opus"];
+const mediaExtensions = ["wav", "mp3", "flac", "m4a", "ogg", "opus", "mp4", "mkv", "mov", "webm", "avi", "m4v"];
 const workflowInput = document.querySelector("#input-path");
 const nativeMediaInput = document.createElement("input");
 nativeMediaInput.type = "file";
@@ -635,8 +635,8 @@ nativeMediaInput.hidden = true;
 const nativeMediaButton = document.createElement("button");
 nativeMediaButton.type = "button";
 nativeMediaButton.className = "path-browser-button";
-nativeMediaButton.textContent = "Choose audio files…";
-nativeMediaButton.title = "Choose an existing user-space audio file with the browser's native picker.";
+nativeMediaButton.textContent = "Choose audio or video files…";
+nativeMediaButton.title = "Choose existing audio or video files with the browser's native picker.";
 nativeMediaButton.addEventListener("click", () => nativeMediaInput.click());
 const selectedGuiAudio = [];
 let activeGuiAudio = null;

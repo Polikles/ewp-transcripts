@@ -4,6 +4,19 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Added
+
+- Source-review recording audio in the left rail with grouped-source/channel choice, native
+  playback controls and per-block seeking through actual canonical word timestamps. Drafts are
+  saved before seeking; ambiguous/inserted text is marked explicitly. Recording positions survive
+  stage/recording navigation within the session. Original-source hashes, opaque session URLs,
+  private working audio and bounded HTTP ranges protect identity and seeking.
+- MP4, MKV, MOV, WebM, AVI and M4V input in discovery and GUI file selection. FFmpeg extracts
+  audio through the existing pipeline while canonical provenance retains the original video.
+  Missing/multiple audio streams have actionable errors; interactive stream choice is deferred.
+- A repository-based percentage/ETA assessment with actual-event, historical-calibration and
+  GPU acceptance requirements. Numeric estimates remain deferred until supported by evidence.
+
 ### Fixed
 
 - Source and translation Save actions now highlight missing human verification and explain it

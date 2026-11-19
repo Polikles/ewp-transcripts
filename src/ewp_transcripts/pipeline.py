@@ -645,7 +645,7 @@ def _canonical_source(
         filename=source.fingerprint.filename,
         sha256=source.fingerprint.sha256,
         size_bytes=source.fingerprint.size_bytes,
-        media_type="audio",
+        media_type=source.media_type,
         container=source.fingerprint.path.suffix.lstrip(".") or None,
         codec=source.stream.codec,
         stream_index=source.stream.index,

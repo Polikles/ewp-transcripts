@@ -10,7 +10,25 @@ from pydantic import BaseModel, ConfigDict
 
 from ewp_transcripts.discovery import normalize_input_path
 
-_ALLOWED_EXTENSIONS = frozenset({"json", "txt", "toml", "wav", "mp3", "flac", "m4a", "ogg", "opus"})
+_ALLOWED_EXTENSIONS = frozenset(
+    {
+        "json",
+        "txt",
+        "toml",
+        "wav",
+        "mp3",
+        "flac",
+        "m4a",
+        "ogg",
+        "opus",
+        "mp4",
+        "mkv",
+        "mov",
+        "webm",
+        "avi",
+        "m4v",
+    }
+)
 _MAX_ENTRIES = 500
 _TEMP_RUNTIME_DIRECTORY_NAMES = frozenset({".X11-unix", ".ICE-unix", ".XIM-unix", ".font-unix"})
 _TEMP_RUNTIME_DIRECTORY_PREFIXES = ("systemd-private-",)
@@ -48,7 +66,7 @@ class GuiFilesystemController:
         extensions: tuple[str, ...] = (),
     ) -> GuiFilesystemListing:
         normalized_extensions = tuple(extension.casefold().lstrip(".") for extension in extensions)
-        if len(normalized_extensions) > 10 or any(
+        if len(normalized_extensions) > len(_ALLOWED_EXTENSIONS) or any(
             extension not in _ALLOWED_EXTENSIONS for extension in normalized_extensions
         ):
             raise ValueError("Filesystem browser extensions are invalid")

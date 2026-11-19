@@ -4,6 +4,40 @@ Last updated: **2026-11-19**.
 
 ## Active task and resume pointers
 
+Current request: [playback, video ingestion and progress analysis](docs/checkpoints/2026-11-19-playback-video-progress.md).
+Baseline: clean main e08a4102ee0d9e0dbe0457b3dc96e58185e13552. Implementation and verification
+are complete; main delivery is pending. Start from TODO.md. The owner will manually review
+these three tasks after delivery. English repo and guides; new GUI copy is localized EN/PL.
+
+Stage 3 has a compact source player in the left rail, grouped-track/channel choice and per-block
+seek buttons below speaker selection. Seek saves dirty drafts and checks the exact review hash;
+it maps through the existing anchored word alignment, discloses fallback timing and never changes
+canonical times. Navigation pauses and retains positions independently per recording in browser
+memory. Private previews are hash-bound to originals and streamed with opaque URLs/byte ranges.
+Missing original audio does not block editing; restore it and reload audio to recover playback.
+
+Video picker/discovery supports MP4/MKV/MOV/WebM/AVI/M4V. Existing FFmpeg preparation extracts
+one audio stream; actual video type (excluding attached cover art), source path/hash/container and
+stream are preserved in canonical provenance. Missing/multiple audio errors explain recovery;
+interactive multi-audio-stream selection remains deferred. No ML pin or canonical schema changed.
+
+Percentage/ETA analysis is complete in docs/30-queue-progress-and-eta.md. Real phase events,
+comparable GPU history and calibration are needed before numeric estimates; the indeterminate gear
+remains. This closes the requested analysis; the implementation is a follow-up, not a hidden estimate.
+
+Verification: Ruff/format/mypy (100 files) and 864 tests PASS; eight integration tests PASS.
+144 browser layout cases PASS in EN/PL and both themes, no page errors/external requests.
+Native MP4 upload/inspect/plan/durable staging, real audio decode/seek/range handling, grouped-source
+and per-recording state, missing-source editing/retry, saved-work recovery after server restart,
+existing source/manual-translation publication/export and packaged help checks PASS.
+Wheel/sdist build PASS; 52 frontend/guide resources match source, nine wheel help routes work
+without ML imports, combined JS parses. Tests use synthetic media and fake engines; they do not
+qualify real GPU ASR, provider calls, Windows zoom or YouTube output. Temporary artifacts remain
+isolated pending delivery cleanup. Release/version/tag unchanged.
+
+Full Polish documentation follows owner terminology acceptance; artist package remains deferred.
+Earlier current-request summaries below are delivery history.
+
 Current request: [review confirmation, palette identity and motion feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md).
 Implementation and VM verification are complete; delivered to origin/main in ef958dc83031900f2c9e82a7692ec8921f64812f.
 Start from TODO.md. Path help and Polish labels are corrected. Example default is first and

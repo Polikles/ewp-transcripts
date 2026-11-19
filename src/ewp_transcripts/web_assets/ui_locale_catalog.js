@@ -1243,3 +1243,28 @@ for (const [en, pl] of [
 ]) guiPolish.set(en, pl);
 
 guiPolish.set("Manual verification confirmed. Save and prepare for export when ready.", "Potwierdzono ręczną weryfikację. Możesz zapisać i przygotować do eksportu.");
+
+for (const [en, pl] of [
+  ["Recording audio", "Odsłuch nagrania"],
+  ["Audio source", "Źródło dźwięku"],
+  ["Reload recording audio", "Wczytaj ponownie dźwięk nagrania"],
+  ["Preparing recording audio…", "Przygotowywanie dźwięku nagrania…"],
+  ["Go to this fragment", "Przejdź do tego fragmentu"],
+  ["Audio ready. Use Go to this fragment to listen while reviewing.", "Dźwięk jest gotowy. Użyj „Przejdź do tego fragmentu”, aby odsłuchać sprawdzany tekst."],
+  ["Audio playback is unavailable. Restore the original recording and reload audio.", "Odsłuch jest niedostępny. Przywróć oryginalne nagranie i ponownie wczytaj dźwięk."],
+  ["Playing from the nearest known source timestamp; edited text has no exact audio boundary.", "Odsłuch od najbliższego znanego czasu źródła; zmieniony tekst nie ma dokładnej granicy w nagraniu."],
+  ["Playing from this fragment's source timestamp.", "Odsłuch od początku tego fragmentu w nagraniu źródłowym."],
+  ["Press Play in the recording audio player.", "Naciśnij odtwarzanie w odtwarzaczu nagrania."],
+  ["Choose an audio source from the current recording.", "Wybierz źródło dźwięku bieżącego nagrania."],
+  ["The recording source differs from its transcription. Restore the original file before playback.", "Plik nagrania różni się od źródła transkrypcji. Przywróć oryginalny plik przed odsłuchem."],
+  ["The recording source changed while preparing playback.", "Plik nagrania zmienił się podczas przygotowywania odsłuchu."],
+  ["The original recording is unavailable. Restore it at its original location, then reload recording audio. Transcript editing remains available.", "Oryginalne nagranie jest niedostępne. Przywróć je w pierwotnej lokalizacji i ponownie wczytaj dźwięk. Nadal możesz edytować transkrypcję."],
+  ["Choose an existing transcript section.", "Wybierz istniejącą sekcję transkrypcji."],
+  ["Choose an existing transcript block.", "Wybierz istniejący fragment transkrypcji."],
+  ["Transcript section has invalid source anchors.", "Sekcja transkrypcji ma nieprawidłowe odwołania do źródła."],
+  ["Choose audio or video files…", "Wybierz pliki audio lub wideo…"],
+  ["Add audio or video files…", "Dodaj pliki audio lub wideo…"],
+  ["Choose existing audio or video files with the browser's native picker.", "Wybierz pliki audio lub wideo w oknie wyboru plików przeglądarki."],
+]) guiPolish.set(en, pl);
+guiPolishErrorDescriptions.set("NO_AUDIO_STREAM", "Plik nie ma ścieżki audio. Wybierz nagranie zawierające dźwięk.");
+guiPolishErrorDescriptions.set("MULTIPLE_AUDIO_STREAMS", "Plik ma kilka ścieżek audio. Wyeksportuj wybraną ścieżkę do osobnego pliku, a następnie sprawdź go i przetwórz.");

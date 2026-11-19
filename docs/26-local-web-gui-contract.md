@@ -396,3 +396,34 @@ are validated at the web boundary and version new exports without changing saved
 Workspace v2 adds allowlisted semantic-review paths and display preferences, restoring through existing
 exact-lineage validators. See [the detailed preview contract/evidence](28-integrated-gui-preview.md)
 and [the consolidated owner plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md).
+
+## Source playback and video increment (2026-11-19)
+
+Stage 3 has a compact left-rail audio player and a per-block Go to this fragment action below
+the speaker selector. The existing model-free anchored alignment maps saved blocks to real
+source-word starts. Insertions/ambiguous matches show a nearest-known-timestamp notice and
+never invent canonical timing. A dirty draft is saved first; seeking publishes no revision.
+Stage changes pause audio. Source/position are kept independently per recording in memory.
+
+Review documents add playback_sources metadata (source ID, filename, speaker and channel).
+POST /api/v1/reviews/playback accepts result_path/source_id through existing Host/Origin/CSRF
+checks, validates the completed canonical result and original source size/SHA-256, then decodes
+the canonical stream/channel to a private mono 16 kHz PCM workdir. One cached preview is kept;
+source changes revoke prior opaque tokens. No arbitrary filesystem URL is exposed. GET/HEAD
+/api/v1/review-audio/<opaque-session-token> streams in bounded chunks with audio/wav, no-store,
+Accept-Ranges and single byte ranges (206/416). Unknown tokens/foreign requests are rejected.
+The exact media-src self policy permits local playback only. Cache/workdir cleanup runs when
+the source changes or the server closes; an open stream retains its own descriptor.
+
+POST /api/v1/reviews/playback-position accepts result/review paths, expected review SHA-256 and anchor/block indices,
+validates their lineage and returns a real start_ms plus an approximate flag. It uses the
+existing deterministic alignment, with a fast path for unchanged words, and writes no artifacts.
+Editing/export remains available when original media has moved; playback asks to restore it.
+
+Video input accepts MP4/MKV/MOV/WebM/AVI/M4V in native picker/directory discovery and follows
+the same inspect/plan/queue/application pipeline. Canonical source metadata already permits
+video; no schema migration is required. Only audio is decoded. Missing/multiple audio is an
+explicit error with guidance; interactive stream selection and video-frame playback are deferred.
+
+The percentage/ETA analysis is [recorded separately](30-queue-progress-and-eta.md). Numeric
+progress remains deferred pending actual live events and GPU measurement/calibration.
