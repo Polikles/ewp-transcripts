@@ -54,3 +54,5 @@ The optional Playwright check is `tools/check_artist_review.py --package /unpack
 --output /dedicated/mktemp/check`. It verifies the manifest and offline interactions while blocking
 HTTP(S). `SOURCE-COMMIT.txt` identifies the checkout used to create the package; the ZIP SHA is
 recorded in the delivery checkpoint. This package does not send artwork or messages to the artist.
+
+Current local ZIP and SHA-256 are recorded in [the delivery checkpoint](checkpoints/2026-11-19-artist-review-package.md).

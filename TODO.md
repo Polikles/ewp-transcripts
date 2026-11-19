@@ -5,7 +5,7 @@ Updated: 2026-11-19.
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
-## Active: mixed playback, bounded review, runtime progress and artist package
+## Delivered: mixed playback, bounded review, runtime progress and artist package
 
 Checkpoint: [current implementation](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
 
@@ -18,7 +18,7 @@ Checkpoint: [current implementation](docs/checkpoints/2026-11-19-review-mix-prog
 - [x] Verify fake-clock/events, real mixed audio, source provenance, long-review splitting, runtime/API/browser and package behavior; use the owner's video privately as reference.
 - [x] After fixes, build a portable clickable frontend-only artist review package with synthetic data, theme/locale/workflow interactions and no transcription backend.
 - [x] Include custom/third-party/native icon and indicator inventory, asset previews, credits/licenses and replacement guidance; leave downloadable ZIP locally.
-- [ ] Commit/push verified implementation; generate final committed-source ZIP and provide owner retest/package location.
+- [x] Commit/push verified implementation; generate and verify final frontend ZIP and provide owner retest/package location.
 
 ## Delivered: playback, video ingestion and progress analysis
 
@@ -105,7 +105,7 @@ Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md
 
 ## Artist reference package (current delivery)
 
-- [ ] Deliver the tested frontend-only ZIP and custom/Lucide/native indicator inventory after current fixes.
+- [x] Deliver the tested frontend-only ZIP and custom/Lucide/native indicator inventory: see [artist delivery checkpoint](docs/checkpoints/2026-11-19-artist-review-package.md).
 - [ ] Integrate the artist’s replacement icon package after it is supplied.
 
 ## Completed delivery history

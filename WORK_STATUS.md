@@ -6,7 +6,7 @@ Last updated: **2026-11-19**.
 
 Current request: [mixed playback, review bounds, live progress and artist package](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
 Baseline clean main 5e025b42169455b545bdd50b88c8e6021f57d60c. Implementation and verification
-are complete; commit/push and final committed-source ZIP generation remain. Start with TODO.md.
+are complete; delivered in 831dca4ee7a294eab1618f7df8788e2464b81ada, with the final ETA refinement in 6610e299e4890771dca589ebd70819b5d6d6f95f. Start with TODO.md.
 Owner confirms actual MP4 transcription succeeded; no ASR/video-ingestion blocker was reopened.
 
 Language info closes on outside pointer/Escape. Default audio is a synchronized all-source mix,
@@ -37,11 +37,14 @@ An offline file:// test passes source/translation editing/save/apply/export, pal
 dictionaries, saved work, settings, running states, EN/PL/themes/full/half widths and asset inventory,
 with zero page errors/network requests. Custom EwP / Lucide / generic/native indicators and font
 credits/licenses are included. No backend/models/private media/transcripts enter the ZIP.
-Final ZIP will be generated from committed source under project-ewp/deliveries and recorded below.
+Final ZIP: /home/linuch/project-ewp/deliveries/ewp-gui-artist-review-2026-11-19.zip
+(1135816 bytes, SHA256 1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1).
+Its frontend source is 831dca4ee7a294eab1618f7df8788e2464b81ada; the later backend-only ETA refinement does not alter those frontend bytes.
+See docs/checkpoints/2026-11-19-artist-review-package.md for recipient/rebuild checks.
 Reported terminal warnings are explained with pinned primary sources in docs/32-runtime-log-notes.md;
 no model training, weight change or broad warning suppression was introduced.
 
-Disposable verification root /tmp/ewp-review-progress.BWiy2Q awaits cleanup after delivery evidence.
+Disposable verification root /tmp/ewp-review-progress.BWiy2Q removed after content-free evidence capture.
 Full Polish documentation follows terminology acceptance. Artist icon integration follows receipt.
 Earlier current-request summaries below are delivery history.
 

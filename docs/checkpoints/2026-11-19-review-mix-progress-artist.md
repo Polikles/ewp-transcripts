@@ -82,12 +82,27 @@ VAD INFO is informational. No generic missing-weight/runtime warning filters wer
 
 ## Delivery and resume
 
-- Commit/push pending. Final committed-source artist ZIP to be generated under project-ewp/deliveries.
-- Current disposable root: /tmp/ewp-review-progress.BWiy2Q. Persist only this content-free evidence,
-  then remove previews/media/logs/browsers after final ZIP verification. Owner's original is untouched.
+- Implementation delivered to origin/main in `831dca4ee7a294eab1618f7df8788e2464b81ada`;
+  final positive-ETA refinement in `6610e299e4890771dca589ebd70819b5d6d6f95f`.
+- Artist ZIP: `/home/linuch/project-ewp/deliveries/ewp-gui-artist-review-2026-11-19.zip`; 1135816 bytes.
+  SHA256 `1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1`.
+  Its frontend bytes match the current frontend; the later refinement is backend-only.
+- Disposable root /tmp/ewp-review-progress.BWiy2Q removed after final ZIP verification and
+  content-free evidence capture. Browser/server processes stopped; owner original unchanged.
 - Owner retest: pull/restart GUI; dismiss (i) outside/Escape; seek host/guest sections in a grouped
   episode with the default mix; inspect file hints; reopen one-speaker MP4 review; observe phase,
   elapsed and approximate percent. First completed comparable jobs calibrate ETA; slow phases
   withdraw ETA. Existing saved/applied sources and exports remain immutable.
 - Artist: unzip complete archive and open index.html in Chrome/Edge; inspect icon-inventory.html
   and JSON. New custom icon integration waits for the artist's assets, not more generated artwork.
+
+## Final artist artifact
+
+The exact retained ZIP passed tools/check_artist_review.py from file:// with no server/network:
+manifest verification, source/translation editing/save/apply/export, palette preview/apply/save,
+mock correction, dictionary editing, saved work, dependency-demo states, all workflow stages,
+EN/PL light/dark at 960/1920px and the 14-entry inventory. No page errors/external requests.
+43 archive files; only the explicitly synthetic demo-audio.wav, no Python backend or model files.
+SOURCE-COMMIT.txt is verified against the frontend source commit; transformed app.js/app.css
+and the mock adapter match the current frontend/tool bytes. No package was sent to the artist
+or published externally. Owner download/artist feedback and real WSL ETA accuracy remain pending.
