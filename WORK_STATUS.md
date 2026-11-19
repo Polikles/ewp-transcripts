@@ -6,7 +6,7 @@ Last updated: **2026-11-19**.
 
 Current request: [playback, video ingestion and progress analysis](docs/checkpoints/2026-11-19-playback-video-progress.md).
 Baseline: clean main e08a4102ee0d9e0dbe0457b3dc96e58185e13552. Implementation and verification
-are complete; main delivery is pending. Start from TODO.md. The owner will manually review
+are complete; delivered to origin/main in 1864900c0928d910df8bb30cafda1d4554dd4cc2. Start from TODO.md. The owner will manually review
 these three tasks after delivery. English repo and guides; new GUI copy is localized EN/PL.
 
 Stage 3 has a compact source player in the left rail, grouped-track/channel choice and per-block
@@ -32,8 +32,8 @@ and per-recording state, missing-source editing/retry, saved-work recovery after
 existing source/manual-translation publication/export and packaged help checks PASS.
 Wheel/sdist build PASS; 52 frontend/guide resources match source, nine wheel help routes work
 without ML imports, combined JS parses. Tests use synthetic media and fake engines; they do not
-qualify real GPU ASR, provider calls, Windows zoom or YouTube output. Temporary artifacts remain
-isolated pending delivery cleanup. Release/version/tag unchanged.
+qualify real GPU ASR, provider calls, Windows zoom or YouTube output. Disposable verification artifacts were removed after
+content-free evidence was recorded. Release/version/tag unchanged.
 
 Full Polish documentation follows owner terminology acceptance; artist package remains deferred.
 Earlier current-request summaries below are delivery history.

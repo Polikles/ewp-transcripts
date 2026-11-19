@@ -5,7 +5,7 @@ Updated: 2026-11-19.
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
-## Active: playback, video ingestion and progress analysis
+## Delivered: playback, video ingestion and progress analysis
 
 Checkpoint: [playback, video and progress](docs/checkpoints/2026-11-19-playback-video-progress.md).
 
@@ -22,7 +22,7 @@ Checkpoint: [playback, video and progress](docs/checkpoints/2026-11-19-playback-
    - [x] Assess numeric estimates against available evidence; retain the indeterminate gear because live phase events and calibrated measurements are absent.
 4. Delivery
    - [x] Run required checks, browser workflows/layout and package verification; update English guides, changelog, roadmap and checkpoints.
-   - [ ] Commit/push all three tasks, leaving manual owner review pending until delivery.
+   - [x] Commit/push playback/video implementation and the completed percentage/ETA analysis; manual owner review remains pending.
 
 ## Follow-up: calibrated progress indicator
 

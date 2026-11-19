@@ -16,8 +16,8 @@ Read AGENTS.md, WORK_POLICY.md, TODO.md, WORK_STATUS.md and the roadmap on resum
 
 ## Progress
 
-- Full task list persisted before implementation. Immediate implementation is complete;
-  final delivery verification is in progress.
+- Full task list persisted before implementation. Implementation and verification are complete;
+  delivered to origin/main in 1864900c0928d910df8bb30cafda1d4554dd4cc2.
 - Source player is bound to canonical source ID/hash/stream/channel. Private 16 kHz mono
   WAV preparation uses workdirs, one cached source and opaque session URLs. GET/HEAD supports
   streaming/single ranges; switching cache revokes old URLs, server close removes workdirs.
@@ -35,9 +35,9 @@ Read AGENTS.md, WORK_POLICY.md, TODO.md, WORK_STATUS.md and the roadmap on resum
   estimates stay deferred, not fabricated. This completes the requested analysis scope.
 - First browser playback and all 144 EN/PL/theme/layout cases PASS. Real MP4 extraction through
   fake-engine pipeline and source playback PASS; missing/multiple audio errors PASS.
-- Temporary verification root: /tmp/ewp-media-tasks.1hT0dM. Latest full browser run is
-  delivery-check, adding native MP4 staging and switching recording state. Consult its logs
-  before rerunning. make check final session 70958; browser session 82846.
+- Temporary verification root: /tmp/ewp-media-tasks.1hT0dM. Full browser run delivery-check covered native MP4 staging and switching recording state.
+  Final focused run seek-final covered the review hash and fresh-server recovery. Content-free
+  results are recorded below; disposable logs/media/screenshots have been removed.
 
 ## Verification
 
@@ -66,9 +66,10 @@ Read AGENTS.md, WORK_POLICY.md, TODO.md, WORK_STATUS.md and the roadmap on resum
 
 ## Delivery and resume
 
-- Implementation/analysis complete; commit and push pending. Manual owner review follows delivery.
-- Disposable root `/tmp/ewp-media-tasks.1hT0dM` must be removed after content-free evidence capture.
-  Browser/server processes exit after each run; final successful runs: delivery-check, seek-final.
+- Implementation/analysis delivered to origin/main in `1864900c0928d910df8bb30cafda1d4554dd4cc2`.
+  Manual owner review remains pending; no release/tag created.
+- Disposable root `/tmp/ewp-media-tasks.1hT0dM` removed after content-free evidence capture.
+  Browser/server processes stopped; final successful runs: delivery-check, seek-final.
 - Owner retest: pull and restart `uv run --locked transcriber gui`; select one-audio-track MP4,
   inspect/plan/stage/transcribe, review source using Go to this fragment, switch grouped sources
   and recordings, navigate away/back, then perform normal save/export. Existing audio still works.
