@@ -5,7 +5,7 @@ Last updated: **2026-11-19**.
 ## Active task and resume pointers
 
 Current request: [review confirmation, palette identity and motion feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md).
-Implementation and VM verification are complete; delivery to main is pending.
+Implementation and VM verification are complete; delivered to origin/main in ef958dc83031900f2c9e82a7692ec8921f64812f.
 Start from TODO.md. Path help and Polish labels are corrected. Example default is first and
 visibly distinct from EwP Brand®; explicit configured palettes and saved custom colors survive.
 Language information explains the observed EN-on-PL behavior without changing engine settings.
@@ -17,7 +17,7 @@ layout cases PASS across six stages/viewports, EN/PL and both themes, with no pa
 external requests. Focused checks cover missing-confirmation/recovery, legacy profiles, actual SVG
 motion, reduced motion and connecting/doctor/save statuses. Wheel/source builds PASS; all 51
 frontend/guide resources match source, all nine help routes work from the wheel without ML imports,
-and bundled JS parses. Temporary verification material remains isolated until delivery cleanup.
+and bundled JS parses. Disposable verification material was removed after recording content-free evidence.
 These model-free checks do not qualify real GPU/provider, Windows zoom or YouTube behavior.
 
 Next priority before other deferred TODO work: a source-review audio player with real segment

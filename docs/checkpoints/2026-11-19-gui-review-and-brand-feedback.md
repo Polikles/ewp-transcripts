@@ -17,7 +17,7 @@ No provider calls, ASR, model downloads or canonical/ML changes are needed for t
 
 ## Progress
 
-- Immediate scope implemented and VM-verified. Main delivery pending.
+- Immediate scope implemented, VM-verified and delivered to origin/main in ef958dc83031900f2c9e82a7692ec8921f64812f.
 - Audio, video and percentage/ETA items remain planned, with audio explicitly next.
 
 ## Implementation notes
@@ -67,10 +67,10 @@ No provider calls, ASR, model downloads or canonical/ML changes are needed for t
 
 ## Delivery and resume
 
-- Main delivery pending; no release/tag requested.
-- Disposable verification root: `/tmp/ewp-gui-brand.U1LSuG`; remove after evidence is recorded.
+- Implementation delivered to origin/main in `ef958dc83031900f2c9e82a7692ec8921f64812f`; no release/tag created.
+- Disposable verification root `/tmp/ewp-gui-brand.U1LSuG` removed after content-free evidence
+  was recorded; local GUI server processes stopped.
 - Owner retest after pull: restart `uv run --locked transcriber gui`, inspect path/language help,
   compare Example default / EwP Brand®, test Save before/after verification, and observe gear.
 - Next implementation starts with the audio-player checklist in TODO.md. Do not enable video
   or percentage/ETA incidentally; implement source identity/seek safety and real progress evidence.
-
