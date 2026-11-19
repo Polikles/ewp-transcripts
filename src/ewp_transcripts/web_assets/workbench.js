@@ -112,7 +112,7 @@ function updateGuiRecordings() {
   for (const job of guiKnownJobs) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "gui-recording";
+    button.className = "gui-recording"; button.dataset.status = job.status;
     button.setAttribute("aria-pressed", String(job.job_id === guiActiveJobId || Boolean(job.result_path && job.result_path === guiActiveResult)));
     const identity = document.createElement("strong");
     identity.textContent = job.planned_job_id;
@@ -280,6 +280,7 @@ function renderGuiTaskContext(job) {
 }
 
 // Colors are display/export preferences, never transcript text or speaker identity.
+const guiExamplePalette = ["#FFE8A3", "#FF8FA3", "#A8DADC", "#CDB4DB", "#F4A261", "#B8DE6F"];
 const guiBrandPalette = ["#F5F7FA", "#00AEEF", "#F2C55B", "#BF734D", "#8CFFB3", "#64D8D0"];
 function guiPaletteKey() { return `ewp-colors-v1:${reviewDocument?.result_path || ""}`; }
 function guiSavedSpeakerColors() {
@@ -291,10 +292,10 @@ let guiPreviewColors = null;
 let guiPreviewResult = "";
 let guiColorProfiles = [];
 function guiAppliedSpeakerColors() {
-  const colors = {...(reviewDocument?.configured_speaker_colors || {}), ...guiSavedSpeakerColors()};
+  const colors = guiSavedSpeakerColors();
   return Object.fromEntries((reviewDocument?.speakers || []).map(id => {
     const n = Number(id.match(/\d+$/)?.[0] || 1) - 1;
-    return [id, /^#[0-9a-f]{6}$/i.test(colors[id] || "") ? colors[id] : guiBrandPalette[n % guiBrandPalette.length]];
+    return [id, /^#[0-9a-f]{6}$/i.test(colors[id] || "") ? colors[id] : guiExamplePalette[n % guiExamplePalette.length]];
   }));
 }
 function guiSpeakerColors() {
@@ -323,7 +324,7 @@ function applyGuiSpeakerColors() {
   });
 }
 function guiProfileValue(profile) {
-  return profile.name === "Configured production" ? "configured" : profile.name === "EwP brand" ? "brand" : profile.name;
+  return profile.id || (["Example default", "Configured production"].includes(profile.name) ? "configured" : ["EwP brand", "EwP Brand®"].includes(profile.name) ? "brand" : profile.name);
 }
 function renderGuiProfileSwatches() {
   const host = document.querySelector("#gui-profile-swatches"); if (!host) return;
@@ -399,7 +400,12 @@ function installGuiPaletteControls() {
   // Session initialization is asynchronous; wait for the session token, without a second session.
   document.addEventListener("ewp-session-ready", () => { void loadGuiColorProfiles(); });
 }
-function guiExportPreferences() { return {speaker_colors:Object.keys(guiSavedSpeakerColors()).length ? guiAppliedSpeakerColors() : null}; }
+function guiExportPreferences() {
+  const colors = guiAppliedSpeakerColors();
+  const configured = reviewDocument?.configured_speaker_colors || {};
+  const same = Object.entries(colors).every(([id, color]) => configured[id]?.toUpperCase() === color.toUpperCase());
+  return {speaker_colors:Object.keys(guiSavedSpeakerColors()).length || !same ? colors : null};
+}
 
 installGuiPaletteControls();
 installGuiShell();

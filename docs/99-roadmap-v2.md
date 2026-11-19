@@ -33,6 +33,22 @@ items belong to one monolithic "Version 2" release.
    correction, review/export, and translation queues. The GUI reuses application services and
    does not implement a parallel pipeline.
 
+Current GUI execution priority (2026-11-19): the
+[review/identity feedback](checkpoints/2026-11-19-gui-review-and-brand-feedback.md) is implemented
+and VM-verified. Next, implement a small audio player in the left rail during source review with per-block seeking to actual
+segment starts. This audio task precedes other deferred TODO work, including the artist package.
+It requires safe seekable local media access, exact source identity and deliberate grouped-track
+selection. Next, support video inputs such as MP4 by extracting their audio through existing
+media services while retaining video-source provenance. Handle missing/multiple audio streams
+explicitly; do not disguise video as an audio-only input in provenance.
+
+Assess queue percent/ETA separately: current canonical stages record completed durations but
+provide no live progress callback. Add real stage events before exposing percentages; base time
+estimates on measured stage duration/real-time factors and recording/model/runtime context.
+Keep an indeterminate gear when estimates lack evidence. Do not simulate continuous progress
+or report completion before the worker finishes. Full Polish documentation still follows owner
+terminology approval. See TODO.md for the concrete checklist and deferred scope.
+
 Cross-cutting observability is implemented in
 [`25-warning-error-catalog.md`](25-warning-error-catalog.md): domain warnings, expected
 application errors, direct policy warnings, command wrappers, and framework-generated usage

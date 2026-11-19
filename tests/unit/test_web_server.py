@@ -1051,6 +1051,7 @@ def test_preview_resources_are_fixed_local_routes() -> None:
     config = WebConfiguration.create(port=8765)
     for asset, expected in [
         ("brand/logo.svg", b"<svg"),
+        ("brand/gear.svg", b"gear--gear-ring"),
         ("brand/montserrat.woff2", b"wOF2"),
         ("brand/mono.woff2", b"wOF2"),
         ("brand/NOTICE.txt", b"Cyryl"),
@@ -1162,3 +1163,26 @@ def test_library_routes_require_active_session_before_access(route: str, token: 
     assert response.status == (200 if token == "expected" else 403)
     if token == "wrong":
         assert not service.mock_calls
+
+
+def test_supplied_gear_animation_has_a_pinned_style_permission() -> None:
+    """Allow the owner's exact animated SVG CSS without enabling arbitrary inline styles."""
+    import base64
+    import hashlib
+    import xml.etree.ElementTree as ET
+
+    response = dispatch_get(
+        WebConfiguration.create(port=8765),
+        server_port=8765,
+        host="localhost:8765",
+        target="/assets/brand/gear.svg",
+    )
+    assert response.status == 200 and response.content_type == "image/svg+xml"
+    root = ET.fromstring(response.body)
+    style = next(node.text for node in root.iter() if node.tag.endswith("style"))
+    assert style is not None and "prefers-reduced-motion" in style
+    digest = base64.b64encode(hashlib.sha256(style.encode()).digest()).decode()
+    policy = SECURITY_HEADERS["Content-Security-Policy"]
+    assert f"'sha256-{digest}'" in policy
+    assert "'unsafe-inline'" not in policy
+    assert not any(node.tag.endswith("script") for node in root.iter())

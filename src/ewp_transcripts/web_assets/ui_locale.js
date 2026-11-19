@@ -19,7 +19,7 @@ const guiPolish = new Map([
   ["Test local dependencies", "Test lokalnych zależności"],
   ["Dependency technical details (JSON)", "Szczegóły techniczne zależności (JSON)"],
   ["Failure technical details (JSON)", "Szczegóły techniczne błędu (JSON)"],
-  ["Selected for inspection", "Wybrano do inspekcji"], ["Select episode", "Wybierz odcinek"],
+  ["Selected for inspection", "Wybrano do sprawdzenia"], ["Select episode", "Wybierz odcinek"],
   ["Transcription failed. Use Test local dependencies, then retry after fixing failed checks.", "Transkrypcja nie powiodła się. Uruchom test lokalnych zależności, usuń wykryte problemy i spróbuj ponownie."],
   ["Testing local dependencies… This can take a minute. No models are downloaded.", "Testowanie lokalnych zależności… Może to potrwać minutę. Modele nie są pobierane."],
   ["Local dependency checks found a problem. Fix failed checks before retrying transcription.", "Test lokalnych zależności wykrył problem. Usuń przyczyny błędów przed ponowną transkrypcją."],
@@ -88,7 +88,7 @@ const guiPolish = new Map([
   ["Prepare review", "Przygotuj weryfikację"], ["Restore saved review", "Przywróć zapisaną weryfikację"],
   ["Save draft", "Zapisz szkic"], ["Preview", "Sprawdź zmiany"], ["Clear current review", "Wyczyść bieżącą weryfikację"],
   ["Prepare and validate", "Przygotowanie i sprawdzenie"], ["Draft and history", "Szkic i historia"],
-  ["Undo", "Cofnij"], ["Redo", "Ponów"], ["Review identity:", "Tożsamość weryfikacji:"],
+  ["Undo", "Cofnij"], ["Redo", "Ponów"], ["Review identity:", "ID weryfikacji:"],
   ["Speaker names for this revision", "Nazwy mówców w tej wersji"], ["Add revision-only speaker", "Dodaj mówcę w tej wersji"],
   ["Speaker", "Mówca"], ["Transcript text", "Tekst transkrypcji"], ["Display", "Widok"],
   ["One section at a time", "Jedna sekcja"], ["All sections", "Wszystkie sekcje"],
@@ -805,6 +805,7 @@ function translateGui() {
     }
     guiAttributeSources.set(element, originals);
   }
+  syncGuiStatusMotion();
   guiTranslationObserver?.observe(document.body, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:["title", "aria-label", "placeholder", "hidden"]});
 }
 function startGuiTranslation() {

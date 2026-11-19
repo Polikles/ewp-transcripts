@@ -6,6 +6,19 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Source and translation Save actions now highlight missing human verification and explain it
+  next to the checkbox before submitting any publication request. Checking the box clears the
+  local error; backend approval requirements remain unchanged.
+- Path help appears directly below the server input. Polish selection/review identity wording
+  is corrected, and accessible language information explains the observed, unguaranteed EN-on-PL
+  behavior without changing transcription or translation engine settings.
+- Example default is the first fresh-session color profile and is visibly distinct from the
+  owner's EwP Brand® profile. Legacy brand/workspace identities, explicit production settings,
+  saved custom colors and earlier exports are preserved.
+- The owner-provided animated gear replaces native progress circles across pending request,
+  status and running queue/card feedback. Original artwork and reduced-motion behavior are
+  retained; its exact SVG CSS is allowed by a pinned policy hash without arbitrary inline styles.
+
 - Start queue recovers after asynchronous success/failure and follows live job state, so later
   staged work can run alongside completed history. Finished ASR jobs are not started again.
 - Applied translations export after visiting other stages without regenerating a candidate;

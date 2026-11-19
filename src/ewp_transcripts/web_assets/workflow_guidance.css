@@ -134,3 +134,24 @@
 .review-prepare-line > .feedback-anchor > button { width: 100%; font-size: .78rem; padding: .4rem; }
 
 .gui-error-diagnostic > summary { color: var(--gui-muted); font-size: .75rem; font-weight: 400; }
+
+.gui-language-choice { position: relative; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; }
+.gui-language-choice > label { min-width: 0; }
+.gui-language-info { position: static; margin-top: 1rem; }
+.gui-language-info > summary { display: grid; place-items: center; width: 1.15rem; height: 1.15rem; border: 1px solid var(--gui-muted); border-radius: 50%; font-size: .75rem; list-style: none; }
+.gui-language-info > summary::-webkit-details-marker { display: none; }
+.gui-language-info > p { position: absolute; z-index: 5; top: 1.5rem; inset-inline-end: 0; width: min(23rem, calc(100vw - 4rem)); box-sizing: border-box; padding: .65rem; background: var(--gui-surface); border: 1px solid var(--gui-line); border-radius: .4rem; color: var(--gui-ink); }
+.gui-verification-feedback { margin: .45rem 0; padding: .5rem; border-inline-start: 3px solid #c4302b; color: var(--gui-ink); font-size: .85rem; }
+.gui-verification-feedback[hidden] { display: none; }
+.inline-working::before, .gui-status-working::before, .status-running::before,
+.gui-recording[data-status="running"] > span::before {
+  content: ""; display: inline-block; width: 1.1rem; height: 1.1rem; flex: 0 0 1.1rem;
+  border: 0; border-radius: 0; background: url(/assets/brand/gear.svg) center / contain no-repeat;
+  animation: none; vertical-align: middle;
+}
+.gui-status-working:not(.inline-working)::before, .status-running::before,
+.gui-recording[data-status="running"] > span::before { margin-inline-end: .35rem; }
+.inline-working.inline-done::before { content: "✓"; background: none; color: #1d9b50; }
+.inline-working.inline-error::before { content: "×"; background: none; color: #c4302b; }
+
+.review-prepare-line > .feedback-anchor { min-width: 6rem; }

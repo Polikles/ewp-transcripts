@@ -125,10 +125,11 @@ def test_dictionary_validation_rejects_unsafe_ids_and_duplicate_terms(tmp_path: 
 def test_profiles_keep_configured_and_brand_distinct_and_persist_custom(tmp_path: Path) -> None:
     service, _ = library(tmp_path)
     profiles = {item["name"]: item["colors"] for item in service.profiles()["profiles"]}
-    assert profiles["Configured production"] != profiles["EwP brand"]
+    assert profiles["Example default"] != profiles["EwP Brand®"]
     service.save_profile(name="My podcast", colors=["#abcdef", "#123456"])
     reloaded, _ = library(tmp_path)
     assert reloaded.profiles()["profiles"][-1] == {
+        "id": "My podcast",
         "name": "My podcast",
         "colors": ["#ABCDEF", "#123456"],
         "custom": True,
@@ -137,3 +138,50 @@ def test_profiles_keep_configured_and_brand_distinct_and_persist_custom(tmp_path
         service.save_profile(name="EwP brand", colors=["#ffffff"])
     with pytest.raises(ValueError, match="#RRGGBB"):
         service.save_profile(name="Bad", colors=["red"])
+
+
+def test_example_default_is_first_and_preserves_explicit_production_settings(
+    tmp_path: Path,
+) -> None:
+    from ewp_transcripts.config import EXAMPLE_YTT_PALETTE
+
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    old = ("#FEFEFE", "#00AEEF", "#FFD700")
+    service = GuiLibrary(
+        state_directory=tmp_path / "state",
+        resolve_path=paths.resolve_allowed_path,
+        subtitles=SubtitlesConfig(ytt_speaker_palette=old),
+    )
+    profiles = service.profiles()["profiles"]
+    assert profiles[0] == {
+        "id": "configured",
+        "name": "Example default",
+        "colors": list(EXAMPLE_YTT_PALETTE),
+        "custom": False,
+    }
+    assert next(item for item in profiles if item["id"] == "production")["colors"] == list(old)
+    brand = next(item for item in profiles if item["id"] == "brand")
+    assert brand["name"] == "EwP Brand®"
+    assert all(a != b for a, b in zip(profiles[0]["colors"], brand["colors"], strict=True))
+    with pytest.raises(ValueError, match="custom name"):
+        service.save_profile(name="Example default", colors=["#123456"])
+
+
+def test_legacy_brand_configuration_and_saved_name_collision_survive(tmp_path: Path) -> None:
+    paths = GuiWorkflowController((tmp_path.resolve(),))
+    state = tmp_path / "state"
+    state.mkdir()
+    old_document = {"hidden": [], "profiles": {"Example default": ["#123456", "#abcdef"]}}
+    (state / "library.json").write_text(json.dumps(old_document), encoding="utf-8")
+    service = GuiLibrary(
+        state_directory=state,
+        resolve_path=paths.resolve_allowed_path,
+        subtitles=SubtitlesConfig(ytt_color_profiles={"EwP brand": ("#123123",)}),
+    )
+    profiles = service.profiles()["profiles"]
+    assert profiles[0]["id"] == "configured"
+    assert next(item for item in profiles if item["id"] == "brand")["name"] == "EwP Brand®"
+    saved = next(item for item in profiles if item["custom"])
+    assert saved["id"] == "Example default" and saved["name"] == "Example default (saved)"
+    assert saved["colors"] == ["#123456", "#abcdef"]
+    assert json.loads((state / "library.json").read_text()) == old_document

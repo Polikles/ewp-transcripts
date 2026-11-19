@@ -77,9 +77,9 @@ min_gap_ms = 80
 max_merge_gap_ms = 1200
 min_words_per_cue = 4
 speaker_labels = "on-change"   # on-change | always | never
-ytt_speaker_palette = ["#FEFEFE", "#00AEEF", "#FFD700", "#00C853", "#E040FB", "#00E5FF"]
+ytt_speaker_palette = ["#FFE8A3", "#FF8FA3", "#A8DADC", "#CDB4DB", "#F4A261", "#B8DE6F"]
 
-# Additional named profiles appear in the GUI. EwP brand is supplied by default.
+# Additional named profiles appear in the GUI. EwP Brand® is supplied by default.
 # [subtitles.ytt_color_profiles]
 # "My podcast" = ["#F5F7FA", "#00AEEF", "#F2C55B"]
 

@@ -1,11 +1,35 @@
 # Immediate work queue
 
-Updated: 2026-11-18.
+Updated: 2026-11-19.
 
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
-## Active: Polish UI audit and queue/translation recovery
+## Delivered: review confirmation, palette identity and motion feedback
+
+Checkpoint: [review and identity feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md).
+
+- [x] Put the Windows/WSL path hint directly below the server input field, before selected files.
+- [x] Rename Selected for inspection to Wybrano do sprawdzenia; Review identity to ID weryfikacji.
+- [x] Mark the EwP Brand® profile with the owner's requested registration symbol, preserving brand identity and saved-work compatibility.
+- [x] Make Example default the first/startup profile, visibly distinct from EwP Brand®; preserve prior exports and explicit user palettes.
+- [x] Add accessible language-selection information about observed EN output from PL recordings, with no correctness guarantee and required review/correction.
+- [x] Highlight the manual-verification checkbox row and explain missing consent next to Save and prepare for export, with EN/PL copy.
+- [x] Replace every in-progress spinner with the supplied animated gear.svg; keep done/error feedback distinct and support reduced motion.
+- [x] Verify relevant regressions, package resources and responsive EN/PL UI; update roadmap, changelog and checkpoint; deliver for WSL retest.
+
+## Next priority: source-review audio playback
+
+- [ ] Before other deferred TODO work, add a compact player to the floating left rail during stage 3 Source review & export, using the recording currently being edited.
+- [ ] Add Go to this fragment below each speaker selector; seek to the segment's real canonical start timestamp without altering alignment or publishing fake timings.
+- [ ] Design safe local media access (including seeking/range requests), exact source matching and selection for grouped tracks; preserve separate per-recording review state.
+
+## Planned: video inputs and progress estimates
+
+- [ ] Add explicit video input support (including MP4): select a video, extract/probe its audio through the existing media pipeline, process audio locally and retain source provenance. Cover remote screen/video-call recordings; handle missing audio and multiple streams deliberately.
+- [ ] Assess a queue Running xx% indicator and approximate remaining time using actual pipeline stage/events and measured duration history. Use an honest indeterminate state when evidence is insufficient; never report invented precision or premature completion.
+
+## Previous delivery: Polish UI audit and queue/translation recovery
 
 Checkpoint: [localization and recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
 

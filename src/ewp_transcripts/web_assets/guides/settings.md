@@ -18,3 +18,5 @@ Repair uses bash scripts/repair-dependencies.sh in the transcription checkout. I
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+In-progress feedback uses the owner-provided animated gear.svg motion mark, including global requests, adjacent button feedback, running statuses and active queue/card indicators. Its original reduced-motion behavior is preserved; completed/error markers are static.

@@ -321,10 +321,26 @@ def check_localized_interface(page: Page) -> None:
     import re
 
     page.locator("#gui-locale").select_option("pl")
+    stage(page, "workspace")
     expect(page.locator("#compatibility")).to_have_text("Stan: usługa lokalna gotowa")
     expect(page.locator("#gui-active-context .gui-path")).not_to_contain_text("Choose a recording")
     # The initial dictionary catalog is populated automatically; no Refresh click is needed.
     expect(page.locator(".library-item")).not_to_have_count(0)
+    assert page.locator("#input-path").evaluate(
+        "e=>e.nextElementSibling.id==='gui-input-path-hint'"
+    )
+    assert page.locator("#gui-audio-choices").evaluate(
+        "e=>Boolean(document.querySelector('#gui-input-path-hint')"
+        ".compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING)"
+    )
+    assert page.locator("#gui-export-palette").input_value() == "configured"
+    assert page.locator("#gui-export-palette option").first.inner_text() == "Example default"
+    assert page.locator('#gui-export-palette option[value="brand"]').inner_text() == "EwP Brand®"
+    page.locator(".gui-language-info summary").click()
+    expect(page.locator(".gui-language-info p")).to_contain_text(
+        "nie jest gwarantowany tryb tłumaczenia"
+    )
+    page.locator(".gui-language-info summary").click()
     assert page.locator("#output-path").evaluate(
         "e=>Boolean(e.compareDocumentPosition(document.querySelector('#input-path')) "
         "& Node.DOCUMENT_POSITION_FOLLOWING)"
@@ -363,6 +379,9 @@ def check_localized_interface(page: Page) -> None:
         "texts=>texts.filter(text=>guiUiText(text)===text)", sorted(all_literals)
     )
     non_ui = {
+        "Example default",
+        "Configured palette",
+        "EwP Brand®",
         "Configured production",
         "EwP Transcripts",
         "EwP brand",
@@ -393,6 +412,8 @@ def check_localized_interface(page: Page) -> None:
     expect(page.locator(".gui-error-diagnostic")).to_have_count(0)
     samples = {
         "Planning…": "Planowanie…",
+        "Selected for inspection": "Wybrano do sprawdzenia",
+        "Review identity:": "ID weryfikacji:",
         "Dry-run completed": "Plan gotowy",
         "Adding…": "Dodawanie…",
         "Added to staged queue": "Dodano do kolejki oczekującej na uruchomienie",
@@ -432,6 +453,50 @@ def check_localized_interface(page: Page) -> None:
     page.locator("#gui-locale").select_option("en")
     expect(page.locator("#preview-review")).to_have_text("Apply")
     expect(page.locator("#prepare-review")).to_have_text("Prepare text for review")
+
+
+def check_motion_feedback(page: Page, output: Path) -> None:
+    """Use the owner asset for real status/feedback hooks, including reduced motion."""
+    page.wait_for_function("() => guiPendingRequests === 0")
+    page.evaluate("setGuiWorking(true, document.querySelector('#prepare-review'))")
+    for selector in ("#gui-working", "#prepare-review + .inline-working"):
+        marker = page.locator(selector)
+        assert marker.evaluate(
+            "e=>getComputedStyle(e,'::before').backgroundImage.includes('/assets/brand/gear.svg')"
+        )
+        assert marker.evaluate("e=>getComputedStyle(e,'::before').borderTopWidth==='0px'")
+    page.evaluate("setGuiWorking(false, document.querySelector('#prepare-review'))")
+    assert page.locator("#prepare-review + .inline-working").evaluate(
+        "e=>getComputedStyle(e,'::before').backgroundImage==='none'"
+    )
+    for selector, message in [
+        ("#operation-status", "Inspecting…"),
+        ("#correction-status", "Correction is running; do not close the server."),
+        ("#translation-status", "Translation is running; do not close the server."),
+        ("#operation-status", "Status: connecting"),
+        ("#doctor-status", "Running doctor…"),
+        ("#library-status", "Saving new dictionary version…"),
+        ("#gui-palette-status", "Saving custom profile…"),
+    ]:
+        node = page.locator(selector)
+        node.evaluate("(e,text)=>{e.textContent=text}", message)
+        expect(node).to_have_attribute("aria-busy", "true")
+        assert node.evaluate(
+            "e=>getComputedStyle(e,'::before').backgroundImage.includes('/assets/brand/gear.svg')"
+        )
+        node.evaluate("e=>{e.textContent=''}")
+        expect(node).to_have_attribute("aria-busy", "false")
+    svg = page.context.browser.new_page()
+    svg.goto(page.url.rstrip("/") + "/assets/brand/gear.svg")
+    ring = svg.locator("#gear--gear-ring")
+    assert ring.evaluate("e=>getComputedStyle(e).animationName") == "gear-gear"
+    initial_transform = ring.evaluate("e=>getComputedStyle(e).transform")
+    svg.wait_for_timeout(150)  # Observe the asset's own animation without unsafe-eval polling.
+    assert ring.evaluate("e=>getComputedStyle(e).transform") != initial_transform
+    svg.screenshot(path=str(output / "gear-animation.png"))
+    svg.emulate_media(reduced_motion="reduce")
+    expect(ring).to_have_css("animation-name", "none")
+    svg.close()
 
 
 def check_dictionary_library(page: Page, output: Path) -> None:
@@ -583,6 +648,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
             name,
         )
     check_localized_interface(page)
+    check_motion_feedback(page, output)
     check_maintenance_controls(page)
     check_dictionary_library(page, output)
     stage(page, "workspace")
@@ -659,9 +725,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     assert page.locator("#gui-profile-swatches span").nth(2).get_attribute("title") == "#F2C55B"
     expect(page.locator('input[aria-label="Speaker color speaker_001"]')).to_have_value("#f5f7fa")
     page.locator("#gui-export-palette").select_option("configured")
-    configured_color = page.evaluate(
-        "reviewDocument.configured_speaker_colors.speaker_001.toLowerCase()"
-    )
+    configured_color = "#ffe8a3"
     expect(page.locator('input[aria-label="Speaker color speaker_001"]')).to_have_value(
         configured_color
     )
@@ -720,7 +784,20 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
         "() => document.querySelector('#review-status').textContent.startsWith('Preview passed')"
     )
     assert abs(page.evaluate("window.scrollY") - before_preview) <= 2
+    page.locator("#gui-locale").select_option("pl")
+    page.locator("#apply-review").click()
+    expect(page.locator('#review-workflow input[name="verified"]')).to_have_attribute(
+        "aria-invalid", "true"
+    )
+    expect(page.locator('#review-workflow input[name="verified"]').locator("..")).to_have_class(
+        "confirmation field-error"
+    )
+    expect(page.locator("#review-status-verification-feedback")).to_contain_text(
+        "Zaznacz „Ręcznie sprawdziłem treść…”"
+    )
     page.locator('#review-workflow input[name="verified"]').check()
+    expect(page.locator("#review-status-verification-feedback")).to_be_hidden()
+    page.locator("#gui-locale").select_option("en")
     page.locator("#apply-review").click()
     expect(page.locator("#export-review")).to_be_enabled()
     page.locator("#export-review").click()
@@ -782,7 +859,11 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
         textarea.fill(f"Testowe tłumaczenie jednostki {index + 1}.")
     page.locator("#preview-translation-review").click()
     expect(page.locator("#apply-translation-review")).to_be_enabled()
+    page.locator("#apply-translation-review").click()
+    expect(page.locator("#translation-review-confirmed")).to_have_attribute("aria-invalid", "true")
+    expect(page.locator("#translation-review-status-verification-feedback")).to_be_visible()
     page.locator("#translation-review-confirmed").check()
+    expect(page.locator("#translation-review-status-verification-feedback")).to_be_hidden()
     page.locator("#apply-translation-review").click()
     expect(page.locator("#export-translation-review")).to_be_enabled()
     # Reopening optional translation clears a transient candidate while the saved review remains.

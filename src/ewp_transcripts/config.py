@@ -180,8 +180,20 @@ class QualityConfig(StrictConfigModel):
     high_silence_min_ratio: float = Field(default=0.5, ge=0.0, le=1.0)
 
 
+EXAMPLE_YTT_PALETTE: tuple[str, ...] = (
+    "#FFE8A3",
+    "#FF8FA3",
+    "#A8DADC",
+    "#CDB4DB",
+    "#F4A261",
+    "#B8DE6F",
+)
+EWP_BRAND_PROFILE = "EwP Brand®"
+EWP_BRAND_PROFILE_ALIASES = (EWP_BRAND_PROFILE, "EwP brand", "EwP Brand")
+
+
 def _default_color_profiles() -> dict[str, tuple[str, ...]]:
-    return {"EwP brand": ("#F5F7FA", "#00AEEF", "#F2C55B", "#BF734D", "#8CFFB3", "#64D8D0")}
+    return {EWP_BRAND_PROFILE: ("#F5F7FA", "#00AEEF", "#F2C55B", "#BF734D", "#8CFFB3", "#64D8D0")}
 
 
 class SubtitlesConfig(StrictConfigModel):
@@ -197,14 +209,7 @@ class SubtitlesConfig(StrictConfigModel):
     max_merge_gap_ms: int = Field(default=1200, ge=0)
     min_words_per_cue: int = Field(default=4, ge=1)
     speaker_labels: Literal["on-change", "always", "never"] = "on-change"
-    ytt_speaker_palette: tuple[str, ...] = (
-        "#FEFEFE",
-        "#00AEEF",
-        "#FFD700",
-        "#00C853",
-        "#E040FB",
-        "#00E5FF",
-    )
+    ytt_speaker_palette: tuple[str, ...] = EXAMPLE_YTT_PALETTE
 
     ytt_color_profiles: dict[str, tuple[str, ...]] = Field(default_factory=_default_color_profiles)
 
@@ -218,7 +223,14 @@ class SubtitlesConfig(StrictConfigModel):
                 not name.strip()
                 or name != name.strip()
                 or len(name) > 80
-                or name in {"Configured production", "configured", "brand"}
+                or name
+                in {
+                    "Example default",
+                    "Configured production",
+                    "Configured palette",
+                    "configured",
+                    "brand",
+                }
             ):
                 raise ValueError("Color profile names must be unique printable custom names")
             if any(ord(char) < 32 for char in name):

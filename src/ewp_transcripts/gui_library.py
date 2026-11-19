@@ -12,7 +12,12 @@ from pathlib import Path
 from threading import RLock
 from typing import Any
 
-from ewp_transcripts.config import SubtitlesConfig
+from ewp_transcripts.config import (
+    EWP_BRAND_PROFILE,
+    EWP_BRAND_PROFILE_ALIASES,
+    EXAMPLE_YTT_PALETTE,
+    SubtitlesConfig,
+)
 from ewp_transcripts.correction_dictionary import ProjectCorrectionDictionary
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.translation_dictionary import ProjectTranslationDictionary
@@ -155,27 +160,65 @@ class GuiLibrary:
     def profiles(self) -> dict[str, Any]:
         with self._lock:
             custom = self._read()["profiles"]
-        configured = {
-            "Configured production": list(self._subtitles.ytt_speaker_palette),
-            **{name: list(colors) for name, colors in self._subtitles.ytt_color_profiles.items()},
-        }
-        custom = {name: colors for name, colors in custom.items() if name not in configured}
-        return {
-            "profiles": [
-                {"name": name, "colors": colors, "custom": name in custom}
-                for name, colors in {**configured, **custom}.items()
-            ]
-        }
+        profiles: list[dict[str, Any]] = []
+        used_ids = set(custom)
+        used_names: set[str] = set()
+
+        def configured(name: str, identifier: str, colors: tuple[str, ...]) -> None:
+            while identifier in used_ids:
+                identifier = "configured:" + identifier
+            used_ids.add(identifier)
+            used_names.add(name)
+            profiles.append(
+                {"id": identifier, "name": name, "colors": list(colors), "custom": False}
+            )
+
+        # Stable configured/brand IDs preserve old workspaces; the example is independent
+        # of explicitly configured production colors, which remain a separate choice.
+        configured("Example default", "configured", EXAMPLE_YTT_PALETTE)
+        if self._subtitles.ytt_speaker_palette != EXAMPLE_YTT_PALETTE:
+            configured("Configured palette", "production", self._subtitles.ytt_speaker_palette)
+        brand_key = next(
+            (
+                name
+                for name in EWP_BRAND_PROFILE_ALIASES
+                if name in self._subtitles.ytt_color_profiles
+            ),
+            None,
+        )
+        for name, colors in self._subtitles.ytt_color_profiles.items():
+            configured(
+                EWP_BRAND_PROFILE if name == brand_key else name,
+                "brand" if name == brand_key else name,
+                colors,
+            )
+        for name, colors in custom.items():
+            profiles.append(
+                {
+                    "id": name,
+                    "name": f"{name} (saved)" if name in used_names else name,
+                    "colors": colors,
+                    "custom": True,
+                }
+            )
+        return {"profiles": profiles}
 
     def save_profile(self, *, name: str, colors: list[str]) -> dict[str, Any]:
         name = name.strip()
         if not name or len(name) > 80 or any(ord(char) < 32 for char in name):
             raise ValueError("Profile name must contain 1–80 printable characters")
         if name in {
+            "Example default",
+            "Configured palette",
             "Configured production",
+            *EWP_BRAND_PROFILE_ALIASES,
             "configured",
             "brand",
             *self._subtitles.ytt_color_profiles,
+        }:
+            raise ValueError("Use a custom name to preserve configured profiles")
+        if name in {
+            profile["id"] for profile in self.profiles()["profiles"] if not profile["custom"]
         }:
             raise ValueError("Use a custom name to preserve configured profiles")
         if not 1 <= len(colors) <= 32 or not all(

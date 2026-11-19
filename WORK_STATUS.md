@@ -1,8 +1,30 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-18**.
+Last updated: **2026-11-19**.
 
 ## Active task and resume pointers
+
+Current request: [review confirmation, palette identity and motion feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md).
+Implementation and VM verification are complete; delivery to main is pending.
+Start from TODO.md. Path help and Polish labels are corrected. Example default is first and
+visibly distinct from EwP Brand®; explicit configured palettes and saved custom colors survive.
+Language information explains the observed EN-on-PL behavior without changing engine settings.
+Source/translation Save highlights missing human verification and shows a nearby EN/PL message.
+The original owner-supplied gear animates pending/status/queue feedback with reduced-motion support.
+
+Verification: Ruff/format/mypy and 834 tests PASS; five integration tests PASS; 144 browser
+layout cases PASS across six stages/viewports, EN/PL and both themes, with no page errors or
+external requests. Focused checks cover missing-confirmation/recovery, legacy profiles, actual SVG
+motion, reduced motion and connecting/doctor/save statuses. Wheel/source builds PASS; all 51
+frontend/guide resources match source, all nine help routes work from the wheel without ML imports,
+and bundled JS parses. Temporary verification material remains isolated until delivery cleanup.
+These model-free checks do not qualify real GPU/provider, Windows zoom or YouTube behavior.
+
+Next priority before other deferred TODO work: a source-review audio player with real segment
+seeking. Video input/audio extraction and evidence-based queue percentage/ETA are planned.
+Full Polish documentation follows owner terminology approval; the artist package stays deferred.
+No canonical schema, ML pin, approval requirement, release tag or version changed.
+Earlier current-request summaries below are delivery history.
 
 Current request: [Polish UI audit and queue/translation recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
 Read the active TODO checklist first. Implementation and VM verification are complete;

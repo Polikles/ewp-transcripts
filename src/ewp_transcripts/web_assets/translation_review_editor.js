@@ -408,6 +408,7 @@ async function previewEnhancedTranslationReview() {
 
 async function applyEnhancedTranslationReview() {
   if (!translationReview) return;
+  if (!requireGuiVerification(document.querySelector("#translation-review-confirmed"), document.querySelector("#translation-review-status"), "Confirm that you manually verified the translation before saving and preparing for export.", "GUI_TRANSLATION_REVIEW_REQUEST_INVALID")) return;
   try {
     const root = currentTranslationReviewCandidate().output_root;
     const payload = await queuePost("/api/v1/translation-reviews/apply", {

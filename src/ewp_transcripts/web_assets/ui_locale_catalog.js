@@ -1234,3 +1234,12 @@ for (const [en, pl] of [
   ["The first block in a transcript section has no previous block to merge with.", "Pierwszy fragment sekcji nie ma poprzedniego fragmentu, z którym można go połączyć."],
   ["This saved workspace references unavailable paths. It can still be removed or overwritten.", "Ten zapis pracy wskazuje niedostępne ścieżki. Nadal można go usunąć lub zastąpić nowym zapisem."],
 ]) guiPolish.set(en, pl);
+
+for (const [en, pl] of [
+  ["Language selection information", "Informacja o wyborze języka"],
+  ["Choosing EN for Polish recordings has sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.", "Wybranie EN dla polskiego nagrania czasem dawało sensowny tekst po angielsku. To nie jest gwarantowany tryb tłumaczenia — wynik nadal wymaga sprawdzenia i korekty."],
+  ["Confirm that you manually verified the text before saving and preparing for export.", "Zaznacz „Ręcznie sprawdziłem treść…” przed zapisaniem i przygotowaniem do eksportu."],
+  ["Confirm that you manually verified the translation before saving and preparing for export.", "Zaznacz potwierdzenie ręcznej weryfikacji tłumaczenia przed zapisaniem i przygotowaniem do eksportu."],
+]) guiPolish.set(en, pl);
+
+guiPolish.set("Manual verification confirmed. Save and prepare for export when ready.", "Potwierdzono ręczną weryfikację. Możesz zapisać i przygotować do eksportu.");
