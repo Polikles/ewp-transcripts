@@ -161,9 +161,15 @@
 #gui-source-playback audio, #gui-source-playback select { width: 100%; min-width: 0; }
 #gui-source-playback label, #gui-source-playback button { font-size: .75rem; }
 #gui-source-playback p { font-size: .72rem; overflow-wrap: anywhere; }
+.review-source-files { display: block; color: var(--gui-muted); font-size: .65rem; line-height: 1.35; margin-top: .3rem; overflow-wrap: anywhere; font-weight: 400; }
 .review-block > label:first-child { grid-column: 1; grid-row: 1; align-self: start; }
 .review-block > label:nth-of-type(2) { grid-column: 2; grid-row: 1 / span 2; }
 .review-block > .review-seek { grid-column: 1; grid-row: 2; align-self: start; justify-self: start; font-size: .75rem; padding: .35rem .45rem; }
 @media (max-width: 620px) {
   .review-block > label:nth-of-type(2) { grid-column: 1; grid-row: 3; }
 }
+.gui-runtime-progress { margin-top: .3rem; font-size: .65rem; font-weight: 400; color: var(--gui-muted); line-height: 1.45; max-width: 10rem; }
+.gui-runtime-bar { display: flex; align-items: center; gap: .35rem; }
+.gui-runtime-bar progress { min-width: 0; width: 100%; flex: 1; height: .5rem; accent-color: var(--gui-accent); }
+
+.gui-job-status { font-size: .65rem; white-space: nowrap; }

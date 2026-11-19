@@ -1268,3 +1268,85 @@ for (const [en, pl] of [
 ]) guiPolish.set(en, pl);
 guiPolishErrorDescriptions.set("NO_AUDIO_STREAM", "Plik nie ma ścieżki audio. Wybierz nagranie zawierające dźwięk.");
 guiPolishErrorDescriptions.set("MULTIPLE_AUDIO_STREAMS", "Plik ma kilka ścieżek audio. Wyeksportuj wybraną ścieżkę do osobnego pliku, a następnie sprawdź go i przetwórz.");
+
+for (const [en, pl] of [
+  [
+    "Complete episode (mixed audio)",
+    "Cały odcinek (wspólny odsłuch)"
+  ],
+  [
+    "Inspecting recording",
+    "Sprawdzanie nagrania"
+  ],
+  [
+    "Planning outputs",
+    "Planowanie wyników"
+  ],
+  [
+    "Preparing audio",
+    "Przygotowywanie dźwięku"
+  ],
+  [
+    "Transcribing",
+    "Transkrypcja"
+  ],
+  [
+    "Aligning words",
+    "Dopasowywanie czasów słów"
+  ],
+  [
+    "Organizing transcript",
+    "Porządkowanie transkrypcji"
+  ],
+  [
+    "Identifying speakers",
+    "Rozpoznawanie mówców"
+  ],
+  [
+    "Assigning speakers",
+    "Przypisywanie mówców"
+  ],
+  [
+    "Combining tracks",
+    "Łączenie ścieżek"
+  ],
+  [
+    "Saving result",
+    "Zapisywanie wyniku"
+  ],
+  [
+    "Exporting files",
+    "Eksportowanie plików"
+  ],
+  [
+    "Finishing cleanup",
+    "Kończenie porządkowania"
+  ],
+  [
+    "Approximate processing progress",
+    "Orientacyjny postęp przetwarzania"
+  ],
+  [
+    "Approximate phase progress; percentages within a phase use earlier timings from this machine.",
+    "Orientacyjny postęp etapów; procent wewnątrz etapu korzysta z wcześniejszych pomiarów na tym komputerze."
+  ],
+  [
+    "Elapsed",
+    "Upłynęło"
+  ],
+  [
+    "ETA",
+    "Pozostały czas"
+  ],
+  [
+    "Taking longer than estimated",
+    "Trwa dłużej niż przewidywano"
+  ],
+  [
+    "ETA: calibrating on this machine",
+    "Pozostały czas: kalibracja na tym komputerze"
+  ]
+]) guiPolish.set(en, pl);
+
+guiPolish.set("FFmpeg could not mix recording audio", "FFmpeg nie mógł przygotować wspólnego odsłuchu nagrania.");
+guiPolish.set("A new mix requires at least two prepared audio files", "Wspólny odsłuch wymaga co najmniej dwóch przygotowanych plików audio.");

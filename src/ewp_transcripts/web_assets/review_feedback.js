@@ -42,6 +42,15 @@ function installReviewFeedback() {
   summary.title = message; summary.setAttribute("aria-label", "Language selection information");
   const info = document.createElement("p"); info.className = "field-hint"; info.textContent = message;
   details.append(summary, info); choice.append(details);
+  document.addEventListener("pointerdown", event => {
+    if (details.open && !details.contains(event.target)) details.open = false;
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && details.open) {
+      details.open = false;
+      summary.focus({preventScroll:true});
+    }
+  });
   for (const input of [reviewForm.elements.namedItem("verified"), document.querySelector("#translation-review-confirmed")]) {
     input.addEventListener("change", () => {
       if (!input.checked || input.dataset.guiConfirmationMissing !== "true") return;

@@ -14,20 +14,27 @@ Choose one recording for the editor; batch checkboxes are independent. The queue
 
 Speaker names and colors keeps stable speaker IDs. Switching the YTT profile updates visible colors for the next export and retains custom overrides. Preview tries a configured profile, Apply commits colors for this recording, and Save keeps a reusable custom profile; previous exports stay unchanged. Add speaker adds a revision-local identity, not a new ASR run or voice-recognition identity. An in-use speaker cannot be removed until its blocks are reassigned.
 
-The left recording rail contains Recording audio while this stage is open. Audio is prepared
-from the original canonical source and its selected stream/channel into a private mono preview;
-it does not change the source. Preparation can take longer for large files. Use Audio source
-for grouped recordings or split channels. Go to this fragment below a speaker selector saves
-any dirty draft, then seeks to a real source-word start and starts playback. Changed/inserted
-text may use the nearest known source timestamp, explicitly marked in the player status.
+The left recording rail contains Recording audio while this stage is open. All synchronized
+files/channels in the episode are mixed from their shared time zero into one private mono preview,
+so a guest on a separate track remains audible when seeking to their words. Original paths,
+stream/channel choices and hashes are verified. The mix uses the longest source duration without
+concatenation, timing offsets or source modification. Go to this fragment below a speaker selector
+saves any dirty draft, then seeks to a real source-word start and starts the complete episode mix.
+Changed/inserted text may use the nearest known timestamp, explicitly marked in player status.
 
-Changing stages pauses playback; returning restores that recording's source and position for
-this browser session. Switching recordings keeps their playback choices independent. Original
-recordings must remain accessible at their canonical paths and match their stored SHA-256.
-If audio is unavailable, restore the original and use Reload recording audio; transcript editing
-still works. Media/decoded previews are not embedded in reviews or published exports. A server
-restart requires preparing the private preview again. On narrow screens the rail precedes the
-editor, and remains accessible through normal page navigation.
+Small source-file hints below Speaker come from immutable source-word provenance, not the current
+speaker label. Renaming or reassigning a speaker does not rewrite where the words originated.
+An ambiguous mapping lists relevant section sources conservatively. Changing stages pauses audio;
+returning restores the per-recording position in this browser session. Original recordings must
+remain available and match their canonical hashes. If any source is missing, restore it and use
+Reload recording audio; transcript editing still works. Server restart prepares a new private mix.
+
+New review sections honor both anchor_target_words (default 200) and anchor_target_speaker_blocks
+(default 5), including one-speaker recordings and single long canonical segments. Oversized saved
+drafts are presented as bounded blocks without replacing saved bytes. Unchanged legacy text can
+be projected into bounded source-word sections while retaining speaker assignments. Explicit Save
+persists the projected draft structure; canonical JSON, prior reviews and published revisions retain
+their original timing/lineage. Presentation changes do not require repeating ASR.
 
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 

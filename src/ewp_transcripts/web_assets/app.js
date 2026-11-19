@@ -234,7 +234,9 @@ async function refreshJobs() {
     const row = document.createElement("tr");
     const status = document.createElement("td");
     status.className = `status-${job.status}`;
-    status.textContent = job.status.toUpperCase();
+    const statusText = document.createElement("span"); statusText.className = "gui-job-status";
+    statusText.textContent = job.status.toUpperCase();
+    status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");
@@ -484,17 +486,20 @@ new MutationObserver(() => { if (reviewDocument) renderReviewSpeakerLabels(revie
 async function saveReviewDraft() {
   const active = reviewDocument;
   const section = reviewSectionIndex;
-  const snapshot = JSON.stringify([active.anchors, active.speaker_labels]);
+  const editableSnapshot = value => JSON.stringify([value.anchors.map(({first_word_id,last_word_id,blocks})=>({first_word_id,last_word_id,blocks})), value.speaker_labels]);
+  const snapshot = editableSnapshot(active);
   const payload = await postReview("save", {result_path: active.result_path, review_path: active.review_path, review_sha256: active.review_sha256, anchors: active.anchors});
   if (reviewDocument !== active) throw new Error("GUI_REVIEW_ACTIVE_CHANGED: The active review changed while saving. Reopen the requested recording.");
-  if (JSON.stringify([active.anchors, active.speaker_labels]) !== snapshot) {
+  if (editableSnapshot(active) !== snapshot) {
     active.review_sha256 = payload.review_sha256;
     persistReview();
     throw new Error("GUI_REVIEW_CHANGED_DURING_SAVE: The earlier draft was saved. Newer edits remain open; save and preview them again.");
   }
-  if (JSON.stringify([payload.anchors, payload.speaker_labels]) === snapshot) {
+  if (editableSnapshot(payload) === snapshot) {
     const anchors = active.anchors;
+    payload.anchors.forEach((anchor,index)=>Object.assign(anchors[index], anchor, {blocks:anchors[index].blocks}));
     Object.assign(active, payload, {anchors});
+    document.dispatchEvent(new Event("ewp-review-metadata"));
     reviewDirty = false;
     appliedRevisionPath = "";
     reviewForm.elements.namedItem("verified").checked = false;

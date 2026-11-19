@@ -101,7 +101,10 @@ class Alignment:
         pass
 
 
-def test_video_through_discovery_plan_pipeline_and_private_playback(tmp_path: Path) -> None:
+@pytest.mark.parametrize("observer_fails", [False, True])
+def test_video_through_discovery_plan_pipeline_and_private_playback(
+    tmp_path: Path, observer_fails
+) -> None:
     source = tmp_path / "s0e01.mp4"
     video(source)
     digest = sha256_file(source)
@@ -115,13 +118,33 @@ def test_video_through_discovery_plan_pipeline_and_private_playback(tmp_path: Pa
     assert inspected.media_type == "video" and inspected.stream.index == 1
     output = tmp_path / "output"
     assert len(dry_run(source, config=config, output_directory=output).jobs) == 1
+    events = []
+
+    def observe(event):
+        events.append(event)
+        if observer_fails:
+            raise RuntimeError("observability failure")
+
     outcome = transcribe_one(
         source,
+        progress=observe,
         config=config,
         output_directory=output,
         asr_factory=lambda _: Asr(),
         alignment_factory=lambda _: Alignment(),
     )
+    assert [event.phase for event in events if event.state == "completed"] == [
+        "inspect",
+        "plan",
+        "prepare_audio",
+        "transcribe",
+        "align",
+        "normalize",
+        "publish",
+        "export",
+        "cleanup",
+    ]
+    assert next(event for event in events if event.state == "planned").media_duration_ms >= 2000
     base = load_canonical_result(outcome.result_path)
     assert base.sources[0].media_type == "video"
     assert base.sources[0].normalized_path == str(source)
@@ -155,3 +178,52 @@ def test_video_without_unique_audio_has_actionable_error(tmp_path: Path, tracks,
         if tracks == 0
         else "Export the intended" in str(error.value)
     )
+
+
+def test_shared_timeline_mix_contains_both_alternating_speakers(tmp_path: Path) -> None:
+    import math
+    import struct
+
+    from ewp_transcripts.web_reviews import GuiReviewController
+
+    template = Path(__file__).resolve().parents[2] / "examples/results.example.json"
+    document = json.loads(template.read_text())
+    for index, source in enumerate(document["sources"]):
+        path = tmp_path / f"speaker-{index}.wav"
+        frames = [
+            int(14000 * math.sin(2 * math.pi * (440 + 220 * index) * n / 16000))
+            if (1.24 <= n / 16000 < 3.9 if index == 0 else 4.32 <= n / 16000 < 6.32)
+            else 0
+            for n in range(8 * 16000)
+        ]
+        with wave.open(str(path), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(16000)
+            handle.writeframes(struct.pack(f"<{len(frames)}h", *frames))
+        source.update(
+            normalized_path=str(path),
+            input_path=str(path),
+            filename=path.name,
+            sha256=sha256_file(path),
+            size_bytes=path.stat().st_size,
+            duration_ms=8000,
+        )
+    result = tmp_path / "mixed_results.json"
+    result.write_text(json.dumps(document))
+    paths = GuiWorkflowController()
+    media = GuiMediaController(resolve_path=paths.resolve_allowed_path)
+    try:
+        url = media.prepare(str(result), "mix")["url"]
+        with media.open(url.rsplit("/", 1)[1]) as handle, wave.open(handle) as audio:
+            assert audio.getnframes() == 8 * 16000
+            for second in (2, 5):
+                audio.setpos(second * 16000)
+                samples = struct.unpack("<1600h", audio.readframes(1600))
+                assert math.sqrt(sum(value * value for value in samples) / len(samples)) > 2000
+    finally:
+        media.close()
+    review = GuiReviewController(
+        config=ApplicationConfig(), resolve_path=paths.resolve_allowed_path
+    ).prepare(str(result), str(tmp_path / "reviews"))
+    assert review["anchors"][0]["block_sources"] == [["speaker-0.wav"], ["speaker-1.wav"]]

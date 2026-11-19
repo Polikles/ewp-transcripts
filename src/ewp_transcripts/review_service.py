@@ -15,6 +15,7 @@ from ewp_transcripts.domain.review import (
     ReviewHeader,
     ReviewSpeakerBlock,
     TranscriptReview,
+    validate_review_base,
 )
 from ewp_transcripts.domain.revision import (
     TranscriptRevision,
@@ -85,13 +86,14 @@ def _anchor_ranges(
         blocks_in_range = 1
         previous_speaker_id = units[0][1]
         for index, (_, speaker_id) in enumerate(units[1:], start=1):
-            if speaker_id == previous_speaker_id:
-                continue
-            if blocks_in_range == target_speaker_blocks:
+            changed = speaker_id != previous_speaker_id
+            if index - start >= target_words or (
+                changed and blocks_in_range == target_speaker_blocks
+            ):
                 speaker_ranges.append((start, index))
                 start = index
                 blocks_in_range = 1
-            else:
+            elif changed:
                 blocks_in_range += 1
             previous_speaker_id = speaker_id
         speaker_ranges.append((start, len(units)))
@@ -109,6 +111,62 @@ def _anchor_ranges(
     if accumulated:
         ranges.append((start, start + accumulated))
     return tuple(ranges)
+
+
+def bounded_review_document(
+    review: TranscriptReview, base: CanonicalResult, *, target_words: int, target_blocks: int
+) -> TranscriptReview:
+    """Project old oversized drafts into bounded sections without changing saved bytes."""
+    validate_review_base(review, base, base_sha256=review.header.base_result_sha256)
+    units = _canonical_units(base)
+    tokens = [
+        (text, block.speaker_id)
+        for anchor in review.anchors
+        for block in anchor.speaker_blocks
+        for text in block.text.split()
+    ]
+    if any(
+        sum(len(block.text.split()) for block in anchor.speaker_blocks) > target_words
+        for anchor in review.anchors
+    ) and [text for text, _ in tokens] == [word.text.strip() for word, _ in units]:
+        ranges = _anchor_ranges(
+            base, target_words=target_words, target_speaker_blocks=target_blocks
+        )
+        revised_units = tuple(
+            (word, speaker) for (word, _), (_, speaker) in zip(units, tokens, strict=True)
+        )
+        return review.model_copy(
+            update={
+                "anchors": tuple(
+                    ReviewAnchor(
+                        first_word_id=units[start][0].word_id,
+                        last_word_id=units[end - 1][0].word_id,
+                        speaker_blocks=_speaker_blocks(revised_units[start:end]),
+                    )
+                    for start, end in ranges
+                )
+            }
+        )
+    return review.model_copy(
+        update={
+            "anchors": tuple(
+                anchor.model_copy(
+                    update={
+                        "speaker_blocks": tuple(
+                            ReviewSpeakerBlock(
+                                speaker_id=block.speaker_id,
+                                text=" ".join(words[start : start + target_words]),
+                            )
+                            for block in anchor.speaker_blocks
+                            for words in [block.text.split()]
+                            for start in range(0, max(1, len(words)), target_words)
+                        )
+                    }
+                )
+                for anchor in review.anchors
+            )
+        }
+    )
 
 
 def _speaker_blocks(units: tuple[tuple[CanonicalWord, str], ...]) -> tuple[ReviewSpeakerBlock, ...]:

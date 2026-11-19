@@ -85,6 +85,7 @@ from ewp_transcripts.pipeline import (
     run_single_speaker_pipeline,
     run_source_speaker_pipeline,
 )
+from ewp_transcripts.progress import ProgressObserver, emit_progress
 from ewp_transcripts.review_discovery import discover_review_files, discover_review_results
 from ewp_transcripts.review_format import load_review
 from ewp_transcripts.review_service import prepare_review
@@ -1685,9 +1686,11 @@ def transcribe_one(
     speaker_map: dict[str, str] | None = None,
     explicit_group_paths: tuple[Path, ...] | None = None,
     explicit_group_id: str | None = None,
+    progress: ProgressObserver | None = None,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
     started = time.perf_counter()
+    emit_progress(progress, "inspect", "started")
     inspected = inspect_input(
         input_path,
         config=config,
@@ -1703,6 +1706,37 @@ def transcribe_one(
     if len(inspected.episodes) != 1:
         raise UnsupportedPipelineScopeError("Single-file transcribe requires exactly one episode")
     episode = inspected.episodes[0]
+    emit_progress(
+        progress,
+        "inspect",
+        "completed",
+        duration_ms=max(0, round((time.perf_counter() - started) * 1000)),
+    )
+    streams = (
+        len(episode.sources)
+        if len(episode.sources) > 1
+        else 2
+        if episode.sources[0].channel_classification.processing_mode is ChannelMode.SPLIT_SPEAKERS
+        else 1
+    )
+    phases = ["inspect", "plan"]
+    for stream in range(1, streams + 1):
+        phases.extend(
+            f"{phase}:{stream}" for phase in ("prepare_audio", "transcribe", "align", "normalize")
+        )
+    if streams > 1:
+        phases.append("compose")
+    elif config.diarization.speaker_count != 1:
+        phases.extend(("diarize:1", "reconcile_speakers:1"))
+    phases.extend(("publish", "export", "cleanup"))
+    emit_progress(
+        progress,
+        "plan",
+        "planned",
+        phases=tuple(phases),
+        stream_count=streams,
+        media_duration_ms=episode.duration_ms,
+    )
     destination = resolve_output_directory(
         inspected.discovery,
         config=config.outputs,
@@ -1717,6 +1751,7 @@ def transcribe_one(
         asr_factory=asr_factory or _whisperx_asr,
         alignment_factory=alignment_factory or _whisperx_alignment,
         diarization_factory=diarization_factory or _pyannote_diarization,
+        progress=progress,
     )
     return replace(outcome, elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)))
 
@@ -1816,7 +1851,10 @@ def _transcribe_episode(
     asr_factory: AsrFactory,
     alignment_factory: AlignmentFactory,
     diarization_factory: DiarizationFactory,
+    progress: ProgressObserver | None = None,
 ) -> TranscriptionOutcome:
+    emit_progress(progress, "plan", "started")
+    plan_started = time.perf_counter()
     reservation = reserve_job(
         episode,
         output_directory=destination,
@@ -1824,6 +1862,12 @@ def _transcribe_episode(
         force=force,
         config=config.outputs,
         lock_timeout_seconds=config.runtime.lock_timeout_seconds,
+    )
+    emit_progress(
+        progress,
+        "plan",
+        "completed",
+        duration_ms=max(0, round((time.perf_counter() - plan_started) * 1000)),
     )
     if reservation.plan.decision is PlanDecision.SKIP:
         existing = reservation.plan.existing_result
@@ -1853,6 +1897,7 @@ def _transcribe_episode(
         asr_factory=asr_factory,
         alignment_factory=alignment_factory,
         diarization_factory=diarization_factory,
+        progress=progress,
     )
 
 
@@ -1864,6 +1909,7 @@ def _process_reservation(
     asr_factory: AsrFactory,
     alignment_factory: AlignmentFactory,
     diarization_factory: DiarizationFactory,
+    progress: ProgressObserver | None = None,
 ) -> TranscriptionOutcome:
     state = reservation.state
     assert state is not None
@@ -1889,6 +1935,7 @@ def _process_reservation(
                 workspace,
                 config=config,
                 environment=environment,
+                progress=progress,
                 asr_engine_factory=lambda: asr_factory(config),
                 alignment_engine_factory=lambda: alignment_factory(config),
             )
@@ -1899,6 +1946,7 @@ def _process_reservation(
                 workspace,
                 config=config,
                 environment=environment,
+                progress=progress,
                 asr_engine=asr_factory(config),
                 alignment_engine=alignment_factory(config),
             )
@@ -1909,17 +1957,28 @@ def _process_reservation(
                 workspace,
                 config=config,
                 environment=environment,
+                progress=progress,
                 asr_engine=asr_factory(config),
                 alignment_engine=alignment_factory(config),
                 diarization_engine=diarization_factory(config),
             )
         result = _record_peak_vram(result)
+        emit_progress(progress, "publish", "started")
+        publication_started = time.perf_counter()
         result_path = finalize_job_result(
             reservation,
             result,
             lock_timeout_seconds=config.runtime.lock_timeout_seconds,
         )
         published = True
+        emit_progress(
+            progress,
+            "publish",
+            "completed",
+            duration_ms=max(0, round((time.perf_counter() - publication_started) * 1000)),
+        )
+        emit_progress(progress, "export", "started")
+        export_started = time.perf_counter()
         formats = _configured_export_formats(config)
         exports = (
             export_result(
@@ -1929,6 +1988,12 @@ def _process_reservation(
             )
             if formats
             else None
+        )
+        emit_progress(
+            progress,
+            "export",
+            "completed",
+            duration_ms=max(0, round((time.perf_counter() - export_started) * 1000)),
         )
         outcome = TranscriptionOutcome(
             decision=PlanDecision.PROCESS,
@@ -1960,11 +2025,19 @@ def _process_reservation(
             )
         raise
     finally:
+        emit_progress(progress, "cleanup", "started")
+        cleanup_started = time.perf_counter()
         retain = (
             config.runtime.keep_temp_on_success if succeeded else config.runtime.keep_temp_on_error
         )
         if workspace is not None and not retain:
             cleanup_work_directory(workspace)
+        emit_progress(
+            progress,
+            "cleanup",
+            "completed",
+            duration_ms=max(0, round((time.perf_counter() - cleanup_started) * 1000)),
+        )
 
 
 def _configured_export_formats(config: ApplicationConfig) -> tuple[ExportFormat, ...]:

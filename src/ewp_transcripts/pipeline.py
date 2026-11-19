@@ -40,6 +40,7 @@ from ewp_transcripts.engines import (
 )
 from ewp_transcripts.media import prepare_working_audio
 from ewp_transcripts.normalization import NormalizedTranscript, normalize_single_speaker
+from ewp_transcripts.progress import ProgressObserver, emit_progress, stream_progress
 from ewp_transcripts.streams import SpeakerStream, plan_speaker_streams
 
 AudioPreparer = Callable[..., Path]
@@ -70,6 +71,7 @@ def run_diarization_pipeline(
     alignment_engine: AlignmentEngine,
     diarization_engine: DiarizationEngine,
     audio_preparer: AudioPreparer = prepare_working_audio,
+    progress: ProgressObserver | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -86,6 +88,7 @@ def run_diarization_pipeline(
         if source.channel_classification.processing_mode is ChannelMode.MIXED_STEREO
         else source.channel_classification.selected_channel_index
     )
+    emit_progress(progress, "prepare_audio", "started")
     start = clock()
     audio_preparer(
         source.fingerprint.path,
@@ -93,9 +96,10 @@ def run_diarization_pipeline(
         stream_index=source.stream.index,
         channel_index=channel_index,
     )
-    stages.append(_completed_stage("prepare_audio", start, clock))
+    stages.append(_completed_stage("prepare_audio", start, clock, progress))
 
     asr_info = asr_engine.model_info
+    emit_progress(progress, "transcribe", "started")
     start = clock()
     try:
         draft = asr_engine.transcribe(
@@ -105,26 +109,29 @@ def run_diarization_pipeline(
         )
     finally:
         asr_engine.close()
-    stages.append(_completed_stage("transcribe", start, clock))
+    stages.append(_completed_stage("transcribe", start, clock, progress))
 
+    emit_progress(progress, "align", "started")
     start = clock()
     try:
         aligned = alignment_engine.align(working_audio, draft, language=draft.language)
     finally:
         alignment_engine.close()
     alignment_info = alignment_engine.model_info
-    stages.append(_completed_stage("align", start, clock))
+    stages.append(_completed_stage("align", start, clock, progress))
 
+    emit_progress(progress, "normalize", "started")
     start = clock()
     normalized = normalize_single_speaker(
         aligned,
         speaker_id="speaker_001",
         source_id="source_001",
     )
-    stages.append(_completed_stage("normalize", start, clock))
+    stages.append(_completed_stage("normalize", start, clock, progress))
 
     diarization_info = diarization_engine.model_info
     requested_speakers = config.diarization.speaker_count
+    emit_progress(progress, "diarize", "started")
     start = clock()
     try:
         diarization = diarization_engine.diarize(
@@ -133,8 +140,9 @@ def run_diarization_pipeline(
         )
     finally:
         diarization_engine.close()
-    stages.append(_completed_stage("diarize", start, clock))
+    stages.append(_completed_stage("diarize", start, clock, progress))
 
+    emit_progress(progress, "reconcile_speakers", "started")
     start = clock()
     reconciled = reconcile_diarization(
         normalized.transcript,
@@ -142,7 +150,7 @@ def run_diarization_pipeline(
         source_id="source_001",
         use_exclusive_for_words=config.diarization.use_exclusive_for_word_assignment,
     )
-    stages.append(_completed_stage("reconcile_speakers", start, clock))
+    stages.append(_completed_stage("reconcile_speakers", start, clock, progress))
     if not reconciled.speakers:
         raise TranscriptNormalizationError("Diarization returned no speakers")
 
@@ -205,6 +213,7 @@ def run_source_speaker_pipeline(
     asr_engine_factory: AsrEngineFactory,
     alignment_engine_factory: AlignmentEngineFactory,
     audio_preparer: AudioPreparer = prepare_working_audio,
+    progress: ProgressObserver | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -227,6 +236,7 @@ def run_source_speaker_pipeline(
             asr_engine=asr_engine_factory(),
             alignment_engine=alignment_engine_factory(),
             working_filename=f"stream_{stream_index:03d}-working.wav",
+            progress=stream_progress(progress, stream_index, len(streams)),
             audio_preparer=audio_preparer,
             clock=clock,
         )
@@ -241,6 +251,8 @@ def run_source_speaker_pipeline(
             stage.model_copy(update={"details": stage_details}) for stage in stream_result.stages
         )
 
+    emit_progress(progress, "compose", "started")
+    compose_start = time.perf_counter()
     streams, processed, stages = _order_source_speakers(streams, processed, stages)
     transcript = merge_speaker_transcripts(
         tuple(stream_result.normalized.transcript for stream_result in processed)
@@ -250,6 +262,12 @@ def run_source_speaker_pipeline(
     outputs = reservation.plan.outputs
     assert state is not None and outputs is not None
     split_channels = len(inspection.sources) == 1
+    emit_progress(
+        progress,
+        "compose",
+        "completed",
+        duration_ms=max(0, round((time.perf_counter() - compose_start) * 1000)),
+    )
     sources = (
         (_canonical_source(inspection.sources[0], channel_selection="all"),)
         if split_channels
@@ -405,6 +423,7 @@ def run_single_speaker_pipeline(
     asr_engine: AsrEngine,
     alignment_engine: AlignmentEngine,
     audio_preparer: AudioPreparer = prepare_working_audio,
+    progress: ProgressObserver | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -428,6 +447,7 @@ def run_single_speaker_pipeline(
         asr_engine=asr_engine,
         alignment_engine=alignment_engine,
         working_filename="source_001-working.wav",
+        progress=progress,
         audio_preparer=audio_preparer,
         clock=clock,
     )
@@ -497,12 +517,14 @@ def process_speaker_stream(
     alignment_engine: AlignmentEngine,
     working_filename: str,
     audio_preparer: AudioPreparer = prepare_working_audio,
+    progress: ProgressObserver | None = None,
     clock: Clock = time.perf_counter,
 ) -> ProcessedSpeakerStream:
     """Prepare, transcribe, align, and normalize one independent speaker stream."""
 
     stages: list[CanonicalStage] = []
     working_audio = workspace.path / working_filename
+    emit_progress(progress, "prepare_audio", "started")
     start = clock()
     audio_preparer(
         stream.source.fingerprint.path,
@@ -510,9 +532,10 @@ def process_speaker_stream(
         stream_index=stream.source.stream.index,
         channel_index=stream.channel_index,
     )
-    stages.append(_completed_stage("prepare_audio", start, clock))
+    stages.append(_completed_stage("prepare_audio", start, clock, progress))
 
     asr_info = asr_engine.model_info
+    emit_progress(progress, "transcribe", "started")
     start = clock()
     try:
         draft = asr_engine.transcribe(
@@ -522,8 +545,9 @@ def process_speaker_stream(
         )
     finally:
         asr_engine.close()
-    stages.append(_completed_stage("transcribe", start, clock))
+    stages.append(_completed_stage("transcribe", start, clock, progress))
 
+    emit_progress(progress, "align", "started")
     start = clock()
     try:
         aligned = alignment_engine.align(
@@ -534,15 +558,16 @@ def process_speaker_stream(
     finally:
         alignment_engine.close()
     alignment_info = alignment_engine.model_info
-    stages.append(_completed_stage("align", start, clock))
+    stages.append(_completed_stage("align", start, clock, progress))
 
+    emit_progress(progress, "normalize", "started")
     start = clock()
     normalized = normalize_single_speaker(
         aligned,
         speaker_id=stream.speaker_id,
         source_id=stream.source_id,
     )
-    stages.append(_completed_stage("normalize", start, clock))
+    stages.append(_completed_stage("normalize", start, clock, progress))
     return ProcessedSpeakerStream(
         normalized=normalized,
         asr_model=asr_info,
@@ -616,8 +641,11 @@ def _validate_job_identity(
         raise UnsupportedPipelineScopeError("Pipeline inputs do not describe the same job")
 
 
-def _completed_stage(name: str, start: float, clock: Clock) -> CanonicalStage:
+def _completed_stage(
+    name: str, start: float, clock: Clock, progress: ProgressObserver | None = None
+) -> CanonicalStage:
     duration_ms = max(0, round((clock() - start) * 1000))
+    emit_progress(progress, name, "completed", duration_ms=duration_ms)
     return CanonicalStage(name=name, status="completed", duration_ms=duration_ms)
 
 

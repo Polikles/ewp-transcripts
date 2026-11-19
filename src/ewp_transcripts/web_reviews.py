@@ -20,10 +20,11 @@ from ewp_transcripts.application import (
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.errors import ApplicationError
-from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
+from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock, validate_review_base
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.review_format import load_review, render_review
-from ewp_transcripts.revision_service import playback_block_positions
+from ewp_transcripts.review_service import bounded_review_document
+from ewp_transcripts.revision_service import playback_block_mappings, playback_block_positions
 from ewp_transcripts.web_workflows import require_completed_canonical_result
 
 
@@ -77,6 +78,7 @@ class GuiReviewController:
                 "The saved review does not belong to the selected canonical result.",
             )
         verification = next(
+            # Original headers and saved bytes remain authoritative for lineage.
             (
                 extension.value
                 for extension in parsed.header.extensions
@@ -87,12 +89,50 @@ class GuiReviewController:
         words = {
             word.word_id: word for segment in base.transcript.segments for word in segment.words
         }
+        parsed = bounded_review_document(
+            parsed,
+            base,
+            target_words=self._config.revision.anchor_target_words,
+            target_blocks=self._config.revision.anchor_target_speaker_blocks,
+        )
         base_speakers = [speaker.speaker_id for speaker in base.speakers]
         speakers = [
             *base_speakers,
             *sorted(set(parsed.header.speaker_labels) - set(base_speakers)),
         ]
         base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
+        source_names = {source.source_id: source.filename for source in base.sources}
+        original_sources = {speaker.speaker_id: speaker.source_ids for speaker in base.speakers}
+        word_sources = {
+            word.word_id: original_sources.get(
+                word.speaker_id or segment.speaker_id or "", segment.source_ids
+            )
+            for segment in base.transcript.segments
+            for word in segment.words
+        }
+
+        def block_sources(anchor: ReviewAnchor) -> list[list[str]]:
+            if len(base.sources) == 1:
+                return [[base.sources[0].filename] for _ in anchor.speaker_blocks]
+            if (
+                len(anchor.speaker_blocks) > 20
+                or sum(len(block.text.split()) for block in anchor.speaker_blocks) > 1000
+            ):
+                return [list(source_names.values()) for _ in anchor.speaker_blocks]
+            mappings = playback_block_mappings(anchor, tuple(words.values()))
+            return [
+                list(
+                    dict.fromkeys(
+                        source_names[source_id]
+                        for word_id in refs
+                        for source_id in word_sources.get(word_id, ())
+                        if source_id in source_names
+                    )
+                )
+                or list(source_names.values())
+                for _, _, refs in mappings
+            ]
+
         return {
             "review_path": str(review_path),
             "result_path": str(result_path),
@@ -132,6 +172,7 @@ class GuiReviewController:
                     if anchor.last_word_id in words
                     else None,
                     "blocks": [block.model_dump(mode="json") for block in anchor.speaker_blocks],
+                    "block_sources": block_sources(anchor),
                 }
                 for anchor in parsed.anchors
             ],
@@ -155,8 +196,14 @@ class GuiReviewController:
         document = self.document(review, result)
         if not 0 <= anchor_index < len(document["anchors"]):
             raise ValueError("Choose an existing transcript section.")
-        parsed = load_review(self._resolve_path(review))
-        anchor = parsed.anchors[anchor_index]
+        raw_anchor = document["anchors"][anchor_index]
+        anchor = ReviewAnchor(
+            first_word_id=raw_anchor["first_word_id"],
+            last_word_id=raw_anchor["last_word_id"],
+            speaker_blocks=tuple(
+                ReviewSpeakerBlock.model_validate(block) for block in raw_anchor["blocks"]
+            ),
+        )
         if not 0 <= block_index < len(anchor.speaker_blocks):
             raise ValueError("Choose an existing transcript block.")
         base = self._require_canonical_result(self._resolve_path(result))
@@ -182,6 +229,13 @@ class GuiReviewController:
             )
         parsed = load_review(review_path)
         base = self._require_canonical_result(result_path)
+        validate_review_base(parsed, base, base_sha256=sha256_file(result_path))
+        parsed = bounded_review_document(
+            parsed,
+            base,
+            target_words=self._config.revision.anchor_target_words,
+            target_blocks=self._config.revision.anchor_target_speaker_blocks,
+        )
         known_speakers = {speaker.speaker_id for speaker in base.speakers}
         base_labels = {speaker.speaker_id: speaker.speaker_label for speaker in base.speakers}
         if speaker_labels is not None:

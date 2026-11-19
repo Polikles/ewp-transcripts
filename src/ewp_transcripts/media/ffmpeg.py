@@ -83,3 +83,38 @@ def prepare_working_audio(
     if not destination.is_file() or destination.is_symlink() or destination.stat().st_size == 0:
         raise AudioPreparationError("ffmpeg did not create a valid working-audio file")
     return destination
+
+
+def mix_working_audio(
+    sources: Sequence[Path],
+    destination: Path,
+    *,
+    executable: str = "ffmpeg",
+    runner: CommandRunner = _run_command,
+) -> Path:
+    """Mix synchronous mono previews from time zero, retaining the longest source timeline."""
+    if len(sources) < 2 or destination.exists() or destination.is_symlink():
+        raise AudioPreparationError("A new mix requires at least two prepared audio files")
+    arguments = [executable, "-nostdin", "-hide_banner", "-loglevel", "error", "-n"]
+    for source in sources:
+        arguments.extend(("-i", str(source.absolute())))
+    arguments.extend(
+        (
+            "-filter_complex",
+            f"amix=inputs={len(sources)}:duration=longest:dropout_transition=0:normalize=1",
+            "-ac",
+            "1",
+            "-ar",
+            "16000",
+            "-c:a",
+            "pcm_s16le",
+            str(destination.absolute()),
+        )
+    )
+    try:
+        completed = runner(arguments)
+    except (OSError, subprocess.SubprocessError) as error:
+        raise AudioPreparationError("FFmpeg could not mix recording audio") from error
+    if completed.returncode or not destination.is_file() or destination.stat().st_size == 0:
+        raise AudioPreparationError("FFmpeg could not mix recording audio")
+    return destination

@@ -77,3 +77,6 @@
 - `examples/review.example.txt` - human-editable review example.
 
 - [Queue progress and ETA assessment](30-queue-progress-and-eta.md) — current evidence, event design and calibration gates.
+
+- [Artist review package](31-artist-review-package.md) — offline frontend and asset inventory.
+- [Runtime log notes](32-runtime-log-notes.md) — exact reported ONNX/VAD/Wav2Vec2 messages.

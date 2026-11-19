@@ -5,6 +5,21 @@ Updated: 2026-11-19.
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
 
+## Active: mixed playback, bounded review, runtime progress and artist package
+
+Checkpoint: [current implementation](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
+
+- [x] Close language information on outside click/tap and Escape; retain keyboard accessibility.
+- [x] Mix all synchronized episode files/channels for default review playback; preserve real shared timing and source hashes.
+- [x] Show each review block's original source filename(s) below Speaker without deriving provenance from edited speaker names.
+- [x] Diagnose the owner's HD06 MP4 wall of text; cap review sections/blocks for a single long speaker without changing canonical timing or overwriting saved drafts.
+- [x] Explain the supplied ONNX/VAD/Wav2Vec2 logs using actual dependency code and available run evidence.
+- [x] Implement live backend phase events, elapsed time, approximate percentage and sensible ETA/fallbacks; preserve sequential execution and terminal correctness.
+- [x] Verify fake-clock/events, real mixed audio, source provenance, long-review splitting, runtime/API/browser and package behavior; use the owner's video privately as reference.
+- [x] After fixes, build a portable clickable frontend-only artist review package with synthetic data, theme/locale/workflow interactions and no transcription backend.
+- [x] Include custom/third-party/native icon and indicator inventory, asset previews, credits/licenses and replacement guidance; leave downloadable ZIP locally.
+- [ ] Commit/push verified implementation; generate final committed-source ZIP and provide owner retest/package location.
+
 ## Delivered: playback, video ingestion and progress analysis
 
 Checkpoint: [playback, video and progress](docs/checkpoints/2026-11-19-playback-video-progress.md).
@@ -26,9 +41,9 @@ Checkpoint: [playback, video and progress](docs/checkpoints/2026-11-19-playback-
 
 ## Follow-up: calibrated progress indicator
 
-- [ ] Implement optional application/pipeline phase events and thread-safe queue snapshots as specified in [the completed assessment](docs/30-queue-progress-and-eta.md).
+- [x] Implement optional application/pipeline phase events, thread-safe snapshots and approximate percentage/ETA with unknown/overdue fallbacks.
 - [ ] Gather comparable real RTX 3090/WSL timings, separate cold/warm load and topology, then qualify percent/ETA error ranges. Keep indeterminate feedback when evidence is insufficient.
-- [ ] Owner manually reviews playback, video and the progress recommendation after this delivery.
+- [x] Owner reviewed playback/video and requested mixed playback, bounded sections and a live approximate indicator.
 
 ## Delivered: review confirmation, palette identity and motion feedback
 
@@ -88,9 +103,10 @@ Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md
 - [x] Run required checks and model-free browser workflows; deliver verified changes for WSL retest.
 - [ ] Owner retests these changes on WSL; API/provider and YouTube qualification stay pending.
 
-## Deferred: artist reference package
+## Artist reference package (current delivery)
 
-- [ ] After GUI fixes/tweaks are complete, create a small frontend-only GUI review package the artwork artist can open to review the interface and design replacement icons.
+- [ ] Deliver the tested frontend-only ZIP and custom/Lucide/native indicator inventory after current fixes.
+- [ ] Integrate the artist’s replacement icon package after it is supplied.
 
 ## Completed delivery history
 

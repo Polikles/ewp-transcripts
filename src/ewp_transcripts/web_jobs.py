@@ -20,6 +20,7 @@ from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.progress import ProgressHistory, RuntimeProgress, runtime_profile
 
 WorkflowStageName = Literal[
     "correction",
@@ -29,6 +30,22 @@ WorkflowStageName = Literal[
     "translation",
     "translated_export",
 ]
+
+
+class GuiRuntimeProgress(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    phase: str
+    percent: int = Field(ge=0, le=100)
+    estimated: bool
+    elapsed_seconds: int = Field(ge=0)
+    phase_elapsed_seconds: int = Field(ge=0)
+    eta_seconds: int | None = None
+    eta_min_seconds: int | None = None
+    eta_max_seconds: int | None = None
+    calibrated: bool
+    overdue: bool
+    stream_index: int = Field(ge=1)
+    stream_count: int = Field(ge=1)
 
 
 class GuiTranscriptionJob(BaseModel):
@@ -50,6 +67,7 @@ class GuiTranscriptionJob(BaseModel):
     error: dict[str, str] | None = None
     workflow_errors: dict[WorkflowStageName, str] = Field(default_factory=dict)
     workflow_skips: set[WorkflowStageName] = Field(default_factory=set)
+    runtime_progress: GuiRuntimeProgress | None = None
 
 
 class GuiWorkflowStage(BaseModel):
@@ -87,9 +105,12 @@ class GuiTranscriptionQueue:
         *,
         config: ApplicationConfig,
         service: TranscriptionService = transcribe_one,
+        history_path: Path | None = None,
     ) -> None:
         self._config = config
         self._service = service
+        self._history = ProgressHistory(history_path)
+        self._live_progress: dict[str, RuntimeProgress] = {}
         self._pending: Queue[
             tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int] | None
         ] = Queue()
@@ -280,7 +301,18 @@ class GuiTranscriptionQueue:
 
     def jobs(self) -> tuple[GuiTranscriptionJob, ...]:
         with self._lock:
-            return tuple(self._jobs[job_id] for job_id in self._order)
+            jobs = []
+            for job_id in self._order:
+                job = self._jobs[job_id]
+                if job_id in self._live_progress:
+                    snapshot = self._live_progress[job_id].snapshot()
+                    if job.status != "completed":
+                        snapshot["percent"] = min(99, snapshot["percent"])
+                    job = job.model_copy(
+                        update={"runtime_progress": GuiRuntimeProgress.model_validate(snapshot)}
+                    )
+                jobs.append(job)
+            return tuple(jobs)
 
     def record_workflow_error(self, result_path: str, stage: WorkflowStageName, code: str) -> bool:
         """Record one non-secret later-stage error against its queue job for this GUI process."""
@@ -427,6 +459,7 @@ class GuiTranscriptionQueue:
                 )
                 continue
             self._replace(job_id, status="running")
+            tracker: RuntimeProgress | None = None
             try:
                 config = self._config.model_copy(
                     update={
@@ -444,18 +477,32 @@ class GuiTranscriptionQueue:
                     if job.group_sources
                     else {}
                 )
+                tracker = RuntimeProgress(
+                    self._history,
+                    runtime_profile(
+                        config,
+                        len(job.group_sources) or 1,
+                        "group" if job.group_sources else "single",
+                    ),
+                )
+                with self._lock:
+                    self._live_progress[job_id] = tracker
                 outcome = self._service(
                     input_path,
                     config=config,
                     output_directory=output_directory,
+                    progress=tracker,
                     **group_options,
                 )
+                tracker.finish(True)
                 self._replace(
                     job_id,
                     status="completed",
                     result_path=str(outcome.result_path) if outcome.result_path else None,
                 )
             except ApplicationError as error:
+                if tracker is not None:
+                    tracker.finish(False)
                 self._replace(
                     job_id,
                     status="failed",
@@ -473,6 +520,8 @@ class GuiTranscriptionQueue:
                     },
                 )
             except Exception:
+                if tracker is not None:
+                    tracker.finish(False)
                 self._replace(
                     job_id,
                     status="failed",

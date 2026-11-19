@@ -163,6 +163,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     ).to_have_count(0)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
     assert page.locator("#transcription-jobs tbody").inner_text().count("STAGED") == 2
+    check_runtime_feedback(page, output)
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     page.locator("#gui-audio-choices li").first.get_by_role(
         "button", name="Remove from list"
@@ -205,6 +206,34 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.evaluate("queuePost('/api/v1/transcriptions/clear-current', {confirmed:true})")
     page.evaluate("refreshJobs()")
     expect(page.locator("#start-queue")).to_be_disabled()
+
+
+def check_runtime_feedback(page: Page, output: Path) -> None:
+    """Keep progress/ETA readable in the real narrow queue cell and both locales."""
+    page.evaluate("""() => {
+      const cell=document.querySelector('#transcription-jobs tbody td');
+      const widget=renderRuntimeProgress({status:'running',
+        runtime_progress:{phase:'align',percent:67,
+        elapsed_seconds:845,eta_seconds:120,eta_min_seconds:60,eta_max_seconds:240,
+        stream_index:2,stream_count:3,calibrated:true,overdue:false}});
+      widget.id='runtime-test';cell.append(widget);
+    }""")
+    for locale in ("en", "pl"):
+        page.locator("#gui-locale").select_option(locale)
+        for width in (720, 960):
+            page.set_viewport_size({"width": width, "height": 1080})
+            widget = page.locator("#runtime-test")
+            widget.scroll_into_view_if_needed()
+            expect(widget.locator("progress")).to_have_attribute("value", "67")
+            assert widget.evaluate(
+                "e=>e.getBoundingClientRect().right <= "
+                "e.closest('td').getBoundingClientRect().right+1"
+            )
+            assert not geometry(page)["overflow"]
+            page.screenshot(path=str(output / f"runtime-{locale}-{width}.png"))
+    page.locator("#runtime-test").evaluate("e=>e.remove()")
+    page.locator("#gui-locale").select_option("en")
+    page.set_viewport_size({"width": 1440, "height": 1000})
 
 
 def check_maintenance_controls(page: Page) -> None:
@@ -341,7 +370,12 @@ def check_localized_interface(page: Page) -> None:
     expect(page.locator(".gui-language-info p")).to_contain_text(
         "nie jest gwarantowany tryb tłumaczenia"
     )
+    page.locator("#output-path").click()
+    assert not page.locator(".gui-language-info").evaluate("e=>e.open")
     page.locator(".gui-language-info summary").click()
+    page.keyboard.press("Escape")
+    assert not page.locator(".gui-language-info").evaluate("e=>e.open")
+    expect(page.locator(".gui-language-info summary")).to_be_focused()
     assert page.locator("#output-path").evaluate(
         "e=>Boolean(e.compareDocumentPosition(document.querySelector('#input-path')) "
         "& Node.DOCUMENT_POSITION_FOLLOWING)"
@@ -504,7 +538,9 @@ def check_source_playback(page: Page, output: Path) -> None:
     """Decode real synthetic source audio, seek exact words and retain grouped-track state."""
     expect(page.locator("#gui-source-playback")).to_be_visible()
     page.wait_for_function("() => playbackAudio.readyState >= 1")
-    expect(page.locator("#gui-playback-source option")).to_have_count(2)
+    expect(page.locator("#gui-playback-source option")).to_have_count(1)
+    assert page.locator("#gui-playback-source").input_value() == "mix"
+    expect(page.locator(".review-source-files").first).to_contain_text("playback-")
     seek = page.locator(".review-seek").nth(1)
     assert seek.evaluate(
         "e=>e.getBoundingClientRect().top >= "
@@ -520,10 +556,6 @@ def check_source_playback(page: Page, output: Path) -> None:
     assert response.headers["content-range"].startswith("bytes 0-43/")
     response = page.request.get(page.url.rstrip("/") + url, headers={"Range": "bytes=99999999-"})
     assert response.status == 416
-    page.locator("#gui-playback-source").select_option("source_002")
-    page.wait_for_function(
-        "() => playbackAudio.readyState >= 1 && playbackSource.value === 'source_002'"
-    )
     page.evaluate("playbackAudio.currentTime=2; rememberPlaybackPosition()")
     stage(page, "workspace")
     expect(page.locator("#gui-source-playback")).not_to_be_visible()
@@ -532,7 +564,7 @@ def check_source_playback(page: Page, output: Path) -> None:
     page.wait_for_function(
         "() => playbackAudio.readyState >= 1 && Math.abs(playbackAudio.currentTime - 2) < .1"
     )
-    assert page.locator("#gui-playback-source").input_value() == "source_002"
+    assert page.locator("#gui-playback-source").input_value() == "mix"
     current = page.evaluate("reviewDocument.result_path")
     other = page.evaluate(
         "stageQueueJobs.find(job=>job.result_path && "
@@ -544,7 +576,7 @@ def check_source_playback(page: Page, output: Path) -> None:
             result,
         )
         page.wait_for_function("() => playbackAudio.readyState >= 1")
-    assert page.locator("#gui-playback-source").input_value() == "source_002"
+    assert page.locator("#gui-playback-source").input_value() == "mix"
     assert abs(page.evaluate("playbackAudio.currentTime") - 2) < 0.1
     page.locator("#gui-locale").select_option("pl")
     expect(page.locator(".review-seek").first).to_have_text("Przejdź do tego fragmentu")

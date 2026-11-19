@@ -100,3 +100,93 @@ def test_prepare_review_prefills_exact_revision_and_records_parent(tmp_path: Pat
 
     assert preview.revision.parent_revision is not None
     assert preview.revision.parent_revision.sha256 == sha256_file(revision_path)
+
+
+def test_one_speaker_is_bounded_even_with_one_long_canonical_segment(tmp_path: Path) -> None:
+    document = json.loads(RESULT_EXAMPLE.read_text())
+    segment = document["transcript"]["segments"][0]
+    template = segment["words"][0]
+    segment["words"] = [
+        {
+            **template,
+            "word_id": f"word_{index + 1:06d}",
+            "text": f"Word{index}.",
+            "start_ms": index * 100,
+            "end_ms": index * 100 + 90,
+            "speaker_id": "speaker_001",
+        }
+        for index in range(501)
+    ]
+    segment.update(
+        text=" ".join(word["text"] for word in segment["words"]), start_ms=0, end_ms=50100
+    )
+    document["transcript"]["segments"] = [segment]
+    result = tmp_path / RESULT_EXAMPLE.name
+    result.write_text(json.dumps(document))
+    base = load_canonical_result(result)
+    review = prepare_review(result)
+    assert [
+        sum(len(block.text.split()) for block in anchor.speaker_blocks) for anchor in review.anchors
+    ] == [200, 200, 101]
+    validate_review_base(review, base, base_sha256=sha256_file(result))
+    assert len(build_revision(review, base, base_path=result).transcript.tokens) == 501
+    # Opening an old unchanged draft projects bounded sections without replacing saved work.
+    from ewp_transcripts.config import ApplicationConfig
+    from ewp_transcripts.web_reviews import GuiReviewController
+    from ewp_transcripts.web_workflows import GuiWorkflowController
+
+    old = prepare_review(result, anchor_target_words=10000)
+    path = tmp_path / "old.review.txt"
+    path.write_text(render_review(old))
+    old_bytes = path.read_bytes()
+    service = GuiReviewController(
+        config=ApplicationConfig(), resolve_path=GuiWorkflowController().resolve_allowed_path
+    )
+    projected = service.document(path, result)
+    assert len(projected["anchors"]) == 3 and path.read_bytes() == old_bytes
+    saved = service.save(
+        str(path),
+        str(result),
+        expected_sha256=projected["review_sha256"],
+        anchors=projected["anchors"],
+    )
+    assert len(saved["anchors"]) == 3
+    assert len(load_canonical_result(result).transcript.segments) == 1
+
+
+def test_large_edited_playback_uses_real_timestamps_without_dense_alignment(tmp_path: Path) -> None:
+    from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock
+    from ewp_transcripts.revision_service import playback_block_positions
+
+    base = load_canonical_result(RESULT_EXAMPLE)
+    template = base.transcript.segments[0].words[0]
+    words = tuple(
+        template.model_copy(
+            update={
+                "word_id": f"word_{index + 1:06d}",
+                "text": f"Word{index}",
+                "start_ms": index * 100,
+                "end_ms": index * 100 + 90,
+            }
+        )
+        for index in range(501)
+    )
+    anchor = ReviewAnchor(
+        first_word_id=words[0].word_id,
+        last_word_id=words[-1].word_id,
+        speaker_blocks=(
+            ReviewSpeakerBlock(
+                speaker_id="speaker_001",
+                text="Inserted " + " ".join(word.text for word in words[:200]),
+            ),
+            ReviewSpeakerBlock(
+                speaker_id="speaker_001", text=" ".join(word.text for word in words[200:])
+            ),
+        ),
+    )
+    positions = playback_block_positions(anchor, words)
+    assert positions == ((0, True), (20000, True))
+    empty = anchor.model_copy(
+        update={"speaker_blocks": (ReviewSpeakerBlock(speaker_id="speaker_001", text=""),)}
+    )
+    assert playback_block_positions(empty, words) == ((0, True),)

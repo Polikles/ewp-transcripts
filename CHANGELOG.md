@@ -6,6 +6,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Live transcription phase, elapsed time, approximate percentage and per-machine measured ETA
+  ranges. Unknown/slow phases have explicit fallbacks; observer/cache failures cannot fail a job,
+  failed work never reaches 100%, and completion follows publication/exports/cleanup.
+- An offline artist-reference ZIP builder using the real frontend with synthetic data, clickable
+  workflow/editor controls and an inventory of custom, Lucide, generic and native icons/indicators.
+
+
 - Source-review recording audio in the left rail with grouped-source/channel choice, native
   playback controls and per-block seeking through actual canonical word timestamps. Drafts are
   saved before seeking; ambiguous/inserted text is marked explicitly. Recording positions survive
@@ -18,6 +25,16 @@ All notable changes to EWP-transcripts are documented here.
   GPU acceptance requirements. Numeric estimates remain deferred until supported by evidence.
 
 ### Fixed
+
+- Source review plays a synchronized mix of all episode files/channels, so isolated guest tracks
+  remain audible. Muted original-source filename hints stay independent of edited speaker labels.
+- Single-speaker reviews honor the word limit instead of becoming one unbounded text field.
+  Existing drafts have bounded presentation; source timing and saved bytes remain unchanged until
+  explicit draft save. Provenance-only updates retain the caret and scroll position.
+- Language information closes on outside click/tap and Escape, with keyboard focus restored.
+- Documented the specific ONNX/VAD/Wav2Vec2 terminal messages without changing model weights,
+  locked dependencies or hiding unrelated warnings.
+
 
 - Source and translation Save actions now highlight missing human verification and explain it
   next to the checkbox before submitting any publication request. Checking the box clears the

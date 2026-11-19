@@ -68,15 +68,9 @@ function syncSourcePlayback() {
   sourcePlaybackKey = key;
   playbackSource.replaceChildren();
   if (!key) return;
-  const saved = sourcePlaybackState.get(key);
-  for (const source of reviewDocument.playback_sources || []) {
-    const option = document.createElement("option"); option.value = source.source_id;
-    option.textContent = `${source.filename}${source.speaker_label ? ` · ${source.speaker_label}` : ""}${Number.isInteger(source.channel_selection) ? ` · ch ${source.channel_selection + 1}` : ""}`;
-    option.dataset.guiContent = "true";
-    playbackSource.append(option);
-  }
-  if ([...playbackSource.options].some(option=>option.value === saved?.source)) playbackSource.value = saved.source;
-  playbackSourceLabel.hidden = playbackSource.options.length < 2;
+  const option = document.createElement("option"); option.value = "mix";
+  option.textContent = "Complete episode (mixed audio)"; playbackSource.append(option);
+  playbackSource.value = "mix"; playbackSourceLabel.hidden = true;
   void requestSourcePlayback();
 }
 async function seekReviewBlock(button) {
@@ -106,15 +100,30 @@ async function seekReviewBlock(button) {
 }
 function installReviewSeekButtons() {
   document.querySelectorAll("#review-editor .review-block").forEach(row => {
-    if (row.querySelector(".review-seek")) return;
     const speaker = row.querySelector("label");
-    const button = document.createElement("button"); button.type = "button";
-    button.className = "review-seek"; button.textContent = "Go to this fragment";
-    button.addEventListener("click", () => { void seekReviewBlock(button); });
-    speaker.after(button);
+    let button = row.querySelector(".review-seek");
+    if (!button) {
+      button = document.createElement("button"); button.type = "button";
+      button.className = "review-seek"; button.textContent = "Go to this fragment";
+      button.addEventListener("click", () => { void seekReviewBlock(button); });
+      speaker.after(button);
+    }
+    const {anchorIndex, blockIndex} = reviewBlockPosition(button);
+    const anchor = reviewDocument?.anchors[anchorIndex];
+    const names = anchor?.block_sources?.length === anchor?.blocks?.length ? anchor.block_sources[blockIndex] : (reviewDocument?.playback_sources || []).map(source=>source.filename);
+    let hint = speaker.querySelector(".review-source-files");
+    if (!hint) {
+      hint = document.createElement("span"); hint.className = "review-source-files";
+      const prefix = document.createElement("span"); prefix.textContent = "Source files";
+      const value = document.createElement("span"); value.dataset.guiContent = "true";
+      hint.append(prefix, document.createTextNode(": "), value); speaker.insertBefore(hint, speaker.querySelector("select"));
+    }
+    const value = hint.lastElementChild, text = (names || []).join(", ");
+    if (value.textContent !== text) { value.textContent = text; value.title = text; }
   });
   syncSourcePlayback();
 }
+document.addEventListener("ewp-review-metadata", installReviewSeekButtons);
 new MutationObserver(installReviewSeekButtons).observe(document.querySelector("#review-editor"), {childList:true, subtree:true});
 document.addEventListener("ewp-stage", syncSourcePlayback);
 installReviewSeekButtons();

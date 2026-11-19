@@ -374,6 +374,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("dictionary_library.js").read_bytes()
         body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()
         body += b"\n" + assets.joinpath("source_playback.js").read_bytes()
+        body += b"\n" + assets.joinpath("runtime_progress.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -440,7 +441,10 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_openrouter_api_key = ""
         self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
-        self.gui_transcriptions = GuiTranscriptionQueue(config=application_config)
+        self.gui_transcriptions = GuiTranscriptionQueue(
+            config=application_config,
+            history_path=default_workspace_directory().parent / "runtime-timings.json",
+        )
 
     def server_close(self) -> None:
         self.gui_openrouter_api_key = ""

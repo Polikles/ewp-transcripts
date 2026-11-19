@@ -33,20 +33,20 @@ items belong to one monolithic "Version 2" release.
    correction, review/export, and translation queues. The GUI reuses application services and
    does not implement a parallel pipeline.
 
-Current GUI execution priority (2026-11-19): source-review playback and video ingestion are
-implemented and VM-verified, following the delivered review/identity fixes.
-See the [active checkpoint](checkpoints/2026-11-19-playback-video-progress.md) and TODO.md.
-The left-rail player seeks to real source-word starts and supports grouped-source selection.
-Video containers use the existing FFmpeg extraction pipeline while preserving original provenance;
-missing/multiple audio streams are explicit errors. Interactive multi-audio-track choice remains
-future work. The owner will manually review after this delivery, before other deferred GUI work.
+Current GUI execution priority (2026-11-19): complete the
+[mixed playback / bounded review / live progress delivery](checkpoints/2026-11-19-review-mix-progress-artist.md)
+and its offline [artist reference package](31-artist-review-package.md). The owner has confirmed
+real MP4 transcription and reported the current GUI issues. Default playback now mixes all
+synchronized sources; filenames follow original word provenance. Word limits also bound one-speaker
+reviews without changing canonical timing. Language help closes with outside-click/Escape.
 
-The requested [queue percent/ETA assessment](30-queue-progress-and-eta.md) is complete. Numeric
-progress remains a future implementation: introduce actual application/pipeline phase events,
-then collect comparable successful GPU timings and calibrate estimates. Canonical stage durations
-are historical evidence, not live progress. Keep an indeterminate gear without credible samples;
-do not drive percentages from a browser timer or claim completion before publication/cleanup.
-Full Polish documentation follows owner terminology approval; the artist package stays deferred.
+The [progress/ETA implementation](30-queue-progress-and-eta.md) uses real optional phase events,
+a monotonic elapsed heartbeat and bounded local successful timing history. First-run weights are
+explicitly approximate; unknown/slow ETA has a fallback, and 100% follows real publication/cleanup.
+Real target-hardware accuracy and finer native engine callbacks remain follow-up qualification.
+The artist ZIP is local-only, uses synthetic data and contains no transcription backend. Integrating
+the future custom icon set follows the artist's delivery. Full Polish documentation still follows
+owner terminology acceptance. See TODO.md for current acceptance and remaining work.
 
 Cross-cutting observability is implemented in
 [`25-warning-error-catalog.md`](25-warning-error-catalog.md): domain warnings, expected

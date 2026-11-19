@@ -769,3 +769,50 @@ def test_start_later_staged_work_preserves_completed_and_failed_history(tmp_path
         assert len(queue.jobs()) == 3
     finally:
         queue.close()
+
+
+@pytest.mark.parametrize("fails", [False, True])
+def test_queue_reports_live_phase_and_finishes_only_after_service_returns(
+    tmp_path: Path, fails
+) -> None:
+    from ewp_transcripts.progress import ProgressEvent
+
+    entered, release = threading.Event(), threading.Event()
+
+    def service(path, **kwargs):
+        observer = kwargs["progress"]
+        observer(ProgressEvent("plan", "planned", phases=("transcribe:1",), media_duration_ms=1000))
+        observer(ProgressEvent("transcribe", "started"))
+        entered.set()
+        release.wait(2)
+        if fails:
+            raise RuntimeError("synthetic failure")
+        observer(ProgressEvent("transcribe", "completed", duration_ms=1000))
+        return SimpleNamespace(result_path=tmp_path / "result.json")
+
+    queue = GuiTranscriptionQueue(
+        config=ApplicationConfig(), service=service, history_path=tmp_path / "timings.json"
+    )
+    try:
+        queue.stage(
+            tmp_path / "source.wav",
+            tmp_path,
+            planned_job_id="job",
+            planned_result_path=str(tmp_path / "result.json"),
+        )
+        queue.start()
+        assert entered.wait(1)
+        active = queue.jobs()[0]
+        assert active.status == "running" and active.runtime_progress.phase == "transcribe"
+        assert active.runtime_progress.percent < 100
+        release.set()
+        terminal = wait_for_terminal(queue)
+        assert (
+            terminal.runtime_progress.percent < 100
+            if fails
+            else terminal.runtime_progress.percent == 100
+        )
+        assert (tmp_path / "timings.json").exists() is not fails
+    finally:
+        release.set()
+        queue.close()

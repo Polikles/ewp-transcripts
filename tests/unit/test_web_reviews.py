@@ -479,3 +479,22 @@ def test_playback_rejects_an_externally_changed_review(tmp_path: Path) -> None:
             prepared["review_path"], str(result), 0, 0, expected_sha256="0" * 64
         )
     assert error.value.code == "GUI_REVIEW_CONFLICT"
+
+
+def test_source_filename_follows_original_words_after_speaker_reassignment(tmp_path: Path) -> None:
+    import json
+
+    result = tmp_path / EXAMPLE.name
+    result.write_bytes(EXAMPLE.read_bytes())
+    service = controller(tmp_path)
+    prepared = service.prepare(str(result), str(tmp_path / "reviews"))
+    names = [source["filename"] for source in json.loads(result.read_text())["sources"]]
+    assert prepared["anchors"][0]["block_sources"] == [[names[0]], [names[1]]]
+    prepared["anchors"][0]["blocks"][0]["speaker_id"] = "speaker_002"
+    saved = service.save(
+        prepared["review_path"],
+        str(result),
+        expected_sha256=prepared["review_sha256"],
+        anchors=prepared["anchors"],
+    )
+    assert saved["anchors"][0]["block_sources"][0] == [names[0]]

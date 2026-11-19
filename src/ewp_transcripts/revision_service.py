@@ -5,6 +5,7 @@ from __future__ import annotations
 import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from difflib import SequenceMatcher
 from pathlib import Path
 from uuid import uuid4
 
@@ -52,6 +53,14 @@ def _align(
     preserve_speaker_attribution: bool = False,
 ) -> tuple[tuple[_Step, ...], bool]:
     """Return one stable minimum-cost path and whether another optimum exists."""
+
+    if tuple(word.text for word in source) == tuple(item.text for item in corrected) and (
+        not preserve_speaker_attribution
+        or all(
+            word.speaker_id == item.speaker_id for word, item in zip(source, corrected, strict=True)
+        )
+    ):
+        return tuple(_Step(1, 1) for _ in source), False
 
     width = len(corrected) + 1
     costs: list[list[int | None]] = [[None] * width for _ in range(len(source) + 1)]
@@ -116,9 +125,9 @@ def _align(
     return path, counts[-1][-1] > 1
 
 
-def playback_block_positions(
+def playback_block_mappings(
     anchor: ReviewAnchor, words: tuple[CanonicalWord, ...]
-) -> tuple[tuple[int, bool], ...]:
+) -> tuple[tuple[int, bool, tuple[str, ...]], ...]:
     """Locate blocks using real source word starts; never synthesize playback timestamps."""
     positions = {word.word_id: index for index, word in enumerate(words)}
     if (
@@ -133,18 +142,38 @@ def playback_block_positions(
         for block in anchor.speaker_blocks
         for text in block.text.split()
     )
-    if tuple(word.text for word in source) == tuple(item.text for item in corrected):
+    path: tuple[_Step, ...]
+    if len(source) * len(corrected) > 250000 and tuple(word.text for word in source) != tuple(
+        item.text for item in corrected
+    ):
+        starts: list[int | None] = [None] * len(corrected)
+        references: list[tuple[str, ...]] = [()] * len(corrected)
+        for match in SequenceMatcher(
+            None, [word.text for word in source], [item.text for item in corrected]
+        ).get_matching_blocks():
+            for offset in range(match.size):
+                word = source[match.a + offset]
+                starts[match.b + offset] = word.start_ms
+                references[match.b + offset] = (word.word_id,)
+        ambiguous = True
+        path = ()
+    elif tuple(word.text for word in source) == tuple(item.text for item in corrected):
         path, ambiguous = tuple(_Step(1, 1) for _ in source), False
+        starts, references = [], []
     else:
         path, ambiguous = _align(source, corrected)
-    starts: list[int | None] = []
+        starts, references = [], []
     source_at = 0
     for step in path:
         starts.extend(
             [source[source_at].start_ms if step.source_count else None] * step.corrected_count
         )
+        references.extend(
+            [tuple(word.word_id for word in source[source_at : source_at + step.source_count])]
+            * step.corrected_count
+        )
         source_at += step.source_count
-    result: list[tuple[int, bool]] = []
+    result: list[tuple[int, bool, tuple[str, ...]]] = []
     offset = 0
     for block in anchor.speaker_blocks:
         count = len(block.text.split())
@@ -154,11 +183,24 @@ def playback_block_positions(
         result.append(
             (
                 known if known is not None else source[0].start_ms,
-                ambiguous or starts[offset] is None,
+                ambiguous or offset >= len(starts) or starts[offset] is None,
+                tuple(
+                    dict.fromkeys(
+                        word_id for ids in references[offset : offset + count] for word_id in ids
+                    )
+                ),
             )
         )
         offset += count
     return tuple(result)
+
+
+def playback_block_positions(
+    anchor: ReviewAnchor, words: tuple[CanonicalWord, ...]
+) -> tuple[tuple[int, bool], ...]:
+    return tuple(
+        (start, approximate) for start, approximate, _ in playback_block_mappings(anchor, words)
+    )
 
 
 def build_revision(

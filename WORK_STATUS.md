@@ -4,6 +4,47 @@ Last updated: **2026-11-19**.
 
 ## Active task and resume pointers
 
+Current request: [mixed playback, review bounds, live progress and artist package](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
+Baseline clean main 5e025b42169455b545bdd50b88c8e6021f57d60c. Implementation and verification
+are complete; commit/push and final committed-source ZIP generation remain. Start with TODO.md.
+Owner confirms actual MP4 transcription succeeded; no ASR/video-ingestion blocker was reopened.
+
+Language info closes on outside pointer/Escape. Default audio is a synchronized all-source mix,
+with normalized preview gain and longest timeline. Filename hints below Speaker follow canonical
+word provenance, independent of edited names. New one-speaker sections honor the 200-word cap;
+old draft presentation is bounded without replacing saved bytes until explicit Save. Canonical
+text/timing/lineage is untouched. Provenance metadata updates retain caret/scroll.
+
+Optional application/pipeline events now drive actual phase/elapsed/stream feedback and approximate
+percentage. First runs use coarse completed-phase weights; successful local timings calibrate an
+ETA range. Unknown/overdue estimates withdraw numeric ETA; completion reaches 100% only after
+publication/exports/cleanup and terminal success. Content-free bounded timing cache; observer/cache
+failures cannot fail transcription. Engine calls, ML pins and canonical schemas stay unchanged.
+Real GPU accuracy needs owner qualification; this VM has no GPU/E2E suite/target dataset installed.
+
+Verification: Ruff/format/mypy (101 files) and 874 tests PASS; ten integration tests PASS.
+Alternating real synthetic tracks are audible in the mixed preview at both speakers' times.
+501-word single-speaker reviews split 200/200/101; legacy projection preserves saved bytes and
+speaker edits. Fake-clock/worker tests cover calibration, heartbeat, overdue/failure/terminal behavior.
+144 browser layout cases PASS, EN/PL × themes × six viewports/stages, zero page errors/external
+requests; popup dismissal, narrow progress/ETA, source hints/seek, editing/export and recovery PASS.
+Fresh-server recovery and final mixed playback/source-hint placement PASS. Wheel/sdist PASS;
+53 assets/guides byte-match source, nine help routes work from wheel without ML imports; JS parses.
+Owner's 45-minute H.264/AAC video decoded to 16 kHz mono, duration/bytes preserved, without ASR.
+
+Artist build is documented in docs/31-artist-review-package.md and tools/build_artist_review.py.
+An offline file:// test passes source/translation editing/save/apply/export, palettes, demo correction,
+dictionaries, saved work, settings, running states, EN/PL/themes/full/half widths and asset inventory,
+with zero page errors/network requests. Custom EwP / Lucide / generic/native indicators and font
+credits/licenses are included. No backend/models/private media/transcripts enter the ZIP.
+Final ZIP will be generated from committed source under project-ewp/deliveries and recorded below.
+Reported terminal warnings are explained with pinned primary sources in docs/32-runtime-log-notes.md;
+no model training, weight change or broad warning suppression was introduced.
+
+Disposable verification root /tmp/ewp-review-progress.BWiy2Q awaits cleanup after delivery evidence.
+Full Polish documentation follows terminology acceptance. Artist icon integration follows receipt.
+Earlier current-request summaries below are delivery history.
+
 Current request: [playback, video ingestion and progress analysis](docs/checkpoints/2026-11-19-playback-video-progress.md).
 Baseline: clean main e08a4102ee0d9e0dbe0457b3dc96e58185e13552. Implementation and verification
 are complete; delivered to origin/main in 1864900c0928d910df8bb30cafda1d4554dd4cc2. Start from TODO.md. The owner will manually review

@@ -407,9 +407,9 @@ Stage changes pause audio. Source/position are kept independently per recording 
 
 Review documents add playback_sources metadata (source ID, filename, speaker and channel).
 POST /api/v1/reviews/playback accepts result_path/source_id through existing Host/Origin/CSRF
-checks, validates the completed canonical result and original source size/SHA-256, then decodes
+checks, validates the completed canonical result and selected original source sizes/SHA-256, then decodes
 the canonical stream/channel to a private mono 16 kHz PCM workdir. One cached preview is kept;
-source changes revoke prior opaque tokens. No arbitrary filesystem URL is exposed. GET/HEAD
+source/mix changes revoke prior opaque tokens. No arbitrary filesystem URL is exposed. GET/HEAD
 /api/v1/review-audio/<opaque-session-token> streams in bounded chunks with audio/wav, no-store,
 Accept-Ranges and single byte ranges (206/416). Unknown tokens/foreign requests are rejected.
 The exact media-src self policy permits local playback only. Cache/workdir cleanup runs when
@@ -425,5 +425,29 @@ the same inspect/plan/queue/application pipeline. Canonical source metadata alre
 video; no schema migration is required. Only audio is decoded. Missing/multiple audio is an
 explicit error with guidance; interactive stream selection and video-frame playback are deferred.
 
-The percentage/ETA analysis is [recorded separately](30-queue-progress-and-eta.md). Numeric
-progress remains deferred pending actual live events and GPU measurement/calibration.
+The percentage/ETA analysis is [recorded separately](30-queue-progress-and-eta.md). Approximate
+progress is implemented through actual phase events; real GPU accuracy qualification remains pending.
+
+## Episode mix, review bounds and live progress increment
+
+Default source playback requests source_id=mix, verifies all original source records and mixes
+their selected streams/channels at shared time zero. The longest timeline is retained; amplitudes
+are normalized in the preview to avoid summed clipping. Individual source API identifiers remain
+backward compatible, but the regular UI always plays the complete episode. Each block adds a muted
+source-filename hint from canonical word/speaker/segment provenance, independent of edited labels.
+
+New review anchors honor word and speaker-block bounds simultaneously. The GUI can project
+unchanged oversized legacy drafts into bounded anchors, preserving text/assignments; edited legacy
+blocks are bounded without changing their existing anchors. Projection is read-only until explicit
+Save. Server-owned projected anchors are re-derived at save/seek boundaries. Derived provenance
+metadata updates do not discard the caret or scroll position. Canonical timing remains unchanged.
+
+Transcription API responses add runtime_progress with phase, approximate percent, monotonic
+elapsed/phase time, stream counters, optional ETA range and calibration/overdue flags. Optional
+application/pipeline observers report actual phase starts/completions. Only successful completed
+runs update bounded content-free local timing history. Queue polling provides the elapsed heartbeat;
+unknown estimates remain explicit, slow phases withdraw ETA, failures stay below 100%, and true
+completion follows publication/exports/cleanup. Saved-work history never revives a live job.
+
+The [artist package](31-artist-review-package.md) uses a separate in-memory mock adapter and never
+changes production request/authentication/provider behavior. Its state/progress are synthetic.

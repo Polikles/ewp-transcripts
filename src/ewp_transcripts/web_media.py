@@ -14,7 +14,7 @@ from uuid import uuid4
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
-from ewp_transcripts.media.ffmpeg import prepare_working_audio
+from ewp_transcripts.media.ffmpeg import mix_working_audio, prepare_working_audio
 from ewp_transcripts.web_workflows import require_completed_canonical_result
 from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
 
@@ -55,37 +55,55 @@ class GuiMediaController:
         with self._lock:
             result_path = self._resolve_path(result)
             base = require_completed_canonical_result(result_path)
-            source = next((item for item in base.sources if item.source_id == source_id), None)
-            if source is None:
+            sources = tuple(
+                source
+                for source in base.sources
+                if source_id == "mix" or source.source_id == source_id
+            )
+            if not sources:
                 raise ValueError("Choose an audio source from the current recording.")
-            try:
-                path = self._resolve_path(source.normalized_path)
-            except FileNotFoundError as error:
-                raise ValueError(
-                    "The original recording is unavailable. Restore it at its original location, "
-                    "then reload recording audio. Transcript editing remains available."
-                ) from error
             key = (str(result_path), sha256_file(result_path), source_id)
-            if self._key != key:
-                if path.stat().st_size != source.size_bytes or sha256_file(path) != source.sha256:
+            resolved = []
+            for source in sources:
+                try:
+                    path = self._resolve_path(source.normalized_path)
+                except FileNotFoundError as error:
+                    raise ValueError(
+                        "The original recording is unavailable. Restore it at its "
+                        "original location, "
+                        "then reload recording audio. Transcript editing remains available."
+                    ) from error
+                if path.stat().st_size != source.size_bytes or (
+                    self._key != key and sha256_file(path) != source.sha256
+                ):
                     raise ValueError(
                         "The recording source differs from its transcription. "
                         "Restore the original file before playback."
                     )
+                resolved.append((source, path))
+            if self._key != key:
                 self._clear()
                 workspace = allocate_work_directory(
                     Path(self._temporary.name), run_id=uuid4(), job_id="playback"
                 )
                 try:
-                    audio = prepare_working_audio(
-                        path,
-                        workspace.path / "preview.wav",
-                        stream_index=source.stream_index,
-                        channel_index=source.channel_selection
-                        if isinstance(source.channel_selection, int)
-                        else None,
+                    prepared = [
+                        prepare_working_audio(
+                            path,
+                            workspace.path / f"source-{index}.wav",
+                            stream_index=source.stream_index,
+                            channel_index=source.channel_selection
+                            if isinstance(source.channel_selection, int)
+                            else None,
+                        )
+                        for index, (source, path) in enumerate(resolved)
+                    ]
+                    audio = (
+                        mix_working_audio(prepared, workspace.path / "preview.wav")
+                        if len(prepared) > 1
+                        else prepared[0]
                     )
-                    if sha256_file(path) != source.sha256:
+                    if any(sha256_file(path) != source.sha256 for source, path in resolved):
                         raise ValueError("The recording source changed while preparing playback.")
                 except (ApplicationError, OSError, ValueError):
                     cleanup_work_directory(workspace)

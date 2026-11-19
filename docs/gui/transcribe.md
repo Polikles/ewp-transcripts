@@ -32,3 +32,14 @@ Inspect → Dry-run → Add to queue → Start queue sequence is unchanged. A vi
 reports NO_AUDIO_STREAM. Multiple audio tracks report MULTIPLE_AUDIO_STREAMS: export the
 intended audio track to a separate file and process it. The application does not choose a
 possibly wrong track silently. Container/codec availability depends on the installed FFmpeg.
+
+While running, the queue shows the real backend phase, a gear, elapsed time and approximate phase
+percentage. The first run uses coarse phase weights; an opaque inference call can hold its percent
+while elapsed time continues. ETA becomes a range after successful comparable runs on this machine.
+It uses local measured phase timings, duration, model/runtime settings and source topology. If a
+phase takes too long, ETA is withdrawn instead of counting down to zero. Completion is 100% only
+after result publication, configured exports and required cleanup finish. A failed job never displays
+100%. These estimates do not predict human correction/review time. No transcript text is retained
+in the bounded timing cache. See the runtime progress assessment for algorithm details.
+
+The (i) language popup closes on outside click/tap or Escape; Escape returns focus to the icon.
