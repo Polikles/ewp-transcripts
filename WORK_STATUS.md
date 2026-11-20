@@ -6,7 +6,8 @@ Last updated: **2026-11-20**.
 
 Current request: [summary footnotes and scope reconciliation](docs/checkpoints/2026-11-20-scope-and-summary-polish.md).
 Baseline clean main 8b64329. Read TODO.md, WORK_POLICY.md and the opening owner-scope section
-of docs/99-roadmap-v2.md. Implementation/audit/verification complete; delivery commit/push next.
+of docs/99-roadmap-v2.md. Implementation/audit/verification complete; delivered to origin/main
+in 159cb1f (fix(gui): align summary notes and reconcile owner scope).
 
 Language * and speaker-count ** notes span the full summary width below all Inspect/Dry-run
 tables; queue confirmation is plural in EN/PL and error guidance matches it. Top/bottom source
@@ -40,7 +41,8 @@ lint PASS. Real model-free browser checks: 24 summary variants (Inspect/Dry-run 
 1440/960/390 widths), eight top/bottom counter-alignment cases; zero page errors/external requests
 or page overflow. Wheel/sdist PASS offline; all 56 resources match source and nine help routes work
 from the wheel without eager ML imports. No new GPU/provider/ETA-accuracy qualification claimed.
-Disposable evidence is under /tmp/ewp-scope-summary.d3btur pending removal at handoff. Artist ZIP
+Dedicated temporary verification root /tmp/ewp-scope-summary.d3btur was removed after recording
+content-free evidence. Test servers were closed. Artist ZIP
 SHA remains 1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1.
 
 Previous deliveries below are historical evidence, not current tasks.

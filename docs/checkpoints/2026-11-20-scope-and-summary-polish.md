@@ -72,9 +72,18 @@ Final make check remains 896 passing tests; no new unit tests were added for the
 copy/layout changes. Dedicated browser geometry/actual Inspect/Dry-run checks verify the reported
 symptoms. Artist ZIP SHA256 remains 1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1.
 
-## Remaining delivery steps
+## Delivery and resume
 
-Commit/push the UI/policy/planning update, remove the dedicated temporary verification root,
-then record the delivery and report recovered proposals. No feature implementation beyond the
-small reported UI fixes is authorized by this planning update. No EN–PL approval file or Polish
-manual is generated yet; wait for functional additions to finish. No artist package changes.
+Delivered to origin/main in 159cb1f (fix(gui): align summary notes and reconcile owner scope).
+All authorized UI fixes, plan reconciliation and verification are complete. The dedicated
+/tmp/ewp-scope-summary.d3btur directory (browser environment, synthetic media, states, reports,
+screenshot and package builds) was removed after recording content-free evidence. Test servers
+were closed. The sent artist ZIP remained unchanged; no demo/builder was edited.
+
+Next user decision is the order/subset of retained roadmap proposals R01–R15 and E01–E13.
+No other feature implementation is automatically authorized by this planning update. At feature
+completion prepare the complete editable EN–PL string-pair file, then owner approval and Polish
+manuals; screenshots additionally wait for custom GUI/icons. Do not generate the approval file
+prematurely or reinstate optional research/ETA accuracy as a completion gate. Latest owner restart
+recovery remains unchecked; full profile exchange is provisionally accepted without a full owner
+transfer test. Native Windows is explicitly retained planned work.
