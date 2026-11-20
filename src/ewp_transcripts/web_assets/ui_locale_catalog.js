@@ -582,6 +582,10 @@ function guiPolishDynamicText(text) {
   const diagnostic = /^(PASS|WARNING|FAIL) · ([^:]+): ([\s\S]+)$/.exec(text);
   if (diagnostic) return `${({PASS:"POPRAWNE", WARNING:"OSTRZEŻENIE", FAIL:"BŁĄD"})[diagnostic[1]]} · ${diagnostic[2]}: ${guiUiText(diagnostic[3])}`;
   const rules = [
+    [/^(\d+) unavailable queue items? omitted; check missing source or result files before restoring it\.$/, 'Pominięte pozycje kolejki: $1. Sprawdź brakujące pliki źródłowe lub wyniki przed przywróceniem.'],
+    [/^(\d+) session-picked queue items? omitted because their temporary source cannot survive a GUI restart\.$/, 'Pominięte tymczasowe pozycje kolejki: $1. Ponownie wybierz oryginalne pliki przed wznowieniem pracy.'],
+    [/^(\d+) stale file fields? cleared\.$/, 'Wyczyszczone nieaktualne ścieżki: $1.'],
+    [/^Selected: (.+)\. Review the processing plan before adding these jobs to the queue\.$/, 'Wybrano: $1. Sprawdź plan przetwarzania przed dodaniem zadań do kolejki.'],
     [/^(\d+) temporary directories selected; ([\d.]+) MiB\. Confirm deletion within five minutes\.$/, 'Wybrano katalogi tymczasowe: $1; $2 MiB. Potwierdź usunięcie w ciągu pięciu minut.'],
     [/^Temporary directories removed: (\d+)\.$/, 'Usunięte katalogi tymczasowe: $1.'],
     [/^Cleanup stopped\. Removed: (\d+)\. Refresh the inventory before retrying\.$/, 'Zatrzymano usuwanie. Usunięto: $1. Odśwież listę przed kolejną próbą.'],
@@ -1727,3 +1731,68 @@ guiPolish.set("Minimum age must be a whole number between 0 and 36500", "Minimal
 guiPolish.set("Current workspace fields are invalid", "Bieżące pola obszaru roboczego są nieprawidłowe");
 
 guiPolish.set("CANCELLATION REQUESTED", "OCZEKIWANIE NA ANULOWANIE");
+
+// Owner package-A acceptance corrections.
+for (const [en, pl] of [
+  [
+    "Retry",
+    "Ponów"
+  ],
+  [
+    "ASR completed",
+    "ASR ukończony"
+  ],
+  [
+    "Workflow completed",
+    "Całe zadanie ukończone"
+  ],
+  [
+    "Next step: transcription",
+    "Następny krok: transkrypcja"
+  ],
+  [
+    "Loading",
+    "Wczytywanie"
+  ],
+  [
+    "Restoring saved queue and editors…",
+    "Przywracanie zapisanej kolejki i edycji…"
+  ],
+  [
+    "Wait until saved work is fully restored. Transcription does not start automatically.",
+    "Poczekaj na pełne przywrócenie pracy. Transkrypcja nie uruchomi się automatycznie."
+  ],
+  [
+    "Selected for planning",
+    "Wybrano do planowania"
+  ],
+  [
+    "Media copied locally. Plan processing, review and confirm the plan, then start the queue. Copies become durable only when staged.",
+    "Pliki skopiowano lokalnie. Zaplanuj przetwarzanie, sprawdź i potwierdź plan, a następnie uruchom kolejkę. Kopie zostają zachowane po dodaniu do kolejki."
+  ],
+  [
+    "Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. Durable media copies are separate; use Managed source copies to remove unreferenced sources. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.",
+    "Sprawdzany jest tylko skonfigurowany katalog tymczasowy. Aktywne zadania, używane ścieżki, starsze katalogi i nieznane pliki są chronione. Trwałe kopie nagrań są osobne; nieużywane kopie usuwa się w sekcji Zarządzane kopie plików źródłowych. Sprawdzane są odwołania w bieżącej kolejce oraz domyślnym i wybranym katalogu obszarów roboczych; pozostałe katalogi sprawdź osobno."
+  ],
+  [
+    "Saved work is already being restored",
+    "Trwa już przywracanie zapisanej pracy"
+  ],
+  [
+    "Saved-work restore identity is invalid",
+    "Identyfikator przywracania pracy jest nieprawidłowy"
+  ],
+  [
+    "Saved file reference is invalid",
+    "Zapisana ścieżka pliku jest nieprawidłowa"
+  ],
+  [
+    "Saved file reference must not be a directory",
+    "Zapisana ścieżka pliku nie może wskazywać katalogu"
+  ]
+]) guiPolish.set(en, pl);
+
+guiPolish.set("Saving current work…", "Zapisywanie bieżącej pracy…");
+guiPolish.set("Restoring saved work…", "Przywracanie zapisanej pracy…");
+
+guiPolish.set("Refreshing temporary inventory…", "Odświeżanie listy katalogów tymczasowych…");

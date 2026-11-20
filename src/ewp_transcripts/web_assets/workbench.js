@@ -30,6 +30,7 @@ function guiIcon(name) {
 function showGuiStage(stage, focus = false) {
   if (!guiStages.some(item => item[0] === stage)) return;
   guiActiveStage = stage;
+  document.body.dataset.guiActiveStage = stage;
   lastWorkspaceStep = guiStages.find(item => item[0] === stage)[2];
   for (const [id, , heading] of guiStages) {
     const section = document.getElementById(heading)?.closest("section");
@@ -117,7 +118,9 @@ function updateGuiRecordings() {
     const identity = document.createElement("strong");
     identity.textContent = job.planned_job_id;
     const status = document.createElement("span");
-    status.textContent = `${job.status} · ${nextWorkflowLabel(nextWorkflowStage(job))}`;
+    const state = document.createElement("span"); state.textContent = queueJobStatusLabel(job);
+    const next = document.createElement("span"); next.textContent = nextWorkflowLabel(nextWorkflowStage(job));
+    status.append(state, " · ", next);
     button.title = job.result_path || job.input_path;
     button.append(identity, status);
     button.addEventListener("click", () => {

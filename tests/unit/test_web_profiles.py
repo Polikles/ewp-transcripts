@@ -175,3 +175,10 @@ def test_imported_palette_does_not_overwrite_existing_custom_palette(tmp_path: P
     assert palettes["Personal"] == ["#654321"]
     assert ["#123456"] in palettes.values()
     assert len(palettes) == len(target.library.profiles()["profiles"])
+
+
+@pytest.mark.parametrize("speed", [0.25, 0.5, 1.5, 2, 4])
+def test_native_playback_rates_can_be_saved_in_profiles(speed):
+    from ewp_transcripts.web_profiles import GuiPreferences
+
+    assert GuiPreferences(playbackSpeed=speed).playbackSpeed == speed

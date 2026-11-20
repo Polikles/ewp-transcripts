@@ -21,7 +21,7 @@ etaPreference.addEventListener("change", () => { guiPreferences.showEta = etaPre
 const userProfileStatus = document.querySelector("#user-profile-status");
 function collectGuiPreferences() {
   return {locale:guiLocale, theme:document.querySelector("#gui-theme").value, showEta:etaPreference.checked,
-    playbackSpeed:Number(playbackSpeed.value), reviewLayout:localStorage.getItem("ewp-review-layout") || "one",
+    playbackSpeed:Number(guiPreferences.playbackSpeed || 1), reviewLayout:localStorage.getItem("ewp-review-layout") || "one",
     translationLayout:localStorage.getItem("ewp-translation-review-layout") || "few", dictionaryDirectory:document.querySelector("#library-directory").value};
 }
 async function saveUserProfile(trigger) {
@@ -34,7 +34,7 @@ async function applyUserProfile(payload) {
   guiPreferences = {...preferences}; guiLocale = preferences.locale;
   document.querySelector("#gui-locale").value = guiLocale;
   document.querySelector("#gui-theme").value = preferences.theme; applyGuiTheme();
-  etaPreference.checked = preferences.showEta; playbackSpeed.value = String(preferences.playbackSpeed); applyPlaybackSpeed();
+  etaPreference.checked = preferences.showEta; playbackAudio.playbackRate = preferences.playbackSpeed;
   localStorage.setItem("ewp-review-layout", preferences.reviewLayout);
   document.querySelector("#review-layout").value = preferences.reviewLayout; updateReviewSections();
   localStorage.setItem("ewp-translation-review-layout", preferences.translationLayout);

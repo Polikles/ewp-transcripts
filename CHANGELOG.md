@@ -20,8 +20,8 @@ All notable changes to EWP-transcripts are documented here.
   default/selected workspace manifests, custom palettes and exact dictionary editions; independent
   dictionary import/export preserves original version, hash and provenance. Imports do not start
   jobs or replace the active editor, and missing external paths stay visibly unavailable.
-- Explicit playback-speed control for both mixed episodes and individual media, sentence-boundary
-  guidance and a red review note when ASR punctuation cannot support reliable sectioning.
+- Persistent native playback-speed preferences for mixed episodes and individual media, sentence-
+  boundary guidance and a red review note when ASR punctuation cannot support reliable sectioning.
 
 - Live transcription phase, elapsed time, approximate percentage and per-machine measured ETA
   ranges. Unknown/slow phases have explicit fallbacks; observer/cache failures cannot fail a job,
@@ -42,6 +42,20 @@ All notable changes to EWP-transcripts are documented here.
   GPU acceptance requirements, followed by the phase-based indicator and optional calibrated ETA.
 
 ### Fixed
+
+- Package A acceptance feedback: transcription-first rail labels and distinct ASR/workflow
+  completion, blocking saved-work restore progress with real queue counts, immediate save/load
+  busy feedback, and valid failed/cancelled history when a retry publishes its former planned path.
+- Retry / Ponów replaces its selected terminal row with a fresh attempt. GUI checking/planning
+  is one Dry-run step; missing confirmation preserves the reviewed plan while changed settings
+  remain invalid. Batch planning uses the owner gear. Starting manual review skips unused optional
+  LLM correction, including recovery from existing downstream artifacts.
+- Native source-player controls receive sufficient rail width, with the browser overflow/speed
+  menu replacing the permanent custom speed list. Native rates persist and remain profile-compatible.
+  Half-screen navigation/history controls retain usable alignment.
+- Localized cancellation, maintenance and save-omission messages; temporary inventory blocks stale
+  rows during refresh and discards outdated selections/previews. Raw ASR file and durable-media
+  retention guidance is clarified without starting the final EN/PL documentation rewrite.
 
 - Completed queue history can recover after original audio is moved, while still requiring its
   canonical result/output. Saved reviews, applied/export pointers and new cancelled history are

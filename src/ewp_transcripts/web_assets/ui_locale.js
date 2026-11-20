@@ -743,7 +743,7 @@ function guiUiText(value) {
   if (dynamic !== null) return value.replace(trimmed, dynamic);
   let translated = guiPolish.get(trimmed);
   if (!translated) {
-    const composite = /^(completed|failed|staged|queued|running) · (.+)$/.exec(trimmed);
+    const composite = /^(completed|failed|staged|queued|running|cancelled|cancel_requested) · (.+)$/.exec(trimmed);
     if (composite) return `${guiPolish.get(composite[1]) || composite[1]} · ${guiUiText(composite[2])}`;
     translated = trimmed.replace(/^Workspace saved: (.*)$/, 'Zapisano obszar pracy: $1')
       .replace(/^Workspace loaded: (.*)\. Provider credentials and confirmations were not restored\.$/, 'Wczytano obszar pracy: $1. Dane dostępowe i potwierdzenia nie zostały przywrócone.')

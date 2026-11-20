@@ -1,5 +1,7 @@
 # Package A owner acceptance checklist
 
+Current owner-feedback retest: [focused follow-up](GUI_PACKAGE_A_RETEST.md).
+
 Date: 2026-11-20. Scope: A1 recovery, A2 cancellation/retry, A3 temporary-workdir maintenance,
 A4 existing-export downloads. Package B stays gated on this checklist and fixes/retest acceptance.
 Use your working WSL installation and disposable recordings/output for cancellation tests. Existing
@@ -32,7 +34,7 @@ private transcript content or full profiles to public issues.
   Human verification/disclosure boxes stay unset, and any session API key stays absent.
 - [ ] A1.4 Optional, disposable copy only: move original media after completed ASR, save/reload the
   completed workspace. Review/export should recover while playback honestly needs its original
-  media. Restore the media afterwards. Staged/failed/cancelled attempts still require their input.
+  media. Restore the media afterwards. Staged work and actual retries still require their input; failed/cancelled terminal history can load without it.
 
 ## A2 — cancellation and retry
 
@@ -44,8 +46,7 @@ private transcript content or full profiles to public issues.
   Cancellation requested just after publication begins may be refused: the completed publication
   remains valid. Do not expect forced GPU/thread termination or instant cancellation.
 - [ ] A2.3 Choose Retry from beginning on a cancelled/failed row. A fresh staged attempt appears;
-  Start queue enables and processes it from the beginning. The earlier terminal row remains
-  history. Completed ASR from other rows must not run again.
+  Start queue enables and processes it from the beginning. The selected old terminal row is replaced; its retained files remain. Completed ASR from other rows must not run again.
 - [ ] A2.4 Save/restart/load after cancellation. Cancelled history should remain terminal, not
   resume itself. Optional disposable negative case: change a staged source before starting;
   hash mismatch must reject it and require a new Inspect/Dry-run/confirmation.

@@ -23,7 +23,7 @@ function syncGuiStatusMotion() {
   for (const host of document.querySelectorAll('[role="status"]')) {
     const source = [...host.childNodes].map(node => guiNodeSources.get(node)?.source || node.textContent).join("").trim();
     const busy = host === guiWorking ? guiPendingRequests > 0 :
-      /^(Working…|Status: connecting|Inspecting(?:…| \d)|Planning…|Preparing recording audio…|Adding…|Generating (?:correction|translation)|Correction is running|Translation is running|Testing local dependencies…|Running .+…|Saving .+…|Loading .+…|Refreshing .+…|Checking[ ;…]|Copying .+ into this local GUI session…|Inventorying|Auto-save detected tracked changes; validating)/.test(source);
+      /^(Working…|Status: connecting|Inspecting(?:…| \d)|Planning(?:…| \d)|Preparing recording audio…|Adding…|Generating (?:correction|translation)|Correction is running|Translation is running|Testing local dependencies…|Running .+…|Saving .+…|Loading .+…|Restoring saved queue and editors…|Refreshing .+…|Checking[ ;…]|Copying .+ into this local GUI session…|Inventorying|Auto-save detected tracked changes; validating)/.test(source);
     host.classList.toggle("gui-status-working", busy);
     host.setAttribute("aria-busy", String(busy));
   }

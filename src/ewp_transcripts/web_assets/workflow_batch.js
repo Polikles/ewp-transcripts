@@ -80,7 +80,8 @@ async function runGuiBatch(kind, trigger) {
     }
     succeeded = true;
   } catch (error) {
-    guiBatchPlan = null; status.textContent = error.message;
+    if (!error.message.startsWith("GUI_CONFIRMATION_REQUIRED")) guiBatchPlan = null;
+    status.textContent = error.message;
     if (error.message.startsWith("GUI_DRY_RUN_REQUIRED")) highlightDryRun();
     if (kind === "transcriptions") await refreshJobs();
   } finally {

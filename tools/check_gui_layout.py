@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import time
 import wave
 from importlib.metadata import version
 from pathlib import Path
@@ -164,19 +165,17 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
         "request",
         lambda request: (
             inspections.append(request.post_data_json)
-            if request.url.endswith("/api/v1/inspect")
+            if request.url.endswith("/api/v1/dry-run")
             else None
         ),
     )
-    page.locator("#workflow button[value=inspect]").click()
-    expect(page.locator("#operation-status")).to_contain_text("Inspection completed")
+    page.locator("#workflow button[value=dry-run]").click()
+    expect(page.locator("#operation-status")).to_contain_text("Dry-run completed")
     expect(page.locator("#operation-summary")).to_contain_text(
         "* Recording language: selected processing value"
     )
     assert page.locator("#workflow-speaker-count").input_value() == "2"
     assert [item["language"] for item in inspections] == ["pl", "en"]
-    page.locator("#workflow button[value=dry-run]").click()
-    expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
     plans = json.loads(page.locator("#operation-result").text_content())
     assert len(plans) == 2 and sum(len(plan["jobs"]) for plan in plans) == 2
     # Changing an option invalidates the entire confirmed snapshot.
@@ -190,6 +189,9 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.locator("#workflow-speaker-count").dispatch_event("change")
     page.locator("#workflow button[value=dry-run]").click()
     expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
+    page.locator("#workflow button[value=transcriptions]").click()
+    expect(page.locator("#operation-status")).to_contain_text("GUI_CONFIRMATION_REQUIRED")
+    assert page.evaluate("guiBatchPlan !== null")
     page.locator("#workflow input[name=confirmed]").check()
     page.locator("#workflow button[value=transcriptions]").click()
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
@@ -200,7 +202,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
             page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
         ).to_be_disabled()
     expect(page.locator("#start-queue")).to_be_enabled()
-    expect(page.locator("#workflow button[value=inspect]")).to_be_disabled()
+    expect(page.locator("#workflow button[value=inspect]")).to_have_count(0)
     expect(page.locator("#workflow button[value=dry-run]")).to_be_disabled()
     expect(page.locator("#transcription-jobs input[type=checkbox]")).to_have_count(0)
     expect(
@@ -224,6 +226,16 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     stage(page, "correction")
     page.locator('#stage-queue-correction input[type="file"]').set_input_files(history_path)
     expect(page.locator("#stage-queue-review .stage-queue-item")).to_have_count(1)
+    stage(page, "workspace")
+    for job in page.evaluate("guiQueueJobs"):
+        label = page.locator("#gui-recordings button").filter(
+            has=page.locator("strong", has_text=job["planned_job_id"])
+        )
+        if job["status"] == "staged":
+            expect(label).to_contain_text("Next step: transcription")
+        else:
+            expect(label).to_contain_text("ASR completed")
+    check_pending_restore(page)
     stage(page, "workspace")
     expect(page.locator("#start-queue")).to_be_enabled()
     page.route(
@@ -251,6 +263,35 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.evaluate("queuePost('/api/v1/transcriptions/clear-current', {confirmed:true})")
     page.evaluate("refreshJobs()")
     expect(page.locator("#start-queue")).to_be_disabled()
+
+
+def check_pending_restore(page: Page) -> None:
+    """Restore two staged recordings plus completed history with visible real job counters."""
+    stage(page, "saved")
+    page.locator("#workspace-name").fill("Pending restore progress")
+    page.locator("#save-workspace").click()
+    expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
+    page.evaluate("""async () => {
+      await queuePost('/api/v1/transcriptions/clear-current', {confirmed:true});
+      await refreshJobs();
+      window.restoreCounts=[];
+      const node=document.querySelector('#gui-restore-count');
+      new MutationObserver(()=>window.restoreCounts.push(node.textContent))
+        .observe(node,{childList:true,characterData:true,subtree:true});
+    }""")
+    page.locator("#load-workspace").click()
+    expect(page.locator("#gui-workspace-restore")).to_be_visible()
+    expect(page.locator("#gui-restore-count")).to_have_text("0/3")
+    expect(page.locator("#gui-workspace-restore")).to_be_hidden(timeout=15000)
+    counts = page.evaluate("window.restoreCounts")
+    assert "0/3" in counts and "3/3" in counts, counts
+    assert any(value in counts for value in ("1/3", "2/3")), counts
+    assert sorted(job["status"] for job in page.evaluate("guiQueueJobs")) == [
+        "completed",
+        "staged",
+        "staged",
+    ]
+    assert not page.locator('#workflow input[name="confirmed"]').is_checked()
 
 
 def check_runtime_feedback(page: Page, output: Path) -> None:
@@ -560,7 +601,8 @@ def check_motion_feedback(page: Page, output: Path) -> None:
         "e=>getComputedStyle(e,'::before').backgroundImage==='none'"
     )
     for selector, message in [
-        ("#operation-status", "Inspecting…"),
+        ("#operation-status", "Planning 1 / 2: episode"),
+        ("#workspace-status", "Saving current work…"),
         ("#correction-status", "Correction is running; do not close the server."),
         ("#translation-status", "Translation is running; do not close the server."),
         ("#operation-status", "Status: connecting"),
@@ -589,15 +631,114 @@ def check_motion_feedback(page: Page, output: Path) -> None:
     svg.close()
 
 
+def check_native_player_controls(page: Page, output: Path) -> None:
+    """Use real mouse clicks on Chromium's native overflow and speed controls."""
+    page.wait_for_function("() => playbackAudio.readyState >= 1")
+    page.evaluate("document.fonts.ready")
+    original = page.viewport_size
+    client = page.context.new_cdp_session(page)
+
+    def nodes():
+        return [
+            item
+            for item in client.send("Accessibility.getFullAXTree")["nodes"]
+            if not item.get("ignored")
+        ]
+
+    def find(predicate):
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            found = next((item for item in nodes() if predicate(item)), None)
+            if found is not None:
+                return found
+            page.wait_for_timeout(30)
+        page.screenshot(path=str(output / "native-menu-failure.png"))
+        diagnostics = [
+            (item.get("role", {}).get("value"), item.get("name", {}).get("value"))
+            for item in nodes()
+            if "menuitem" in item.get("role", {}).get("value", "")
+            or "speed" in item.get("name", {}).get("value", "")
+        ]
+        raise AssertionError(f"Native audio control did not become accessible: {diagnostics}")
+
+    def click(node):
+        remote = client.send("DOM.resolveNode", {"backendNodeId": node["backendDOMNodeId"]})[
+            "object"
+        ]["objectId"]
+        try:
+            # Native menu accessibility nodes can be visually hidden inputs inside labels.
+            rect = client.send(
+                "Runtime.callFunctionOn",
+                {
+                    "objectId": remote,
+                    "functionDeclaration": """async function(){
+                      const target=this.closest('label') || this;
+                      let previous='', stable=0;
+                      for(let i=0;i<60;i++){
+                        await new Promise(requestAnimationFrame);
+                        const r=target.getBoundingClientRect();
+                        const box={x:r.x,y:r.y,width:r.width,height:r.height};
+                        const key=JSON.stringify(box);
+                        stable=key===previous?stable+1:0; previous=key;
+                        if(stable>=3) return box;
+                      }
+                      throw new Error('Native control did not settle');
+                    }""",
+                    "returnByValue": True,
+                    "awaitPromise": True,
+                },
+            )["result"]["value"]
+            page.mouse.click(rect["x"] + rect["width"] / 2, rect["y"] + rect["height"] / 2)
+        finally:
+            client.send("Runtime.releaseObject", {"objectId": remote})
+
+    for width in (1440, 960, 900, 390):
+        page.set_viewport_size({"width": width, "height": 1000})
+        page.locator("#gui-playback-audio").evaluate(
+            "e=>e.scrollIntoView({behavior:'instant',block:'center'})"
+        )
+        assert page.locator("#gui-playback-audio").evaluate(
+            "e=>e.getBoundingClientRect().width >= 300"
+        )
+        overflow = find(
+            lambda item: (
+                item.get("role", {}).get("value") == "button"
+                and item.get("name", {}).get("value") == "show more media controls"
+            )
+        )
+        click(overflow)
+        speed = find(lambda item: item.get("name", {}).get("value") == "show playback speed menu")
+        if width == 960:
+            click(speed)
+            choice = find(
+                lambda item: (
+                    item.get("role", {}).get("value") == "menuitemcheckbox"
+                    and item.get("name", {}).get("value", "").startswith("1.5")
+                )
+            )
+            click(choice)
+            page.wait_for_function(
+                "() => playbackAudio.playbackRate === 1.5 && guiPreferences.playbackSpeed === 1.5"
+            )
+        page.keyboard.press("Escape")
+    page.locator("#gui-playback-audio").screenshot(path=str(output / "native-audio-controls.png"))
+    page.set_viewport_size(original)
+    client.detach()
+
+
 def check_source_playback(page: Page, output: Path) -> None:
     """Decode real synthetic source audio, seek exact words and retain grouped-track state."""
     expect(page.locator("#gui-source-playback")).to_be_visible()
     page.wait_for_function("() => playbackAudio.readyState >= 1")
     expect(page.locator("#gui-playback-source option")).to_have_count(1)
     assert page.locator("#gui-playback-source").input_value() == "mix"
+    check_native_player_controls(page, output)
     for speed in ("1.5", "2", "1"):
-        page.locator("#gui-playback-speed").select_option(speed)
+        page.evaluate("rate => { playbackAudio.playbackRate = Number(rate); }", speed)
         assert page.evaluate("playbackAudio.playbackRate") == float(speed)
+        page.wait_for_function("rate => guiPreferences.playbackSpeed === Number(rate)", arg=speed)
+    expect(page.locator("#gui-playback-speed")).to_have_count(0)
+    assert page.locator("#gui-playback-audio").evaluate("e=>e.getBoundingClientRect().width >= 300")
     expect(page.locator(".review-source-files").first).to_contain_text("playback-")
     seek = page.locator(".review-seek").nth(1)
     assert seek.evaluate(
@@ -681,9 +822,9 @@ def check_video_staging(page: Page, output: Path) -> None:
     assert ".mp4" in picker.get_attribute("accept")
     picker.set_input_files(video)
     expect(page.locator("#gui-audio-choices li")).to_have_count(1)
-    with page.expect_response("**/api/v1/inspect") as response:
-        page.locator("#workflow button[value=inspect]").click()
-    inspected = response.value.json()["result"]["episodes"][0]["sources"][0]
+    with page.expect_response("**/api/v1/dry-run") as response:
+        page.locator("#workflow button[value=dry-run]").click()
+    inspected = response.value.json()["result"]["inspection"]["episodes"][0]["sources"][0]
     assert inspected["media_type"] == "video" and inspected["stream"]["index"] == 1
     page.locator("#workflow button[value=dry-run]").click()
     expect(page.locator("#operation-status")).to_have_text("Dry-run completed")

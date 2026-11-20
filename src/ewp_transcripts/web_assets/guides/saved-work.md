@@ -29,3 +29,7 @@ Completed review/export can recover without original audio when the canonical re
 playback still requires the original media. Credentials and human consent/verification remain unset.
 Refresh Existing export downloads in either review stage to download an existing applied version.
 Temporary-workdir cleanup is a separate Settings & About action with an explicit preview.
+
+Loading shows a modal with loaded/total queue jobs until the queue and saved editors are ready.
+Failed/cancelled history may reference moved media without being omitted; actual retry still
+requires unchanged original sources. Retry replaces its selected old row with a new staged attempt.

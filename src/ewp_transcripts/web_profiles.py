@@ -38,7 +38,7 @@ class GuiPreferences(BaseModel):
     @field_validator("playbackSpeed")
     @classmethod
     def supported_speed(cls, value: float) -> float:
-        if value not in {0.75, 1, 1.25, 1.5, 1.75, 2}:
+        if not 0.25 <= value <= 4:
             raise ValueError("Unsupported playback speed")
         return value
 

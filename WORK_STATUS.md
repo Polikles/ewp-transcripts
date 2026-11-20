@@ -4,7 +4,31 @@ Last updated: **2026-11-20**.
 
 ## Active task and resume pointers
 
-Current request: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
+Current request: [package A acceptance fixes](docs/checkpoints/2026-11-20-package-a-feedback.md).
+Baseline clean main abe9ed2. Reported A acceptance fixes are implemented and verified; use the
+[focused owner retest](Instructions/GUI_PACKAGE_A_RETEST.md). B remains gated on A acceptance.
+
+Queue rail correctly distinguishes pre-ASR / ASR complete / workflow complete. Saved-work loading
+has a blocking loaded/total modal through queue/editor restoration. Retry / Ponów replaces its old
+row. Valid failed/cancelled history survives missing media and a later published planned path;
+actual staged/retried source hashes remain strict. Missing confirmation preserves the unchanged
+batch plan. Public GUI inspection/planning is merged; CLI/API Inspect remains compatible.
+Manual review implies skipping unused LLM correction. PL cleanup/status/omission text and stale
+inventory/preview selection are corrected. Native audio controls have sufficient width, with no
+permanent duplicate rate selector; native speed persists, including profiles.
+
+Evidence: make check PASS (928 tests, mypy 106 source files), 12 integration tests; 144 browser
+layout/workflow cases and mixed 3-job progress pass, plus 12 maintenance layouts/PL feedback and
+native overflow/speed at four widths across three reloads. Wheel/sdist and 57 resources/help/CLI
+smoke pass with existing model-free base dependencies; full clean ML install is not claimed.
+Owner's real WSL cancellation/recovery/export successes are retained; agent GPU/Windows/provider
+qualification is not claimed. See checkpoint for final restart/download, evidence and cleanup.
+
+Current scope is A feedback/retest only. Complete EN–PL two-column approval still follows feature
+completion; final EN revision/PL manuals wait for approval. Only necessary changed-stage/raw-output
+instructions are updated now. Artist ZIP/demo remain unchanged, no paid calls or model pin changes.
+
+Previous implementation checkpoint: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
 Baseline clean main 6322a4a. Package A is implemented and automatically verified; owner testing
 and fix/retest acceptance are next. The earlier planning-only hold was revoked for A.
 Use [the concrete checklist](Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md). Package B is not started.

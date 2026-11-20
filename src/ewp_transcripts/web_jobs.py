@@ -277,6 +277,10 @@ class GuiTranscriptionQueue:
                     "workflow_skips": set(),
                 }
             )
+            self._order.remove(previous.job_id)
+            del self._jobs[previous.job_id]
+            self._live_progress.pop(previous.job_id, None)
+            self._cancellations.pop(previous.job_id, None)
             self._jobs[job.job_id] = job
             self._order.appendleft(job.job_id)
             return job
@@ -701,7 +705,12 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
 
     return GuiWorkflowProgress(
         transcription=transcription,
-        correction=stage("correction", correction_path),
+        correction=(
+            GuiWorkflowStage(state="skipped")
+            if not correction_path
+            and any((review_path, original_export_path, translation_path, translated_export_path))
+            else stage("correction", correction_path)
+        ),
         review=stage("review", review_path),
         original_export=stage("original_export", original_export_path),
         assisted_translation=stage(

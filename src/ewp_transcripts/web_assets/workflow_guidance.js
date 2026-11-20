@@ -52,14 +52,9 @@ function numberWorkflowSections() {
   const outputLabel = document.querySelector('label[for="output-path"]');
   const outputInput = document.querySelector("#output-path");
   document.querySelector('label[for="input-path"]').before(outputLabel, outputInput, chooseOutputFeedback);
-  const inspectActions = form.querySelector(".actions");
-  markWorkflowStep("workspace", 2, inspectActions);
-  const confirmation = form.querySelector('input[name="confirmed"]').closest("label");
-  const planActions = document.createElement("div"); planActions.className = "actions";
-  planActions.append(form.querySelector('button[value="dry-run"]'));
-  confirmation.before(planActions);
-  markWorkflowStep("workspace", 3, planActions);
-  markWorkflowStep("workspace", 4, document.querySelector("#queue-scroll-hint").previousElementSibling, {rename:true});
+  const planningActions = form.querySelector(".actions");
+  markWorkflowStep("workspace", 2, planningActions);
+  markWorkflowStep("workspace", 3, document.querySelector("#queue-scroll-hint").previousElementSibling, {rename:true});
 
   markWorkflowStep("review", 2, document.querySelector("#review-speaker-names summary, #review-speaker-names legend"), {rename:true});
   markWorkflowStep("review", 3, document.querySelector("#review-navigation"));

@@ -365,3 +365,44 @@ def test_workspace_retains_terminal_queue_history_without_credentials(
         "translation": "INVALID_TRANSLATION_RESPONSE"
     }
     assert restored.terminal_jobs[1].status == terminal_status
+
+
+@pytest.mark.parametrize("missing_media", [False, True])
+def test_cancelled_history_is_saved_when_retry_published_the_planned_result(
+    tmp_path: Path, missing_media: bool
+) -> None:
+    output = tmp_path / "output"
+    output.mkdir()
+    media = tmp_path / "episode.wav"
+    if not missing_media:
+        media.write_bytes(b"audio")
+    result = output / "episode_results.json"
+    result.write_text("{}")
+    now = datetime.now(UTC)
+    workspaces = GuiWorkspaceController(
+        state_directory=tmp_path / "state",
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+    )
+    saved = workspaces.save(
+        name="cancelled attempt",
+        current_step="workspace-heading",
+        fields={},
+        terminal_jobs=[
+            dict(
+                job_id="cancelled",
+                status="cancelled",
+                input_path=str(media),
+                output_directory=str(output),
+                planned_job_id="episode",
+                planned_result_path=str(result),
+                source_sha256="a" * 64,
+                language="pl",
+                speaker_count=2,
+                created_at=now,
+                updated_at=now,
+            )
+        ],
+        omit_unavailable=True,
+    )
+    assert len(saved.terminal_jobs) == 1
+    assert workspaces.load(saved.workspace_id).terminal_jobs[0].status == "cancelled"

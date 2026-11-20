@@ -13,6 +13,7 @@ import sys
 import tempfile
 import threading
 import webbrowser
+from collections.abc import Callable
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -44,6 +45,7 @@ from ewp_transcripts.web_jobs import (
 )
 from ewp_transcripts.web_media import GuiMediaController, media_byte_range
 from ewp_transcripts.web_profiles import PROFILE_LIMIT, GuiProfileController
+from ewp_transcripts.web_restore import GuiRestoreProgress
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_source_cleanup import (
     GuiManagedSourceCleanupError,
@@ -58,7 +60,11 @@ from ewp_transcripts.web_workflows import (
     default_gui_prohibited_roots,
     require_completed_canonical_result,
 )
-from ewp_transcripts.web_workspaces import GuiWorkspaceController, default_workspace_directory
+from ewp_transcripts.web_workspaces import (
+    GuiWorkspaceController,
+    default_workspace_directory,
+    resolve_optional_workspace_file,
+)
 from ewp_transcripts.workdirs import allocate_work_directory, cleanup_work_directory
 
 API_VERSION = "1.0"
@@ -381,6 +387,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("runtime_progress.js").read_bytes()
         body += b"\n" + assets.joinpath("workflow_batch.js").read_bytes()
         body += b"\n" + assets.joinpath("user_profiles.js").read_bytes()
+        body += b"\n" + assets.joinpath("workspace_restore.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -452,6 +459,7 @@ class LocalGuiServer(ThreadingHTTPServer):
             resolve_path=self.gui_workflows.resolve_allowed_path,
             registry=default_workspace_directory().parent / "export-downloads.json",
         )
+        self.gui_restore = GuiRestoreProgress()
         self.gui_workdirs = GuiWorkdirController(application_config.runtime.work_root)
         self.gui_csrf_token = secrets.token_urlsafe(32)
         self.gui_dependencies_tested = False
@@ -1188,15 +1196,32 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         "unavailable_fields_omitted": unavailable_fields_omitted,
                         "unavailable_jobs_omitted": unavailable_jobs_omitted,
                     }
+                elif path == "/api/v1/workspaces/restore-progress":
+                    payload = self.server.gui_restore.snapshot(str(document.get("restore_id", "")))
                 elif path == "/api/v1/workspaces/load":
-                    loaded = workspaces.load(str(document.get("workspace_id", "")))
-                    restored_terminal = self._restore_workspace_terminal_jobs(loaded.terminal_jobs)
-                    restored = self._restore_workspace_staged_jobs(loaded.staged_jobs)
-                    payload = {
-                        "workspace": loaded.model_dump(mode="json"),
-                        "restored_staged_jobs": restored,
-                        "restored_terminal_jobs": restored_terminal,
-                    }
+                    restore_id = str(document.get("restore_id") or secrets.token_urlsafe(24))
+                    self.server.gui_restore.start(restore_id)
+                    succeeded = False
+                    try:
+                        loaded = workspaces.load(
+                            str(document.get("workspace_id", "")),
+                            on_read=self.server.gui_restore.total,
+                        )
+                        restored_terminal = self._restore_workspace_terminal_jobs(
+                            loaded.terminal_jobs
+                        )
+                        self.server.gui_restore.advance(len(loaded.terminal_jobs))
+                        restored = self._restore_workspace_staged_jobs(
+                            loaded.staged_jobs, progress=self.server.gui_restore.advance
+                        )
+                        payload = {
+                            "workspace": loaded.model_dump(mode="json"),
+                            "restored_staged_jobs": restored,
+                            "restored_terminal_jobs": restored_terminal,
+                        }
+                        succeeded = True
+                    finally:
+                        self.server.gui_restore.finish(restore_id, succeeded=succeeded)
                 elif path == "/api/v1/workspaces/delete":
                     workspaces.delete(str(document.get("workspace_id", "")))
                     payload = {"deleted": True}
@@ -1389,6 +1414,17 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
+                if path in {
+                    "/api/v1/reviews/prepare",
+                    "/api/v1/reviews/load",
+                    "/api/v1/reviews/session/restore",
+                    "/api/v1/reviews/save",
+                    "/api/v1/reviews/preview",
+                    "/api/v1/reviews/apply",
+                }:
+                    self.server.gui_transcriptions.skip_workflow_stage(
+                        str(payload.get("result_path", result)), "correction"
+                    )
             except ApplicationError as error:
                 self._write_response(
                     _json_response(
@@ -2536,7 +2572,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self._write_response(_json_response(HTTPStatus.OK, payload))
         return
 
-    def _restore_workspace_staged_jobs(self, staged_jobs: tuple[dict[str, Any], ...]) -> int:
+    def _restore_workspace_staged_jobs(
+        self,
+        staged_jobs: tuple[dict[str, Any], ...],
+        *,
+        progress: Callable[[int], None] | None = None,
+    ) -> int:
         """Rebuild only hash-validated staged jobs after a GUI restart."""
 
         if not staged_jobs:
@@ -2560,6 +2601,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 for job in active
             }
             if actual == expected:
+                if progress is not None:
+                    progress(len(staged_jobs))
                 return 0
             raise ValueError(
                 "An active transcription queue cannot be replaced by saved workspace jobs"
@@ -2615,6 +2658,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 language=language,
                 speaker_count=speaker_count,
             )
+            if progress is not None:
+                progress(1)
         return len(staged_jobs)
 
     def _restore_workspace_terminal_jobs(
@@ -2632,10 +2677,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         )
         for job in jobs:
             if job.status != "completed":
-                self.server.gui_workflows.resolve_allowed_path(job.input_path)
+                resolve_optional_workspace_file(
+                    job.input_path, self.server.gui_workflows.resolve_allowed_path
+                )
             self.server.gui_workflows.resolve_allowed_path(job.output_directory, directory=True)
-            self.server.gui_workflows.resolve_allowed_path(
-                job.planned_result_path, directory=job.status in {"failed", "cancelled"}
+            resolve_optional_workspace_file(
+                job.planned_result_path, self.server.gui_workflows.resolve_allowed_path
             )
             if job.status == "completed":
                 if not job.result_path:

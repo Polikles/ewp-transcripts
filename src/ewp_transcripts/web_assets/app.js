@@ -120,8 +120,8 @@ removeCompletedQueueItems.addEventListener("click", async () => {
   } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
 });
 function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; correctionForm.elements.namedItem("confirmed").checked = false; correctionForm.elements.namedItem("allow_remote_endpoint").checked = false; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
-function nextWorkflowStage(job) { const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
-function nextWorkflowLabel(stage) { return ({correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
+function nextWorkflowStage(job) { if (job.status !== "completed" || !job.result_path) return "transcription"; const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
+function nextWorkflowLabel(stage) { return ({transcription: "Next step: transcription", correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
 function advanceQueueJob(job) {
   guiActiveResult = job.result_path || "";
   const resultPath = job.result_path;
@@ -159,11 +159,15 @@ function advanceQueueJob(job) {
     target_language: job.language === "pl" ? "en" : "pl",
   });
 }
+function queueJobStatusLabel(job) {
+  if (job.status === "completed") return queueJobFinished(job) ? "Workflow completed" : "ASR completed";
+  return job.status === "cancel_requested" ? "CANCELLATION REQUESTED" : job.status.toUpperCase();
+}
 function addJobActions(job, action) {
   if (["staged", "queued", "running", "cancel_requested", "failed", "cancelled"].includes(job.status)) {
     const retry = ["failed", "cancelled"].includes(job.status);
     const button = document.createElement("button"); button.type = "button";
-    button.textContent = retry ? "Retry from beginning" : job.status === "cancel_requested" ? "Cancellation requested…" : "Cancel task";
+    button.textContent = retry ? "Retry" : job.status === "cancel_requested" ? "Cancellation requested…" : "Cancel task";
     button.title = retry ? "Stage a fresh attempt with the same settings. Source hashes are checked again." : "Cancellation waits for the current processing stage to return. Final publication cannot be cancelled.";
     button.disabled = job.status === "cancel_requested";
     button.addEventListener("click", async () => { button.disabled = true; try {
@@ -296,7 +300,7 @@ async function refreshJobs() {
     const status = document.createElement("td");
     status.className = `status-${job.status}`;
     const statusText = document.createElement("span"); statusText.className = "gui-job-status";
-    statusText.textContent = job.status === "cancel_requested" ? "CANCELLATION REQUESTED" : job.status.toUpperCase();
+    statusText.textContent = queueJobStatusLabel(job);
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
@@ -753,7 +757,7 @@ function selectGuiAudio(episode, announce = true) {
   document.querySelector("#workflow").elements.confirmed.checked = false;
   document.querySelector("#operation-summary").replaceChildren();
   document.querySelector("#operation-result").textContent = "";
-  if (announce) document.querySelector("#operation-status").textContent = `Selected: ${episode.files.map(file=>file.name).join(", ")}. Inspect, then run dry-run to review this episode before adding it to the queue.`;
+  if (announce) document.querySelector("#operation-status").textContent = `Selected: ${episode.files.map(file=>file.name).join(", ")}. Review the processing plan before adding these jobs to the queue.`;
   renderGuiAudioChoices();
 }
 function renderGuiAudioChoices() {
@@ -767,9 +771,9 @@ function renderGuiAudioChoices() {
     const active = activeGuiAudio?.paths.join("|") === episode.paths.join("|") && workflowInput.value === episode.paths[0];
     const staged = episode.files.some(file => file.staged);
     use.disabled = staged || guiBatchBusy;
-    use.textContent = staged ? "Added to queue" : active ? "Selected for inspection" : "Select episode";
+    use.textContent = staged ? "Added to queue" : active ? "Selected for planning" : "Select episode";
     use.setAttribute("aria-pressed", String(active));
-    use.addEventListener("click", () => { selectGuiAudio(episode); document.querySelector('#workflow button[value="inspect"]').focus(); });
+    use.addEventListener("click", () => { selectGuiAudio(episode); document.querySelector('#workflow button[value="dry-run"]').focus(); });
     const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove from list";
     remove.disabled = guiBatchBusy;
     remove.addEventListener("click", () => {
@@ -871,7 +875,7 @@ function workspaceKey(workspaceId, storageDirectory) { return JSON.stringify([st
 function selectedWorkspaceReference() {
   const option = workspaceList.selectedOptions[0];
   if (!option?.dataset.workspaceId) return null;
-  return {workspaceId: option.dataset.workspaceId, storageDirectory: option.dataset.storageDirectory || "", key: option.value};
+  return {workspaceId: option.dataset.workspaceId, storageDirectory: option.dataset.storageDirectory || "", key: option.value, queueCount:Number(option.dataset.queueCount || 0)};
 }
 function activateWorkspace(workspace, storageDirectory) { activeWorkspaceId = workspace.workspace_id; activeWorkspaceStorageDirectory = storageDirectory || ""; activeWorkspaceKey = workspaceKey(activeWorkspaceId, activeWorkspaceStorageDirectory); workspaceAutosave.disabled = false; lastWorkspaceFingerprint = workspaceFingerprint(); workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; }
 function showWorkspacePendingState() { if (activeWorkspaceId && workspaceAutosave.checked && !workspaceAutosave.disabled && workspaceFingerprint() !== lastWorkspaceFingerprint) workspaceAutosaveStatus.textContent = "Changes pending for auto-save. They will be validated at the next 60-second check."; }
@@ -967,9 +971,10 @@ cleanupManagedSourcesButton.addEventListener("click", async () => {
   } catch (error) { managedSourcesStatus.textContent = error.message; }
 });
 function updateWorkspaceSelectionControls() { const selectedWorkspace = selectedWorkspaceReference(); const available = selectedWorkspace && workspaceList.selectedOptions[0]?.dataset.available === "true"; loadWorkspaceButton.disabled = !available; loadWorkspaceButton.title = selectedWorkspace && !available ? "This saved workspace references unavailable paths. It can still be removed or overwritten." : ""; deleteWorkspaceButton.disabled = !selectedWorkspace; workspaceAutosave.disabled = !available || workspaceList.value !== activeWorkspaceKey; if (workspaceAutosave.disabled) workspaceAutosaveStatus.textContent = "Auto-save inactive: load an available workspace first."; }
-async function refreshWorkspaces(selectedKey = "", options = {}) { const payload = await workspacePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = workspaceKey(item.workspace_id, item.storage_directory); option.dataset.workspaceId = item.workspace_id; option.dataset.storageDirectory = item.storage_directory || ""; option.dataset.available = String(item.available); option.textContent = `${item.name} · ${item.catalog} catalog · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.title = item.storage_directory || "Private default workspace catalog"; option.selected = option.value === selectedKey; workspaceList.append(option); } updateWorkspaceSelectionControls(); }
+async function refreshWorkspaces(selectedKey = "", options = {}) { const payload = await workspacePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = workspaceKey(item.workspace_id, item.storage_directory); option.dataset.workspaceId = item.workspace_id; option.dataset.storageDirectory = item.storage_directory || ""; option.dataset.available = String(item.available); option.dataset.queueCount = String(item.queue_count || 0); option.textContent = `${item.name} · ${item.catalog} catalog · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.title = item.storage_directory || "Private default workspace catalog"; option.selected = option.value === selectedKey; workspaceList.append(option); } updateWorkspaceSelectionControls(); }
 document.querySelector("#refresh-workspaces").addEventListener("click", async () => { try { await refreshWorkspaces(workspaceList.value); workspaceStatus.textContent = "Saved workspace list refreshed."; } catch (error) { workspaceStatus.textContent = error.message; } });
 document.querySelector("#save-workspace").addEventListener("click", async () => {
+  workspaceStatus.textContent = "Saving current work…";
   try {
     if (reviewDocument && reviewDirty) await saveReviewDraft();
     if (translationReview && translationReviewDirty && !(await saveEnhancedTranslationReview())) {
@@ -995,12 +1000,13 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
     const unavailableFieldsOmitted = payload.unavailable_fields_omitted || 0;
     const omissions = [];
     if (temporaryOmitted) omissions.push(`${temporaryOmitted} session-picked queue item${temporaryOmitted === 1 ? "" : "s"} omitted because their temporary source cannot survive a GUI restart.`);
-    if (unavailableJobsOmitted) omissions.push(`${unavailableJobsOmitted} unavailable queue item${unavailableJobsOmitted === 1 ? "" : "s"} omitted; add its original source again before resuming it.`);
+    if (unavailableJobsOmitted) omissions.push(`${unavailableJobsOmitted} unavailable queue item${unavailableJobsOmitted === 1 ? "" : "s"} omitted; check missing source or result files before restoring it.`);
     if (unavailableFieldsOmitted) omissions.push(`${unavailableFieldsOmitted} stale file field${unavailableFieldsOmitted === 1 ? "" : "s"} cleared.`);
-    workspaceStatus.textContent = `Workspace saved: ${saved.name}. ${omissions.join(" ")}`;
+    workspaceStatus.textContent = `Workspace saved: ${saved.name}.`;
+    for (const message of omissions) { const detail = document.createElement("span"); detail.textContent = message; workspaceStatus.append(" ", detail); }
   } catch (error) { workspaceStatus.textContent = error.message; }
 });
-document.querySelector("#load-workspace").addEventListener("click", async () => { const selectedWorkspace = selectedWorkspaceReference(); if (!selectedWorkspace) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } try { if (reviewDocument && reviewDirty) await saveReviewDraft(); if (translationReview && translationReviewDirty && !(await saveEnhancedTranslationReview())) return; const payload = await workspacePost("/api/v1/workspaces/load", {workspace_id: selectedWorkspace.workspaceId}, {storageDirectory: selectedWorkspace.storageDirectory}); resetActiveReviewState(); clearActiveTranslationReview(); await applyWorkspaceFields(payload.workspace.fields); await refreshJobs(); workspaceName.value = payload.workspace.name; lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep; activateWorkspace(payload.workspace, selectedWorkspace.storageDirectory); workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`; const heading = document.getElementById(payload.workspace.current_step); guiScrollTo(heading, {behavior: "smooth"}); } catch (error) { workspaceStatus.textContent = error.message; } });
+document.querySelector("#load-workspace").addEventListener("click", loadSelectedWorkspace);
 importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const targetStorageDirectory = workspaceDirectory.value; const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(targetStorageDirectory)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(workspaceKey(payload.workspace.workspace_id, targetStorageDirectory), {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
 deleteWorkspaceButton.addEventListener("click", async () => { const selectedWorkspace = selectedWorkspaceReference(); if (!selectedWorkspace) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } const selected = workspaceList.selectedOptions[0]?.textContent || "this saved work state"; if (!window.confirm(`Remove ${selected}? This deletes only its saved workspace JSON, not transcripts, reviews, exports, or dictionaries.`)) return; try { await workspacePost("/api/v1/workspaces/delete", {workspace_id: selectedWorkspace.workspaceId}, {storageDirectory: selectedWorkspace.storageDirectory}); activeWorkspaceId = ""; activeWorkspaceStorageDirectory = ""; activeWorkspaceKey = ""; workspaceAutosave.disabled = true; workspaceName.value = ""; await refreshWorkspaces("", {feedback: false}); workspaceStatus.textContent = "Saved work state removed."; workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load a workspace first."; } catch (error) { workspaceStatus.textContent = error.message; } });
 clearCurrentStateButton.addEventListener("click", async () => {
@@ -1026,7 +1032,7 @@ clearCurrentStateButton.addEventListener("click", async () => {
 });
 workspaceList.addEventListener("change", updateWorkspaceSelectionControls);
 workspaceAutosave.addEventListener("change", () => { workspaceAutosaveStatus.textContent = workspaceAutosave.checked ? "Auto-save active. The next change-sensitive check runs within 60 seconds." : "Auto-save is off for this active workspace."; });
-setInterval(async () => { if (!workspaceAutosave.checked || workspaceAutosave.disabled || workspaceAutosaveBusy || !activeWorkspaceId) return; const fingerprint = workspaceFingerprint(); if (fingerprint === lastWorkspaceFingerprint) { workspaceAutosaveStatus.textContent = "Auto-save checked: no tracked workflow-field changes to save."; return; } workspaceAutosaveBusy = true; workspaceAutosaveStatus.textContent = "Auto-save detected tracked changes; validating workspace paths…"; try { const payload = await workspacePost("/api/v1/workspaces/save", {workspace_id: activeWorkspaceId, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}, {feedback: false, storageDirectory: activeWorkspaceStorageDirectory}); workspaceName.value = payload.workspace.name; lastWorkspaceFingerprint = workspaceFingerprint(); await refreshWorkspaces(activeWorkspaceKey, {feedback: false}); workspaceStatus.textContent = `Workspace auto-saved: ${payload.workspace.name}.`; workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored."; } catch (error) { workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`; } finally { workspaceAutosaveBusy = false; } }, 60000);
+setInterval(async () => { if (workspaceRestoreBusy || !workspaceAutosave.checked || workspaceAutosave.disabled || workspaceAutosaveBusy || !activeWorkspaceId) return; const fingerprint = workspaceFingerprint(); if (fingerprint === lastWorkspaceFingerprint) { workspaceAutosaveStatus.textContent = "Auto-save checked: no tracked workflow-field changes to save."; return; } workspaceAutosaveBusy = true; workspaceAutosaveStatus.textContent = "Auto-save detected tracked changes; validating workspace paths…"; try { const payload = await workspacePost("/api/v1/workspaces/save", {workspace_id: activeWorkspaceId, name: workspaceName.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields()}, {feedback: false, storageDirectory: activeWorkspaceStorageDirectory}); workspaceName.value = payload.workspace.name; lastWorkspaceFingerprint = workspaceFingerprint(); await refreshWorkspaces(activeWorkspaceKey, {feedback: false}); workspaceStatus.textContent = `Workspace auto-saved: ${payload.workspace.name}.`; workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored."; } catch (error) { workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`; } finally { workspaceAutosaveBusy = false; } }, 60000);
 const restoreReviewButton = document.querySelector("#restore-review");
 const restoredReviewButton = restoreReviewButton.cloneNode(true);
 restoreReviewButton.replaceWith(restoredReviewButton);
@@ -1591,16 +1597,23 @@ start();
 // Temporary pipeline workspaces are separate from durable browser-selected source copies.
 const tempWorkdirs = document.createElement("details");
 tempWorkdirs.id = "temporary-workdirs";
-tempWorkdirs.innerHTML = `<summary>Temporary work directories</summary><p class="field-hint">Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.</p><div class="actions"><label>Retention reason<select id="workdir-reason"><option value="">All</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="successful-retained">Successful, retained</option><option value="active">Active</option><option value="interrupted">Interrupted</option></select></label><label>Minimum age (days)<input id="workdir-age" type="number" min="0" value="0"></label><button type="button" id="workdir-refresh">Refresh temporary inventory</button></div><div id="workdir-list"></div><div class="actions"><button type="button" id="workdir-preview" disabled>Preview cleanup</button><button type="button" id="workdir-delete" disabled>Confirm deletion</button></div><p id="workdir-status" role="status"></p>`;
+tempWorkdirs.innerHTML = `<summary>Temporary work directories</summary><p class="field-hint">Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. Durable media copies are separate; use Managed source copies to remove unreferenced sources. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.</p><div class="actions"><label>Retention reason<select id="workdir-reason"><option value="">All</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="successful-retained">Successful, retained</option><option value="active">Active</option><option value="interrupted">Interrupted</option></select></label><label>Minimum age (days)<input id="workdir-age" type="number" min="0" value="0"></label><button type="button" id="workdir-refresh">Refresh temporary inventory</button></div><div id="workdir-list"></div><div class="actions"><button type="button" id="workdir-preview" disabled>Preview cleanup</button><button type="button" id="workdir-delete" disabled>Confirm deletion</button></div><p id="workdir-status" role="status"></p>`;
 dependencyPanel.after(tempWorkdirs);
 let workdirPreview = "";
+let workdirInventoryRequest = 0;
+let workdirPreviewRequest = 0;
 const workdirRequest = (action, fields={}) => queuePost(`/api/v1/workdirs/${action}`, {...fields, storage_directory:workspaceDirectory.value, fields:collectWorkspaceFields()});
-function invalidateWorkdirPreview() { workdirPreview = ""; document.querySelector("#workdir-delete").disabled = true; }
+function invalidateWorkdirPreview() { workdirPreviewRequest += 1; workdirPreview = ""; document.querySelector("#workdir-delete").disabled = true; }
 async function refreshWorkdirs() {
   invalidateWorkdirPreview();
   const status = document.querySelector("#workdir-status"), list = document.querySelector("#workdir-list");
+  const request = ++workdirInventoryRequest;
+  list.querySelectorAll("input").forEach(input=>{ input.disabled = true; });
+  document.querySelector("#workdir-preview").disabled = true;
+  status.textContent = "Refreshing temporary inventory…";
   try {
     const data = await workdirRequest("inventory", {reason:document.querySelector("#workdir-reason").value, older_than_days:Number(document.querySelector("#workdir-age").value)});
+    if (request !== workdirInventoryRequest) return;
     list.replaceChildren();
     for (const item of data.entries) {
       const row = document.createElement("label"); row.className = "workdir-row";
@@ -1608,7 +1621,7 @@ async function refreshWorkdirs() {
       box.addEventListener("change", () => { invalidateWorkdirPreview(); document.querySelector("#workdir-preview").disabled = !list.querySelector("input:checked"); });
       const description = document.createElement("span");
       const identity = document.createElement("span"); identity.setAttribute("data-gui-content", ""); identity.textContent = item.job_id;
-      const reason = document.createElement("span"); reason.textContent = ({failed:"Failed", cancelled:"Cancelled", "successful-retained":"Successful, retained", active:"Active", interrupted:"Interrupted", "legacy-unknown":"Legacy: creation time unknown"})[item.reason] || item.reason;
+      const reason = document.createElement("span"); reason.className = "workdir-retention-reason"; reason.textContent = ({failed:"Failed", cancelled:"Cancelled", "successful-retained":"Successful, retained", active:"Active", interrupted:"Interrupted", "legacy-unknown":"Legacy: creation time unknown"})[item.reason] || item.reason;
       const metadata = document.createElement("span"); metadata.setAttribute("data-gui-content", ""); metadata.textContent = ` · ${item.created_at || "—"} · ${(item.size_bytes / 1048576).toFixed(1)} MiB`;
       description.append(identity, " · ", reason, metadata);
       row.append(box, description);
@@ -1617,12 +1630,13 @@ async function refreshWorkdirs() {
     }
     document.querySelector("#workdir-preview").disabled = true;
     status.textContent = data.entries.length ? "Select unprotected temporary directories, then preview cleanup." : "No temporary work directories match these filters.";
-  } catch (error) { status.textContent = error.message; }
+  } catch (error) { if (request === workdirInventoryRequest) status.textContent = error.message; }
 }
 document.querySelector("#workdir-refresh").addEventListener("click", refreshWorkdirs);
 for (const id of ["workdir-reason", "workdir-age"]) document.getElementById(id).addEventListener("change", refreshWorkdirs);
-document.querySelector("#workdir-preview").addEventListener("click", async () => { invalidateWorkdirPreview(); try {
+document.querySelector("#workdir-preview").addEventListener("click", async () => { invalidateWorkdirPreview(); const request = workdirPreviewRequest; try {
   const data = await workdirRequest("preview", {ids:[...document.querySelectorAll("#workdir-list input:checked")].map(box=>box.value)});
+  if (request !== workdirPreviewRequest) return;
   workdirPreview = data.preview_token;
   document.querySelector("#workdir-status").textContent = `${data.entries.length} temporary directories selected; ${(data.size_bytes/1048576).toFixed(1)} MiB. Confirm deletion within five minutes.`;
   document.querySelector("#workdir-delete").disabled = false;

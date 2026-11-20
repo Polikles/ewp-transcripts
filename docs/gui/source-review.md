@@ -43,8 +43,9 @@ presentation; unresolved old section boundaries receive the same caution. Readin
 saved bytes. Explicit Save persists the displayed draft structure. Canonical JSON/timing and published
 revisions remain unchanged. These changes do not require repeating ASR.
 
-Playback speed (0.75× through 2×) is an explicit selector for both mixed audio and single-source
-recordings, independently of the browser's native audio menu. It persists as a display preference.
+The recording player has room for the browser's native controls, including its overflow menu
+and playback-speed option where supported. Rate changes persist as a display preference for
+both mixed episodes and individual recordings. The redundant permanent speed selector is removed.
 
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 

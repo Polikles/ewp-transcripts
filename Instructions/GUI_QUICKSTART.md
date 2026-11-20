@@ -1,5 +1,10 @@
 # EwP Transcripts GUI — quick start in WSL
 
+Current A owner-feedback changes: GUI inspection and planning are one Dry-run action; use the
+[focused retest](GUI_PACKAGE_A_RETEST.md). The complete terminology/manual revision remains
+after feature completion and owner EN–PL approval.
+
+
 Use the existing working WSL installation. This preview does not require another model download,
 a new distribution, Docker, or a desktop environment. [Consolidated manual test plan](GUI_PREVIEW_TEST_PLAN.md).
 

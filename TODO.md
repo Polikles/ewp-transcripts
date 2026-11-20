@@ -3,13 +3,35 @@
 Updated: 2026-11-20. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Current state: package A implemented; owner test/fix/retest gate
+## Current state: package A owner-feedback fixes implemented; focused retest pending
 
 Active checkpoint: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
 The owner explicitly instructed “ok, zaczynaj z A”. The earlier planning-only hold is revoked
 for A1–A4 and its verification/checklist. A is implemented and automatically verified; use the
 [owner checklist](Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md). Package B remains gated on
 owner acceptance of A.
+
+## Active A acceptance fixes — owner feedback
+
+Checkpoint: [A acceptance fixes](docs/checkpoints/2026-11-20-package-a-feedback.md).
+
+- [x] Correct rail next-step labels for staged/queued/running/failed/cancelled ASR; distinguish ASR complete from workflow finished.
+- [x] Show modal/translucent restore progress with loaded/total saved queue jobs until queue and editor recovery finish; no automatic ASR/consent.
+- [x] Retry replaces the failed/cancelled queue row with a fresh attempt; label Retry / Ponów.
+- [x] Fix valid cancelled attempts being omitted from saved work; accurately report actual omissions and localize the message.
+- [x] Merge GUI Inspect and Dry-run into one planning step, keeping safety/hash/explicit confirmation; first-use planning must remain valid when confirmation is checked.
+- [x] Show the custom gear during batch planning and restoration, and correct untranslated new cancellation/cleanup messages.
+- [x] Infer skipped optional LLM correction when manual review/downstream work begins, so next-step/finished state follows actual work.
+- [x] Explain raw ASR results/segments/transcript files and distinguish retained durable media from temporary cleanup; preserve owner-qualified cleanup/export behavior.
+- [x] Fix cramped/unstable native audio controls; remove the redundant permanent speed selector once browser controls have sufficient room, preserving seeking/mixed playback.
+- [x] Run focused regression/browser/restart/package checks, update retest checklist and commit/push A fixes. Package B remains gated.
+- [x] Record the final two-column EN–PL approval requirement after functional additions and before the full EN/PL manual rewrite. The actual task-10 export is still pending; no artist ZIP changes.
+- [ ] Owner runs [the focused feedback retest](Instructions/GUI_PACKAGE_A_RETEST.md); fix/retest any remaining A defects before B.
+
+Owner evidence: restart preserves edits and leaves ASR/checkboxes stopped/unset; waiting/running
+cancellation and no rerun of completed ASR work on WSL; temporary cancelled workdir deletion and
+versioned export downloads/restart recovery pass. Legacy workdirs remain protected, durable media
+remains present. These successes are retained while the reported defects are fixed.
 
 ## Package A — original tasks 1–4, in order
 
@@ -57,8 +79,8 @@ native-Windows execution. This does not block A planning or its later authorized
 
 ## Acceptance already retained
 
-Owner accepts recent GUI/workflow, browsers/palette and current profiles provisionally. Latest
-full-restart recovery and full profile exchange are not owner-tested. Actual browser page zoom
+Owner accepts recent GUI/workflow, browsers/palette and current profiles provisionally. Owner confirms restart recovery (with missing progress feedback); full profile exchange remains
+provisionally accepted without a complete owner test. Actual browser page zoom
 200% remains optional/unchecked. Existing regression/security/lineage checks remain required.
 Tested hardware is RTX 3090 24 GB; >=8 GB VRAM elsewhere is an unqualified expectation, without
 a compatibility/performance guarantee. No completed acceptance is reopened because an old plan

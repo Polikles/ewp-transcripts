@@ -19,22 +19,12 @@
       },
       {
         "title": {
-          "en": "Inspect file",
-          "pl": "Sprawdź plik"
-        },
-        "text": {
-          "en": "Choose processing language separately for each selected recording and speaker count or auto-detection. Inspect checks all unqueued selections.",
-          "pl": "Ustaw język osobno dla każdego wybranego nagrania oraz liczbę mówców lub wykrywanie automatyczne. Sprawdzenie obejmuje wszystkie pozycje spoza kolejki."
-        }
-      },
-      {
-        "title": {
           "en": "Plan and add to queue",
           "pl": "Zaplanuj i dodaj do kolejki"
         },
         "text": {
-          "en": "Run Dry-run for all unqueued selections, review and confirm the full plan, then Add to queue once for the entire batch.",
-          "pl": "Zaplanuj wszystkie pliki spoza kolejki, sprawdź i potwierdź cały plan, a następnie kliknij Dodaj do kolejki raz dla całej listy."
+          "en": "Choose language and speaker count per recording. Dry-run checks and plans all unqueued files. Review the full plan, confirm it and Add to queue once for the batch.",
+          "pl": "Ustaw język i liczbę mówców osobno dla nagrania. Planowanie sprawdza wszystkie pliki spoza kolejki. Sprawdź cały plan, zaznacz potwierdzenie i dodaj zadania do kolejki."
         }
       },
       {

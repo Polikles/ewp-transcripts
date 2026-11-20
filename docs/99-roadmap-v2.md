@@ -26,6 +26,11 @@ research metrics and optional presets do not block completion or release readine
 | 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
 | Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |
 
+Current A owner test: WSL data recovery, waiting/running cancellation (`USER_CANCELLED`), no ASR
+rerun for completed work, temporary cleanup and versioned export recovery/downloads are confirmed.
+Follow-up UI/planning/retry/save/player fixes are implemented; use the [focused retest](../Instructions/GUI_PACKAGE_A_RETEST.md)
+and [feedback checkpoint](checkpoints/2026-11-20-package-a-feedback.md). B still waits for A acceptance.
+
 ### Accepted package sequence — package A authorized
 
 The owner approved the consolidated plan and now explicitly instructed “ok, zaczynaj z A”.
@@ -64,8 +69,8 @@ implemented, can be checked while preparing/testing native Windows rather than b
 No further scope decision blocks package A. Before B, confirm the target Windows
 test environment and execution/access arrangement. Before B8a, select the initial cloud provider,
 exact model and allowed media/cost scope. Those decisions do not need to delay A. No cloud provider
-is chosen by implication, and no uploads, paid requests, downloads/models or product changes are
-authorized by the current planning-only instruction.
+is chosen by implication; cloud uploads, paid requests and model downloads are not authorized.
+A and its acceptance fixes are authorized; B still waits for the owner gate.
 
 ### Final classification of the recovered inventory
 

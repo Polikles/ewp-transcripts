@@ -120,6 +120,7 @@ class GuiWorkspaceSummary(BaseModel):
     saved_at: datetime
     field_count: int = Field(ge=0)
     available: bool
+    queue_count: int = Field(default=0, ge=0)
 
 
 class GuiWorkspaceDocument(BaseModel):
@@ -136,6 +137,22 @@ class GuiWorkspaceDocument(BaseModel):
 
 
 ResolvePath = Callable[..., Path]
+
+
+def resolve_optional_workspace_file(raw: str, resolve_path: ResolvePath) -> Path:
+    """Validate a saved file location without confusing a future result with a directory."""
+    candidate = Path(raw.strip()).expanduser()
+    if not candidate.name or candidate.name in {".", ".."}:
+        raise ValueError("Saved file reference is invalid")
+    try:
+        resolved = resolve_path(raw)
+    except FileNotFoundError:
+        if candidate.is_symlink():
+            raise ValueError("Symbolic-link paths are not allowed") from None
+        return resolve_path(str(candidate.parent), directory=True) / candidate.name
+    if resolved.is_dir():
+        raise ValueError("Saved file reference must not be a directory")
+    return resolved
 
 
 def default_workspace_directory() -> Path:
@@ -254,6 +271,7 @@ class GuiWorkspaceController:
                         saved_at=document.saved_at,
                         field_count=len(document.fields),
                         available=available,
+                        queue_count=len(document.staged_jobs) + len(document.terminal_jobs),
                     )
                 )
             except (OSError, ValueError):
@@ -261,9 +279,13 @@ class GuiWorkspaceController:
         summaries.sort(key=lambda item: item.saved_at, reverse=True)
         return tuple(summaries[:20])
 
-    def load(self, workspace_id: str) -> GuiWorkspaceDocument:
+    def load(
+        self, workspace_id: str, *, on_read: Callable[[int], None] | None = None
+    ) -> GuiWorkspaceDocument:
         path = self._workspace_path(workspace_id)
         document = self._read(path)
+        if on_read is not None:
+            on_read(len(document.staged_jobs) + len(document.terminal_jobs))
         self._validate_fields(document.fields)
         self._validate_staged_jobs(list(document.staged_jobs))
         self._validate_terminal_jobs(
@@ -403,10 +425,12 @@ class GuiWorkspaceController:
                 raise ValueError("Workspace completed job is invalid")
             try:
                 if job.status in {"failed", "cancelled"}:
-                    self._resolve_path(job.input_path)
+                    resolve_optional_workspace_file(job.input_path, self._resolve_path)
                 output = self._resolve_path(job.output_directory, directory=True)
-                planned = self._resolve_path(
-                    job.planned_result_path, directory=job.status in {"failed", "cancelled"}
+                planned = (
+                    resolve_optional_workspace_file(job.planned_result_path, self._resolve_path)
+                    if job.status in {"failed", "cancelled"}
+                    else self._resolve_path(job.planned_result_path)
                 )
             except FileNotFoundError:
                 if omit_unavailable:

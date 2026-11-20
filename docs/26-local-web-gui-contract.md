@@ -545,3 +545,32 @@ registered after publication; compatible older files are verified read-only agai
 Older custom palette files without records may need their original settings, rather than guessed
 provenance. Missing/changed files are withheld; older registered palette/version hashes stay exact.
 Public canonical/revision/translation schemas and pinned ML packages remain unchanged.
+
+## Owner A acceptance corrections — 2026-11-20
+
+The public GUI has one checking/planning action, Dry-run, which performs the existing inspection
+and creates exact hash/settings-bound plans. CLI/API Inspect is retained. Missing human staging
+confirmation does not invalidate an otherwise unchanged plan; source/settings changes still do.
+Before ASR completes, the recording rail identifies transcription as the next stage. Canonical
+imports and completed ASR are labelled ASR completed; only all finished/skipped stages indicate
+workflow completed. Successful manual source-review actions infer the unused optional correction
+skip; existing downstream immutable artifacts provide the same inference after restart.
+
+Saved-work load has a session-local progress identity, serialized restore ownership and real
+loaded/total queue counts. A modal/backdrop/gear remains until server queue and browser editor
+restoration finish. No ASR or confirmation is restored. Immediate save/load busy text replaces stale
+success messages. Failed/cancelled terminal history validates safe file locations even if originals
+have moved or its planned result was later published; staged work still requires exact live source
+hashes and plans, and completed history still requires its canonical artifact.
+
+Retry uses a fresh attempt ID and replaces the selected old terminal row rather than duplicating
+it in the visible queue. Source/publication/workdir retention is independent. Existing older duplicate
+history is not silently migrated/deleted. The native audio player has stable space for browser
+controls during source review; overflow and playback-speed UI are supplied by the browser. Native
+rate preferences (0.25–4x) persist in the existing profile field. The permanent duplicate rate select
+is removed. Raw output/source provenance and shared-timeline playback are unchanged.
+
+Temporary inventory refresh disables stale rows and ignores superseded responses; selection/filter
+changes invalidate pending previews before confirmation. Cleanup continues to target only eligible
+temporary workdirs, not durable media. Whole-interface EN–PL approval and final EN/PL manuals
+remain sequenced after feature completion; only necessary changed-stage instructions are updated.

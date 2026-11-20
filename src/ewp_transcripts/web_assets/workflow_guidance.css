@@ -173,3 +173,15 @@
 .gui-runtime-bar progress { min-width: 0; width: 100%; flex: 1; height: .5rem; accent-color: var(--gui-accent); }
 
 .gui-job-status { font-size: .65rem; white-space: nowrap; }
+
+@media (min-width: 56.251rem) {
+  .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr); }
+}
+#gui-source-playback audio { display: block; height: 54px; }
+@media (min-width: 56.251rem) and (max-width: 75rem) {
+  .gui-workbench[data-gui-active-stage="review"] #gui-stage-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .gui-workbench[data-gui-active-stage="review"] .review-control-groups { grid-template-columns: minmax(0, .65fr) minmax(0, 1.35fr); }
+}
+@media (min-width: 90rem) {
+  .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr) minmax(11rem, 13rem); }
+}

@@ -14,7 +14,8 @@ native Windows remains planned convenience work. General-corpus research, univer
 broad model/hardware preset benchmarking and accurate percentage/ETA calibration are optional,
 not current completion gates. Preserve accepted results and ordinary regression/security checks.
 Generate the complete editable EN–PL string-pair approval file only after functional additions
-finish, then owner approval and Polish manuals. Documentation screenshots wait for custom icons;
+finish, then owner approval before the full English-manual revision and Polish manuals.
+Keep only necessary changed-step/raw-output instructions current before that approval. Documentation screenshots wait for custom icons;
 waiting for the artist has no deadline and blocks no other work. Do not modify the sent artist ZIP.
 
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed

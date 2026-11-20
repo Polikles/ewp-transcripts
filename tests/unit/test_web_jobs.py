@@ -860,6 +860,8 @@ def test_cancel_waiting_running_and_retry_uses_new_attempt(tmp_path: Path) -> No
         assert calls == [tmp_path / "first.wav"]
         retry = queue.retry(first.job_id)
         assert retry.job_id != first.job_id and retry.status == "staged"
+        assert first.job_id not in {job.job_id for job in queue.jobs()}
+        assert len(queue.jobs()) == 2
         queue.start()
         assert wait_for_terminal(queue).status == "completed"
         assert calls == [tmp_path / "first.wav"] * 2
@@ -890,6 +892,70 @@ def test_cancel_rejected_after_publication_boundary(tmp_path: Path) -> None:
         with pytest.raises(ValueError, match="publication"):
             queue.cancel(job.job_id)
         assert queue.jobs()[0].status == "running"
+    finally:
+        release.set()
+        queue.close()
+
+
+def test_manual_review_downstream_artifacts_imply_skipped_optional_correction(
+    tmp_path: Path,
+) -> None:
+    now = datetime.now(UTC)
+    job = GuiTranscriptionJob(
+        job_id="completed",
+        status="completed",
+        input_path=str(tmp_path / "episode.wav"),
+        output_directory=str(tmp_path),
+        planned_job_id="episode",
+        planned_result_path=str(tmp_path / "episode_results.json"),
+        result_path=str(tmp_path / "episode_results.json"),
+        language="pl",
+        speaker_count=2,
+        created_at=now,
+        updated_at=now,
+    )
+    assert workflow_progress(job).correction.state == "pending"
+    (tmp_path / "revisions").mkdir()
+    (tmp_path / "revisions/episode_revision_001.json").write_text("{}")
+    assert workflow_progress(job).correction.state == "skipped"
+    (tmp_path / "correction-candidates").mkdir()
+    (tmp_path / "correction-candidates/episode_revision_001.json").write_text("{}")
+    assert workflow_progress(job).correction.state == "complete"
+
+
+def test_retry_of_cancelled_waiting_entry_does_not_run_the_stale_pending_item(tmp_path: Path):
+    entered, release = threading.Event(), threading.Event()
+    calls = []
+
+    def transcribe(path, **kwargs):
+        calls.append(path.name)
+        entered.set()
+        assert release.wait(2)
+        return SimpleNamespace(result_path=tmp_path / (path.stem + "_results.json"))
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        queue.stage(
+            tmp_path / "first.wav",
+            tmp_path,
+            planned_job_id="first",
+            planned_result_path=str(tmp_path / "first_results.json"),
+        )
+        waiting = queue.stage(
+            tmp_path / "second.wav",
+            tmp_path,
+            planned_job_id="second",
+            planned_result_path=str(tmp_path / "second_results.json"),
+        )
+        queue.start()
+        assert entered.wait(1)
+        queue.cancel(waiting.job_id)
+        retry = queue.retry(waiting.job_id)
+        assert waiting.job_id not in {job.job_id for job in queue.jobs()}
+        queue.start()
+        release.set()
+        assert wait_for_terminal(queue).job_id == retry.job_id
+        assert calls == ["first.wav", "second.wav"]
     finally:
         release.set()
         queue.close()

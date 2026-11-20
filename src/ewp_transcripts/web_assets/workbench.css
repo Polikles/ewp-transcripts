@@ -103,3 +103,7 @@
 #source-export-downloads, #translation-export-downloads { width: 100%; }
 
 .status-cancel_requested .gui-job-status { white-space: normal; }
+
+#gui-workspace-restore { width: min(26rem, calc(100vw - 3rem)); border: 1px solid var(--gui-line); border-radius: .7rem; padding: 1.4rem; background: var(--gui-surface); color: var(--gui-ink); box-sizing: border-box; }
+#gui-workspace-restore::backdrop { background: rgb(20 28 38 / .55); }
+.gui-restore-message::before { content: ""; display: inline-block; width: 1.4rem; height: 1.4rem; vertical-align: middle; margin-inline-end: .5rem; background: url(/assets/brand/gear.svg) center / contain no-repeat; }
