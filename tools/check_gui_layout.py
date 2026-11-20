@@ -170,7 +170,9 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     )
     page.locator("#workflow button[value=inspect]").click()
     expect(page.locator("#operation-status")).to_contain_text("Inspection completed")
-    expect(page.locator("#operation-summary")).to_contain_text("Selected processing values")
+    expect(page.locator("#operation-summary")).to_contain_text(
+        "* Recording language: selected processing value"
+    )
     assert page.locator("#workflow-speaker-count").input_value() == "2"
     assert [item["language"] for item in inspections] == ["pl", "en"]
     page.locator("#workflow button[value=dry-run]").click()

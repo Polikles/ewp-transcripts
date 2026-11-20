@@ -4,6 +4,47 @@ Last updated: **2026-11-20**.
 
 ## Active task and resume pointers
 
+Current request: [summary footnotes and scope reconciliation](docs/checkpoints/2026-11-20-scope-and-summary-polish.md).
+Baseline clean main 8b64329. Read TODO.md, WORK_POLICY.md and the opening owner-scope section
+of docs/99-roadmap-v2.md. Implementation/audit/verification complete; delivery commit/push next.
+
+Language * and speaker-count ** notes span the full summary width below all Inspect/Dry-run
+tables; queue confirmation is plural in EN/PL and error guidance matches it. Top/bottom source
+section counters center against actual buttons rather than padded feedback wrappers. No request,
+plan-confirmation, inference, model pin or canonical-data behavior changed.
+
+Owner accepts the current GUI/workflow and browsers/palette. Current full restart recovery remains
+unchecked by owner; full profile exchange is provisionally accepted without a complete owner test.
+Actual 200% browser page zoom is optional/unchecked. Percentage primarily indicates ongoing work;
+accurate ETA/calibration studies are no longer required. Existing approximate ETA stays opt-in.
+
+Project scope is the owner's podcast and similar workflows. Broad research benchmarks, private/
+public corpus expansion, universal dictionaries, model benchmark automation and hardware presets
+are nice-to-have outside delivery gates. Ordinary functional/security/packaging checks still apply.
+Docs record tested RTX 3090 24 GB and an unqualified >=8 GB VRAM expectation without a guarantee.
+Native Windows remains planned convenience work; current WSL success does not qualify it.
+
+Roadmap R01–R15 retain existing product proposals; E01–E13 recover additional items from contracts,
+ADRs, traceability and feedback guides. No implementation order was assigned and the whole backlog
+is not automatically authorized for immediate implementation. The dated milestone/history text
+below does not override these decisions. Work policies, handoff, scope, quality/testing/traceability
+and installation entry points now link or repeat the current status.
+
+At feature completion, generate one complete editable EN–PL file for labels/messages/errors/
+states/hints/tooltips/guide copy/dynamic templates. Owner correction and approval precede full
+Polish manuals. Documentation screenshots wait for final custom GUI/icons. Artist waiting has no
+deadline and does not block other work; sent ZIP/demo stays unchanged.
+
+Verification: make check PASS (896 tests, Ruff/format/mypy 102 source files), optional browser-helper
+lint PASS. Real model-free browser checks: 24 summary variants (Inspect/Dry-run × EN/PL × themes ×
+1440/960/390 widths), eight top/bottom counter-alignment cases; zero page errors/external requests
+or page overflow. Wheel/sdist PASS offline; all 56 resources match source and nine help routes work
+from the wheel without eager ML imports. No new GPU/provider/ETA-accuracy qualification claimed.
+Disposable evidence is under /tmp/ewp-scope-summary.d3btur pending removal at handoff. Artist ZIP
+SHA remains 1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1.
+
+Previous deliveries below are historical evidence, not current tasks.
+
 Current request: [batch planning, sentence-aware review and portable user profiles](docs/checkpoints/2026-11-20-batch-sentences-profiles.md).
 Baseline clean main aa70f4d00c74cd23740dcace55c597d58fa707ac. Start with TODO.md.
 Implementation and verification complete; delivered to origin/main in 7cfddb4

@@ -45,10 +45,14 @@ in the bounded timing cache. See the runtime progress assessment for algorithm d
 The (i) language popup closes on outside click/tap or Escape; Escape returns focus to the icon.
 
 Inspect does not run ASR and media metadata does not supply spoken language or speaker count.
-Its summary shows the chosen processing values with an asterisk and an explanatory note;
+Its summary shows language with * and speaker count with **, with separate full-width wrapping
+notes below the tables after both Inspect and Dry-run;
 automatic detection remains a processing request until transcription resolves it. Dry-run displays
 one combined plan for all pending selected episodes, with per-episode settings. Changing the
 selection/output/settings requires a new dry-run and confirmation. Already staged inputs are
 excluded. A completed matching result is shown as skipped, rather than transcribed again.
 If staging fails partway, earlier staged jobs remain visible; fix the error and replan the remaining
 list. Planning/staging does not start ASR; Start queue is a separate explicit action.
+
+The confirmation reads I reviewed the plan and want to add jobs to the queue. It still requires
+review of this exact batch snapshot; the shorter plural wording does not weaken validation.

@@ -18,7 +18,7 @@ The pinned ASR, Polish/English alignment, and diarization snapshots add approxim
 8.5 GB, making the complete network transfer roughly 13 GB. Reserve at least 20 GB of
 free space on the Linux filesystem, preferably on an SSD, plus space for source audio
 and outputs. The recommended storage minimum is not expected to vary materially by
-preset. RAM, VRAM, and runtime requirements will be characterized later per preset.
+configuration. Validation was performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA CUDA-capable machines with at least 8 GB VRAM are expected to work, but that is an unqualified owner expectation, not a measured minimum or a compatibility/performance guarantee. Memory needs depend on the recording and configuration; hardware-preset qualification is optional.
 
 1. [`../WSL config/SYSTEM_REQUIREMENTS.md`](../WSL%20config/SYSTEM_REQUIREMENTS.md)
 2. [`../WSL config/INSTALL_WSL.md`](../WSL%20config/INSTALL_WSL.md)

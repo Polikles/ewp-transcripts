@@ -518,7 +518,7 @@ const guiPolishErrorDescriptions = new Map([
   ],
   [
     "GUI_CONFIRMATION_REQUIRED",
-    "Potwierdź sprawdzenie bieżącego planu przed dodaniem pliku do kolejki."
+    "Potwierdź sprawdzenie planu przed dodaniem zadań do kolejki."
   ],
   [
     "GUI_CORRECTION_OUTPUT_ROOT_REQUIRED",
@@ -1475,4 +1475,10 @@ for (const [en, pl] of [
   ["Profile API endpoints must not contain credentials", "Adresy API w profilu nie mogą zawierać danych dostępowych. Użyj okna klucza API dla bieżącej sesji."],
   ["User profile contains invalid or unsupported settings", "Profil zawiera nieprawidłowe lub nieobsługiwane ustawienia."],
   ["Dictionary document does not match a supported dictionary format", "Plik nie jest zgodny z obsługiwanym formatem słownika."]
+]) guiPolish.set(en, pl);
+
+for (const [en, pl] of [
+  ["Auto-detect **", "Wykryj automatycznie **"],
+  ["* Recording language: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "* Język nagrania: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."],
+  ["** Number of speakers: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "** Liczba mówców: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."]
 ]) guiPolish.set(en, pl);

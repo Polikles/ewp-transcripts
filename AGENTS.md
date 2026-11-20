@@ -8,6 +8,15 @@ This file defines implementation rules for coding agents working on **ewp-transc
 
 The existing files under `docs/`, `examples/`, and `schemas/` are the product and data-contract source of truth. Read them before changing application behavior.
 
+Current owner scope (2026-11-20) is authoritative in the opening section of
+`docs/99-roadmap-v2.md`: a practical podcast/recording workflow tool. GUI is authorized and
+native Windows remains planned convenience work. General-corpus research, universal dictionaries,
+broad model/hardware preset benchmarking and accurate percentage/ETA calibration are optional,
+not current completion gates. Preserve accepted results and ordinary regression/security checks.
+Generate the complete editable EN–PL string-pair approval file only after functional additions
+finish, then owner approval and Polish manuals. Documentation screenshots wait for custom icons;
+waiting for the artist has no deadline and blocks no other work. Do not modify the sent artist ZIP.
+
 ## 2. Scope discipline
 
 Implement only the current MVP unless a task explicitly says otherwise.
@@ -163,7 +172,11 @@ Changes touching FFmpeg, filesystem behavior, or pipeline orchestration must als
 make test-integration
 ```
 
-Changes touching WhisperX, alignment, pyannote, CUDA, model loading, or performance must run the relevant GPU/E2E suite against the external test dataset.
+Changes touching WhisperX, alignment, pyannote, CUDA, model loading, or performance must run
+relevant available GPU/E2E functional regression checks with authorized representative material.
+Record unavailable hardware/material honestly; never claim qualification from model-free tests.
+Broad external-dataset/model/hardware benchmark campaigns are optional under the current owner
+scope and must not be imposed as a new project-completion gate.
 
 All disposable pilot outputs, provider resume state, generated candidates, temporary
 exports, and intermediate benchmark bundles MUST be written under a dedicated `mktemp -d`

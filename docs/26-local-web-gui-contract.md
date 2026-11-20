@@ -426,7 +426,7 @@ video; no schema migration is required. Only audio is decoded. Missing/multiple 
 explicit error with guidance; interactive stream selection and video-frame playback are deferred.
 
 The percentage/ETA analysis is [recorded separately](30-queue-progress-and-eta.md). Approximate
-progress is implemented through actual phase events; real GPU accuracy qualification remains pending.
+progress is implemented through actual phase events; precise GPU percentage/ETA accuracy qualification is no longer required by owner.
 
 ## Episode mix, review bounds and live progress increment
 
@@ -487,3 +487,24 @@ complete runs, counted per job rather than per source track. Runtime snapshots a
 and calibration_required. Browser elapsed interpolates every second, capped between existing two-second
 polls; no extra requests. Machine timing history never enters portable profiles. Playback speed uses
 an explicit local selector for both single media and mixed previews, retaining native audio controls.
+
+
+## Owner acceptance and documentation sequence (2026-11-20)
+
+The owner accepts current GUI/workflow changes with the summary/navigation polish in the current
+checkpoint. Full profile exchange and the latest full-restart recovery are not owner-tested;
+automated success does not upgrade those claims. Browsers and palette are accepted. Actual 200%
+page zoom is not established, and remains an optional layout check rather than a blocking gate.
+Progress primarily demonstrates continued activity; no accurate ETA study is required.
+
+Finish the selected functional work before generating one editable complete EN–PL pair list for
+all labels/messages, errors, statuses, hints, tooltips, numbered guide copy and dynamic templates.
+Owner correction/approval precedes full Polish manuals; documentation screenshots additionally
+wait for custom icons/final GUI. Artist waiting has no deadline and does not block development.
+The sent artist ZIP/demo remains unchanged. Native Windows is planned as a separate target.
+See the roadmap's retained/recovered inventory; research benchmarks and presets are optional.
+
+Inspect and Dry-run display language * and speaker-count ** as selected processing values, with
+two full-width wrapping explanations below all summary tables. The plural queue confirmation
+still authorizes the exact reviewed request snapshot. Source section counters are vertically
+centered against navigation buttons; no workflow/API semantics change.

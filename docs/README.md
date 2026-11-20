@@ -1,5 +1,9 @@
 # Documentation Index
 
+Start ongoing work with [TODO](../TODO.md), [WORK_STATUS](../WORK_STATUS.md) and the
+[owner scope/current roadmap](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+Older milestone procedures and checkpoints retain evidence, not competing current priorities.
+
 ## Normative documents
 
 | Document | Scope |

@@ -1,24 +1,25 @@
 # Development Handoff
 
-Active resume point (2026-11-18): [WORK_STATUS](../WORK_STATUS.md),
-[work policy](../WORK_POLICY.md), [todo](../TODO.md), and the
-[current guided-workflow checkpoint](checkpoints/2026-11-18-guided-workflow.md).
-The reported pre-GUI launch failure ran in the separate `ewp-waveform` project, which
-does not provide `transcriber`. Resume the owner session from the transcription checkout.
-The later WSL queue error identifies missing compatible TorchCodec/FFmpeg libraries.
-The owner has now confirmed the repaired local-only workflow through subtitle export on WSL.
-Current work implements numbered instructions, source-review usability fixes and a documented
-prototype comparison. See [the reconciliation record](29-guided-workflow-and-prototype.md).
+Active resume point (2026-11-20): [WORK_STATUS](../WORK_STATUS.md),
+[work policy](../WORK_POLICY.md), [TODO](../TODO.md), and the
+[current scope/summary checkpoint](checkpoints/2026-11-20-scope-and-summary-polish.md).
+The [owner scope and current backlog](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20)
+supersede older dates, manual gates and research/preset requirements below.
 
-Current preview: [0.20.0 integrated GUI](28-integrated-gui-preview.md), with a
-[WSL launch guide](../Instructions/GUI_QUICKSTART.md) and
-[one consolidated owner test plan](../Instructions/GUI_PREVIEW_TEST_PLAN.md). Earlier GUI-34a
-manual gates are included there rather than blocking further implementation.
+Owner accepts the current GUI/workflow and browser/palette behavior with the reported small
+footnote/navigation fixes. Full profile exchange and current restart recovery remain untested by
+the owner but have automated coverage; do not repeat all completed acceptance work. Actual 200%
+browser zoom is an optional unchecked layout case. Precise percentage/ETA calibration is no longer
+required. Broad benchmarks, universal dictionaries and hardware presets are nice-to-have.
 
-Current update (2026-11-16): GUI-55 is closed on the owner’s confirmation. The historical
-manual gate below is superseded. GUI-34a is implemented with Windows/WSL acceptance pending;
-see [GUI-34a verification](27-gui-34a-verification.md). The dated snapshot below is retained
-as historical context.
+Finish adding chosen functions before preparing the complete editable EN–PL string-pair file for
+owner approval, then write Polish manuals. Screenshots wait for final custom GUI/icons. Waiting
+for the artist has no deadline and blocks no other work; the sent ZIP/demo stays unchanged.
+Native Windows remains planned convenience work. Read the roadmap for recovered proposals,
+including cancellation, verified downloads, provider catalogs/favorites, Ollama, optional credential
+storage and conditional timing/translation/cleanup refinements.
+
+The dated snapshot below is historical context, not the current implementation queue.
 
 ## Snapshot
 

@@ -1,5 +1,10 @@
 # Collect feedback for V2
 
+Historical feedback guide. Current acceptance/scope is recorded in
+[the roadmap](../docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+Do not restart the completed pilot or require a new corpus/benchmark campaign from this guide.
+Ordinary podcast-workflow feedback remains useful; research evaluation is optional.
+
 The first internal pilot should reveal the correction and delivery workflow that V2
 actually needs. It is not another release gate and should use real archive material.
 

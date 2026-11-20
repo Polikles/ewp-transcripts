@@ -1,5 +1,11 @@
 # Corpus lexical quality evaluation
 
+Owner scope update (2026-11-20): the current [roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20)
+controls required work. Corpus/quality research, general dictionaries and hardware/preset benchmark
+programs described here are optional nice-to-have, not current project completion gates. Existing
+unit/integration, security, data-lineage and packaging checks remain required; preserve all accepted
+historical evidence. This is a practical podcast/recording workflow tool.
+
 ## 1. Purpose
 
 `tools/evaluate_corpus.py` compares generated hypotheses with independently, manually

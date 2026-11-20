@@ -4,7 +4,90 @@ The filename is retained for compatibility with existing links. The roadmap now 
 planned work after the `0.1.x` internal release candidates rather than implying that all
 items belong to one monolithic "Version 2" release.
 
-## Current execution order
+## Owner scope and current status — 2026-11-20
+
+This section is authoritative over older milestone plans and historical acceptance wording below.
+Build a practical workflow tool for the owner's podcast and similar recording work. A general-purpose
+transcription research platform, universal dictionaries and broad model/hardware evaluation are not
+required deliverables. Existing regression, security, lineage and packaging checks remain required;
+research metrics and optional presets do not block completion or release readiness.
+
+### Owner acceptance of the recent GUI
+
+| Previous summary item | Current status |
+|---|---|
+| 1: recent GUI fixes | Accepted with the small summary/navigation fixes in the current checkpoint; full user-profile import/export was not tested by the owner and is provisionally accepted as implemented. |
+| 2: complete workflow | Owner tested the workflow except restart recovery. Keep only that recovery check open; retain earlier historical recovery evidence separately. |
+| 3: browser/platform presentation | Owner accepts browsers and the palette. Actual browser zoom at 200% was not explicitly performed/understood; retain as an optional unchecked layout check, not a new blocking gate. |
+| 4: precise progress/ETA calibration | Removed as a required task by owner. Progress primarily communicates continued activity; keep existing approximate percentage, elapsed timer and optional ETA without a new accuracy study. |
+| 5: terminology/docs | Wait for feature completion, then export every UI label/message as editable EN–PL pairs, including errors, states, hints and dynamic templates. Owner correction/approval comes next, then full Polish documentation. Screenshots wait for final custom GUI/icons. |
+| 6: artist | Waiting for supplied icons/feedback, no deadline, does not block other work. The already sent ZIP/demo must remain unchanged. |
+| 10/11/12/14: benchmarks/research | Nice-to-have outside required project scope: private-corpus expansion/comparisons, translation quality suites, public datasets/universal dictionary research, automated model benchmark matrices. |
+| 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
+| Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; no implementation order is assigned yet. |
+
+### Retained product backlog — order still to be agreed
+
+These are retained proposals from existing plans, not authorization to implement them all at once.
+Items already delivered are not reopened. The previous 22-item summary is a discussion reference,
+not a second roadmap.
+
+| ID | Remaining work | Source / dependency |
+|---|---|---|
+| R01 | Recent-work/project browser, named media/output roots, directory scanning of saved canonical results | Section 13; GUI contract recent-session pointers. Existing workspace save/load is implemented. |
+| R02 | Choose an audio stream in multi-stream media; remaining native file-picker/direct-entry conveniences | Sections 10/13; existing MP4/audio extraction remains qualified. |
+| R03 | Optional profile export without embedded dictionaries | Section 13; full profile and independent dictionary exchange already implemented. |
+| R04 | Optional cloud speech-to-text for machines without suitable local hardware | Section 13; requires explicit media disclosure/consent and the existing canonical contract. |
+| R05 | Separate default-off LLM punctuation and basic editorial experiments | Section 2; still non-final and manually reviewed; no broad benchmark campaign required for current delivery. |
+| R06 | Unknown-speaker-count improvements within one recording | Section 9 research proposal; no persistent cross-recording identities. Existing auto count remains available. |
+| R07 | Advanced multichannel/crosstalk handling, channel maps and layout-aware surround downmix | Section 10; separate from current synchronized episode playback mixing. |
+| R08 | Content-aware directory discovery independent of file extension | Section 6, ADR-0017 / FR-A05; reuse probe data and preserve ordinary-file skip behavior. |
+| R09 | Optional audio repair and original/repaired comparison | Sections 7/8; original media stays unchanged. |
+| R10 | Additional subtitle formats/presets, burned-in captions, visual preview and platform compatibility | Sections 11/12; current accepted YTT/HTML exports are delivered. |
+| R11 | Explicit non-speech event authoring and renderer styling; possible bilingual HTML | Timed-event contract and sections 11/12; schema foundation already exists. |
+| R12 | Native Windows build and installation workflow | Section 14; compatible native speech/media dependencies, Windows paths/model caches, CLI/GUI launch and owner workflow qualification. Treat as a distinct target, not a promise that the WSL environment runs natively. |
+| R13 | Packaging/distribution: GUI installer, remaining clean Ubuntu/bare-metal qualification, planned public-release checkpoint, later GPU Docker | Section 14; no release/tag authorized by this planning update. |
+| R14 | Operational conveniences: explicit input aliases for same-name recordings, scheduling and old-workdir cleanup | Section 15; current per-job safety and versioning stay intact. Research quality-trend reports are optional. |
+| R15 | Final custom GUI/icon integration, creator credits/URL and eventual project website metadata | Wait for artwork/contact/site details; non-blocking and without a deadline. Do not rebuild the sent artist package. |
+
+### Additional items recovered from other plans
+
+These details were omitted or compressed in the earlier summary. They are proposals to prioritize
+with the owner, and their dependencies do not silently become new completion gates.
+
+| ID | Recovered item | Source / status |
+|---|---|---|
+| E01 | Explicit cancellation of queued/running work with safe worker/artifact behavior | GUI contract section 7; GUI traceability FR-L04/L05. Not currently implemented. |
+| E02 | Browser downloads of verified exports through validated artifact identities | GUI contract security/download boundary; FR-L03/L17/NFR-020 traceability. Profile/dictionary JSON downloads do not constitute this general export feature. |
+| E03 | Searchable full provider model catalog and saved favorite models | GUI contract section 5; current bounded presets/manual IDs are implemented. |
+| E04 | Explicit local-backend model load/unload control where supported | GUI contract section 5; opt-in application convenience is separate from the optional automated benchmarking program. |
+| E05 | Optional Ollama correction adapter | Automated-correction contract opening; future backend adapter, not a required replacement for existing providers. |
+| E06 | Optional OS credential-store design for persisting API keys | Automated-correction contract and GUI security boundary; current keys stay in process memory and profiles must never export them. |
+| E07 | Emergency manual timing overrides | Revision plan section on timing / ADR-0020; conditional on a real workflow need, separately versioned, never silent changes to canonical timestamps. |
+| E08 | Bounded speaker-chunk translation mode if sentence units repeatedly lose necessary context | Translation contract section 3 / WORK_STATUS deferred list; conditional proposal, no corpus-wide study required now. |
+| E09 | Immutable workdir creation time plus explicit failed/cancelled/successful-retained reason, then reason-specific cleanup filters | State/logging contract section 9; current ownership/age-based cleanup already exists. |
+| E10 | Optional owned input snapshots to reduce source-change races while processing | Section 13 source-integrity note; current pre-start fingerprint checks are implemented. |
+| E11 | Residual word-alignment/acoustic spill at sentence boundaries | HTML delivery acceptance and timing notes; preserve real timestamps, investigate observed podcast problems rather than require research benchmarks. |
+| E12 | Plain-language instruction review with less-technical readers and later screenshots | Section 13 / WSL feedback guide; wording review follows feature completion and EN–PL approval, screenshots additionally wait for custom GUI. |
+| E13 | Optional automatic playback-follow/current-block highlighting in the review editor | Section 13 audio-following review and GUI traceability. Existing seek buttons/player and the separate exported HTML follow-player are delivered; app-editor auto-follow is a retained convenience proposal. |
+
+### Nice-to-have, outside required delivery
+
+- Previous items 10/11: new private gold/reference expansion, comparative correction/review-time
+  studies and separate PL→EN / EN→PL translation-quality benchmark suites.
+- Previous item 12: public-corpus WER/CER/timestamp/DER/JER qualification, corpus-derived universal
+  Polish dictionary, broad model comparisons and related dataset work.
+- Previous item 14: unattended model × quantization × prompt × chunking benchmark automation and
+  model benchmarking load/unload matrices.
+- Previous item 13: balanced/low-VRAM/CPU-only/Apple Silicon preset qualification and hardware matrices.
+- Research quality-trend reports between releases and any broad model quality sweeps.
+
+No accuracy-calibration campaign for the percentage/ETA is scheduled. Existing evidence and tools
+remain available; moving work here does not erase accepted results or weaken regression checks.
+The detailed historical benchmark procedures below apply only if that optional work is later chosen.
+
+## Milestone history and detailed proposals
+
 
 1. **v0.2.0 manual transcript revisions** — promoted from backlog into the next MVP
    increment and specified normatively in
@@ -50,7 +133,7 @@ reviews without changing canonical timing. Language help closes with outside-cli
 The [progress/ETA implementation](30-queue-progress-and-eta.md) uses real optional phase events,
 a monotonic elapsed heartbeat and bounded local successful timing history. First-run weights are
 explicitly approximate; unknown/slow ETA has a fallback, and 100% follows real publication/cleanup.
-Real target-hardware accuracy and finer native engine callbacks remain follow-up qualification.
+Precise target-hardware accuracy calibration is no longer required by the owner; finer native callbacks remain optional.
 The artist ZIP is local-only, uses synthetic data and contains no transcription backend. Integrating
 the future custom icon set follows the artist's delivery. Full Polish documentation still follows
 owner terminology acceptance. See TODO.md for current acceptance and remaining work.
@@ -831,12 +914,12 @@ qualify one task at a time; later tasks must not be folded into an unrelated fix
     tracks episode inspection/progression, state-aware recording navigation, completed-only
     cleanup, versioned dictionary management, configured/custom palettes and translation/layout
     feedback. Keep its owner retest pending. After GUI fixes/tweaks, prepare a frontend-only
-    artist review package for icon design; this is saved in TODO.md as follow-up, not yet built.
+    artist review package for icon design. That package was subsequently delivered and sent; it is now frozen per the owner scope above.
     The [localization/recovery follow-up](checkpoints/2026-11-18-gui-localization-and-recovery.md)
     covers the owner’s Polish UI audit, per-recording language, later queue starts and applied
     translation recovery, plus revised EN/PL review actions. English stays authoritative.
-    Prepare full Polish user documentation only after the owner accepts the function/section
-    terminology; this is tracked separately from the artist reference package in TODO.md.
+    At feature completion, produce the complete editable EN–PL string-pair file for owner approval,
+    then prepare full Polish user documentation; this is tracked separately from the artist reference package in TODO.md.
     **GUI-34a earlier slice:** GUI-34a implements responsive access
     to existing queues/review controls, retaining the locally scrollable table and existing workflow.
     Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance
@@ -1074,7 +1157,8 @@ releaseable.
 - local service/API;
 - GUI installer;
 - Ubuntu 26.04 LTS qualification;
-- optional native Windows support as Tier 2.
+- planned native Windows support as a distinct convenience target; qualify native dependencies,
+  paths, media/model setup, CLI/GUI launch and installation separately from WSL.
 - Canonical repository and issue-tracker URLs are present in package metadata and release
   surfaces.
 - Add the public project website once its address and deployment are ready.
@@ -1096,7 +1180,7 @@ and expected evidence have stabilized.
   canonical IDs;
 - queue scheduling;
 - automatic cleanup of old work directories;
-- quality-trend reports between releases.
+- optional research: quality-trend reports between releases.
 
 Before the CLI is declared ready for general users, create a top-level `Instructions/`
 directory containing a concise operator runbook for every shipped command and workflow:

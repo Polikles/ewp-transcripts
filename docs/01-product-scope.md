@@ -1,5 +1,12 @@
 # Product Scope
 
+Current owner scope (2026-11-20): build a practical workflow tool for the owner's podcast and
+similar recording work. Broad transcription research, corpus-wide model/hardware benchmarking
+and a universal dictionary are optional nice-to-have, not required completion gates. Native
+Windows is a retained planned convenience target. See the authoritative
+[roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20); older MVP milestone
+boundaries below describe their historical increments.
+
 ## 1. Purpose
 
 EWP-transcripts generates accurate local transcripts, word timestamps, speaker assignments, and readable subtitles from edited podcast and training recordings.

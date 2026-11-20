@@ -7,7 +7,7 @@
 | Host | Windows 11 with virtualization enabled |
 | WSL | Current stable WSL, distribution running as WSL2 |
 | Distribution | Ubuntu 24.04 LTS or Ubuntu 26.04 LTS |
-| GPU | NVIDIA RTX 3090, 24 GB VRAM |
+| GPU | NVIDIA CUDA-capable GPU; tested on RTX 3090 (24 GB); expected starting point >=8 GB VRAM, unqualified |
 | Driver | Current Windows NVIDIA driver with WSL support |
 | Python | 3.12 |
 | Package manager | `uv`; dependencies are reproduced from the committed lockfile |
@@ -28,7 +28,10 @@ snapshots, working audio, retained failure artifacts, and archive outputs. The a
 151-minute test peaked near 4.14 GiB process RAM and 14.6 GiB sampled total GPU use on the
 24 GiB reference GPU, but these observations are not minimum hardware guarantees.
 
-Do not publish an unsupported numeric minimum before these measurements exist.
+Validation was performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA
+CUDA-capable machines with at least 8 GB VRAM are expected to work, but that is an unqualified
+owner expectation, not a measured minimum or a compatibility/performance guarantee. Memory
+needs depend on the recording and configuration; hardware-preset qualification is optional.
 
 ## Expected paths
 

@@ -33,6 +33,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Inspect and Dry-run keep distinct language (*) and speaker-count (**) explanations below all
+  summary tables, spanning the full width and wrapping normally. Queue confirmation now names
+  the reviewed plan and plural jobs, and source-review section counters align with their buttons.
+- Reconciled current owner acceptance and podcast-workflow scope across plans: research benchmarks,
+  universal dictionaries and hardware presets are optional; precise ETA calibration is no longer
+  required. Native Windows remains planned. Complete EN–PL copy approval waits for feature completion,
+  Polish manuals follow approval, and screenshots wait for custom GUI/icons. Artist waiting is non-blocking.
+- Installation docs distinguish tested RTX 3090 hardware from an unqualified >=8 GB VRAM expectation.
+
 - Inspect, dry-run and staging operate on the same complete pending selection, retaining each
   episode's language/speaker count and exact-plan confirmation. Grouped tracks and video episodes
   enter the queue together; Inspect uses explained starred selection values when metadata is absent.

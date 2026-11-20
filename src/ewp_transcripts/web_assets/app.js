@@ -25,7 +25,53 @@ async function start() { const status = document.querySelector("#compatibility")
 function clearEwpBrowserState() { if (!window.confirm("Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved editor changes will be lost.")) return; for (const storage of [window.localStorage, window.sessionStorage]) { for (let index = storage.length - 1; index >= 0; index -= 1) { const key = storage.key(index); if (key?.startsWith("ewp-")) storage.removeItem(key); } } window.location.reload(); }
 document.querySelector("#clear-browser-state").addEventListener("click", clearEwpBrowserState);
 function shortName(path) { return path ? path.split(/[\\/]/).pop() : "—"; }
-function showSummary(kind, result, operation = {}) { const summary = document.querySelector("#operation-summary"); summary.replaceChildren(); let entries; const selected = operation.language ?? document.querySelector("#workflow-language").value; const count = operation.speaker_count ?? (document.querySelector("#workflow-speaker-auto").checked ? "auto" : document.querySelector("#workflow-speaker-count").value); const speakers = count === "auto" ? "Auto-detect" : count; const language = selected === "auto" ? "Auto-detect" : selected; if (kind === "inspect") { entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0], ["Recording language", `${language} *`], ["Speakers", `${speakers} *`]]; } else { const jobs = result.jobs || []; const identities = jobs.map(job => job.job_id).join(", "); const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", "); entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"], ["Recording language", language], ["Speakers", speakers]]; } for (const [label, value] of entries) { const card = document.createElement("div"); card.className = "result-card"; const heading = document.createElement("strong"); heading.textContent = label; card.append(heading, String(value)); summary.append(card); } if (kind === "inspect") { const hint = document.createElement("p"); hint.className = "field-hint"; hint.textContent = "* Selected processing values: recording metadata does not provide language or speaker count. Auto-detect is a processing request, not a detected value."; summary.append(hint); } if (kind === "dry-run" && result.jobs?.length) { const table = document.createElement("table"); table.className = "queue-table plan-table"; table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>"; const body = document.createElement("tbody"); for (const job of result.jobs) { const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id); const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—"; const row = document.createElement("tr"); for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); } body.append(row); } table.append(body); summary.append(table); } }
+function appendSelectionFootnotes(summary) {
+  const notes = document.createElement("div"); notes.className = "summary-selection-notes";
+  for (const message of [
+    "* Recording language: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.",
+    "** Number of speakers: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.",
+  ]) {
+    const note = document.createElement("p"); note.className = "field-hint"; note.textContent = message; notes.append(note);
+  }
+  summary.append(notes);
+}
+function showSummary(kind, result, operation = {}) {
+  const summary = document.querySelector("#operation-summary"); summary.replaceChildren();
+  const selected = operation.language ?? document.querySelector("#workflow-language").value;
+  const count = operation.speaker_count ?? (document.querySelector("#workflow-speaker-auto").checked ? "auto" : document.querySelector("#workflow-speaker-count").value);
+  const speakers = count === "auto" ? "Auto-detect" : count;
+  const language = selected === "auto" ? "Auto-detect" : selected;
+  let entries;
+  if (kind === "inspect") entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0]];
+  else {
+    const jobs = result.jobs || [], identities = jobs.map(job => job.job_id).join(", ");
+    const outputs = jobs.map(job => shortName(job.outputs?.results || job.existing_result?.path)).join(", ");
+    entries = [["Jobs", identities ? `${jobs.length} — ${identities}` : jobs.length], ["Output", outputs || "—"]];
+  }
+  entries.push(["Recording language", `${language} *`], ["Speakers", `${speakers} **`]);
+  for (const [label, value] of entries) {
+    const card = document.createElement("div"); card.className = "result-card";
+    const heading = document.createElement("strong"); heading.textContent = label;
+    card.append(heading, String(value)); summary.append(card);
+  }
+  if (kind === "dry-run" && result.jobs?.length) {
+    const table = document.createElement("table"); table.className = "queue-table plan-table";
+    table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>";
+    const body = document.createElement("tbody");
+    for (const job of result.jobs) {
+      const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id);
+      const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—";
+      const row = document.createElement("tr");
+      for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) {
+        const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
+      }
+      body.append(row);
+    }
+    table.append(body); summary.append(table);
+  }
+  appendSelectionFootnotes(summary);
+}
+
 async function queuePost(path, body, options = {}) { const feedback = options.feedback !== false; const trigger = options.trigger ?? lastClickedButton; let succeeded = false; if (feedback) setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json", "X-EWP-CSRF": csrfToken}, body: JSON.stringify(body)}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { if (feedback) setGuiWorking(false, trigger, succeeded); } }
 async function postSelectedFile(path, file, trigger, extraHeaders = {}) { let succeeded = false; setGuiWorking(true, trigger); try { const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/octet-stream", "Accept": "application/json", "X-EWP-CSRF": csrfToken, "X-EWP-Filename": encodeURIComponent(file.name), ...extraHeaders}, body: file}); const payload = await response.json(); if (!response.ok) throw new Error(`${payload.error.code}: ${payload.error.message}`); succeeded = true; return payload; } finally { setGuiWorking(false, trigger, succeeded); } }
 function diagnosticCode(error) { const message = String(error?.message || "GUI_WORKFLOW_OPERATION_FAILED"); return message.split(":", 1)[0] || "GUI_WORKFLOW_OPERATION_FAILED"; }

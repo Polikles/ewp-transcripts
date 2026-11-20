@@ -1,6 +1,6 @@
 # Work policy and context recovery
 
-Updated: 2026-11-18. Read `AGENTS.md` first; this file supplements its rules.
+Updated: 2026-11-20. Read `AGENTS.md` first; this file supplements its rules.
 
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
    and `docs/99-roadmap-v2.md`. Inspect Git status before edits. Historical handoff sections
@@ -21,3 +21,9 @@ Updated: 2026-11-18. Read `AGENTS.md` first; this file supplements its rules.
    immutable artifacts and qualified workflows. Record user-visible changes in `CHANGELOG.md`.
 7. End each task with a checkpoint containing checked/unchecked work and commands needed
    to resume. Do not mark environmental or owner-only verification as completed.
+
+8. Owner scope (2026-11-20): follow the current classification at the top of the roadmap.
+   Research benchmarks, universal dictionaries, hardware presets and accurate ETA calibration
+   are not completion gates. Prepare the complete editable EN–PL terminology file only after
+   feature completion, then owner approval and Polish documentation. Documentation screenshots
+   wait for custom GUI/icons; waiting for the artist has no deadline and blocks no other work.

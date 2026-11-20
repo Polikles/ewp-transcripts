@@ -1,5 +1,11 @@
 # Definition of Done — MVP
 
+Owner scope update (2026-11-20): the current [roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20)
+controls required work. Corpus/quality research, general dictionaries and hardware/preset benchmark
+programs described here are optional nice-to-have, not current project completion gates. Existing
+unit/integration, security, data-lineage and packaging checks remain required; preserve all accepted
+historical evidence. This is a practical podcast/recording workflow tool.
+
 The MVP is complete when the following conditions are met.
 
 ## Functionality
@@ -24,7 +30,7 @@ deferral are recorded in the [MVP requirements traceability matrix](20-mvp-requi
 Fast/noisy derived fixtures and the long-form archive cases close the available material
 rows. Full-English and three-speaker quality remain explicitly deferred by ADR-0014
 until representative archive-derived inputs exist.
-- [ ] WER/CER/timestamp/DER baselines have been recorded.
+- Optional research backlog: additional WER/CER/timestamp/DER baselines (not a completion checkbox).
 
 The lexical WER/CER portion has an accepted three-case Polish baseline. Timestamp,
 DER/JER, English, and statistically representative thresholds are explicitly deferred by

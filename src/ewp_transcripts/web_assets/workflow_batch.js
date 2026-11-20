@@ -14,12 +14,14 @@ function appendBatchSettings(entries) {
   const body = document.createElement("tbody");
   for (const {episode, request} of entries) {
     const row = document.createElement("tr");
-    for (const value of [episode.files.map(file=>file.name).join(", "), `${request.language === "auto" ? "Auto-detect" : request.language} *`, `${request.speaker_count === "auto" ? "Auto-detect" : request.speaker_count} *`]) {
+    for (const value of [episode.files.map(file=>file.name).join(", "), `${request.language === "auto" ? "Auto-detect" : request.language} *`, `${request.speaker_count === "auto" ? "Auto-detect" : request.speaker_count} **`]) {
       const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
     }
     body.append(row);
   }
-  table.append(body); document.querySelector("#operation-summary").append(table);
+  table.append(body);
+  const summary = document.querySelector("#operation-summary"), notes = summary.querySelector(".summary-selection-notes");
+  if (notes) notes.before(table); else summary.append(table);
 }
 async function runGuiBatch(kind, trigger) {
   if (guiBatchBusy) return;
@@ -35,7 +37,7 @@ async function runGuiBatch(kind, trigger) {
   try {
     if (kind === "transcriptions") {
       if (!guiBatchPlan || guiBatchPlan.signature !== signature) throw new Error("GUI_DRY_RUN_REQUIRED: Run and review dry-run for this exact input, output, language, and speaker count before adding it to the queue.");
-      if (!form.elements.confirmed.checked) throw new Error("GUI_CONFIRMATION_REQUIRED: Check 'I reviewed this exact dry-run' before adding the file to the queue.");
+      if (!form.elements.confirmed.checked) throw new Error("GUI_CONFIRMATION_REQUIRED: Check 'I reviewed the plan' before adding jobs to the queue.");
       const plan = guiBatchPlan; guiBatchPlan = null;
       let added = 0, skipped = 0;
       // Each item retains the server's exact plan and hash validation. A failed item

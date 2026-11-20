@@ -20,11 +20,12 @@ pipeline deployment. Multi-user credential isolation is not currently on the roa
 
 ## Status
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.19.0` remains an internal beta, not a public release.
+- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.20.0` remains an internal preview, not a public release.
 - Development remains untagged on `main` while requirements work continues. The first public
   release is planned only as the checkpoint immediately before Docker-image work begins.
 - MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
-- Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM; lower-memory GPUs have not been validated.
+- Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM. Other NVIDIA machines with at least
+  8 GB VRAM are expected to work, without validation or a compatibility/performance guarantee.
 - Validated source language: Polish.
 - Reference backend: WhisperX with pyannote speaker diarization.
 - The v0.2.0 transcript-revision workflow is implemented and acceptance-audited on
@@ -48,20 +49,26 @@ pipeline deployment. Multi-user credential isolation is not currently on the roa
 - The wheel passed isolated offline transcription, and the complete locked source installation passed in a fresh Ubuntu 24.04 WSL2 distribution.
 - Three-speaker and full-English quality validation remain deferred until representative archive-derived material exists.
 
+Current planning: [owner scope and backlog](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+Research benchmarks/universal dictionaries are optional. Native Windows is planned; current WSL
+success does not establish native Windows compatibility. Polish manuals follow feature completion
+and approval of the complete EN–PL UI string list. Artist feedback is non-blocking.
+
 ## Requirements
 
 - Ubuntu 24.04 and 26.04 on WSL2 are accepted baselines. The complete historical release
   gate passed on 24.04; the 26.04 local-only transcription/source-export workflow is now
-  owner-qualified on WSL/RTX 3090. New guided-UI changes still need the WSL retest. Bare-metal Ubuntu and an Ubuntu
+  owner-qualified on WSL/RTX 3090. The owner accepts the recent GUI/workflow and browser/palette behavior; current restart
+  recovery and full profile exchange remain untested by the owner. Bare-metal Ubuntu and an Ubuntu
   virtual machine with working NVIDIA GPU passthrough are expected deployment shapes but
   have not yet passed the complete release gate.
 - An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
-  performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM; minimum hardware requirements
-  for future presets have not yet been characterized.
+  performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA machines with
+  at least 8 GB VRAM are expected to work; this is unqualified and carries no compatibility
+  or performance guarantee. Hardware-preset studies are optional, not a delivery requirement.
 - At least 20 GB of free Linux-filesystem space is recommended, preferably on an SSD.
   This minimum applies across the planned presets; audio inputs and generated results
-  require additional space. RAM and VRAM requirements will be validated later and
-  documented per preset.
+  require additional space. RAM/VRAM requirements vary with configuration; no lower-memory performance guarantee is made.
 
 See [`Instructions/README.md`](Instructions/README.md) for the current manual installation
 workflow and its approximate download sizes.

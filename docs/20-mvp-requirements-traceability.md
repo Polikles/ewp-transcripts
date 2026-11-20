@@ -1,5 +1,10 @@
 # MVP requirements traceability
 
+Current scope is governed by the [2026-11-20 owner decisions](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+Broad research metrics, hardware presets and ETA accuracy studies are optional, not current
+completion gates. Preserve earlier accepted results; current owner acceptance excludes a full
+profile exchange and latest restart recovery, with browser/palette behavior accepted.
+
 This matrix audits every normative requirement against production code, automated
 tests, and accepted external evidence. It is a release-control document, not a claim
 that the unchecked MVP gates are complete.
@@ -121,18 +126,18 @@ The v0.4 contracts are defined in `23-v0.4-translation-contract.md`,
 ## Local browser GUI requirements
 
 ADR-0021 and `26-local-web-gui-contract.md` define the common WSL2, bare-metal Ubuntu, and
-future-Docker interface. These requirements are intentionally planned, not implied complete
-by the existing exported HTML transcript player.
+future-Docker interface. The application GUI is implemented separately from the exported HTML transcript player.
+The evidence below distinguishes delivered functions from retained proposals.
 
 | Requirement | Status | Planned implementation/evidence |
 | --- | --- | --- |
-| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | `transcriber gui`, bundled offline assets, loopback-only adapter, `/api/v1` health/about/root endpoints, and frontend compatibility rejection. Application-workflow calls begin in the next slice. |
-| FR-L03, FR-L17, NFR-020 | partial | Windows/WSL/POSIX paths normalize before explicit-root authorization; Host/Origin/CSRF validation, restrictive CSP, safe fixed routing, and negative tests are implemented. CSRF-protected root-contained file/directory browsing rejects symlinks and filters expected file types; download identity remains later work. |
+| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | `transcriber gui`, bundled offline assets, loopback-only adapter, `/api/v1` health/about/root endpoints, and frontend compatibility rejection. All workflow stages call the application services directly. |
+| FR-L03, FR-L17, NFR-020 | partial | Windows/WSL/POSIX paths normalize before ordinary-user-space/system-denylist validation; Host/Origin/CSRF validation, restrictive CSP, safe fixed routing, and negative tests are implemented. Safe file selection rejects symlinks/system trees. General verified export-download identities remain retained proposal E02. |
 | FR-L04, FR-L05 | implemented | Browser inspect/dry-run calls existing services; an explicitly confirmed single-worker queue invokes atomic transcription, survives browser refresh, and waits safely on server shutdown. Explicit cancellation and richer persisted GUI history remain later operational enhancements. |
-| FR-L06, FR-L07 | implemented | Structured browser transcript editor hides/protects anchors, saves with hash conflict detection, requires exact saved preview before immutable manual apply, and exports the selected verified revision through existing services. External browser qualification remains pending. |
+| FR-L06, FR-L07 | implemented | Structured browser transcript editor hides/protects anchors, saves with hash conflict detection, requires exact saved preview before immutable manual apply, and exports the selected verified revision through existing services. The owner accepts the current workflow; latest restart recovery and full profile exchange remain unchecked. |
 | FR-L08, FR-L09 | verified | Correction and translation candidate generation, structured manual editors, exact-lineage preview/apply, translation audit/export, and direct handoffs passed external browser qualification. |
 | FR-L10 | verified | Compatible correction/translation dictionaries are catalogued and selectable; proposal review retains approved/rejected decisions and publishes immutable project dictionaries with exact provenance. |
 | FR-L11, FR-L12 | implemented | Coded failures cover startup, routes, paths, credentials, providers, models, and confirmations. Provider workflows require explicit disclosure/consent and keep optional OpenRouter credentials only in server-process memory. |
-| FR-L14, FR-L15, NFR-018 | partial | Version, license/warranty, source, and issue information is implemented in the responsive keyboard-native shell. Synchronized media review and explicit theme/follow controls remain planned. |
-| FR-L18 | implemented | Inspect, exact dry-run authorization, staged queue evidence, and execution carry an explicit per-job language and speaker count. External browser qualification remains pending. |
+| FR-L14, FR-L15, NFR-018 | partial | Version, license/warranty, source, and issue information is implemented in the responsive keyboard-native shell. Synchronized mixed/single media review, seeking, playback speed, PL/EN and explicit themes are implemented and owner-accepted. Any automatic audio-follow enhancement remains a separate proposal. |
+| FR-L18 | implemented | Inspect, exact dry-run authorization, staged queue evidence, and execution carry an explicit per-job language and speaker count. The owner accepts the current workflow; latest restart recovery and full profile exchange remain unchecked. |
 | NFR-017, NFR-019 | planned | Shared contract tests across WSL2-compatible/native launch modes, then the identical packaged application in Docker; offline acceptance after model setup. |

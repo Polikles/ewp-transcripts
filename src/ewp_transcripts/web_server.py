@@ -2124,8 +2124,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "error": {
                                     "code": "GUI_CONFIRMATION_REQUIRED",
                                     "message": (
-                                        "Check 'I reviewed this exact dry-run' before adding "
-                                        "the file to the queue."
+                                        "Check 'I reviewed the plan' before adding "
+                                        "jobs to the queue."
                                     ),
                                 }
                             },

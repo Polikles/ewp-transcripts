@@ -47,7 +47,7 @@ const guiPolish = new Map([
   ["Restart the GUI and rerun Test local dependencies before retrying the queue.", "Uruchom ponownie GUI i test lokalnych zależności przed ponownym uruchomieniem kolejki."],
   ["Running doctor…", "Uruchamianie doctor…"], ["Doctor report (JSON)", "Raport doctor (JSON)"],
   ["Doctor finished. Native speech loading is reported separately by Test local dependencies.", "Doctor zakończył pracę. Ładowanie natywnych bibliotek mowy sprawdza osobno test lokalnych zależności."],
-  ["I reviewed this exact dry-run and want to add it to the queue.", "Sprawdziłem ten konkretny plan i chcę dodać plik do kolejki."],
+  ["I reviewed the plan and want to add jobs to the queue.", "Sprawdziłem plan i chcę dodać zadania do kolejki."],
   ["Audio copied locally. Inspect and dry-run each file, confirm staging, then start the queue. Copies become durable only when staged.", "Audio skopiowano lokalnie. Sprawdź i zaplanuj każdy plik, potwierdź dodanie, potem uruchom kolejkę. Kopie są trwałe dopiero po dodaniu do kolejki."],
   ["Remove", "Usuń"], ["Status", "Stan"], ["Job and settings", "Zadanie i ustawienia"], ["Input", "Wejście"],
   ["Planned/actual result", "Planowany / zapisany wynik"], ["Action", "Działanie"],

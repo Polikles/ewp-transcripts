@@ -1,5 +1,10 @@
 # Queue percentage and ETA
 
+Owner decision (2026-11-20): no further accuracy-calibration campaign is required. Approximate
+percentage, actual elapsed time and visible activity are sufficient to show that transcription
+continues. Keep the current opt-in ETA and its conservative fallbacks; the research proposals
+below remain optional rather than an open delivery gate.
+
 Status: first implementation delivered after the 2026-11-19 assessment and owner's request for
 an approximate indicator. It makes activity visible without changing inference or model pins.
 Synthetic tests validate behavior; prediction accuracy on real target hardware remains to qualify.
@@ -80,7 +85,7 @@ live snapshots while the service is blocked and terminal state after it returns.
 fake engines verifies event order through publication/exports/cleanup, including observer failures.
 Browser checks cover EN/PL labels and narrow queue cells. These tests do not calibrate GPU speed.
 
-Next real-runtime checks: mono, mixed-speaker/diarization, grouped/split-channel, PL/EN, cold/warm
+Optional future research checks (not scheduled): mono, mixed-speaker/diarization, grouped/split-channel, PL/EN, cold/warm
 load and video extraction on RTX 3090/WSL and a slower supported machine. Compare each predicted
 remaining range with actual remaining wall time at phase boundaries; record error/spread privately
 without transcript data. Use that evidence to tune weights/ranges and decide on finer engine-native

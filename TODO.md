@@ -1,188 +1,72 @@
 # Immediate work queue
 
-Updated: 2026-11-20.
+Updated: 2026-11-20. Start here after a context reset.
 
-Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
-[docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
+Policy: [WORK_POLICY.md](WORK_POLICY.md). Product sequencing and the complete retained inventory:
+[roadmap — owner scope](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+The owner is building a podcast/recording workflow tool. Optional research does not block delivery.
 
-## Delivered: batch planning, sentence boundaries and portable user profiles
+## Delivered: summary footnotes and scope reconciliation
 
-Checkpoint: [current work](docs/checkpoints/2026-11-20-batch-sentences-profiles.md).
+Checkpoint: [current work](docs/checkpoints/2026-11-20-scope-and-summary-polish.md).
 
-- [x] Frame the Cyryl artwork credit and create a framed-logo favicon visible in dark browser chrome.
-- [x] Localize Inspect batch counts; show selected language/speaker fallback values with an explained asterisk when media metadata is absent.
-- [x] Plan all inspected unstaged episodes and stage the entire reviewed batch; preserve each episode's settings, exact-plan confirmation and completed-job protection.
-- [x] Hide ETA by default, add a persisted opt-in with an explicit minimum calibration sample count, and refresh elapsed time every second without increasing API polling.
-- [x] Add one-file user profile save/load/export/import covering preferences, workspace manifests and dictionaries; exclude credentials/private media and handle missing paths honestly.
-- [x] Add independent dictionary import/export preserving immutable versions and validation.
-- [x] Split review sections at sentence ends near the word target, including multi-speaker boundaries; keep canonical text/times unchanged and existing edits safe.
-- [x] Warn in red near the first review section when sentence boundaries are unavailable; explain section/block separation versus subtitle layout.
-- [x] Provide explicit playback speed for mixed and single-source audio; put three block actions in one responsive row and shorten Merge with previous block in EN/PL.
-- [x] Verify backend, browser, packaging and portable profile regressions; update guides, changelog, roadmap and checkpoints; push the application changes. The artist package was sent for review and must remain unchanged.
+- [x] Make language (*) and speaker-count (**) footnotes span the summary width and remain below Inspect and Dry-run tables.
+- [x] Rename the queue confirmation to reviewed plan / add jobs in EN/PL; vertically center the source section counter between navigation buttons.
+- [x] Record owner acceptance: current GUI accepted with profile exchange untested; workflow passed except restart recovery; browsers/palette passed; actual 200% zoom not established.
+- [x] Remove accurate percentage/ETA calibration as a delivery requirement; retain simple activity feedback and existing optional estimates.
+- [x] Defer a complete editable EN–PL string-pair file until feature completion, then owner approval, then Polish docs; screenshots wait for final custom GUI/icons.
+- [x] Mark artist delivery waiting without a deadline or blocking other work; leave sent ZIP/demo untouched.
+- [x] Move research benchmarks, private/public universal-corpus work, translation model sweeps, model benchmark automation and hardware presets into an optional nice-to-have list outside delivery gates.
+- [x] Document RTX 3090 owner-tested hardware and an unqualified expectation of at least 8 GB VRAM; retain native Windows as planned convenience work.
+- [x] Audit roadmap, requirements, plans, ADRs and operator docs for other open items; reconcile statuses and report retained versus optional work without inventing priorities.
+- [x] Verify the small UI changes, update changelog/checkpoints, and deliver application/planning updates.
 
-## Delivered: mixed playback, bounded review, runtime progress and artist package
+## Owner acceptance and remaining checks
 
-Checkpoint: [current implementation](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
+- [x] Owner accepts recent GUI/workflow changes, subject to the small fixes above.
+- [x] Owner accepts the complete workflow except restart recovery; retain earlier accepted
+  recovery evidence as history rather than claiming a current restart test.
+- [x] Owner confirms browsers and palette work.
+- [ ] Owner check still open: recover the latest workflow after a full program/VM restart.
+- [ ] Optional owner check: complete user-profile import/export transfer. Provisionally accepted
+  as implemented; the owner has not fully tested exchange. Automated coverage already passes.
+- [ ] Optional display check: actual browser zoom 200% (page magnification, not window resizing).
+  Not established by the owner's report and not a newly imposed blocking gate.
+- Precise percentage/ETA calibration is removed from required work. Keep elapsed/activity feedback
+  and the existing optional approximate ETA; no accuracy study is scheduled.
 
-- [x] Close language information on outside click/tap and Escape; retain keyboard accessibility.
-- [x] Mix all synchronized episode files/channels for default review playback; preserve real shared timing and source hashes.
-- [x] Show each review block's original source filename(s) below Speaker without deriving provenance from edited speaker names.
-- [x] Diagnose the owner's HD06 MP4 wall of text; cap review sections/blocks for a single long speaker without changing canonical timing or overwriting saved drafts.
-- [x] Explain the supplied ONNX/VAD/Wav2Vec2 logs using actual dependency code and available run evidence.
-- [x] Implement live backend phase events, elapsed time, approximate percentage and sensible ETA/fallbacks; preserve sequential execution and terminal correctness.
-- [x] Verify fake-clock/events, real mixed audio, source provenance, long-review splitting, runtime/API/browser and package behavior; use the owner's video privately as reference.
-- [x] After fixes, build a portable clickable frontend-only artist review package with synthetic data, theme/locale/workflow interactions and no transcription backend.
-- [x] Include custom/third-party/native icon and indicator inventory, asset previews, credits/licenses and replacement guidance; leave downloadable ZIP locally.
-- [x] Commit/push verified implementation; generate and verify final frontend ZIP and provide owner retest/package location.
+## Retained product work — ordering not yet agreed
 
-## Delivered: playback, video ingestion and progress analysis
+- [ ] Prioritize roadmap R01–R15 and recovered proposals E01–E13 with the owner; do not implement
+  the whole inventory automatically. Native Windows build/installer remains planned (R12).
+- [ ] At feature completion, produce a complete editable EN–PL string-pair file for all labels,
+  messages, errors, states, hints, tooltips and dynamic templates; preserve original error codes.
+- [ ] After the owner corrects and approves that file, finalize terminology and full Polish docs.
+- [ ] Screenshots are deferred until the final custom GUI/icon set is integrated.
+- [ ] Integrate artist feedback/icons when supplied. No deadline; does not block other work.
+  Leave the already sent frontend ZIP/demo unchanged.
 
-Checkpoint: [playback, video and progress](docs/checkpoints/2026-11-19-playback-video-progress.md).
+## Nice-to-have — outside required project scope
 
-1. Source-review audio playback
-   - [x] Add a compact player in the left rail during stage 3, bound to the current recording.
-   - [x] Add Go to this fragment below speaker selection, seeking to the real segment start.
-   - [x] Support secure seekable media access, grouped-track selection, navigation and per-recording state.
-2. Video inputs
-   - [x] Accept supported video containers (including MP4) in CLI and GUI discovery/upload.
-   - [x] Extract audio through existing media services, preserve original provenance, reject absent/ambiguous audio streams with actionable errors.
-   - [x] Verify video-only/no-audio and real audio extraction with synthetic fixtures.
-3. Percentage and ETA analysis
-   - [x] Inspect available pipeline events/timings and document feasibility, limitations and a concrete implementation recommendation.
-   - [x] Assess numeric estimates against available evidence; retain the indeterminate gear because live phase events and calibrated measurements are absent.
-4. Delivery
-   - [x] Run required checks, browser workflows/layout and package verification; update English guides, changelog, roadmap and checkpoints.
-   - [x] Commit/push playback/video implementation and the completed percentage/ETA analysis; manual owner review remains pending.
+Previous summary references 10/11/12/14: private-corpus benchmark expansion, comparative correction
+and translation studies, public datasets/universal dictionary research, automated model benchmark
+matrices. Previous item 13: hardware presets and GTX 1070/CPU-only/Apple Silicon qualification.
+No such campaign is required for current completion. Ordinary regression/security/packaging checks
+remain required. See the authoritative roadmap for details rather than a duplicate research queue.
 
-## Follow-up: calibrated progress indicator
+## Delivered history
 
-- [x] Implement optional application/pipeline phase events, thread-safe snapshots and approximate percentage/ETA with unknown/overdue fallbacks.
-- [ ] Gather comparable real RTX 3090/WSL timings, separate cold/warm load and topology, then qualify percent/ETA error ranges. Keep indeterminate feedback when evidence is insufficient.
-- [x] Owner reviewed playback/video and requested mixed playback, bounded sections and a live approximate indicator.
+- [Batch planning, sentence-aware review and portable profiles](docs/checkpoints/2026-11-20-batch-sentences-profiles.md)
+- [Mixed playback, progress and artist reference](docs/checkpoints/2026-11-19-review-mix-progress-artist.md)
+- [Artist package sent for review](docs/checkpoints/2026-11-19-artist-review-package.md)
+- [Playback and video](docs/checkpoints/2026-11-19-playback-video-progress.md)
+- [Brand/palette and feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md)
+- [Polish UI and recovery fixes](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md)
+- [Workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md)
+- [Guided workflow](docs/checkpoints/2026-11-18-guided-workflow.md)
+- [Native dependency repair](docs/checkpoints/2026-11-18-gui-dependency-repair.md)
+- [Resolved launch diagnosis](docs/checkpoints/2026-11-18-gui-launch.md)
 
-## Delivered: review confirmation, palette identity and motion feedback
-
-Checkpoint: [review and identity feedback](docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md).
-
-- [x] Put the Windows/WSL path hint directly below the server input field, before selected files.
-- [x] Rename Selected for inspection to Wybrano do sprawdzenia; Review identity to ID weryfikacji.
-- [x] Mark the EwP Brand® profile with the owner's requested registration symbol, preserving brand identity and saved-work compatibility.
-- [x] Make Example default the first/startup profile, visibly distinct from EwP Brand®; preserve prior exports and explicit user palettes.
-- [x] Add accessible language-selection information about observed EN output from PL recordings, with no correctness guarantee and required review/correction.
-- [x] Highlight the manual-verification checkbox row and explain missing consent next to Save and prepare for export, with EN/PL copy.
-- [x] Replace every in-progress spinner with the supplied animated gear.svg; keep done/error feedback distinct and support reduced motion.
-- [x] Verify relevant regressions, package resources and responsive EN/PL UI; update roadmap, changelog and checkpoint; deliver for WSL retest.
-
-## Previous delivery: Polish UI audit and queue/translation recovery
-
-Checkpoint: [localization and recovery](docs/checkpoints/2026-11-18-gui-localization-and-recovery.md).
-
-- [x] Automatically load the dictionary catalog on first session initialization.
-- [x] Put shared output before input paths; retain processing language separately per selected episode/file.
-- [x] Fix Polish Transcribe wording: Sprawdź plik, Zaplanuj przetwarzanie, complete summaries/statuses/decision labels.
-- [x] Audit all stages, dialogs, dynamic statuses, errors and hover text in EN/PL; preserve diagnostic codes and user content.
-- [x] Translate the OpenRouter key dialog and correction/translation running/candidate states.
-- [x] Reduce technical detail font size and prevent Add speaker overlapping the preceding input.
-- [x] Rename source Prepare text for review / Apply and Polish equivalents; align Apply first on one line.
-- [x] Rename source publication Save and prepare for export; make Export subtitles a normal section heading.
-- [x] Update correction/translation generation and Continue to translation review wording.
-- [x] Rename translation stage/Apply translation/Save translation/Save and prepare for export/Save and export consistently in guides and controls.
-- [x] Fix reopening a saved/applied translation and exporting after stage navigation without regenerating a candidate.
-- [x] Fix Start queue activation whenever staged work exists; preserve completed ASR jobs and support later additions after completion/cleanup.
-- [x] Verify regressions, complete localization audit, update changelog/roadmap/checkpoints and deliver for WSL testing.
-- [ ] Owner approves final EN/PL function and section names and qualifies this revised workflow on WSL.
-
-## Deferred: full Polish user documentation
-
-- [ ] After the owner accepts function/section terminology, prepare the complete user guide and documentation in Polish. English remains the repository's primary language; Polish documentation is explicitly supported.
-
-## Previous delivery: GUI workflow polish and library management
-
-Checkpoint: [workflow polish](docs/checkpoints/2026-11-18-gui-workflow-polish.md).
-
-- [x] Reduce top header gap; make Quick steps vertical; strengthen light-theme artwork.
-- [x] Advance Inspect across selected episodes; prevent inspecting/planning already staged episodes.
-- [x] Remove queue selection checkboxes/bulk removal; retain per-row removal and add completed-only cleanup.
-- [x] Route recording-rail selection to that recording's current workflow step.
-- [x] Mute technical details, hints and legends; place every legend below its queue.
-- [x] Collapse optional correction dictionaries by default.
-- [x] Add dictionary viewing, version comparison, new/example creation, immutable editing and library removal.
-- [x] Replace duplicate palette choices with configured profiles and Preview / Apply / Save; support custom profiles; name preset EwP brand; remove browser confirmation.
-- [x] Equalize source review panels; align Undo/Redo/Clear at half-screen and all controls on wide screens.
-- [x] Preserve owner-confirmed cursor splitting and selected-text separation.
-- [x] Translation: move Skip below queue/legend; remove Open manual translation; rename step 3 Generate candidate.
-- [x] Translation: highlight inferred direction and show an explicit accept action when changing source direction.
-- [x] Collapse auto-filled translation inputs and optional dictionary; prevent status-label word splitting.
-- [x] Translation review: secondary right-aligned Clear below Preview; add Apply and Audit/export hover explanations.
-- [x] Update per-stage instructions, prototype comparison, changelog, roadmap and checkpoints.
-- [x] Run required checks and model-free browser workflows; deliver verified changes for WSL retest.
-- [ ] Owner retests these changes on WSL; API/provider and YouTube qualification stay pending.
-
-## Artist reference package (current delivery)
-
-- [x] Deliver the tested frontend-only ZIP and custom/Lucide/native indicator inventory: see [artist delivery checkpoint](docs/checkpoints/2026-11-19-artist-review-package.md).
-- [ ] Integrate the artist’s replacement icon package after it is supplied.
-
-## Completed delivery history
-
-## GUI launch diagnosis completed; WSL launch confirmed
-
-Checkpoint: [2026-11-18 launch diagnosis](docs/checkpoints/2026-11-18-gui-launch.md).
-
-- [x] Recover repository state, previous verification and private reference location.
-- [x] Establish persistent work policy, todo and task checkpoint.
-- [x] Reproduce package/CLI/server launch with the locked Python environment.
-- [x] Inspect staging/start/error paths and run existing queue/integration coverage.
-- [x] Reproduce native speech-runtime diagnostics without models or downloads.
-- [x] Identify supplied WSL error: `uv` ran in `ewp-waveform`, which lacks `transcriber`.
-- [x] Document recovery and run required local checks (781 tests; five integration tests).
-- [x] Record remaining WSL evidence and a bounded owner retest in the checkpoint.
-- [x] Owner confirms GUI launch from the correct transcription checkout.
-- [x] Capture actual WSL queue/backend error: missing FFmpeg libraries disable TorchCodec.
-
-## Completed: dependency repair and GUI feedback
-
-Checkpoint: [dependency repair](docs/checkpoints/2026-11-18-gui-dependency-repair.md).
-
-- [x] Add a guided native-runtime repair preserving locked ML versions.
-- [x] Put Test, doctor and repair controls in Settings & About, with post-test activation.
-- [x] Accept Ubuntu 26.04 alongside 24.04 in diagnostics and installation tools.
-- [x] Rename Remove from list and reduce queue width/spacing at half-screen.
-- [x] Run automated gates, real native audio decoding and available browser checks.
-- [x] Record remaining GPU/WSL qualification and exact owner retest commands.
-- [x] Owner runs repair and retries the short staged episode on the RTX 3090 (local workflow through subtitle export passed).
-
-## Previous delivery: guided workflow, review fixes and prototype comparison
-
-Checkpoint: [workflow usability](docs/checkpoints/2026-11-18-guided-workflow.md).
-
-Consult this list before each implementation slice and after any context reset.
-
-- [x] Verify native dependency setup is automatic in installation; add installer regression coverage.
-- [x] Explain Ubuntu 24.04 → 26.04 upgrade mismatch in errors and link exact recovery instructions.
-- [x] Add short numbered instructions below active-recording context for every workflow stage.
-- [x] Ship one detailed instruction document per stage, including optional stages, linked from the GUI.
-- [x] Match section numbering and action names to each stage's instructions; clarify next actions.
-- [x] Reduce the visual emphasis of Skip LLM-assisted correction.
-- [x] Place compact Prepare and validate / Draft and history panels side by side below transcript review and above human verification.
-- [x] Keep Preview from scrolling away from the current review position.
-- [x] Reduce the vertical footprint of workflow queue lists without losing item identity or actions.
-- [x] Combine YTT profile with Speaker names and colors; update visible swatches on profile changes.
-- [x] Rename Add revision-only speaker to Add speaker.
-- [x] Reproduce and fix Split at cursor with actual user caret, draft saving, pointer and keyboard activation.
-- [x] Make transcript text boxes grow with content on load, edits, navigation and width changes.
-- [x] Compare the updated app against the private prototype and workflow/visual references; fix in-scope discrepancies and record exclusions.
-- [x] Verify automated gates, browser workflows, package/help resources and update durable checkpoints.
-- [x] Prepare verified changes and a commit-ready handoff for the next WSL test without a release/tag.
-- [ ] Owner retests the new guided workflow, compact review and caret behavior on WSL.
-
-Owner evidence: local-only transcription through subtitle export succeeded on WSL/RTX 3090;
-API-assisted correction/translation is not qualified by that report. Reported ONNX DRM and
-WhisperX VAD terminal lines did not prevent completion. Do not reopen the resolved ASR blocker.
-
-## Other following work
-
-- Resume the consolidated GUI preview acceptance session after startup is understood.
-- Record WSL/browser, real GPU/provider and actual zoom results against the existing
-  owner test plan; leave the new-palette YouTube qualification pending until observed.
-- Keep GUI-55 closed. Do not tag or publish the internal 0.20.0 preview.
+The repaired local-only ASR/source-export path on WSL/RTX 3090 and the later MP4/mixed playback
+owner successes remain accepted. GUI-55 stays closed. Do not tag/publish a release as part of this
+planning update. Do not reopen delivered work merely because a historical plan calls it future.
