@@ -29,12 +29,22 @@ returning restores the per-recording position in this browser session. Original 
 remain available and match their canonical hashes. If any source is missing, restore it and use
 Reload recording audio; transcript editing still works. Server restart prepares a new private mix.
 
-New review sections honor both anchor_target_words (default 200) and anchor_target_speaker_blocks
-(default 5), including one-speaker recordings and single long canonical segments. Oversized saved
-drafts are presented as bounded blocks without replacing saved bytes. Unchanged legacy text can
-be projected into bounded source-word sections while retaining speaker assignments. Explicit Save
-persists the projected draft structure; canonical JSON, prior reviews and published revisions retain
-their original timing/lineage. Presentation changes do not require repeating ASR.
+Review sections aim for anchor_target_words (default 200) and anchor_target_speaker_blocks
+(default 5), then choose a nearby sentence end, including closing quotes and common EN/PL
+abbreviation handling. These are presentation targets, not hard sentence cuts. A search extends
+up to twice the word target. Without a usable sentence end, a bounded fallback keeps the editor
+usable and a red note above the first section requests extra attention to punctuation and speakers.
+This is a structural heuristic, not an ASR confidence score. Correcting speaker assignments matters
+more than presentation splits; splitting a block here does not determine subtitle line breaks.
+
+Unchanged legacy text can be repartitioned at source-word sentence boundaries while retaining
+speaker assignments. Edited legacy and parent-revision anchors keep their identities and use sentence-aware within-block
+presentation; unresolved old section boundaries receive the same caution. Reading does not replace
+saved bytes. Explicit Save persists the displayed draft structure. Canonical JSON/timing and published
+revisions remain unchanged. These changes do not require repeating ASR.
+
+Playback speed (0.75× through 2×) is an explicit selector for both mixed audio and single-source
+recordings, independently of the browser's native audio menu. It persists as a display preference.
 
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 

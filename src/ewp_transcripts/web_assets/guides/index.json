@@ -33,8 +33,8 @@
           "pl": "Zaplanuj i dodaj do kolejki"
         },
         "text": {
-          "en": "Run Dry-run, review the exact plan, confirm it and Add to queue. Adding advances to the next unqueued recording.",
-          "pl": "Kliknij Zaplanuj przetwarzanie, sprawdź dokładny plan, potwierdź go i dodaj plik do kolejki. Wybór przejdzie do następnego nagrania spoza kolejki."
+          "en": "Run Dry-run for all unqueued selections, review and confirm the full plan, then Add to queue once for the entire batch.",
+          "pl": "Zaplanuj wszystkie pliki spoza kolejki, sprawdź i potwierdź cały plan, a następnie kliknij Dodaj do kolejki raz dla całej listy."
         }
       },
       {
@@ -377,6 +377,16 @@
       "pl": "Ustawienia i informacje"
     },
     "steps": [
+      {
+        "title": {
+          "en": "Preferences and profile",
+          "pl": "Preferencje i profil"
+        },
+        "text": {
+          "en": "Keep ETA off or enable it after calibration. Save, load or transfer one user-profile JSON with preferences, workspaces and dictionaries.",
+          "pl": "Pozostaw ETA wyłączone lub włącz je po kalibracji. Zapisz, wczytaj lub przenieś jeden plik JSON profilu z preferencjami, obszarami pracy i słownikami."
+        }
+      },
       {
         "title": {
           "en": "Test local dependencies",

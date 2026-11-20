@@ -88,3 +88,20 @@ reviewSizeObserver.observe(document.querySelector("#translation-review-editor"))
 window.addEventListener("resize", scheduleTranscriptReviewResize);
 document.addEventListener("ewp-stage", scheduleTranscriptReviewResize);
 document.fonts.ready.then(scheduleTranscriptReviewResize);
+
+const reviewSectionGuidance = document.createElement("p");
+reviewSectionGuidance.className = "field-hint";
+reviewSectionGuidance.textContent = "Sections make correction easier. Check speaker assignments carefully. Splitting a speaker block here does not determine subtitle line breaks.";
+document.querySelector("#review-navigation").after(reviewSectionGuidance);
+const reviewSentenceWarning = document.createElement("p");
+reviewSentenceWarning.id = "review-sentence-warning"; reviewSentenceWarning.className = "review-sentence-warning";
+reviewSentenceWarning.setAttribute("role", "note"); reviewSentenceWarning.hidden = true;
+reviewSentenceWarning.textContent = "ASR sentence boundaries appear incomplete. Text may be divided incorrectly; pay extra attention to punctuation and speaker assignments during correction.";
+reviewSectionGuidance.after(reviewSentenceWarning);
+function syncReviewSentenceWarning() {
+  reviewSectionGuidance.hidden = !reviewDocument;
+  reviewSentenceWarning.hidden = !reviewDocument?.sentence_boundary_warning;
+}
+new MutationObserver(syncReviewSentenceWarning).observe(document.querySelector("#review-editor"), {childList:true});
+document.addEventListener("ewp-review-metadata", syncReviewSentenceWarning);
+syncReviewSentenceWarning();

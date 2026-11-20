@@ -12,6 +12,8 @@ from pathlib import Path
 from threading import RLock
 from typing import Any
 
+from pydantic import ValidationError
+
 from ewp_transcripts.config import (
     EWP_BRAND_PROFILE,
     EWP_BRAND_PROFILE_ALIASES,
@@ -90,6 +92,51 @@ class GuiLibrary:
             "kind": kind,
             "document": dictionary.model_dump(mode="json"),
         }
+
+    @staticmethod
+    def dictionary_identity(payload: str) -> tuple[str, str]:
+        """Validate an exchanged edition without rewriting its bytes/provenance."""
+        raw = json.loads(payload)
+        if not isinstance(raw, dict):
+            raise ValueError("Dictionary document must be a JSON object")
+        model = (
+            ProjectTranslationDictionary
+            if "source_language" in raw
+            else ProjectCorrectionDictionary
+        )
+        try:
+            parsed = model.model_validate_json(payload)
+        except ValidationError:
+            raise ValueError(
+                "Dictionary document does not match a supported dictionary format"
+            ) from None
+        if len(parsed.dictionary_id) > 180:
+            raise ValueError("Dictionary ID is too long for a portable file")
+        return parsed.dictionary_id, hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def import_dictionary(self, *, payload: str, directory: str) -> dict[str, Any]:
+        identifier, digest = self.dictionary_identity(payload)
+        root = self._resolve(directory, directory=True)
+        root.mkdir(parents=True, exist_ok=True)
+        destination = root / f"{identifier}.json"
+        with self._lock:
+            if destination.is_symlink():
+                raise ValueError("Dictionary destination cannot be a symlink")
+            if destination.exists():
+                if sha256_file(destination) != digest:
+                    raise ValueError(
+                        "That dictionary ID already exists with different content; "
+                        "import into another directory or create a new version"
+                    )
+            else:
+                self._publish(destination, payload.encode("utf-8"))
+        return self.view(str(destination))
+
+    def export_dictionary(self, path: str) -> dict[str, str]:
+        source = self._resolve(path)
+        payload = source.read_bytes().decode("utf-8")
+        identifier, digest = self.dictionary_identity(payload)
+        return {"filename": f"{identifier}.json", "payload": payload, "sha256": digest}
 
     def edition(
         self, *, document: dict[str, Any], directory: str, previous_path: str, previous_sha256: str
@@ -203,8 +250,10 @@ class GuiLibrary:
             )
         return {"profiles": profiles}
 
-    def save_profile(self, *, name: str, colors: list[str]) -> dict[str, Any]:
-        name = name.strip()
+    def validate_profile(self, *, name: str, colors: list[str]) -> None:
+        """Check a custom palette before any profile-import side effects."""
+        if name != name.strip():
+            raise ValueError("Profile name must not have surrounding whitespace")
         if not name or len(name) > 80 or any(ord(char) < 32 for char in name):
             raise ValueError("Profile name must contain 1–80 printable characters")
         if name in {
@@ -225,6 +274,10 @@ class GuiLibrary:
             re.fullmatch(r"#[0-9a-fA-F]{6}", color) for color in colors
         ):
             raise ValueError("A profile needs 1–32 colors in #RRGGBB format")
+
+    def save_profile(self, *, name: str, colors: list[str]) -> dict[str, Any]:
+        name = name.strip()
+        self.validate_profile(name=name, colors=colors)
         with self._lock:
             document = self._read()
             document["profiles"][name] = [color.upper() for color in colors]

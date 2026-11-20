@@ -441,6 +441,13 @@ generate_audit = false
 editor = ""
 ```
 
+Anchor word/speaker counts are presentation targets. Preparation prefers a nearby EN/PL sentence
+end, searching up to twice the word target rather than cutting a well-punctuated sentence at a fixed
+count. Without a usable boundary, bounded fallback keeps editing usable and the GUI discloses the
+need for extra punctuation/speaker review. Revision-source indivisible word references retain their
+protected anchors. Section/block presentation does not determine subtitle line breaks or change
+canonical timing.
+
 `editor = ""` means use the normal environment fallback (`VISUAL`, then `EDITOR`) or fail
 with actionable guidance when `revise edit` cannot identify an editor.
 

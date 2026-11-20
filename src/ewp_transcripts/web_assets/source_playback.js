@@ -18,7 +18,21 @@ const playbackRetry = document.createElement("button"); playbackRetry.type = "bu
 playbackRetry.textContent = "Reload recording audio";
 const playbackStatus = document.createElement("p"); playbackStatus.id = "gui-playback-status";
 playbackStatus.className = "field-hint"; playbackStatus.setAttribute("role", "status");
-sourcePlayback.append(playbackHeading, playbackSourceLabel, playbackAudio, playbackRetry, playbackStatus);
+const playbackSpeedLabel = document.createElement("label"); playbackSpeedLabel.textContent = "Playback speed";
+const playbackSpeed = document.createElement("select"); playbackSpeed.id = "gui-playback-speed";
+for (const speed of [0.75, 1, 1.25, 1.5, 1.75, 2]) {
+  const option = document.createElement("option"); option.value = String(speed); option.textContent = `${speed}×`; playbackSpeed.append(option);
+}
+playbackSpeed.value = String(guiPreferences.playbackSpeed || 1);
+function applyPlaybackSpeed() { playbackAudio.playbackRate = Number(playbackSpeed.value); }
+playbackSpeed.addEventListener("change", () => { guiPreferences.playbackSpeed = Number(playbackSpeed.value); saveGuiPreferences(); applyPlaybackSpeed(); });
+playbackAudio.addEventListener("loadedmetadata", applyPlaybackSpeed);
+playbackAudio.addEventListener("ratechange", () => {
+  const value = String(playbackAudio.playbackRate);
+  if ([...playbackSpeed.options].some(option => option.value === value)) playbackSpeed.value = value;
+});
+playbackSpeedLabel.append(playbackSpeed);
+sourcePlayback.append(playbackHeading, playbackSourceLabel, playbackAudio, playbackSpeedLabel, playbackRetry, playbackStatus);
 document.querySelector("#gui-recordings").after(sourcePlayback);
 
 function rememberPlaybackPosition() {

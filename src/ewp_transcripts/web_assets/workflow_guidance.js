@@ -110,10 +110,11 @@ function numberWorkflowSections() {
   markWorkflowStep("saved", 3, document.querySelector('label[for="workspace-list"]'));
   markWorkflowStep("saved", 4, document.querySelector("#managed-sources summary"), {rename:true});
   document.querySelector("#dependency-repair").before(document.querySelector("#doctor-status"), document.querySelector("#doctor-details"));
-  markWorkflowStep("settings", 1, document.querySelector("#dependency-panel h3"), {rename:true});
-  markWorkflowStep("settings", 2, document.querySelector("#doctor-status"));
-  markWorkflowStep("settings", 3, document.querySelector("#dependency-repair"));
-  markWorkflowStep("settings", 4, document.querySelector("footer"));
+  markWorkflowStep("settings", 1, document.querySelector("#gui-user-profile h3"), {rename:true});
+  markWorkflowStep("settings", 2, document.querySelector("#dependency-panel h3"), {rename:true});
+  markWorkflowStep("settings", 3, document.querySelector("#doctor-status"));
+  markWorkflowStep("settings", 4, document.querySelector("#dependency-repair"));
+  markWorkflowStep("settings", 5, document.querySelector("footer"));
 }
 
 function renderWorkflowInstructions() {

@@ -33,7 +33,14 @@ items belong to one monolithic "Version 2" release.
    correction, review/export, and translation queues. The GUI reuses application services and
    does not implement a parallel pipeline.
 
-Current GUI execution priority (2026-11-19): complete the
+Current GUI execution priority (2026-11-20): [batch plans, sentence-aware reviews and portable
+profiles](checkpoints/2026-11-20-batch-sentences-profiles.md). The current application work includes
+all selected episode planning/staging, metadata fallback disclosure, sentence-aware sections, playback
+speed parity, optional calibrated ETA and portable preferences/workspaces/dictionaries. The artist
+package has already been sent by the owner and MUST remain unchanged. Artist feedback/custom-icon
+integration follow later. Full Polish documentation remains after terminology approval.
+
+Previous GUI execution priority (2026-11-19): complete the
 [mixed playback / bounded review / live progress delivery](checkpoints/2026-11-19-review-mix-progress-artist.md)
 and its offline [artist reference package](31-artist-review-package.md). The owner has confirmed
 real MP4 transcription and reported the current GUI issues. Default playback now mixes all

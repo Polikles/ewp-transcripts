@@ -732,6 +732,7 @@ function guiUiText(value) {
   if (coded) {
     const description = guiPolishErrorDescriptions.get(coded[1]);
     const translatedBody = guiUiText(coded[2]);
+    if (["GUI_PROFILE_INVALID", "GUI_DICTIONARY_REQUEST_INVALID"].includes(coded[1]) && translatedBody !== coded[2]) return `${coded[1]}: ${translatedBody}`;
     return `${coded[1]}: ${description || (translatedBody !== coded[2] ? translatedBody : guiPolishFallbackError(coded[1]))}`;
   }
   const exact = guiPolish.get(trimmed);

@@ -43,6 +43,8 @@ class GuiRuntimeProgress(BaseModel):
     eta_min_seconds: int | None = None
     eta_max_seconds: int | None = None
     calibrated: bool
+    calibration_runs: int = Field(default=0, ge=0)
+    calibration_required: int = Field(default=3, ge=1)
     overdue: bool
     stream_index: int = Field(ge=1)
     stream_count: int = Field(ge=1)

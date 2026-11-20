@@ -160,7 +160,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"const formElement = event.currentTarget" in script_response.body
     assert b"formElement.elements.confirmed" in script_response.body
     assert b"event.currentTarget.elements" not in script_response.body
-    assert b"(auto)" in script_response.body
+    assert b"Auto-detect" in script_response.body
     assert b"GUI_REVIEW_ACTIVE" in script_response.body
     assert b"GUI_REVIEW_RESTORE_FAILED" in script_response.body
     assert b"None \xe2\x80\x94 validation only" in script_response.body
@@ -1127,7 +1127,9 @@ def test_gui_doctor_requires_a_completed_dependency_test(monkeypatch, tested) ->
 
 
 @pytest.mark.parametrize("token", ["expected", "wrong"])
-@pytest.mark.parametrize("route", ["profiles", "profile-save", "view", "visibility", "edition"])
+@pytest.mark.parametrize(
+    "route", ["profiles", "profile-save", "view", "visibility", "edition", "export", "import"]
+)
 def test_library_routes_require_active_session_before_access(route: str, token: str) -> None:
     """Even profile reads and library metadata remain inside the local session boundary."""
     request = {
@@ -1137,12 +1139,21 @@ def test_library_routes_require_active_session_before_access(route: str, token: 
         "sha256": "0" * 64,
         "visible": False,
         "document": {},
+        "payload": "{}",
         "directory": "dictionaries",
     }
     body = json.dumps(request).encode()
     handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
     service = Mock()
-    for method in ("profiles", "save_profile", "view", "visibility", "edition"):
+    for method in (
+        "profiles",
+        "save_profile",
+        "view",
+        "visibility",
+        "edition",
+        "export_dictionary",
+        "import_dictionary",
+    ):
         getattr(service, method).return_value = {"ok": True}
     handler.server = SimpleNamespace(
         server_port=8765, gui_csrf_token="expected", gui_library=service
@@ -1186,3 +1197,31 @@ def test_supplied_gear_animation_has_a_pinned_style_permission() -> None:
     assert f"'sha256-{digest}'" in policy
     assert "'unsafe-inline'" not in policy
     assert not any(node.tag.endswith("script") for node in root.iter())
+
+
+@pytest.mark.parametrize("token", ["expected", "wrong"])
+@pytest.mark.parametrize("route", ["load", "import"])
+def test_user_profile_routes_require_active_session(route: str, token: str) -> None:
+    request = {"profile": {}}
+    body = json.dumps(request).encode()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    profiles = Mock()
+    profiles.load.return_value = profiles.restore.return_value = {"profile": {}}
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_profiles=profiles
+    )
+    handler.path = f"/api/v1/profile/{route}"
+    handler.headers = Message()
+    for name, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": token,
+    }.items():
+        handler.headers[name] = value
+    handler.rfile = BytesIO(body)
+    handler._write_response = Mock()
+    handler.do_POST()
+    assert handler._write_response.call_args.args[0].status == (200 if token == "expected" else 403)
+    if token == "wrong":
+        assert not profiles.mock_calls

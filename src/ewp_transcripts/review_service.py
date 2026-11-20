@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
+from itertools import groupby
 from pathlib import Path
 from typing import Literal, cast
 
@@ -69,48 +71,95 @@ def _canonical_units(base: CanonicalResult) -> tuple[tuple[CanonicalWord, str], 
     return tuple(units)
 
 
+def sentence_end(text: str) -> bool:
+    """Conservative EN/PL terminal punctuation, excluding common abbreviations/initials."""
+    clean = text.rstrip("\"'”’»)]}")
+    if clean.lower() in {
+        "dr.",
+        "prof.",
+        "mgr.",
+        "np.",
+        "tzn.",
+        "tj.",
+        "itd.",
+        "itp.",
+        "mr.",
+        "mrs.",
+        "ms.",
+        "vs.",
+        "e.g.",
+        "i.e.",
+    }:
+        return False
+    if re.fullmatch(r"[^\W\d_]\.", clean):
+        return False
+    return bool(re.search(r"[.!?…]$", clean))
+
+
+def sentence_ranges(
+    texts: list[str],
+    *,
+    target_words: int,
+    speakers: list[str] | None = None,
+    target_blocks: int | None = None,
+) -> tuple[tuple[int, int], ...]:
+    """Prefer nearby sentence ends; bound long unpunctuated ASR with a disclosed fallback."""
+    if target_words < 1 or (target_blocks is not None and target_blocks < 1):
+        raise ValueError("Review word and speaker-block targets must be positive")
+    if not texts:
+        return ((0, 0),)
+    terminals = [index + 1 for index, text in enumerate(texts) if sentence_end(text)]
+    ranges: list[tuple[int, int]] = []
+    start = 0
+    while start < len(texts):
+        blocks = 1
+        ideal = len(texts)
+        for index in range(start + 1, len(texts)):
+            changed = speakers is not None and speakers[index] != speakers[index - 1]
+            if index - start >= target_words or (
+                changed and target_blocks and blocks >= target_blocks
+            ):
+                ideal = index
+                break
+            blocks += bool(changed)
+        if ideal == len(texts):
+            end = len(texts)
+        else:
+            lower = start + max(1, (ideal - start) // 2)
+            upper = min(len(texts), start + target_words * 2)
+            candidates = [end for end in terminals if lower <= end <= upper]
+            end = min(candidates, key=lambda end: (abs(end - ideal), end)) if candidates else ideal
+        ranges.append((start, end))
+        start = end
+    return tuple(ranges)
+
+
 def _anchor_ranges(
     base: CanonicalResult,
     *,
     target_words: int,
     target_speaker_blocks: int | None,
 ) -> tuple[tuple[int, int], ...]:
-    if target_words < 1:
-        raise ValueError("anchor_target_words must be positive")
-    if target_speaker_blocks is not None and target_speaker_blocks < 1:
-        raise ValueError("anchor_target_speaker_blocks must be positive when configured")
-    if target_speaker_blocks is not None:
-        units = _canonical_units(base)
-        speaker_ranges: list[tuple[int, int]] = []
-        start = 0
-        blocks_in_range = 1
-        previous_speaker_id = units[0][1]
-        for index, (_, speaker_id) in enumerate(units[1:], start=1):
-            changed = speaker_id != previous_speaker_id
-            if index - start >= target_words or (
-                changed and blocks_in_range == target_speaker_blocks
-            ):
-                speaker_ranges.append((start, index))
-                start = index
-                blocks_in_range = 1
-            elif changed:
-                blocks_in_range += 1
-            previous_speaker_id = speaker_id
-        speaker_ranges.append((start, len(units)))
-        return tuple(speaker_ranges)
-    segment_sizes = [len(segment.words) for segment in base.transcript.segments if segment.words]
-    ranges: list[tuple[int, int]] = []
-    start = 0
-    accumulated = 0
-    for size in segment_sizes:
-        if accumulated and accumulated + size > target_words:
-            ranges.append((start, start + accumulated))
-            start += accumulated
-            accumulated = 0
-        accumulated += size
-    if accumulated:
-        ranges.append((start, start + accumulated))
-    return tuple(ranges)
+    units = _canonical_units(base)
+    return sentence_ranges(
+        [word.text.strip() for word, _ in units],
+        target_words=target_words,
+        speakers=[speaker for _, speaker in units],
+        target_blocks=target_speaker_blocks,
+    )
+
+
+def review_sentence_warning(review: TranscriptReview) -> bool:
+    """Flag heuristic fallback; this is not an ASR confidence measurement."""
+    texts = [block.text for anchor in review.anchors for block in anchor.speaker_blocks]
+    tokens = " ".join(texts).split()
+    if len(tokens) >= 30 and not any(sentence_end(text) for text in tokens):
+        return True
+    return any(
+        not sentence_end(anchor.speaker_blocks[-1].text)
+        for anchor in review.anchors[:-1]
+        if anchor.speaker_blocks[-1].text.strip()
+    )
 
 
 def bounded_review_document(
@@ -119,29 +168,42 @@ def bounded_review_document(
     """Project old oversized drafts into bounded sections without changing saved bytes."""
     validate_review_base(review, base, base_sha256=review.header.base_result_sha256)
     units = _canonical_units(base)
+    blocks = [block for anchor in review.anchors for block in anchor.speaker_blocks]
     tokens = [
-        (text, block.speaker_id)
-        for anchor in review.anchors
-        for block in anchor.speaker_blocks
+        (text, block.speaker_id, index)
+        for index, block in enumerate(blocks)
         for text in block.text.split()
     ]
-    if any(
-        sum(len(block.text.split()) for block in anchor.speaker_blocks) > target_words
-        for anchor in review.anchors
-    ) and [text for text, _ in tokens] == [word.text.strip() for word, _ in units]:
-        ranges = _anchor_ranges(
-            base, target_words=target_words, target_speaker_blocks=target_blocks
+    ranges = _anchor_ranges(base, target_words=target_words, target_speaker_blocks=target_blocks)
+    boundaries = [(units[start][0].word_id, units[end - 1][0].word_id) for start, end in ranges]
+    # Parent revisions may contain indivisible multi-word references. Their already
+    # protected anchors cannot be repartitioned from canonical punctuation alone.
+    if (
+        review.header.source_revision_id is None
+        and boundaries != [(anchor.first_word_id, anchor.last_word_id) for anchor in review.anchors]
+        and (
+            review_sentence_warning(review)
+            or any(
+                sum(len(block.text.split()) for block in anchor.speaker_blocks) > target_words * 2
+                for anchor in review.anchors
+            )
         )
-        revised_units = tuple(
-            (word, speaker) for (word, _), (_, speaker) in zip(units, tokens, strict=True)
-        )
+        and [text for text, _, _ in tokens] == [word.text.strip() for word, _ in units]
+    ):
         return review.model_copy(
             update={
                 "anchors": tuple(
                     ReviewAnchor(
                         first_word_id=units[start][0].word_id,
                         last_word_id=units[end - 1][0].word_id,
-                        speaker_blocks=_speaker_blocks(revised_units[start:end]),
+                        speaker_blocks=tuple(
+                            ReviewSpeakerBlock(
+                                speaker_id=identity[0], text=" ".join(text for text, _, _ in values)
+                            )
+                            for identity, values in groupby(
+                                tokens[start:end], key=lambda item: item[1:]
+                            )
+                        ),
                     )
                     for start, end in ranges
                 )
@@ -155,11 +217,11 @@ def bounded_review_document(
                         "speaker_blocks": tuple(
                             ReviewSpeakerBlock(
                                 speaker_id=block.speaker_id,
-                                text=" ".join(words[start : start + target_words]),
+                                text=" ".join(words[start:end]),
                             )
                             for block in anchor.speaker_blocks
                             for words in [block.text.split()]
-                            for start in range(0, max(1, len(words)), target_words)
+                            for start, end in sentence_ranges(words, target_words=target_words)
                         )
                     }
                 )

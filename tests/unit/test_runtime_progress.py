@@ -28,6 +28,10 @@ def test_progress_uses_events_then_calibrates_with_local_successful_timings(tmp_
     first.finish(True)
     assert first.snapshot()["percent"] == 100
     assert history.path.is_file()
+    assert history.completed_runs(first.profile) == 1
+    # Independent complete jobs, not per-track observations, calibrate ETA.
+    history.record(first.profile, history.samples(first.profile))
+    history.record(first.profile, history.samples(first.profile))
     second = RuntimeProgress(ProgressHistory(history.path), "a" * 64, clock=lambda: now[0])
     second(ProgressEvent("plan", "planned", media_duration_ms=10000, phases=phases))
     second(ProgressEvent("inspect", "completed", duration_ms=1000))
@@ -64,3 +68,27 @@ def test_progress_observer_failure_is_isolated() -> None:
         raise RuntimeError("observer failure")
 
     emit_progress(failing, "transcribe", "started")
+
+
+def test_eta_requires_three_complete_jobs_not_three_source_tracks() -> None:
+    history = ProgressHistory()
+    phases = ("transcribe:1", "transcribe:2", "transcribe:3", "publish")
+    for index in range(3):
+        progress = RuntimeProgress(history, "c" * 64, clock=lambda: 0)
+        progress(ProgressEvent("plan", "planned", phases=phases, media_duration_ms=1000))
+        assert progress.snapshot()["calibration_runs"] == index
+        assert progress.snapshot()["eta_seconds"] is None
+        for stream in range(1, 4):
+            progress(
+                ProgressEvent(
+                    "transcribe", "completed", stream_index=stream, stream_count=3, duration_ms=1000
+                )
+            )
+        progress(ProgressEvent("publish", "completed", duration_ms=100))
+        progress.finish(True)
+    probe = RuntimeProgress(history, "c" * 64, clock=lambda: 0)
+    probe(ProgressEvent("plan", "planned", phases=phases, media_duration_ms=1000))
+    assert probe.snapshot()["calibration_runs"] == probe.snapshot()["calibration_required"] == 3
+    assert probe.snapshot()["eta_seconds"] > 0
+    probe.finish(False)
+    assert history.completed_runs(probe.profile) == 3

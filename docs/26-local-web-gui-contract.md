@@ -436,7 +436,9 @@ are normalized in the preview to avoid summed clipping. Individual source API id
 backward compatible, but the regular UI always plays the complete episode. Each block adds a muted
 source-filename hint from canonical word/speaker/segment provenance, independent of edited labels.
 
-New review anchors honor word and speaker-block bounds simultaneously. The GUI can project
+New review anchors use word/speaker targets and prefer nearby EN/PL sentence ends. A bounded
+unpunctuated fallback is disclosed above the first review section. These are presentation sections,
+not subtitle boundaries. The GUI can project
 unchanged oversized legacy drafts into bounded anchors, preserving text/assignments; edited legacy
 blocks are bounded without changing their existing anchors. Projection is read-only until explicit
 Save. Server-owned projected anchors are re-derived at save/seek boundaries. Derived provenance
@@ -451,3 +453,37 @@ completion follows publication/exports/cleanup. Saved-work history never revives
 
 The [artist package](31-artist-review-package.md) uses a separate in-memory mock adapter and never
 changes production request/authentication/provider behavior. Its state/progress are synthetic.
+
+
+## Portable user profiles and batch planning (2026-11-20)
+
+Native selected-media Inspect, dry-run and staging share one ordered list of all pending episodes.
+Each episode retains language/count independently. Combined planning is an explicit request snapshot;
+any changed selection/output/options requires replanning. Staging calls the existing exact-plan,
+confirmation and source-hash boundary per item; a partial error retains earlier staged items and
+requires planning the remaining list again. Completed matches retain normal skip behavior.
+Inspect summaries mark processing selections with * when metadata lacks those values; no ASR language
+or speaker detection is claimed. Batch counts, settings and actions are localized EN/PL.
+
+POST /api/v1/profile/save accepts name, explicit display preferences, allowlisted current workflow
+fields, selected workspace-storage and dictionary-directory values. It writes a version-1 user profile
+under the private state root and returns its JSON. /load restores the saved profile; /import accepts
+that profile JSON. All profile routes require same-origin and the active CSRF session, permit at most
+16 MiB and validate the complete structure before imports. They do not execute jobs or replace editors.
+The single file includes selected/default workspace manifests, selected/referenced available dictionary
+editions and custom palettes; it excludes credentials, confirmations, transcripts, media and timing
+history. Missing external paths remain unavailable, with normal workspace validation required at Load.
+Imported workspace identities are content-derived and distinct; repeated identical imports are idempotent.
+Existing records/editions are not deleted. Dictionary bytes/hashes survive transfer; private imported
+copies use digest directories. Custom palette name conflicts allocate distinct names.
+
+POST /api/v1/dictionaries/export returns filename, original UTF-8 JSON payload and SHA-256;
+/import validates/publishes those exact bytes under the chosen catalog and accepts an existing ID
+only when bytes match. These routes retain the library's origin/CSRF/path policy and immutable editions.
+Editing/importing a dictionary are distinct actions.
+
+ETA is a persisted display opt-in, off by default. Numeric ETA requires three matching successful
+complete runs, counted per job rather than per source track. Runtime snapshots add calibration_runs
+and calibration_required. Browser elapsed interpolates every second, capped between existing two-second
+polls; no extra requests. Machine timing history never enters portable profiles. Playback speed uses
+an explicit local selector for both single media and mixed previews, retaining native audio controls.

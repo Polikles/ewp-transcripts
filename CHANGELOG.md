@@ -6,6 +6,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Portable single-file user profiles in Settings & About: preferences, current workflow fields,
+  default/selected workspace manifests, custom palettes and exact dictionary editions; independent
+  dictionary import/export preserves original version, hash and provenance. Imports do not start
+  jobs or replace the active editor, and missing external paths stay visibly unavailable.
+- Explicit playback-speed control for both mixed episodes and individual media, sentence-boundary
+  guidance and a red review note when ASR punctuation cannot support reliable sectioning.
+
 - Live transcription phase, elapsed time, approximate percentage and per-machine measured ETA
   ranges. Unknown/slow phases have explicit fallbacks; observer/cache failures cannot fail a job,
   failed work never reaches 100%, and completion follows publication/exports/cleanup.
@@ -22,9 +29,19 @@ All notable changes to EWP-transcripts are documented here.
   audio through the existing pipeline while canonical provenance retains the original video.
   Missing/multiple audio streams have actionable errors; interactive stream choice is deferred.
 - A repository-based percentage/ETA assessment with actual-event, historical-calibration and
-  GPU acceptance requirements. Numeric estimates remain deferred until supported by evidence.
+  GPU acceptance requirements, followed by the phase-based indicator and optional calibrated ETA.
 
 ### Fixed
+
+- Inspect, dry-run and staging operate on the same complete pending selection, retaining each
+  episode's language/speaker count and exact-plan confirmation. Grouped tracks and video episodes
+  enter the queue together; Inspect uses explained starred selection values when metadata is absent.
+- Sentence ends near the review word/speaker targets replace fixed mid-sentence cuts, preserving
+  canonical timing and edits. Source block actions share a row and use Merge with previous block.
+- ETA is hidden by default and enabled in Settings & About after three comparable successful runs;
+  elapsed renders each second without increasing API polling. Timing history stays machine-local.
+- Framed artwork credit, original-logo framed favicon for dark browser chrome, and localized
+  batch-summary headings/processing values.
 
 - Late active phases retain positive remaining time without consuming later-phase estimates;
   ETA is withdrawn on overrun instead of displaying zero before completion.

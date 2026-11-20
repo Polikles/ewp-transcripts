@@ -45,7 +45,7 @@ def test_small_anchor_target_splits_only_at_segment_boundaries() -> None:
     ]
 
 
-def test_default_review_groups_five_speaker_blocks_per_section(tmp_path: Path) -> None:
+def test_review_prefers_sentence_end_over_fifth_speaker_block(tmp_path: Path) -> None:
     document = json.loads(RESULT_EXAMPLE.read_text(encoding="utf-8"))
     words = [word for segment in document["transcript"]["segments"] for word in segment["words"]]
     for index, word in enumerate(words):
@@ -55,7 +55,7 @@ def test_default_review_groups_five_speaker_blocks_per_section(tmp_path: Path) -
 
     review = prepare_review(result, generated_at=NOW)
 
-    assert [len(anchor.speaker_blocks) for anchor in review.anchors] == [5, 3]
+    assert [len(anchor.speaker_blocks) for anchor in review.anchors] == [4, 4]
 
 
 def test_prepared_review_round_trips_without_changing_canonical_file() -> None:
@@ -86,6 +86,12 @@ def test_prepare_review_prefills_exact_revision_and_records_parent(tmp_path: Pat
     assert review.header.source_revision_id is not None
     assert review.header.source_revision_number == 1
     assert review.header.source_revision_sha256 == sha256_file(revision_path)
+    from ewp_transcripts.review_service import bounded_review_document
+
+    protected = bounded_review_document(review, base, target_words=2, target_blocks=1)
+    assert [(anchor.first_word_id, anchor.last_word_id) for anchor in protected.anchors] == [
+        (anchor.first_word_id, anchor.last_word_id) for anchor in review.anchors
+    ]
     assert review.header.extensions[0].value == "manually_verified"
     rendered = render_review(review)
     assert "Today we discuss transcription." in rendered
@@ -151,6 +157,21 @@ def test_one_speaker_is_bounded_even_with_one_long_canonical_segment(tmp_path: P
         anchors=projected["anchors"],
     )
     assert len(saved["anchors"]) == 3
+
+    # Presentation normalization must preserve explicit splits within one speaker.
+    blocks = saved["anchors"][0]["blocks"]
+    text = blocks[0]["text"].split()
+    saved["anchors"][0]["blocks"] = [
+        dict(blocks[0], text=" ".join(text[:10])),
+        dict(blocks[0], text=" ".join(text[10:])),
+    ]
+    split_saved = service.save(
+        str(path), str(result), expected_sha256=saved["review_sha256"], anchors=saved["anchors"]
+    )
+    assert [len(block["text"].split()) for block in split_saved["anchors"][0]["blocks"]] == [
+        10,
+        190,
+    ]
     assert len(load_canonical_result(result).transcript.segments) == 1
 
 
@@ -190,3 +211,54 @@ def test_large_edited_playback_uses_real_timestamps_without_dense_alignment(tmp_
         update={"speaker_blocks": (ReviewSpeakerBlock(speaker_id="speaker_001", text=""),)}
     )
     assert playback_block_positions(empty, words) == ((0, True),)
+
+
+def test_sentence_boundaries_override_word_and_speaker_targets() -> None:
+    from ewp_transcripts.review_service import sentence_ranges
+
+    words = ["word"] * 460
+    for end in (120, 215, 320, 460):
+        words[end - 1] += "."
+    assert sentence_ranges(words, target_words=200) == ((0, 215), (215, 460))
+    # Speaker changes inside a sentence stay in the same section, preserving attribution.
+    assert sentence_ranges(
+        ["Hello", "there", "friend.", "Next", "sentence!"],
+        target_words=200,
+        speakers=["a", "b", "a", "b", "a"],
+        target_blocks=2,
+    ) == ((0, 3), (3, 5))
+    assert sentence_ranges(["word"] * 501, target_words=200) == ((0, 200), (200, 400), (400, 501))
+
+
+def test_sentence_boundary_detection_handles_abbreviations_and_quotations() -> None:
+    from ewp_transcripts.review_service import sentence_end
+
+    assert sentence_end("koniec.”") and sentence_end("Ready?)")
+    assert not sentence_end("dr.") and not sentence_end("A.") and not sentence_end("3.14")
+
+
+def test_review_warns_when_sentence_boundaries_are_missing_without_changing_words(
+    tmp_path: Path,
+) -> None:
+    from ewp_transcripts.domain.review import ReviewSpeakerBlock
+    from ewp_transcripts.review_service import bounded_review_document, review_sentence_warning
+
+    base = load_canonical_result(RESULT_EXAMPLE)
+    review = prepare_review(RESULT_EXAMPLE)
+    assert not review_sentence_warning(review)
+    anchor = review.anchors[0].model_copy(
+        update={
+            "speaker_blocks": (
+                ReviewSpeakerBlock(speaker_id="speaker_001", text=" ".join(["word"] * 501)),
+            )
+        }
+    )
+    edited = review.model_copy(update={"anchors": (anchor,)})
+    projected = bounded_review_document(edited, base, target_words=200, target_blocks=5)
+    assert review_sentence_warning(projected)
+    assert [block.text for block in projected.anchors[0].speaker_blocks] == [
+        " ".join(["word"] * 200),
+        " ".join(["word"] * 200),
+        " ".join(["word"] * 101),
+    ]
+    assert projected.anchors[0].first_word_id == anchor.first_word_id

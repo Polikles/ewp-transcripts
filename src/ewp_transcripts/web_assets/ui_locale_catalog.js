@@ -585,6 +585,8 @@ function guiPolishDynamicText(text) {
     [/^Started (\d+) queued job\(s\)$/, 'Uruchomiono zadania: $1'],
     [/^API OK · (.+)$/, 'API działa · $1'],
     [/^(\d+) compatible dictionary option\(s\) loaded\.$/, 'Wczytano pasujące słowniki: $1.'],
+    [/^Planning (\d+) \/ (\d+): (.*)$/, 'Planowanie $1 z $2: $3'],
+    [/^Added to staged queue: (\d+)\. Already completed: (\d+)\.$/, 'Dodano do kolejki: $1. Już ukończone: $2.'],
     [/^Inspecting (\d+) \/ (\d+): (.*)$/, 'Sprawdzanie $1 z $2: $3'],
     [/^Inspected (\d+) \/ (\d+) episodes\.\s*(.*)$/, 'Sprawdzono $1 z $2 plików. $3'],
     [/^Copying (.+) into this local GUI session…$/, 'Kopiowanie $1 do lokalnej sesji GUI…'],
@@ -1350,3 +1352,127 @@ for (const [en, pl] of [
 
 guiPolish.set("FFmpeg could not mix recording audio", "FFmpeg nie mógł przygotować wspólnego odsłuchu nagrania.");
 guiPolish.set("A new mix requires at least two prepared audio files", "Wspólny odsłuch wymaga co najmniej dwóch przygotowanych plików audio.");
+
+for (const [en, pl] of [
+  [
+    "Episodes",
+    "Odcinki"
+  ],
+  [
+    "Files",
+    "Pliki"
+  ],
+  [
+    "Skipped",
+    "Pominięte"
+  ],
+  [
+    "Auto-detect *",
+    "Wykryj automatycznie *"
+  ],
+  [
+    "* Selected processing values: recording metadata does not provide language or speaker count. Auto-detect is a processing request, not a detected value.",
+    "* Wybrane ustawienia przetwarzania: metadane nagrania nie podają języka ani liczby mówców. Wykrywanie automatyczne jest żądaniem przetwarzania, a nie rozpoznaną wartością."
+  ],
+  [
+    "Merge with previous block",
+    "Połącz z poprzednim blokiem"
+  ],
+  [
+    "Playback speed",
+    "Tempo odtwarzania"
+  ],
+  [
+    "Sections make correction easier. Check speaker assignments carefully. Splitting a speaker block here does not determine subtitle line breaks.",
+    "Podział na sekcje ułatwia korektę. Najważniejsze jest poprawne przypisanie mówców. Podział bloku mówcy na mniejsze części nie określa podziału napisów."
+  ],
+  [
+    "ASR sentence boundaries appear incomplete. Text may be divided incorrectly; pay extra attention to punctuation and speaker assignments during correction.",
+    "ASR mógł niedokładnie rozpoznać granice zdań. Tekst może być podzielony nieprawidłowo; podczas korekty zwróć szczególną uwagę na interpunkcję i przypisanie mówców."
+  ],
+  [
+    "User preferences",
+    "Preferencje użytkownika"
+  ],
+  [
+    "Show estimated remaining time (ETA)",
+    "Pokaż szacowany pozostały czas (ETA)"
+  ],
+  [
+    "ETA is off by default. Estimates become available after 3 successful transcriptions with comparable language, models and track configuration on this computer. Timing history stays on this computer and is not transferred with a profile.",
+    "ETA jest domyślnie wyłączone. Oszacowanie będzie dostępne po 3 udanych transkrypcjach z porównywalnym językiem, modelami i układem ścieżek na tym komputerze. Historia czasów pozostaje na tym komputerze i nie jest przenoszona z profilem."
+  ],
+  [
+    "User profile",
+    "Profil użytkownika"
+  ],
+  [
+    "Profile name",
+    "Nazwa profilu"
+  ],
+  [
+    "Save profile",
+    "Zapisz profil"
+  ],
+  [
+    "Load saved profile",
+    "Wczytaj zapisany profil"
+  ],
+  [
+    "Export profile…",
+    "Eksportuj profil…"
+  ],
+  [
+    "Import profile…",
+    "Importuj profil…"
+  ],
+  [
+    "One JSON file contains preferences, current workflow settings, saved workspace manifests, custom palettes and dictionaries from the selected library and referenced workspaces. Media, transcripts, API keys, permissions and running jobs are excluded. Other workspace catalogs must be selected before saving. Referenced recordings and outputs must be transferred separately.",
+    "Jeden plik JSON zawiera preferencje, bieżące ustawienia pracy, zapisy obszarów pracy, własne palety oraz słowniki z wybranej biblioteki i zapisanych obszarów pracy. Nie zawiera mediów, transkrypcji, kluczy API, zgód ani uruchomionych zadań. Inne katalogi obszarów pracy trzeba wybrać przed zapisem. Nagrania i wyniki należy przenieść osobno."
+  ],
+  [
+    "Profile loaded. Open Saved work & cleanup to select a restored workspace. Missing recordings or outputs must be restored before loading that workspace. The active queue and editor are unchanged.",
+    "Profil wczytany. W sekcji Zapisana praca i porządkowanie wybierz przywrócony obszar pracy. Brakujące nagrania i wyniki trzeba przywrócić przed jego wczytaniem. Aktywna kolejka i edytor pozostają bez zmian."
+  ],
+  [
+    "Profile saved and exported as one JSON file.",
+    "Profil zapisany i wyeksportowany jako jeden plik JSON."
+  ],
+  [
+    "Profile saved on this computer.",
+    "Profil zapisany na tym komputerze."
+  ],
+  [
+    "Export dictionary…",
+    "Eksportuj słownik…"
+  ],
+  [
+    "Dictionary imported. Original version, hash and provenance preserved.",
+    "Słownik zaimportowany. Zachowano oryginalną wersję, skrót i pochodzenie."
+  ],
+  [
+    "Dictionary exported without changing its contents.",
+    "Słownik wyeksportowany bez zmiany zawartości."
+  ],
+  [
+    "No user profile has been saved on this computer",
+    "Na tym komputerze nie zapisano jeszcze profilu użytkownika"
+  ],
+  [
+    "User profile exceeds the 16 MiB limit",
+    "Profil użytkownika przekracza limit 16 MiB"
+  ],
+  [
+    "That dictionary ID already exists with different content; import into another directory or create a new version",
+    "Słownik z tym ID ma już inną zawartość. Zaimportuj go do innego katalogu lub utwórz nową wersję."
+  ]
+]) guiPolish.set(en, pl);
+guiPolishErrorDescriptions.set("GUI_BATCH_CHANGED", "Lista plików lub ustawienia zmieniły się podczas planowania. Sprawdź i zaplanuj bieżącą listę ponownie.");
+guiPolishErrorDescriptions.set("GUI_PROFILE_INVALID", "Nie udało się zapisać lub wczytać profilu. Sprawdź poprawność pliku, ścieżki i dostępność biblioteki słowników.");
+guiPolishErrorDescriptions.set("GUI_DICTIONARY_SELECTION_REQUIRED", "Przed eksportem wybierz słownik z listy.");
+
+for (const [en, pl] of [
+  ["Profile API endpoints must not contain credentials", "Adresy API w profilu nie mogą zawierać danych dostępowych. Użyj okna klucza API dla bieżącej sesji."],
+  ["User profile contains invalid or unsupported settings", "Profil zawiera nieprawidłowe lub nieobsługiwane ustawienia."],
+  ["Dictionary document does not match a supported dictionary format", "Plik nie jest zgodny z obsługiwanym formatem słownika."]
+]) guiPolish.set(en, pl);

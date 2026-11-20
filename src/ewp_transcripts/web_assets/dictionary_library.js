@@ -15,7 +15,7 @@ function installGuiDictionaryLibrary() {
     <h3 id="gui-dictionary-step-2">2. View and compare versions</h3>
     <label>Dictionary<select id="library-select"><option value="">Choose a dictionary</option></select></label>
     <label>Compare with<select id="library-compare"><option value="">No comparison</option></select></label>
-    <div class="actions"><button type="button" id="library-open">View / edit</button><button type="button" id="library-diff">Compare versions</button></div>
+    <div class="actions"><button type="button" id="library-open">View / edit</button><button type="button" id="library-diff">Compare versions</button><button type="button" id="library-export">Export dictionary…</button></div>
     <div id="library-comparison"></div>
     <h3 id="gui-dictionary-step-3">3. Edit a new version</h3>
     <label>Dictionary kind<select id="library-kind"><option value="correction">Polish correction</option><option value="translation">Translation</option></select></label>
@@ -142,8 +142,19 @@ function installGuiDictionaryLibrary() {
   get("import").addEventListener("click", () => get("file").click());
   get("file").addEventListener("change", async () => {
     const file = get("file").files?.[0]; get("file").value = ""; if (!file) return;
-    try { fill(JSON.parse(await file.text())); status("Dictionary file loaded. Review its entries and Save new dictionary version to add it to this catalog."); }
+    try {
+      const payload = await queuePost("/api/v1/dictionaries/import", {payload:await file.text(), directory:get("directory").value});
+      await refresh(); get("select").value = payload.path; fill(payload.document, payload);
+      status("Dictionary imported. Original version, hash and provenance preserved.");
+    }
     catch (error) { status(error.message); }
+  });
+  get("export").addEventListener("click", async () => {
+    try {
+      if (!get("select").value) throw new Error("GUI_DICTIONARY_SELECTION_REQUIRED: Choose a dictionary before exporting it.");
+      const result = await queuePost("/api/v1/dictionaries/export", {path:get("select").value});
+      downloadGuiFile(result.filename, result.payload); status("Dictionary exported without changing its contents.");
+    } catch (error) { status(error.message); }
   });
   get("save").addEventListener("click", async () => {
     get("save").disabled = true; status("Saving new dictionary version…");

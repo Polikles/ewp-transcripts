@@ -6,3 +6,8 @@ are packaged unchanged, including the asset's reduced-motion treatment. No addit
 credit or open asset license was supplied; do not invent one. The identity asset restrictions
 in LICENSE-ASSETS.txt continue to apply. EwP Brand® is the owner's visual-identity profile;
 Example default is a separate generic demonstration palette.
+
+Owner-requested favicon presentation — 2026-11-20
+favicon.svg places the original Cyryl logo geometry/colors on a light framed tile for readable
+browser chrome. The original logo.svg remains unchanged. This derived presentation was explicitly
+requested by the rights holder; it grants no general permission to modify identity artwork.

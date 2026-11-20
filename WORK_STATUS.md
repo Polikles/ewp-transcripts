@@ -1,8 +1,41 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-19**.
+Last updated: **2026-11-20**.
 
 ## Active task and resume pointers
+
+Current request: [batch planning, sentence-aware review and portable user profiles](docs/checkpoints/2026-11-20-batch-sentences-profiles.md).
+Baseline clean main aa70f4d00c74cd23740dcace55c597d58fa707ac. Start with TODO.md.
+Implementation and verification complete; commit/push is the final delivery step.
+
+Inspect, dry-run and Add to queue share all pending selected episodes. Per-episode language/count
+survive selection changes; Inspect discloses chosen values with * and localized counts. Batch staging
+retains the existing exact-plan/hash/confirmation boundary and stops honestly on partial errors.
+Review sections choose nearby sentence ends; red fallback guidance, explicit mixed/single playback
+speed, row-aligned block actions, framed artwork credit and framed-logo favicon are implemented.
+Manual same-speaker splits and parent-revision protected anchors survive presentation normalization.
+
+ETA is opt-in/off by default and requires three comparable complete successful jobs. Track count
+does not multiply the run count. Elapsed renders once per second without more API polling. Portable
+profiles contain preferences, current settings, workspace manifests, palettes and exact dictionary
+editions; no media/transcripts/keys/consents/in-flight jobs/timing calibration. Missing external paths
+remain visibly unavailable. Independent dictionary import/export preserves bytes/hash/provenance,
+including CRLF; imports do not overwrite different editions or conflicting palette names.
+
+Verification: make check (Ruff/format/mypy, 102 typed source files, 896 tests) and ten integration
+tests PASS. 144 EN/PL/theme/viewport/stage layout cases PASS, zero page errors/external requests.
+Actual browser batch uses two synchronized WAV tracks plus MP4, two independent language/count
+settings, unchanged-plan invalidation, one-click batch staging and source/translation export.
+Profile JSON export/import/load, dictionary byte transfer, second-by-second elapsed, ETA opt-in,
+explicit mixed playback speed and responsive block controls PASS. Fresh-server saved-work recovery
+and model-free 581-word sentence/fallback warning checks PASS in EN/PL and both themes.
+Wheel/sdist PASS; 56 packaged resources match source and nine help routes render from the wheel
+without eager ML imports. Artist ZIP SHA remains unchanged. Disposable cleanup follows delivery.
+Owner-qualified WSL/GPU ASR is not rerun here; no engine/pin/canonical schema changed. Real ETA
+accuracy still needs target-machine observations. Full Polish manuals follow terminology approval.
+
+The artist package was already sent for review. The owner explicitly removed it from current scope:
+do not change/rebuild its ZIP or work on its demo adapter. Previous deliveries below are history.
 
 Current request: [mixed playback, review bounds, live progress and artist package](docs/checkpoints/2026-11-19-review-mix-progress-artist.md).
 Baseline clean main 5e025b42169455b545bdd50b88c8e6021f57d60c. Implementation and verification

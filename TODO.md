@@ -1,9 +1,24 @@
 # Immediate work queue
 
-Updated: 2026-11-19.
+Updated: 2026-11-20.
 
 Policy: [WORK_POLICY.md](WORK_POLICY.md). Product roadmap:
 [docs/99-roadmap-v2.md](docs/99-roadmap-v2.md).
+
+## Delivered: batch planning, sentence boundaries and portable user profiles
+
+Checkpoint: [current work](docs/checkpoints/2026-11-20-batch-sentences-profiles.md).
+
+- [x] Frame the Cyryl artwork credit and create a framed-logo favicon visible in dark browser chrome.
+- [x] Localize Inspect batch counts; show selected language/speaker fallback values with an explained asterisk when media metadata is absent.
+- [x] Plan all inspected unstaged episodes and stage the entire reviewed batch; preserve each episode's settings, exact-plan confirmation and completed-job protection.
+- [x] Hide ETA by default, add a persisted opt-in with an explicit minimum calibration sample count, and refresh elapsed time every second without increasing API polling.
+- [x] Add one-file user profile save/load/export/import covering preferences, workspace manifests and dictionaries; exclude credentials/private media and handle missing paths honestly.
+- [x] Add independent dictionary import/export preserving immutable versions and validation.
+- [x] Split review sections at sentence ends near the word target, including multi-speaker boundaries; keep canonical text/times unchanged and existing edits safe.
+- [x] Warn in red near the first review section when sentence boundaries are unavailable; explain section/block separation versus subtitle layout.
+- [x] Provide explicit playback speed for mixed and single-source audio; put three block actions in one responsive row and shorten Merge with previous block in EN/PL.
+- [x] Verify backend, browser, packaging and portable profile regressions; update guides, changelog, roadmap and checkpoints; push the application changes. The artist package was sent for review and must remain unchanged.
 
 ## Delivered: mixed playback, bounded review, runtime progress and artist package
 

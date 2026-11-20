@@ -11,8 +11,15 @@ Grouped work includes current stream/count. Cold/unknown runs use coarse phase w
 opaque inference call can hold its percentage while elapsed time and the gear keep showing work.
 The percentage describes estimated pipeline completion, not a measured fraction of recognized audio.
 
-After comparable successful jobs, ETA appears as a broad remaining-time range and percent can
-advance within the active phase using those measurements. Unknown profiles show calibration.
+ETA is off by default. Enable Show estimated remaining time (ETA) in Settings & About to see a
+broad remaining-time range after at least three comparable successful complete transcriptions on
+this computer. Percent can advance within the active phase using earlier measurements. With ETA
+enabled, unknown profiles show calibration. Display preferences persist in the browser and can
+be transferred in a user profile; timing history is deliberately machine-local.
+
+Elapsed renders locally every second between the existing two-second server polls, without
+extra requests. Interpolation is capped at three seconds after the last received snapshot so
+a disconnected browser does not invent unlimited continued activity. Terminal elapsed is factual.
 When a phase takes much longer than expected, ETA is withdrawn and a longer-than-estimated
 message replaces it. The counter never silently counts down to zero while inference still runs.
 Failure stays below 100%; completion reaches 100% after the application returns from required
@@ -41,17 +48,18 @@ later, subject to actual GPU/E2E qualification.
 Successful complete runs record measured per-phase duration divided by media duration. The cache
 keeps up to 12 samples/phase and 32 profiles. Its default file is runtime-timings.json alongside
 the GUI workspace catalog, under XDG_STATE_HOME/ewp-transcripts (or the user's local state root).
-The cache contains hashed profile keys, phase names and numeric timing factors only; no host
+The cache contains hashed profile keys, phase names, numeric timing factors and successful-run counts only; no host
 names, source paths, transcript text, audio or API credentials are stored.
 
 Profiles separate host/CPU, available GPU identity/driver (queried without initializing torch),
 OS/Python, exact model/runtime configuration, language, speaker/topology and actual stream phase
 plan. Unknown/unavailable GPU discovery remains explicit in the hashed profile input. Different
 hardware/configuration does not borrow another machine's speed. Cache read/write failure leaves
-transcription unaffected. Deleting this cache simply resets calibration.
+transcription unaffected. Old caches without a completed-run counter collect three new runs
+before a numeric ETA is shown; multiple tracks in one job count as one run. Deleting this cache simply resets calibration.
 
-A median factor predicts each pending phase for the current recording duration. At least one
-matching successful complete run is required for a numeric ETA. The initial range is deliberately
+A median factor predicts each pending phase for the current recording duration. At least three
+matching successful complete runs are required for a numeric ETA. The initial range is deliberately
 broad: 50–175% of predicted remaining time. This is a heuristic confidence display, not a measured
 accuracy guarantee. More diverse completed jobs improve the evidence but do not make it exact;
 cold load, system contention, silence and speaker topology still affect timing.

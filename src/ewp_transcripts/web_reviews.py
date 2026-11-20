@@ -23,7 +23,7 @@ from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.review import ReviewAnchor, ReviewSpeakerBlock, validate_review_base
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
 from ewp_transcripts.review_format import load_review, render_review
-from ewp_transcripts.review_service import bounded_review_document
+from ewp_transcripts.review_service import bounded_review_document, review_sentence_warning
 from ewp_transcripts.revision_service import playback_block_mappings, playback_block_positions
 from ewp_transcripts.web_workflows import require_completed_canonical_result
 
@@ -149,6 +149,7 @@ class GuiReviewController:
                 for source in base.sources
             ],
             "source_verification": verification,
+            "sentence_boundary_warning": review_sentence_warning(parsed),
             "canonical_speakers": base_speakers,
             "configured_speaker_colors": {
                 speaker_id: self._config.subtitles.ytt_speaker_palette[

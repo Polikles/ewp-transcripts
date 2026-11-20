@@ -4,7 +4,7 @@ Use this guide with the matching stage in EwP Transcripts. Interface language do
 
 1. Choose output and recordings: Choose the shared output directory first, then audio or video files. Select matching speaker tracks for one episode together.
 2. Inspect file: Choose processing language separately for each selected recording and speaker count or auto-detection. Inspect checks all unqueued selections.
-3. Plan and add to queue: Run Dry-run, review the exact plan, confirm it and Add to queue. Adding advances to the next unqueued recording.
+3. Plan and add to queue: Run Dry-run for all unqueued selections, review and confirm the full plan, then Add to queue once for the entire batch.
 4. Start queue: Start queue runs staged episodes in order. After completion, continue to optional correction or source review.
 
 ## Detailed instructions
@@ -43,3 +43,12 @@ after result publication, configured exports and required cleanup finish. A fail
 in the bounded timing cache. See the runtime progress assessment for algorithm details.
 
 The (i) language popup closes on outside click/tap or Escape; Escape returns focus to the icon.
+
+Inspect does not run ASR and media metadata does not supply spoken language or speaker count.
+Its summary shows the chosen processing values with an asterisk and an explanatory note;
+automatic detection remains a processing request until transcription resolves it. Dry-run displays
+one combined plan for all pending selected episodes, with per-episode settings. Changing the
+selection/output/settings requires a new dry-run and confirmation. Already staged inputs are
+excluded. A completed matching result is shown as skipped, rather than transcribed again.
+If staging fails partway, earlier staged jobs remain visible; fix the error and replan the remaining
+list. Planning/staging does not start ASR; Start queue is a separate explicit action.

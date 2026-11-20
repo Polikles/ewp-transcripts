@@ -18,3 +18,12 @@ Use exact canonical/manual-revision pairs and preserve rejected decisions as wel
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
 
 Library visibility and custom color profiles are stored with local GUI state. Hiding is reversible through Show removed dictionaries. Copying a dictionary file into the editor still requires an explicit Save new dictionary version before it appears in the catalog. Publication rejects duplicate IDs, duplicate source terms and stale edit hashes.
+
+## Transfer a dictionary independently
+
+Select an existing dictionary and Export dictionary to download its original JSON. Add dictionary
+file imports that JSON into the chosen catalog, validates its schema and preserves original bytes,
+ID/version, hash and provenance. Re-importing identical bytes is safe. A different file with the
+same ID cannot overwrite the existing edition: choose another catalog, or use View / edit and
+Save new dictionary version with a new ID. Importing an edition is separate from editing one.
+User profiles can transfer the selected dictionary catalog together with other preferences.

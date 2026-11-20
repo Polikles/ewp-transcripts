@@ -14,3 +14,9 @@
   line-height: 1.6;
 }
 .review-cursor-status { grid-column: 1 / -1; margin: .25rem 0; font-size: .85rem; }
+
+.gui-artwork-credit { border: 2px solid var(--ewp-border, #88949d); border-radius: .6rem; padding: .9rem 1rem; font-weight: 600; }
+.review-sentence-warning { color: #b42318; font-weight: 600; border-left: 3px solid currentColor; padding-left: .7rem; }
+[data-theme="dark"] .review-sentence-warning { color: #ff9b91; }
+#review-editor .review-block-controls { grid-column: 1 / -1; display: flex; flex-wrap: nowrap; gap: .4rem; }
+#review-editor .review-block-controls button { flex: 1 1 0; min-width: 0; white-space: normal; font-size: .8rem; padding: .45rem .35rem; }

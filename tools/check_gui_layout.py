@@ -112,8 +112,10 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
 
 def stage_audio_without_models(page: Page, output: Path) -> None:
     stage(page, "workspace")
+    page.locator("#workflow-speaker-auto").uncheck()
+    page.locator("#workflow-speaker-count").fill("2")
     files = []
-    for filename in ("S01E01-a.wav", "S01E01-b.wav", "S01E02.wav"):
+    for filename in ("S01E01-a.wav", "S01E01-b.wav"):
         path = output / filename
         with wave.open(str(path), "wb") as stream:
             stream.setnchannels(1)
@@ -121,12 +123,40 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
             stream.setframerate(16000)
             stream.writeframes(b"\x00\x00" * 16000)
         files.append(path)
+    video = output / "presentation.mp4"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-nostdin",
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=s=32x32:r=10:d=1",
+            "-f",
+            "lavfi",
+            "-i",
+            "sine=sample_rate=16000:duration=1",
+            "-c:v",
+            "mpeg4",
+            "-c:a",
+            "aac",
+            str(video),
+        ],
+        check=True,
+        capture_output=True,
+        timeout=30,
+    )
+    files.append(video)
     page.locator("#workflow input[type=file]").set_input_files(files)
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
     page.locator("#workflow-language").select_option("pl")
     page.locator("#gui-audio-choices li").last.locator("button[aria-pressed]").click()
     page.locator("#workflow-language").select_option("en")
+    page.locator("#workflow-speaker-count").fill("1")
+    page.locator("#workflow-speaker-count").dispatch_event("change")
     page.locator("#gui-audio-choices li").first.locator("button[aria-pressed]").click()
     assert page.locator("#workflow-language").input_value() == "pl"
     inspections = []
@@ -139,18 +169,31 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
         ),
     )
     page.locator("#workflow button[value=inspect]").click()
-    expect(page.locator("#operation-status")).to_contain_text("Inspected 2 / 2 episodes")
+    expect(page.locator("#operation-status")).to_contain_text("Inspection completed")
+    expect(page.locator("#operation-summary")).to_contain_text("Selected processing values")
+    assert page.locator("#workflow-speaker-count").input_value() == "2"
     assert [item["language"] for item in inspections] == ["pl", "en"]
+    page.locator("#workflow button[value=dry-run]").click()
+    expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
+    plans = json.loads(page.locator("#operation-result").text_content())
+    assert len(plans) == 2 and sum(len(plan["jobs"]) for plan in plans) == 2
+    # Changing an option invalidates the entire confirmed snapshot.
+    page.locator("#workflow-speaker-count").fill("3")
+    page.locator("#workflow-speaker-count").dispatch_event("change")
+    page.locator("#workflow input[name=confirmed]").check()
+    page.locator("#workflow button[value=transcriptions]").click()
+    expect(page.locator("#operation-status")).to_contain_text("GUI_DRY_RUN_REQUIRED")
+    expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
+    page.locator("#workflow-speaker-count").fill("2")
+    page.locator("#workflow-speaker-count").dispatch_event("change")
+    page.locator("#workflow button[value=dry-run]").click()
+    expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
+    page.locator("#workflow input[name=confirmed]").check()
+    page.locator("#workflow button[value=transcriptions]").click()
+    expect(page.locator("#transcription-jobs tbody tr")).to_have_count(2)
+    jobs = page.evaluate("guiQueueJobs")
+    assert {(job["language"], job["speaker_count"]) for job in jobs} == {("pl", 2), ("en", 1)}
     for index in (0, 1):
-        assert page.locator("#workflow-language").input_value() == ("pl" if index == 0 else "en")
-        expect(
-            page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
-        ).to_have_attribute("aria-pressed", "true")
-        page.locator("#workflow button[value=dry-run]").click()
-        expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
-        page.locator("#workflow input[name=confirmed]").check()
-        page.locator("#workflow button[value=transcriptions]").click()
-        expect(page.locator("#transcription-jobs tbody tr")).to_have_count(index + 1)
         expect(
             page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
         ).to_be_disabled()
@@ -212,12 +255,16 @@ def check_runtime_feedback(page: Page, output: Path) -> None:
     """Keep progress/ETA readable in the real narrow queue cell and both locales."""
     page.evaluate("""() => {
       const cell=document.querySelector('#transcription-jobs tbody td');
-      const widget=renderRuntimeProgress({status:'running',
+      guiPreferences.showEta=true;
+      const widget=renderRuntimeProgress({job_id:"runtime-synthetic",status:'running',
         runtime_progress:{phase:'align',percent:67,
         elapsed_seconds:845,eta_seconds:120,eta_min_seconds:60,eta_max_seconds:240,
         stream_index:2,stream_count:3,calibrated:true,overdue:false}});
       widget.id='runtime-test';cell.append(widget);
     }""")
+    expect(page.locator("#runtime-test .gui-runtime-elapsed")).to_contain_text(
+        "14:06", timeout=1800
+    )
     for locale in ("en", "pl"):
         page.locator("#gui-locale").select_option(locale)
         for width in (720, 960):
@@ -232,6 +279,12 @@ def check_runtime_feedback(page: Page, output: Path) -> None:
             assert not geometry(page)["overflow"]
             page.screenshot(path=str(output / f"runtime-{locale}-{width}.png"))
     page.locator("#runtime-test").evaluate("e=>e.remove()")
+    page.evaluate("guiPreferences.showEta=false")
+    assert page.evaluate(
+        """() => !renderRuntimeProgress({job_id:'hidden-eta',status:'running',
+          runtime_progress:{phase:'align',percent:50,elapsed_seconds:20,eta_seconds:40,
+          eta_min_seconds:20,eta_max_seconds:70}}).textContent.includes('ETA')"""
+    )
     page.locator("#gui-locale").select_option("en")
     page.set_viewport_size({"width": 1440, "height": 1000})
 
@@ -540,6 +593,9 @@ def check_source_playback(page: Page, output: Path) -> None:
     page.wait_for_function("() => playbackAudio.readyState >= 1")
     expect(page.locator("#gui-playback-source option")).to_have_count(1)
     assert page.locator("#gui-playback-source").input_value() == "mix"
+    for speed in ("1.5", "2", "1"):
+        page.locator("#gui-playback-speed").select_option(speed)
+        assert page.evaluate("playbackAudio.playbackRate") == float(speed)
     expect(page.locator(".review-source-files").first).to_contain_text("playback-")
     seek = page.locator(".review-seek").nth(1)
     assert seek.evaluate(
@@ -676,6 +732,56 @@ def check_dictionary_library(page: Page, output: Path) -> None:
     page.locator("#library-show-hidden").uncheck()
 
 
+def check_user_profiles(page: Page, output: Path) -> None:
+    """Round-trip one-file profiles and exact dictionary exports through real local APIs."""
+    stage(page, "settings")
+    expect(page.locator("#gui-show-eta")).not_to_be_checked()
+    page.locator("#gui-show-eta").check()
+    expect(page.locator("#gui-user-profile")).to_contain_text("3 successful transcriptions")
+    page.locator("#user-profile-name").fill("Portable browser profile")
+    with page.expect_download() as pending:
+        page.locator("#user-profile-export").click()
+    profile_file = output / "portable-profile.json"
+    pending.value.save_as(profile_file)
+    exported = json.loads(profile_file.read_text())
+    assert exported["preferences"]["showEta"] is True
+    assert len(exported["dictionaries"]) == 2
+    assert "api_key" not in exported and "confirmed" not in exported["fields"]
+    page.locator("#gui-show-eta").uncheck()
+    page.locator("#gui-locale").select_option("pl")
+    page.locator("#gui-theme").select_option("dark")
+    page.locator("#user-profile-file").set_input_files(profile_file)
+    expect(page.locator("#user-profile-status")).to_contain_text("Profile loaded")
+    assert page.locator("#gui-locale").input_value() == "en"
+    expect(page.locator("#gui-show-eta")).to_be_checked()
+    expect(page.locator("#library-select option")).to_have_count(3)
+    page.locator("#user-profile-load").click()
+    expect(page.locator("#user-profile-status")).to_contain_text("Profile loaded")
+    page.locator("#gui-show-eta").uncheck()
+    stage(page, "dictionary")
+    chosen = page.locator("#library-select option").nth(1).get_attribute("value")
+    page.locator("#library-select").select_option(chosen)
+    with page.expect_download() as pending:
+        page.locator("#library-export").click()
+    dictionary = output / "exported-dictionary.json"
+    pending.value.save_as(dictionary)
+    assert dictionary.read_bytes() == Path(chosen).read_bytes()
+    destination = output / "independent-dictionary-import"
+    page.locator("#library-directory").fill(str(destination))
+    page.locator("#library-file").set_input_files(dictionary)
+    expect(page.locator("#library-status")).to_contain_text("Dictionary imported")
+    assert next(destination.glob("*.json")).read_bytes() == dictionary.read_bytes()
+    stage(page, "settings")
+    assert (
+        page.locator(".gui-artwork-credit").evaluate(
+            "e=>parseFloat(getComputedStyle(e).borderTopWidth)"
+        )
+        >= 1
+    )
+    assert page.locator('link[rel="icon"]').get_attribute("href").endswith("/favicon.svg")
+    stage(page, "workspace")
+
+
 def check_workflow_polish(page: Page) -> None:
     page.locator("#gui-locale").select_option("en")
     for name in ("correction", "review", "translation", "semantic-review"):
@@ -791,6 +897,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     check_motion_feedback(page, output)
     check_maintenance_controls(page)
     check_dictionary_library(page, output)
+    check_user_profiles(page, output)
     stage(page, "workspace")
     page.evaluate("document.fonts.ready")
     assert page.evaluate('document.fonts.check("16px Montserrat")')
@@ -1109,6 +1216,72 @@ def verify_recovery(page: Page, checkpoint: dict) -> None:
     assert not page.locator("#translation-review-confirmed").is_checked()
 
 
+def check_sentence_guidance(page: Page, output: Path) -> None:
+    """Real model-free preparation renders sentence-aware sections and fallback warnings."""
+    for punctuated in (True, False):
+        document = json.loads((ROOT / "examples/results.example.json").read_text())
+        document["job_id"] = "BOUNDARIES" if punctuated else "UNPUNCTUATED"
+        document["episode"]["episode_id"] = document["job_id"]
+        segment = document["transcript"]["segments"][0]
+        template = segment["words"][0]
+        segment["words"] = [
+            dict(
+                template,
+                word_id=f"word_{index + 1:06d}",
+                text=f"word{index}" + ("." if punctuated and index + 1 in (210, 430, 581) else ""),
+                start_ms=index * 10,
+                end_ms=(index + 1) * 10,
+                speaker_id="speaker_001",
+            )
+            for index in range(581)
+        ]
+        segment.update(
+            text=" ".join(word["text"] for word in segment["words"]), start_ms=0, end_ms=5810
+        )
+        document["transcript"]["segments"] = [segment]
+        result = output / f"{document['job_id']}_results.json"
+        result.write_text(json.dumps(document))
+        payload = page.evaluate(
+            """async data => {
+          const payload=await postReview('prepare',
+            {result_path:data.result,review_output_directory:data.reviews});
+          renderReview(payload);showGuiStage('review');return payload;
+        }""",
+            {"result": str(result), "reviews": str(output / "boundary-reviews")},
+        )
+        warning = page.locator("#review-sentence-warning")
+        assert payload["sentence_boundary_warning"] is not punctuated
+        if punctuated:
+            assert [len(anchor["blocks"][0]["text"].split()) for anchor in payload["anchors"]] == [
+                210,
+                220,
+                151,
+            ]
+            expect(warning).not_to_be_visible()
+        else:
+            expect(warning).to_be_visible()
+            assert warning.evaluate(
+                "e=>Boolean(e.compareDocumentPosition("
+                "document.querySelector('#review-editor .review-anchor')) & "
+                "Node.DOCUMENT_POSITION_FOLLOWING)"
+            )
+            for locale in ("en", "pl"):
+                page.locator("#gui-locale").select_option(locale)
+                for theme, color in (("light", "rgb(180, 35, 24)"), ("dark", "rgb(255, 155, 145)")):
+                    page.locator("#gui-theme").select_option(theme)
+                    expect(warning).to_have_css("color", color)
+            page.set_viewport_size({"width": 960, "height": 1080})
+            warning.screenshot(path=str(output / "sentence-warning.png"))
+            buttons = page.locator("#review-editor .review-block-controls").first
+            assert (
+                buttons.evaluate(
+                    "e=>new Set([...e.querySelectorAll('button')]"
+                    ".map(button=>Math.round(button.getBoundingClientRect().top))).size"
+                )
+                == 1
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default="http://127.0.0.1:8765")
@@ -1139,6 +1312,7 @@ def main() -> None:
         try:
             if args.recover:
                 verify_recovery(page, json.loads(args.recover.read_text()))
+                check_sentence_guidance(page, args.output)
                 measurements = []
             else:
                 measurements = exercise(page, args.output, args.baseline)

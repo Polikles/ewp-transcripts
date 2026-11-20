@@ -42,6 +42,7 @@ from ewp_transcripts.web_jobs import (
     workflow_progress,
 )
 from ewp_transcripts.web_media import GuiMediaController, media_byte_range
+from ewp_transcripts.web_profiles import PROFILE_LIMIT, GuiProfileController
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_source_cleanup import (
     GuiManagedSourceCleanupError,
@@ -70,6 +71,7 @@ _ASSET_TYPES.update(
         for name, mime in {
             "tokens.css": "text/css; charset=utf-8",
             "logo.svg": "image/svg+xml",
+            "favicon.svg": "image/svg+xml",
             "gear.svg": "image/svg+xml",
             "web-pattern-light.svg": "image/svg+xml",
             "web-pattern-dark.svg": "image/svg+xml",
@@ -375,6 +377,8 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("workflow_guidance.js").read_bytes()
         body += b"\n" + assets.joinpath("source_playback.js").read_bytes()
         body += b"\n" + assets.joinpath("runtime_progress.js").read_bytes()
+        body += b"\n" + assets.joinpath("workflow_batch.js").read_bytes()
+        body += b"\n" + assets.joinpath("user_profiles.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -421,6 +425,11 @@ class LocalGuiServer(ThreadingHTTPServer):
         )
         self.gui_dictionaries = GuiDictionaryController(
             resolve_path=self.gui_workflows.resolve_allowed_path, library=self.gui_library
+        )
+        self.gui_profiles = GuiProfileController(
+            state_directory=default_workspace_directory().parent,
+            workspaces=self.gui_workspaces,
+            library=self.gui_library,
         )
         self.gui_corrections = GuiCorrectionController(
             config=application_config,
@@ -755,7 +764,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
-            if not 0 < length <= 1_048_576:
+            limit = PROFILE_LIMIT if path.startswith("/api/v1/profile/") else 1_048_576
+            if not 0 < length <= limit:
                 raise ValueError("Request body size is invalid")
             document = json.loads(self.rfile.read(length))
             if not isinstance(document, dict):
@@ -772,6 +782,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     },
                 )
             )
+            return
+        if path.startswith("/api/v1/profile/"):
+            self._handle_profile_request(path, document)
             return
         if path == "/api/v1/select-output-directory":
             supplied = self.headers.get("X-EWP-CSRF", "")
@@ -1570,6 +1583,16 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 elif path.endswith("/view"):
                     payload = self.server.gui_library.view(str(document.get("path", "")))
+                elif path.endswith("/export"):
+                    payload = {
+                        **self.server.gui_library.export_dictionary(str(document.get("path", "")))
+                    }
+                elif path.endswith("/import"):
+                    if not isinstance(document.get("payload"), str):
+                        raise ValueError("Dictionary file must contain JSON text")
+                    payload = self.server.gui_library.import_dictionary(
+                        payload=document["payload"], directory=str(document.get("directory", ""))
+                    )
                 elif path.endswith("/visibility"):
                     if not isinstance(document.get("visible"), bool):
                         raise ValueError("Dictionary visibility must be true or false")
@@ -2239,6 +2262,81 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             return
         status = HTTPStatus.OK if operation.status == "completed" else HTTPStatus.BAD_REQUEST
         self._write_response(_json_response(status, operation.model_dump(mode="json")))
+
+    def _handle_profile_request(self, path: str, document: dict[str, Any]) -> None:
+        if not secrets.compare_digest(
+            self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+        ):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.FORBIDDEN,
+                    {
+                        "error": {
+                            "code": "GUI_CSRF_REJECTED",
+                            "message": "The profile request lacks the active session token.",
+                        }
+                    },
+                )
+            )
+            return
+        payload: dict[str, Any]
+        try:
+            if path == "/api/v1/profile/save":
+                catalogs = self.server.workspace_catalogs(
+                    str(document.get("storage_directory", ""))
+                )
+                workspaces = tuple(
+                    item for _, _, controller in catalogs for item in controller.documents()
+                )
+                directories = [str(document.get("dictionary_directory", "dictionaries"))]
+                # Dictionaries referenced by workspace fields are included even when
+                # they live outside the currently selected catalog.
+                dictionary_paths = [
+                    item["path"]
+                    for directory in directories
+                    for item in self.server.gui_dictionaries.catalog(
+                        directory, include_hidden=True
+                    )["items"]
+                ]
+                fields = document.get("fields", {})
+                preferences = document.get("preferences", {})
+                if not isinstance(fields, dict) or not isinstance(preferences, dict):
+                    raise ValueError("Profile preferences and fields must be objects")
+                for saved_fields in [fields, *(item.fields for item in workspaces)]:
+                    for key in (
+                        "correction-dictionary",
+                        "translation-dictionary",
+                        "dictionary-previous",
+                    ):
+                        value = saved_fields.get(key)
+                        if isinstance(value, str) and value and Path(value).is_file():
+                            dictionary_paths.append(value)
+                profile = self.server.gui_profiles.capture(
+                    name=str(document.get("name", "")),
+                    preferences=preferences,
+                    fields=fields,
+                    workspaces=workspaces,
+                    dictionary_paths=dictionary_paths,
+                )
+                payload = {"profile": profile.model_dump(mode="json")}
+            elif path == "/api/v1/profile/load":
+                payload = self.server.gui_profiles.load()
+            elif path == "/api/v1/profile/import":
+                if not isinstance(document.get("profile"), dict):
+                    raise ValueError("Profile document must be an object")
+                payload = self.server.gui_profiles.restore(document["profile"])
+            else:
+                raise ValueError("Unknown user profile action")
+        except (OSError, ValueError) as error:
+            self._write_response(
+                _json_response(
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": {"code": "GUI_PROFILE_INVALID", "message": str(error)}},
+                )
+            )
+            return
+        self._write_response(_json_response(HTTPStatus.OK, payload))
+        return
 
     def _restore_workspace_staged_jobs(self, staged_jobs: tuple[dict[str, Any], ...]) -> int:
         """Rebuild only hash-validated staged jobs after a GUI restart."""

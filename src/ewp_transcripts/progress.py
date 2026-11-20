@@ -105,6 +105,9 @@ def runtime_profile(config: Any, streams: int, topology: str) -> str:
     return hashlib.sha256(json.dumps(descriptor, sort_keys=True).encode()).hexdigest()
 
 
+MIN_ETA_RUNS = 3
+
+
 class ProgressHistory:
     """Bounded content-free timing cache. Failure to read/write it never fails a job."""
 
@@ -112,6 +115,7 @@ class ProgressHistory:
         self.path = path
         self.data: dict[str, dict[str, list[float]]] = {}
         self.lock = threading.Lock()
+        self.counts: dict[str, int] = {}
         if path is not None:
             try:
                 raw = json.loads(path.read_text())
@@ -119,6 +123,9 @@ class ProgressHistory:
                     for profile, phases in raw.items():
                         if len(profile) != 64 or not isinstance(phases, dict):
                             continue
+                        runs = phases.get("_runs", [0])
+                        if isinstance(runs, list) and runs and type(runs[0]) is int:
+                            self.counts[profile] = max(0, min(1000000, runs[0]))
                         self.data[profile] = {
                             phase: [
                                 float(value)
@@ -137,19 +144,31 @@ class ProgressHistory:
         with self.lock:
             return {key: list(values) for key, values in self.data.get(profile, {}).items()}
 
+    def completed_runs(self, profile: str) -> int:
+        with self.lock:
+            return self.counts.get(profile, 0)
+
     def record(self, profile: str, factors: dict[str, list[float]]) -> None:
         with self.lock:
+            self.counts[profile] = self.counts.get(profile, 0) + 1
             phases = self.data.setdefault(profile, {})
             for phase, values in factors.items():
                 phases[phase] = [*phases.get(phase, []), *values][-12:]
             self.data = dict(list(self.data.items())[-32:])
+            self.counts = {key: self.counts.get(key, 0) for key in self.data}
             if self.path is not None:
                 temporary = self.path.with_suffix(".tmp")
                 try:
                     self.path.parent.mkdir(parents=True, exist_ok=True)
                     with temporary.open("w", encoding="utf-8") as handle:
                         os.chmod(temporary, 0o600)
-                        json.dump(self.data, handle)
+                        json.dump(
+                            {
+                                key: {**value, "_runs": [self.counts.get(key, 0)]}
+                                for key, value in self.data.items()
+                            },
+                            handle,
+                        )
                     temporary.replace(self.path)
                 except OSError:
                     pass
@@ -238,8 +257,11 @@ class RuntimeProgress:
                 key: statistics.median(self.samples.get(key.split(":")[0], [0])) * self.duration
                 for key in self.work
             }
-            known = bool(self.work) and all(
-                predictions[key] > 0 for key in self.work if key not in self.completed
+            runs = self.history.completed_runs(self.profile)
+            known = (
+                runs >= MIN_ETA_RUNS
+                and bool(self.work)
+                and all(predictions[key] > 0 for key in self.work if key not in self.completed)
             )
             expected = predictions.get(self.current, 0)
             overdue = expected > 0 and phase_elapsed > expected * 1.75
@@ -270,6 +292,8 @@ class RuntimeProgress:
                 if known and not overdue and self.finished is None
                 else None,
                 "calibrated": known,
+                "calibration_runs": runs,
+                "calibration_required": MIN_ETA_RUNS,
                 "overdue": overdue,
                 "stream_index": self.stream_index,
                 "stream_count": self.stream_count,
