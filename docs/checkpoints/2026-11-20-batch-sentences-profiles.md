@@ -73,14 +73,22 @@ rebuild are part of this work.
   same-speaker splits survive Save; parent-revision anchors remain protected. Canonical files unchanged.
 - Fresh process/browser restores the saved source/manual translation and export state successfully.
 - GUI evidence under /tmp/ewp-batch-profiles.jCbW8c/fifth (complete browser) and recovered-final
-  (fresh-server recovery and sentence guidance). Fixtures/logs/screenshots will be removed at handoff.
+  (fresh-server recovery and sentence guidance). Fixtures/logs/screenshots were removed at handoff after this content-free evidence capture.
 
-## Remaining handoff steps
+## Delivery and resume
 
-Verify wheel/source assets and no eager ML initialization, record artist ZIP unchanged SHA,
-commit/push application and docs, remove dedicated temporary root, then report the exact delivered
-commit. No user decisions are required. Real GPU/ETA accuracy and full Polish manuals remain
-owner-dependent follow-ups; the already sent artist package remains out of scope.
+Implementation delivered to origin/main in 7cfddb4 (func(gui): add portable profiles and refine
+batch review). All authorized application work and verification are complete. No app version,
+release or tag was changed. The dedicated temporary root /tmp/ewp-batch-profiles.jCbW8c, including
+synthetic recordings, private browser state, wheels, test exports, reports and browser binaries,
+was removed after recording the evidence above. Test servers were closed.
+
+Owner retest: git pull, then uv run --locked transcriber gui. Check the complete mixed selection
+through Inspect / Dry-run / Add once, per-episode settings, sentence-aware presentation, mixed
+playback speed and Settings & About profile/ETA controls. Profile transfer includes settings and
+workspace references; media/results move separately. Real GPU/ETA accuracy and full Polish manuals
+remain owner-dependent follow-ups. The already sent artist package stays out of scope until new
+owner instructions; no further package work is queued for this task.
 
 Package gate: wheel and sdist build PASS. All 56 packaged resource files byte-match the source;
 nine help routes render from the extracted wheel and no torch/torchcodec/WhisperX/pyannote import

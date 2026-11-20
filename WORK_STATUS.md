@@ -6,7 +6,8 @@ Last updated: **2026-11-20**.
 
 Current request: [batch planning, sentence-aware review and portable user profiles](docs/checkpoints/2026-11-20-batch-sentences-profiles.md).
 Baseline clean main aa70f4d00c74cd23740dcace55c597d58fa707ac. Start with TODO.md.
-Implementation and verification complete; commit/push is the final delivery step.
+Implementation and verification complete; delivered to origin/main in 7cfddb4
+(func(gui): add portable profiles and refine batch review).
 
 Inspect, dry-run and Add to queue share all pending selected episodes. Per-episode language/count
 survive selection changes; Inspect discloses chosen values with * and localized counts. Batch staging
@@ -30,7 +31,8 @@ Profile JSON export/import/load, dictionary byte transfer, second-by-second elap
 explicit mixed playback speed and responsive block controls PASS. Fresh-server saved-work recovery
 and model-free 581-word sentence/fallback warning checks PASS in EN/PL and both themes.
 Wheel/sdist PASS; 56 packaged resources match source and nine help routes render from the wheel
-without eager ML imports. Artist ZIP SHA remains unchanged. Disposable cleanup follows delivery.
+without eager ML imports. Artist ZIP SHA remains unchanged. Dedicated temporary verification root
+/tmp/ewp-batch-profiles.jCbW8c was removed after content-free evidence capture.
 Owner-qualified WSL/GPU ASR is not rerun here; no engine/pin/canonical schema changed. Real ETA
 accuracy still needs target-machine observations. Full Polish manuals follow terminology approval.
 
