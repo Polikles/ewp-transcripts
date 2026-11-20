@@ -1,5 +1,16 @@
 # Development Handoff
 
+Active resume point (latest 2026-11-20 decision): [WORK_STATUS](../WORK_STATUS.md),
+[TODO](../TODO.md), [package checkpoint](checkpoints/2026-11-20-package-sequencing.md) and the
+[roadmap package sequence](99-roadmap-v2.md#accepted-package-sequence--implementation-not-started).
+The current turn is planning only. Product implementation has not started and must await a
+separate instruction. A1–A4 → owner checklist/fix/retest gate → B5–B8 → B8a cloud ASR → B9 full
+native-Windows/WSL acceptance → task 10 EN–PL approval and later documentation. Artist waiting
+is non-blocking/no-deadline. Historical candidate lists below do not override selected/declined
+scope in the current roadmap.
+
+Previous handoff text below is retained as historical context.
+
 Active resume point (2026-11-20): [WORK_STATUS](../WORK_STATUS.md),
 [work policy](../WORK_POLICY.md), [TODO](../TODO.md), and the
 [current scope/summary checkpoint](checkpoints/2026-11-20-scope-and-summary-polish.md).

@@ -27,3 +27,10 @@ Updated: 2026-11-20. Read `AGENTS.md` first; this file supplements its rules.
    are not completion gates. Prepare the complete editable EN–PL terminology file only after
    feature completion, then owner approval and Polish documentation. Documentation screenshots
    wait for custom GUI/icons; waiting for the artist has no deadline and blocks no other work.
+
+9. Latest sequencing decision (2026-11-20): the roadmap package table and TODO govern order.
+   A1–A4 → concrete owner checklist → fix/retest acceptance → B5–B8 → B8a cloud ASR → B9 full
+   native-Windows/WSL workflow acceptance → task 10 EN–PL approval. Product work has explicitly
+   not been started/authorized yet; await a later start instruction. Record planning only now.
+   Cloud provider/model/spending/media scope and native-Windows test arrangements are decisions
+   for package B, not new blockers for A. Declined historical roadmap ideas must not return as gates.

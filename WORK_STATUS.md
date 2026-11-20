@@ -4,6 +4,35 @@ Last updated: **2026-11-20**.
 
 ## Active task and resume pointers
 
+Current request: [accepted package sequencing, planning only](docs/checkpoints/2026-11-20-package-sequencing.md).
+Baseline clean main 90768eb. Read TODO.md and the opening roadmap package table.
+**Product implementation must not start yet.** The owner explicitly requested planning only.
+No source/test/runtime/asset/model/installer changes or provider calls were made in this turn.
+
+Accepted order: package A tasks 1–4 (restart recovery, cancellation, retained-workdir cleanup,
+verified GUI export downloads), then a concrete owner test checklist and fix/retest gate. Package B
+waits for A fixes to pass: tasks 5–8 (native Windows, OS key store, project/profile and media
+conveniences), then 8a cloud ASR, then 9 full native-Windows/WSL workflow qualification and fixes.
+After B acceptance/function freeze: task 10 complete editable EN–PL list and owner approval, then
+consistent textual documentation. Artist remains non-blocking/no-deadline; screenshots wait for
+custom GUI/icons and the sent package remains frozen.
+
+No extra decision blocks the later start of A. Before B confirm native-Windows test execution/
+environment; before B8a choose the initial cloud provider/model and explicit spending/media scope.
+Do not turn those deferred decisions into prerequisites for A. Do not start paid/media cloud calls.
+
+Roadmap classifications now reflect the owner choices: cancellation/downloads/key-store/cleanup
+selected; cloud ASR inserted 8a; non-speech/channels/audio repair/extra subtitle formats are nice-to-
+have; model catalog/favorites/loading, manual timing editing, alternate translation chunking,
+input snapshots, whole-block audio-follow, new correction modes, speaker-count research, bilingual
+HTML and Docker are outside selected scope. Word/phrase highlighting, Ollama, timing refinements,
+less-technical instruction review and earlier research/preset work remain only nice-to-have.
+
+Next action: report readiness and wait for an explicit product-start instruction. Package-A
+acceptance checklist is a future implementation deliverable, not already completed.
+
+Previous deliveries below are historical evidence, not current work authorization.
+
 Current request: [summary footnotes and scope reconciliation](docs/checkpoints/2026-11-20-scope-and-summary-polish.md).
 Baseline clean main 8b64329. Read TODO.md, WORK_POLICY.md and the opening owner-scope section
 of docs/99-roadmap-v2.md. Implementation/audit/verification complete; delivered to origin/main

@@ -24,67 +24,83 @@ research metrics and optional presets do not block completion or release readine
 | 6: artist | Waiting for supplied icons/feedback, no deadline, does not block other work. The already sent ZIP/demo must remain unchanged. |
 | 10/11/12/14: benchmarks/research | Nice-to-have outside required project scope: private-corpus expansion/comparisons, translation quality suites, public datasets/universal dictionary research, automated model benchmark matrices. |
 | 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
-| Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; no implementation order is assigned yet. |
+| Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |
 
-### Retained product backlog — order still to be agreed
+### Accepted package sequence — implementation not started
 
-These are retained proposals from existing plans, not authorization to implement them all at once.
-Items already delivered are not reopened. The previous 22-item summary is a discussion reference,
-not a second roadmap.
+The owner approved the consolidated plan and the following gates, but explicitly said not to
+start product work yet. This is planning authorization only; wait for the product-start instruction.
+Original task numbers are retained, with cloud ASR inserted as 8a to avoid shifting documentation
+approval task 10.
 
-| ID | Remaining work | Source / dependency |
-|---|---|---|
-| R01 | Recent-work/project browser, named media/output roots, directory scanning of saved canonical results | Section 13; GUI contract recent-session pointers. Existing workspace save/load is implemented. |
-| R02 | Choose an audio stream in multi-stream media; remaining native file-picker/direct-entry conveniences | Sections 10/13; existing MP4/audio extraction remains qualified. |
-| R03 | Optional profile export without embedded dictionaries | Section 13; full profile and independent dictionary exchange already implemented. |
-| R04 | Optional cloud speech-to-text for machines without suitable local hardware | Section 13; requires explicit media disclosure/consent and the existing canonical contract. |
-| R05 | Separate default-off LLM punctuation and basic editorial experiments | Section 2; still non-final and manually reviewed; no broad benchmark campaign required for current delivery. |
-| R06 | Unknown-speaker-count improvements within one recording | Section 9 research proposal; no persistent cross-recording identities. Existing auto count remains available. |
-| R07 | Advanced multichannel/crosstalk handling, channel maps and layout-aware surround downmix | Section 10; separate from current synchronized episode playback mixing. |
-| R08 | Content-aware directory discovery independent of file extension | Section 6, ADR-0017 / FR-A05; reuse probe data and preserve ordinary-file skip behavior. |
-| R09 | Optional audio repair and original/repaired comparison | Sections 7/8; original media stays unchanged. |
-| R10 | Additional subtitle formats/presets, burned-in captions, visual preview and platform compatibility | Sections 11/12; current accepted YTT/HTML exports are delivered. |
-| R11 | Explicit non-speech event authoring and renderer styling; possible bilingual HTML | Timed-event contract and sections 11/12; schema foundation already exists. |
-| R12 | Native Windows build and installation workflow | Section 14; compatible native speech/media dependencies, Windows paths/model caches, CLI/GUI launch and owner workflow qualification. Treat as a distinct target, not a promise that the WSL environment runs natively. |
-| R13 | Packaging/distribution: GUI installer, remaining clean Ubuntu/bare-metal qualification, planned public-release checkpoint, later GPU Docker | Section 14; no release/tag authorized by this planning update. |
-| R14 | Operational conveniences: explicit input aliases for same-name recordings, scheduling and old-workdir cleanup | Section 15; current per-job safety and versioning stay intact. Research quality-trend reports are optional. |
-| R15 | Final custom GUI/icon integration, creator credits/URL and eventual project website metadata | Wait for artwork/contact/site details; non-blocking and without a deadline. Do not rebuild the sent artist package. |
+| Package / task | Work and completion boundary |
+|---|---|
+| A1 | Latest restart recovery of queue, saved source/translation reviews and export state; preserve previously accepted behavior. |
+| A2 | Safe cancellation of waiting/running work; honest requested/cancelled status, no incomplete final publication, retry from the beginning. |
+| A3 | Immutable workdir creation time, failed/cancelled/successful-retained reason and preview/filter explicit cleanup, protecting references/final artifacts. |
+| A4 | GUI downloads of verified existing export versions, without ASR reruns. |
+| A acceptance gate | Deliver an implementation-specific test checklist after A is complete. Owner tests; fix defects and repeat until accepted before starting B. |
+| B5 | Native Windows dependencies, audio/model setup, paths, CLI/GUI launch using the same application/frontend as WSL. |
+| B6 | Opt-in OS credential storage with read/delete and session-only fallback; secrets never enter profiles, exports or logs. |
+| B7 | Recent projects/sessions, named media/output roots, saved-result directory scanning and optional profile export without embedded dictionaries. |
+| B8 | Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit identities for same-name inputs. |
+| B8a | Optional cloud speech-to-text, after 8 and before 9. Choose initial provider/model and explicit media disclosure/spending boundary before the integration or any paid/media call. |
+| B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
+| 10 | Produce the complete editable EN–PL file for labels/messages/errors/states/hints/tooltips/guide copy/dynamic templates; owner corrections and approval. |
+| 11 | Consistent English instructions and full Polish textual documentation after task-10 approval. |
+| 12 | Later installer/distribution preparation. Release/publishing is a separate owner decision, not authorized by this plan update. |
+| Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
 
-### Additional items recovered from other plans
+The sequence is serial within each package. A test checklist is delivered against concrete reviewed
+behavior after implementation; it is not treated as already written or passed. B does not start
+while A acceptance fixes are outstanding. Full profile transfer, provisionally accepted as currently
+implemented, can be checked while preparing/testing native Windows rather than blocking A.
 
-These details were omitted or compressed in the earlier summary. They are proposals to prioritize
-with the owner, and their dependencies do not silently become new completion gates.
+No further scope decision blocks the eventual start of A. Before B, confirm the target Windows
+test environment and execution/access arrangement. Before B8a, select the initial cloud provider,
+exact model and allowed media/cost scope. Those decisions do not need to delay A. No cloud provider
+is chosen by implication, and no uploads, paid requests, downloads/models or product changes are
+authorized by the current planning-only instruction.
 
-| ID | Recovered item | Source / status |
-|---|---|---|
-| E01 | Explicit cancellation of queued/running work with safe worker/artifact behavior | GUI contract section 7; GUI traceability FR-L04/L05. Not currently implemented. |
-| E02 | Browser downloads of verified exports through validated artifact identities | GUI contract security/download boundary; FR-L03/L17/NFR-020 traceability. Profile/dictionary JSON downloads do not constitute this general export feature. |
-| E03 | Searchable full provider model catalog and saved favorite models | GUI contract section 5; current bounded presets/manual IDs are implemented. |
-| E04 | Explicit local-backend model load/unload control where supported | GUI contract section 5; opt-in application convenience is separate from the optional automated benchmarking program. |
-| E05 | Optional Ollama correction adapter | Automated-correction contract opening; future backend adapter, not a required replacement for existing providers. |
-| E06 | Optional OS credential-store design for persisting API keys | Automated-correction contract and GUI security boundary; current keys stay in process memory and profiles must never export them. |
-| E07 | Emergency manual timing overrides | Revision plan section on timing / ADR-0020; conditional on a real workflow need, separately versioned, never silent changes to canonical timestamps. |
-| E08 | Bounded speaker-chunk translation mode if sentence units repeatedly lose necessary context | Translation contract section 3 / WORK_STATUS deferred list; conditional proposal, no corpus-wide study required now. |
-| E09 | Immutable workdir creation time plus explicit failed/cancelled/successful-retained reason, then reason-specific cleanup filters | State/logging contract section 9; current ownership/age-based cleanup already exists. |
-| E10 | Optional owned input snapshots to reduce source-change races while processing | Section 13 source-integrity note; current pre-start fingerprint checks are implemented. |
-| E11 | Residual word-alignment/acoustic spill at sentence boundaries | HTML delivery acceptance and timing notes; preserve real timestamps, investigate observed podcast problems rather than require research benchmarks. |
-| E12 | Plain-language instruction review with less-technical readers and later screenshots | Section 13 / WSL feedback guide; wording review follows feature completion and EN–PL approval, screenshots additionally wait for custom GUI. |
-| E13 | Optional automatic playback-follow/current-block highlighting in the review editor | Section 13 audio-following review and GUI traceability. Existing seek buttons/player and the separate exported HTML follow-player are delivered; app-editor auto-follow is a retained convenience proposal. |
+### Final classification of the recovered inventory
+
+Old R/E identifiers are retained only to reconcile earlier discussions; the package sequence above
+is the execution plan. Rows excluded or declined here must not reappear from historical text as
+new completion requirements.
+
+| Earlier ID | Owner disposition |
+|---|---|
+| R01, R03 | B7: project/session conveniences and optional dictionary-free profile export. |
+| R02, R08 | B8: stream/file-picker and content-aware media selection. |
+| R04 | B8a: cloud ASR, explicitly inserted between 8 and 9. |
+| R05, R06 | Removed: additional LLM punctuation/editorial modes and speaker-count research. Existing correction/auto-count functions remain available. |
+| R07, R09, R10 | Nice-to-have: advanced channels/crosstalk/surround, audio repair/comparison and additional subtitle formats. |
+| R11 | Non-speech authoring/styling is nice-to-have; bilingual HTML is removed. Existing timed-event foundation/HTML export are delivered and remain unchanged. |
+| R12 | B5: native Windows. |
+| R13 | Later task 12 retains installer/distribution preparation. Docker and unrelated broad deployment qualification are outside selected scope. |
+| R14 | Selected: cleanup in A3 and same-name aliases in B8. Unselected scheduling/automatic-maintenance programs are not package obligations. |
+| R15 | Artist/icon/creator-credit work waits independently without a deadline; public-site publication is not scheduled by this plan. |
+| E01, E02, E06, E09 | Selected: A2 cancellation, A4 verified downloads, B6 OS credential storage, A3 workdir metadata/cleanup. |
+| E03, E04 | Outside project scope: searchable full model catalog, favorites and local model-loading management. |
+| E05 | Nice-to-have: Ollama; no current expansion of local-model usage. |
+| E07 | Outside scope: manual timing overrides; dedicated subtitle editors already provide this. |
+| E08, E10 | Unnecessary/removed: alternate translation chunking and owned input snapshots. |
+| E11, E12 | Nice-to-have: alignment/timing refinements and less-technical instruction review. |
+| E13 | Whole-block audio following is removed. Only optional word/phrase-level highlighting is retained as nice-to-have. |
 
 ### Nice-to-have, outside required delivery
 
-- Previous items 10/11: new private gold/reference expansion, comparative correction/review-time
-  studies and separate PL→EN / EN→PL translation-quality benchmark suites.
-- Previous item 12: public-corpus WER/CER/timestamp/DER/JER qualification, corpus-derived universal
-  Polish dictionary, broad model comparisons and related dataset work.
-- Previous item 14: unattended model × quantization × prompt × chunking benchmark automation and
-  model benchmarking load/unload matrices.
-- Previous item 13: balanced/low-VRAM/CPU-only/Apple Silicon preset qualification and hardware matrices.
-- Research quality-trend reports between releases and any broad model quality sweeps.
+- Ollama/further local-model expansion, word/phrase playback highlighting, alignment refinements
+  and optional instruction review with less-technical readers.
+- Non-speech authoring, advanced channels/crosstalk/surround, audio repair/comparison and additional
+  subtitle formats. Existing supported media/export functions are not removed.
+- Earlier optional research: private gold/reference expansion, comparative correction/review-time
+  studies, separate PL→EN / EN→PL translation-quality suites, public datasets/universal dictionary
+  studies, automated model × quantization × prompt × chunking benchmarks and hardware presets.
+- Optional research quality-trend reports. No accurate percentage/ETA calibration campaign.
 
-No accuracy-calibration campaign for the percentage/ETA is scheduled. Existing evidence and tools
-remain available; moving work here does not erase accepted results or weaken regression checks.
-The detailed historical benchmark procedures below apply only if that optional work is later chosen.
+Nice-to-have means no current delivery gate, schedule or implementation authorization. Historical
+benchmark procedures below apply only if separately chosen in the future; accepted evidence remains.
 
 ## Milestone history and detailed proposals
 

@@ -1,58 +1,66 @@
 # Immediate work queue
 
-Updated: 2026-11-20. Start here after a context reset.
+Updated: 2026-11-20. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
+Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-Policy: [WORK_POLICY.md](WORK_POLICY.md). Product sequencing and the complete retained inventory:
-[roadmap — owner scope](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
-The owner is building a podcast/recording workflow tool. Optional research does not block delivery.
+## Current state: planning only — product implementation must not start yet
 
-## Delivered: summary footnotes and scope reconciliation
+Checkpoint: [package sequencing](docs/checkpoints/2026-11-20-package-sequencing.md).
+The owner accepted the consolidated plan with the changes below, but explicitly instructed:
+no product work yet. Recording these decisions does not authorize starting package A.
 
-Checkpoint: [current work](docs/checkpoints/2026-11-20-scope-and-summary-polish.md).
+## Package A — original tasks 1–4, in order
 
-- [x] Make language (*) and speaker-count (**) footnotes span the summary width and remain below Inspect and Dry-run tables.
-- [x] Rename the queue confirmation to reviewed plan / add jobs in EN/PL; vertically center the source section counter between navigation buttons.
-- [x] Record owner acceptance: current GUI accepted with profile exchange untested; workflow passed except restart recovery; browsers/palette passed; actual 200% zoom not established.
-- [x] Remove accurate percentage/ETA calibration as a delivery requirement; retain simple activity feedback and existing optional estimates.
-- [x] Defer a complete editable EN–PL string-pair file until feature completion, then owner approval, then Polish docs; screenshots wait for final custom GUI/icons.
-- [x] Mark artist delivery waiting without a deadline or blocking other work; leave sent ZIP/demo untouched.
-- [x] Move research benchmarks, private/public universal-corpus work, translation model sweeps, model benchmark automation and hardware presets into an optional nice-to-have list outside delivery gates.
-- [x] Document RTX 3090 owner-tested hardware and an unqualified expectation of at least 8 GB VRAM; retain native Windows as planned convenience work.
-- [x] Audit roadmap, requirements, plans, ADRs and operator docs for other open items; reconcile statuses and report retained versus optional work without inventing priorities.
-- [x] Verify the small UI changes, update changelog/checkpoints, and deliver application/planning updates.
+- [ ] A1: Check latest restart recovery (queue, saved source/translation reviews, publication/export pointers). Preserve owner acceptance of already tested workflows. Full profile transfer may be checked during Windows work.
+- [ ] A2: Cancel waiting/running tasks safely with honest requested/cancelled status, no incomplete final publication, and restart-from-beginning retry semantics.
+- [ ] A3: Workdir immutable creation time and retained reason (failed/cancelled/successful-retained); preview/filter explicit cleanup without deleting referenced or final artifacts.
+- [ ] A4: Download verified existing exports through the GUI, preserving exact artifact/version identity and avoiding ASR reruns.
+- [ ] Run relevant regression/packaging checks, then deliver one concrete manual checklist for the implemented A package.
+- [ ] Owner tests A; fix reported defects, update checkpoint/checklist and repeat until accepted.
+- [ ] Gate: package B starts only after A fixes pass and owner approves progression. No current product start authorization.
 
-## Owner acceptance and remaining checks
+## Package B — original tasks 5–9, with cloud ASR inserted as 8a
 
-- [x] Owner accepts recent GUI/workflow changes, subject to the small fixes above.
-- [x] Owner accepts the complete workflow except restart recovery; retain earlier accepted
-  recovery evidence as history rather than claiming a current restart test.
-- [x] Owner confirms browsers and palette work.
-- [ ] Owner check still open: recover the latest workflow after a full program/VM restart.
-- [ ] Optional owner check: complete user-profile import/export transfer. Provisionally accepted
-  as implemented; the owner has not fully tested exchange. Automated coverage already passes.
-- [ ] Optional display check: actual browser zoom 200% (page magnification, not window resizing).
-  Not established by the owner's report and not a newly imposed blocking gate.
-- Precise percentage/ETA calibration is removed from required work. Keep elapsed/activity feedback
-  and the existing optional approximate ETA; no accuracy study is scheduled.
+- [ ] B5: Native Windows dependency/media/model/path/CLI/GUI launch support, sharing the same application and frontend as WSL.
+- [ ] B6: Opt-in OS credential storage: save/read/remove API keys; preserve session-only fallback and exclude secrets from profiles/exports/logs.
+- [ ] B7: Recent projects/sessions, named input/output locations, canonical-result directory scanning and optional profile export without embedded dictionaries.
+- [ ] B8: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
+- [ ] B8a: Optional cloud ASR, after B8 and before B9. Select the initial provider/model and cost/consent boundary before implementing/calling that integration; no paid calls or media uploads are authorized now.
+- [ ] B9: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
+- [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
 
-## Retained product work — ordering not yet agreed
+Before B, confirm the target Windows test environment and how the owner and agent will divide
+native-Windows execution. This does not block A planning or its later authorized implementation.
 
-- [ ] Prioritize roadmap R01–R15 and recovered proposals E01–E13 with the owner; do not implement
-  the whole inventory automatically. Native Windows build/installer remains planned (R12).
-- [ ] At feature completion, produce a complete editable EN–PL string-pair file for all labels,
-  messages, errors, states, hints, tooltips and dynamic templates; preserve original error codes.
-- [ ] After the owner corrects and approves that file, finalize terminology and full Polish docs.
-- [ ] Screenshots are deferred until the final custom GUI/icon set is integrated.
-- [ ] Integrate artist feedback/icons when supplied. No deadline; does not block other work.
-  Leave the already sent frontend ZIP/demo unchanged.
+## After package B acceptance
 
-## Nice-to-have — outside required project scope
+- [ ] Task 10: Generate the complete editable EN–PL label/message/error/state/hint/tooltip/guide/dynamic-template file, preserving diagnostic codes; owner corrects and approves it.
+- [ ] Task 11: Finalize English instructions and full Polish documentation after terminology approval.
+- [ ] Task 12: Later installer/distribution preparation; actual release/publishing remains a separate owner decision.
+- [ ] Parallel, no deadline/non-blocking: integrate artist icons/feedback when supplied. Do not modify the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons.
 
-Previous summary references 10/11/12/14: private-corpus benchmark expansion, comparative correction
-and translation studies, public datasets/universal dictionary research, automated model benchmark
-matrices. Previous item 13: hardware presets and GTX 1070/CPU-only/Apple Silicon qualification.
-No such campaign is required for current completion. Ordinary regression/security/packaging checks
-remain required. See the authoritative roadmap for details rather than a duplicate research queue.
+## Nice-to-have only
+
+- Ollama/further local-model expansion; word/phrase-level playback highlighting (not whole-block highlighting).
+- Alignment/timing refinements and optional instruction review with less-technical users.
+- Non-speech authoring, advanced channels/crosstalk/surround, audio repair/comparison and additional subtitle formats.
+- Earlier optional research: private/public corpus benchmarks, universal dictionaries, model benchmark automation and hardware presets. No ETA/percentage accuracy study is scheduled.
+
+## Removed / outside selected scope
+
+- Full model catalog/favorites/local model-loading management; manual timing overrides.
+- Alternative translation chunking and owned input snapshots; whole-block audio-follow highlighting.
+- Additional LLM punctuation/editorial modes, speaker-count research, bilingual HTML and Docker from the old roadmap.
+- Other unselected broad deployment/research/scheduling ideas are not package obligations and must not reappear as completion gates.
+
+## Acceptance already retained
+
+Owner accepts recent GUI/workflow, browsers/palette and current profiles provisionally. Latest
+full-restart recovery and full profile exchange are not owner-tested. Actual browser page zoom
+200% remains optional/unchecked. Existing regression/security/lineage checks remain required.
+Tested hardware is RTX 3090 24 GB; >=8 GB VRAM elsewhere is an unqualified expectation, without
+a compatibility/performance guarantee. No completed acceptance is reopened because an old plan
+calls it future.
 
 ## Delivered history
 

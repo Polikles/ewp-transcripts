@@ -17,6 +17,12 @@ Generate the complete editable EN–PL string-pair approval file only after func
 finish, then owner approval and Polish manuals. Documentation screenshots wait for custom icons;
 waiting for the artist has no deadline and blocks no other work. Do not modify the sent artist ZIP.
 
+Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
+by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL
+workflow test), then 10 complete EN–PL approval. The current instruction is planning only: do not
+start product implementation until explicitly instructed. Previously declined roadmap proposals
+must not be revived as new requirements. No provider/media/spending authorization is implied.
+
 ## 2. Scope discipline
 
 Implement only the current MVP unless a task explicitly says otherwise.
