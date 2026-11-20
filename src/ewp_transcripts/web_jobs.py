@@ -16,6 +16,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.application import transcribe_one
+from ewp_transcripts.cancellation import CancellationToken, TranscriptionCancelled
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
@@ -54,7 +55,9 @@ class GuiTranscriptionJob(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     job_id: str
-    status: Literal["staged", "queued", "running", "completed", "failed"]
+    status: Literal[
+        "staged", "queued", "running", "cancel_requested", "cancelled", "completed", "failed"
+    ]
     input_path: str
     output_directory: str
     planned_job_id: str
@@ -112,6 +115,7 @@ class GuiTranscriptionQueue:
         self._config = config
         self._service = service
         self._history = ProgressHistory(history_path)
+        self._cancellations: dict[str, CancellationToken] = {}
         self._live_progress: dict[str, RuntimeProgress] = {}
         self._pending: Queue[
             tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int] | None
@@ -223,6 +227,60 @@ class GuiTranscriptionQueue:
             self._pending.put(item)
         return len(pending)
 
+    def cancel(self, job_id: str) -> GuiTranscriptionJob:
+        """Cancel waiting work immediately or request a safe checkpoint from its worker."""
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                raise ValueError("Queue job does not exist")
+            if job.status in {"staged", "queued"}:
+                status = "cancelled"
+            elif job.status in {"running", "cancel_requested"}:
+                if not self._cancellations[job_id].request():
+                    raise ValueError(
+                        "Final publication has started; this job can no longer be cancelled"
+                    )
+                status = "cancel_requested"
+            else:
+                raise ValueError("Only waiting or running jobs can be cancelled")
+            job = job.model_copy(update={"status": status, "updated_at": datetime.now(UTC)})
+            self._jobs[job_id] = job
+            return job
+
+    def retry(self, job_id: str) -> GuiTranscriptionJob:
+        """Stage a new attempt; the worker rechecks hashes and restarts the application pipeline."""
+        with self._lock:
+            previous = self._jobs.get(job_id)
+            if previous is None or previous.status not in {"failed", "cancelled"}:
+                raise ValueError("Only failed or cancelled jobs can be retried")
+            previous_sources = {previous.input_path, *previous.group_sources}
+            if any(
+                (
+                    job.planned_job_id == previous.planned_job_id
+                    or previous_sources.intersection({job.input_path, *job.group_sources})
+                )
+                and job.status in {"staged", "queued", "running", "cancel_requested"}
+                for job in self._jobs.values()
+            ):
+                raise ValueError("This recording already has an active attempt")
+            now = datetime.now(UTC)
+            job = previous.model_copy(
+                update={
+                    "job_id": str(uuid4()),
+                    "status": "staged",
+                    "created_at": now,
+                    "updated_at": now,
+                    "error": None,
+                    "runtime_progress": None,
+                    "result_path": None,
+                    "workflow_errors": {},
+                    "workflow_skips": set(),
+                }
+            )
+            self._jobs[job.job_id] = job
+            self._order.appendleft(job.job_id)
+            return job
+
     def remove(self, job_id: str) -> bool:
         """Remove one staged job; running/history entries remain immutable."""
 
@@ -259,7 +317,7 @@ class GuiTranscriptionQueue:
                 job_id
                 for job_id in job_ids
                 if (job := self._jobs.get(job_id)) is not None
-                and job.status in {"queued", "running"}
+                and job.status in {"queued", "running", "cancel_requested"}
             )
             if active:
                 raise ValueError("Queued or running transcription jobs cannot be removed")
@@ -280,7 +338,8 @@ class GuiTranscriptionQueue:
                 (
                     self._jobs[job_id].output_directory
                     for job_id in self._order
-                    if self._jobs[job_id].status in {"staged", "queued", "running"}
+                    if self._jobs[job_id].status
+                    in {"staged", "queued", "running", "cancel_requested"}
                 ),
                 None,
             )
@@ -289,7 +348,7 @@ class GuiTranscriptionQueue:
         with self._lock:
             return any(
                 job.planned_job_id == planned_job_id
-                and job.status in {"staged", "queued", "running"}
+                and job.status in {"staged", "queued", "running", "cancel_requested"}
                 for job in self._jobs.values()
             )
 
@@ -297,7 +356,7 @@ class GuiTranscriptionQueue:
         with self._lock:
             return any(
                 (job.input_path == str(input_path) or str(input_path) in job.group_sources)
-                and job.status in {"staged", "queued", "running"}
+                and job.status in {"staged", "queued", "running", "cancel_requested"}
                 for job in self._jobs.values()
             )
 
@@ -399,7 +458,7 @@ class GuiTranscriptionQueue:
         restoration path.
         """
 
-        if any(job.status not in {"completed", "failed"} for job in jobs):
+        if any(job.status not in {"completed", "failed", "cancelled"} for job in jobs):
             raise ValueError("Only completed or failed jobs can be restored as queue history")
         with self._lock:
             if len({job.job_id for job in jobs}) != len(jobs):
@@ -407,7 +466,7 @@ class GuiTranscriptionQueue:
             active = tuple(
                 self._jobs[job_id]
                 for job_id in self._order
-                if self._jobs[job_id].status in {"staged", "queued", "running"}
+                if self._jobs[job_id].status in {"staged", "queued", "running", "cancel_requested"}
             )
             if {job.job_id for job in active} & {job.job_id for job in jobs}:
                 raise ValueError("Saved queue history conflicts with an active job")
@@ -419,7 +478,10 @@ class GuiTranscriptionQueue:
         """Forget only inactive queue entries; never interrupt active GPU work."""
 
         with self._lock:
-            if any(job.status in {"queued", "running"} for job in self._jobs.values()):
+            if any(
+                job.status in {"queued", "running", "cancel_requested"}
+                for job in self._jobs.values()
+            ):
                 raise ValueError("Stop or finish active transcription jobs before clearing state")
             count = len(self._jobs)
             self._jobs.clear()
@@ -442,7 +504,15 @@ class GuiTranscriptionQueue:
             if item is None:
                 return
             job_id, input_path, output_directory, source_sha256, language, speaker_count = item
-            job = self._jobs[job_id]
+            with self._lock:
+                job = self._jobs.get(job_id)
+                if job is None or job.status != "queued":
+                    continue
+                token = CancellationToken()
+                self._cancellations[job_id] = token
+                self._jobs[job_id] = job.model_copy(
+                    update={"status": "running", "updated_at": datetime.now(UTC)}
+                )
             fingerprints = job.group_sources or {str(input_path): source_sha256}
             if any(
                 digest and not _matches_staged_source(Path(path), digest)
@@ -460,7 +530,6 @@ class GuiTranscriptionQueue:
                     },
                 )
                 continue
-            self._replace(job_id, status="running")
             tracker: RuntimeProgress | None = None
             try:
                 config = self._config.model_copy(
@@ -494,6 +563,7 @@ class GuiTranscriptionQueue:
                     config=config,
                     output_directory=output_directory,
                     progress=tracker,
+                    cancellation=token,
                     **group_options,
                 )
                 tracker.finish(True)
@@ -502,6 +572,10 @@ class GuiTranscriptionQueue:
                     status="completed",
                     result_path=str(outcome.result_path) if outcome.result_path else None,
                 )
+            except TranscriptionCancelled:
+                if tracker is not None:
+                    tracker.finish(False)
+                self._replace(job_id, status="cancelled", error=None)
             except ApplicationError as error:
                 if tracker is not None:
                     tracker.finish(False)
@@ -598,7 +672,9 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
         matches = sorted(candidate_root.glob(pattern))
         return str(matches[-1]) if matches else None
 
-    if job.status == "failed":
+    if job.status == "cancelled":
+        transcription = GuiWorkflowStage(state="skipped")
+    elif job.status == "failed":
         transcription = GuiWorkflowStage(state="failed")
     elif job.status == "completed":
         transcription = GuiWorkflowStage(state="complete", path=job.result_path)

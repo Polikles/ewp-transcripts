@@ -784,6 +784,12 @@ immutable results remain safe. See
 
 ## 13. Clean retained workspaces: `clean`
 
+Version-2 workdirs are selected by original creation time. Bulk cleanup skips active owners,
+legacy markers without owner/liveness metadata, symlinks and unknown artifacts. The GUI's
+Settings & About → Temporary work directories adds reason filters, preview/confirmation and
+known saved-work/queue reference protection. CLI cleanup does not scan GUI workspace catalogs.
+Inspect older legacy workdirs manually before removing them outside the bulk tool.
+
 Preview first:
 
 ```bash

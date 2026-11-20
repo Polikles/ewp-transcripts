@@ -184,3 +184,11 @@ CSS cannot style it. DPI awareness/visual styles are enabled, and automatic shel
 requested when supported by the host .NET runtime; Windows PowerShell's older runtime may retain
 its legacy folder dialog. The direct output-path field remains available. Check appearance and
 text sharpness on the actual Windows display; the Linux VM cannot qualify that behavior.
+
+## Package A maintenance and downloads
+
+Queue rows offer Cancel task and Retry from beginning. Running cancellation waits for a safe
+stage boundary; final publication cannot be cancelled. Settings & About has a separate temporary
+workdir inventory with filters and preview/confirmation. Both review/export stages offer hash-bound
+Existing export downloads, including after saved-work recovery, without ASR or re-exporting.
+Use the focused [package A checklist](GUI_PACKAGE_A_TEST_CHECKLIST.md) for owner acceptance.

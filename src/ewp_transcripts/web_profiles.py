@@ -125,7 +125,9 @@ def _portable_workspace(workspace: GuiWorkspaceDocument) -> None:
             )
         ):
             raise ValueError("Profile workspace grouped source is invalid")
-    if any(job.status not in {"completed", "failed"} for job in workspace.terminal_jobs):
+    if any(
+        job.status not in {"completed", "failed", "cancelled"} for job in workspace.terminal_jobs
+    ):
         raise ValueError("Profiles cannot contain running queue jobs")
 
 

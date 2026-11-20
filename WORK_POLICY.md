@@ -30,7 +30,9 @@ Updated: 2026-11-20. Read `AGENTS.md` first; this file supplements its rules.
 
 9. Latest sequencing decision (2026-11-20): the roadmap package table and TODO govern order.
    A1–A4 → concrete owner checklist → fix/retest acceptance → B5–B8 → B8a cloud ASR → B9 full
-   native-Windows/WSL workflow acceptance → task 10 EN–PL approval. Product work has explicitly
-   not been started/authorized yet; await a later start instruction. Record planning only now.
+   native-Windows/WSL workflow acceptance → task 10 EN–PL approval. The owner has now explicitly
+   authorized package A; its earlier planning-only hold is revoked. Do not start package B
+   before owner acceptance of A. A implementation/automated checks are complete; use its owner
+   checklist and fix/retest feedback as the current resume point.
    Cloud provider/model/spending/media scope and native-Windows test arrangements are decisions
    for package B, not new blockers for A. Declined historical roadmap ideas must not return as gates.

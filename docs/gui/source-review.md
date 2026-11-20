@@ -59,3 +59,16 @@ Return to the application and use the numbered sections and actions above. Savin
 Example default is a visibly different six-color example palette and the first choice in a fresh session. EwP Brand® is the owner’s identity preset; its registered-mark symbol and original colors are retained. Named profiles are defined in subtitles.ytt_color_profiles; explicitly configured subtitles.ytt_speaker_palette colors remain available as Configured palette if they differ from Example default. Legacy configured/brand workspace IDs and legacy EwP brand configuration names still load. Selecting a profile previews its speaker colors immediately. Preview does not change export preferences: Apply commits the visible colors for this recording’s next export. Save stores a named custom profile for other recordings and future sessions; use a custom name to preserve configured presets. Existing exports stay unchanged.
 
 Save and prepare for export requires the human-verification checkbox. Missing verification outlines that row and shows a message immediately below it; no revision is submitted. Checking it clears the local error, and saving still requires the explicit Save action. Saved per-recording colors and existing exports are retained when profiles change.
+
+## Download a published export
+
+After export, open Existing export downloads. Refresh existing exports also works after loading
+saved work; it validates existing files without running ASR or writing new exports. Click the
+exact filename/version to download the original bytes. The displayed SHA-256 identifies that file;
+older registered palette/export versions stay available. Download links expire after 30 minutes
+and are renewed by refresh after a restart. Missing/changed files are withheld, never repaired silently.
+
+Compatible older exports can be checked read-only against the deterministic renderer. A historical
+custom palette without a download record may need its original export settings; the application
+does not guess its identity. New GUI exports keep a private download registry with artifact and
+source/revision hashes. Back up the local application state as well as the output root when needed.

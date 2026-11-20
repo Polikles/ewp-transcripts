@@ -4,6 +4,26 @@ Last updated: **2026-11-20**.
 
 ## Active task and resume pointers
 
+Current request: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
+Baseline clean main 6322a4a. Package A is implemented and automatically verified; owner testing
+and fix/retest acceptance are next. The earlier planning-only hold was revoked for A.
+Use [the concrete checklist](Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md). Package B is not started.
+
+A1 restores saved queue/drafts/applied pointers and allows completed review without original audio.
+A2 cancels waiting work or waits for safe running-stage checkpoints, refuses late publication
+cancellation and stages fresh retries. A3 adds v2 creation/retention metadata and protected preview-
+bound temporary cleanup. A4 serves exact hash/version-bound existing export downloads after restart.
+Public schemas/model pins are unchanged. No paid calls or artist ZIP/demo changes.
+
+Verification and limits are recorded in the active checkpoint. Real pinned-model cancellation on
+owner WSL/GPU, full profile exchange and native Windows remain unqualified here. Ordinary
+model-free regressions, real FFmpeg tests, actual browser recovery/downloads and package/resource
+checks passed. Resume with owner checklist feedback, fix/retest A, and wait for explicit acceptance
+before B. Task 10 complete EN–PL approval remains after feature completion/B acceptance.
+
+Previous planning/delivery records below are historical; the no-start instruction there no longer
+applies to package A.
+
 Current request: [accepted package sequencing, planning only](docs/checkpoints/2026-11-20-package-sequencing.md).
 Baseline clean main 90768eb. Read TODO.md and the opening roadmap package table.
 **Product implementation must not start yet.** The owner explicitly requested planning only.

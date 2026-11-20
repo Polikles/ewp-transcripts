@@ -160,13 +160,26 @@ function advanceQueueJob(job) {
   });
 }
 function addJobActions(job, action) {
+  if (["staged", "queued", "running", "cancel_requested", "failed", "cancelled"].includes(job.status)) {
+    const retry = ["failed", "cancelled"].includes(job.status);
+    const button = document.createElement("button"); button.type = "button";
+    button.textContent = retry ? "Retry from beginning" : job.status === "cancel_requested" ? "Cancellation requested…" : "Cancel task";
+    button.title = retry ? "Stage a fresh attempt with the same settings. Source hashes are checked again." : "Cancellation waits for the current processing stage to return. Final publication cannot be cancelled.";
+    button.disabled = job.status === "cancel_requested";
+    button.addEventListener("click", async () => { button.disabled = true; try {
+      await queuePost(`/api/v1/transcriptions/${retry ? "retry" : "cancel"}`, {job_id:job.job_id});
+      jobsSignature = ""; await refreshJobs();
+    } catch (error) { document.querySelector("#operation-status").textContent = error.message; button.disabled = false; } });
+    action.append(button);
+  }
+
   if (job.status === "completed" && job.result_path) {
     const stage = nextWorkflowStage(job), next = document.createElement("button");
     next.type = "button"; next.className = "primary";
     next.textContent = nextWorkflowLabel(stage); next.disabled = stage === "finished";
     next.addEventListener("click", () => advanceQueueJob(job)); action.append(next);
   }
-  if (!["queued", "running"].includes(job.status)) {
+  if (!["queued", "running", "cancel_requested"].includes(job.status)) {
     const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove";
     remove.title = "Remove this queue entry. Saved files remain on disk.";
     remove.addEventListener("click", async () => {
@@ -283,7 +296,7 @@ async function refreshJobs() {
     const status = document.createElement("td");
     status.className = `status-${job.status}`;
     const statusText = document.createElement("span"); statusText.className = "gui-job-status";
-    statusText.textContent = job.status.toUpperCase();
+    statusText.textContent = job.status === "cancel_requested" ? "CANCELLATION REQUESTED" : job.status.toUpperCase();
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
@@ -315,7 +328,7 @@ document.querySelector("#start-queue").addEventListener("click", async () => {
     const payload = await queuePost("/api/v1/transcriptions/start", {});
     document.querySelector("#operation-status").textContent = payload.queued
       ? `Started ${payload.queued} queued job(s)`
-      : guiQueueJobs.some(job => ["queued", "running"].includes(job.status)) ? "Queue is already running" : "No staged jobs to start";
+      : guiQueueJobs.some(job => ["queued", "running", "cancel_requested"].includes(job.status)) ? "Queue is already running" : "No staged jobs to start";
     await refreshJobs();
   } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
   finally { guiQueueStarting = false; updateGuiQueueStart(); }
@@ -591,7 +604,7 @@ document.querySelector("#preview-review").addEventListener("click", async () => 
   } catch (error) { setReviewStatus(error.message); }
 });
 document.querySelector("#apply-review").addEventListener("click", async () => { if (!reviewDocument) return; if (!requireGuiVerification(reviewForm.elements.namedItem("verified"), document.querySelector("#review-status"), "Confirm that you manually verified the text before saving and preparing for export.", "GUI_REVIEW_REQUEST_INVALID")) return; try { const payload = await postReview("apply", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, revision_output_directory: reviewValue("revision_output_directory"), source_revision_path: reviewSourceRevisionPath, confirmed: reviewForm.elements.namedItem("verified").checked}); appliedRevisionPath = payload.revision_path; const apply = document.querySelector("#apply-review"); apply.disabled = true; apply.title = "This saved review has already been applied."; const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; unlockTranslationHandoff(); persistReview(); await rememberReviewSession(); setReviewStatus("Verified immutable revision applied", payload); showReviewSummary([["Publication", "Immutable revision written"], ["Revision", payload.revision_number], ["Revision file", shortName(payload.revision_path)], ["Warnings", payload.warnings?.length || 0]]); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "review", error); } });
-document.querySelector("#export-review").addEventListener("click", async () => { if (!reviewDocument || !appliedRevisionPath) return; const formats = [...reviewForm.querySelectorAll('input[name="format"]:checked')].map(item => item.value); try { const payload = await postReview("export", {result_path: reviewDocument.result_path, revision_path: appliedRevisionPath, export_output_directory: reviewValue("export_output_directory"), formats, ...guiExportPreferences()}); setReviewStatus("Verified exports completed", payload); showReviewSummary([["Revision", shortName(appliedRevisionPath)], ["Files written", payload.written?.length || 0], ["Files skipped", payload.skipped?.length || 0]]); await refreshJobs(); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "original_export", error); } });
+document.querySelector("#export-review").addEventListener("click", async () => { if (!reviewDocument || !appliedRevisionPath) return; const formats = [...reviewForm.querySelectorAll('input[name="format"]:checked')].map(item => item.value); try { const payload = await postReview("export", {result_path: reviewDocument.result_path, revision_path: appliedRevisionPath, export_output_directory: reviewValue("export_output_directory"), formats, ...guiExportPreferences()}); setReviewStatus("Verified exports completed", payload); await refreshExportDownloads("source"); showReviewSummary([["Revision", shortName(appliedRevisionPath)], ["Files written", payload.written?.length || 0], ["Files skipped", payload.skipped?.length || 0]]); await refreshJobs(); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "original_export", error); } });
 proceedToTranslation.addEventListener("click", () => { if (!reviewDocument || !appliedRevisionPath) return; translationForm.elements.namedItem("result_path").value = reviewDocument.result_path; translationForm.elements.namedItem("source_revision_path").value = appliedRevisionPath; translationForm.elements.namedItem("output_root").value = reviewValue("project_output_directory"); translationForm.elements.namedItem("target_language").value = reviewDocument.language === "pl" ? "en" : "pl"; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from the completed review step."; guiScrollTo(document.querySelector("#translation-heading"), {behavior: "smooth", block: "start"}); });
 function parentPath(path) { const normalized = path.replace(/[\\/]+$/, ""); const separator = normalized.includes("\\") && !normalized.includes("/") ? "\\" : "/"; return normalized.split(/[\\/]/).slice(0, -1).join(separator) || separator; }
 window.addEventListener("beforeunload", event => { if (!reviewDirty) return; event.preventDefault(); event.returnValue = ""; });
@@ -604,7 +617,7 @@ document.querySelector("#review-translation").addEventListener("click", async ()
 document.querySelector("#save-translation-review").addEventListener("click", async () => { const targets = [...document.querySelectorAll("#translation-review-editor textarea")].map(item => ({unit_id: item.dataset.unitId, target_text: item.value})); try { renderTranslationReview(await queuePost("/api/v1/translation-reviews/save", translationReviewRequest({review_sha256: translationReview.review_sha256, targets}))); document.querySelector("#apply-translation-review").disabled = true; } catch (error) { document.querySelector("#translation-review-status").textContent = error.message; } });
 document.querySelector("#preview-translation-review").addEventListener("click", async () => { try { const payload = await queuePost("/api/v1/translation-reviews/preview", translationReviewRequest()); document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2); const summary = document.querySelector("#translation-review-summary"); const table = document.createElement("table"); table.className = "review-summary-table"; const rows = [["Validation", "Passed"], ["Publication", "None — preview only"], ["Units", payload.statistics.unit_count], ["Source tokens", payload.statistics.source_tokens], ["Target tokens", payload.statistics.target_tokens], ["Warnings", payload.warnings.length]]; const body = document.createElement("tbody"); for (const [label, value] of rows) { const row = document.createElement("tr"); const heading = document.createElement("th"); heading.scope = "row"; heading.textContent = label; const cell = document.createElement("td"); cell.textContent = String(value); row.append(heading, cell); body.append(row); } table.append(body); summary.replaceChildren(table); document.querySelector("#translation-review-status").textContent = "Preview passed: exact source lineage, complete target text, and immutable unit ownership validated. No translation was published."; document.querySelector("#apply-translation-review").disabled = false; } catch (error) { document.querySelector("#translation-review-status").textContent = error.message; } });
 document.querySelector("#apply-translation-review").addEventListener("click", async () => { try { const root = translationCandidate.output_root; const payload = await queuePost("/api/v1/translation-reviews/apply", translationReviewRequest({translation_output_directory: `${root}/accepted-translations`, confirmed: document.querySelector("#translation-review-confirmed").checked})); appliedTranslation = payload.translation_path; document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2); document.querySelector("#translation-review-status").textContent = "Verified manual translation applied."; document.querySelector("#export-translation-review").disabled = false; } catch (error) { document.querySelector("#translation-review-status").textContent = error.message; } });
-document.querySelector("#export-translation-review").addEventListener("click", async () => { try { const root = translationCandidate.output_root; const formats = [...document.querySelectorAll('input[name="translation-format"]:checked')].map(item => item.value); const payload = await queuePost("/api/v1/translation-reviews/audit-export", translationReviewRequest({translation_path: appliedTranslation, audit_output_directory: `${root}/translation-audits`, export_output_directory: `${root}/translation-exports`, formats})); document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2); document.querySelector("#translation-review-status").textContent = "Verified translation audited and exported."; } catch (error) { document.querySelector("#translation-review-status").textContent = error.message; } });
+document.querySelector("#export-translation-review").addEventListener("click", async () => { try { const root = translationCandidate.output_root; const formats = [...document.querySelectorAll('input[name="translation-format"]:checked')].map(item => item.value); const payload = await queuePost("/api/v1/translation-reviews/audit-export", translationReviewRequest({translation_path: appliedTranslation, audit_output_directory: `${root}/translation-audits`, export_output_directory: `${root}/translation-exports`, formats})); document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2); document.querySelector("#translation-review-status").textContent = "Verified translation audited and exported."; await refreshExportDownloads("translation"); } catch (error) { document.querySelector("#translation-review-status").textContent = error.message; } });
 const dictionaryForm = document.querySelector("#dictionary-workflow");
 let dictionaryProposal = null;
 function renderDictionaryProposal(payload) { dictionaryProposal = payload; const editor = document.querySelector("#dictionary-editor"); editor.replaceChildren(); payload.candidates.forEach((candidate, index) => { const fieldset = document.createElement("fieldset"); fieldset.className = "dictionary-candidate"; const legend = document.createElement("legend"); legend.textContent = `${index + 1}. ${candidate.source} → ${candidate.target}`; const meta = document.createElement("p"); meta.textContent = `${candidate.occurrences} occurrence(s) across ${candidate.case_count} case(s)`; const select = document.createElement("select"); select.dataset.source = candidate.source; select.dataset.target = candidate.target; for (const status of ["pending", "approved", "rejected"]) { const option = document.createElement("option"); option.value = status; option.textContent = status; option.selected = candidate.status === status; select.append(option); } fieldset.append(legend, meta, select); candidate.evidence.forEach(example => { const details = document.createElement("details"); const summary = document.createElement("summary"); summary.textContent = `Example · ${example.job_id}`; const source = document.createElement("p"); source.textContent = `Before: ${example.source_context}`; const target = document.createElement("p"); target.textContent = `After: ${example.target_context}`; details.append(summary, source, target); fieldset.append(details); }); editor.append(fieldset); }); document.querySelector("#save-dictionary-decisions").disabled = false; document.querySelector("#publish-dictionary").disabled = payload.counts.pending !== 0; document.querySelector("#dictionary-status").textContent = `${payload.project_id}: ${payload.candidates.length} candidates; ${payload.counts.pending} pending, ${payload.counts.approved} approved, ${payload.counts.rejected} rejected.`; document.querySelector("#dictionary-result").textContent = JSON.stringify(payload, null, 2); }
@@ -1574,3 +1587,77 @@ if (window.sessionStorage.getItem("ewp-clear-after-reload") === "1") {
   workspaceDirectory.value = "";
 }
 start();
+
+// Temporary pipeline workspaces are separate from durable browser-selected source copies.
+const tempWorkdirs = document.createElement("details");
+tempWorkdirs.id = "temporary-workdirs";
+tempWorkdirs.innerHTML = `<summary>Temporary work directories</summary><p class="field-hint">Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.</p><div class="actions"><label>Retention reason<select id="workdir-reason"><option value="">All</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="successful-retained">Successful, retained</option><option value="active">Active</option><option value="interrupted">Interrupted</option></select></label><label>Minimum age (days)<input id="workdir-age" type="number" min="0" value="0"></label><button type="button" id="workdir-refresh">Refresh temporary inventory</button></div><div id="workdir-list"></div><div class="actions"><button type="button" id="workdir-preview" disabled>Preview cleanup</button><button type="button" id="workdir-delete" disabled>Confirm deletion</button></div><p id="workdir-status" role="status"></p>`;
+dependencyPanel.after(tempWorkdirs);
+let workdirPreview = "";
+const workdirRequest = (action, fields={}) => queuePost(`/api/v1/workdirs/${action}`, {...fields, storage_directory:workspaceDirectory.value, fields:collectWorkspaceFields()});
+function invalidateWorkdirPreview() { workdirPreview = ""; document.querySelector("#workdir-delete").disabled = true; }
+async function refreshWorkdirs() {
+  invalidateWorkdirPreview();
+  const status = document.querySelector("#workdir-status"), list = document.querySelector("#workdir-list");
+  try {
+    const data = await workdirRequest("inventory", {reason:document.querySelector("#workdir-reason").value, older_than_days:Number(document.querySelector("#workdir-age").value)});
+    list.replaceChildren();
+    for (const item of data.entries) {
+      const row = document.createElement("label"); row.className = "workdir-row";
+      const box = document.createElement("input"); box.type = "checkbox"; box.value = item.id; box.disabled = !item.removable;
+      box.addEventListener("change", () => { invalidateWorkdirPreview(); document.querySelector("#workdir-preview").disabled = !list.querySelector("input:checked"); });
+      const description = document.createElement("span");
+      const identity = document.createElement("span"); identity.setAttribute("data-gui-content", ""); identity.textContent = item.job_id;
+      const reason = document.createElement("span"); reason.textContent = ({failed:"Failed", cancelled:"Cancelled", "successful-retained":"Successful, retained", active:"Active", interrupted:"Interrupted", "legacy-unknown":"Legacy: creation time unknown"})[item.reason] || item.reason;
+      const metadata = document.createElement("span"); metadata.setAttribute("data-gui-content", ""); metadata.textContent = ` · ${item.created_at || "—"} · ${(item.size_bytes / 1048576).toFixed(1)} MiB`;
+      description.append(identity, " · ", reason, metadata);
+      row.append(box, description);
+      if (item.blocker) { const note = document.createElement("small"); note.textContent = ({active:"Active — protected", referenced:"Referenced — protected", "legacy-unknown":"Legacy owner unknown — protected", "unknown-artifact":"Unknown artifact — protected", "unsafe-entry":"Unsafe entry — protected"})[item.blocker]; row.append(note); }
+      list.append(row);
+    }
+    document.querySelector("#workdir-preview").disabled = true;
+    status.textContent = data.entries.length ? "Select unprotected temporary directories, then preview cleanup." : "No temporary work directories match these filters.";
+  } catch (error) { status.textContent = error.message; }
+}
+document.querySelector("#workdir-refresh").addEventListener("click", refreshWorkdirs);
+for (const id of ["workdir-reason", "workdir-age"]) document.getElementById(id).addEventListener("change", refreshWorkdirs);
+document.querySelector("#workdir-preview").addEventListener("click", async () => { invalidateWorkdirPreview(); try {
+  const data = await workdirRequest("preview", {ids:[...document.querySelectorAll("#workdir-list input:checked")].map(box=>box.value)});
+  workdirPreview = data.preview_token;
+  document.querySelector("#workdir-status").textContent = `${data.entries.length} temporary directories selected; ${(data.size_bytes/1048576).toFixed(1)} MiB. Confirm deletion within five minutes.`;
+  document.querySelector("#workdir-delete").disabled = false;
+} catch (error) { document.querySelector("#workdir-status").textContent = error.message; } });
+document.querySelector("#workdir-delete").addEventListener("click", async () => { const token = workdirPreview; invalidateWorkdirPreview(); try {
+  const data = await workdirRequest("cleanup", {preview_token:token, confirmed:true});
+  await refreshWorkdirs();
+  document.querySelector("#workdir-status").textContent = data.failed ? `Cleanup stopped. Removed: ${data.removed.length}. Refresh the inventory before retrying.` : `Temporary directories removed: ${data.removed.length}.`;
+} catch (error) { document.querySelector("#workdir-status").textContent = error.message; } });
+
+function createExportDownloads(kind, buttonId) {
+  const details = document.createElement("details"); details.id = `${kind}-export-downloads`;
+  const summary = document.createElement("summary"); summary.textContent = "Existing export downloads";
+  const hint = document.createElement("p"); hint.className = "field-hint"; hint.textContent = "Download the exact published file. Refreshing checks existing artifacts and does not run transcription or create exports.";
+  const button = document.createElement("button"); button.type = "button"; button.textContent = "Refresh existing exports";
+  button.id = `${kind}-refresh-downloads`; button.addEventListener("click", () => refreshExportDownloads(kind));
+  const status = document.createElement("p"); status.role = "status"; status.className = "field-hint";
+  const list = document.createElement("ul"); list.className = "export-download-list";
+  details.append(summary, hint, button, status, list); document.getElementById(buttonId).after(details);
+}
+createExportDownloads("source", "export-review");
+createExportDownloads("translation", "export-translation-review");
+async function refreshExportDownloads(kind) {
+  const panel = document.getElementById(`${kind}-export-downloads`), list = panel.querySelector("ul"), status = panel.querySelector('[role="status"]');
+  list.replaceChildren(); panel.open = true;
+  const source = kind === "source";
+  const request = source ? {result_path:reviewDocument?.result_path || reviewValue("result_path"), revision_path:appliedRevisionPath, export_output_directory:reviewValue("export_output_directory")} : {result_path:translationCandidate?.result_path || "", revision_path:translationCandidate?.revision_path || "", translation_path:appliedTranslation || "", export_output_directory:translationCandidate?.output_root ? `${translationCandidate.output_root}/translation-exports` : ""};
+  try {
+    const payload = await queuePost("/api/v1/exports/list", request);
+    for (const artifact of payload.exports) {
+      const item = document.createElement("li"), link = document.createElement("a");
+      link.href = artifact.url; link.download = artifact.filename; link.textContent = artifact.filename; link.setAttribute("data-gui-content", "");
+      const detail = document.createElement("small"); detail.textContent = ` · ${(artifact.size_bytes/1024).toFixed(1)} KiB · SHA-256 ${artifact.sha256}`; detail.setAttribute("data-gui-content", "");
+      item.append(link, detail); list.append(item);
+    }
+    status.textContent = payload.unavailable.length ? "Some published exports are missing or changed and cannot be downloaded." : payload.exports.length ? "Verified existing exports are ready to download." : "No verified exports found for this applied version. Export it first. Legacy exports with a custom palette may require their original settings.";
+  } catch (error) { status.textContent = error.message; }
+}

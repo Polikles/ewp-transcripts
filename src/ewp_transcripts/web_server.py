@@ -20,7 +20,7 @@ from importlib.resources import files
 from io import BufferedIOBase
 from pathlib import Path
 from typing import Any, ClassVar, cast
-from urllib.parse import unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit
 from uuid import uuid4
 
 from ewp_transcripts import __version__
@@ -34,6 +34,7 @@ from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
+from ewp_transcripts.web_downloads import GuiExportDownloads
 from ewp_transcripts.web_guides import render_guide
 from ewp_transcripts.web_jobs import (
     GuiTranscriptionJob,
@@ -51,6 +52,7 @@ from ewp_transcripts.web_source_cleanup import (
 )
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
+from ewp_transcripts.web_workdirs import GuiWorkdirController
 from ewp_transcripts.web_workflows import (
     GuiWorkflowController,
     default_gui_prohibited_roots,
@@ -445,6 +447,12 @@ class LocalGuiServer(ThreadingHTTPServer):
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
         )
+        self.gui_downloads = GuiExportDownloads(
+            config=application_config,
+            resolve_path=self.gui_workflows.resolve_allowed_path,
+            registry=default_workspace_directory().parent / "export-downloads.json",
+        )
+        self.gui_workdirs = GuiWorkdirController(application_config.runtime.work_root)
         self.gui_csrf_token = secrets.token_urlsafe(32)
         self.gui_dependencies_tested = False
         self.gui_openrouter_api_key = ""
@@ -495,6 +503,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     _security_headers: ClassVar[dict[str, str]] = SECURITY_HEADERS
 
     def do_GET(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path.startswith("/api/v1/export-downloads/"):
+            self._download_export()
+            return
         if urlsplit(self.path).path.startswith("/api/v1/review-audio/"):
             self._stream_review_audio()
             return
@@ -582,10 +593,58 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(response.body)
 
     def do_HEAD(self) -> None:  # noqa: N802
-        if urlsplit(self.path).path.startswith("/api/v1/review-audio/"):
+        if urlsplit(self.path).path.startswith("/api/v1/export-downloads/"):
+            self._download_export(head=True)
+        elif urlsplit(self.path).path.startswith("/api/v1/review-audio/"):
             self._stream_review_audio(head=True)
         else:
             self.send_error(HTTPStatus.NOT_FOUND)
+
+    def _download_export(self, *, head: bool = False) -> None:
+        origins = {
+            f"http://127.0.0.1:{self.server.server_port}",
+            f"http://localhost:{self.server.server_port}",
+        }
+        if (
+            self.headers.get("Host", "")
+            not in {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+            or self.headers.get("Sec-Fetch-Site") == "cross-site"
+            or (
+                self.headers.get("Origin") is not None and self.headers.get("Origin") not in origins
+            )
+        ):
+            self.send_error(HTTPStatus.FORBIDDEN)
+            return
+        token = urlsplit(self.path).path.removeprefix("/api/v1/export-downloads/")
+        try:
+            filename, data = self.server.gui_downloads.open(token)
+        except (OSError, ValueError, ApplicationError):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.NOT_FOUND,
+                    {
+                        "error": {
+                            "code": "GUI_EXPORT_DOWNLOAD_INVALID",
+                            "message": (
+                                "Download is unavailable or changed. Refresh existing exports."
+                            ),
+                        }
+                    },
+                )
+            )
+            return
+        self.send_response(HTTPStatus.OK)
+        self._headers(content_type="application/octet-stream", content_length=len(data))
+        self.send_header(
+            "Content-Disposition",
+            "attachment; filename=export; filename*=UTF-8''" + quote(filename, safe=""),
+        )
+        self.end_headers()
+        if not head:
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError, ConnectionResetError):
+                return
 
     def _stream_review_audio(self, *, head: bool = False) -> None:
         if (
@@ -783,6 +842,111 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
             )
             return
+        if path == "/api/v1/exports/list":
+            if not secrets.compare_digest(
+                self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": "The export request lacks the active session token.",
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                export_list = self.server.gui_downloads.list(
+                    result=str(document.get("result_path", "")),
+                    revision=str(document.get("revision_path", "")),
+                    translation=str(document.get("translation_path", "")),
+                    directory=str(document.get("export_output_directory", "")),
+                )
+                self._write_response(_json_response(HTTPStatus.OK, export_list))
+            except (OSError, ValueError, ApplicationError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_EXPORT_DOWNLOAD_INVALID", "message": str(error)}},
+                    )
+                )
+            return
+        if path.startswith("/api/v1/workdirs/"):
+            if not secrets.compare_digest(
+                self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {
+                            "error": {
+                                "code": "GUI_CSRF_REJECTED",
+                                "message": (
+                                    "The maintenance request lacks the active session token."
+                                ),
+                            }
+                        },
+                    )
+                )
+                return
+            try:
+                references: list[Path] = []
+
+                def collect(value: Any) -> None:
+                    if isinstance(value, str) and value.startswith(("/", "~")):
+                        references.append(Path(value))
+                    elif isinstance(value, dict):
+                        for key, item in value.items():
+                            collect(key)
+                            collect(item)
+                    elif isinstance(value, (tuple, list)):
+                        for item in value:
+                            collect(item)
+
+                current_fields = document.get("fields", {})
+                if not isinstance(current_fields, dict):
+                    raise ValueError("Current workspace fields are invalid")
+                collect(current_fields)
+                for job in self.server.gui_transcriptions.jobs():
+                    collect(job.model_dump(mode="json"))
+                for _storage, _label, controller in self.server.workspace_catalogs(
+                    str(document.get("storage_directory", ""))
+                ):
+                    for maintenance_workspace in controller.documents():
+                        collect(maintenance_workspace.model_dump(mode="json"))
+                protected = tuple(references)
+                if path.endswith("/inventory"):
+                    age = document.get("older_than_days", 0)
+                    if type(age) is not int or not 0 <= age <= 36500:
+                        raise ValueError("Minimum age must be a whole number between 0 and 36500")
+                    maintenance_payload = self.server.gui_workdirs.inventory(
+                        protected,
+                        older_than_days=age,
+                        reason=str(document.get("reason", "")),
+                    )
+                elif path.endswith("/preview"):
+                    ids = document.get("ids")
+                    if not isinstance(ids, list) or any(not isinstance(item, str) for item in ids):
+                        raise ValueError("Select temporary work directories to preview")
+                    maintenance_payload = self.server.gui_workdirs.preview(ids, protected)
+                elif path.endswith("/cleanup") and document.get("confirmed") is True:
+                    maintenance_payload = self.server.gui_workdirs.cleanup(
+                        str(document.get("preview_token", "")), protected
+                    )
+                else:
+                    raise ValueError("Preview and confirm temporary work directory cleanup")
+                self._write_response(_json_response(HTTPStatus.OK, maintenance_payload))
+            except (OSError, ValueError, ApplicationError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_WORKDIR_INVALID", "message": str(error)}},
+                    )
+                )
+            return
         if path.startswith("/api/v1/profile/"):
             self._handle_profile_request(path, document)
             return
@@ -971,7 +1135,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     durable_terminal = tuple(
                         job
                         for job in queue_jobs
-                        if job.status in {"completed", "failed"}
+                        if job.status in {"completed", "failed", "cancelled"}
                         and job.source_sha256
                         and not workspaces.is_temporary_selection(job.input_path)
                         and not workspaces.is_temporary_selection(job.result_path or "")
@@ -1016,7 +1180,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     payload = {
                         "workspace": saved.model_dump(mode="json"),
                         "temporary_jobs_omitted": sum(
-                            job.status in {"staged", "completed", "failed"} for job in queue_jobs
+                            job.status in {"staged", "completed", "failed", "cancelled"}
+                            for job in queue_jobs
                         )
                         - len(durable_staged)
                         - len(durable_terminal),
@@ -1205,6 +1370,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         formats,
                         speaker_colors=document.get("speaker_colors"),
                     )
+                    self.server.gui_downloads.register(
+                        result=result,
+                        revision=str(document.get("revision_path", "")),
+                        paths=cast(list[str], payload["written"]),
+                    )
                     self.server.gui_transcriptions.clear_workflow_error(result, "original_export")
                 else:
                     self._write_response(
@@ -1276,7 +1446,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             try:
                 if document.get("provider") == "lm-studio" and any(
-                    job.status in {"queued", "running"}
+                    job.status in {"queued", "running", "cancel_requested"}
                     for job in self.server.gui_transcriptions.jobs()
                 ):
                     raise GuiCorrectionError(
@@ -1372,7 +1542,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     path == "/api/v1/translations/generate"
                     and document.get("provider") == "lm-studio"
                     and any(
-                        job.status in {"queued", "running"}
+                        job.status in {"queued", "running", "cancel_requested"}
                         for job in self.server.gui_transcriptions.jobs()
                     )
                 ):
@@ -1520,6 +1690,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         audit_output=str(document.get("audit_output_directory", "")),
                         export_output=str(document.get("export_output_directory", "")),
                         formats=formats,
+                    )
+                    self.server.gui_downloads.register(
+                        result=common["result"],
+                        revision=common["revision"],
+                        translation=str(document.get("translation_path", "")),
+                        paths=[
+                            *cast(list[str], payload["written"]),
+                            *cast(list[str], payload["skipped"]),
+                        ],
                     )
                     self.server.gui_transcriptions.clear_workflow_error(
                         common["result"], "translated_export"
@@ -1740,6 +1919,25 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         },
                     )
                 )
+                return
+            if path in {"/api/v1/transcriptions/cancel", "/api/v1/transcriptions/retry"}:
+                try:
+                    method = (
+                        self.server.gui_transcriptions.cancel
+                        if path.endswith("/cancel")
+                        else self.server.gui_transcriptions.retry
+                    )
+                    job = method(str(document.get("job_id", "")))
+                    self._write_response(
+                        _json_response(HTTPStatus.OK, {"job": job.model_dump(mode="json")})
+                    )
+                except ValueError as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.CONFLICT,
+                            {"error": {"code": "GUI_QUEUE_ACTION_REJECTED", "message": str(error)}},
+                        )
+                    )
                 return
             if path == "/api/v1/transcriptions/start":
                 count = self.server.gui_transcriptions.start()
@@ -2346,7 +2544,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         active = [
             job
             for job in self.server.gui_transcriptions.jobs()
-            if job.status in {"staged", "queued", "running"}
+            if job.status in {"staged", "queued", "running", "cancel_requested"}
         ]
         expected = {
             (
@@ -2433,10 +2631,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             for item in terminal_jobs
         )
         for job in jobs:
-            self.server.gui_workflows.resolve_allowed_path(job.input_path)
+            if job.status != "completed":
+                self.server.gui_workflows.resolve_allowed_path(job.input_path)
             self.server.gui_workflows.resolve_allowed_path(job.output_directory, directory=True)
             self.server.gui_workflows.resolve_allowed_path(
-                job.planned_result_path, directory=job.status == "failed"
+                job.planned_result_path, directory=job.status in {"failed", "cancelled"}
             )
             if job.status == "completed":
                 if not job.result_path:

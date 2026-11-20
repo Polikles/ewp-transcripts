@@ -6,7 +6,7 @@ from uuid import UUID
 from typer.testing import CliRunner
 
 from ewp_transcripts.cli import app
-from ewp_transcripts.workdirs import allocate_work_directory
+from ewp_transcripts.workdirs import allocate_work_directory, retain_work_directory
 
 RUN_ID = UUID("123e4567-e89b-12d3-a456-426614174000")
 
@@ -33,6 +33,7 @@ def test_clean_dry_run_then_confirmed_removal_preserves_unknown_sibling(tmp_path
     root = tmp_path / "work"
     workspace = allocate_work_directory(root, run_id=RUN_ID, job_id="episode")
     (workspace.path / "private-audio.wav").write_bytes(b"audio")
+    retain_work_directory(workspace, "failed")
     sibling = root / "models-must-remain"
     sibling.mkdir()
     (sibling / "model.bin").write_bytes(b"model")

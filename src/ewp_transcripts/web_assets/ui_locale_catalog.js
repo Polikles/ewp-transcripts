@@ -582,6 +582,9 @@ function guiPolishDynamicText(text) {
   const diagnostic = /^(PASS|WARNING|FAIL) · ([^:]+): ([\s\S]+)$/.exec(text);
   if (diagnostic) return `${({PASS:"POPRAWNE", WARNING:"OSTRZEŻENIE", FAIL:"BŁĄD"})[diagnostic[1]]} · ${diagnostic[2]}: ${guiUiText(diagnostic[3])}`;
   const rules = [
+    [/^(\d+) temporary directories selected; ([\d.]+) MiB\. Confirm deletion within five minutes\.$/, 'Wybrano katalogi tymczasowe: $1; $2 MiB. Potwierdź usunięcie w ciągu pięciu minut.'],
+    [/^Temporary directories removed: (\d+)\.$/, 'Usunięte katalogi tymczasowe: $1.'],
+    [/^Cleanup stopped\. Removed: (\d+)\. Refresh the inventory before retrying\.$/, 'Zatrzymano usuwanie. Usunięto: $1. Odśwież listę przed kolejną próbą.'],
     [/^Started (\d+) queued job\(s\)$/, 'Uruchomiono zadania: $1'],
     [/^API OK · (.+)$/, 'API działa · $1'],
     [/^(\d+) compatible dictionary option\(s\) loaded\.$/, 'Wczytano pasujące słowniki: $1.'],
@@ -1482,3 +1485,245 @@ for (const [en, pl] of [
   ["* Recording language: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "* Język nagrania: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."],
   ["** Number of speakers: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "** Liczba mówców: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."]
 ]) guiPolish.set(en, pl);
+
+// Package A maintenance and artifact download copy.
+for (const [en, pl] of [
+  [
+    "Cancel task",
+    "Anuluj zadanie"
+  ],
+  [
+    "Retry from beginning",
+    "Ponów od początku"
+  ],
+  [
+    "Cancellation requested…",
+    "Oczekiwanie na anulowanie…"
+  ],
+  [
+    "CANCEL_REQUESTED",
+    "OCZEKIWANIE NA ANULOWANIE"
+  ],
+  [
+    "CANCELLED",
+    "ANULOWANO"
+  ],
+  [
+    "Cancelled",
+    "Anulowane"
+  ],
+  [
+    "Failed",
+    "Błąd"
+  ],
+  [
+    "Active",
+    "W toku"
+  ],
+  [
+    "Interrupted",
+    "Przerwane"
+  ],
+  [
+    "Stage a fresh attempt with the same settings. Source hashes are checked again.",
+    "Przygotuj nową próbę z tymi samymi ustawieniami. Pliki wejściowe zostaną ponownie sprawdzone."
+  ],
+  [
+    "Cancellation waits for the current processing stage to return. Final publication cannot be cancelled.",
+    "Anulowanie nastąpi po zakończeniu bieżącego etapu przetwarzania. Publikacji końcowej nie można anulować."
+  ],
+  [
+    "Temporary work directories",
+    "Katalogi plików tymczasowych"
+  ],
+  [
+    "Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.",
+    "Sprawdzany jest tylko skonfigurowany katalog tymczasowy. Aktywne zadania, używane ścieżki, starsze katalogi i nieznane pliki są chronione. Sprawdzane są odwołania w bieżącej kolejce oraz domyślnym i wybranym katalogu obszarów roboczych; pozostałe katalogi sprawdź osobno."
+  ],
+  [
+    "Retention reason",
+    "Powód zachowania"
+  ],
+  [
+    "All",
+    "Wszystkie"
+  ],
+  [
+    "Successful, retained",
+    "Ukończone, zachowane"
+  ],
+  [
+    "Minimum age (days)",
+    "Minimalny wiek (dni)"
+  ],
+  [
+    "Refresh temporary inventory",
+    "Odśwież listę katalogów tymczasowych"
+  ],
+  [
+    "Preview cleanup",
+    "Podgląd usuwania"
+  ],
+  [
+    "Confirm deletion",
+    "Potwierdź usunięcie"
+  ],
+  [
+    "Legacy: creation time unknown",
+    "Starszy katalog: nieznany czas utworzenia"
+  ],
+  [
+    "Active — protected",
+    "Aktywne — chronione"
+  ],
+  [
+    "Referenced — protected",
+    "W użyciu — chronione"
+  ],
+  [
+    "Legacy owner unknown — protected",
+    "Nieznany właściciel starszego katalogu — chronione"
+  ],
+  [
+    "Unknown artifact — protected",
+    "Nieznany plik — chronione"
+  ],
+  [
+    "Unsafe entry — protected",
+    "Niebezpieczna ścieżka — chronione"
+  ],
+  [
+    "Select unprotected temporary directories, then preview cleanup.",
+    "Wybierz niechronione katalogi tymczasowe, a następnie sprawdź podgląd usuwania."
+  ],
+  [
+    "No temporary work directories match these filters.",
+    "Brak katalogów tymczasowych pasujących do filtrów."
+  ],
+  [
+    "Existing export downloads",
+    "Pobieranie zapisanych eksportów"
+  ],
+  [
+    "Refresh existing exports",
+    "Odśwież zapisane eksporty"
+  ],
+  [
+    "Download the exact published file. Refreshing checks existing artifacts and does not run transcription or create exports.",
+    "Pobierz dokładnie zapisany plik. Odświeżanie sprawdza istniejące pliki bez uruchamiania transkrypcji i tworzenia eksportów."
+  ],
+  [
+    "Verified existing exports are ready to download.",
+    "Sprawdzone eksporty są gotowe do pobrania."
+  ],
+  [
+    "Some published exports are missing or changed and cannot be downloaded.",
+    "Niektórych eksportów brakuje lub zmieniono je; nie można ich pobrać."
+  ],
+  [
+    "No verified exports found for this applied version. Export it first. Legacy exports with a custom palette may require their original settings.",
+    "Brak sprawdzonych eksportów tej zapisanej wersji. Najpierw wykonaj eksport. Starsze eksporty z własną paletą mogą wymagać pierwotnych ustawień."
+  ],
+  [
+    "Queue job does not exist",
+    "Zadanie nie istnieje w kolejce"
+  ],
+  [
+    "Final publication has started; this job can no longer be cancelled",
+    "Rozpoczęła się publikacja końcowa; tego zadania nie można już anulować"
+  ],
+  [
+    "Only waiting or running jobs can be cancelled",
+    "Można anulować tylko zadania oczekujące lub przetwarzane"
+  ],
+  [
+    "Only failed or cancelled jobs can be retried",
+    "Można ponowić tylko zadania zakończone błędem lub anulowane"
+  ],
+  [
+    "This recording already has an active attempt",
+    "To nagranie ma już aktywną próbę przetwarzania"
+  ],
+  [
+    "Select temporary work directories to preview",
+    "Wybierz katalogi tymczasowe do podglądu usuwania"
+  ],
+  [
+    "Selected work directory is unavailable or protected",
+    "Wybrany katalog jest niedostępny lub chroniony"
+  ],
+  [
+    "Selected work directory became protected",
+    "Wybrany katalog został objęty ochroną"
+  ],
+  [
+    "Cleanup preview expired; preview the selection again",
+    "Podgląd usuwania wygasł; sprawdź wybrane katalogi ponownie"
+  ],
+  [
+    "A work directory changed after preview; refresh and preview again",
+    "Katalog zmienił się od podglądu; odśwież listę i sprawdź podgląd ponownie"
+  ],
+  [
+    "A work directory changed or became protected after preview",
+    "Katalog zmienił się lub został objęty ochroną po podglądzie"
+  ],
+  [
+    "Preview and confirm temporary work directory cleanup",
+    "Sprawdź podgląd i potwierdź usuwanie katalogów tymczasowych"
+  ],
+  [
+    "older_than_days must not be negative",
+    "Minimalny wiek katalogów nie może być ujemny"
+  ],
+  [
+    "Choose an applied manual revision before downloading exports",
+    "Wybierz zapisaną ręcznie zweryfikowaną wersję przed pobraniem eksportów"
+  ],
+  [
+    "Only manually verified revision exports can be downloaded",
+    "Można pobierać tylko eksporty ręcznie zweryfikowanych wersji"
+  ],
+  [
+    "Choose a verified manual translation of this canonical result",
+    "Wybierz ręcznie zweryfikowane tłumaczenie tego wyniku"
+  ],
+  [
+    "Translation revision identity differs from the selected revision",
+    "Tłumaczenie odnosi się do innej wersji źródła niż wybrana"
+  ],
+  [
+    "Symbolic-link export paths are not allowed",
+    "Ścieżki eksportów z dowiązaniami symbolicznymi są niedozwolone"
+  ],
+  [
+    "Export download registry is invalid",
+    "Rejestr pobierania eksportów jest nieprawidłowy"
+  ],
+  [
+    "Published export identity changed; download registration rejected",
+    "Tożsamość zapisanego eksportu zmieniła się; odmówiono rejestracji pobierania"
+  ],
+  [
+    "Download is unavailable or changed. Refresh existing exports.",
+    "Plik jest niedostępny lub zmieniony. Odśwież zapisane eksporty."
+  ],
+  [
+    "Export download registry is full",
+    "Rejestr pobierania eksportów jest pełny"
+  ],
+  [
+    "Export file is not a bounded regular file",
+    "Plik eksportu jest zbyt duży lub nie jest zwykłym plikiem"
+  ],
+  [
+    "Export file is too large",
+    "Plik eksportu jest zbyt duży"
+  ]
+]) guiPolish.set(en, pl);
+
+guiPolish.set("Minimum age must be a whole number between 0 and 36500", "Minimalny wiek musi być liczbą całkowitą od 0 do 36500");
+
+guiPolish.set("Current workspace fields are invalid", "Bieżące pola obszaru roboczego są nieprawidłowe");
+
+guiPolish.set("CANCELLATION REQUESTED", "OCZEKIWANIE NA ANULOWANIE");

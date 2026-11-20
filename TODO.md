@@ -3,21 +3,23 @@
 Updated: 2026-11-20. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Current state: planning only — product implementation must not start yet
+## Current state: package A implemented; owner test/fix/retest gate
 
-Checkpoint: [package sequencing](docs/checkpoints/2026-11-20-package-sequencing.md).
-The owner accepted the consolidated plan with the changes below, but explicitly instructed:
-no product work yet. Recording these decisions does not authorize starting package A.
+Active checkpoint: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
+The owner explicitly instructed “ok, zaczynaj z A”. The earlier planning-only hold is revoked
+for A1–A4 and its verification/checklist. A is implemented and automatically verified; use the
+[owner checklist](Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md). Package B remains gated on
+owner acceptance of A.
 
 ## Package A — original tasks 1–4, in order
 
-- [ ] A1: Check latest restart recovery (queue, saved source/translation reviews, publication/export pointers). Preserve owner acceptance of already tested workflows. Full profile transfer may be checked during Windows work.
-- [ ] A2: Cancel waiting/running tasks safely with honest requested/cancelled status, no incomplete final publication, and restart-from-beginning retry semantics.
-- [ ] A3: Workdir immutable creation time and retained reason (failed/cancelled/successful-retained); preview/filter explicit cleanup without deleting referenced or final artifacts.
-- [ ] A4: Download verified existing exports through the GUI, preserving exact artifact/version identity and avoiding ASR reruns.
-- [ ] Run relevant regression/packaging checks, then deliver one concrete manual checklist for the implemented A package.
+- [x] A1: Check latest restart recovery (queue, saved source/translation reviews, publication/export pointers). Preserve owner acceptance of already tested workflows. Full profile transfer may be checked during Windows work.
+- [x] A2: Cancel waiting/running tasks safely with honest requested/cancelled status, no incomplete final publication, and restart-from-beginning retry semantics.
+- [x] A3: Workdir immutable creation time and retained reason (failed/cancelled/successful-retained); preview/filter explicit cleanup without deleting referenced or final artifacts.
+- [x] A4: Download verified existing exports through the GUI, preserving exact artifact/version identity and avoiding ASR reruns.
+- [x] Run relevant regression/packaging checks, then deliver one concrete manual checklist for the implemented A package.
 - [ ] Owner tests A; fix reported defects, update checkpoint/checklist and repeat until accepted.
-- [ ] Gate: package B starts only after A fixes pass and owner approves progression. No current product start authorization.
+- [ ] Gate: package B starts only after A fixes pass and owner approves progression. Package A is authorized; package B is not started.
 
 ## Package B — original tasks 5–9, with cloud ASR inserted as 8a
 

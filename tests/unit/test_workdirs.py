@@ -24,11 +24,12 @@ def test_allocate_creates_isolated_marked_workspace(tmp_path: Path) -> None:
 
     assert workspace.path == tmp_path / "work" / str(RUN_ID) / "episode"
     marker = json.loads(workspace.marker_path.read_text(encoding="utf-8"))
-    assert marker == {
-        "marker_version": "1.0",
-        "run_id": str(RUN_ID),
-        "job_id": "episode",
-    }
+    assert marker["marker_version"] == "2.0"
+    assert marker["retention_reason"] == "active"
+    assert marker["owner_pid"] == os.getpid()
+    assert datetime.fromisoformat(marker["created_at"]).tzinfo is not None
+    assert marker["run_id"] == str(RUN_ID)
+    assert marker["job_id"] == "episode"
 
 
 def test_existing_workspace_is_never_reused(tmp_path: Path) -> None:
@@ -105,6 +106,12 @@ def test_find_work_directories_filters_by_marker_age_and_ignores_unknown_paths(
     now = datetime(2026, 8, 4, tzinfo=UTC)
     old_time = (now - timedelta(days=10)).timestamp()
     recent_time = (now - timedelta(days=1)).timestamp()
+    old.marker_path.write_text(
+        json.dumps({"marker_version": "1.0", "run_id": str(RUN_ID), "job_id": "old"})
+    )
+    recent.marker_path.write_text(
+        json.dumps({"marker_version": "1.0", "run_id": str(recent_run), "job_id": "recent"})
+    )
     os.utime(old.marker_path, (old_time, old_time))
     os.utime(recent.marker_path, (recent_time, recent_time))
 

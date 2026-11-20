@@ -92,3 +92,14 @@
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; } }
 
 .review-time { font-family: 'Noto Sans Mono', monospace; font-size: .8rem; }
+
+#temporary-workdirs .actions { align-items: end; }
+#temporary-workdirs input[type=number] { max-width: 8rem; }
+#workdir-list > label { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-block: .5rem; }
+#workdir-list > label input { width: auto; }
+#workdir-list small, .export-download-list small { color: var(--muted); }
+.export-download-list { padding-inline-start: 1.4rem; overflow-wrap: anywhere; }
+.export-download-list li { margin-block: .6rem; }
+#source-export-downloads, #translation-export-downloads { width: 100%; }
+
+.status-cancel_requested .gui-job-status { white-space: normal; }

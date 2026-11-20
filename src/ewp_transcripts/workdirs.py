@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
+import stat
+from collections.abc import Iterable
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any, Literal, cast
 from uuid import UUID
 
 from ewp_transcripts.domain import WorkDirectory
@@ -56,8 +60,12 @@ def find_work_directories(
                 marker_path=marker_path,
             )
             try:
-                _validate_work_directory(workspace)
-                marker_time = datetime.fromtimestamp(marker_path.stat().st_mtime, UTC)
+                marker = work_directory_metadata(workspace)
+                marker_time = (
+                    datetime.fromisoformat(marker["created_at"])
+                    if marker["marker_version"] == "2.0"
+                    else datetime.fromtimestamp(marker_path.stat().st_mtime, UTC)
+                )
             except (OSError, UnsafeWorkDirectoryError):
                 continue
             if marker_time <= cutoff:
@@ -95,9 +103,12 @@ def allocate_work_directory(
         run_directory.mkdir(exist_ok=True, mode=0o700)
         path.mkdir(mode=0o700)
         marker = {
-            "marker_version": "1.0",
+            "marker_version": "2.0",
             "run_id": run_component,
             "job_id": safe_job_id,
+            "created_at": datetime.now(UTC).isoformat(),
+            "owner_pid": os.getpid(),
+            "retention_reason": "active",
         }
         descriptor = os.open(
             marker_path,
@@ -138,7 +149,7 @@ def cleanup_work_directory(workspace: WorkDirectory) -> None:
         workspace.path.parent.rmdir()
 
 
-def _validate_work_directory(workspace: WorkDirectory) -> None:
+def work_directory_metadata(workspace: WorkDirectory) -> dict[str, Any]:
     """Verify path structure and marker ownership without changing the workspace."""
 
     expected_path = workspace.work_root / str(workspace.run_id) / workspace.job_id
@@ -146,6 +157,7 @@ def _validate_work_directory(workspace: WorkDirectory) -> None:
         raise UnsafeWorkDirectoryError("Work directory paths do not match ownership metadata")
     if (
         workspace.work_root.is_symlink()
+        or workspace.path.parent.is_symlink()
         or workspace.path.is_symlink()
         or workspace.marker_path.is_symlink()
     ):
@@ -159,5 +171,110 @@ def _validate_work_directory(workspace: WorkDirectory) -> None:
         "run_id": str(workspace.run_id),
         "job_id": workspace.job_id,
     }
-    if marker != expected_marker:
+    if marker == expected_marker:
+        return cast(dict[str, Any], marker)
+    if not isinstance(marker, dict) or set(marker) != {
+        "marker_version",
+        "run_id",
+        "job_id",
+        "created_at",
+        "owner_pid",
+        "retention_reason",
+    }:
         raise UnsafeWorkDirectoryError("Work directory marker does not match ownership")
+    try:
+        valid = (
+            marker["marker_version"] == "2.0"
+            and marker["run_id"] == str(workspace.run_id)
+            and marker["job_id"] == workspace.job_id
+            and type(marker["owner_pid"]) is int
+            and marker["owner_pid"] > 0
+            and datetime.fromisoformat(marker["created_at"]).utcoffset() is not None
+            and marker["retention_reason"]
+            in {"active", "failed", "cancelled", "successful-retained"}
+        )
+    except (ValueError, TypeError):
+        valid = False
+    if not valid:
+        raise UnsafeWorkDirectoryError("Work directory marker does not match ownership")
+    return marker
+
+
+def _validate_work_directory(workspace: WorkDirectory) -> None:
+    work_directory_metadata(workspace)
+
+
+def retain_work_directory(
+    workspace: WorkDirectory, reason: Literal["failed", "cancelled", "successful-retained"]
+) -> None:
+    """Record the terminal reason without changing the immutable allocation identity/time."""
+    marker = work_directory_metadata(workspace)
+    if (
+        marker["marker_version"] != "2.0"
+        or marker["retention_reason"] != "active"
+        or marker["owner_pid"] != os.getpid()
+    ):
+        raise UnsafeWorkDirectoryError("Only the active owner can finish a work directory")
+    marker["retention_reason"] = reason
+    temporary = workspace.marker_path.with_suffix(".pending")
+    try:
+        with temporary.open("x", encoding="utf-8") as handle:
+            os.chmod(temporary, 0o600)
+            handle.write(json.dumps(marker) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.replace(workspace.marker_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def cleanup_identity(
+    workspace: WorkDirectory, references: Iterable[Path] = ()
+) -> tuple[str, int, str]:
+    """Return a fingerprint/size and conservative deletion blocker."""
+    marker = work_directory_metadata(workspace)
+    reason = marker.get("retention_reason", "legacy-unknown")
+    blocker = ""
+    if reason == "legacy-unknown":
+        blocker = "legacy-unknown"
+    elif reason == "active":
+        try:
+            os.kill(marker["owner_pid"], 0)
+            blocker = "active"
+        except ProcessLookupError:
+            pass  # A crashed owner's workdir is explicitly previewed as interrupted.
+        except (PermissionError, OSError):
+            blocker = "active"
+    base = workspace.path.resolve()
+    for reference in references:
+        resolved = reference.expanduser().resolve()
+        if resolved == base or base in resolved.parents or resolved in base.parents:
+            blocker = "referenced"
+    items: list[Any] = [marker]
+    size = 0
+    for directory, dirs, files in os.walk(workspace.path, followlinks=False):
+        for name in sorted([*dirs, *files]):
+            path = Path(directory) / name
+            metadata = path.lstat()
+            relative = path.relative_to(workspace.path).as_posix()
+            items.append(
+                [
+                    relative,
+                    metadata.st_ino,
+                    metadata.st_mode,
+                    metadata.st_size,
+                    metadata.st_mtime_ns,
+                ]
+            )
+            if stat.S_ISLNK(metadata.st_mode) or not (
+                stat.S_ISREG(metadata.st_mode) or stat.S_ISDIR(metadata.st_mode)
+            ):
+                blocker = "unsafe-entry"
+            elif stat.S_ISREG(metadata.st_mode):
+                size += metadata.st_size
+                # The current pipeline owns only working WAVs and its marker. Protect all other
+                # artifacts, models and unknown files even if someone moved them into a workdir.
+                if name != MARKER_FILENAME and path.suffix.lower() != ".wav":
+                    blocker = "unknown-artifact"
+    digest = hashlib.sha256(json.dumps(items, sort_keys=True).encode()).hexdigest()
+    return digest, size, blocker

@@ -397,16 +397,16 @@ class GuiWorkspaceController:
                 job = GuiTranscriptionJob.model_validate(item)
             except ValueError:
                 raise ValueError("Workspace completed job is invalid") from None
-            if job.status not in {"completed", "failed"} or job.job_id in seen_job_ids:
+            if job.status not in {"completed", "failed", "cancelled"} or job.job_id in seen_job_ids:
                 raise ValueError("Workspace completed job is invalid")
             if not job.source_sha256 or len(job.source_sha256) != 64:
                 raise ValueError("Workspace completed job is invalid")
             try:
-                if job.status == "failed":
+                if job.status in {"failed", "cancelled"}:
                     self._resolve_path(job.input_path)
                 output = self._resolve_path(job.output_directory, directory=True)
                 planned = self._resolve_path(
-                    job.planned_result_path, directory=job.status == "failed"
+                    job.planned_result_path, directory=job.status in {"failed", "cancelled"}
                 )
             except FileNotFoundError:
                 if omit_unavailable:

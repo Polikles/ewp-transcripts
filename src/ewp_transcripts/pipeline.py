@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from contextlib import suppress
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
 from ewp_transcripts import __version__
+from ewp_transcripts.cancellation import (
+    CancellationToken,
+    TranscriptionCancelled,
+    check_cancellation,
+)
 from ewp_transcripts.composition import merge_speaker_transcripts
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.diarization import reconcile_diarization
@@ -72,6 +78,7 @@ def run_diarization_pipeline(
     diarization_engine: DiarizationEngine,
     audio_preparer: AudioPreparer = prepare_working_audio,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -88,6 +95,7 @@ def run_diarization_pipeline(
         if source.channel_classification.processing_mode is ChannelMode.MIXED_STEREO
         else source.channel_classification.selected_channel_index
     )
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
     emit_progress(progress, "prepare_audio", "started")
     start = clock()
     audio_preparer(
@@ -97,6 +105,7 @@ def run_diarization_pipeline(
         channel_index=channel_index,
     )
     stages.append(_completed_stage("prepare_audio", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     asr_info = asr_engine.model_info
     emit_progress(progress, "transcribe", "started")
@@ -110,6 +119,7 @@ def run_diarization_pipeline(
     finally:
         asr_engine.close()
     stages.append(_completed_stage("transcribe", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     emit_progress(progress, "align", "started")
     start = clock()
@@ -119,6 +129,7 @@ def run_diarization_pipeline(
         alignment_engine.close()
     alignment_info = alignment_engine.model_info
     stages.append(_completed_stage("align", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     emit_progress(progress, "normalize", "started")
     start = clock()
@@ -128,6 +139,7 @@ def run_diarization_pipeline(
         source_id="source_001",
     )
     stages.append(_completed_stage("normalize", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     diarization_info = diarization_engine.model_info
     requested_speakers = config.diarization.speaker_count
@@ -141,6 +153,7 @@ def run_diarization_pipeline(
     finally:
         diarization_engine.close()
     stages.append(_completed_stage("diarize", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     emit_progress(progress, "reconcile_speakers", "started")
     start = clock()
@@ -151,6 +164,7 @@ def run_diarization_pipeline(
         use_exclusive_for_words=config.diarization.use_exclusive_for_word_assignment,
     )
     stages.append(_completed_stage("reconcile_speakers", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
     if not reconciled.speakers:
         raise TranscriptNormalizationError("Diarization returned no speakers")
 
@@ -214,6 +228,7 @@ def run_source_speaker_pipeline(
     alignment_engine_factory: AlignmentEngineFactory,
     audio_preparer: AudioPreparer = prepare_working_audio,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -229,6 +244,7 @@ def run_source_speaker_pipeline(
     processed: list[ProcessedSpeakerStream] = []
     stages: list[CanonicalStage] = []
     for stream_index, stream in enumerate(streams, start=1):
+        check_cancellation(cancellation)
         stream_result = process_speaker_stream(
             stream,
             workspace,
@@ -237,6 +253,7 @@ def run_source_speaker_pipeline(
             alignment_engine=alignment_engine_factory(),
             working_filename=f"stream_{stream_index:03d}-working.wav",
             progress=stream_progress(progress, stream_index, len(streams)),
+            cancellation=cancellation,
             audio_preparer=audio_preparer,
             clock=clock,
         )
@@ -424,6 +441,7 @@ def run_single_speaker_pipeline(
     alignment_engine: AlignmentEngine,
     audio_preparer: AudioPreparer = prepare_working_audio,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
     clock: Clock = time.perf_counter,
     now: Now = lambda: datetime.now(UTC),
 ) -> CanonicalResult:
@@ -448,6 +466,7 @@ def run_single_speaker_pipeline(
         alignment_engine=alignment_engine,
         working_filename="source_001-working.wav",
         progress=progress,
+        cancellation=cancellation,
         audio_preparer=audio_preparer,
         clock=clock,
     )
@@ -518,12 +537,14 @@ def process_speaker_stream(
     working_filename: str,
     audio_preparer: AudioPreparer = prepare_working_audio,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
     clock: Clock = time.perf_counter,
 ) -> ProcessedSpeakerStream:
     """Prepare, transcribe, align, and normalize one independent speaker stream."""
 
     stages: list[CanonicalStage] = []
     working_audio = workspace.path / working_filename
+    _check_cancel(cancellation, asr_engine, alignment_engine)
     emit_progress(progress, "prepare_audio", "started")
     start = clock()
     audio_preparer(
@@ -533,6 +554,7 @@ def process_speaker_stream(
         channel_index=stream.channel_index,
     )
     stages.append(_completed_stage("prepare_audio", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine)
 
     asr_info = asr_engine.model_info
     emit_progress(progress, "transcribe", "started")
@@ -546,6 +568,7 @@ def process_speaker_stream(
     finally:
         asr_engine.close()
     stages.append(_completed_stage("transcribe", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine)
 
     emit_progress(progress, "align", "started")
     start = clock()
@@ -559,6 +582,7 @@ def process_speaker_stream(
         alignment_engine.close()
     alignment_info = alignment_engine.model_info
     stages.append(_completed_stage("align", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine)
 
     emit_progress(progress, "normalize", "started")
     start = clock()
@@ -568,6 +592,7 @@ def process_speaker_stream(
         source_id=stream.source_id,
     )
     stages.append(_completed_stage("normalize", start, clock, progress))
+    _check_cancel(cancellation, asr_engine, alignment_engine)
     return ProcessedSpeakerStream(
         normalized=normalized,
         asr_model=asr_info,
@@ -821,3 +846,16 @@ def _effective_channel_mode(
     if mode is ChannelMode.MIXED_STEREO:
         return "mixed_stereo"
     raise UnsupportedPipelineScopeError("Effective channel mode must be concrete")
+
+
+def _check_cancel(
+    token: CancellationToken | None, *engines: AsrEngine | AlignmentEngine | DiarizationEngine
+) -> None:
+    try:
+        check_cancellation(token)
+    except TranscriptionCancelled:
+        # Some engines may not yet have run. Release them before leaving this pipeline.
+        for engine in engines:
+            with suppress(Exception):
+                engine.close()
+        raise

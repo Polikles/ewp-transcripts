@@ -46,3 +46,15 @@ restore their files (and original paths, or update a saved workspace copy) befor
 are placed in content-addressed private directories, so an existing edition is not overwritten.
 Independent dictionary import/export is also available in Dictionaries. Profile import merges saved
 records; it does not delete existing workspaces, palettes or dictionary files.
+
+## Temporary work directories
+
+Open Temporary work directories and Refresh temporary inventory. Choose a retention reason and
+minimum age in days, select unprotected rows, then Preview cleanup. Check the directory count/size
+and Confirm deletion within five minutes. A change or new reference requires a new preview.
+Creation time is the original allocation time, independent of the later retention reason.
+Active tasks, known queue/workspace references, unknown files, final artifacts and legacy workdirs
+without an owner timestamp are protected. A dead owner's workdir may show Interrupted.
+Only the configured temporary root is inspected. References cover the current queue and default/
+selected workspace catalogs; inspect other catalogs separately. This action is separate from
+managed source-copy cleanup and never targets final output or model directories.

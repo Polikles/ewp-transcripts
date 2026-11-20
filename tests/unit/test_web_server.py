@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import UTC, datetime
 from email.message import Message
 from http import HTTPStatus
 from io import BytesIO
@@ -12,6 +13,7 @@ import pytest
 from ewp_transcripts import __version__
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.storage import preserve_gui_selected_source
+from ewp_transcripts.web_jobs import GuiTranscriptionJob
 from ewp_transcripts.web_server import (
     SECURITY_HEADERS,
     GuiSelectionCache,
@@ -1225,3 +1227,113 @@ def test_user_profile_routes_require_active_session(route: str, token: str) -> N
     assert handler._write_response.call_args.args[0].status == (200 if token == "expected" else 403)
     if token == "wrong":
         assert not profiles.mock_calls
+
+
+def test_completed_workspace_history_recovers_without_original_media(tmp_path: Path) -> None:
+    result = tmp_path / "episode_results.json"
+    result.write_text("{}")
+    now = datetime.now(UTC)
+    job = GuiTranscriptionJob(
+        job_id="saved",
+        status="completed",
+        input_path=str(tmp_path / "moved.wav"),
+        output_directory=str(tmp_path),
+        planned_job_id="episode",
+        planned_result_path=str(result),
+        result_path=str(result),
+        language="pl",
+        speaker_count=1,
+        created_at=now,
+        updated_at=now,
+    )
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    queue = Mock()
+    queue.replace_terminal_jobs.return_value = 1
+    resolver = Mock()
+
+    def resolve(path, **kwargs):
+        if path == job.input_path:
+            raise FileNotFoundError(path)
+        return Path(path)
+
+    resolver.resolve_allowed_path.side_effect = resolve
+    handler.server = SimpleNamespace(gui_workflows=resolver, gui_transcriptions=queue)
+    assert handler._restore_workspace_terminal_jobs((job,)) == 1
+    queue.replace_terminal_jobs.assert_called_once_with((job,))
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"Host": "evil.invalid"},
+        {"Host": "127.0.0.1:8765", "Origin": "https://evil.invalid"},
+        {"Host": "127.0.0.1:8765", "Sec-Fetch-Site": "cross-site"},
+    ],
+)
+def test_export_attachment_rejects_foreign_requests(headers) -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.path = "/api/v1/export-downloads/opaque"
+    handler.headers = Message()
+    for key, value in headers.items():
+        handler.headers[key] = value
+    downloads = Mock()
+    handler.server = SimpleNamespace(server_port=8765, gui_downloads=downloads)
+    handler.send_error = Mock()
+    handler.do_GET()
+    handler.send_error.assert_called_once_with(HTTPStatus.FORBIDDEN)
+    downloads.open.assert_not_called()
+
+
+def test_export_attachment_is_exact_and_preserves_unicode_filename() -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.path = "/api/v1/export-downloads/opaque"
+    handler.headers = Message()
+    handler.headers["Host"] = "127.0.0.1:8765"
+    downloads = Mock()
+    downloads.open.return_value = ("Żółć_revision_002.srt", b"published bytes\r\n")
+    handler.server = SimpleNamespace(server_port=8765, gui_downloads=downloads)
+    handler.send_response = Mock()
+    handler._headers = Mock()
+    handler.send_header = Mock()
+    handler.end_headers = Mock()
+    handler.wfile = BytesIO()
+    handler.do_GET()
+    assert handler.wfile.getvalue() == b"published bytes\r\n"
+    handler._headers.assert_called_once_with(
+        content_type="application/octet-stream", content_length=17
+    )
+    disposition = handler.send_header.call_args.args[1]
+    assert disposition.startswith("attachment; filename=export; filename*=UTF-8''%C5%BB")
+    assert disposition.endswith("_revision_002.srt")
+
+
+@pytest.mark.parametrize("token, expected", [("expected", 200), ("", 403)])
+def test_existing_exports_list_requires_session_token(token: str, expected: int) -> None:
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    body = json.dumps(
+        {"result_path": "result", "revision_path": "revision", "export_output_directory": "exports"}
+    ).encode()
+    handler.path = "/api/v1/exports/list"
+    handler.headers = Message()
+    for key, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": token,
+    }.items():
+        handler.headers[key] = value
+    handler.rfile = BytesIO(body)
+    downloads = Mock()
+    downloads.list.return_value = {"exports": [], "unavailable": []}
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_csrf_token="expected", gui_downloads=downloads
+    )
+    handler._write_response = Mock()
+    handler.do_POST()
+    assert handler._write_response.call_args.args[0].status == expected
+    if expected == 403:
+        downloads.list.assert_not_called()
+    else:
+        downloads.list.assert_called_once_with(
+            result="result", revision="revision", translation="", directory="exports"
+        )

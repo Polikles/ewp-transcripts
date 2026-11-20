@@ -26,12 +26,17 @@ research metrics and optional presets do not block completion or release readine
 | 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
 | Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |
 
-### Accepted package sequence — implementation not started
+### Accepted package sequence — package A authorized
 
-The owner approved the consolidated plan and the following gates, but explicitly said not to
-start product work yet. This is planning authorization only; wait for the product-start instruction.
+The owner approved the consolidated plan and now explicitly instructed “ok, zaczynaj z A”.
+Package A is authorized, including its regression checks and concrete manual checklist. The
+earlier planning-only hold is revoked for A. Package B still waits for owner acceptance of A.
 Original task numbers are retained, with cloud ASR inserted as 8a to avoid shifting documentation
 approval task 10.
+
+A1–A4 are now implemented with automated regression, browser/restart/download and package checks.
+Owner acceptance remains pending: use the [package A checklist](../Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md)
+and [execution checkpoint](checkpoints/2026-11-20-package-a.md). Fix/retest A before starting B.
 
 | Package / task | Work and completion boundary |
 |---|---|
@@ -56,7 +61,7 @@ behavior after implementation; it is not treated as already written or passed. B
 while A acceptance fixes are outstanding. Full profile transfer, provisionally accepted as currently
 implemented, can be checked while preparing/testing native Windows rather than blocking A.
 
-No further scope decision blocks the eventual start of A. Before B, confirm the target Windows
+No further scope decision blocks package A. Before B, confirm the target Windows
 test environment and execution/access arrangement. Before B8a, select the initial cloud provider,
 exact model and allowed media/cost scope. Those decisions do not need to delay A. No cloud provider
 is chosen by implication, and no uploads, paid requests, downloads/models or product changes are

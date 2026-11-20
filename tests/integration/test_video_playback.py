@@ -227,3 +227,53 @@ def test_shared_timeline_mix_contains_both_alternating_speakers(tmp_path: Path) 
         config=ApplicationConfig(), resolve_path=paths.resolve_allowed_path
     ).prepare(str(result), str(tmp_path / "reviews"))
     assert review["anchors"][0]["block_sources"] == [["speaker-0.wav"], ["speaker-1.wav"]]
+
+
+@pytest.mark.parametrize("cancel_phase", ["transcribe", "normalize"])
+def test_cancel_before_publication_retains_work_and_retry_starts_from_beginning(
+    tmp_path: Path, cancel_phase: str
+) -> None:
+    from ewp_transcripts.cancellation import CancellationToken, TranscriptionCancelled
+
+    source = tmp_path / "cancel.mp4"
+    video(source)
+    output = tmp_path / "output"
+    config = ApplicationConfig(
+        diarization=DiarizationConfig(speaker_count=1),
+        runtime=RuntimeConfig(work_root=tmp_path / "work"),
+    )
+    token = CancellationToken()
+
+    def observe(event):
+        if event.phase == cancel_phase and event.state == "completed":
+            assert token.request()
+
+    with pytest.raises(TranscriptionCancelled):
+        transcribe_one(
+            source,
+            config=config,
+            output_directory=output,
+            cancellation=token,
+            progress=observe,
+            asr_factory=lambda _: Asr(),
+            alignment_factory=lambda _: Alignment(),
+        )
+    assert not (output / "cancel_results.json").exists()
+    states = [json.loads(p.read_text()) for p in output.glob("*.failed.json")]
+    assert any(state.get("status") == "cancelled" for state in states)
+    assert list((tmp_path / "work").rglob("*working.wav"))
+    assert all(
+        json.loads(marker.read_text())["retention_reason"] == "cancelled"
+        for marker in (tmp_path / "work").rglob(".ewp-transcripts-work.json")
+    )
+    events = []
+    outcome = transcribe_one(
+        source,
+        config=config,
+        output_directory=output,
+        progress=events.append,
+        asr_factory=lambda _: Asr(),
+        alignment_factory=lambda _: Alignment(),
+    )
+    assert outcome.result_path.exists()
+    assert any(e.phase == "transcribe" and e.state == "completed" for e in events)

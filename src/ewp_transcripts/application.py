@@ -14,6 +14,11 @@ from uuid import UUID, uuid4
 
 from ewp_transcripts import __version__
 from ewp_transcripts.automated_translation import build_automated_translation
+from ewp_transcripts.cancellation import (
+    CancellationToken,
+    TranscriptionCancelled,
+    check_cancellation,
+)
 from ewp_transcripts.config import ApplicationConfig, load_config
 from ewp_transcripts.correction import (
     CorrectionChunkConfig,
@@ -135,8 +140,10 @@ from ewp_transcripts.translation_storage import (
 )
 from ewp_transcripts.workdirs import (
     allocate_work_directory,
+    cleanup_identity,
     cleanup_work_directory,
     find_work_directories,
+    retain_work_directory,
 )
 
 __all__ = [
@@ -1523,6 +1530,7 @@ def clean_all_workdirs(
         config.runtime.work_root,
         older_than_days=older_than_days,
     )
+    workspaces = tuple(workspace for workspace in workspaces if not cleanup_identity(workspace)[2])
     if not dry_run:
         for workspace in workspaces:
             cleanup_work_directory(workspace)
@@ -1687,8 +1695,10 @@ def transcribe_one(
     explicit_group_paths: tuple[Path, ...] | None = None,
     explicit_group_id: str | None = None,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
+    check_cancellation(cancellation)
     started = time.perf_counter()
     emit_progress(progress, "inspect", "started")
     inspected = inspect_input(
@@ -1752,6 +1762,7 @@ def transcribe_one(
         alignment_factory=alignment_factory or _whisperx_alignment,
         diarization_factory=diarization_factory or _pyannote_diarization,
         progress=progress,
+        cancellation=cancellation,
     )
     return replace(outcome, elapsed_ms=max(0, round((time.perf_counter() - started) * 1000)))
 
@@ -1852,7 +1863,9 @@ def _transcribe_episode(
     alignment_factory: AlignmentFactory,
     diarization_factory: DiarizationFactory,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
 ) -> TranscriptionOutcome:
+    check_cancellation(cancellation)
     emit_progress(progress, "plan", "started")
     plan_started = time.perf_counter()
     reservation = reserve_job(
@@ -1872,6 +1885,8 @@ def _transcribe_episode(
     if reservation.plan.decision is PlanDecision.SKIP:
         existing = reservation.plan.existing_result
         assert existing is not None
+        if cancellation is not None:
+            cancellation.begin_publication()
         formats = _configured_export_formats(config)
         exports = (
             export_result(
@@ -1898,6 +1913,7 @@ def _transcribe_episode(
         alignment_factory=alignment_factory,
         diarization_factory=diarization_factory,
         progress=progress,
+        cancellation=cancellation,
     )
 
 
@@ -1910,13 +1926,16 @@ def _process_reservation(
     alignment_factory: AlignmentFactory,
     diarization_factory: DiarizationFactory,
     progress: ProgressObserver | None = None,
+    cancellation: CancellationToken | None = None,
 ) -> TranscriptionOutcome:
     state = reservation.state
     assert state is not None
     workspace = None
     published = False
     succeeded = False
+    cancelled = False
     try:
+        check_cancellation(cancellation)
         workspace = allocate_work_directory(
             config.runtime.work_root,
             run_id=state.run_id,
@@ -1936,6 +1955,7 @@ def _process_reservation(
                 config=config,
                 environment=environment,
                 progress=progress,
+                cancellation=cancellation,
                 asr_engine_factory=lambda: asr_factory(config),
                 alignment_engine_factory=lambda: alignment_factory(config),
             )
@@ -1947,6 +1967,7 @@ def _process_reservation(
                 config=config,
                 environment=environment,
                 progress=progress,
+                cancellation=cancellation,
                 asr_engine=asr_factory(config),
                 alignment_engine=alignment_factory(config),
             )
@@ -1958,10 +1979,13 @@ def _process_reservation(
                 config=config,
                 environment=environment,
                 progress=progress,
+                cancellation=cancellation,
                 asr_engine=asr_factory(config),
                 alignment_engine=alignment_factory(config),
                 diarization_engine=diarization_factory(config),
             )
+        if cancellation is not None:
+            cancellation.begin_publication()
         result = _record_peak_vram(result)
         emit_progress(progress, "publish", "started")
         publication_started = time.perf_counter()
@@ -2004,7 +2028,8 @@ def _process_reservation(
         )
         succeeded = True
         return outcome
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, TranscriptionCancelled):
+        cancelled = True
         if not published:
             transition_job_state(
                 reservation,
@@ -2030,8 +2055,14 @@ def _process_reservation(
         retain = (
             config.runtime.keep_temp_on_success if succeeded else config.runtime.keep_temp_on_error
         )
-        if workspace is not None and not retain:
-            cleanup_work_directory(workspace)
+        if workspace is not None:
+            if retain:
+                retain_work_directory(
+                    workspace,
+                    "successful-retained" if succeeded else "cancelled" if cancelled else "failed",
+                )
+            else:
+                cleanup_work_directory(workspace)
         emit_progress(
             progress,
             "cleanup",

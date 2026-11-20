@@ -65,3 +65,5 @@ unnecessary source paths from shared evidence.
 Send the tested full SHA plus failures and any NOT_RUN items. Keep production acceptance separate from
 this preview's headless VM checks. If diagnosis needs artifacts, provide only a small exact-lineage
 example set; the full corpus is unnecessary.
+
+For current package A acceptance use the focused [A1–A4 checklist](GUI_PACKAGE_A_TEST_CHECKLIST.md). Previously accepted cases above remain historical/regression evidence; package B is not started.

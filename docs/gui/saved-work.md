@@ -18,3 +18,14 @@ Remove from list only removes a selection entry. Forgetting an inactive queue it
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+## Restart and completed/cancelled history
+
+Save the current work state after saving/applying a review or changing the queue. Cancel unwanted
+waiting/running tasks and wait for terminal status before stopping if you do not want them to finish.
+On restart, load the same named workspace/catalog. Saved staged work is hash-checked and re-staged;
+completed, failed and cancelled history is restored as history, never as a running GPU operation.
+Completed review/export can recover without original audio when the canonical result still exists;
+playback still requires the original media. Credentials and human consent/verification remain unset.
+Refresh Existing export downloads in either review stage to download an existing applied version.
+Temporary-workdir cleanup is a separate Settings & About action with an explicit preview.

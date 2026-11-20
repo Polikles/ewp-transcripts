@@ -23,3 +23,11 @@ Return to the application and use the numbered sections and actions above. Savin
 Queue legends sit below the queue. Clear current translation review is a secondary action below Apply translation and affects the current browser view; saved files remain available. Hover over Apply and Audit/export for their verification and lineage requirements.
 
 After saving a verified translation, you can visit other stages and return to export without regenerating an API candidate. Export uses the active saved review identity and its own output root.
+
+## Download an existing translation export
+
+Existing export downloads lists the selected applied manual translation's published files, including
+its provenance JSON. Refresh checks their exact bytes and source/revision/translation identity; it
+does not regenerate a candidate, run ASR or write an export. Click the exact filename to download.
+After restarting, load saved work and refresh to obtain new session download links. A missing or
+changed artifact cannot be downloaded. The original publication/version stays unchanged.

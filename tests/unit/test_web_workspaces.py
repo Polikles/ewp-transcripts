@@ -302,7 +302,10 @@ def test_workspace_restores_imported_result_after_browser_selection_expires(tmp_
         workspaces.load(saved.workspace_id)
 
 
-def test_workspace_retains_terminal_queue_history_without_credentials(tmp_path: Path) -> None:
+@pytest.mark.parametrize("terminal_status", ["failed", "cancelled"])
+def test_workspace_retains_terminal_queue_history_without_credentials(
+    tmp_path: Path, terminal_status: str
+) -> None:
     workspaces, allowed = controller(tmp_path)
     media = allowed / "episode.wav"
     media.write_bytes(b"audio")
@@ -335,7 +338,7 @@ def test_workspace_retains_terminal_queue_history_without_credentials(tmp_path: 
             },
             {
                 "job_id": "f2a7fdd3-4bdb-4c84-9156-b4177df5670f",
-                "status": "failed",
+                "status": terminal_status,
                 "input_path": str(media),
                 "output_directory": str(output),
                 "planned_job_id": "failed-episode",
@@ -361,4 +364,4 @@ def test_workspace_retains_terminal_queue_history_without_credentials(tmp_path: 
     assert restored.terminal_jobs[0].workflow_errors == {
         "translation": "INVALID_TRANSLATION_RESPONSE"
     }
-    assert restored.terminal_jobs[1].status == "failed"
+    assert restored.terminal_jobs[1].status == terminal_status

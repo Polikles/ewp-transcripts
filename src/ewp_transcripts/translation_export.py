@@ -181,6 +181,54 @@ def export_translation(
     """Write or safely skip deterministic translation-derived representations."""
 
     normalized = Path(translation_path).expanduser().absolute()
+    destination = output_directory or normalized.parent
+    payloads = render_translation_exports(
+        normalized, formats=formats, output_directory=destination, subtitles_config=subtitles_config
+    )
+    written_paths: list[Path] = []
+    skipped_paths: list[Path] = []
+    with output_directory_lock(destination, timeout_seconds=lock_timeout_seconds):
+        for path, payload in payloads:
+            if path.is_file() and path.read_bytes() != payload:
+                raise OutputReservationError(
+                    f"Translation export already exists with other content: {path}"
+                )
+        for path, payload in payloads:
+            if _publish_or_skip(path, payload):
+                written_paths.append(path)
+            else:
+                skipped_paths.append(path)
+    return TranslationExportOutcome(
+        translation_path=normalized,
+        written=tuple(written_paths),
+        skipped=tuple(skipped_paths),
+    )
+
+
+def export_translation_text(
+    translation_path: str | Path,
+    *,
+    output_directory: Path | None = None,
+    lock_timeout_seconds: float = 0,
+) -> TranslationExportOutcome:
+    """Backward-compatible focused entry point for deterministic TXT export."""
+
+    return export_translation(
+        translation_path,
+        output_directory=output_directory,
+        lock_timeout_seconds=lock_timeout_seconds,
+    )
+
+
+def render_translation_exports(
+    translation_path: Path,
+    *,
+    formats: tuple[TranslationExportFormat, ...],
+    output_directory: Path | None = None,
+    subtitles_config: SubtitlesConfig | None = None,
+) -> tuple[tuple[Path, bytes], ...]:
+    """Render existing-format verification bytes without publication or model loading."""
+    normalized = Path(translation_path).expanduser().absolute()
     translation = load_transcript_translation(normalized)
     destination = output_directory or normalized.parent
     stem = (
@@ -275,36 +323,4 @@ def export_translation(
             provenance_payload,
         )
     )
-    written_paths: list[Path] = []
-    skipped_paths: list[Path] = []
-    with output_directory_lock(destination, timeout_seconds=lock_timeout_seconds):
-        for path, payload in payloads:
-            if path.is_file() and path.read_bytes() != payload:
-                raise OutputReservationError(
-                    f"Translation export already exists with other content: {path}"
-                )
-        for path, payload in payloads:
-            if _publish_or_skip(path, payload):
-                written_paths.append(path)
-            else:
-                skipped_paths.append(path)
-    return TranslationExportOutcome(
-        translation_path=normalized,
-        written=tuple(written_paths),
-        skipped=tuple(skipped_paths),
-    )
-
-
-def export_translation_text(
-    translation_path: str | Path,
-    *,
-    output_directory: Path | None = None,
-    lock_timeout_seconds: float = 0,
-) -> TranslationExportOutcome:
-    """Backward-compatible focused entry point for deterministic TXT export."""
-
-    return export_translation(
-        translation_path,
-        output_directory=output_directory,
-        lock_timeout_seconds=lock_timeout_seconds,
-    )
+    return tuple(payloads)

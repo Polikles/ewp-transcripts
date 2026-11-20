@@ -138,54 +138,7 @@ def export_result(
         results_path=results_path,
         results_sha256=hashlib.sha256(payload).hexdigest(),
     )
-    try:
-        effective = resolve_effective_transcript(
-            result,
-            selected_revision,
-            base_path=results_path if selected_revision is not None else None,
-        )
-        rendered_result = effective_canonical_result(result, effective)
-        if selected_revision is not None and selected_revision.transcript.speaker_labels:
-            labels = selected_revision.transcript.speaker_labels
-            existing_speakers = {speaker.speaker_id for speaker in rendered_result.speakers}
-            additional_speakers = tuple(
-                CanonicalSpeaker(
-                    speaker_id=speaker_id,
-                    speaker_label=label,
-                    speaker_source="default",
-                    first_seen_ms=next(
-                        (
-                            token.start_ms
-                            for token in effective.tokens
-                            if token.speaker_id == speaker_id
-                        ),
-                        0,
-                    ),
-                )
-                for speaker_id, label in labels.items()
-                if speaker_id not in existing_speakers
-            )
-            rendered_result = rendered_result.model_copy(
-                update={
-                    "speakers": tuple(
-                        speaker.model_copy(
-                            update={
-                                "speaker_label": labels.get(
-                                    speaker.speaker_id, speaker.speaker_label
-                                )
-                            }
-                        )
-                        for speaker in rendered_result.speakers
-                    )
-                    + additional_speakers
-                }
-            )
-    except (ValidationError, ValueError) as error:
-        if selected_revision is not None:
-            raise InvalidCanonicalResultError(
-                "Cannot resolve revised transcript for export"
-            ) from error
-        raise InvalidCanonicalResultError("Cannot resolve transcript for export") from error
+    effective, rendered_result = _resolve_export_content(result, selected_revision, results_path)
 
     with output_directory_lock(destination):
         if selected_revision is None:
@@ -242,6 +195,124 @@ def export_result(
             ),
             revision_path=revision_path,
         )
+
+
+def _resolve_export_content(
+    result: CanonicalResult, selected_revision: TranscriptRevision | None, results_path: Path
+) -> tuple[EffectiveTranscript, CanonicalResult]:
+    try:
+        effective = resolve_effective_transcript(
+            result,
+            selected_revision,
+            base_path=results_path if selected_revision is not None else None,
+        )
+        rendered_result = effective_canonical_result(result, effective)
+        if selected_revision is not None and selected_revision.transcript.speaker_labels:
+            labels = selected_revision.transcript.speaker_labels
+            existing_speakers = {speaker.speaker_id for speaker in rendered_result.speakers}
+            additional_speakers = tuple(
+                CanonicalSpeaker(
+                    speaker_id=speaker_id,
+                    speaker_label=label,
+                    speaker_source="default",
+                    first_seen_ms=next(
+                        (
+                            token.start_ms
+                            for token in effective.tokens
+                            if token.speaker_id == speaker_id
+                        ),
+                        0,
+                    ),
+                )
+                for speaker_id, label in labels.items()
+                if speaker_id not in existing_speakers
+            )
+            rendered_result = rendered_result.model_copy(
+                update={
+                    "speakers": tuple(
+                        speaker.model_copy(
+                            update={
+                                "speaker_label": labels.get(
+                                    speaker.speaker_id, speaker.speaker_label
+                                )
+                            }
+                        )
+                        for speaker in rendered_result.speakers
+                    )
+                    + additional_speakers
+                }
+            )
+    except (ValidationError, ValueError) as error:
+        if selected_revision is not None:
+            raise InvalidCanonicalResultError(
+                "Cannot resolve revised transcript for export"
+            ) from error
+        raise InvalidCanonicalResultError("Cannot resolve transcript for export") from error
+
+    return effective, rendered_result
+
+
+def verified_existing_revision_exports(
+    results_path: Path, revision_path: Path, directory: Path, subtitles: SubtitlesConfig
+) -> tuple[Path, ...]:
+    """Read-only legacy discovery: accept only exact deterministic bytes for this revision."""
+    result, payload = _read_result(results_path)
+    revision, selected_path = _select_revision(
+        revision_path,
+        result=result,
+        results_path=results_path,
+        results_sha256=hashlib.sha256(payload).hexdigest(),
+    )
+    if revision is None or revision.provenance.method != "manual":
+        raise InvalidRevisionError("Only manually verified revision exports can be downloaded")
+    effective, rendered = _resolve_export_content(result, revision, results_path)
+    found = []
+    if not directory.is_dir():
+        return ()
+    for path in sorted(directory.iterdir()):
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 64 * 1024 * 1024:
+            continue
+        match = re.search(
+            r"_revision_" + f"{revision.revision_number:03d}" + r"(?:_v(\d{3,}))?\.[a-z]+$",
+            path.name,
+        )
+        if match is None:
+            continue
+        version = int(match[1]) if match[1] else 1
+        for format_ in ExportFormat:
+            expected = _revision_export_path(
+                directory,
+                result=result,
+                revision_number=revision.revision_number,
+                format_=format_,
+                export_version=version,
+            )
+            if path != expected:
+                continue
+            generated = datetime.now(UTC)
+            if format_ is ExportFormat.SEGMENTS:
+                try:
+                    import json
+
+                    generated = datetime.fromisoformat(
+                        json.loads(path.read_bytes())["generated_at"]
+                    )
+                except (ValueError, KeyError, TypeError):
+                    continue
+            expected_bytes = _render_exports(
+                rendered,
+                ((format_, path),),
+                results_path=results_path,
+                results_sha256=hashlib.sha256(payload).hexdigest(),
+                subtitles_config=subtitles,
+                generated_at=generated,
+                revision=revision,
+                revision_path=selected_path,
+                effective_transcript=effective,
+            )[0][1].encode("utf-8")
+            if path.read_bytes() == expected_bytes:
+                found.append(path)
+    return tuple(found)
 
 
 def export_batch(

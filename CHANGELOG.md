@@ -6,6 +6,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package A: cancel waiting/running GUI transcription tasks at safe stage checkpoints, show
+  requested versus completed cancellation, and stage retries as fresh attempts with source hashes
+  rechecked. Cancellation stops being available when final publication begins.
+- Settings & About temporary-workdir inventory, age/reason filters and expiring explicit cleanup
+  previews. Version-2 markers retain allocation time, owner process and terminal retention reason;
+  active/referenced/unknown/final artifacts and version-1 workdirs stay protected in bulk cleanup.
+- Browser attachment downloads for existing manually reviewed source and translation exports,
+  with exact version/name/byte hashes, durable private registration, session links and read-only
+  verification of compatible legacy exports. Refreshing never reruns ASR or writes exports.
+
 - Portable single-file user profiles in Settings & About: preferences, current workflow fields,
   default/selected workspace manifests, custom palettes and exact dictionary editions; independent
   dictionary import/export preserves original version, hash and provenance. Imports do not start
@@ -32,6 +42,10 @@ All notable changes to EWP-transcripts are documented here.
   GPU acceptance requirements, followed by the phase-based indicator and optional calibrated ETA.
 
 ### Fixed
+
+- Completed queue history can recover after original audio is moved, while still requiring its
+  canonical result/output. Saved reviews, applied/export pointers and new cancelled history are
+  restored without repeating ASR or restoring human confirmations.
 
 - Inspect and Dry-run keep distinct language (*) and speaker-count (**) explanations below all
   summary tables, spanning the full width and wrapping normally. Queue confirmation now names

@@ -19,9 +19,11 @@ waiting for the artist has no deadline and blocks no other work. Do not modify t
 
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
 by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL
-workflow test), then 10 complete EN–PL approval. The current instruction is planning only: do not
-start product implementation until explicitly instructed. Previously declined roadmap proposals
-must not be revived as new requirements. No provider/media/spending authorization is implied.
+workflow test), then 10 complete EN–PL approval. The owner explicitly authorized A1–A4 and its
+verification/checklist; implementation and automated checks are now complete. The earlier planning-
+only hold is revoked for A. Package B still waits for owner acceptance of A after testing/fixes.
+Previously declined proposals must not return as requirements. No provider/media/spending
+authorization is implied.
 
 ## 2. Scope discipline
 

@@ -127,22 +127,32 @@ remain and the version stays occupied; neither record is overwritten.
 
 ## 9. Workdir cleanup metadata
 
-The MVP cleanup command treats every valid owner-marked workspace as one category:
-`all-workdirs`. It cannot safely infer why a workspace was retained from filenames or
-contents. Selection by age uses the ownership marker's modification time and is
-conservative when that timestamp has been changed.
+New allocations use marker version `2.0`: run/job identity, immutable UTC `created_at`,
+`owner_pid`, and `retention_reason`. Allocation writes `active`; the owning process atomically
+records `failed`, `cancelled`, or `successful-retained` when preserving a finished workdir.
+These metadata changes never alter the creation time. Version-2 age filters use creation time.
+Version-1 markers remain readable and structurally valid; their creation time/reason is unknown,
+and legacy age discovery retains the old marker-mtime interpretation.
 
-A later marker version should add an immutable creation timestamp and a terminal
-retention reason written through a validated atomic transition. Proposed reasons are:
+The GUI inventories only the configured temporary root. It separately filters by age/reason,
+selects eligible workdirs, previews identities/size, and requires explicit confirmation within
+five minutes. Before deleting any selected path, it rechecks the entire selection's markers,
+file metadata and references. A changed/protected selection invalidates the preview. I/O failure
+reports the successfully removed subset. No automatic cleanup runs.
 
-- `failed` for a processing error;
-- `cancelled` for user interruption;
-- `successful-retained` when configuration deliberately preserves temporary files after
-  success.
+Active owner processes, current queue paths, default/selected saved-workspace references,
+symlinks, special files and unknown artifacts are protected. The current pipeline owns only WAV
+intermediates plus its marker; any other file protects that entire directory. A dead owner's active
+marker is displayed as interrupted; PID reuse may conservatively keep it protected. Catalogs stored
+elsewhere are unknown: select/check them separately. Final results, revisions, translations, models
+and durable browser source copies are not temporary-workdir cleanup targets.
 
-Only after that metadata exists may cleanup expose corresponding filters. The reader and
-cleanup path must remain compatible with version-1 markers until their retained
-workspaces have expired or been explicitly removed.
+Version-1 markers lack proof of owner liveness and remain visible but protected in bulk GUI/CLI
+cleanup. Inspect any old retained workspace manually before explicitly removing its exact directory
+outside the bulk tool. The existing low-level owner-marker validator/cleanup remains compatible
+with both versions. `clean all-workdirs --dry-run/--yes` now skips active, legacy-unknown and unsafe/
+unknown-artifact workdirs too; its CLI JSON/text shape is unchanged. The GUI additionally checks
+known saved-work references; the CLI does not inventory GUI workspace catalogs.
 
 
 ## 10. Revision state and publication (implemented for v0.2.0)

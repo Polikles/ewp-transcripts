@@ -618,3 +618,79 @@ def _environment() -> CanonicalEnvironment:
 def _assert_schema_valid(document: dict[str, object]) -> None:
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     assert list(Draft202012Validator(schema).iter_errors(document)) == []
+
+
+@pytest.mark.parametrize("pipeline", ["single", "diarization", "group"])
+def test_cancellation_after_asr_stops_alignment_and_later_streams(
+    tmp_path: Path, pipeline: str
+) -> None:
+    from ewp_transcripts.cancellation import CancellationToken, TranscriptionCancelled
+
+    inspection, reservation, workspace = _job(tmp_path)
+    events = []
+    token = CancellationToken()
+
+    def observe(event):
+        if event.phase == "transcribe" and event.state == "completed":
+            token.request()
+
+    common = dict(
+        config=ApplicationConfig(
+            diarization=DiarizationConfig(speaker_count=1 if pipeline == "single" else 2)
+        ),
+        environment=_environment(),
+        progress=observe,
+        cancellation=token,
+        audio_preparer=lambda source, destination, **kwargs: _write_audio(destination),
+    )
+    with pytest.raises(TranscriptionCancelled):
+        if pipeline == "single":
+            run_single_speaker_pipeline(
+                inspection,
+                reservation,
+                workspace,
+                asr_engine=FakeAsr(events),
+                alignment_engine=FakeAlignment(events),
+                **common,
+            )
+        elif pipeline == "diarization":
+            run_diarization_pipeline(
+                inspection,
+                reservation,
+                workspace,
+                asr_engine=FakeAsr(events),
+                alignment_engine=FakeAlignment(events),
+                diarization_engine=FakeDiarization(events),
+                **common,
+            )
+        else:
+            first = inspection.sources[0].model_copy(
+                update={
+                    "speaker_label": "First",
+                    "speaker_id": "speaker_001",
+                    "speaker_source": "explicit",
+                }
+            )
+            second = first.model_copy(
+                update={
+                    "fingerprint": first.fingerprint.model_copy(
+                        update={"path": tmp_path / "second.wav", "filename": "second.wav"}
+                    ),
+                    "speaker_label": "Second",
+                    "speaker_id": "speaker_002",
+                }
+            )
+            inspection = inspection.model_copy(update={"sources": (first, second)})
+            run_source_speaker_pipeline(
+                inspection,
+                reservation,
+                workspace,
+                asr_engine_factory=lambda: FakeAsr(events),
+                alignment_engine_factory=lambda: FakeAlignment(events),
+                **common,
+            )
+    assert (
+        len([event for event in events if event.startswith("asr:") and event != "asr:close"]) == 1
+    )
+    assert not any(event.startswith("align:") and event != "align:close" for event in events)
+    assert "align:close" in events

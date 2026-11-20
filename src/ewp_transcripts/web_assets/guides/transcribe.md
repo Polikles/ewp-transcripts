@@ -56,3 +56,14 @@ list. Planning/staging does not start ASR; Start queue is a separate explicit ac
 
 The confirmation reads I reviewed the plan and want to add jobs to the queue. It still requires
 review of this exact batch snapshot; the shorter plural wording does not weaken validation.
+
+## Cancel and retry a task
+
+Use Cancel task on a waiting or running row. Waiting work becomes Cancelled immediately. Running
+work shows Cancellation requested until its current FFmpeg/model stage returns and reaches a safe
+checkpoint; it may take time during a long ASR call. There is no forced thread/GPU interruption.
+Cancellation is refused after final publication starts. A cancelled attempt publishes no incomplete
+canonical result, and its temporary work follows keep_temp_on_error. Other queue tasks continue.
+Retry from beginning stages a new attempt with the same settings; Start queue runs it after checking
+the original source hashes again. Changed sources require a new Inspect/Dry-run/confirmation.
+An old cancelled/failed history row remains available until explicitly removed.

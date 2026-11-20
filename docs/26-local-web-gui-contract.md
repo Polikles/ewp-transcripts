@@ -508,3 +508,40 @@ Inspect and Dry-run display language * and speaker-count ** as selected processi
 two full-width wrapping explanations below all summary tables. The plural queue confirmation
 still authorizes the exact reviewed request snapshot. Source section counters are vertically
 centered against navigation buttons; no workflow/API semantics change.
+
+## Package A additions — 2026-11-20
+
+The current owner package adds cooperative cancellation to the single ASR worker. Waiting work
+becomes `cancelled`; running work first becomes `cancel_requested`. Safe checkpoints occur between
+inspection/preparation, ASR, alignment, normalization, diarization/composition and final publication.
+The active native call may finish first; no thread/GPU is killed. An atomic token gate rejects late
+requests once publication begins. Cancelled attempts retain terminal job state/workdirs according to
+configuration, publish no incomplete final canonical result, and retry under a new queue-attempt ID
+from the beginning with source hashes rechecked. Completed history never re-enters the worker.
+Cancelled history joins completed/failed saved-work history; running/requested work never resumes
+as an in-flight operation. Completed history recovery no longer requires original audio, but still
+requires its validated canonical result/output. Playback independently requires its source media.
+
+Settings & About offers configured-root temporary inventory, reason/creation-age filters, selected
+cleanup preview and explicit confirmation within five minutes. Version-2 owner markers preserve
+UTC allocation time and terminal retention reason. Current queue/default/selected workspace catalog
+references, active owners, symlinks, special/unknown artifacts and legacy-unknown owners protect
+workdirs. Revalidation covers the whole selection before deletion and reports partial I/O removal
+honestly. See [the marker contract](09-state-errors-and-logging.md#9-workdir-cleanup-metadata).
+This is separate from durable managed-source copies; catalogs outside the selected/default roots
+remain unknown and must be checked separately. No automatic deletion or final-artifact cleanup.
+
+Both review stages expose existing-export downloads for applied manual revisions/translations.
+A CSRF-protected POST lists validated export records; opaque 30-minute session URLs serve only
+registered artifacts. Records bind canonical/revision/translation identities plus file SHA-256/size.
+GET/HEAD enforce local Host, reject foreign Origin/cross-site fetches, reread bounded regular files,
+reject symlink ancestors/hash changes, and serve exact bytes as attachment/octet-stream with the
+original UTF-8 filename and security/no-store headers. No user-supplied filesystem download URL
+exists. HTML is downloaded, never executed inline. Refresh does not run ASR or write exports.
+
+Private `export-downloads.json` under the application state root preserves verified file/version
+records across server restarts, without credentials or transcript text. New trusted GUI exports are
+registered after publication; compatible older files are verified read-only against the same renderers.
+Older custom palette files without records may need their original settings, rather than guessed
+provenance. Missing/changed files are withheld; older registered palette/version hashes stay exact.
+Public canonical/revision/translation schemas and pinned ML packages remain unchanged.

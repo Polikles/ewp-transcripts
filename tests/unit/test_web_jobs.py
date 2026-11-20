@@ -816,3 +816,80 @@ def test_queue_reports_live_phase_and_finishes_only_after_service_returns(
     finally:
         release.set()
         queue.close()
+
+
+def test_cancel_waiting_running_and_retry_uses_new_attempt(tmp_path: Path) -> None:
+
+    entered, release = threading.Event(), threading.Event()
+    calls = []
+
+    def transcribe(path, **kwargs):
+        calls.append(path)
+        entered.set()
+        assert release.wait(2)
+        kwargs["cancellation"].check()
+        return SimpleNamespace(result_path=tmp_path / "episode_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        first = queue.stage(
+            tmp_path / "first.wav",
+            tmp_path,
+            planned_job_id="first",
+            planned_result_path=str(tmp_path / "first_results.json"),
+        )
+        second = queue.stage(
+            tmp_path / "second.wav",
+            tmp_path,
+            planned_job_id="second",
+            planned_result_path=str(tmp_path / "second_results.json"),
+        )
+        queue.start()
+        assert entered.wait(1)
+        assert queue.cancel(second.job_id).status == "cancelled"
+        assert queue.cancel(first.job_id).status == "cancel_requested"
+        assert (
+            next(job for job in queue.jobs() if job.job_id == first.job_id).status
+            == "cancel_requested"
+        )
+        release.set()
+        deadline = time.monotonic() + 2
+        while next(job for job in queue.jobs() if job.job_id == first.job_id).status != "cancelled":
+            assert time.monotonic() < deadline
+            time.sleep(0.005)
+        assert calls == [tmp_path / "first.wav"]
+        retry = queue.retry(first.job_id)
+        assert retry.job_id != first.job_id and retry.status == "staged"
+        queue.start()
+        assert wait_for_terminal(queue).status == "completed"
+        assert calls == [tmp_path / "first.wav"] * 2
+    finally:
+        release.set()
+        queue.close()
+
+
+def test_cancel_rejected_after_publication_boundary(tmp_path: Path) -> None:
+    entered, release = threading.Event(), threading.Event()
+
+    def transcribe(path, **kwargs):
+        kwargs["cancellation"].begin_publication()
+        entered.set()
+        assert release.wait(2)
+        return SimpleNamespace(result_path=tmp_path / "episode_results.json")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=transcribe)
+    try:
+        job = queue.stage(
+            tmp_path / "first.wav",
+            tmp_path,
+            planned_job_id="first",
+            planned_result_path=str(tmp_path / "first_results.json"),
+        )
+        queue.start()
+        assert entered.wait(1)
+        with pytest.raises(ValueError, match="publication"):
+            queue.cancel(job.job_id)
+        assert queue.jobs()[0].status == "running"
+    finally:
+        release.set()
+        queue.close()

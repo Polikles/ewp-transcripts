@@ -14,7 +14,7 @@ import subprocess
 import wave
 from importlib.metadata import version
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from playwright.sync_api import Page, expect, sync_playwright
 
@@ -1179,6 +1179,14 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     stage(page, "saved")
     page.locator("#save-workspace").click()
     expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
+    stage(page, "review")
+    page.locator("#export-review").click()
+    expect(page.locator("#review-status")).to_contain_text("exports completed")
+    stage(page, "saved")
+    page.locator("#save-workspace").click()
+    expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
+    checkpoint["source_applied"] = page.evaluate("appliedRevisionPath")
+    checkpoint["downloads"] = True
     checkpoint["target"] = "Testowe tłumaczenie jednostki 1."
     checkpoint["applied"] = page.evaluate("appliedTranslation")
     (output / "checkpoint.json").write_text(json.dumps(checkpoint))
@@ -1216,6 +1224,57 @@ def verify_recovery(page: Page, checkpoint: dict) -> None:
         expect(page.locator("#export-translation-review")).to_be_enabled()
     assert not page.locator("#allow-empty-translation-units").is_checked()
     assert not page.locator("#translation-review-confirmed").is_checked()
+    if checkpoint.get("source_applied"):
+        assert page.evaluate("appliedRevisionPath") == checkpoint["source_applied"]
+        expect(page.locator("#export-review")).to_be_enabled()
+    if checkpoint.get("downloads"):
+        check_export_downloads(page)
+
+
+def check_export_downloads(page: Page) -> None:
+    """Actual browser attachment downloads after restoration, without re-exporting or ASR."""
+    for kind, section in (("source", "review"), ("translation", "semantic-review")):
+        stage(page, section)
+        page.locator(f"#{kind}-export-downloads > summary").click()
+        page.locator(f"#{kind}-refresh-downloads").click()
+        panel = page.locator(f"#{kind}-export-downloads")
+        expect(panel.locator('[role="status"]')).to_contain_text("ready to download")
+        links = panel.locator("a[download]")
+        assert links.count() > 0
+        for index in range(links.count()):
+            link = links.nth(index)
+            href = link.get_attribute("href")
+            # Chromium throttles bursts of automatic attachments; model human click pacing.
+            page.wait_for_timeout(250)
+            with page.expect_download() as pending:
+                link.click()
+            download = pending.value
+            expected = page.request.get(urljoin(page.url, href))
+            assert expected.ok
+            assert expected.headers["content-type"] == "application/octet-stream"
+            assert expected.headers["content-disposition"].startswith("attachment;")
+            assert download.suggested_filename == link.get_attribute("download")
+            assert download.path().read_bytes() == expected.body()
+            assert hashlib.sha256(expected.body()).hexdigest() in link.locator("..").inner_text()
+            forbidden = page.request.get(
+                urljoin(page.url, href),
+                headers={"Origin": "https://example.invalid", "Sec-Fetch-Site": "cross-site"},
+            )
+            assert forbidden.status == 403
+        for locale in ("en", "pl"):
+            page.locator("#gui-locale").select_option(locale)
+            for theme in ("light", "dark"):
+                page.locator("#gui-theme").select_option(theme)
+                for width in (1440, 960, 390):
+                    page.set_viewport_size({"width": width, "height": 1000})
+                    panel.scroll_into_view_if_needed()
+                    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+                    expect(panel.locator("button")).to_have_text(
+                        "Odśwież zapisane eksporty"
+                        if locale == "pl"
+                        else "Refresh existing exports"
+                    )
+        page.locator("#gui-locale").select_option("en")
 
 
 def check_sentence_guidance(page: Page, output: Path) -> None:

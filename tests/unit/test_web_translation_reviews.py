@@ -78,6 +78,30 @@ def test_gui_translation_review_prepare_save_preview_apply_and_export(tmp_path: 
     assert applied["final"] is True
     assert Path(exported["audit_path"]).is_file()
     assert len(exported["written"]) == 5
+    from ewp_transcripts.web_downloads import GuiExportDownloads
+
+    downloads = GuiExportDownloads(
+        config=config,
+        resolve_path=paths.resolve_allowed_path,
+        registry=tmp_path / "download-state/exports.json",
+    )
+    request = dict(
+        result=str(result),
+        revision="",
+        translation=applied["translation_path"],
+        directory=str(tmp_path / "exports"),
+    )
+    existing = downloads.list(**request)["exports"]
+    assert len(existing) == 5
+    for item in existing:
+        name, payload = downloads.open(item["url"].rsplit("/", 1)[1])
+        assert payload == (tmp_path / "exports" / name).read_bytes()
+    restarted = GuiExportDownloads(
+        config=config,
+        resolve_path=paths.resolve_allowed_path,
+        registry=tmp_path / "download-state/exports.json",
+    )
+    assert len(restarted.list(**request)["exports"]) == 5
 
 
 def test_gui_translation_review_prepares_manual_translation_without_provider_candidate(
