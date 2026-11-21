@@ -56,3 +56,10 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
     superseded. See docs/checkpoints/2026-11-21-cloud-chunking.md for tests and safe speaker
     continuity handling. Cumulative live-ASR spend including this follow-up is
     USD 0.0153610111540591670 within the original USD 2 budget. Retain that total after cleanup.
+
+12. Current Windows feedback (2026-11-21): owner confirms installation/model setup/GUI/doctor pass.
+    A reproduced Windows CRT directory-descriptor publication defect and requested picker, per-file
+    settings, conditional stream/identity controls, single-plan table and OpenRouter check/estimate
+    changes are delivered in the Windows queue/GUI checkpoint. Continue from that checkpoint and
+    owner B retest; do not repeat model setup or paid pilots. Uninstall/model-removal script and
+    standalone EXE installer/desktop shortcut/Add-Remove Programs/GUI uninstall are later TODO only.

@@ -1,6 +1,8 @@
 """Real video extraction, provenance and review playback without ML models."""
 
+import errno
 import json
+import os
 import shutil
 import subprocess
 import wave
@@ -102,9 +104,32 @@ class Alignment:
 
 
 @pytest.mark.parametrize("observer_fails", [False, True])
+@pytest.mark.parametrize("windows_directory_handles", [False, True])
 def test_video_through_discovery_plan_pipeline_and_private_playback(
-    tmp_path: Path, observer_fails
+    tmp_path: Path, observer_fails, windows_directory_handles, monkeypatch
 ) -> None:
+    if windows_directory_handles:
+        from ewp_transcripts import export_service, platform_runtime, state
+
+        original_open = os.open
+
+        def reject_directory_open(path, flags, *args, **kwargs):
+            if Path(path).is_dir():
+                raise PermissionError(errno.EACCES, "Simulated Windows CRT directory open")
+            return original_open(path, flags, *args, **kwargs)
+
+        monkeypatch.setattr(platform_runtime, "WINDOWS", True)
+
+        class WindowsPublicationOS:
+            # Only app publication uses the CRT double. Linux shutil keeps its actual
+            # fd-based cleanup; native Windows has its own shutil implementation.
+            def __getattr__(self, name):
+                return getattr(os, name)
+
+            open = staticmethod(reject_directory_open)
+
+        for module in (state, export_service):
+            monkeypatch.setattr(module, "os", WindowsPublicationOS())
     source = tmp_path / "s0e01.mp4"
     video(source)
     digest = sha256_file(source)

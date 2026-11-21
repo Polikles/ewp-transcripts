@@ -37,3 +37,23 @@ def test_windows_unknown_or_denied_owner_is_protected(monkeypatch, last_error, a
     )
     assert platform_runtime.process_is_alive(123) is alive
     kernel.CloseHandle.assert_not_called()
+
+
+def test_windows_directory_sync_never_opens_crt_directory_descriptor(tmp_path, monkeypatch):
+    monkeypatch.setattr(platform_runtime, "WINDOWS", True)
+    opener = Mock(side_effect=PermissionError("Windows CRT rejects directories"))
+    monkeypatch.setattr(platform_runtime, "os", Mock(open=opener))
+    platform_runtime.fsync_directory(tmp_path)
+    opener.assert_not_called()
+
+
+def test_posix_directory_sync_keeps_flush_and_closes_on_error(tmp_path, monkeypatch):
+    monkeypatch.setattr(platform_runtime, "WINDOWS", False)
+    runtime_os = Mock(O_RDONLY=0, O_DIRECTORY=1)
+    runtime_os.open.return_value = 42
+    runtime_os.fsync.side_effect = OSError("flush failed")
+    monkeypatch.setattr(platform_runtime, "os", runtime_os)
+    with pytest.raises(OSError, match="flush failed"):
+        platform_runtime.fsync_directory(tmp_path)
+    runtime_os.fsync.assert_called_once_with(42)
+    runtime_os.close.assert_called_once_with(42)

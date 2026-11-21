@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import threading
+import traceback
 from collections import deque
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -617,13 +619,20 @@ class GuiTranscriptionQueue:
             except ApplicationError as error:
                 if tracker is not None:
                     tracker.finish(False)
+                detail = _backend_failure_detail(error)
+                logging.getLogger(__name__).error(
+                    "Transcription %s failed: %s\n%s",
+                    job.planned_job_id,
+                    error.code,
+                    _unexpected_failure_detail(error.__cause__ or error)["traceback"],
+                )
                 self._replace(
                     job_id,
                     status="failed",
                     error={
                         "code": error.code,
                         "message": str(error),
-                        **_backend_failure_detail(error),
+                        **detail,
                         "exception_type": type(error).__name__,
                         "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
                         "action": (
@@ -636,27 +645,54 @@ class GuiTranscriptionQueue:
                         ),
                     },
                 )
-            except Exception:
+            except Exception as error:
                 if tracker is not None:
                     tracker.finish(False)
+                detail = _unexpected_failure_detail(error)
+                logging.getLogger(__name__).error(
+                    "Transcription %s failed: %s", job.planned_job_id, detail["traceback"]
+                )
                 self._replace(
                     job_id,
                     status="failed",
                     error={
+                        **detail,
                         "code": "GUI_TRANSCRIPTION_FAILED",
                         "message": (
-                            "Transcription failed unexpectedly. Use Test local dependencies "
-                            "and inspect retained job state."
+                            "Transcription failed unexpectedly. Open failure technical details "
+                            "to identify the failed operation."
                         ),
                     },
                 )
 
 
+def _unexpected_failure_detail(error: BaseException) -> dict[str, str]:
+    # No locals, transcript/provider payloads, source lines or arbitrary exception text.
+    frames = traceback.extract_tb(error.__traceback__)
+    location = "\n".join(
+        f"{Path(frame.filename).name}:{frame.lineno} in {frame.name}" for frame in frames
+    )
+    return {
+        "exception_type": type(error).__name__,
+        "errno": str(getattr(error, "errno", "") or ""),
+        "winerror": str(getattr(error, "winerror", "") or ""),
+        "traceback": f"{type(error).__name__}\n{location}",
+    }
+
+
 def _backend_failure_detail(error: ApplicationError) -> dict[str, str]:
     # Backend exception text is only shown in the local technical-details disclosure.
     # Do not expose arbitrary unexpected exceptions or environment credentials.
-    if error.code != "SPEECH_ENGINE_ERROR" or error.__cause__ is None:
+    if error.__cause__ is None:
         return {}
+    if error.code != "SPEECH_ENGINE_ERROR":
+        cause = error.__cause__
+        details = _unexpected_failure_detail(cause)
+        return {
+            "cause_traceback": details["traceback"],
+            "errno": details["errno"],
+            "winerror": details["winerror"],
+        }
     cause = error.__cause__
     while cause.__cause__ is not None:
         cause = cause.__cause__

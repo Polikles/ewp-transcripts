@@ -128,16 +128,18 @@ same error persists in the confirmed `ewp-transcripts` project, run `uv sync --l
   speech-library loading without downloading models or transcribing. A completed test enables
   **Run doctor** and **Reinstall dependencies…**. The repair button provides terminal steps to run
   after saving work and stopping the GUI; see [native repair](../WSL%20config/TROUBLESHOOTING.md).
-- Choose a shared output root and select audio. Matching speaker tracks such as
-  `s0e00-Szymon.wav` and `s0e00-Damian.wav` appear as one episode. Select the episode, inspect,
-  dry-run and explicitly stage it. Check that dry-run lists both filenames under the one job ID.
-  Separate episode prefixes remain separate jobs. Tracks must share a timeline and sample rate;
-  duration differences over 100 ms warn and over 500 ms block staging. Select all tracks for an
-  episode before planning it. **Select episode** updates the input and gives visible feedback.
-  Trying **Add to queue** before planning highlights **Dry-run**. Explicitly stage each episode. **Start queue** begins processing; picking files alone does not run models.
-  Direct WSL/server paths remain supported. The browser copies selected audio locally; staging makes
-  the selected source durable under the chosen root.
-- Existing canonical `*_results.json` / versioned results can be imported from stage queues to skip ASR.
+- Choose a shared output root and select audio/video or saved canonical result JSON. Main picker and
+  **Add audio** in the left rail use the same selection. Matching tracks such as `s0e00-Szymon.wav`
+  and `s0e00-Damian.wav` form one episode. Set language/count directly per recording; multiple
+  audio streams reveal a choice automatically. Dry-run checks/plans all pending episodes in one
+  combined table. Review/confirm it, Add to queue once, then Start queue. Selection alone runs no ASR.
+  Direct WSL/server paths remain supported; staging preserves durable local source copies.
+  Synchronized tracks need matching sample rates; duration differences over 100 ms warn and over
+  500 ms block. Changing settings/selection requires replanning.
+- Open **Transcription engine** for optional OpenRouter ASR. Manage the shared key, check the key
+  and connection, then explicitly refresh model availability/hourly prices and the cost estimate.
+  Checks upload no audio. Starting cloud jobs requires fresh upload/payment consent. Cost protection
+  is calculated internally; displayed estimates are not provider billing caps.
 - Use **Source review & export** for text/speaker edits, Preview, explicit human Apply and source export.
   Cursor splitting and selected-text isolation are separate commands. Neither invents timestamps.
 - **Optional translation** offers assistance or **Open manual translation**. Review meaning separately

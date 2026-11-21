@@ -4,12 +4,23 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Windows queue/GUI fixes delivered: [checkpoint](docs/checkpoints/2026-11-21-windows-queue-gui-feedback.md).
+Baseline 761109f. Shared Windows-safe publication fixes the reproduced directory-descriptor defect;
+unexpected failures now retain safe OS/frame diagnostics. Single media/results picker, per-recording
+settings, conditional stream/ID controls, one plan table and explicit OpenRouter key/pricing estimates
+are implemented. make check: 1008 tests / mypy115; integration: 17 passed / 4 deselected. Full Chromium
+144 layouts, focused owner-feedback checks and actual restart/editor/export recovery pass.
+Next: owner pulls/restarts/refreshes Windows GUI and retries grouped audio + MP4, then publication.
+No model reinstall for this storage fix. Native full workflow/B acceptance remains pending.
+Later uninstall/model removal and standalone GUI EXE installer/desktop/Add-Remove Programs/uninstaller
+are TODO only. A stays closed, artist ZIP frozen; full ENPL terminology/manual gate unchanged.
+
 Windows owner step-4 defect fixed: setup-models.py isolates NLTK language-data preparation in a
 child with -I and neutral cwd, preserving its security hook and caller paths. Locked NLTK import
 regression passes without downloads. [Fix checkpoint](docs/checkpoints/2026-11-21-windows-model-setup-nltk.md).
 987 tests / 15 integrations and explicit script Ruff/format pass; model/dependency pins unchanged.
-Next: owner pulls and repeats the same Windows model-preparation command, then doctor/B checklist.
-Native qualification remains pending. Disposable test root /tmp/ewp-nltk-setup.AScITi removed after evidence capture; no paid calls, models, private audio or artist package changes in this fix.
+Owner subsequently confirms model preparation/install/GUI/doctor pass. Native ASR/publication
+acceptance continues with the current queue/GUI fix above, not another model-preparation cycle. Disposable test root /tmp/ewp-nltk-setup.AScITi removed after evidence capture; no paid calls, models, private audio or artist package changes in this fix.
 
 Owner requested installation/run/test instructions; [handoff checkpoint](docs/checkpoints/2026-11-21-owner-b-test-handoff.md).
 Next: owner native Windows 11 x64 installation/doctor and the B checklist, then full WSL comparison.

@@ -179,12 +179,14 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     page.locator("#workflow input[type=file]").set_input_files(files)
     expect(page.locator("#gui-audio-choices li")).to_have_count(2)
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
-    page.locator("#workflow-language").select_option("pl")
-    page.locator("#gui-audio-choices li").last.locator("button[aria-pressed]").click()
-    page.locator("#workflow-language").select_option("en")
-    page.locator("#workflow-speaker-count").fill("1")
-    page.locator("#workflow-speaker-count").dispatch_event("change")
-    page.locator("#gui-audio-choices li").first.locator("button[aria-pressed]").click()
+    expect(page.locator("#gui-audio-choices li button[aria-pressed]")).to_have_count(0)
+    page.locator("#gui-audio-choices li").first.locator("[data-episode-language]").select_option(
+        "pl"
+    )
+    page.locator("#gui-audio-choices li").last.locator("[data-episode-language]").select_option(
+        "en"
+    )
+    page.locator("#gui-audio-choices li").last.locator("[data-episode-speakers]").select_option("1")
     assert page.locator("#workflow-language").input_value() == "pl"
     inspections = []
     page.on(
@@ -205,14 +207,16 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     plans = json.loads(page.locator("#operation-result").text_content())
     assert len(plans) == 2 and sum(len(plan["jobs"]) for plan in plans) == 2
     # Changing an option invalidates the entire confirmed snapshot.
-    page.locator("#workflow-speaker-count").fill("3")
-    page.locator("#workflow-speaker-count").dispatch_event("change")
+    page.locator("#gui-audio-choices li").first.locator("[data-episode-speakers]").select_option(
+        "3"
+    )
     page.locator("#workflow input[name=confirmed]").check()
     page.locator("#workflow button[value=transcriptions]").click()
     expect(page.locator("#operation-status")).to_contain_text("GUI_DRY_RUN_REQUIRED")
     expect(page.locator("#transcription-jobs tbody tr")).to_have_count(0)
-    page.locator("#workflow-speaker-count").fill("2")
-    page.locator("#workflow-speaker-count").dispatch_event("change")
+    page.locator("#gui-audio-choices li").first.locator("[data-episode-speakers]").select_option(
+        "2"
+    )
     page.locator("#workflow button[value=dry-run]").click()
     expect(page.locator("#operation-status")).to_have_text("Dry-run completed")
     page.locator("#workflow button[value=transcriptions]").click()
@@ -225,7 +229,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
     assert {(job["language"], job["speaker_count"]) for job in jobs} == {("pl", 2), ("en", 1)}
     for index in (0, 1):
         expect(
-            page.locator("#gui-audio-choices li").nth(index).locator("button[aria-pressed]")
+            page.locator("#gui-audio-choices li").nth(index).locator("[data-episode-language]")
         ).to_be_disabled()
     expect(page.locator("#start-queue")).to_be_enabled()
     expect(page.locator("#workflow button[value=inspect]")).to_have_count(0)
@@ -519,8 +523,11 @@ def check_localized_interface(page: Page) -> None:
             if re.search(r"[A-Za-z]{3}", value):
                 literals.add(value)
     missing = page.evaluate("texts=>texts.filter(text=>guiUiText(text)===text)", sorted(literals))
-    assert set(missing) <= {"EwP Transcripts", "Model",
-        "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Repair"}, missing
+    assert set(missing) <= {
+        "EwP Transcripts",
+        "Model",
+        "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Repair",
+    }, missing
     # Include conditional messages and confirmation dialogs, not only direct assignments.
     all_literals = set()
     for file in (ROOT / "src/ewp_transcripts/web_assets").glob("*.js"):

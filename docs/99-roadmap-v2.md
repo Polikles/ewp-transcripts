@@ -34,7 +34,19 @@ WSL cancellation/recovery/cleanup/download/player success evidence.
 
 Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is corrected via an
 isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
-Owner repeats model preparation/doctor before proceeding with native B acceptance.
+Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
+
+### Current B owner feedback and later Windows distribution
+
+Owner confirms native installation/GUI/doctor pass; queue/workflow is not accepted yet. Follow
+[Windows queue/GUI feedback](checkpoints/2026-11-21-windows-queue-gui-feedback.md) and the opening
+TODO for persistence/diagnostics, simplified selection/planning and cloud pricing estimates. Those
+fixes pass 1008 tests, 17 FFmpeg integrations, full/focused Chromium and restart recovery; owner
+native queue/revision/export retest remains next. Uninstall/installers below remain deferred.
+Later task 12 now explicitly includes an uninstall script with optional model removal, followed
+by a standalone graphical EXE installer, desktop shortcut, Add/Remove Programs entry and matching
+graphical uninstaller. These are deferred, not part of the current fixes. Preserve recordings,
+publications and unrelated/shared caches during future uninstall design.
 
 ### B8a owner follow-up delivered — automatic large-request splitting
 

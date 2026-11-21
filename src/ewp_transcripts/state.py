@@ -20,6 +20,7 @@ from ewp_transcripts.domain.canonical import CanonicalResult
 from ewp_transcripts.domain.enums import JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import InvalidJobStateError, OutputReservationError
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.platform_runtime import fsync_directory
 from ewp_transcripts.storage import find_existing_results, plan_job_outputs
 
 
@@ -27,17 +28,6 @@ def _write_all(descriptor: int, payload: bytes) -> None:
     remaining = memoryview(payload)
     while remaining:
         remaining = remaining[os.write(descriptor, remaining) :]
-
-
-def _fsync_directory(path: Path) -> None:
-    flags = os.O_RDONLY
-    if hasattr(os, "O_DIRECTORY"):
-        flags |= os.O_DIRECTORY
-    descriptor = os.open(path, flags)
-    try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
 
 
 def _read_state(path: Path, *, maximum_bytes: int = 1024 * 1024) -> JobStateRecord:
@@ -77,7 +67,7 @@ def _publish_exclusive_json(path: Path, payload: str, *, run_id: UUID) -> None:
         finally:
             os.close(descriptor)
         os.link(temporary, path)
-        _fsync_directory(path.parent)
+        fsync_directory(path.parent)
     except FileExistsError as error:
         raise OutputReservationError(f"Output state already exists: {path}") from error
     except OSError as error:
@@ -86,7 +76,8 @@ def _publish_exclusive_json(path: Path, payload: str, *, run_id: UUID) -> None:
         if created:
             with suppress(FileNotFoundError):
                 temporary.unlink()
-            _fsync_directory(path.parent)
+            with suppress(OSError):
+                fsync_directory(path.parent)
 
 
 def reserve_job(
@@ -196,7 +187,7 @@ def transition_job_state(
         )
         try:
             reservation.state_path.unlink()
-            _fsync_directory(outputs.output_directory)
+            fsync_directory(outputs.output_directory)
         except OSError as error:
             raise InvalidJobStateError(
                 f"Failed state was published but running state could not be removed: "
@@ -257,7 +248,7 @@ def finalize_job_result(
         )
         try:
             reservation.state_path.unlink()
-            _fsync_directory(outputs.output_directory)
+            fsync_directory(outputs.output_directory)
         except OSError as error:
             raise InvalidJobStateError(
                 f"Final result was published but running state could not be removed: "

@@ -193,9 +193,12 @@ class CloudSpeechSession:
         cancellation: CancellationToken | None = None,
         transport: HttpCall | None = None,
         rate: Decimal | None = None,
+        expected_durations_ms: tuple[int, ...] = (),
     ) -> None:
         self.config, self._key, self._transport = config, api_key, transport or request_json
         self._rate = rate
+        self._expected_durations_ms = expected_durations_ms
+        self._limit: Decimal | None = None
         self._cancellation = cancellation
         self._cache: dict[Path, CloudTranscript] = {}
         self.calls: list[dict[str, Any]] = []
@@ -211,7 +214,8 @@ class CloudSpeechSession:
             "endpoint": f"{BASE}/audio/transcriptions",
             "consent": "explicit-authorization",
             "timing": "provider-word-timestamps",
-            "budget_usd": self.config.max_cost_usd,
+            "cost_mode": self.config.cost_mode,
+            "budget_usd": str(self._limit) if self._limit is not None else self.config.max_cost_usd,
             "accounted_cost_usd": str(self._charged),
             "calls": list(self.calls),
             "speaker_reconciliation": list(self.speaker_notes),
@@ -252,7 +256,41 @@ class CloudSpeechSession:
                 * 2
                 for chunk in chunks
             )
-            if self._charged + estimate > Decimal(str(self.config.max_cost_usd)):
+            if self._limit is None:
+                self._limit = Decimal(str(self.config.max_cost_usd))
+                if self.config.cost_mode == "estimated":
+                    durations = self._expected_durations_ms or (
+                        round(Decimal(total) / rate * 1000),
+                    )
+                    all_seconds = Decimal(0)
+                    for duration in durations:
+                        planned = plan_audio_chunks(
+                            round(duration * rate / 1000),
+                            rate=rate,
+                            frame_bytes=channels * width,
+                            seconds=self.config.chunk_seconds,
+                            diarize=diarize,
+                        )
+                        all_seconds += sum(
+                            (Decimal(part.end - part.start) / rate).to_integral_value(
+                                rounding="ROUND_CEILING"
+                            )
+                            + 1
+                            for part in planned
+                        )
+                    # Internal job-wide protection follows the actual planned workload/prices,
+                    # with room for rounding. It is not an input the operator must guess.
+                    calculated_limit = (
+                        Decimal(all_seconds) * self._rate * Decimal("2.5") + Decimal("0.01")
+                    ).quantize(Decimal("0.01"), rounding="ROUND_CEILING")
+                    if calculated_limit > 100:
+                        self._limit = None
+                        raise SpeechEngineError(
+                            "Estimated cloud ASR workload exceeds the internal safety ceiling; "
+                            "use a smaller batch"
+                        )
+                    self._limit = calculated_limit
+            if self._charged + estimate > self._limit:
                 raise SpeechEngineError(
                     "Cloud ASR cost estimate exceeds the remaining job budget; "
                     "no further audio was sent"
@@ -274,7 +312,7 @@ class CloudSpeechSession:
                 audio = buffer.getvalue()
                 seconds = Decimal(len(data)) / channels / width / rate
                 reserve = (seconds.to_integral_value(rounding="ROUND_CEILING") + 1) * self._rate * 2
-                if self._charged + reserve > Decimal(str(self.config.max_cost_usd)):
+                if self._charged + reserve > self._limit:
                     raise SpeechEngineError(
                         "Cloud ASR job budget exhausted; no further audio was sent"
                     )
@@ -344,7 +382,7 @@ class CloudSpeechSession:
                 record["status"] = "response-received"
                 record["generation_id"] = document.get("_generation_id")
                 self._write_usage(path.parent)
-                if self._charged > Decimal(str(self.config.max_cost_usd)):
+                if self._charged > self._limit:
                     raise SpeechEngineError(
                         "OpenRouter reported charges above the job budget; "
                         "no further request will be made"

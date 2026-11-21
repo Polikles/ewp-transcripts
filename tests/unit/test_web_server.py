@@ -1337,3 +1337,43 @@ def test_existing_exports_list_requires_session_token(token: str, expected: int)
         downloads.list.assert_called_once_with(
             result="result", revision="revision", translation="", directory="exports"
         )
+
+
+@pytest.mark.parametrize("action", ["check", "estimate"])
+@pytest.mark.parametrize("token,expected", [("expected", 200), ("", 403)])
+def test_cloud_read_only_checks_require_csrf_and_use_shared_session_key(action, token, expected):
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    body = json.dumps({"items": [{"path": "selected.wav"}]}).encode()
+    handler.path = f"/api/v1/speech/{action}"
+    handler.headers = Message()
+    for key, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": token,
+    }.items():
+        handler.headers[key] = value
+    handler.rfile = BytesIO(body)
+    speech = Mock()
+    speech.check_key.return_value = {"status": "ok"}
+    speech.refresh.return_value = {"recordings": 1, "models": []}
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_speech=speech,
+        gui_openrouter_api_key="shared-fake-key",
+        gui_openrouter_api_key_env="EWP_TEST_UNUSED_KEY",
+    )
+    handler._write_response = Mock()
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    assert response.status == expected
+    assert b"shared-fake-key" not in response.body
+    if expected == 403:
+        assert not speech.method_calls
+    elif action == "check":
+        speech.check_key.assert_called_once_with("shared-fake-key")
+        speech.refresh.assert_not_called()
+    else:
+        speech.refresh.assert_called_once_with([{"path": "selected.wav"}])
+        speech.check_key.assert_not_called()

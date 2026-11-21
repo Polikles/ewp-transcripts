@@ -1795,7 +1795,12 @@ def transcribe_one(
             CloudSpeechSession,
         )
 
-        session = CloudSpeechSession(config.speech, api_key, cancellation=cancellation)
+        durations = tuple(source.duration_ms for source in episode.sources)
+        if len(episode.sources) == 1 and streams > 1:
+            durations = tuple(episode.duration_ms for _ in range(streams))
+        session = CloudSpeechSession(
+            config.speech, api_key, cancellation=cancellation, expected_durations_ms=durations
+        )
         needs_diarization = streams == 1 and config.diarization.speaker_count != 1
 
         def asr_factory(_: ApplicationConfig) -> AsrEngine:

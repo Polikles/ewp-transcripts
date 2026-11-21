@@ -57,3 +57,18 @@ def process_is_alive(pid: int) -> bool:
         return not kernel.GetExitCodeProcess(handle, ctypes.byref(code)) or code.value == 259
     finally:
         kernel.CloseHandle(handle)
+
+
+def fsync_directory(path: Path) -> None:
+    """Flush POSIX directory entries; Windows CRT cannot open directory file descriptors.
+
+    Publication callers still flush file contents and use atomic link/replace operations.
+    Windows directory-metadata power-loss durability is not provided by Python's os.fsync.
+    """
+    if WINDOWS:
+        return
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)

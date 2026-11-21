@@ -11,6 +11,7 @@ from pathlib import Path
 from ewp_transcripts.domain.errors import OutputReservationError, UnsafeOutputNameError
 from ewp_transcripts.domain.revision import TranscriptRevision
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.platform_runtime import fsync_directory
 
 
 def _safe_job_id(job_id: str) -> str:
@@ -60,17 +61,6 @@ def _write_all(descriptor: int, payload: bytes) -> None:
         remaining = remaining[os.write(descriptor, remaining) :]
 
 
-def _fsync_directory(path: Path) -> None:
-    flags = os.O_RDONLY
-    if hasattr(os, "O_DIRECTORY"):
-        flags |= os.O_DIRECTORY
-    descriptor = os.open(path, flags)
-    try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
-
-
 def _publish_exclusive(path: Path, payload: bytes, *, revision_id: str) -> None:
     temporary = path.parent / f".{path.name}.{revision_id}.tmp"
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -86,7 +76,7 @@ def _publish_exclusive(path: Path, payload: bytes, *, revision_id: str) -> None:
         finally:
             os.close(descriptor)
         os.link(temporary, path)
-        _fsync_directory(path.parent)
+        fsync_directory(path.parent)
     except FileExistsError as error:
         raise OutputReservationError(f"Revision output already exists: {path}") from error
     except OSError as error:
@@ -95,7 +85,7 @@ def _publish_exclusive(path: Path, payload: bytes, *, revision_id: str) -> None:
         if created:
             with suppress(FileNotFoundError):
                 temporary.unlink()
-            _fsync_directory(path.parent)
+            fsync_directory(path.parent)
 
 
 def publish_next_revision(

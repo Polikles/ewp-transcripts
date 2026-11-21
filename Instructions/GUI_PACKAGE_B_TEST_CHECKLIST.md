@@ -50,9 +50,9 @@ separately for **Windows native** and **WSL**. Send diagnostic codes/technical d
   If a result changes after scanning, it must be scanned again before adding.
 - [ ] Choose synchronized speaker tracks plus a separate MP4. Test per-recording language/count.
   Dry-run plans all pending episodes, then one confirmation/Add stages all planned jobs.
-- [ ] Use Add media from this directory with an audio file whose extension was changed. It is
-  recognized by content; invalid/non-media files are skipped, not sent to ASR.
-- [ ] For media with multiple audio streams, Read audio streams and choose one explicitly.
+- [ ] Use the shared file picker with media and canonical result JSON. No input-directory/discovery
+  or Select episode actions remain. Media is probed by content; invalid files produce useful errors.
+- [ ] Selected multi-stream media automatically reveals a warning and stream chooser. Choose one explicitly; ordinary one-stream media shows no extra panel.
   Check the selected language/title/index and transcribe the intended stream. Ambiguous inputs
   require a choice. Changing the stream/recording ID invalidates the old reviewed plan.
 - [ ] Give same-name recordings distinct portable recording IDs. Planned output names differ;
@@ -79,12 +79,12 @@ separately for **Windows native** and **WSL**. Send diagnostic codes/technical d
 ## 5. Cloud ASR, same downstream workflow
 
 Use short disposable excerpts, not full episodes for initial acceptance. These owner-run calls
-are separate from the agent's completed USD 2 pilot; choose a dedicated key/cost limit deliberately.
+are separate from the agent's completed USD 2 pilot; choose a dedicated low-limit provider key deliberately.
 No benchmark or live EN sample is required: owner explicitly accepted PL-only pilot material.
 
 - [ ] In Transcription engine choose OpenRouter and verify the four IDs: `openai/whisper-large-v3`,
   `openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`, `microsoft/mai-transcribe-2`.
-  Set model/job cost guard before planning. Queue rows identify cloud jobs and their model.
+  Set the model before planning. Use Check key and OpenRouter connection, then Refresh models and estimate cost: no audio upload, four-model availability, current hourly prices and duration-based estimates. No user-entered job cap appears. Queue rows identify cloud jobs and their model.
 - [ ] Plan/stage without audio upload. Start without cloud consent is rejected and jobs stay
   staged. Check upload/paid-usage consent and Start: only then may provider requests begin.
 - [ ] Whisper: use separate synchronized speaker tracks, or explicitly select one speaker for a
@@ -97,11 +97,11 @@ No benchmark or live EN sample is required: owner explicitly accepted PL-only pi
   source review shows a warning and preserves a distinct label for manual reassignment.
 - [ ] Open the cloud canonical result in the same source review; save/apply a draft and export
   SRT/VTT/YTT. Cloud processing must not load local WhisperX/alignment/pyannote models.
-- [ ] An intentionally low cost guard rejects audio before sending when the estimate exceeds it.
+- [ ] Internal cost protection rejects excessive workloads before upload; legacy fixed-guard jobs retain their limits.
   Invalid key/credits/model failures are useful and do not trigger automatic retries. An uncertain
   submitted request may be charged; explicit Retry can incur new charges. The guard is an estimate,
   not a hard OpenRouter billing cap. Cancellation waits for a safe request checkpoint.
-- [ ] Save/restart/load a staged cloud job. Provider/model/guard survive; cloud consent and key do
+- [ ] Save/restart/load a staged cloud job. Provider/model/cost mode survive; cloud consent and key do
   not. Confirm deliberately before starting again. Inspect content-free charge/model provenance
   in canonical processing stages; a failed retained workdir has `cloud-asr-usage.json`.
 
@@ -127,3 +127,22 @@ terminal/technical code and commit. Do not send credentials or full private tran
 After fixes pass owner acceptance, freeze B functions and prepare task 10: the complete editable
 EN–PL string-pair file. Owner terminology approval precedes full EN/PL documentation. Screenshots
 wait for custom artwork/icons; the existing artist ZIP remains frozen and blocks no other work.
+
+## Focused Windows feedback retest (2026-11-21)
+
+- [ ] Pull the fix, stop/restart the GUI and refresh its browser page. No model reinstall is needed.
+  Retry the failed audio group and MP4. Both should progress beyond initial state reservation,
+  produce canonical/raw outputs and allow revision/translation/export publication. Keep old partial
+  state for diagnosis; output versions are allocated without overwriting it.
+- [ ] Main picker and Add audio accept both media and canonical result JSON. No input-directory
+  picker, Add media from this directory or Select episode buttons remain. Output picker remains.
+- [ ] Set different language/count for two pending episodes. One Dry-run table lists both with
+  their settings and selection footnotes; Add to queue stages both.
+- [ ] A single-stream file shows no stream/ID panel; a multi-stream file reveals a warning/chooser.
+  Duplicate IDs reveal fields only when needed, then different IDs allow planning.
+- [ ] An unexpected queue failure has one expandable summary per job, a Polish description and
+  technical exception/OS codes/frame locations; the terminal also reports safe frame locations.
+  With two failed jobs, neither generic guidance paragraph is repeated outside its disclosure.
+- [ ] Cloud checks use the same key as correction/translation. Refresh with selected/staged media,
+  compare four hourly prices and estimates; change source/settings and check the stale-estimate
+  notice. No audio is uploaded by these checks. Start still requires fresh paid-upload consent.

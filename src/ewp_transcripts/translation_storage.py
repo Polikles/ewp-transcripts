@@ -12,6 +12,7 @@ from ewp_transcripts.domain.errors import OutputReservationError, UnsafeOutputNa
 from ewp_transcripts.domain.translation import Language, TranscriptTranslation
 from ewp_transcripts.domain.translation_review import TranslationReview
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.platform_runtime import fsync_directory
 from ewp_transcripts.translation_review_format import render_translation_review
 
 
@@ -52,15 +53,6 @@ def _write_all(descriptor: int, payload: bytes) -> None:
         remaining = remaining[os.write(descriptor, remaining) :]
 
 
-def _fsync_directory(path: Path) -> None:
-    flags = os.O_RDONLY | (os.O_DIRECTORY if hasattr(os, "O_DIRECTORY") else 0)
-    descriptor = os.open(path, flags)
-    try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
-
-
 def _publish_exclusive(path: Path, payload: bytes) -> None:
     temporary = path.parent / f".{path.name}.{os.getpid()}.tmp"
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -76,7 +68,7 @@ def _publish_exclusive(path: Path, payload: bytes) -> None:
         finally:
             os.close(descriptor)
         os.link(temporary, path)
-        _fsync_directory(path.parent)
+        fsync_directory(path.parent)
     except FileExistsError as error:
         raise OutputReservationError(f"Translation output already exists: {path}") from error
     except OSError as error:
@@ -85,7 +77,7 @@ def _publish_exclusive(path: Path, payload: bytes) -> None:
         if created:
             with suppress(FileNotFoundError):
                 temporary.unlink()
-            _fsync_directory(path.parent)
+            fsync_directory(path.parent)
 
 
 def publish_translation_review(

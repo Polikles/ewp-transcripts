@@ -56,13 +56,14 @@ function showSummary(kind, result, operation = {}) {
   }
   if (kind === "dry-run" && result.jobs?.length) {
     const table = document.createElement("table"); table.className = "queue-table plan-table";
-    table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th></tr></thead>";
+    table.innerHTML = "<thead><tr><th>Source files</th><th>Decision</th><th>Warnings</th><th>Recording language</th><th>Speakers</th></tr></thead>";
     const body = document.createElement("tbody");
     for (const job of result.jobs) {
       const episode = result.inspection?.episodes?.find(item => item.job_id === job.job_id);
       const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—";
       const row = document.createElement("tr");
-      for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None"]) {
+      const rowLanguage=job.gui_language ?? selected,rowSpeakers=job.gui_speaker_count ?? count;
+      for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None", `${rowLanguage==="auto" ? "Auto-detect" : rowLanguage} *`, `${rowSpeakers==="auto" ? "Auto-detect" : rowSpeakers} **`]) {
         const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
       }
       body.append(row);
@@ -258,20 +259,22 @@ function renderTranscriptionErrors(jobs) {
   const failures = jobs.filter(job => job.status === "failed");
   transcriptionErrors.hidden = failures.length === 0;
   for (const job of failures) {
-    const message = document.createElement("p");
-    message.textContent = `${job.planned_job_id} · ${job.error?.code || "GUI_TRANSCRIPTION_FAILED"}: ${job.error?.message || "Transcription failed."}`;
-    const action = document.createElement("p");
-    action.textContent = job.error?.action || "Transcription failed. Open Settings & About and use Test local dependencies, then retry after fixing failed checks.";
-    const details = document.createElement("details");
-    const summary = document.createElement("summary"); summary.textContent = "Failure technical details (JSON)";
-    const json = document.createElement("pre"); json.textContent = JSON.stringify(job.error || {code:"GUI_TRANSCRIPTION_FAILED"}, null, 2);
-    details.append(summary, json); transcriptionErrors.append(message, action, details);
-    if (job.error?.help_url === "/help/ubuntu-upgrade") {
-      const guidance = document.createElement("p");
-      guidance.textContent = job.error.upgrade_guidance || "Ubuntu upgrade and dependency repair instructions";
-      const link = document.createElement("a"); link.href = "/help/ubuntu-upgrade";
-      link.textContent = "Open Ubuntu upgrade instructions"; link.target = "_blank"; link.rel = "noopener noreferrer";
-      guidance.append(" ", link); transcriptionErrors.append(guidance);
+    const entry=document.createElement("details"); entry.className="transcription-failure";
+    const title=document.createElement("summary");
+    const name=document.createElement("span"); name.dataset.guiContent="true"; name.textContent=job.planned_job_id;
+    const code=document.createElement("code"); code.textContent=job.error?.code || "GUI_TRANSCRIPTION_FAILED";
+    title.append(name," · ",code); entry.append(title);
+    const message=document.createElement("p"); message.textContent=job.error?.message || "Transcription failed.";
+    entry.append(message);
+    if(job.error?.action && job.error.code!=="GUI_TRANSCRIPTION_FAILED") {const action=document.createElement("p");action.textContent=job.error.action;entry.append(action);}
+    const details=document.createElement("details"); details.className="technical-details";
+    const summary=document.createElement("summary"); summary.textContent="Failure technical details (JSON)";
+    const json=document.createElement("pre"); json.textContent=JSON.stringify(job.error || {},null,2);
+    details.append(summary,json);entry.append(details);transcriptionErrors.append(entry);
+    if(job.error?.help_url==="/help/ubuntu-upgrade") {
+      const guidance=document.createElement("p");guidance.textContent=job.error.upgrade_guidance || "Ubuntu upgrade and dependency repair instructions";
+      const link=document.createElement("a");link.href="/help/ubuntu-upgrade";link.textContent="Open Ubuntu upgrade instructions";link.target="_blank";link.rel="noopener noreferrer";
+      guidance.append(" ",link);entry.append(guidance);
     }
   }
 }
@@ -303,13 +306,13 @@ async function refreshJobs() {
     statusText.textContent = queueJobStatusLabel(job);
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
-    if(job.speech?.provider === "openrouter") {const hint=document.createElement("small"); hint.textContent=`OpenRouter · ${job.speech.model} · USD ${job.speech.max_cost_usd}`; identity.append(hint);}
+    if(job.speech?.provider === "openrouter") {const hint=document.createElement("small"); hint.textContent=`OpenRouter · ${job.speech.model}`; identity.append(hint);}
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");
     input.textContent = Object.keys(job.group_sources || {}).map(shortName).join(", ") || shortName(job.input_path);
     input.title = job.input_path;
     const output = document.createElement("td");
-    output.textContent = (job.error ? `${job.error.code}: ${job.error.message}` : shortName(job.result_path || job.planned_result_path));
+    output.textContent = (job.error ? job.error.code : shortName(job.result_path || job.planned_result_path));
     output.title = job.result_path || job.planned_result_path;
     const action = document.createElement("td");
     addJobActions(job, action);
@@ -322,7 +325,7 @@ async function refreshJobs() {
 }
 async function enableProceedNextOutput() { const button = document.querySelector("#proceed-next-output"); const payload = await refreshJobs(); const completeJobs = payload?.jobs?.filter(job => job.status === "completed") || []; const allTranslated = completeJobs.length > 0 && completeJobs.every(job => ["complete", "skipped"].includes(job.workflow?.translated_export?.state)); button.textContent = allTranslated ? "Queue finished" : "Proceed with next output"; button.title = allTranslated ? "All completed queue outputs have verified translated exports or an explicitly skipped translation. Return to the transcription queue." : "Return to the transcription queue to continue the next output."; button.disabled = false; }
 document.querySelector("#proceed-next-output").addEventListener("click", () => guiScrollTo(document.querySelector("#workspace-heading"), {behavior: "smooth", block: "start"}));
-document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; if (selectedGuiAudio.length && ["inspect", "dry-run", "transcriptions"].includes(kind)) { await runGuiBatch(kind, submitter); return; } if (guiInputAlreadyStaged()) return; const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (activeGuiAudio && request.path === activeGuiAudio.paths[0] && activeGuiAudio.paths.length > 1) { request.group_paths = activeGuiAudio.paths; request.group_id = activeGuiAudio.name; } if (typeof decorateGuiMediaRequest === "function") decorateGuiMediaRequest(request); if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; if (activeGuiAudio) activeGuiAudio.files.forEach(file => { file.staged = true; }); formElement.elements.confirmed.checked = false; if (payload.input_path) formElement.elements.path.value = payload.input_path; if (payload.group_sources && activeGuiAudio) { for (const file of activeGuiAudio.files) { const durable = activeGuiAudio.files.length === 1 ? payload.input_path : Object.keys(payload.group_sources).find(path => shortName(path) === file.name); if (durable) file.path = durable; } activeGuiAudio.paths = activeGuiAudio.files.map(file => file.path); renderGuiAudioChoices(); } result.textContent = ""; summary.replaceChildren(); await refreshJobs(); const next = guiAudioEpisodes().find(item => !item.files.some(file => file.staged)); if (next) selectGuiAudio(next); else renderGuiAudioChoices(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); if (payload.error.code === "GUI_DRY_RUN_REQUIRED") highlightDryRun(); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); if (kind === "dry-run") document.querySelector('#workflow button[value="dry-run"]').classList.remove("next-required"); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = guiInputAlreadyStaged(); } });
+document.querySelector("#workflow").addEventListener("submit", async event => { event.preventDefault(); const formElement = event.currentTarget; const submitter = event.submitter; const kind = submitter.value; if (!selectedGuiAudio.length && typeof prepareDirectGuiMedia === "function" && !(await prepareDirectGuiMedia())) return; if (selectedGuiAudio.length && ["inspect", "dry-run", "transcriptions"].includes(kind)) { await runGuiBatch(kind, submitter); return; } if (guiInputAlreadyStaged()) return; const form = new FormData(formElement); const autoSpeakers = form.get("speaker_count_auto") === "on"; const request = {path: form.get("path"), language: form.get("language"), speaker_count: autoSpeakers ? "auto" : Number(form.get("speaker_count"))}; if (activeGuiAudio && request.path === activeGuiAudio.paths[0] && activeGuiAudio.paths.length > 1) { request.group_paths = activeGuiAudio.paths; request.group_id = activeGuiAudio.name; } if (typeof decorateGuiMediaRequest === "function") decorateGuiMediaRequest(request); if (form.get("output_directory")) request.output_directory = form.get("output_directory"); const status = document.querySelector("#operation-status"); const result = document.querySelector("#operation-result"); const summary = document.querySelector("#operation-summary"); submitter.disabled = true; status.textContent = kind === "inspect" ? "Inspecting…" : kind === "dry-run" ? "Planning…" : "Adding…"; if (kind !== "transcriptions") { result.textContent = ""; summary.replaceChildren(); } try { const headers = {"Content-Type": "application/json", "Accept": "application/json"}; if (kind === "transcriptions") { request.confirmed = form.get("confirmed") === "on"; headers["X-EWP-CSRF"] = csrfToken; } const response = await fetch(`/api/v1/${kind}`, {method: "POST", headers, body: JSON.stringify(request)}); const payload = await response.json(); if (kind === "transcriptions") { if (response.ok) { status.textContent = "Added to staged queue"; if (activeGuiAudio) activeGuiAudio.files.forEach(file => { file.staged = true; }); formElement.elements.confirmed.checked = false; if (payload.input_path) formElement.elements.path.value = payload.input_path; if (payload.group_sources && activeGuiAudio) { for (const file of activeGuiAudio.files) { const durable = activeGuiAudio.files.length === 1 ? payload.input_path : Object.keys(payload.group_sources).find(path => shortName(path) === file.name); if (durable) file.path = durable; } activeGuiAudio.paths = activeGuiAudio.files.map(file => file.path); renderGuiAudioChoices(); } result.textContent = ""; summary.replaceChildren(); await refreshJobs(); const next = guiAudioEpisodes().find(item => !item.files.some(file => file.staged)); if (next) selectGuiAudio(next); else renderGuiAudioChoices(); } else { status.textContent = `${payload.error.code}: ${payload.error.message}`; result.textContent = JSON.stringify(payload.error, null, 2); if (payload.error.code === "GUI_DRY_RUN_REQUIRED") highlightDryRun(); } } else if (payload.status === "completed" && payload.result) { status.textContent = `${kind === "inspect" ? "Inspection" : "Dry-run"} completed`; showSummary(kind, payload.result, payload); if (kind === "dry-run") document.querySelector('#workflow button[value="dry-run"]').classList.remove("next-required"); result.textContent = JSON.stringify(payload.result, null, 2); } else { const error = payload.error || {code: "GUI_RESPONSE_INVALID", message: "The local service returned no result."}; status.textContent = `${error.code}: ${error.message}`; result.textContent = JSON.stringify(error, null, 2); } } catch (error) { status.textContent = `GUI_API_UNAVAILABLE: ${error.message}`; } finally { submitter.disabled = guiInputAlreadyStaged(); } });
 function updateGuiQueueStart() {
   document.querySelector("#start-queue").disabled = guiQueueStarting || !guiQueueJobs.some(job => ["staged", "queued", "running"].includes(job.status));
 }
@@ -708,7 +711,7 @@ const nativeMediaButton = document.createElement("button");
 nativeMediaButton.type = "button";
 nativeMediaButton.className = "path-browser-button";
 nativeMediaButton.textContent = "Choose audio or video files…";
-nativeMediaButton.title = "Choose existing audio or video files with the browser's native picker.";
+nativeMediaButton.title = "Choose audio, video or saved canonical result JSON files.";
 nativeMediaButton.addEventListener("click", () => nativeMediaInput.click());
 const selectedGuiAudio = [];
 let activeGuiAudio = null;
@@ -742,7 +745,7 @@ function guiAudioEpisodes() {
   });
 }
 function rememberGuiAudioLanguage() {
-  if (activeGuiAudio) activeGuiAudio.files.forEach(file => { file.language = document.querySelector("#workflow-language").value; file.speaker_count = document.querySelector("#workflow-speaker-auto").checked ? "auto" : Number(document.querySelector("#workflow-speaker-count").value); });
+  if (activeGuiAudio && !selectedGuiAudio.length) activeGuiAudio.files.forEach(file => { file.language = document.querySelector("#workflow-language").value; file.speaker_count = document.querySelector("#workflow-speaker-auto").checked ? "auto" : Number(document.querySelector("#workflow-speaker-count").value); });
 }
 for (const id of ["workflow-language", "workflow-speaker-count", "workflow-speaker-auto"]) document.getElementById(id).addEventListener("change", rememberGuiAudioLanguage);
 function selectGuiAudio(episode, announce = true) {
@@ -765,47 +768,83 @@ function selectGuiAudio(episode, announce = true) {
 function renderGuiAudioChoices() {
   for (const button of document.querySelectorAll("#workflow button[value]")) button.disabled = typeof guiBatchBusy !== "undefined" && guiBatchBusy || (selectedGuiAudio.length ? !guiAudioEpisodes().some(item => !item.files.some(file => file.staged)) : guiInputAlreadyStaged());
   audioChoices.replaceChildren();
+  document.querySelector(".workflow-options").hidden=selectedGuiAudio.length>0;
   for (const episode of guiAudioEpisodes()) {
     const row = document.createElement("li");
     const name = document.createElement("span");
-    name.textContent = episode.files.map(file => file.name).join(" + ") + (episode.files[0].recording_id ? ` · ${episode.files[0].recording_id}` : ""); name.title = episode.paths.join("\n");
-    const use = document.createElement("button"); use.type = "button";
-    const active = activeGuiAudio?.paths.join("|") === episode.paths.join("|") && workflowInput.value === episode.paths[0];
+    name.textContent = episode.files.map(file => file.name).join(" + ") + (episode.files[0].recording_id ? ` · ${episode.files[0].recording_id}` : ""); name.title = episode.paths.join("\n"); name.dataset.guiContent="true";
+    const active = activeGuiAudio?.paths.join("|") === episode.paths.join("|");
     const staged = episode.files.some(file => file.staged);
-    use.disabled = staged || guiBatchBusy;
-    use.textContent = staged ? "Added to queue" : active ? "Selected for planning" : "Select episode";
-    use.setAttribute("aria-pressed", String(active));
-    use.addEventListener("click", () => { selectGuiAudio(episode); document.querySelector('#workflow button[value="dry-run"]').focus(); });
+    const settings=document.createElement("div");settings.className="gui-episode-settings";
+    const languageLabel=document.createElement("label");languageLabel.textContent="Recording language";
+    const language=document.createElement("select");language.dataset.episodeLanguage=episode.paths[0];
+    for(const [value,label] of [["pl","Polish"],["en","English"],["auto","Auto-detect"]]) {const option=document.createElement("option");option.value=value;option.textContent=label;language.append(option);}
+    language.value=episode.files[0].language || "pl";language.disabled=staged || guiBatchBusy;
+    language.addEventListener("change",()=>{episode.files.forEach(file=>file.language=language.value);if(active) document.querySelector("#workflow-language").value=language.value; if(typeof invalidateMediaPlan==="function") invalidateMediaPlan();});
+    languageLabel.append(language);
+    const languageChoice=typeof createGuiLanguageChoice==="function" ? createGuiLanguageChoice(languageLabel) : languageLabel;
+    const speakerLabel=document.createElement("label");speakerLabel.textContent="Speakers";
+    const speakers=document.createElement("select");speakers.dataset.episodeSpeakers=episode.paths[0];
+    for(const value of ["auto",1,2,3,4,5,6]) {const option=document.createElement("option");option.value=String(value);option.textContent=value==="auto" ? "Auto-detect" : String(value);speakers.append(option);}
+    speakers.value=String(episode.files[0].speaker_count ?? 2);speakers.disabled=staged || guiBatchBusy;
+    speakers.addEventListener("change",()=>{episode.files.forEach(file=>file.speaker_count=speakers.value==="auto" ? "auto" : Number(speakers.value));if(active) {document.querySelector("#workflow-speaker-auto").checked=speakers.value==="auto";if(speakers.value!=="auto")document.querySelector("#workflow-speaker-count").value=speakers.value;}if(typeof invalidateMediaPlan==="function")invalidateMediaPlan();});
+    speakerLabel.append(speakers);settings.append(languageChoice,speakerLabel);
     const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Remove from list";
     remove.disabled = guiBatchBusy;
     remove.addEventListener("click", () => {
       for (const file of episode.files) selectedGuiAudio.splice(selectedGuiAudio.indexOf(file), 1);
-      if (active) { activeGuiAudio = null; workflowInput.value = ""; }
+      if (active) {
+        activeGuiAudio=null;
+        const remaining=guiAudioEpisodes(),next=remaining.find(item=>!item.files.some(file=>file.staged)) || remaining[0];
+        if(next)selectGuiAudio(next,false);else workflowInput.value="";
+      }
+      if(typeof invalidateMediaPlan==="function")invalidateMediaPlan();
       renderGuiAudioChoices();
     });
-    row.append(name, use, remove); audioChoices.append(row);
+    row.append(name, settings, remove); if(typeof appendGuiMediaControls==="function") appendGuiMediaControls(row,episode); audioChoices.append(row);
   }
 }
 workflowInput.after(audioChoices);
+let pendingGuiResultFiles=[];
+let guiResultImportBusy=false;
+async function importPendingGuiResults() {
+  const root=workflowOutput.value.trim();
+  if(!pendingGuiResultFiles.length || !root || guiResultImportBusy) return;
+  guiResultImportBusy=true;
+  const status=document.querySelector("#operation-status");
+  try {
+    while(pendingGuiResultFiles.length) {
+      const file=pendingGuiResultFiles.shift();
+      await postSelectedFile("/api/v1/import-canonical-file",file,nativeMediaButton,{"X-EWP-Output-Directory":encodeURIComponent(root)});
+    }
+    jobsSignature="";await refreshJobs();status.textContent="Saved results added to review queues.";
+  } catch(error) {status.textContent=error.message;}
+  finally {guiResultImportBusy=false;}
+}
+workflowOutput.addEventListener("change",()=>{if(pendingGuiResultFiles.length)void importPendingGuiResults();});
 nativeMediaInput.addEventListener("change", async () => {
-  const files = [...(nativeMediaInput.files || [])];
-  nativeMediaInput.value = "";
-  if (!files.length) return;
-  const status = document.querySelector("#operation-status");
-  nativeMediaButton.disabled = true;
-  const errors = [];
-  for (const file of files) {
-    status.textContent = `Copying ${file.name} into this local GUI session…`;
-    try {
-      const payload = await postSelectedFile("/api/v1/selected-media/upload", file, nativeMediaButton);
-      selectedGuiAudio.push({name:file.name, path:payload.path, language:document.querySelector("#workflow-language").value, speaker_count:document.querySelector("#workflow-speaker-auto").checked ? "auto" : Number(document.querySelector("#workflow-speaker-count").value)});
-    } catch (error) { errors.push(`${file.name}: ${error.message}`); }
-  }
-  const episodes = guiAudioEpisodes();
-  const available = episodes.find(item => !item.files.some(file => file.staged));
-  if (available) selectGuiAudio(available);
-  if (errors.length) status.textContent = errors.join("; ");
-  nativeMediaButton.disabled = false;
+  const files=[...(nativeMediaInput.files || [])];nativeMediaInput.value="";
+  if(!files.length)return;
+  const status=document.querySelector("#operation-status");nativeMediaButton.disabled=true;
+  const errors=[];
+  try {
+    for(const file of files) {
+      if(file.name.toLowerCase().endsWith(".json")) {pendingGuiResultFiles.push(file);continue;}
+      status.textContent=`Copying ${file.name} into this local GUI session…`;
+      try {
+        const payload=await postSelectedFile("/api/v1/selected-media/upload",file,nativeMediaButton);
+        selectedGuiAudio.push({name:file.name,path:payload.path,language:document.querySelector("#workflow-language").value,speaker_count:document.querySelector("#workflow-speaker-auto").checked ? "auto" : Number(document.querySelector("#workflow-speaker-count").value)});
+      } catch(error) {errors.push(error.message);}
+    }
+    const episodes=guiAudioEpisodes(), available=episodes.find(item=>!item.files.some(file=>file.staged));
+    if(available)selectGuiAudio(available);
+    if(typeof readEpisodeMediaOptions==="function") for(const episode of episodes) await readEpisodeMediaOptions(episode);
+    renderGuiAudioChoices();
+    await importPendingGuiResults();
+    if(pendingGuiResultFiles.length) status.textContent="Choose a shared output directory to add the selected saved results.";
+    if(errors.length)status.textContent=errors.join("; ");
+  }catch(error){status.textContent=error.message;}
+  finally{nativeMediaButton.disabled=false;}
 });
 workflowInput.addEventListener("input", () => {
   if (activeGuiAudio && workflowInput.value !== activeGuiAudio.paths[0]) activeGuiAudio = null;

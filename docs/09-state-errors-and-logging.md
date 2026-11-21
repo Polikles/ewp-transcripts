@@ -33,7 +33,9 @@ directory, model cache, or siblings.
 The reservation implementation publishes the initial running state with an
 exclusive same-filesystem hard link from a fully written and `fsync`ed temporary file.
 This provides no-overwrite semantics unavailable from a normal replacing rename. The
-directory is then `fsync`ed before the temporary link is removed. Reservation is planned
+directory is then `fsync`ed on POSIX before the temporary link is removed. Native Windows skips
+unsupported directory-descriptor operations while keeping file flushes and atomic publication;
+directory-metadata durability after power loss is not claimed there. Reservation is planned
 again while holding the output-directory lock, so a stale dry-run decision is never used
 for mutation.
 

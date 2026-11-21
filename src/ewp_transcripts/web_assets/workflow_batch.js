@@ -9,21 +9,6 @@ function guiBatchRequests() {
     return {episode, request};
   });
 }
-function appendBatchSettings(entries) {
-  const table = document.createElement("table"); table.className = "queue-table plan-table";
-  table.innerHTML = "<thead><tr><th>Source files</th><th>Recording language</th><th>Speakers</th></tr></thead>";
-  const body = document.createElement("tbody");
-  for (const {episode, request} of entries) {
-    const row = document.createElement("tr");
-    for (const value of [episode.files.map(file=>file.name).join(", "), `${request.language === "auto" ? "Auto-detect" : request.language} *`, `${request.speaker_count === "auto" ? "Auto-detect" : request.speaker_count} **`]) {
-      const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
-    }
-    body.append(row);
-  }
-  table.append(body);
-  const summary = document.querySelector("#operation-summary"), notes = summary.querySelector(".summary-selection-notes");
-  if (notes) notes.before(table); else summary.append(table);
-}
 async function runGuiBatch(kind, trigger) {
   if (guiBatchBusy) return;
   if(kind !== "transcriptions" && typeof prepareGuiMediaBatch === "function") {
@@ -72,11 +57,11 @@ async function runGuiBatch(kind, trigger) {
       }
       if (JSON.stringify(guiBatchRequests().map(item=>item.request)) !== signature) throw new Error("GUI_BATCH_CHANGED: Selection or settings changed during planning. Inspect and plan the current list again.");
       const identifiers=results.flatMap(item=>item.jobs || []).map(job=>job.job_id);
-      if(new Set(identifiers).size!==identifiers.length) throw new Error("GUI_RECORDING_ID_COLLISION: Choose distinct recording IDs for same-name episodes before planning again.");
-      const combined = {episodes:results.flatMap(item=>item.episodes || []), discovery:{files:results.flatMap(item=>item.discovery?.files || []), skipped:results.flatMap(item=>item.discovery?.skipped || [])}, jobs:results.flatMap(item=>item.jobs || []), inspection:{episodes:results.flatMap(item=>item.inspection?.episodes || [])}};
+      if(new Set(identifiers).size!==identifiers.length) {entries.forEach(({episode})=>episode.files.forEach(file=>file.needs_recording_id=true));renderGuiAudioChoices();throw new Error("GUI_RECORDING_ID_COLLISION: Choose distinct recording IDs for same-name episodes before planning again.");}
+      const combined = {episodes:results.flatMap(item=>item.episodes || []), discovery:{files:results.flatMap(item=>item.discovery?.files || []), skipped:results.flatMap(item=>item.discovery?.skipped || [])}, jobs:results.flatMap((item,index)=>(item.jobs || []).map(job=>({...job,gui_language:entries[index].request.language,gui_speaker_count:entries[index].request.speaker_count}))), inspection:{episodes:results.flatMap(item=>item.inspection?.episodes || [])}};
       const languages = [...new Set(entries.map(item=>item.request.language))].join(", ");
       const speakers = [...new Set(entries.map(item=>item.request.speaker_count))].join(", ");
-      showSummary(kind, combined, {language:languages, speaker_count:speakers}); appendBatchSettings(entries);
+      showSummary(kind, combined, {language:languages, speaker_count:speakers});
       technical.textContent = JSON.stringify(results, null, 2);
       status.textContent = kind === "inspect" ? "Inspection completed" : "Dry-run completed";
       if (kind === "dry-run") {

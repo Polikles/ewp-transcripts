@@ -82,9 +82,9 @@ def test_queue_applies_staged_language_and_speaker_count(tmp_path: Path) -> None
     assert seen[0].diarization.speaker_count == 4
 
 
-def test_queue_sanitizes_unexpected_failure(tmp_path: Path) -> None:
+def test_queue_sanitizes_unexpected_failure(tmp_path: Path, caplog) -> None:
     def fail(*args, **kwargs):
-        raise RuntimeError("secret backend detail")
+        raise PermissionError(13, "secret backend detail")
 
     queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=fail)
     try:
@@ -102,7 +102,12 @@ def test_queue_sanitizes_unexpected_failure(tmp_path: Path) -> None:
     assert failed.status == "failed"
     assert failed.error is not None
     assert failed.error["code"] == "GUI_TRANSCRIPTION_FAILED"
-    assert "secret" not in failed.error["message"]
+    assert "secret" not in str(failed.error) + caplog.text
+    assert failed.error["exception_type"] == "PermissionError"
+    assert failed.error["errno"] == "13"
+    assert "test_web_jobs.py:" in failed.error["traceback"]
+    assert "in fail" in caplog.text and "PermissionError" in caplog.text
+    assert str(tmp_path) not in failed.error["traceback"]
 
 
 def test_staged_job_can_be_removed_before_start(tmp_path: Path) -> None:

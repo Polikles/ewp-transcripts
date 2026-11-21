@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-21",
+  "baseline_commit": "761109f",
+  "owner_evidence": {
+    "native_windows_install_gui_doctor": "pass",
+    "native_queue_before_fix": "failed before ASR logs, only initial running partial state",
+    "native_workflow_after_fix": "owner retest pending"
+  },
+  "diagnosis": "POSIX directory descriptors in publication unsupported by Windows CRT; reproduced with directory-open rejection; partial-only state matches failure stage but owner exception was masked",
+  "verification": {
+    "make_check": {
+      "tests": 1008,
+      "lint": "pass",
+      "format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4,
+      "runtime": "real FFmpeg, fake speech engines, includes simulated Windows publication restrictions"
+    },
+    "windows_publication_families": 6,
+    "full_chromium_geometry_cases": 144,
+    "full_page_errors": [],
+    "full_external_requests": [],
+    "focused_check": {
+      "checks": "main JSON/media picker, per-recording settings, conditional streams, one table, language help, cloud mock checks/prices/staleness, error disclosures, ENPL responsive geometry, removal and conditional collision IDs",
+      "pageErrors": [],
+      "externalRequests": [],
+      "measurements": [
+        {
+          "width": 1440,
+          "page": 1440
+        },
+        {
+          "width": 960,
+          "page": 960
+        },
+        {
+          "width": 720,
+          "page": 720
+        },
+        {
+          "width": 390,
+          "page": 390
+        },
+        {
+          "width": 1440,
+          "page": 1440
+        },
+        {
+          "width": 960,
+          "page": 960
+        },
+        {
+          "width": 720,
+          "page": 720
+        },
+        {
+          "width": 390,
+          "page": 390
+        }
+      ],
+      "cloudAudioUploads": 0
+    },
+    "restart_recovery": "pass: actual server stop/restart, source/translation drafts and immutable exports restored; no browser errors or external requests"
+  },
+  "provider_testing": {
+    "read_only_controller": "mock transports verify authenticated key check, public catalog/endpoints, duration units/rounding and malformed-workload rejection",
+    "browser": "mock local read-only responses, no provider audio requests",
+    "paid_calls_this_task": 0,
+    "prior_cumulative_asr_usd": "0.0153610111540591670"
+  },
+  "limitations": [
+    "Actual native Windows/GPU ASR requires owner retest",
+    "No Windows directory metadata power-loss durability claim",
+    "Price estimates can differ from final billing",
+    "No final EN-PL terminology/manual acceptance implied"
+  ],
+  "deferred": [
+    "Uninstall script and optional model removal",
+    "Standalone Windows EXE installer with desktop shortcut and Add/Remove Programs registration and GUI uninstall"
+  ],
+  "disposable_root": "/tmp/ewp-win-feedback.KwPQAK",
+  "disposable_cleanup": "complete: local servers stopped and dedicated disposable root removed after reviewed evidence capture",
+  "artist_zip_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1"
+}

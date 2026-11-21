@@ -3,13 +3,36 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered B owner Windows/GUI fixes — native retest next
+
+Owner confirms Windows installation and GUI launch work; doctor/dependency checks all pass.
+Reported queue failure was before ASR with masked GUI_TRANSCRIPTION_FAILED on audio group and MP4.
+The reproduced Windows publication defect and requested UI changes are fixed; see the
+[checkpoint](docs/checkpoints/2026-11-21-windows-queue-gui-feedback.md).
+
+- [x] Diagnose/fix Windows queue persistence; expose sanitized exception/stack/OS codes instead of masking unexpected failures; stop duplicate generic error/action rendering and localize messages.
+- [x] Simplify step 1: remove input-directory picker and directory-media button; share one audio/video/previous-result picker with left rail; rail label Add audio / Dodaj audio.
+- [x] Remove Select episode / Selected for planning buttons; keep per-recording settings directly editable and Remove from list; batch plans all inputs.
+- [x] Replace permanently visible stream/ID section with automatic multi-stream warning and explicit per-file selection when needed (ID controls only for actual collisions). All-stream processing is an alternative, not required if explicit selection is available.
+- [x] Replace cloud cost-limit input with live hourly prices and duration-based estimates; add shared-key/connection check and explicit model availability/pricing/estimate refresh; retain backend cost protection as an internal safeguard.
+- [x] Use Local GPU (default) / Lokalne GPU (domyślne); merge duplicate dry-run tables into one source/decision/warnings/language/count table.
+- [x] Update necessary EN/PL copy, tests/checklist, changelog/checkpoints/roadmap; verify and push; native owner re-test remains required.
+
+- [ ] Owner: pull/restart/refresh native GUI, retry grouped audio and MP4, then revision/translation/exports. Full B Windows/WSL acceptance remains pending; no model reinstall is needed for the storage fix.
+
+## Later Windows installation/distribution TODO — explicitly deferred
+
+- [ ] Windows uninstall script with documented removal of application environment/private FFmpeg and optional downloaded models. Inventory exact owned paths and shared caches; preserve recordings/publications and unrelated/shared model editions unless explicitly selected.
+- [ ] Standalone graphical Windows EXE installer without a repository checkout; desktop launch icon and Add/Remove Programs registration.
+- [ ] Matching graphical uninstaller, including explicit optional model removal. Schedule after current workflow fixes; do not build either installer now.
+
 ## Completed Windows model-setup fix
 
 - [x] Fix NLTK 3.10.1 blocking regex inside the checkout's .venv during setup-models.py; -P alone also reproduces the failure.
 - [x] Prepare NLTK data from an isolated child/neutral working directory, preserving safety hook, model pins, caller paths and explicit downloads.
 - [x] Test the locked NLTK import without network and the model setup flow/failures with stubs; update Windows instructions/checkpoints, verify, commit/push.
 
-- [ ] Owner reruns Windows model preparation (step 4), then doctor and the B checklist. [Fix checkpoint](docs/checkpoints/2026-11-21-windows-model-setup-nltk.md).
+- [x] Owner confirms native Windows model preparation/install/GUI launch and doctor/dependency checks pass. Continue queue/workflow fixes and the B checklist. [Fix checkpoint](docs/checkpoints/2026-11-21-windows-model-setup-nltk.md).
 
 ## Completed B8a follow-up: large cloud recordings
 

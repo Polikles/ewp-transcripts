@@ -13,8 +13,8 @@
           "pl": "Wybierz katalog wyników i nagrania"
         },
         "text": {
-          "en": "Choose the shared output directory first, then audio or video files. Select matching speaker tracks for one episode together.",
-          "pl": "Najpierw wybierz wspólny katalog wyników, a następnie pliki audio lub wideo. Zaznacz razem ścieżki mówców jednego nagrania."
+          "en": "Choose the shared output directory first, then audio/video or saved canonical result JSON files. Select matching speaker tracks for one episode together.",
+          "pl": "Najpierw wybierz wspólny katalog wyników, a potem pliki audio, wideo lub zapisane wyniki canonical JSON. Pasujące ścieżki mówców jednego odcinka wybierz razem."
         }
       },
       {

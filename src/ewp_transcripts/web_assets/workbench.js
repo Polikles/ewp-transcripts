@@ -219,7 +219,7 @@ function installGuiShell() {
   recordings.setAttribute("aria-label", "Recordings");
   const queueTitle = document.createElement("h2"); queueTitle.textContent = "Recording queue";
   const addAudio = document.createElement("button"); addAudio.type = "button";
-  addAudio.id = "gui-add-audio"; addAudio.textContent = "Add audio or video files…";
+  addAudio.id = "gui-add-audio"; addAudio.textContent = "Add audio";
   addAudio.disabled = nativeMediaButton.disabled;
   new MutationObserver(() => { addAudio.disabled = nativeMediaButton.disabled; }).observe(nativeMediaButton, {attributes:true, attributeFilter:["disabled"]});
   addAudio.addEventListener("click", () => { if (nativeMediaButton.disabled) return; showGuiStage("workspace"); nativeMediaInput.click(); });

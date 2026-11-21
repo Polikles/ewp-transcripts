@@ -42,6 +42,7 @@ from ewp_transcripts.exporters import (
     render_ytt,
 )
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.platform_runtime import fsync_directory
 from ewp_transcripts.review_discovery import discover_review_results
 
 
@@ -607,11 +608,7 @@ def _publish_exclusive(path: Path, content: str) -> None:
         finally:
             os.close(descriptor)
         os.link(temporary, path)
-        directory_descriptor = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-        try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
+        fsync_directory(path.parent)
     except FileExistsError as error:
         raise OutputReservationError(f"Export already exists: {path}") from error
     except OSError as error:

@@ -57,6 +57,15 @@
 #gui-palette { background: var(--gui-soft); border: 1px solid var(--gui-line); border-radius: .5rem; padding: .75rem; margin-block: 1rem; }
 .gui-audio-list { display: grid; gap: .4rem; padding: 0; list-style: none; }
 .gui-audio-list li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; overflow-wrap: anywhere; }
+.gui-audio-list li { border: 1px solid var(--gui-line); border-radius: .4rem; padding: .6rem; }
+.gui-audio-list li > span { flex: 1 1 100%; }
+.gui-episode-settings { display: flex; flex-wrap: wrap; gap: .5rem; flex: 1 1 18rem; min-width: 0; }
+.gui-episode-settings > :is(label, .gui-language-choice) { flex: 1 1 8rem; min-width: 0; margin: 0; }
+.gui-episode-settings label { margin: 0; }
+.gui-audio-list li > label, .gui-audio-list li > .notice { flex: 1 1 100%; }
+#cloud-asr-prices { overflow-x: auto; max-width: 100%; }
+#cloud-asr-prices td:first-child { overflow-wrap: anywhere; }
+.transcription-failure { margin-block: .5rem; }
 .gui-workbench .translation-unit { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem 1rem; }
 .gui-workbench .translation-source-label { grid-column: 1; grid-row: 1; }
 .gui-workbench .translation-source { grid-column: 1; grid-row: 2; }

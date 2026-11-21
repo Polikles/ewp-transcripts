@@ -584,3 +584,34 @@ Temporary inventory refresh disables stale rows and ignores superseded responses
 changes invalidate pending previews before confirmation. Cleanup continues to target only eligible
 temporary workdirs, not durable media. Whole-interface EN–PL approval and final EN/PL manuals
 remain sequenced after feature completion; only necessary changed-stage instructions are updated.
+
+## Owner Windows feedback clarification — 2026-11-21
+
+The main recording picker and Add audio in the rail accept audio, video and canonical result JSON
+through the same flow. The input-directory convenience/discovery buttons and per-episode selection
+buttons are removed; output browsing and direct paths remain. Each pending recording exposes its
+language/count. Local ffprobe metadata is read automatically; only multi-stream media reveals a
+warning and explicit stream choice. This supersedes earlier deferral of interactive stream selection.
+Duplicate planned IDs reveal ID fields only when required. One Dry-run table combines sources,
+decisions, warnings and processing settings for the batch.
+
+Explicit POST /api/v1/speech/check uses the shared process/environment OpenRouter key for a GET
+/key readiness check, without returning account information. POST /api/v1/speech/estimate validates
+local media paths/stream choices, probes durations and reads the public transcription model catalog
+and endpoint prices for the four existing presets. Both local routes require the current CSRF token
+and same-origin policy. Neither uploads audio/text; price discovery does not require a key and is
+never triggered automatically. The UI marks an estimate stale after input/settings changes.
+
+Endpoint duration rates are normalized to USD/audio hour (MAI's prompt price is per hour; the other
+three vetted presets use seconds). Estimates account for chunk overlap/rounding and a stereo-mode
+range. They are mutable estimates, not billing promises. New GUI speech requests use
+speech.cost_mode=estimated and derive an internal job-wide reserve from actual track durations,
+chunk plan and refreshed maximum endpoint price, with a USD100 safety ceiling. Existing fixed
+speech.max_cost_usd jobs remain compatible. Consent is still fresh and excludes saved work.
+
+Unexpected queue failures expose exception type, errno/winerror and basename/line/function frames,
+without arbitrary exception text, source lines, locals, credentials or transcript content. The same
+safe locations are logged to the local terminal. Each failed job has one collapsed error disclosure,
+with technical JSON nested inside. Storage retains file fsync and atomic publication on Windows;
+it skips POSIX directory-descriptor flushing there, without claiming directory-metadata power-loss
+durability. See the Windows feedback checkpoint and owner retest checklist.

@@ -56,6 +56,7 @@ from ewp_transcripts.web_source_cleanup import (
     cleanup_managed_sources,
     inventory_managed_sources,
 )
+from ewp_transcripts.web_speech import GuiSpeechController
 from ewp_transcripts.web_translation_reviews import GuiTranslationReviewController
 from ewp_transcripts.web_translations import GuiTranslationController, GuiTranslationError
 from ewp_transcripts.web_workdirs import GuiWorkdirController
@@ -431,6 +432,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
         self.gui_inputs = GuiInputs(self.gui_workflows.resolve_allowed_path)
+        self.gui_speech = GuiSpeechController(self.gui_inputs)
         self.gui_selections = GuiSelectionCache()
         self.gui_workspaces = GuiWorkspaceController(
             state_directory=default_workspace_directory(),
@@ -1350,6 +1352,35 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             self._write_response(_json_response(HTTPStatus.OK, payload))
+            return
+        if path in {"/api/v1/speech/check", "/api/v1/speech/estimate"}:
+            if not secrets.compare_digest(
+                self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {"error": {"code": "GUI_CSRF_REJECTED", "message": "Invalid session."}},
+                    )
+                )
+                return
+            try:
+                key = self.server.gui_openrouter_api_key or os.environ.get(
+                    self.server.gui_openrouter_api_key_env, ""
+                )
+                speech_payload = (
+                    self.server.gui_speech.check_key(key)
+                    if path.endswith("/check")
+                    else self.server.gui_speech.refresh(document.get("items", []))
+                )
+                self._write_response(_json_response(HTTPStatus.OK, speech_payload))
+            except (ValueError, OSError, ApplicationError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_ASR_CHECK_FAILED", "message": str(error)}},
+                    )
+                )
             return
         if path == "/api/v1/credentials/openrouter":
             supplied = self.headers.get("X-EWP-CSRF", "")

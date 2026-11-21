@@ -29,26 +29,29 @@ function syncGuiStatusMotion() {
   }
 }
 
-function installReviewFeedback() {
-  const hint = [...document.querySelectorAll("#workflow .field-hint")].find(node=>node.textContent.includes("Windows"));
-  if (hint) { hint.id = "gui-input-path-hint"; workflowInput.after(hint); }
-  const language = document.querySelector("#workflow-language");
-  const label = language.closest("label");
+function createGuiLanguageChoice(label) {
   const choice = document.createElement("div"); choice.className = "gui-language-choice";
-  label.before(choice); choice.append(label);
+  if(label.parentNode)label.before(choice);choice.append(label);
   const details = document.createElement("details"); details.className = "gui-language-info";
   const summary = document.createElement("summary"); summary.textContent = "i";
   const message = "Choosing EN for Polish recordings has sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.";
   summary.title = message; summary.setAttribute("aria-label", "Language selection information");
   const info = document.createElement("p"); info.className = "field-hint"; info.textContent = message;
   details.append(summary, info); choice.append(details);
+  return choice;
+}
+function installReviewFeedback() {
+  const hint = [...document.querySelectorAll("#workflow .field-hint")].find(node=>node.textContent.includes("Windows"));
+  if (hint) { hint.id = "gui-input-path-hint"; workflowInput.after(hint); }
+  createGuiLanguageChoice(document.querySelector("#workflow-language").closest("label"));
   document.addEventListener("pointerdown", event => {
-    if (details.open && !details.contains(event.target)) details.open = false;
+    document.querySelectorAll(".gui-language-info[open]").forEach(details=>{if(!details.contains(event.target))details.open=false;});
   });
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && details.open) {
+    const details=document.querySelector(".gui-language-info[open]");
+    if (event.key === "Escape" && details) {
       details.open = false;
-      summary.focus({preventScroll:true});
+      details.querySelector("summary").focus({preventScroll:true});
     }
   });
   for (const input of [reviewForm.elements.namedItem("verified"), document.querySelector("#translation-review-confirmed")]) {

@@ -326,6 +326,7 @@ class SpeechConfig(StrictConfigModel):
         "elevenlabs/scribe-v2",
         "microsoft/mai-transcribe-2",
     ] = "openai/whisper-large-v3"
+    cost_mode: Literal["fixed", "estimated"] = "fixed"
     max_cost_usd: float = Field(default=2, gt=0, le=100)
     chunk_seconds: int = Field(default=120, ge=15, le=300)
     timeout_seconds: int = Field(default=90, ge=1, le=180)

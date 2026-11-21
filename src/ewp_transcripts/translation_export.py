@@ -21,6 +21,7 @@ from ewp_transcripts.exporters.subtitles import (
     wrap_subtitle_text,
 )
 from ewp_transcripts.output_lock import output_directory_lock
+from ewp_transcripts.platform_runtime import fsync_directory
 
 
 class TranslationExportFormat(StrEnum):
@@ -153,12 +154,7 @@ def _publish_or_skip(path: Path, payload: bytes) -> bool:
         finally:
             os.close(descriptor)
         os.link(temporary, path)
-        directory_flags = os.O_RDONLY | (os.O_DIRECTORY if hasattr(os, "O_DIRECTORY") else 0)
-        directory_descriptor = os.open(path.parent, directory_flags)
-        try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
+        fsync_directory(path.parent)
         return True
     except FileExistsError as error:
         raise OutputReservationError(

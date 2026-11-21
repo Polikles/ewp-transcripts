@@ -662,6 +662,8 @@ const guiPolishErrorDescriptions = new Map([
 ]);
 
 function guiPolishDynamicText(text) {
+  const estimate=/^Estimated recordings: (\d+) · Audio duration \(min\): ([\d.]+)$/.exec(text);
+  if(estimate)return `Liczba nagrań: ${estimate[1]} · Długość audio (min): ${estimate[2]}`;
   const cloudHttp = /^OpenRouter ASR request failed \(HTTP (\d+)\); check model, key, credits and supported options$/.exec(text);
   if(cloudHttp) return `Żądanie ASR OpenRouter nie powiodło się (HTTP ${cloudHttp[1]}); sprawdź model, klucz, środki i obsługiwane opcje.`;
   const diagnostic = /^(PASS|WARNING|FAIL) · ([^:]+): ([\s\S]+)$/.exec(text);
@@ -1893,3 +1895,38 @@ for (const [en,pl] of [
   ["Cloud ASR audio format cannot fit within the request size limit", "Format audio ASR w chmurze nie mieści się w limicie rozmiaru żądania."],
   ["Cloud ASR request exceeds the upload size limit; no audio was sent", "Żądanie ASR w chmurze przekracza limit rozmiaru; audio nie zostało wysłane."]
 ]) guiPolish.set(en,pl);
+
+// Owner native-Windows feedback: single selection flow and explicit read-only cloud checks.
+for(const [en,pl] of [
+  ["Local GPU (default)","Lokalne GPU (domyślne)"],
+  ["Add audio","Dodaj audio"],
+  ["Choose audio, video or saved canonical result JSON files.","Wybierz pliki audio, wideo lub zapisane wyniki canonical JSON."],
+  ["Saved results added to review queues.","Zapisane wyniki dodano do kolejek weryfikacji."],
+  ["Choose a shared output directory to add the selected saved results.","Wybierz wspólny katalog wyników, aby dodać wybrane zapisane wyniki."],
+  ["Multiple audio streams found. Choose the stream to transcribe.","Plik zawiera kilka strumieni audio. Wybierz strumień do transkrypcji."],
+  ["Recording ID (distinct for same-name recordings)","ID nagrania (różne dla nagrań o tej samej nazwie)"],
+  ["Check key and OpenRouter connection","Sprawdź klucz i połączenie z OpenRouter"],
+  ["Refresh models and estimate cost","Odśwież modele i oszacuj koszt"],
+  ["Checking OpenRouter key and connection…","Sprawdzanie klucza i połączenia z OpenRouter…"],
+  ["OpenRouter key and connection are ready. No audio was uploaded.","Klucz i połączenie z OpenRouter działają. Nie wysłano audio."],
+  ["Refreshing OpenRouter models and prices…","Odświeżanie modeli i cen OpenRouter…"],
+  ["Refresh models to see current hourly prices and an estimate for pending recordings.","Odśwież modele, aby zobaczyć aktualne ceny za godzinę audio i szacowany koszt oczekujących nagrań."],
+  ["Recordings or settings changed. Refresh the cost estimate.","Nagrania lub ustawienia uległy zmianie. Odśwież oszacowanie kosztu."],
+  ["Availability","Dostępność"], ["Available","Dostępny"], ["Unavailable","Niedostępny"],
+  ["USD / audio hour","USD / godzinę audio"], ["Estimated cost (USD)","Szacowany koszt (USD)"], ["Price unavailable","Cena niedostępna"],
+  ["Checks and price refresh do not upload audio. Estimates use current endpoint prices, source duration and chunk overlap; stereo processing may cost more. Final billing can differ. An internal safety guard is calculated before upload; it is not a provider billing cap.","Sprawdzanie klucza i odświeżanie cen nie wysyłają audio. Szacunki uwzględniają aktualne ceny dostawców, długość źródeł i nakładanie się fragmentów; przetwarzanie stereo może kosztować więcej. Końcowe rozliczenie może się różnić. Wewnętrzne zabezpieczenie kosztu jest obliczane przed wysłaniem; nie jest blokadą rozliczeń po stronie dostawcy."],
+  ["I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not saved.","Zgadzam się na wysłanie audio z zadań chmurowych do OpenRouter i dostawcy modelu oraz płatne użycie API. Zgoda nie jest zapisywana."],
+  ["Set the shared OpenRouter key before checking the connection","Ustaw wspólny klucz OpenRouter przed sprawdzeniem połączenia."],
+  ["OpenRouter key check returned an invalid response","Sprawdzenie klucza OpenRouter zwróciło nieprawidłową odpowiedź."],
+  ["OpenRouter model list is unavailable","Lista modeli OpenRouter jest niedostępna."],
+  ["Choose an audio stream before estimating cloud ASR","Wybierz strumień audio przed oszacowaniem kosztu ASR w chmurze."],
+  ["Recording duration is unavailable for the ASR estimate","Nie można odczytać długości nagrania do oszacowania kosztu ASR."],
+  ["ASR estimate expects up to 50 recordings","Można oszacować koszt najwyżej 50 nagrań naraz."],
+  ["ASR estimate recording is invalid","Nieprawidłowe nagranie do oszacowania kosztu ASR."],
+  ["ASR estimate sources are invalid","Nieprawidłowe źródła do oszacowania kosztu ASR."],
+  ["ASR estimate stream selection is invalid","Nieprawidłowy wybór strumienia do oszacowania kosztu ASR."],
+  ["Estimated cloud ASR workload exceeds the internal safety ceiling; use a smaller batch","Szacowany koszt ASR w chmurze przekracza wewnętrzny pułap bezpieczeństwa; wybierz krótsze nagrania."],
+  ["Transcription failed unexpectedly. Open failure technical details to identify the failed operation.","Transkrypcja nie powiodła się. Otwórz szczegóły techniczne błędu, aby ustalić, która operacja się nie udała."],
+  ["Transcription failed unexpectedly. Use Test local dependencies and inspect retained job state.","Transkrypcja nie powiodła się. Otwórz szczegóły techniczne błędu i sprawdź zachowany stan zadania."]
+])guiPolish.set(en,pl);
+guiPolishErrorDescriptions.set("MULTIPLE_AUDIO_STREAMS","Plik ma kilka strumieni audio. Wybierz strumień pod nagraniem, a następnie ponownie zaplanuj przetwarzanie.");

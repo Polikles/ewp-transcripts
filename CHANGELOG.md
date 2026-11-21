@@ -4,6 +4,20 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- Native Windows job state/revision/translation/subtitle publication no longer opens unsupported
+  POSIX directory descriptors. File-content flushes and atomic immutable publication remain;
+  unexpected queue failures retain safe exception/OS codes/frame locations and log them locally.
+  Each failed job has one expandable error summary rather than duplicate generic guidance.
+- One main/rail picker accepts audio, video and saved results. Removed duplicate input-directory
+  and episode-selection actions; per-recording language/count stay directly editable. Multi-stream
+  choices appear automatically only where needed; identity fields appear for collisions. Dry-run
+  has one combined plan/settings table. Updated EN/PL labels and changed-step instructions.
+- Cloud ASR now offers explicit shared-key checks and model availability/hourly-price/duration
+  estimates without uploading audio. New GUI jobs calculate their safety guard from the actual
+  workload; the guessed user-entered cost-cap field is removed. Saved fixed-guard jobs remain compatible.
+
 ### Added
 
 - Package B8a optional OpenRouter ASR with the four owner-selected models and the existing shared
@@ -11,8 +25,8 @@ All notable changes to EWP-transcripts are documented here.
   Start-queue consent, which is excluded from saved work/profiles. Live pricing, bounded WAV
   requests, no automatic retries and content-free charge/provenance records protect the pilot.
   Provider word timestamps feed the existing canonical/review/export pipeline without local ML.
-  Whisper supports one speaker or separate synchronized tracks; mixed Scribe/MAI audio stays in
-  one bounded request so per-request speaker identities are never incorrectly stitched together.
+  Whisper supports one speaker or separate synchronized tracks; mixed Scribe/MAI audio uses
+  overlapping bounded chunks with conservative speaker continuity checks and review warnings.
 - Package B regression/Windows–WSL acceptance checklist and short changed-step instructions;
   full terminology approval and EN/PL manuals remain after owner B acceptance.
 

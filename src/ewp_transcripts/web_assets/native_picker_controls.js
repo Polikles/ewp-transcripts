@@ -1,7 +1,7 @@
 "use strict";
 
 for(const [id,kind] of [
-  ["input-path","directory"], ["review-result-path","file"], ["correction-result-path","file"],
+  ["review-result-path","file"], ["correction-result-path","file"],
   ["translation-result-path","file"], ["translation-revision-path","file"],
   ["review-project-path","directory"], ["review-output-path","directory"],
   ["revision-output-path","directory"], ["export-output-path","directory"],

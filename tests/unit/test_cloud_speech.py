@@ -5,6 +5,7 @@ import time
 import wave
 from decimal import Decimal
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -268,3 +269,42 @@ def test_per_stream_provenance_counts_each_paid_call_once(tmp_path):
     assert Decimal(first.provenance["accounted_cost_usd"]) + Decimal(
         second.provenance["accounted_cost_usd"]
     ) == Decimal(session.provenance["accounted_cost_usd"])
+
+
+def test_automatic_guard_covers_all_tracks_instead_of_arbitrary_two_dollar_input(tmp_path):
+    first = audio(tmp_path / "first.wav", 4)
+    second = audio(tmp_path / "second.wav", 4)
+    calls = []
+
+    def transport(*args):
+        calls.append(args)
+        return response()
+
+    session = CloudSpeechSession(
+        SpeechConfig(cost_mode="estimated"),
+        "fake-key",
+        transport=transport,
+        rate=Decimal("0.5"),
+        expected_durations_ms=(4000, 4000),
+    )
+    session.transcribe(first, "pl", diarize=False)
+    session.transcribe(second, "pl", diarize=False)
+    assert len(calls) == 2
+    assert Decimal(session.provenance["budget_usd"]) > 10
+    assert session.provenance["cost_mode"] == "estimated"
+
+
+def test_automatic_guard_refuses_excessive_workload_before_audio_upload(tmp_path):
+    transport = Mock()
+    session = CloudSpeechSession(
+        SpeechConfig(cost_mode="estimated"),
+        "fake-key",
+        transport=transport,
+        rate=Decimal("1"),
+        expected_durations_ms=(3600000,),
+    )
+    path = audio(tmp_path / "first.wav")
+    for _ in range(2):
+        with pytest.raises(SpeechEngineError, match="internal safety ceiling"):
+            session.transcribe(path, "pl", diarize=False)
+    transport.assert_not_called()
