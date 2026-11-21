@@ -27,6 +27,7 @@ from uuid import uuid4
 from ewp_transcripts import __version__
 from ewp_transcripts.application import doctor
 from ewp_transcripts.config import load_config
+from ewp_transcripts.credentials import OSCredentialStore, validate_api_key
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
@@ -388,6 +389,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("workflow_batch.js").read_bytes()
         body += b"\n" + assets.joinpath("user_profiles.js").read_bytes()
         body += b"\n" + assets.joinpath("workspace_restore.js").read_bytes()
+        body += b"\n" + assets.joinpath("credential_controls.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -467,6 +469,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         self.gui_csrf_token = secrets.token_urlsafe(32)
         self.gui_dependencies_tested = False
         self.gui_openrouter_api_key = ""
+        self.gui_credentials = OSCredentialStore()
         self.gui_openrouter_api_key_env = application_config.correction.openrouter_api_key_env
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(
@@ -1267,32 +1270,57 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 )
                 return
-            key = document.get("api_key")
-            if (
-                not isinstance(key, str)
-                or not key.strip()
-                or len(key) > 512
-                or any(character.isspace() for character in key)
-            ):
+            try:
+                action = document.get("action", "session")
+                persistence = "server-session-only"
+                if action == "status":
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.OK,
+                            {
+                                "os_store_available": self.server.gui_credentials.available(),
+                                "configured": bool(self.server.gui_openrouter_api_key),
+                            },
+                        )
+                    )
+                    return
+                if action == "session":
+                    key = validate_api_key(document.get("api_key"))
+                elif action in {"save", "use", "remove"}:
+                    supplied_key = (
+                        validate_api_key(document.get("api_key")) if action == "save" else ""
+                    )
+                    key = self.server.gui_credentials.perform(str(action), supplied_key)
+                    persistence = "os-store" if action != "remove" else "removed"
+                elif action == "clear-session":
+                    key = ""
+                else:
+                    raise ValueError("Unknown credential action.")
+                self.server.gui_openrouter_api_key = key
                 self._write_response(
                     _json_response(
-                        HTTPStatus.BAD_REQUEST,
+                        HTTPStatus.OK,
                         {
-                            "error": {
-                                "code": "GUI_CREDENTIAL_INVALID",
-                                "message": "Enter one non-empty API key without whitespace.",
-                            }
+                            "configured": bool(
+                                key
+                                or os.environ.get(
+                                    self.server.gui_openrouter_api_key_env, ""
+                                ).strip()
+                            ),
+                            "persistence": persistence,
+                            "environment_configured": bool(
+                                os.environ.get(self.server.gui_openrouter_api_key_env, "").strip()
+                            ),
                         },
                     )
                 )
-                return
-            self.server.gui_openrouter_api_key = key
-            self._write_response(
-                _json_response(
-                    HTTPStatus.OK,
-                    {"configured": True, "persistence": "server-session-only"},
+            except ValueError as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_CREDENTIAL_INVALID", "message": str(error)}},
+                    )
                 )
-            )
             return
         if path.startswith("/api/v1/reviews/"):
             supplied = self.headers.get("X-EWP-CSRF", "")

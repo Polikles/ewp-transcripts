@@ -8,6 +8,7 @@ license = "AGPL-3.0-only"
 license-files = ["LICENSE", "LICENSING.md"]
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "keyring>=25.7,<26",
     "pyannote-audio==4.0.7",
     "pydantic>=2.13.4",
     "rapidfuzz>=3.14,<4",

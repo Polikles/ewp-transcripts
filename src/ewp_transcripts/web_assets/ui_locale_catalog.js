@@ -2,6 +2,22 @@
 const guiDiagnosticPattern = /^([A-Z][A-Z0-9]*_[A-Z0-9_]+):\s*([\s\S]*)$/;
 // Additional audited UI copy. Keys remain English; codes and user content are preserved.
 for (const [en, pl] of [
+  ["Save key in OS credential store", "Zapisz klucz w magazynie systemowym"],
+  ["Use saved OpenRouter key", "Użyj zapisanego klucza OpenRouter"],
+  ["Remove saved OpenRouter key", "Usuń zapisany klucz OpenRouter"],
+  ["Clear session key", "Wyczyść klucz sesji"],
+  ["Manage OpenRouter key", "Zarządzaj kluczem OpenRouter"],
+  ["OpenRouter API key", "Klucz API OpenRouter"],
+  ["Key saved in the OS credential store and active for this session.", "Klucz zapisano w magazynie systemowym i uaktywniono w tej sesji."],
+  ["Saved OpenRouter key is active for this session.", "Zapisany klucz OpenRouter jest aktywny w tej sesji."],
+  ["Stored/session key cleared. The server environment still supplies a key.", "Usunięto zapisany klucz lub klucz sesji. Środowisko serwera nadal dostarcza klucz."],
+  ["OpenRouter key removed from the selected storage.", "Usunięto klucz OpenRouter z wybranego magazynu."],
+  ["OS credential storage is unavailable; use a session-only key.", "Systemowy magazyn poświadczeń jest niedostępny; użyj klucza tylko na tę sesję."],
+  ["No OpenRouter key is saved in the OS store.", "W magazynie systemowym nie ma zapisanego klucza OpenRouter."],
+  ["Unknown credential action.", "Nieznane działanie dotyczące klucza API."],
+  ["One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, choose Use saved OpenRouter key.", "Jeden klucz służy do ASR, korekty i tłumaczeń. Zapis systemowy jest opcjonalny. Jeśli bezpieczny magazyn nie jest dostępny, użyj klucza tylko na sesję. Po restarcie wybierz Użyj zapisanego klucza OpenRouter."],
+  ["The key is sent only to this loopback server. Session-only keys are erased when it stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.", "Klucz trafia wyłącznie do tego lokalnego serwera. Klucz sesji znika po jego zatrzymaniu. Możesz jawnie zapisać klucz w magazynie systemowym i użyć go po restarcie. ASR, korekta i tłumaczenia korzystają z tego samego klucza; profile i pamięć przeglądarki go nie zawierają."],
+  ["One OpenRouter key is available for ASR, correction and translation on this server. Session memory is cleared on exit; an explicitly saved OS entry remains until removed.", "Na serwerze jest dostępny jeden klucz OpenRouter do ASR, korekty i tłumaczeń. Pamięć sesji jest czyszczona po zakończeniu; jawnie zapisany klucz systemowy pozostaje do usunięcia."],
   ["Native Windows environment detected.", "Wykryto natywne środowisko Windows."],
   ["Native Windows setup and repair instructions", "Instrukcje konfiguracji i naprawy natywnego Windows"],
   ["This restores locked Python dependencies and the pinned private FFmpeg 7 shared runtime. Internet access is required. Save work and stop the GUI first.", "Przywraca przypięte zależności Pythona i prywatne biblioteki współdzielone FFmpeg 7. Wymaga internetu. Najpierw zapisz pracę i zatrzymaj GUI."],

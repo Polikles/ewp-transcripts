@@ -58,3 +58,17 @@ without an owner timestamp are protected. A dead owner's workdir may show Interr
 Only the configured temporary root is inspected. References cover the current queue and default/
 selected workspace catalogs; inspect other catalogs separately. This action is separate from
 managed source-copy cleanup and never targets final output or model directories.
+
+## Optional saved OpenRouter key
+
+Manage OpenRouter key opens the same session-key dialog used by correction/translation. One key
+serves all OpenRouter operations, including cloud ASR. Set key for this session keeps it in server
+memory only. Save key in OS credential store deliberately retains it on this computer; after
+restarting, choose Use saved OpenRouter key. Remove saved OpenRouter key deletes that OS entry
+and clears the active session key. Clear session key leaves a saved OS entry intact. An environment
+key still applies until removed from the launching terminal; the UI reports that explicitly.
+
+Windows uses Credential Manager (local-machine persistence). Linux/WSL requires an available
+Secret Service; otherwise use the session-only option. No plaintext keyring fallback is used.
+An OS unlock prompt may appear only when you request storage access. Profiles, workspaces,
+transcripts, exports and browser storage never include keys.

@@ -6,6 +6,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package B6 opt-in OS credential save/use/remove with a single OpenRouter key for ASR,
+  correction and translation. Use the saved key explicitly after a restart; session-only and
+  environment keys remain supported. Only Windows Credential Manager/Secret Service backends
+  qualify; unavailable secure storage never falls back to plaintext files.
+
 - Package B5 native Windows x64 lock resolution and repository setup/repair script with a
   SHA-256-pinned private FFmpeg 7 shared runtime and explicit cross-platform model preparation.
   Native launch prepares per-process media/CUDA DLL paths; doctor identifies Windows separately.

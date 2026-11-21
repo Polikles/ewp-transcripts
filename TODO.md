@@ -10,7 +10,7 @@ information or concrete blockers. A stays closed. Active execution checkpoint:
 [package B execution](docs/checkpoints/2026-11-21-package-b-execution.md).
 
 - [x] B5 agent implementation: native lock resolution, Windows setup/repair/model preparation, guarded OS primitives/paths/launch/doctor; 935 model-free tests and 12 FFmpeg integration tests pass. Owner Windows execution remains B9 acceptance.
-- [ ] B6: Shared OpenRouter credential save/use/remove through optional OS storage and session-only fallback.
+- [x] B6 agent implementation: shared OpenRouter credential save/use/remove, explicit OS access and session fallback; 937 tests pass. Real native store acceptance remains in B9.
 - [ ] B7: Recent projects, named locations, canonical-directory scanning, dictionary-free profile export and cross-platform profile handling.
 - [ ] B8: Stream selection, native picker coverage, content-based discovery and unambiguous same-name input identities.
 - [ ] B8a: Four-model OpenRouter ASR, same canonical/downstream workflow and one key; functional short PL/EN live tests within USD 2 total.
