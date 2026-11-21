@@ -318,6 +318,19 @@ class RuntimeConfig(StrictConfigModel):
         return value.expanduser()
 
 
+class SpeechConfig(StrictConfigModel):
+    provider: Literal["local", "openrouter"] = "local"
+    model: Literal[
+        "openai/whisper-large-v3",
+        "openai/whisper-large-v3-turbo",
+        "elevenlabs/scribe-v2",
+        "microsoft/mai-transcribe-2",
+    ] = "openai/whisper-large-v3"
+    max_cost_usd: float = Field(default=2, gt=0, le=100)
+    chunk_seconds: int = Field(default=120, ge=15, le=300)
+    timeout_seconds: int = Field(default=90, ge=1, le=180)
+
+
 class ApplicationConfig(StrictConfigModel):
     """Resolved, validated MVP configuration."""
 
@@ -334,6 +347,7 @@ class ApplicationConfig(StrictConfigModel):
     revision: RevisionConfig = RevisionConfig()
     correction: CorrectionConfig = CorrectionConfig()
     runtime: RuntimeConfig = RuntimeConfig()
+    speech: SpeechConfig = SpeechConfig()
 
 
 PRESETS: dict[str, ConfigurationData] = {

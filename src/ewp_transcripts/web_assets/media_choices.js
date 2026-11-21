@@ -106,5 +106,5 @@ mediaFolderButton.addEventListener("click",async()=>{
   }catch(error){status.textContent=error.message;}
   finally{mediaFolderButton.disabled=false;}
 });
-workflowInput.after(mediaFolderButton);
+(document.querySelector("#gui-input-path-hint") || workflowInput).after(mediaFolderButton);
 drawMediaOptions();

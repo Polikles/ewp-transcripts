@@ -312,3 +312,59 @@ def test_cancel_before_publication_retains_work_and_retry_starts_from_beginning(
     )
     assert outcome.result_path.exists()
     assert any(e.phase == "transcribe" and e.state == "completed" for e in events)
+
+
+def test_cloud_words_publish_same_canonical_and_export_without_local_models(tmp_path, monkeypatch):
+    from ewp_transcripts.application import export_result
+    from ewp_transcripts.config import SpeechConfig
+    from ewp_transcripts.engines import openrouter
+
+    source = tmp_path / "s0e22.mp4"
+    video(source)
+    calls = []
+
+    def request(url, headers, body, timeout):
+        calls.append((url, body))
+        if body is None:
+            return {"data": {"endpoints": [{"pricing": {"prompt": "0.0001"}}]}}
+        return {
+            "language": "pl",
+            "text": "Test audio.",
+            "words": [
+                {"word": "Test", "start": 0.1, "end": 0.4},
+                {"word": "audio.", "start": 0.4, "end": 0.9},
+            ],
+            "usage": {"cost": "0.001"},
+        }
+
+    monkeypatch.setattr(openrouter, "request_json", request)
+    config = ApplicationConfig(
+        speech=SpeechConfig(provider="openrouter"),
+        diarization=DiarizationConfig(speaker_count=1),
+        runtime=RuntimeConfig(work_root=tmp_path / "work"),
+    )
+    from ewp_transcripts.domain.errors import SpeechEngineError
+
+    with pytest.raises(SpeechEngineError, match="consent"):
+        transcribe_one(source, config=config, output_directory=tmp_path / "out")
+    assert not calls
+    outcome = transcribe_one(
+        source,
+        config=config,
+        output_directory=tmp_path / "out",
+        allow_cloud=True,
+        api_key="fake-key",
+    )
+    result = load_canonical_result(outcome.result_path)
+    assert result.processing.environment.device == "remote"
+    assert result.processing.environment.whisperx is None
+    assert result.sources[0].sha256 == sha256_file(source)
+    assert result.transcript.segments[0].words[0].start_ms == 100
+    stage = next(x for x in result.processing.stages if x.name == "transcribe")
+    assert stage.details["provider"] == "openrouter"
+    assert "fake-key" not in outcome.result_path.read_text()
+    assert len([x for x in calls if x[1] is not None]) == 1
+    export_result(
+        outcome.result_path, formats=("srt", "vtt"), output_directory=tmp_path / "exports"
+    )
+    assert len(list((tmp_path / "exports").glob("*.srt"))) == 1

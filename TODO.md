@@ -3,7 +3,7 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Current state: B5–B9 implementation authorized and active
+## Current state: B5–B9 agent delivery complete; owner acceptance next
 
 Owner explicitly instructed execution of B5–B9 to completion, returning only for missing
 information or concrete blockers. A stays closed. Active execution checkpoint:
@@ -13,13 +13,13 @@ information or concrete blockers. A stays closed. Active execution checkpoint:
 - [x] B6 agent implementation: shared OpenRouter credential save/use/remove, explicit OS access and session fallback; 937 tests pass. Real native store acceptance remains in B9.
 - [x] B7 agent implementation: recent projects/locations, strict canonical scanning/queue selection, optional dictionary-free profile/catalog transfer; 942 tests/12 integrations pass. Native profile exchange remains owner B9 acceptance.
 - [x] B8 agent implementation: exact stream/ID plan/stage/recovery, content-based folder scan, native picker handoffs; 957 tests/13 integrations pass. Native desktop checks remain owner B9 acceptance.
-- [ ] B8a: Four-model OpenRouter ASR, same canonical/downstream workflow and one key; functional short PL/EN live tests within USD 2 total.
-- [ ] B9: Complete applicable regression/package/browser checks and deliver full Windows/WSL owner acceptance checklist; commit/push all slices.
+- [x] B8a agent implementation/functional PL qualification: four-model OpenRouter ASR, shared key, fresh consent/cost guard, same canonical/downstream workflow. Ten paid calls cost USD 0.0095832333762821113 total; owner waives live EN (no sample).
+- [x] B9 agent checks/checklist: 973 unit tests, 14 integrations, full 144-case Chromium/restart/focused B HTTP checks and wheel/sdist resource/privacy/CLI audit pass. [Owner checklist](Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md). Native Win11x64/full WSL acceptance remains owner-run.
 
-B8a live prerequisites: no OpenRouter key in environment/standard .env locations and no original
-PL podcast media found in accessible inventory. Asynchronous questions sent for local secret-file
-path and PL source paths. EN MP4 reference exists; continue implementation/mocks while awaiting
-reply. No paid call/upload yet; USD 2 budget unused.
+B8a live qualification and limitations: [cloud checkpoint](docs/checkpoints/2026-11-21-b8a-cloud-asr.md).
+B9 evidence and next gate: [verification checkpoint](docs/checkpoints/2026-11-21-b9-verification.md).
+No key/audio/transcript/runtime output committed. Owner test is pending; task 10 stays after B
+acceptance/function freeze, followed by terminology approval and full EN/PL manuals.
 
 The historical planning-only statements below are superseded by this execution instruction.
 
@@ -86,12 +86,12 @@ remains present. The feedback fixes and the complete focused retest are now acce
 
 ## Package B — original tasks 5–9, with cloud ASR inserted as 8a
 
-- [ ] B5: Native Windows dependency/media/model/path/CLI/GUI launch support, sharing the same application and frontend as WSL.
-- [ ] B6: Opt-in OS credential storage: save/read/remove API keys; preserve session-only fallback and exclude secrets from profiles/exports/logs.
-- [ ] B7: Recent projects/sessions, named input/output locations, canonical-result directory scanning and optional profile export without embedded dictionaries.
-- [ ] B8: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
-- [ ] B8a: Optional cloud ASR, after B8 and before B9. Select the initial provider/model and cost/consent boundary before implementing/calling that integration. Owner now selects OpenRouter/four model presets/shared key and permits short supplied PL/EN functional tests within USD 2 total, including retries; permission applies to B8a, no calls now.
-- [ ] B9: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
+- [x] B5 agent implementation/checks: Native Windows dependency/media/model/path/CLI/GUI launch support, sharing the same application and frontend as WSL.
+- [x] B6 agent implementation/checks: Opt-in OS credential storage: save/read/remove API keys; preserve session-only fallback and exclude secrets from profiles/exports/logs.
+- [x] B7 agent implementation/checks: Recent projects/sessions, named input/output locations, canonical-result directory scanning and optional profile export without embedded dictionaries.
+- [x] B8 agent implementation/checks: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
+- [x] B8a agent implementation/checks: OpenRouter four-model ASR delivered and short PL live cases pass within the shared USD 2 budget. Owner explicitly waives EN live material. Mixed audio has a documented single-request limit; separate tracks/single-speaker inputs chunk safely.
+- [x] B9 agent implementation/checks: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
 - [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
 
 B5 execution arrangement confirmed 2026-11-21: Windows 11 x64. Agent implements/checks on this
@@ -104,8 +104,7 @@ OpenRouter with one key shared by ASR/correction/translation. ASR dropdown:
 `microsoft/mai-transcribe-2`. Owner permits short supplied podcast/English excerpts (PL two
 speakers, EN one), functional canonical/downstream compatibility checks, USD 2 total live-ASR
 spending including retries across all models. No full-corpus/accuracy benchmark. Locate actual
-material and recheck current capabilities/costs at B8a; preserve this authorization. Planning
-questions are resolved; B product implementation still awaits the start instruction.
+material and recheck current capabilities/costs at B8a; preserve this authorization. Original planning questions are resolved; B agent delivery is complete and owner native Windows/full WSL acceptance is next.
 
 ## After package B acceptance
 

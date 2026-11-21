@@ -14,13 +14,11 @@ def test_browser_workspace_fields_match_server_allowlist() -> None:
     declared = re.search(r"const workspaceFieldIds = \[(.*?)\];", app)
     assert declared is not None
     browser_fields = set(re.findall(r'"([a-z][a-z-]+)"', declared.group(1)))
-    translation_script = (
-        Path(__file__).parents[2]
-        / "src/ewp_transcripts/web_assets/translation_provider_controls.js"
-    ).read_text()
-    added = re.search(r"workspaceFieldIds\.push\((.*?)\);", translation_script)
-    assert added is not None
-    browser_fields.update(re.findall(r'"([a-z][a-z-]+)"', added.group(1)))
+    for script in ["translation_provider_controls.js", "cloud_asr_controls.js"]:
+        source = (Path(__file__).parents[2] / "src/ewp_transcripts/web_assets" / script).read_text()
+        added = re.search(r"workspaceFieldIds\.push\((.*?)\);", source)
+        assert added is not None
+        browser_fields.update(re.findall(r'"([a-z][a-z-]+)"', added.group(1)))
     assert browser_fields == _FIELD_NAMES
 
 

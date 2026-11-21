@@ -23,8 +23,8 @@ by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 fu
 workflow test), then 10 complete EN–PL approval. The owner explicitly authorized A1–A4 and its
 verification/checklist. On 2026-11-21 the owner passed the complete focused retest and accepted A,
 with a final source-review action layout adjustment that needs no new owner retest. That adjustment
-is implemented/verified and A is closed. Next: B5 preparation for Windows 11 x64; agent changes/checks
-on this Linux VM and pushes to GitHub, owner pulls and tests natively.
+is implemented/verified and A is closed. B5–B9 agent implementation/VM verification is now delivered; the owner pulls/tests natively
+on Windows 11 x64 and runs the full WSL checklist. Use the B9 checkpoint and acceptance checklist.
 Do not reopen the accepted A gate. B features/cloud calls are not part of the A closure task.
 Previously declined proposals must not return as requirements. Explicit owner B8a scope now selects
 OpenRouter (one key shared with correction/translation), the four ASR presets in the B plan and
@@ -32,7 +32,10 @@ short supplied PL/EN functional samples with USD 2 total including retries. Reta
 for B8a without asking again; no broader provider/media/spending scope is implied. B implementation
 is now explicitly authorized for B5–B9 to completion (2026-11-21). Earlier planning-only holds are
 revoked; follow the active B execution checkpoint and interrupt only for concrete missing inputs
-or blockers. Owner still performs native Windows acceptance after delivery.
+or blockers. Owner still performs native Windows acceptance after delivery. The short live PL pilot is complete
+at USD 0.0095832333762821113; EN live qualification is waived by the owner (no EN sample).
+Do not reopen passed A or rerun paid qualification merely after a context reset. Task 10 waits
+for B owner acceptance/function freeze.
 
 ## 2. Scope discipline
 

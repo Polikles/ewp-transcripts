@@ -24,5 +24,5 @@ for(const [id,kind] of [
       status.textContent=error.message; input.focus({preventScroll:true});
     } finally {button.disabled=false;}
   });
-  input.after(button);
+  (id==="input-path" ? document.querySelector("#gui-input-path-hint") || input : input).after(button);
 }

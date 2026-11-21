@@ -15,7 +15,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ewp_transcripts.application import dry_run, inspect_input
-from ewp_transcripts.config import load_config
+from ewp_transcripts.config import SpeechConfig, load_config
 from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.enums import LanguageMode
@@ -100,6 +100,7 @@ class GuiOperation(BaseModel):
     group_paths: tuple[str, ...] = ()
     group_id: str | None = None
     recording_id: str | None = None
+    speech: SpeechConfig = SpeechConfig()
     selected_streams: dict[str, int] = Field(default_factory=dict)
     language: LanguageMode
     speaker_count: Literal["auto"] | int
@@ -165,6 +166,7 @@ class GuiWorkflowController:
             config = load_config()
             config = config.model_copy(
                 update={
+                    "speech": SpeechConfig.model_validate(document.get("speech", {})),
                     "general": config.general.model_copy(update={"language": language}),
                     "diarization": config.diarization.model_copy(
                         update={"speaker_count": speaker_count}
@@ -199,6 +201,7 @@ class GuiWorkflowController:
                     str(path) for path in group_options.get("explicit_group_paths", ())
                 ),
                 group_id=group_options.get("explicit_group_id"),
+                speech=config.speech,
                 recording_id=group_options.get("recording_id"),
                 selected_streams={
                     str(path): index
@@ -254,6 +257,7 @@ class GuiWorkflowController:
         group_id: str | None = None,
         recording_id: str | None = None,
         selected_streams: dict[str, int] | None = None,
+        speech: SpeechConfig | None = None,
     ) -> dict[str, Any] | None:
         """Return the newest exact dry-run produced by this server session."""
 
@@ -266,6 +270,7 @@ class GuiWorkflowController:
                 and operation.input_path == str(input_path)
                 and operation.group_paths == group_paths
                 and operation.group_id == group_id
+                and operation.speech == (speech or SpeechConfig())
                 and operation.recording_id == recording_id
                 and operation.selected_streams == (selected_streams or {})
                 and operation.language == language
@@ -287,6 +292,7 @@ class GuiWorkflowController:
         group_id: str | None = None,
         recording_id: str | None = None,
         selected_streams: dict[str, int] | None = None,
+        speech: SpeechConfig | None = None,
     ) -> bool:
         """Confirm this server session produced the exact dry-run being authorized."""
 
@@ -300,6 +306,7 @@ class GuiWorkflowController:
                 group_id=group_id,
                 recording_id=recording_id,
                 selected_streams=selected_streams,
+                speech=speech,
             )
             is not None
         )

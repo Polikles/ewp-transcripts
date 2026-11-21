@@ -15,6 +15,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from ewp_transcripts.config import SpeechConfig
 from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.input_options import recording_identity, stream_choices
 from ewp_transcripts.web_projects import GuiProjects, ProjectCatalog
@@ -106,6 +107,8 @@ def _portable_workspace(workspace: GuiWorkspaceDocument) -> None:
         if not required.issubset(job) or set(job) - required - {
             "group_sources",
             "selected_streams",
+            "recording_id",
+            "speech",
         }:
             raise ValueError("Profile workspace staged job is invalid")
         if any(
@@ -118,6 +121,7 @@ def _portable_workspace(workspace: GuiWorkspaceDocument) -> None:
         count = job["speaker_count"]
         if count != "auto" and (type(count) is not int or not 1 <= count <= 32):
             raise ValueError("Profile workspace staged job is invalid")
+        SpeechConfig.model_validate(job.get("speech", {}))
         recording_identity(job.get("recording_id"))
         group = job.get("group_sources", {})
         stream_choices(

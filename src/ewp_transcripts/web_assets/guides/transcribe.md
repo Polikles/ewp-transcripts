@@ -94,3 +94,36 @@ Choose directory fills the server input path. Add media from this directory then
 starts ASR. Review the resulting list, language/count and any stream choices, then plan/add/start.
 Native file/directory buttons are also available for result, dictionary and workspace paths.
 Without a desktop picker, use direct path entry. Windows/WSL dialog output uses UTF-8.
+
+## Optional OpenRouter ASR (package B)
+
+Local GPU ASR remains the default. Open **Transcription engine**, choose OpenRouter and one of
+Whisper Large V3, Whisper Large V3 Turbo, Scribe v2 or MAI-Transcribe 2. Manage the same OpenRouter
+key used by correction/translation. No audio is uploaded during discovery, planning or staging.
+
+1. Choose the recording language, speaker count and media/streams; set the cloud model and cost
+   guard **per queued job** before planning. Changing these choices requires a new reviewed plan.
+2. Plan, review and add the jobs. Starting a queue with cloud jobs requires explicit audio-upload
+   and paid-usage consent. It clears after starting and is never saved in a workspace/profile.
+3. Provider word timestamps must be returned; text-only responses fail visibly instead of making
+   up alignment. The same canonical JSON, raw TXT/segments, review and immutable exports follow.
+4. Whisper needs one speaker or separate synchronized speaker tracks. Use Scribe/MAI for one
+   mixed-speaker source. To keep provider speaker identities consistent, mixed audio is sent in
+   one request, limited to 24 MiB of normalized WAV (about 13 minutes at 16 kHz mono PCM16).
+   Longer mixed recordings currently use local ASR or separate speaker tracks. Independent
+   tracks/single-speaker audio are uploaded in bounded chunks with timeline offsets preserved.
+5. Prices are fetched when explicitly starting cloud work. The guard reserves conservative costs,
+   including uncertain requests, and stops subsequent requests when exhausted. It is an estimate,
+   not a hard provider billing cap; use a dedicated low-limit OpenRouter key. There is no automatic
+   retry after a timeout/error. Explicit Retry starts again and can incur new charges.
+6. Success records model, provider, word-timing provenance and reported/reserved charges in the
+   canonical processing stages. Retained failed work includes a content-free cloud usage ledger.
+   API keys and raw provider responses are not included. Cancellation takes effect at safe
+   checkpoints; an already submitted request may still be charged. Source media is preserved.
+
+Cloud ASR is exposed through the reviewed GUI queue and the explicitly authorized application
+API. Existing CLI batch transcription remains local; it rejects a cloud config instead of silently
+uploading media or substituting local models. Secure OS key storage is optional; after restart use
+**Use saved OpenRouter key**, or enter a session key again.
+
+Protocol reference: [OpenRouter speech-to-text](https://openrouter.ai/docs/guides/overview/multimodal/stt).

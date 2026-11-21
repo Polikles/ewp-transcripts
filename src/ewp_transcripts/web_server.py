@@ -26,7 +26,7 @@ from uuid import uuid4
 
 from ewp_transcripts import __version__
 from ewp_transcripts.application import doctor
-from ewp_transcripts.config import load_config
+from ewp_transcripts.config import SpeechConfig, load_config
 from ewp_transcripts.credentials import OSCredentialStore, validate_api_key
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
@@ -398,6 +398,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("project_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("media_choices.js").read_bytes()
         body += b"\n" + assets.joinpath("native_picker_controls.js").read_bytes()
+        body += b"\n" + assets.joinpath("cloud_asr_controls.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -488,6 +489,9 @@ class LocalGuiServer(ThreadingHTTPServer):
         super().__init__((config.host, config.port), LocalGuiRequestHandler)
         self.gui_transcriptions = GuiTranscriptionQueue(
             config=application_config,
+            api_key_provider=lambda: (
+                self.gui_openrouter_api_key or os.environ.get(self.gui_openrouter_api_key_env, "")
+            ),
             history_path=default_workspace_directory().parent / "runtime-timings.json",
         )
 
@@ -1248,6 +1252,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "source_sha256": job.source_sha256,
                                 "language": job.language.value,
                                 "speaker_count": job.speaker_count,
+                                "speech": job.speech.model_dump(mode="json"),
                                 **({"recording_id": job.recording_id} if job.recording_id else {}),
                                 **(
                                     {"selected_streams": job.selected_streams}
@@ -2094,7 +2099,23 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 return
             if path == "/api/v1/transcriptions/start":
-                count = self.server.gui_transcriptions.start()
+                try:
+                    count = self.server.gui_transcriptions.start(
+                        allow_cloud=document.get("cloud_confirmed") is True
+                    )
+                except ValueError as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CLOUD_CONSENT_REQUIRED",
+                                    "message": str(error),
+                                }
+                            },
+                        )
+                    )
+                    return
                 self._write_response(_json_response(HTTPStatus.ACCEPTED, {"queued": count}))
                 return
             if path == "/api/v1/transcriptions/clear-current":
@@ -2448,6 +2469,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                     return
+                speech = SpeechConfig.model_validate(document.get("speech", {}))
                 plan = self.server.gui_workflows.completed_plan(
                     input_path,
                     output_path,
@@ -2457,6 +2479,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     group_id=group_options.get("explicit_group_id"),
                     recording_id=group_options.get("recording_id"),
                     selected_streams=selected_streams,
+                    speech=speech,
                 )
                 if plan is None:
                     self._write_response(
@@ -2603,6 +2626,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     source_sha256=source_sha256,
                     group_sources=group_sources,
                     recording_id=group_options.get("recording_id"),
+                    speech=speech,
                     selected_streams=(
                         durable_streams
                         if group_paths
@@ -2821,6 +2845,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 tuple(sorted(item.get("group_sources", {}).items())),
                 tuple(sorted(item.get("selected_streams", {}).items())),
                 item.get("recording_id"),
+                SpeechConfig.model_validate(item.get("speech", {})).model_dump_json(),
             )
             for item in staged_jobs
         }
@@ -2832,6 +2857,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     tuple(sorted(job.group_sources.items())),
                     tuple(sorted(job.selected_streams.items())),
                     job.recording_id,
+                    job.speech.model_dump_json(),
                 )
                 for job in active
             }
@@ -2864,6 +2890,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     "output_directory": str(output_path),
                     "language": language.value,
                     "speaker_count": speaker_count,
+                    "speech": item.get("speech", {}),
                     **(
                         {"group_paths": list(group_sources), "group_id": item["planned_job_id"]}
                         if group_sources
@@ -2901,6 +2928,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 group_sources=group_sources,
                 selected_streams=item.get("selected_streams", {}),
                 recording_id=item.get("recording_id"),
+                speech=SpeechConfig.model_validate(item.get("speech", {})),
                 language=language,
                 speaker_count=speaker_count,
             )

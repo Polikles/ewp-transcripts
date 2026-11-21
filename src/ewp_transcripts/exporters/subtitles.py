@@ -223,7 +223,8 @@ def _same_continuous_chain(
         and previous.overlap == following.overlap
         and bool(previous.words)
         and bool(following.words)
-        and 0 <= gap_ms <= settings.max_merge_gap_ms
+        and gap_ms <= settings.max_merge_gap_ms
+        and following.start_ms >= previous.start_ms
     )
 
 
@@ -246,6 +247,11 @@ def _optimal_word_partition(
         for end in range(start + 1, len(words) + 1):
             chunk = list(words[start:end])
             if not _word_chunk_hard_fits(chunk, settings, prefix=prefix):
+                continue
+            # Cloud ASR may give neighboring words slightly overlapping time windows.
+            # Keep those words in the same cue instead of clipping their canonical times
+            # or publishing overlapping ordinary cues at this partition boundary.
+            if end < len(words) and max(word.end_ms for word in chunk) > words[end].start_ms:
                 continue
             remainder = solutions[end]
             if remainder is None:
@@ -456,6 +462,8 @@ def _rebalance_adjacent_drafts(
             previous_prefix=previous_prefix,
             following_prefix=following_prefix,
         )
+        if max(word.end_ms for word in optimized_previous) > optimized_following[0].start_ms:
+            continue
         previous = _draft_with_words(previous, tuple(optimized_previous))
         following = _draft_with_words(following, tuple(optimized_following))
 
@@ -721,6 +729,8 @@ def _best_word_boundary(
     for boundary in range(1, len(combined)):
         previous_candidate = combined[:boundary]
         following_candidate = combined[boundary:]
+        if max(word.end_ms for word in previous_candidate) > following_candidate[0].start_ms:
+            continue
         if not _word_chunk_fits(
             previous_candidate, settings, prefix=previous_prefix
         ) or not _word_chunk_fits(following_candidate, settings, prefix=following_prefix):

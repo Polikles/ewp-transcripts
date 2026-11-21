@@ -303,6 +303,7 @@ async function refreshJobs() {
     statusText.textContent = queueJobStatusLabel(job);
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
+    if(job.speech?.provider === "openrouter") {const hint=document.createElement("small"); hint.textContent=`OpenRouter · ${job.speech.model} · USD ${job.speech.max_cost_usd}`; identity.append(hint);}
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");
     input.textContent = Object.keys(job.group_sources || {}).map(shortName).join(", ") || shortName(job.input_path);
@@ -329,7 +330,8 @@ document.querySelector("#start-queue").addEventListener("click", async () => {
   if (guiQueueStarting) return;
   guiQueueStarting = true; updateGuiQueueStart();
   try {
-    const payload = await queuePost("/api/v1/transcriptions/start", {});
+    const payload = await queuePost("/api/v1/transcriptions/start", {cloud_confirmed:document.querySelector("#cloud-asr-confirmed")?.checked === true});
+    if(document.querySelector("#cloud-asr-confirmed")) document.querySelector("#cloud-asr-confirmed").checked=false;
     document.querySelector("#operation-status").textContent = payload.queued
       ? `Started ${payload.queued} queued job(s)`
       : guiQueueJobs.some(job => ["queued", "running", "cancel_requested"].includes(job.status)) ? "Queue is already running" : "No staged jobs to start";
@@ -442,7 +444,7 @@ function closeOpenRouterKeyDialog() { document.querySelector("#openrouter-api-ke
 function updateOpenRouterKeyStatus() { openRouterKeyStatus.textContent = openRouterKeyConfigured ? "One OpenRouter key is available for ASR, correction and translation on this server. Session memory is cleared on exit; an explicitly saved OS entry remains until removed." : "No API key is configured for this active GUI server process."; }
 openRouterKeyButton.addEventListener("click", () => { document.querySelector("#openrouter-api-key").value = ""; document.querySelector("#openrouter-key-dialog-status").textContent = ""; openRouterKeyDialog.hidden = false; document.querySelector("#openrouter-api-key").focus(); });
 document.querySelector("#cancel-openrouter-key").addEventListener("click", closeOpenRouterKeyDialog);
-document.querySelector("#save-openrouter-key").addEventListener("click", async () => { const input = document.querySelector("#openrouter-api-key"); const status = document.querySelector("#openrouter-key-dialog-status"); try { await queuePost("/api/v1/credentials/openrouter", {api_key: input.value}); input.value = ""; openRouterKeyConfigured = true; updateOpenRouterKeyStatus(); closeOpenRouterKeyDialog(); } catch (error) { input.value = ""; status.textContent = error.message; } });
+document.querySelector("#save-openrouter-key").addEventListener("click", async () => { const input = document.querySelector("#openrouter-api-key"); const status = document.querySelector("#openrouter-key-dialog-status"); const key = input.value; input.value = ""; try { await queuePost("/api/v1/credentials/openrouter", {api_key: key}); input.value = ""; openRouterKeyConfigured = true; updateOpenRouterKeyStatus(); closeOpenRouterKeyDialog(); } catch (error) { input.value = ""; status.textContent = error.message; } });
 function setProviderCheckState(state, message) { providerCheckLight.className = `connection-light connection-${state}`; providerCheckStatus.textContent = message; }
 updateCorrectionModelChoice();
 providerCheckButton.addEventListener("click", async () => { const form = new FormData(correctionForm); const reasoning = String(form.get("reasoning_max_tokens") || ""); providerCheckButton.disabled = true; setProviderCheckState("unknown", "Checking…"); try { const payload = await queuePost("/api/v1/corrections/check", {provider: form.get("provider"), model: form.get("model"), endpoint: form.get("endpoint"), allow_remote_endpoint: form.get("allow_remote_endpoint") === "on", reasoning_max_tokens: reasoning === "" ? null : Number(reasoning)}); setProviderCheckState("ok", `API OK · ${payload.model}`); } catch (error) { setProviderCheckState("error", error.message); } finally { providerCheckButton.disabled = false; } });

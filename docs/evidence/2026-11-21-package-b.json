@@ -1,0 +1,149 @@
+{
+  "date": "2026-11-21",
+  "scope": "short PL functional compatibility, not accuracy benchmark",
+  "live_english": "waived by owner: no EN sample; HD06 MP4 is PL",
+  "budget_usd": "2",
+  "reported_total_usd": "0.0095832333762821113",
+  "uncertain_charges": 0,
+  "automatic_retries": 0,
+  "models": [
+    {
+      "model": "openai/whisper-large-v3",
+      "requests": 2,
+      "audio_seconds": 60.0,
+      "reported_cost_usd": "0.0011500000315723333"
+    },
+    {
+      "model": "openai/whisper-large-v3-turbo",
+      "requests": 2,
+      "audio_seconds": 60.0,
+      "reported_cost_usd": "0.0004332333447107778"
+    },
+    {
+      "model": "elevenlabs/scribe-v2",
+      "requests": 3,
+      "audio_seconds": 90.0,
+      "reported_cost_usd": "0.005499999999999"
+    },
+    {
+      "model": "microsoft/mai-transcribe-2",
+      "requests": 3,
+      "audio_seconds": 90.0,
+      "reported_cost_usd": "0.0025000000000000002"
+    }
+  ],
+  "downstream": [
+    {
+      "model": "elevenlabs-scribe-v2",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 64
+    },
+    {
+      "model": "elevenlabs-scribe-v2-mixed",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 64
+    },
+    {
+      "model": "microsoft-mai-transcribe-2",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 65
+    },
+    {
+      "model": "microsoft-mai-transcribe-2-mixed",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 64
+    },
+    {
+      "model": "openai-whisper-large-v3",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 66
+    },
+    {
+      "model": "openai-whisper-large-v3-turbo",
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": [
+        "srt",
+        "vtt",
+        "ytt"
+      ],
+      "speakers": 2,
+      "word_count": 55
+    }
+  ],
+  "browser": {
+    "chromium": "159.0.8154.6",
+    "playwright": "1.65.2",
+    "responsive_cases": 144,
+    "page_errors": 0,
+    "external_browser_requests": 0,
+    "real_server_restart_recovery": "pass",
+    "focused_B_http_browser": "pass: OS store and cloud backend test doubles, no paid calls",
+    "expanded_B_panel_cases": 48,
+    "cloud_PL_error_translation": "pass, diagnostic codes/HTTP retained",
+    "Origin_CSRF": "pass"
+  },
+  "quality": {
+    "unit_tests": 973,
+    "ffmpeg_integrations": 14,
+    "integrations_deselected": 4,
+    "ruff": "pass",
+    "format": "pass",
+    "mypy_source_files": 113
+  },
+  "installed_wheel": "CLI/help/resources pass with existing model-free dependencies; not a clean-machine/Windows qualification",
+  "native_windows_gpu": "owner acceptance pending",
+  "artist_zip": "unchanged; SHA-256 checked before delivery",
+  "verification_build_audit": [
+    {
+      "artifact": "ewp_transcripts-0.20.0-py3-none-any.whl",
+      "files": 182,
+      "sha256": "0749aaa9789a39de39d2c381a2f315bf27fb1375c578708d50413cedd2fe5977",
+      "resources": "pass",
+      "private_artifacts_or_key": "absent"
+    },
+    {
+      "artifact": "ewp_transcripts-0.20.0.tar.gz",
+      "files": 548,
+      "sha256": "ea3749332540ac46dccfa3377ff1c5d3504d74ec72932be1185892d3416b4428",
+      "resources": "pass",
+      "private_artifacts_or_key": "absent"
+    }
+  ],
+  "verification_build_note": "Disposable pre-handoff verification snapshot, not a release or delivered installer"
+}

@@ -14,6 +14,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ewp_transcripts.config import SpeechConfig
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.input_options import recording_identity, stream_choices
 from ewp_transcripts.storage import is_preserved_gui_result
@@ -29,6 +30,9 @@ _FIELD_NAMES = frozenset(
         "gui-translation-target",
         "gui-speaker-colors",
         "gui-palette-profile",
+        "cloud-asr-provider",
+        "cloud-asr-model",
+        "cloud-asr-budget",
         "input-path",
         "output-path",
         "workflow-language",
@@ -364,7 +368,9 @@ class GuiWorkspaceController:
             if (
                 not isinstance(item, dict)
                 or not required.issubset(item)
-                or set(item) - required - {"group_sources", "selected_streams", "recording_id"}
+                or set(item)
+                - required
+                - {"group_sources", "selected_streams", "recording_id", "speech"}
             ):
                 raise ValueError("Workspace staged job is invalid")
             speaker_count = item["speaker_count"]
@@ -377,6 +383,7 @@ class GuiWorkspaceController:
             if item["language"] not in {"pl", "en", "auto"} or len(item["source_sha256"]) != 64:
                 raise ValueError("Workspace staged job is invalid")
             try:
+                SpeechConfig.model_validate(item.get("speech", {}))
                 recording_identity(item.get("recording_id"))
                 self._resolve_path(item["input_path"])
                 group_sources = item.get("group_sources", {})
@@ -409,6 +416,15 @@ class GuiWorkspaceController:
             clean.append(
                 {
                     **{key: item[key] for key in required},
+                    **(
+                        {
+                            "speech": SpeechConfig.model_validate(item["speech"]).model_dump(
+                                mode="json"
+                            )
+                        }
+                        if item.get("speech")
+                        else {}
+                    ),
                     **({"group_sources": group_sources} if group_sources else {}),
                     **({"selected_streams": selected_streams} if selected_streams else {}),
                     **({"recording_id": item["recording_id"]} if item.get("recording_id") else {}),

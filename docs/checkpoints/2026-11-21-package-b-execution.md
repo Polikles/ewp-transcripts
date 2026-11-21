@@ -12,15 +12,19 @@ A is closed; artist ZIP frozen; terminology approval/manual rewrite stay after B
 - [x] B6 optional OS credentials; see [credential checkpoint](2026-11-21-b6-credentials.md).
 - [x] B7 projects/profile implementation; see [project checkpoint](2026-11-21-b7-projects.md).
 - [x] B8 media implementation; see [media checkpoint](2026-11-21-b8-media.md).
-- [ ] B8a OpenRouter ASR and functional qualification, exact four model IDs in B plan, short
-  authorized PL two-speaker / EN one-speaker material, USD 2 total including retries.
-- [ ] B9 regression/packaging/browser verification and full owner Windows/WSL checklist.
+- [x] B8a four-model OpenRouter ASR and live short PL functional qualification; owner waives EN.
+  Total USD 0.0095832333762821113 within USD 2 including all calls; see cloud checkpoint.
+- [x] B9 agent regression/packaging/browser verification and full owner Windows/WSL checklist;
+  native/full owner acceptance is pending. See [B9](2026-11-21-b9-verification.md).
 
 Start by auditing native package wheels and runtime/platform assumptions. No GPU/Windows/live
 provider qualification is claimed from synthetic Linux checks. Preserve canonical schema,
 immutable artifacts, staged source checks and explicit manual publication consent. Record exact
 cost/provenance with no secrets/private transcripts. Disposable pilots belong in dedicated /tmp.
 
-Active disposable package root: /tmp/ewp-package-b.Yz9JAl. Remove after package evidence capture.
-Current resume: B8a OpenRouter ASR implementation. Owner asked for local key/podcast source paths;
-continue independent implementation and mocks. No live ASR calls/cost yet.
+Disposable package root /tmp/ewp-package-b.Yz9JAl was removed after evidence capture; test servers stopped.
+Current resume: B8a implemented and live PL functional checks pass; see
+[B8a checkpoint](2026-11-21-b8a-cloud-asr.md). Owner confirms no EN sample and waives live EN.
+10 paid requests across the four models and two mixed cases cost USD 0.0095832333762821113 total.
+B9 final checks, acceptance checklist and cleanup are complete. Commit/push delivery. Owner
+native Windows/full WSL acceptance remains pending.

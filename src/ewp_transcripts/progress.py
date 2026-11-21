@@ -90,6 +90,7 @@ def runtime_profile(config: Any, streams: int, topology: str) -> str:
         )
     descriptor = [
         "phase-estimate-v1",
+        config.speech.model_dump(mode="json"),
         platform.node(),
         platform.release(),
         platform.machine(),

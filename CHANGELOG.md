@@ -6,6 +6,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package B8a optional OpenRouter ASR with the four owner-selected models and the existing shared
+  key. Reviewed queue jobs retain their provider/model/cost guard; cloud uploads require fresh
+  Start-queue consent, which is excluded from saved work/profiles. Live pricing, bounded WAV
+  requests, no automatic retries and content-free charge/provenance records protect the pilot.
+  Provider word timestamps feed the existing canonical/review/export pipeline without local ML.
+  Whisper supports one speaker or separate synchronized tracks; mixed Scribe/MAI audio stays in
+  one bounded request so per-request speaker identities are never incorrectly stitched together.
+- Package B regression/Windows–WSL acceptance checklist and short changed-step instructions;
+  full terminology approval and EN/PL manuals remain after owner B acceptance.
+
 - Package B8 explicit per-source audio-stream selection carried through planning, durable staging,
   retry and saved-work recovery, including channel analysis of the chosen stream. Optional recording
   IDs distinguish same-name episodes while preserving original source filenames and fingerprints.
@@ -64,6 +74,11 @@ All notable changes to EWP-transcripts are documented here.
   GPU acceptance requirements, followed by the phase-based indicator and optional calibrated ETA.
 
 ### Fixed
+
+- Subtitle partitioning keeps same-speaker words with overlapping provider time windows inside
+  one cue, preserving canonical word timestamps and explicit cross-speaker overlaps.
+- Portable staged manifests accept explicit recording IDs; new native picker/discovery buttons
+  preserve the input-path hint immediately below the field.
 
 - Remove POSIX-only startup/storage assumptions for Windows: native output locks, guarded
   descriptor permissions, Windows drive paths/system-directory checks and native folder picking.

@@ -2,7 +2,7 @@
 
 This is the repository-based package B path, with the same application, GUI and pinned models
 as WSL. Agent checks run on Linux; native Windows/GPU acceptance is performed by the owner.
-The full package B acceptance checklist follows B9. Keep an existing WSL environment intact.
+Use the [full package B acceptance checklist](GUI_PACKAGE_B_TEST_CHECKLIST.md). Keep an existing WSL environment intact.
 
 1. Install the NVIDIA Windows driver and Microsoft's current Visual C++ x64 Redistributable.
    Install Git and uv (`winget install --id astral-sh.uv --exact`), then open a new terminal.

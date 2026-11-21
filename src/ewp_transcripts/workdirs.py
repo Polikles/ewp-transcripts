@@ -269,7 +269,10 @@ def cleanup_identity(
                 size += metadata.st_size
                 # The current pipeline owns only working WAVs and its marker. Protect all other
                 # artifacts, models and unknown files even if someone moved them into a workdir.
-                if name != MARKER_FILENAME and path.suffix.lower() != ".wav":
+                if (
+                    name not in {MARKER_FILENAME, "cloud-asr-usage.json"}
+                    and path.suffix.lower() != ".wav"
+                ):
                     blocker = "unknown-artifact"
     digest = hashlib.sha256(json.dumps(items, sort_keys=True).encode()).hexdigest()
     return digest, size, blocker

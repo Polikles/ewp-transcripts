@@ -66,6 +66,7 @@ from ewp_transcripts.domain.errors import (
     AmbiguousJobIdError,
     ApplicationError,
     InvalidReviewError,
+    SpeechEngineError,
     UnsupportedPipelineScopeError,
 )
 from ewp_transcripts.domain.revision import load_transcript_revision, sha256_file
@@ -1724,6 +1725,8 @@ def transcribe_one(
     recording_id: str | None = None,
     progress: ProgressObserver | None = None,
     cancellation: CancellationToken | None = None,
+    api_key: str = "",
+    allow_cloud: bool = False,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
     check_cancellation(cancellation)
@@ -1782,6 +1785,28 @@ def transcribe_one(
         config=config.outputs,
         explicit_directory=output_directory,
     )
+    if config.speech.provider == "openrouter":
+        if not allow_cloud:
+            raise SpeechEngineError("Explicit cloud ASR upload and billing consent is required")
+        from ewp_transcripts.engines.openrouter import (
+            CloudAlignment,
+            CloudAsr,
+            CloudDiarization,
+            CloudSpeechSession,
+        )
+
+        session = CloudSpeechSession(config.speech, api_key, cancellation=cancellation)
+        needs_diarization = streams == 1 and config.diarization.speaker_count != 1
+
+        def asr_factory(_: ApplicationConfig) -> AsrEngine:
+            return CloudAsr(session, needs_diarization)
+
+        def alignment_factory(_: ApplicationConfig) -> AlignmentEngine:
+            return CloudAlignment(session)
+
+        def diarization_factory(_: ApplicationConfig) -> DiarizationEngine:
+            return CloudDiarization(session)
+
     outcome = _transcribe_episode(
         episode,
         destination=destination,
@@ -1811,6 +1836,10 @@ def transcribe_batch(
 ) -> BatchTranscriptionOutcome:
     """Process inspected episodes sequentially and isolate per-job failures."""
 
+    if config.speech.provider != "local":
+        raise SpeechEngineError(
+            "Cloud ASR uses the GUI reviewed queue or explicitly authorized transcribe_one API"
+        )
     inspected = inspect_input(
         input_path,
         config=config,
@@ -2142,6 +2171,17 @@ def _pyannote_diarization(config: ApplicationConfig) -> DiarizationEngine:
 
 
 def _runtime_environment(config: ApplicationConfig) -> CanonicalEnvironment:
+    if config.speech.provider == "openrouter":
+        return CanonicalEnvironment.model_validate(
+            {
+                "os": platform.platform(),
+                "python": platform.python_version(),
+                "device": "remote",
+                "compute_type": "provider-managed",
+                "speech_provider": "openrouter",
+                "speech_model": config.speech.model,
+            }
+        )
     return CanonicalEnvironment(
         os=platform.platform(),
         wsl_distribution=None,
@@ -2157,6 +2197,8 @@ def _runtime_environment(config: ApplicationConfig) -> CanonicalEnvironment:
 def _record_peak_vram(result: CanonicalResult) -> CanonicalResult:
     """Record the process CUDA allocation peak when the ML runtime exposed it."""
 
+    if result.processing.environment.device == "remote":
+        return result
     torch = sys.modules.get("torch")
     cuda = getattr(torch, "cuda", None)
     if cuda is None:

@@ -50,6 +50,7 @@ COMPLETED_AT = datetime(2026, 8, 3, 10, 1, tzinfo=UTC)
 
 
 class FakeAsr:
+    provenance = {"provider": "test-provider"}
     model_info = EngineModelInfo(role="asr", name="large-v2", revision="asr-revision")
 
     def __init__(self, events: list[str], *, fail: bool = False) -> None:
@@ -402,6 +403,11 @@ def test_grouped_speaker_pipeline_composes_schema_valid_result(tmp_path: Path) -
     )
 
     _assert_schema_valid(result.model_dump(mode="json"))
+    assert all(
+        stage.details["provider"] == "test-provider"
+        for stage in result.processing.stages
+        if stage.name == "transcribe"
+    )
     assert result.episode.source_topology == "file_group"
     assert [source.source_id for source in result.sources] == ["source_001", "source_002"]
     assert [source.speaker_label for source in result.sources] == ["Damian", "Szymon"]

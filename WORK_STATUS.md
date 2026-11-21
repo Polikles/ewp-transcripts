@@ -4,17 +4,22 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
-Current request: [execute B5–B9](docs/checkpoints/2026-11-21-package-b-execution.md).
-Baseline clean main 743318d. Owner explicitly authorizes all selected B slices to completion;
-return only for missing information/concrete blockers. B5 agent implementation/checks complete:
-[Windows checkpoint](docs/checkpoints/2026-11-21-b5-windows.md), 935 tests/12 integrations pass;
-owner Windows native/GPU execution remains B9 acceptance. B6 OS keys implemented (937 tests);
-see [credential checkpoint](docs/checkpoints/2026-11-21-b6-credentials.md). B7 projects/profiles
-implemented ([checkpoint](docs/checkpoints/2026-11-21-b7-projects.md), 942 tests/12 integrations).
-B8 media implemented ([checkpoint](docs/checkpoints/2026-11-21-b8-media.md), 957 tests/13 integrations).
-Next B8a OpenRouter ASR then B9 verification/checklist. Local key/PL media missing; async owner
-questions sent, continue implementation/mocks meanwhile. USD 2 budget unused.
-Disposable root /tmp/ewp-package-b.Yz9JAl.
+Current request: B5–B9 agent implementation and delivery complete; owner acceptance next.
+[Execution checkpoint](docs/checkpoints/2026-11-21-package-b-execution.md),
+[B9 verification](docs/checkpoints/2026-11-21-b9-verification.md),
+[full owner Windows/WSL checklist](Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md).
+B5 native support, B6 OS credentials, B7 project/profile references, B8 media/IDs and B8a
+four-model OpenRouter ASR are delivered. 973 unit tests / 14 FFmpeg integrations pass; Ruff/format/
+mypy 113 files pass. Chromium full 144-case GUI, real server restart and focused B HTTP tests pass;
+wheel/sdist resource/privacy and installed CLI smoke pass with model-free dependencies.
+10 live PL calls cost USD 0.0095832333762821113 total; all four models and Scribe/MAI mixed cases
+pass schema/review/SRT/VTT/YTT. EN live waived by owner (no sample; HD06 MP4 is PL).
+Actual native Windows11x64/GPU/OS store and full owner Win/WSL acceptance remain pending.
+No tag/release or artist ZIP changes. Task 10 full EN–PL approval file follows B acceptance;
+manuals follow terminology approval. Disposable root /tmp/ewp-package-b.Yz9JAl and its test outputs were removed after evidence capture;
+servers stopped and frozen artist ZIP hash verified unchanged. B delivery targets main; the
+owner acceptance checklist is the next resume point.
+
 Previous planning-only statements are historical and superseded. Preserve the USD 2 total
 cloud-ASR test scope and the owner Windows 11 x64 execution arrangement.
 

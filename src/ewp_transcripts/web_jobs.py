@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ewp_transcripts.application import transcribe_one
 from ewp_transcripts.cancellation import CancellationToken, TranscriptionCancelled
-from ewp_transcripts.config import ApplicationConfig
+from ewp_transcripts.config import ApplicationConfig, SpeechConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
@@ -67,6 +67,7 @@ class GuiTranscriptionJob(BaseModel):
     group_sources: dict[str, str] = Field(default_factory=dict)
     selected_streams: dict[str, int] = Field(default_factory=dict)
     recording_id: str | None = None
+    speech: SpeechConfig = SpeechConfig()
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -119,7 +120,9 @@ class GuiTranscriptionQueue:
         config: ApplicationConfig,
         service: TranscriptionService = transcribe_one,
         history_path: Path | None = None,
+        api_key_provider: Callable[[], str] = lambda: "",
     ) -> None:
+        self._api_key_provider = api_key_provider
         self._config = config
         self._service = service
         self._history = ProgressHistory(history_path)
@@ -149,6 +152,7 @@ class GuiTranscriptionQueue:
         group_sources: dict[str, str] | None = None,
         selected_streams: dict[str, int] | None = None,
         recording_id: str | None = None,
+        speech: SpeechConfig | None = None,
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
     ) -> GuiTranscriptionJob:
@@ -164,6 +168,7 @@ class GuiTranscriptionQueue:
             group_sources=group_sources or {},
             selected_streams=selected_streams or {},
             recording_id=recording_id,
+            speech=speech or SpeechConfig(),
             language=language,
             speaker_count=speaker_count,
             created_at=now,
@@ -213,11 +218,19 @@ class GuiTranscriptionQueue:
             self._order.appendleft(job.job_id)
             return job, True
 
-    def start(self) -> int:
+    def start(self, *, allow_cloud: bool = False) -> int:
         """Queue every staged job in stable insertion order."""
 
         pending: list[tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int]] = []
         with self._lock:
+            if not allow_cloud and any(
+                job.status == "staged" and job.speech.provider == "openrouter"
+                for job in self._jobs.values()
+            ):
+                raise ValueError(
+                    "Confirm sending staged cloud audio to OpenRouter and its model "
+                    "provider, with paid API usage"
+                )
             for job_id in reversed(self._order):
                 job = self._jobs[job_id]
                 if job.status != "staged":
@@ -550,6 +563,7 @@ class GuiTranscriptionQueue:
             try:
                 config = self._config.model_copy(
                     update={
+                        "speech": job.speech,
                         "general": self._config.general.model_copy(update={"language": language}),
                         "diarization": self._config.diarization.model_copy(
                             update={"speaker_count": speaker_count}
@@ -570,6 +584,8 @@ class GuiTranscriptionQueue:
                     group_options["selected_streams"] = {
                         Path(path): index for path, index in job.selected_streams.items()
                     }
+                if job.speech.provider == "openrouter":
+                    group_options.update(api_key=self._api_key_provider(), allow_cloud=True)
                 tracker = RuntimeProgress(
                     self._history,
                     runtime_profile(
@@ -611,7 +627,10 @@ class GuiTranscriptionQueue:
                         "exception_type": type(error).__name__,
                         "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
                         "action": (
-                            "Transcription failed. Open Settings & About and use "
+                            "Cloud ASR failed. Check the shared key, credits, selected model, "
+                            "timed-word support and job cost limit; retry explicitly."
+                            if job.speech.provider == "openrouter"
+                            else "Transcription failed. Open Settings & About and use "
                             "Test local dependencies, "
                             "then retry after fixing failed checks."
                         ),

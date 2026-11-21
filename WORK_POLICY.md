@@ -43,3 +43,10 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
    B5–B9 execution to completion; earlier planning-only holds are revoked. Interrupt only for
    concrete missing information or blockers. Declined historical roadmap
    ideas must not return as gates.
+
+10. B delivery update (2026-11-21): B5–B9 agent implementation/VM verification is complete. Use
+    docs/checkpoints/2026-11-21-b9-verification.md and Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md
+    for owner native Windows 11 x64/full WSL acceptance. Short live PL cloud checks passed at
+    USD 0.0095832333762821113 total; owner waives live EN because no sample is present. Preserve
+    that evidence after disposable cleanup; do not restart paid tests merely after context reset.
+    A remains closed. Full EN–PL approval follows B acceptance, then manuals; artist ZIP frozen.

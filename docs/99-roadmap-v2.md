@@ -32,17 +32,20 @@ remove redundant preparation, merge controls into two rows and rename Restore sa
 See [the closure checkpoint](checkpoints/2026-11-21-package-a-closure.md). Retain all earlier
 WSL cancellation/recovery/cleanup/download/player success evidence.
 
-### Accepted package sequence — A accepted, B preparation next
+### Accepted package sequence — A accepted, B agent delivery complete
 
 Execution update 2026-11-21: owner explicitly authorizes B5–B9 to completion, returning only for
 concrete missing information/blockers. Earlier planning-only statements below are historical.
 Follow [the active B execution checkpoint](checkpoints/2026-11-21-package-b-execution.md).
-B5 agent implementation/checks are complete; native Windows qualification remains owner B9 work.
+B5–B9 agent implementation/checks are complete; native Windows/full owner WSL qualification
+remains the B acceptance gate. See [B9 evidence](checkpoints/2026-11-21-b9-verification.md) and
+[owner checklist](../Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md). Live PL cloud qualification
+passed all four models and Scribe/MAI mixed cases at USD 0.0095832333762821113 total; owner waives
+EN live qualification because no sample is present. HD06 MP4 is PL, not EN.
 
 A1–A4 and their feedback fixes are implemented, automatically verified and owner accepted.
-The final no-retest action-layout adjustment passed ordinary checks; A is closed. Next: B5 native
-Windows preparation with the confirmed test execution arrangement. B product features are not implemented in this
-closure task. Original task numbers remain, with cloud ASR inserted as 8a before task 9;
+The final no-retest action-layout adjustment passed ordinary checks; A is closed. B agent delivery
+is complete; the next gate is the owner native Windows/full WSL workflow test. Original task numbers remain, with cloud ASR inserted as 8a before task 9;
 terminology approval remains task 10.
 
 | Package / task | Work and completion boundary |
@@ -70,7 +73,7 @@ implemented, can be checked while preparing/testing native Windows rather than b
 
 B5 test arrangement confirmed 2026-11-21: Windows 11 x64; agent implements/checks on the Linux
 VM and pushes to GitHub, owner pulls and executes native-Windows/full-workflow tests.
-A is closed. The current B request is planning/decision recording, not a product-start instruction.
+A is closed; B implementation/VM verification is delivered and the owner acceptance checklist is next.
 
 B execution detail and accepted cloud decisions are in the
 [2026-11-21 planning checkpoint](checkpoints/2026-11-21-package-b-plan.md). Owner selects OpenRouter
@@ -79,8 +82,9 @@ with one key for ASR/correction/translation and an ASR dropdown containing `open
 podcast/English samples (PL two speakers, EN one) may be used in B8a under **USD 2 total**, including
 retries across models. Test canonical structure, timing/speaker mapping and downstream workflow;
 no full-corpus/accuracy benchmark. This explicit permission supersedes earlier pending-cloud-choice
-wording, applies to B8a and does not start calls now. Recheck current capabilities/pricing before
-execution; preserve the permission without repeated confirmation within its stated scope.
+wording. Authorized short PL live checks are now complete at the cost recorded above; EN live
+qualification is explicitly waived by the owner. No corpus/accuracy campaign or further calls are
+scheduled. Preserve these results rather than rerunning a passed pilot after context reset.
 
 ### Final classification of the recovered inventory
 

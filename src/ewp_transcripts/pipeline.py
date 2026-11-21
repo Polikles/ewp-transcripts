@@ -118,7 +118,11 @@ def run_diarization_pipeline(
         )
     finally:
         asr_engine.close()
-    stages.append(_completed_stage("transcribe", start, clock, progress))
+    stages.append(
+        _completed_stage("transcribe", start, clock, progress).model_copy(
+            update={"details": getattr(asr_engine, "provenance", {})}
+        )
+    )
     _check_cancel(cancellation, asr_engine, alignment_engine, diarization_engine)
 
     emit_progress(progress, "align", "started")
@@ -265,7 +269,8 @@ def run_source_speaker_pipeline(
             "channel_index": stream.channel_index,
         }
         stages.extend(
-            stage.model_copy(update={"details": stage_details}) for stage in stream_result.stages
+            stage.model_copy(update={"details": {**stage.details, **stage_details}})
+            for stage in stream_result.stages
         )
 
     emit_progress(progress, "compose", "started")
@@ -567,7 +572,11 @@ def process_speaker_stream(
         )
     finally:
         asr_engine.close()
-    stages.append(_completed_stage("transcribe", start, clock, progress))
+    stages.append(
+        _completed_stage("transcribe", start, clock, progress).model_copy(
+            update={"details": getattr(asr_engine, "provenance", {})}
+        )
+    )
     _check_cancel(cancellation, asr_engine, alignment_engine)
 
     emit_progress(progress, "align", "started")

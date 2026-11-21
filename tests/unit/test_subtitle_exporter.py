@@ -1056,3 +1056,55 @@ def test_final_repartition_pass_cannot_leave_overlap_cues_out_of_order(
     assert all(cue.overlap for cue in cues)
     assert "Welcome" in render_srt(cues)
     assert "Today" in render_vtt(cues)
+
+
+def test_same_speaker_provider_word_overlap_stays_inside_cue_without_timestamp_changes():
+    base = load_canonical_result(EXAMPLE_PATH)
+    original = base.transcript.segments[0]
+    from ewp_transcripts.domain.canonical import CanonicalWord
+
+    words = tuple(
+        CanonicalWord(
+            word_id=f"word_{index:06d}",
+            text=text,
+            start_ms=start,
+            end_ms=end,
+            speaker_id=original.speaker_id,
+            timestamp_source="aligned",
+        )
+        for index, (text, start, end) in enumerate(
+            [
+                ("Alpha", 0, 1000),
+                ("beta.", 900, 1800),
+                ("Gamma", 1900, 2800),
+                ("delta.", 2900, 3800),
+            ],
+            1,
+        )
+    )
+    segments = tuple(
+        original.model_copy(
+            update={
+                "segment_id": f"seg_{index:06d}",
+                "text": word.text,
+                "start_ms": word.start_ms,
+                "end_ms": word.end_ms,
+                "words": (word,),
+            }
+        )
+        for index, word in enumerate(words, 1)
+    )
+    result = base.model_copy(
+        update={"transcript": base.transcript.model_copy(update={"segments": segments})}
+    )
+    before = result.model_dump_json()
+    cues = build_subtitle_cues(
+        result,
+        SubtitlesConfig(
+            max_lines=1, max_chars_per_line=14, min_words_per_cue=2, speaker_labels="never"
+        ),
+    )
+    assert len(cues) >= 2
+    assert all(a.end_ms <= b.start_ms for a, b in zip(cues, cues[1:], strict=False))
+    assert "Alpha beta." in render_srt(cues)
+    assert result.model_dump_json() == before
