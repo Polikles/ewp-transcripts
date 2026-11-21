@@ -14,6 +14,8 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 Evidence: [chunking checkpoint](docs/checkpoints/2026-11-21-cloud-chunking.md). 982 tests / 15
 integrations pass; live Scribe/MAI boundary/review/export cases pass. Owner B acceptance remains next.
 
+- [x] Explain native Windows installation/launch and the owner test order; see [test handoff](docs/checkpoints/2026-11-21-owner-b-test-handoff.md). Full owner Windows/WSL acceptance remains pending.
+
 ## Current state: B5–B9 agent delivery complete; owner acceptance next
 
 Owner explicitly instructed execution of B5–B9 to completion, returning only for missing

@@ -4,6 +4,11 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Owner requested installation/run/test instructions; [handoff checkpoint](docs/checkpoints/2026-11-21-owner-b-test-handoff.md).
+Next: owner native Windows 11 x64 installation/doctor and the B checklist, then full WSL comparison.
+No product change or new qualification is implied by this instructions-only handoff.
+
+
 Latest owner follow-up delivered: cloud recordings split automatically into requests below 24 MB
 and merge on one timeline. [Chunking checkpoint](docs/checkpoints/2026-11-21-cloud-chunking.md).
 Shared timed context remaps local speaker IDs; ambiguous identities stay distinct with a visible
