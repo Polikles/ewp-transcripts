@@ -185,7 +185,7 @@ def main():
         page.locator("#cloud-asr-key").click()
         page.locator("#openrouter-api-key").fill("fake-test-key")
         page.locator("#check-openrouter-key").click()
-        expect(page.locator("#openrouter-key-dialog-status")).to_contain_text(
+        expect(page.locator("#openrouter-key-check-status")).to_contain_text(
             "No audio was uploaded"
         )
         assert checks == [{"api_key": "fake-test-key"}]

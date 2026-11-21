@@ -318,19 +318,21 @@ function updateGuiQueueStart() {
   document.querySelector("#start-queue").disabled = guiQueueStarting || !guiQueueJobs.some(job => ["staged", "queued", "running"].includes(job.status));
 }
 document.querySelector("#start-queue").addEventListener("click", async () => {
-  if (guiQueueStarting) return;
-  const consent=document.querySelector("#cloud-asr-confirmed");
-  if(guiQueueJobs.some(job=>job.status==="staged" && job.speech?.provider==="openrouter") && consent && !requireGuiVerification(consent,document.querySelector("#operation-status"),"Confirm audio upload and paid API usage before starting cloud ASR.","GUI_CLOUD_CONSENT_REQUIRED"))return;
+  if (guiQueueStarting || workspaceRestoreBusy) return;
   guiQueueStarting = true; updateGuiQueueStart();
   try {
-    const payload = await queuePost("/api/v1/transcriptions/start", {cloud_confirmed:document.querySelector("#cloud-asr-confirmed")?.checked === true});
+    await refreshJobs();
+    if(typeof ensureGuiCloudConsent==="function" && !(await ensureGuiCloudConsent()))return;
+    const consent=document.querySelector("#cloud-asr-confirmed");
+    if(guiQueueJobs.some(job=>job.status==="staged" && job.speech?.provider==="openrouter") && consent && !requireGuiVerification(consent,document.querySelector("#operation-status"),"Confirm audio upload and paid API usage before starting cloud ASR.","GUI_CLOUD_CONSENT_REQUIRED"))return;
+    const payload = await queuePost("/api/v1/transcriptions/start", {cloud_confirmed:document.querySelector("#cloud-asr-confirmed")?.checked === true,cloud_consent_token:typeof currentGuiCloudConsentToken==="function" ? currentGuiCloudConsentToken() : ""});
     if(document.querySelector("#cloud-asr-confirmed")) document.querySelector("#cloud-asr-confirmed").checked=false;
     document.querySelector("#operation-status").textContent = payload.queued
       ? `Started ${payload.queued} queued job(s)`
       : guiQueueJobs.some(job => ["queued", "running", "cancel_requested"].includes(job.status)) ? "Queue is already running" : "No staged jobs to start";
     await refreshJobs();
   } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
-  finally { guiQueueStarting = false; updateGuiQueueStart(); }
+  finally { guiQueueStarting = false; if(typeof resetGuiCloudConsent==="function")resetGuiCloudConsent(); updateGuiQueueStart(); }
 });
 
 document.querySelector("#workflow").addEventListener("reset", () => { activeGuiAudio = null; selectedGuiAudio.length = 0; renderGuiAudioChoices(); document.querySelector("#operation-status").textContent = ""; document.querySelector("#operation-summary").replaceChildren(); document.querySelector("#operation-result").textContent = ""; document.querySelector("#raw-result").open = false; });
@@ -857,14 +859,17 @@ const workspaceName = document.querySelector("#workspace-name");
 const workspaceDirectory = document.createElement("input");
 workspaceDirectory.id = "workspace-directory";
 workspaceDirectory.autocomplete = "off";
-workspaceDirectory.placeholder = "Default GUI workspace location";
+workspaceDirectory.placeholder = "Output directory";
 const workspaceDirectoryLabel = document.createElement("label");
 workspaceDirectoryLabel.htmlFor = workspaceDirectory.id;
 workspaceDirectoryLabel.textContent = "Workspace storage directory (optional)";
 const workspaceDirectoryHint = document.createElement("p");
 workspaceDirectoryHint.className = "field-hint";
-workspaceDirectoryHint.textContent = "Enter a user-space directory to keep workspace JSON files with your backups. Leave blank for the private default location.";
-workspaceName.before(workspaceDirectoryLabel, workspaceDirectory, workspaceDirectoryHint);
+workspaceDirectoryHint.textContent = "Choose a directory for saved-work files and backups. Leave blank to save work state in the output directory.";
+const workspaceDirectoryGroup=document.createElement("div");workspaceDirectoryGroup.id="workspace-directory-group";
+workspaceDirectoryHint.id="workspace-directory-hint";workspaceDirectory.setAttribute("aria-describedby",workspaceDirectoryHint.id);
+workspaceDirectoryGroup.append(workspaceDirectoryLabel,workspaceDirectoryHint,workspaceDirectory);
+document.querySelector('label[for="workspace-name"]').before(workspaceDirectoryGroup);
 const workspaceStatus = document.querySelector("#workspace-status");
 const workspaceAutosave = document.querySelector("#workspace-autosave");
 const workspaceAutosaveStatus = document.querySelector("#workspace-autosave-status");
@@ -873,14 +878,14 @@ loadWorkspaceButton.disabled = true;
 const deleteWorkspaceButton = document.createElement("button");
 deleteWorkspaceButton.type = "button";
 deleteWorkspaceButton.id = "delete-workspace";
-deleteWorkspaceButton.className = "danger";
+deleteWorkspaceButton.className = "secondary-action";
 deleteWorkspaceButton.textContent = "Remove selected work state";
 deleteWorkspaceButton.disabled = true;
 document.querySelector("#refresh-workspaces").before(deleteWorkspaceButton);
 const clearCurrentStateButton = document.createElement("button");
 clearCurrentStateButton.type = "button";
 clearCurrentStateButton.id = "clear-current-work-state";
-clearCurrentStateButton.className = "danger";
+clearCurrentStateButton.className = "secondary-action";
 clearCurrentStateButton.textContent = "Clear current work state";
 document.querySelector("#refresh-workspaces").after(clearCurrentStateButton);
 const importWorkspaceInput = document.createElement("input");
@@ -895,6 +900,13 @@ importWorkspaceFeedback.className = "feedback-anchor";
 importWorkspaceFeedback.append(importWorkspaceButton, importWorkspaceInput);
 deleteWorkspaceButton.before(importWorkspaceFeedback);
 importWorkspaceButton.addEventListener("click", () => importWorkspaceInput.click());
+const workspaceRefreshButton=document.querySelector("#refresh-workspaces");
+const workspaceActions=document.querySelector("#save-workspace").closest(".actions");workspaceActions.classList.add("workspace-primary-actions");
+workspaceActions.replaceChildren(document.querySelector("#save-workspace"),loadWorkspaceButton,importWorkspaceFeedback);
+const workspaceSecondary=document.createElement("div");workspaceSecondary.className="workspace-secondary-actions";
+const workspaceRemoval=document.createElement("div");workspaceRemoval.className="workspace-removal-actions";workspaceRemoval.append(deleteWorkspaceButton,clearCurrentStateButton);
+workspaceSecondary.append(workspaceRefreshButton,workspaceRemoval);workspaceActions.after(workspaceSecondary);
+
 let lastWorkspaceStep = "workspace-heading";
 let activeWorkspaceId = "";
 let activeWorkspaceStorageDirectory = "";
@@ -902,7 +914,7 @@ let activeWorkspaceKey = "";
 let lastWorkspaceFingerprint = "";
 let workspaceAutosaveBusy = false;
 function collectWorkspaceFields() { checkpointGuiWorkspaceFields(); const fields = {}; for (const id of workspaceFieldIds) { const element = document.getElementById(id); if (!element) continue; fields[id] = element.type === "checkbox" ? element.checked : element.value; } return fields; }
-function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, storage_directory: workspaceDirectory.value, current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), queue: jobsSignature}); }
+function workspaceFingerprint() { return JSON.stringify({name: workspaceName.value, storage_directory: workspaceStorageDirectory(), current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), queue: jobsSignature}); }
 function workspaceKey(workspaceId, storageDirectory) { return JSON.stringify([storageDirectory || "", workspaceId]); }
 function selectedWorkspaceReference() {
   const option = workspaceList.selectedOptions[0];
@@ -917,7 +929,8 @@ workspaceName.addEventListener("input", showWorkspacePendingState);
 workspaceDirectory.addEventListener("input", showWorkspacePendingState);
 async function applyWorkspaceFields(fields) { document.querySelectorAll("label.confirmation input[type=checkbox]").forEach(element => { element.checked = false; }); for (const [id, value] of Object.entries(fields)) { const element = document.getElementById(id); if (!element) continue; if (element.type === "checkbox") element.checked = value === true; else element.value = String(value); element.dispatchEvent(new Event("change", {bubbles: true})); element.dispatchEvent(new Event("input", {bubbles: true})); } await restoreWorkspaceReviewIfPresent(); await restoreGuiWorkspaceFields(); }
 async function restoreWorkspaceReviewIfPresent() { const root = reviewForm.elements.namedItem("project_output_directory").value; if (!root || reviewDocument) return; try { const payload = await postReview("session/restore", {project_output_directory: root, result_path: reviewValue("result_path")}); const session = payload.session; reviewForm.elements.namedItem("result_path").value = session.result_path; const standard = ["review_output_directory", "revision_output_directory", "export_output_directory"].every(name => session[name] === joinedPath(root, name.replace("_output_directory", "s"))); document.querySelector("#custom-review-paths").checked = !standard; for (const name of ["review_output_directory", "revision_output_directory", "export_output_directory"]) reviewForm.elements.namedItem(name).value = session[name]; updateReviewDirectories(); renderReview(payload); appliedRevisionPath = session.applied_revision_path || ""; if (appliedRevisionPath) { const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; } persistReview(); setReviewStatus(appliedRevisionPath ? "Saved applied review restored from workspace" : "Saved review restored from workspace; preview is required again", payload); showReviewSummary([["Publication", appliedRevisionPath ? "Immutable revision already written" : "None — restored editable draft"], ["Review file", shortName(payload.review_path)], ["Source", payload.source_verification]]); } catch (error) { if (!error.message.startsWith("GUI_REVIEW_SESSION_NOT_FOUND")) setReviewStatus(error.message); } }
-async function workspacePost(path, body = {}, options = {}) { const {storageDirectory = workspaceDirectory.value, ...requestOptions} = options; return queuePost(path, {...body, storage_directory: storageDirectory}, requestOptions); }
+function workspaceStorageDirectory() {return workspaceDirectory.value.trim() || workflowOutput.value.trim();}
+async function workspacePost(path, body = {}, options = {}) { const {storageDirectory = workspaceStorageDirectory(), ...requestOptions} = options; return queuePost(path, {...body, storage_directory: storageDirectory}, requestOptions); }
 const managedSourcesDetails = document.createElement("details");
 managedSourcesDetails.id = "managed-sources";
 managedSourcesDetails.innerHTML = '<summary>Managed source copies</summary><p class="field-hint">Inventory durable browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.</p><div class="actions"><button type="button" id="refresh-managed-sources">Refresh source inventory</button><button type="button" id="cleanup-managed-sources" class="danger" disabled>Delete selected unreferenced copies</button></div><p id="managed-sources-status" role="status">Inventory has not been loaded.</p><div id="managed-sources-list"></div>';
@@ -927,7 +940,7 @@ const managedSourcesList = document.querySelector("#managed-sources-list");
 const cleanupManagedSourcesButton = document.querySelector("#cleanup-managed-sources");
 const selectedManagedSources = new Set();
 const managedSourcePaths = new Map();
-function managedSourcesRequest(path, body = {}) { return queuePost(path, {output_directory: workflow.elements.namedItem("output_directory").value, storage_directory: workspaceDirectory.value, ...body}); }
+function managedSourcesRequest(path, body = {}) { return queuePost(path, {output_directory: workflow.elements.namedItem("output_directory").value, storage_directory: workspaceStorageDirectory(), ...body}); }
 function formatManagedSourceSize(value) { if (value < 1024) return `${value} B`; if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KiB`; return `${(value / (1024 * 1024)).toFixed(1)} MiB`; }
 function renderManagedSources(payload) {
   selectedManagedSources.clear();
@@ -980,7 +993,7 @@ document.querySelector("#refresh-managed-sources").addEventListener("click", asy
       "/api/v1/managed-sources/inventory",
       {
         output_directory: workflow.elements.namedItem("output_directory").value,
-        storage_directory: workspaceDirectory.value,
+        storage_directory: workspaceStorageDirectory(),
       },
       {trigger: document.querySelector("#refresh-managed-sources")},
     ));
@@ -1006,6 +1019,10 @@ function updateWorkspaceSelectionControls() { const selectedWorkspace = selected
 async function refreshWorkspaces(selectedKey = "", options = {}) { const payload = await workspacePost("/api/v1/workspaces/list", {}, options); workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = workspaceKey(item.workspace_id, item.storage_directory); option.dataset.workspaceId = item.workspace_id; option.dataset.storageDirectory = item.storage_directory || ""; option.dataset.available = String(item.available); option.dataset.queueCount = String(item.queue_count || 0); option.textContent = `${item.name} · ${item.catalog} catalog · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.title = item.storage_directory || "Private default workspace catalog"; option.selected = option.value === selectedKey; workspaceList.append(option); } updateWorkspaceSelectionControls(); }
 document.querySelector("#refresh-workspaces").addEventListener("click", async () => { try { await refreshWorkspaces(workspaceList.value); workspaceStatus.textContent = "Saved workspace list refreshed."; } catch (error) { workspaceStatus.textContent = error.message; } });
 document.querySelector("#save-workspace").addEventListener("click", async () => {
+  if(!workspaceName.value.trim() || workspaceName.value.trim().length>100) {
+    workspaceName.classList.add("field-error");workspaceName.setAttribute("aria-invalid","true");workspaceName.setAttribute("aria-describedby","workspace-status");
+    workspaceStatus.textContent="GUI_WORKSPACE_REQUEST_INVALID: Workspace name must contain 1 to 100 characters";workspaceName.focus({preventScroll:true});return;
+  }
   workspaceStatus.textContent = "Saving current work…";
   try {
     if (reviewDocument && reviewDirty) await saveReviewDraft();
@@ -1013,7 +1030,11 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
       throw new Error("GUI_WORKSPACE_REVIEW_SAVE_FAILED: The open translation draft could not be saved.");
     }
     const selectedWorkspace = selectedWorkspaceReference();
-    const targetStorageDirectory = selectedWorkspace?.storageDirectory ?? workspaceDirectory.value;
+    const targetStorageDirectory = selectedWorkspace?.storageDirectory ?? workspaceStorageDirectory();
+    if(!selectedWorkspace && !targetStorageDirectory) {
+      workspaceDirectory.classList.add("field-error");workspaceDirectory.setAttribute("aria-invalid","true");workspaceDirectory.focus({preventScroll:true});
+      workspaceStatus.textContent="GUI_WORKSPACE_REQUEST_INVALID: Choose an output directory or a saved-work directory before saving.";return;
+    }
     const payload = await workspacePost("/api/v1/workspaces/save", {
       workspace_id: selectedWorkspace?.workspaceId || "", name: workspaceName.value,
       current_step: lastWorkspaceStep, fields: collectWorkspaceFields(),
@@ -1039,7 +1060,7 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
   } catch (error) { workspaceStatus.textContent = error.message; }
 });
 document.querySelector("#load-workspace").addEventListener("click", loadSelectedWorkspace);
-importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const targetStorageDirectory = workspaceDirectory.value; const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(targetStorageDirectory)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(workspaceKey(payload.workspace.workspace_id, targetStorageDirectory), {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
+importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const targetStorageDirectory = workspaceStorageDirectory(); const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(targetStorageDirectory)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(workspaceKey(payload.workspace.workspace_id, targetStorageDirectory), {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });
 deleteWorkspaceButton.addEventListener("click", async () => { const selectedWorkspace = selectedWorkspaceReference(); if (!selectedWorkspace) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; } const selected = workspaceList.selectedOptions[0]?.textContent || "this saved work state"; if (!window.confirm(`Remove ${selected}? This deletes only its saved workspace JSON, not transcripts, reviews, exports, or dictionaries.`)) return; try { await workspacePost("/api/v1/workspaces/delete", {workspace_id: selectedWorkspace.workspaceId}, {storageDirectory: selectedWorkspace.storageDirectory}); activeWorkspaceId = ""; activeWorkspaceStorageDirectory = ""; activeWorkspaceKey = ""; workspaceAutosave.disabled = true; workspaceName.value = ""; await refreshWorkspaces("", {feedback: false}); workspaceStatus.textContent = "Saved work state removed."; workspaceAutosaveStatus.textContent = "Auto-save inactive: save or load a workspace first."; } catch (error) { workspaceStatus.textContent = error.message; } });
 clearCurrentStateButton.addEventListener("click", async () => {
   if (!window.confirm("Clear the current queue and unsaved browser work, then start with a blank slate? Saved work states, transcripts, reviews, revisions, exports, and dictionaries will not be deleted. Active transcription must finish first.")) return;
@@ -1643,7 +1664,7 @@ dependencyPanel.after(tempWorkdirs);
 let workdirPreview = "";
 let workdirInventoryRequest = 0;
 let workdirPreviewRequest = 0;
-const workdirRequest = (action, fields={}) => queuePost(`/api/v1/workdirs/${action}`, {...fields, storage_directory:workspaceDirectory.value, fields:collectWorkspaceFields()});
+const workdirRequest = (action, fields={}) => queuePost(`/api/v1/workdirs/${action}`, {...fields, storage_directory:workspaceStorageDirectory(), fields:collectWorkspaceFields()});
 function invalidateWorkdirPreview() { workdirPreviewRequest += 1; workdirPreview = ""; document.querySelector("#workdir-delete").disabled = true; }
 async function refreshWorkdirs() {
   invalidateWorkdirPreview();
@@ -1718,3 +1739,7 @@ async function refreshExportDownloads(kind) {
     status.textContent = payload.unavailable.length ? "Some published exports are missing or changed and cannot be downloaded." : payload.exports.length ? "Verified existing exports are ready to download." : "No verified exports found for this applied version. Export it first. Legacy exports with a custom palette may require their original settings.";
   } catch (error) { status.textContent = error.message; }
 }
+
+workspaceName.addEventListener("input",()=>{if(workspaceName.value.trim() && workspaceName.value.trim().length<=100){workspaceName.classList.remove("field-error");workspaceName.setAttribute("aria-invalid","false");}});
+workspaceDirectory.addEventListener("input",()=>{workspaceDirectory.classList.remove("field-error");workspaceDirectory.setAttribute("aria-invalid","false");});
+document.addEventListener("ewp-stage",event=>{if(event.detail?.stage==="saved")void refreshWorkspaces(workspaceList.value,{feedback:false}).catch(error=>{workspaceStatus.textContent=error.message;});});

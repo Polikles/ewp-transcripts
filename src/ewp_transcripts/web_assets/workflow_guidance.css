@@ -190,3 +190,22 @@
 @media (min-width: 45rem) and (max-width: 70rem) {
   .review-control-line > .feedback-anchor > button { font-size: .8rem; padding-inline: .35rem; }
 }
+
+/* Keep reading width stable above the comfortable desktop layout. */
+.gui-workbench { max-width: 100rem; margin-inline: auto; }
+.gui-workbench main { max-width: 64rem; width: 100%; box-sizing: border-box; }
+#workspace-directory-hint { margin-top: .35rem; margin-bottom: .25rem; }
+.workspace-primary-actions, .workspace-secondary-actions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: .5rem; }
+.workspace-primary-actions > button, .workspace-primary-actions > .feedback-anchor > button { width: 100%; margin: 0; }
+.workspace-primary-actions > .feedback-anchor { min-height: 0; padding-bottom: 0; }
+.workspace-primary-actions .inline-working { position: static; min-width: 0; }
+.workspace-secondary-actions { margin-top: .5rem; }
+.workspace-removal-actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
+.gui-workbench .workspace-removal-actions button { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; padding: .4rem .6rem; }
+.credential-key-check { flex: 1 1 13rem; min-width: 0; }
+.credential-key-check p { margin-block: .35rem 0; }
+@media (max-width: 35rem) {
+  .workspace-primary-actions, .workspace-secondary-actions { grid-template-columns: minmax(0,1fr); }
+  .workspace-removal-actions { grid-column: 1; }
+}
+:root { background: var(--gui-bg); }

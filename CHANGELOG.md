@@ -6,6 +6,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Cloud queue starts over HTTP require a fresh, one-use upload-consent grant for the exact staged
+  queue. Restoring work revokes it; retries/queue changes invalidate it. Saved profiles/workspaces
+  never contain the grant, and stale/programmatically restored checkbox state cannot authorize a start.
+- Center the visible favicon artwork inside its frame, bound wide-screen application/editor widths,
+  keep planning outside the engine disclosure, shorten cloud hints and put API-check feedback below
+  its button. Saved-work controls have correct field labels, inline name validation, automatic list
+  refresh and subdued removal actions; a blank catalog stores new GUI saves in the output directory.
+- Separate the short update checklist from later fresh-install/uninstall/graphical-installer checks;
+  previously qualified model preparation is not repeated after ordinary GUI updates.
 - Source workflow progress recognizes subtitle-only exports and the real canonical-version filename
   ordering, without requiring TXT. Translation generation refreshes durable candidate state, blocks
   accidental duplicate generation until explicit reopening, and keeps manual review pending until

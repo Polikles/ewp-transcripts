@@ -318,3 +318,82 @@ def test_missing_shared_key_explains_enter_or_load_and_never_reads_audio_or_call
     with pytest.raises(SpeechEngineError, match="enter it or load a previously saved key"):
         session.transcribe(tmp_path / "not-opened.wav", "pl", diarize=False)
     transport.assert_not_called()
+
+
+def test_http_cloud_consent_is_single_use_bound_to_queue_and_revoked_on_restore(tmp_path):
+    seen = []
+    queue = GuiTranscriptionQueue(
+        config=ApplicationConfig(),
+        service=lambda path, **kw: (
+            seen.append(path) or SimpleNamespace(result_path=tmp_path / "result.json")
+        ),
+    )
+    try:
+        first = queue.stage(
+            tmp_path / "a.wav",
+            tmp_path,
+            planned_job_id="a",
+            planned_result_path=str(tmp_path / "a_results.json"),
+            speech=SpeechConfig(provider="openrouter"),
+        )
+        for allow, token in [(False, ""), (True, ""), (True, "made-up")]:
+            with pytest.raises(ValueError, match="fresh cloud"):
+                queue.start(allow_cloud=allow, cloud_consent_token=token)
+        assert not seen and queue.jobs()[0].status == "staged"
+        token = queue.authorize_cloud_start((first.job_id,))
+        assert token not in queue.jobs()[0].model_dump_json()
+        queue.revoke_cloud_consent()
+        with pytest.raises(ValueError, match="fresh cloud"):
+            queue.start(allow_cloud=True, cloud_consent_token=token)
+        token = queue.authorize_cloud_start((first.job_id,))
+        second = queue.stage(
+            tmp_path / "b.wav",
+            tmp_path,
+            planned_job_id="b",
+            planned_result_path=str(tmp_path / "b_results.json"),
+            speech=SpeechConfig(provider="openrouter"),
+        )
+        with pytest.raises(ValueError, match="fresh cloud"):
+            queue.start(allow_cloud=True, cloud_consent_token=token)
+        assert not seen and all(job.status == "staged" for job in queue.jobs())
+        token = queue.authorize_cloud_start((first.job_id, second.job_id))
+        assert queue.start(allow_cloud=True, cloud_consent_token=token) == 2
+        deadline = time.monotonic() + 2
+        while len(seen) < 2 and time.monotonic() < deadline:
+            time.sleep(0.005)
+        assert len(seen) == 2
+        with pytest.raises(ValueError, match="changed"):
+            queue.authorize_cloud_start((first.job_id,))
+    finally:
+        queue.close()
+
+
+def test_cloud_retry_cannot_reuse_a_consumed_http_grant(tmp_path):
+    calls = []
+
+    def fail(path, **kw):
+        calls.append(path)
+        raise SpeechEngineError("synthetic failure")
+
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=fail)
+    try:
+        job = queue.stage(
+            tmp_path / "a.wav",
+            tmp_path,
+            planned_job_id="a",
+            planned_result_path=str(tmp_path / "a_results.json"),
+            speech=SpeechConfig(provider="openrouter"),
+        )
+        token = queue.authorize_cloud_start((job.job_id,))
+        queue.start(allow_cloud=True, cloud_consent_token=token)
+        deadline = time.monotonic() + 2
+        while queue.jobs()[0].status != "failed" and time.monotonic() < deadline:
+            time.sleep(0.005)
+        retry = queue.retry(job.job_id)
+        with pytest.raises(ValueError, match="fresh cloud"):
+            queue.start(allow_cloud=True, cloud_consent_token=token)
+        assert queue.jobs()[0].status == "staged" and len(calls) == 1
+        fresh = queue.authorize_cloud_start((retry.job_id,))
+        assert queue.start(allow_cloud=True, cloud_consent_token=fresh) == 1
+    finally:
+        queue.close()

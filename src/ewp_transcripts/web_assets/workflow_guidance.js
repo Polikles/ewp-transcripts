@@ -55,7 +55,7 @@ function numberWorkflowSections() {
   const outputLabel = document.querySelector('label[for="output-path"]');
   const outputInput = document.querySelector("#output-path");
   document.querySelector('label[for="input-path"]').before(outputLabel, outputInput, chooseOutputFeedback);
-  const planningActions = form.querySelector(".actions");
+  const planningActions = form.querySelector(":scope > .actions");
   markWorkflowStep("workspace", 2, planningActions);
   markWorkflowStep("workspace", 3, document.querySelector("#queue-scroll-hint").previousElementSibling, {rename:true});
 
@@ -109,7 +109,7 @@ function numberWorkflowSections() {
     const heading = document.querySelector(`#gui-dictionary-step-${number}`);
     markWorkflowStep("dictionary", number, heading, {rename:true});
   }
-  markWorkflowStep("saved", 1, document.querySelector('label[for="workspace-directory"]'));
+  markWorkflowStep("saved", 1, document.querySelector("#workspace-directory-group"));
   markWorkflowStep("saved", 2, document.querySelector('label[for="workspace-name"]'));
   markWorkflowStep("saved", 3, document.querySelector('label[for="workspace-list"]'));
   markWorkflowStep("saved", 4, document.querySelector("#managed-sources summary"), {rename:true});

@@ -20,7 +20,17 @@ from urllib.parse import urljoin, urlsplit
 from playwright.sync_api import Page, expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-VIEWPORTS = [(1440, 1000), (960, 1080), (768, 1024), (720, 1000), (900, 1440), (390, 844)]
+VIEWPORTS = [
+    (3840, 2160),
+    (2560, 1440),
+    (1920, 1080),
+    (1440, 1000),
+    (960, 1080),
+    (768, 1024),
+    (720, 1000),
+    (900, 1440),
+    (390, 844),
+]
 
 
 def geometry(page: Page) -> dict:
@@ -37,7 +47,10 @@ def geometry(page: Page) -> dict:
         .filter(e => { const b = e.querySelector('button')?.getBoundingClientRect();
           const s = e.querySelector('.inline-working')?.getBoundingClientRect();
           return b && s && b.bottom > s.top + 1; }).length;
+      const app = document.querySelector('.gui-workbench').getBoundingClientRect();
       return {viewport: innerWidth, pageWidth: document.documentElement.scrollWidth,
+        appWidth: app.width, appLeft: app.left, appRight: innerWidth-app.right,
+        mainWidth: document.querySelector('main').getBoundingClientRect().width,
         overflow, feedbackOverlaps: overlaps,
         textareaOverflow: [...document.querySelectorAll(
           '#review-editor textarea, #translation-review-editor textarea')]
@@ -113,6 +126,9 @@ def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
                     results.append(measured)
                     if not baseline:
                         assert measured["pageWidth"] <= width + 1, measured
+                        assert measured["appWidth"] <= 1600.1, measured
+                        assert measured["mainWidth"] <= 1024.1, measured
+                        assert abs(measured["appLeft"] - measured["appRight"]) <= 1, measured
                         assert not measured["overflow"], measured
                         assert not measured["feedbackOverlaps"], measured
                         assert not measured["textareaOverflow"], measured
@@ -1251,7 +1267,9 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     page.locator("#save-workspace").click()
     expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
     checkpoint = {
-        "catalog": page.locator("#workspace-directory").input_value(),
+        "catalog": page.evaluate(
+            "selectedWorkspaceReference()?.storageDirectory ?? workspaceStorageDirectory()"
+        ),
         "key": page.locator("#workspace-list").input_value(),
         "result": page.evaluate("reviewDocument.result_path"),
         "review": page.evaluate("reviewDocument.review_path"),

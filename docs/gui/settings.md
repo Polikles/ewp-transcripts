@@ -34,7 +34,8 @@ single JSON in a browser picker. No media, transcripts, credentials, disclosure/
 active jobs or timing cache is embedded. Workspace records reference original external files.
 Save transcript drafts separately before closing the program.
 
-Profiles include the default workspace catalog and the explicitly selected custom catalog. Select
+Profiles include the legacy private workspace catalog and the current saved-work catalog (the
+output directory when its optional path is blank, or the explicitly selected custom catalog). Select
 another catalog before making a separate export if needed. The selected dictionary library and
 available dictionary files referenced by those workspaces are embedded, with original bytes/hash,
 version and hidden status. Custom palette definitions are included. Missing files remain unavailable

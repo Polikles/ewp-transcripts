@@ -1953,3 +1953,15 @@ for(const [en,pl] of [
 
 guiPolish.set("Next step: translation review","Następny krok: weryfikacja tłumaczenia");
 guiPolish.set("Cloud ASR failed. Check the shared key, credits, selected model, timed-word support and job cost limit; retry explicitly.","ASR w chmurze nie powiodło się. Sprawdź wspólny klucz, środki, wybrany model, obsługę czasów słów i aktualne oszacowanie kosztu; ponów ręcznie.");
+
+// Restored-work and wide-screen follow-up.
+for(const [en,pl] of [
+  ["Output directory","Katalog wyników"],
+  ["Key checks and price refresh do not upload audio. Estimates use current prices and source duration. Final billing can differ. Estimating does not incur provider charges.","Sprawdzanie klucza i odświeżanie cen nie wysyłają audio. Oszacowanie uwzględnia aktualne ceny i długość źródeł. Końcowe rozliczenie może się różnić. Oszacowanie nie powoduje naliczeń po stronie dostawcy."],
+  ["Whisper models need one speaker per track. Scribe and MAI handle mixed-speaker audio better.","Modele Whisper wymagają jednego mówcy na ścieżce. Zmiksowane audio wielu mówców lepiej obsługują Scribe i MAI."],
+  ["Choose a directory for saved-work files and backups. Leave blank to save work state in the output directory.","Wybierz katalog dla plików zapisu obszaru pracy i kopii zapasowych. Puste pole oznacza zapisanie stanu pracy w katalogu wyników."],
+  ["Choose an output directory or a saved-work directory before saving.","Przed zapisem wybierz katalog wyników lub katalog zapisów pracy."],
+  ["Cloud queue changed; review it and select upload consent again","Kolejka chmurowa uległa zmianie. Sprawdź ją i ponownie zaznacz zgodę na wysłanie audio."],
+  ["Select fresh cloud audio upload and paid-usage consent before starting","Przed uruchomieniem ponownie zaznacz zgodę na wysłanie audio do chmury i płatne użycie API."],
+  ["Cloud queue selection is invalid","Wybór zadań chmurowych jest nieprawidłowy."]
+])guiPolish.set(en,pl);

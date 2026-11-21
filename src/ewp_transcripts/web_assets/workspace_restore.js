@@ -13,6 +13,7 @@ async function loadSelectedWorkspace() {
   if (workspaceRestoreBusy) return;
   const selected = selectedWorkspaceReference();
   if (!selected) { workspaceStatus.textContent = "GUI_WORKSPACE_SELECTION_REQUIRED: Select a saved workspace first."; return; }
+  if(typeof resetGuiCloudConsent==="function")resetGuiCloudConsent();
   workspaceRestoreBusy = true;
   workspaceStatus.textContent = "Restoring saved work…";
   const restoreId = crypto.randomUUID();
@@ -52,6 +53,6 @@ async function loadSelectedWorkspace() {
     if (timer !== null) clearInterval(timer);
     workspaceRestoreBusy = false;
     if (workspaceRestoreDialog.open) workspaceRestoreDialog.close();
-    updateWorkspaceSelectionControls();
+    updateWorkspaceSelectionControls();updateGuiQueueStart();
   }
 }

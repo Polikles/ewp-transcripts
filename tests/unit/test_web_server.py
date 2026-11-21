@@ -1466,3 +1466,103 @@ def test_read_only_key_check_can_check_typed_key_without_setting_or_saving_it():
     speech.check_key.assert_called_once_with("typed-fake-key")
     assert handler.server.gui_openrouter_api_key == "existing-fake-key"
     assert not handler.server.gui_credentials.method_calls
+
+
+def test_restored_cloud_job_requires_fresh_http_consent_even_if_start_boolean_is_true(tmp_path):
+    import time
+
+    from ewp_transcripts.config import ApplicationConfig, SpeechConfig
+    from ewp_transcripts.web_jobs import GuiTranscriptionQueue
+
+    source = tmp_path / "episode.wav"
+    source.write_bytes(b"synthetic media")
+    result = tmp_path / "episode_results.json"
+    workflows = GuiWorkflowController()
+    seen = []
+    queue = GuiTranscriptionQueue(
+        config=ApplicationConfig(),
+        service=lambda path, **kw: seen.append(kw) or SimpleNamespace(result_path=result),
+    )
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_transcriptions=queue,
+        gui_workflows=SimpleNamespace(
+            resolve_allowed_path=workflows.resolve_allowed_path,
+            resolve_transcription_options=workflows.resolve_transcription_options,
+            run=Mock(
+                return_value=SimpleNamespace(
+                    status="completed",
+                    result={"jobs": [{"job_id": "episode", "outputs": {"results": str(result)}}]},
+                )
+            ),
+        ),
+    )
+
+    def post(action, body):
+        raw = json.dumps(body).encode()
+        handler.path = "/api/v1/transcriptions/" + action
+        handler.headers = Message()
+        for key, value in {
+            "Host": "127.0.0.1:8765",
+            "Origin": "http://127.0.0.1:8765",
+            "Content-Length": str(len(raw)),
+            "X-EWP-CSRF": "expected",
+        }.items():
+            handler.headers[key] = value
+        handler.rfile = BytesIO(raw)
+        handler._write_response = Mock()
+        handler.do_POST()
+        response = handler._write_response.call_args.args[0]
+        return response.status, json.loads(response.body)
+
+    try:
+        speech = SpeechConfig(provider="openrouter", model="openai/whisper-large-v3")
+        assert (
+            handler._restore_workspace_staged_jobs(
+                (
+                    {
+                        "input_path": str(source),
+                        "output_directory": str(tmp_path),
+                        "planned_job_id": "episode",
+                        "planned_result_path": str(result),
+                        "source_sha256": sha256_file(source),
+                        "language": "pl",
+                        "speaker_count": 1,
+                        "speech": speech.model_dump(mode="json"),
+                    },
+                )
+            )
+            == 1
+        )
+        job = queue.jobs()[0]
+        assert job.speech == speech
+        for body in (
+            {},
+            {"cloud_confirmed": False},
+            {"cloud_confirmed": True},
+            {"cloud_confirmed": True, "cloud_consent_token": None},
+        ):
+            status, payload = post("start", body)
+            assert status == 400 and payload["error"]["code"] == "GUI_CLOUD_CONSENT_REQUIRED"
+            assert not seen and queue.jobs()[0].status == "staged"
+        status, payload = post(
+            "cloud-consent", {"cloud_confirmed": True, "cloud_job_ids": [job.job_id]}
+        )
+        assert status == 200
+        token = payload["cloud_consent_token"]
+        queue.revoke_cloud_consent()
+        assert post("start", {"cloud_confirmed": True, "cloud_consent_token": token})[0] == 400
+        token = post("cloud-consent", {"cloud_confirmed": True, "cloud_job_ids": [job.job_id]})[1][
+            "cloud_consent_token"
+        ]
+        assert post("start", {"cloud_confirmed": True, "cloud_consent_token": token})[0] == 202
+        deadline = time.monotonic() + 2
+        while not seen and time.monotonic() < deadline:
+            time.sleep(0.005)
+        assert (
+            len(seen) == 1 and seen[0]["allow_cloud"] is True and seen[0]["config"].speech == speech
+        )
+    finally:
+        queue.close()

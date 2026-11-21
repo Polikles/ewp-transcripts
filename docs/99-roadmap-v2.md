@@ -36,6 +36,17 @@ Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is cor
 isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
 Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
 
+### Current restored-consent and layout follow-up
+
+Owner confirms native SRT/VTT-only progress, translation candidate status/generation lock and
+correction/translation disclosure blocking. The remaining unchecked-consent incident really used
+OpenRouter Whisper Large, so restored cloud starts need a fresh exact-queue confirmation at both
+browser and server boundaries. See [current checkpoint](checkpoints/2026-11-21-b-restore-consent-layout.md)
+and [update-only checklist](../Instructions/GUI_UPDATE_TEST_CHECKLIST.md). No paid requalification
+or model reinstall is required. Wider B native/WSL acceptance remains pending; A stays accepted.
+Fresh-install/reinstall tests wait for the uninstall-script and later GUI-installer milestones,
+with a [separate deferred qualification plan](../Instructions/INSTALLER_QUALIFICATION_PLAN.md).
+
 ### Latest B native workflow feedback
 
 Owner now confirms local ASR, source subtitle export and cloud ASR work on native Windows.

@@ -3,6 +3,27 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered B restore-consent, workspace and wide-screen feedback
+
+Baseline clean main dee74cd. Owner confirms SRT/VTT-only progress, generated-translation status
+and duplicate-generation lock, and correction/translation consent blocking work. Installation is
+already qualified for updates; fresh install/uninstall tests move to the later uninstall/installer
+milestones. [Checkpoint](docs/checkpoints/2026-11-21-b-restore-consent-layout.md).
+
+- [x] Reproduce/fix restored cloud-ASR queue starting without fresh checkbox consent; enforce frontend and backend after load/retry, preserve provider/model and clear confirmations. No paid requests for tests.
+- [x] Center logo inside framed favicon; inspect existing SVG geometry, preserve artist ZIP.
+- [x] Bound wide-screen GUI/editor width with centered side margins above comfortable 3/4-screen layout; verify half/full 4K logical widths and EN/PL.
+- [x] Put key-check result immediately below Check API key button, separate from other credential messages.
+- [x] Fix Transcription engine disclosure accidentally enclosing step 2 heading; planning controls remain visible when collapsed.
+- [x] Replace cloud hints with owner's two short EN/PL paragraphs (current prices/duration, no charge for estimates; Whisper one speaker per track, mixed audio better with Scribe/MAI).
+- [x] Missing saved-work name highlights/focuses name field. Fix field labels/order and exact optional catalog hint above input; blank catalog resolves to output-root saved work (existing global saves still reachable).
+- [x] Refresh saved workspace list when entering Saved work & cleanup; arrange Refresh below Save, secondary Remove/Clear below/right aligned with Open saved file action.
+- [x] Separate update-only focused checklist from deferred fresh-install/uninstall/GUI-installer qualification; retain passed owner evidence.
+- [x] Meaningful regression/browser/recovery/ordinary gate and integration as appropriate; changed-step docs/ENPL copy/changelog/checkpoints/evidence; clean disposable root, commit/push main.
+
+Next: owner follows `Instructions/GUI_UPDATE_TEST_CHECKLIST.md`; keep prior passes. Full B owner
+acceptance is still separate. Original native bypass cause unproven; fresh grant boundary verified.
+
 ## Active B Windows workflow polish and state feedback
 
 Baseline main 3c413ce. Owner confirms native Windows local ASR, source subtitle export and cloud

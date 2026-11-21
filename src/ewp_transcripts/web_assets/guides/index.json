@@ -323,8 +323,8 @@
           "pl": "Wybierz katalog wyników i zapisu"
         },
         "text": {
-          "en": "Use the same shared output root and workspace catalog as the recording’s durable artifacts.",
-          "pl": "Używaj wspólnego katalogu wyników i katalogu zapisu odpowiadających trwałym plikom nagrania."
+          "en": "Leave the optional catalog blank to store new saved-work JSON files in the output directory, or choose a separate catalog for saves and backups.",
+          "pl": "Pozostaw opcjonalny katalog pusty, aby zapisywać nowe pliki stanu pracy w katalogu wyników, lub wybierz osobny katalog zapisów i kopii zapasowych."
         }
       },
       {
@@ -343,8 +343,8 @@
           "pl": "Wczytaj zapisaną pracę"
         },
         "text": {
-          "en": "Refresh, select the workspace and Load selected work state after a restart. Re-enter provider credentials.",
-          "pl": "Odśwież listę, wybierz zapis i wczytaj stan po ponownym uruchomieniu. Wprowadź ponownie dane dostępu do dostawcy."
+          "en": "The list refreshes when this stage opens. Select the workspace and Load selected work state after a restart. Re-enter or explicitly load provider credentials; upload consent stays unchecked.",
+          "pl": "Lista odświeża się przy otwarciu tej sekcji. Wybierz zapis i wczytaj stan po restarcie. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona."
         }
       },
       {

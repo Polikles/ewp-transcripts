@@ -41,8 +41,11 @@ document.querySelector("#dependency-panel").before(credentialSettings);
 
 document.querySelector("#close-openrouter-key-icon").addEventListener("click",closeOpenRouterKeyDialog);
 openRouterKeyDialog.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();closeOpenRouterKeyDialog();}});
+const keyCheckButton=document.querySelector("#check-openrouter-key");
+const keyCheckGroup=document.createElement("div");keyCheckGroup.className="credential-key-check";keyCheckButton.before(keyCheckGroup);keyCheckGroup.append(keyCheckButton);
+const keyCheckStatus=document.createElement("p");keyCheckStatus.id="openrouter-key-check-status";keyCheckStatus.setAttribute("role","status");keyCheckStatus.className="field-hint";keyCheckGroup.append(keyCheckStatus);
 document.querySelector("#check-openrouter-key").addEventListener("click",async event=>{
-  const button=event.currentTarget,input=document.querySelector("#openrouter-api-key"),status=document.querySelector("#openrouter-key-dialog-status");
+  const button=event.currentTarget,input=document.querySelector("#openrouter-api-key"),status=keyCheckStatus;
   const key=input.value;input.value="";button.disabled=true;status.textContent="Checking OpenRouter key and connection…";
   try {
     await queuePost("/api/v1/speech/check",key ? {api_key:key} : {},{trigger:button});
@@ -50,3 +53,6 @@ document.querySelector("#check-openrouter-key").addEventListener("click",async e
   }catch(error){status.textContent=error.message;}
   finally{input.value="";button.disabled=false;}
 });
+
+openRouterKeyButton.addEventListener("click",()=>{keyCheckStatus.textContent="";});
+document.querySelector("#openrouter-api-key").addEventListener("input",()=>{keyCheckStatus.textContent="";});

@@ -6,25 +6,17 @@ A remains accepted. Use a separate test output directory; do not modify the arti
 Record the Git commit, OS, GPU/driver, browser and language with the results. Mark each item
 separately for **Windows native** and **WSL**. Send diagnostic codes/technical details without keys.
 
-## 1. Update, install and launch
+## 1. Update and launch (existing installation)
 
-- [ ] Windows: pull main in a Windows user directory, using a separate checkout/`.venv` from WSL.
-  Follow [native setup](WINDOWS_NATIVE.md), including the Visual C++ runtime/NVIDIA driver and
-  `powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install`.
-- [ ] Windows: explicitly prepare missing model snapshots with
-  `uv run --locked --no-sync python scripts/setup-models.py`; gated models need accepted HF terms.
-  Model preparation must complete without an NLTK blocked-regex import error.
-  Model downloads must not occur during ordinary discovery/planning/transcription.
-- [ ] WSL: pull main in the existing WSL checkout and run `uv sync --locked`.
-  Existing model caches remain usable. Use the documented repair only if diagnostics fail.
-- [ ] Both: run `uv run --locked transcriber --help`, then
-  `uv run --locked transcriber doctor --test-speech-runtime` and
-  `uv run --locked transcriber gui`. Windows is identified as native, not a missing WSL baseline.
-- [ ] Both: Test local dependencies in Settings & About; verify FFmpeg executables **and** speech
-  shared libraries load. Doctor/repair controls are enabled after testing. Do not confuse missing
-  local models/CUDA with cloud ASR compatibility. Preserve failures for diagnosis.
-- [ ] Windows: use normal user paths with spaces and Polish characters. Try native file/directory
-  pickers and direct entry. WSL Windows drive paths still map to `/mnt/<drive>/…`.
+The active retest is the [short update checklist](GUI_UPDATE_TEST_CHECKLIST.md). Native installation,
+model preparation, doctor and working local/cloud ASR are already owner-confirmed; retain those
+passes. Stop the GUI, pull main, restart and refresh the browser. No reinstall/model setup is
+required for an ordinary GUI update. Run dependency diagnostics only for a new concrete failure.
+
+Fresh-install/reinstall checks are deferred to the [uninstall/installer milestones](INSTALLER_QUALIFICATION_PLAN.md).
+Sections below retain the wider B workflow reference; do not repeat already passed items merely
+because their historical checkboxes are empty. A stays closed. Full B owner acceptance remains
+separate from this short feedback retest.
 
 ## 2. Shared key and portable user state
 

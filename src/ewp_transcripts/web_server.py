@@ -1299,6 +1299,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 elif path == "/api/v1/workspaces/restore-progress":
                     payload = self.server.gui_restore.snapshot(str(document.get("restore_id", "")))
                 elif path == "/api/v1/workspaces/load":
+                    self.server.gui_transcriptions.revoke_cloud_consent()
                     restore_id = str(document.get("restore_id") or secrets.token_urlsafe(24))
                     self.server.gui_restore.start(restore_id)
                     succeeded = False
@@ -2131,10 +2132,44 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                     )
                 return
+            if path == "/api/v1/transcriptions/cloud-consent":
+                try:
+                    if document.get("cloud_confirmed") is not True:
+                        self.server.gui_transcriptions.revoke_cloud_consent()
+                        payload = {"cloud_consent_token": ""}
+                    else:
+                        identifiers = document.get("cloud_job_ids")
+                        if not isinstance(identifiers, list) or not all(
+                            isinstance(identifier, str) for identifier in identifiers
+                        ):
+                            raise ValueError("Cloud queue selection is invalid")
+                        token = self.server.gui_transcriptions.authorize_cloud_start(
+                            tuple(identifiers)
+                        )
+                        payload = {"cloud_consent_token": token}
+                    self._write_response(_json_response(HTTPStatus.OK, payload))
+                except ValueError as error:
+                    self._write_response(
+                        _json_response(
+                            HTTPStatus.BAD_REQUEST,
+                            {
+                                "error": {
+                                    "code": "GUI_CLOUD_CONSENT_REQUIRED",
+                                    "message": str(error),
+                                }
+                            },
+                        )
+                    )
+                return
             if path == "/api/v1/transcriptions/start":
                 try:
                     count = self.server.gui_transcriptions.start(
-                        allow_cloud=document.get("cloud_confirmed") is True
+                        allow_cloud=document.get("cloud_confirmed") is True,
+                        cloud_consent_token=(
+                            document.get("cloud_consent_token")
+                            if isinstance(document.get("cloud_consent_token"), str)
+                            else ""
+                        ),
                     )
                 except ValueError as error:
                     self._write_response(

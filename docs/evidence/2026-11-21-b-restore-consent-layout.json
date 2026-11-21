@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-21",
+  "baseline_commit": "dee74cd",
+  "owner_confirmed": {
+    "native_source_srt_vtt_progress": "pass",
+    "translation_status_and_duplicate_lock": "pass",
+    "correction_translation_disclosure": "pass",
+    "unchecked_incident_provider": "OpenRouter Whisper Large; confirmed by owner",
+    "full_B_native_WSL_acceptance": "pending"
+  },
+  "investigation": {
+    "original_native_bypass": "not reproduced; baseline false-consent check and saved speech configuration were already present",
+    "hardening": "fresh exact-queue one-use grant, consumed/validated under queue lock; restored consent never serialized",
+    "restore_revokes_grants": true,
+    "missing_null_boolean_only_tokens": "rejected before queuing",
+    "retry_changed_queue": "fresh grant required",
+    "in_process_trusted_API": "explicit allow_cloud=True remains supported; HTTP always supplies token string"
+  },
+  "verification": {
+    "make_check": {
+      "tests_passed": 1034,
+      "ruff": "pass",
+      "format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "guide_docs_mirror_check_after_final_docs": {
+      "passed": 14
+    },
+    "changed_js_syntax": {
+      "files": 8,
+      "result": "pass"
+    },
+    "browser": {
+      "playwright": "1.65.2",
+      "chromium": "159.0.8154.6",
+      "full_cases": 216,
+      "viewport_widths": [
+        390,
+        720,
+        768,
+        900,
+        960,
+        1440,
+        1920,
+        2560,
+        3840
+      ],
+      "max_app_css_px": 1600,
+      "max_main_css_px": 1024,
+      "page_errors": [],
+      "external_requests": [],
+      "actual_zoom_200": "not run; not an owner blocking gate"
+    },
+    "restored_consent_browser": {
+      "layout_cases": 48,
+      "provider_preserved": "openrouter",
+      "model_preserved": "openai/whisper-large-v3",
+      "same_process_old_grant_rejected": true,
+      "boolean_only_and_programmatic_checkbox_blocked": true,
+      "save_with_blank_catalog": "manifest physically saved in output root",
+      "actual_process_restart": true,
+      "fake_service_success_only_after_genuine_reconsent": true,
+      "fake_service_calls_total": 2,
+      "provider_uploads": 0,
+      "paid_calls": 0
+    },
+    "favicon": "visible-artwork center equals frame center within 0.01 CSS px at 400px; derived SVG only",
+    "workspace_controls": "name focus/highlight, label/hint order, auto list, refresh-under-save, muted right-aligned removal verified",
+    "workflow_polish": "mock key/OS actions and deterministic translation; source SRT-only and translation status/generation-lock pass",
+    "full_saved_review_restart": "source/translation drafts, applied state and export controls pass"
+  },
+  "scope": {
+    "new_cloud_spend_usd": "0",
+    "cumulative_authorized_prior_cloud_spend_usd": "0.0153610111540591670",
+    "model_reinstall": false,
+    "new_native_windows_qualification": false,
+    "artist_zip_changed": false,
+    "artist_zip_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+    "fresh_install_tests": "deferred to uninstall-script and later GUI-installer milestones"
+  },
+  "disposable_cleanup": {
+    "root": "/tmp/ewp-b-restore.cG0zzL",
+    "removed": true
+  },
+  "next": "owner update-only checklist; retain passed evidence; B acceptance and final EN-PL/manual gates remain separate"
+}

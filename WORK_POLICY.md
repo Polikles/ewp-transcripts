@@ -70,3 +70,11 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
     audio-disconnect fixes are verified with synthetic media/deterministic translation; no new paid
     qualification is needed. A stays closed, artist ZIP stays frozen, final terminology/manual gate
     is unchanged. Do not interpret missing session key after restart as a model-install failure.
+
+14. Latest restored-consent feedback: use the active update-only checklist, not installation/model
+    preparation after routine updates. Fresh-install/reinstall qualification waits for uninstall
+    scripts and the later graphical installer. Keep owner-confirmed SRT/VTT progress, translation
+    status/generation lock and correction/translation blocking passes. OpenRouter Whisper Large
+    actually ran in the reported unchecked-consent incident; test exact restored cloud identity
+    and server-side fresh consent, without another paid run. Do not infer a proven root cause
+    merely from hardening the boundary. Follow the current restore-consent checkpoint.

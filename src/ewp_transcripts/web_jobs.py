@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import secrets
 import threading
 import traceback
 from collections import deque
@@ -136,6 +137,7 @@ class GuiTranscriptionQueue:
         self._jobs: dict[str, GuiTranscriptionJob] = {}
         self._order: deque[str] = deque(maxlen=50)
         self._lock = threading.Lock()
+        self._cloud_consent_grant: tuple[str, tuple[str, ...]] | None = None
         self._worker = threading.Thread(
             target=self._run,
             name="ewp-gui-transcription",
@@ -220,15 +222,57 @@ class GuiTranscriptionQueue:
             self._order.appendleft(job.job_id)
             return job, True
 
-    def start(self, *, allow_cloud: bool = False) -> int:
+    def revoke_cloud_consent(self) -> None:
+        """Discard process-only authorization when restoring work or withdrawing consent."""
+        with self._lock:
+            self._cloud_consent_grant = None
+
+    def authorize_cloud_start(self, cloud_job_ids: tuple[str, ...]) -> str:
+        """Issue one grant for the exact currently staged queue after explicit disclosure."""
+        with self._lock:
+            self._cloud_consent_grant = None
+            expected = tuple(
+                sorted(
+                    job.job_id
+                    for job in self._jobs.values()
+                    if job.status == "staged" and job.speech.provider == "openrouter"
+                )
+            )
+            if not expected or tuple(sorted(cloud_job_ids)) != expected:
+                raise ValueError("Cloud queue changed; review it and select upload consent again")
+            token = secrets.token_urlsafe(32)
+            staged = tuple(
+                sorted(job.job_id for job in self._jobs.values() if job.status == "staged")
+            )
+            self._cloud_consent_grant = token, staged
+            return token
+
+    def start(self, *, allow_cloud: bool = False, cloud_consent_token: str | None = None) -> int:
         """Queue every staged job in stable insertion order."""
 
         pending: list[tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int]] = []
         with self._lock:
-            if not allow_cloud and any(
+            cloud_pending = any(
                 job.status == "staged" and job.speech.provider == "openrouter"
                 for job in self._jobs.values()
-            ):
+            )
+            grant, self._cloud_consent_grant = self._cloud_consent_grant, None
+            # Trusted Python callers may explicitly authorize with allow_cloud=True.
+            # The HTTP adapter always supplies a string, requiring a one-use queue grant.
+            if cloud_pending and cloud_consent_token is not None:
+                staged = tuple(
+                    sorted(job.job_id for job in self._jobs.values() if job.status == "staged")
+                )
+                if (
+                    not allow_cloud
+                    or not grant
+                    or grant[1] != staged
+                    or not secrets.compare_digest(grant[0].encode(), cloud_consent_token.encode())
+                ):
+                    raise ValueError(
+                        "Select fresh cloud audio upload and paid-usage consent before starting"
+                    )
+            if not allow_cloud and cloud_pending:
                 raise ValueError(
                     "Confirm sending staged cloud audio to OpenRouter and its model "
                     "provider, with paid API usage"

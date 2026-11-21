@@ -142,3 +142,8 @@ OpenRouter key after restart means enter a session key or explicitly use the sav
 does not require reinstalling models. Dry-run plan headings keep word boundaries; narrow phone
 views may scroll only the plan table. Speaker-count automatic selection uses the shorter label
 Automatically in the plan, while the language detection control keeps its normal wording.
+
+Each cloud start now needs a fresh one-use confirmation for the exact staged queue. Loading saved
+work invalidates an earlier confirmation; a changed/retried queue needs its checkbox selected again.
+The server rejects an old browser's confirmation boolean without the matching grant, before any
+worker is queued. The grant is not a credential and is never written to saved work or profiles.

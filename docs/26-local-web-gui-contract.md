@@ -639,3 +639,27 @@ Review audio treats BrokenPipeError, ConnectionResetError and ConnectionAbortedE
 request termination during headers or body transfer, closing the source descriptor. Ordinary JSON
 responses also tolerate those disconnected writes. General media/OS errors still propagate. No
 claim is made about which native host/browser component caused a particular Windows10053 event.
+
+### Restored cloud consent and saved-work layout follow-up — 2026-11-21
+
+HTTP cloud starts require a one-use grant in addition to `cloud_confirmed: true`. On a trusted
+checkbox change the frontend posts the exact staged cloud job IDs to
+`POST /api/v1/transcriptions/cloud-consent` with the usual Origin/CSRF checks. The queue returns
+an opaque `cloud_consent_token` bound to all staged job IDs. `/transcriptions/start` consumes and
+checks it under the same queue lock before queuing workers. Missing/null/stale tokens, changed
+staged IDs and false consent are rejected with `GUI_CLOUD_CONSENT_REQUIRED`. Loading a workspace
+revokes the grant even in the same process. A retry gets a new job identity and needs new consent.
+Unchecked input revokes the frontend's token; restoring fields/profiles clears it. No token or
+consent is serialized. Explicit trusted in-process `queue.start(allow_cloud=True)` remains an
+application API; HTTP cannot select that bypass by omitting or nulling its token.
+
+Blank optional GUI catalog paths resolve to the shared output directory for new saves, imports,
+profile workspace storage and cleanup audits. Existing selected saves retain their catalog, including
+the legacy private default catalog, which remains listed. Saved-work entry auto-refreshes the list;
+name validation highlights/focuses its field. Optional catalog hint precedes its input, name label
+stays with its input, Refresh is below Save and removal controls are secondary/right-aligned.
+
+The application is centered and bounded to 100rem, with main reading content bounded to 64rem.
+The engine disclosure never encloses planning actions/headings. Key-check feedback follows its
+button. The derived favicon uses visible-artwork bounds instead of the original SVG's stray
+registration mark; the main logo and sent artist package remain unchanged.

@@ -26,7 +26,7 @@ function collectGuiPreferences() {
 }
 async function saveUserProfile(trigger) {
   return queuePost("/api/v1/profile/save", {name:document.querySelector("#user-profile-name").value,
-    preferences:collectGuiPreferences(), fields:collectWorkspaceFields(), storage_directory:workspaceDirectory.value,
+    preferences:collectGuiPreferences(), fields:collectWorkspaceFields(), storage_directory:workspaceStorageDirectory(),
     dictionary_directory:document.querySelector("#library-directory").value, include_dictionaries:document.querySelector("#user-profile-dictionaries").checked}, {trigger});
 }
 async function applyUserProfile(payload) {

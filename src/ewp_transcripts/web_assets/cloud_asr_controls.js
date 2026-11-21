@@ -9,8 +9,8 @@ cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
     <p id="cloud-asr-check-status" role="status">Not checked</p>
     <p id="cloud-asr-estimate-status" role="status">Refresh models to see current hourly prices and an estimate for pending recordings.</p>
     <div id="cloud-asr-prices" class="table-scroll"></div>
-    <p class="field-hint">Checks and price refresh do not upload audio. Estimates use current endpoint prices, source duration and chunk overlap; stereo processing may cost more. Final billing can differ. An internal safety guard is calculated before upload; it is not a provider billing cap.</p>
-    <p class="field-hint">Whisper models need one speaker or separate synchronized speaker tracks. Mixed-speaker audio uses Scribe or MAI. Long recordings are split automatically into bounded requests and merged on the original timeline. Shared audio context helps keep speakers consistent; uncertain assignments are flagged for manual review. Provider word times are required for subtitles.</p>
+    <p class="field-hint">Key checks and price refresh do not upload audio. Estimates use current prices and source duration. Final billing can differ. Estimating does not incur provider charges.</p>
+    <p class="field-hint">Whisper models need one speaker per track. Scribe and MAI handle mixed-speaker audio better.</p>
   </div>`;
 mediaOptionsPanel.after(cloudAsrPanel);
 const cloudProvider=document.querySelector("#cloud-asr-provider"), cloudModel=document.querySelector("#cloud-asr-model");
@@ -20,12 +20,32 @@ for(const model of ["openai/whisper-large-v3","openai/whisper-large-v3-turbo","e
 const cloudConsent=document.createElement("label"); cloudConsent.id="cloud-asr-consent"; cloudConsent.className="confirmation";
 cloudConsent.innerHTML=`<input type="checkbox" id="cloud-asr-confirmed"> <span>I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not permanently saved.</span>`;
 document.querySelector("#start-queue").before(cloudConsent);
+let cloudConsentToken="",cloudConsentSnapshot="",cloudConsentPending=null,cloudConsentGeneration=0;
+function cloudQueueConsentSnapshot() {return JSON.stringify(guiQueueJobs.filter(job=>job.status==="staged").map(job=>[job.job_id,job.speech]).sort((a,b)=>a[0].localeCompare(b[0])));}
+function resetGuiCloudConsent() {cloudConsentGeneration+=1;cloudConsentToken="";cloudConsentSnapshot="";document.querySelector("#cloud-asr-confirmed").checked=false;}
+function currentGuiCloudConsentToken(){return cloudConsentToken;}
+document.querySelector("#cloud-asr-confirmed").addEventListener("change",event=>{
+  cloudConsentGeneration+=1;cloudConsentToken="";cloudConsentSnapshot="";
+  if(!event.target.checked || !event.isTrusted)return;
+  const generation=cloudConsentGeneration,snapshot=cloudQueueConsentSnapshot();
+  const ids=guiQueueJobs.filter(job=>job.status==="staged" && job.speech?.provider==="openrouter").map(job=>job.job_id);
+  cloudConsentPending=queuePost("/api/v1/transcriptions/cloud-consent",{cloud_confirmed:true,cloud_job_ids:ids},{feedback:false}).then(payload=>{
+    if(generation===cloudConsentGeneration && event.target.checked && snapshot===cloudQueueConsentSnapshot()){cloudConsentToken=payload.cloud_consent_token;cloudConsentSnapshot=snapshot;}
+  }).catch(error=>{if(generation===cloudConsentGeneration){resetGuiCloudConsent();document.querySelector("#operation-status").textContent=error.message;}});
+});
+async function ensureGuiCloudConsent() {
+  if(cloudConsentPending)await cloudConsentPending;
+  if(!guiQueueJobs.some(job=>job.status==="staged" && job.speech?.provider==="openrouter"))return true;
+  if(!cloudConsentToken || cloudConsentSnapshot!==cloudQueueConsentSnapshot())resetGuiCloudConsent();
+  return requireGuiVerification(document.querySelector("#cloud-asr-confirmed"),document.querySelector("#operation-status"),"Confirm audio upload and paid API usage before starting cloud ASR.","GUI_CLOUD_CONSENT_REQUIRED");
+}
 function updateCloudAsrControls() {
+  if(cloudConsentSnapshot && cloudConsentSnapshot!==cloudQueueConsentSnapshot())resetGuiCloudConsent();
   document.querySelector("#cloud-asr-options").hidden=cloudProvider.value!=="openrouter";
   cloudConsent.hidden=cloudProvider.value!=="openrouter" && !guiQueueJobs.some(job=>job.speech?.provider==="openrouter" && job.status==="staged");
 }
 for(const element of [cloudProvider,cloudModel]) element.addEventListener("change",()=>{
-  document.querySelector("#cloud-asr-confirmed").checked=false; invalidateMediaPlan(); updateCloudAsrControls();
+  resetGuiCloudConsent(); invalidateMediaPlan(); updateCloudAsrControls();
 });
 document.querySelector("#cloud-asr-key").addEventListener("click",()=>openRouterKeyButton.click());
 document.querySelector("#cloud-asr-check").addEventListener("click",async event=>{
@@ -86,10 +106,10 @@ decorateGuiMediaRequest=function(request,episode=null) {
 workspaceFieldIds.push("cloud-asr-provider","cloud-asr-model","cloud-asr-budget");
 const restoreFieldsBeforeCloudAsr=applyWorkspaceFields;
 applyWorkspaceFields=async function(...args) {
-  const result=await restoreFieldsBeforeCloudAsr(...args);document.querySelector("#cloud-asr-confirmed").checked=false;updateCloudAsrControls();return result;
+  resetGuiCloudConsent();const result=await restoreFieldsBeforeCloudAsr(...args);resetGuiCloudConsent();updateCloudAsrControls();return result;
 };
 const refreshJobsBeforeCloudAsr=refreshJobs;
 refreshJobs=async function(...args) {const result=await refreshJobsBeforeCloudAsr(...args);updateCloudAsrControls();return result;};
 updateCloudAsrControls();
 const applyProfileBeforeCloudAsr=applyUserProfile;
-applyUserProfile=async function(...args) {document.querySelector("#cloud-asr-confirmed").checked=false;return await applyProfileBeforeCloudAsr(...args);};
+applyUserProfile=async function(...args) {resetGuiCloudConsent();return await applyProfileBeforeCloudAsr(...args);};

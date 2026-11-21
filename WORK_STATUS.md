@@ -4,6 +4,18 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Current follow-up is implemented/verified: [restore consent / workspace / layout](docs/checkpoints/2026-11-21-b-restore-consent-layout.md).
+Baseline main dee74cd. Fresh exact-queue one-use consent now gates HTTP cloud starts; load revokes it,
+retry/changed queues invalidate it, and manifests/profiles never restore it. Original native bypass
+cause remains unproven; tests preserve OpenRouter Whisper identity and reject unchecked/stale state.
+Favicon visible-artwork centering, bounded desktop/editor width, key feedback, planning disclosure,
+short cloud copy and saved-work controls/default output-root storage are corrected. 1034 tests,
+17 integrations, mypy115, 216 full browser cases through 4K, focused/restart recovery pass.
+Use [update-only checklist](Instructions/GUI_UPDATE_TEST_CHECKLIST.md); no model reinstall or fresh
+setup check. Those wait for uninstall/installer milestones. Evidence is saved and disposable
+servers/root removed. Delivered on main; owner B update-only retest remains; A closed, artist ZIP frozen, no paid calls.
+Full B/terminology/manual gates stay separate.
+
 Latest B native feedback is implemented/verified: [checkpoint](docs/checkpoints/2026-11-21-b-workflow-state-polish.md).
 Owner confirms native local ASR, source export, cloud ASR and OS-key save/use actions work. Source
 status now recognizes subtitle-only/versioned exports; generated translation refreshes assisted

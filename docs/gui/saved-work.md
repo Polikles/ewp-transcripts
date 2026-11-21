@@ -2,9 +2,9 @@
 
 Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
 
-1. Choose output root and catalog: Use the same shared output root and workspace catalog as the recording’s durable artifacts.
+1. Choose output root and catalog: Leave the optional catalog blank to store new saved-work JSON files in the output directory, or choose a separate catalog for saves and backups.
 2. Save current work state: Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.
-3. Load saved work: Refresh, select the workspace and Load selected work state after a restart. Re-enter provider credentials.
+3. Load saved work: The list refreshes when this stage opens. Select the workspace and Load selected work state after a restart. Re-enter or explicitly load provider credentials; upload consent stays unchecked.
 4. Inspect cleanup before deleting: Refresh the managed-source inventory and read retention reasons before any explicit cleanup.
 
 ## Detailed instructions
@@ -12,6 +12,15 @@ Use this guide with the matching stage in EwP Transcripts. Interface language do
 A workspace references durable files; it does not embed audio, transcript text, credentials or human approval. Back up the output root including dot-directories and any separate workspace catalog. Interrupted transcription restarts from the beginning.
 
 Auto-save defaults off. Enabling it replaces the active saved checkpoint periodically; leave it off for a stable explicit recovery point. Loading work preserves exact recording/review/translation identity and checks current file hashes.
+
+An empty name highlights/focuses the name field before saving. Existing entries in the private
+default catalog remain listed alongside the chosen output/custom catalog; saving an already selected
+entry keeps its original catalog. Refresh is available below Save. Remove/Clear actions affect
+saved/current state and are visually secondary. A workspace JSON alone is not a media backup.
+
+Loading work also invalidates any earlier cloud-upload confirmation. Select the checkbox again
+only when you intend to start the currently staged cloud jobs. A saved API key and upload consent
+are separate; loading a key never supplies consent.
 
 Remove from list only removes a selection entry. Forgetting an inactive queue item and deleting a saved workspace do not delete publication files. Managed-source cleanup is a separate explicit operation and retains copies still referenced by current work, workspace catalogs or review lineage.
 
