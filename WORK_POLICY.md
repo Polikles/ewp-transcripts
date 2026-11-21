@@ -50,3 +50,9 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
     USD 0.0095832333762821113 total; owner waives live EN because no sample is present. Preserve
     that evidence after disposable cleanup; do not restart paid tests merely after context reset.
     A remains closed. Full EN–PL approval follows B acceptance, then manuals; artist ZIP frozen.
+
+11. Owner B8a follow-up (2026-11-21): automatically split long cloud recordings into bounded
+    requests and merge one timeline; the former single-request mixed-audio restriction is
+    superseded. See docs/checkpoints/2026-11-21-cloud-chunking.md for tests and safe speaker
+    continuity handling. Cumulative live-ASR spend including this follow-up is
+    USD 0.0153610111540591670 within the original USD 2 budget. Retain that total after cleanup.

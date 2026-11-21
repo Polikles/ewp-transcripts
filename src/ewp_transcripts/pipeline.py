@@ -217,6 +217,7 @@ def run_diarization_pipeline(
             *_inspection_warnings(inspection),
             *normalized.warnings,
             *reconciled.warnings,
+            *getattr(asr_engine, "warnings", ()),
         ),
     )
 

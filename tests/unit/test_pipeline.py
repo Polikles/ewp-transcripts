@@ -21,7 +21,7 @@ from ewp_transcripts.domain import (
     SourceFingerprint,
     WorkDirectory,
 )
-from ewp_transcripts.domain.canonical import CanonicalEnvironment
+from ewp_transcripts.domain.canonical import CanonicalEnvironment, CanonicalWarning
 from ewp_transcripts.domain.enums import ChannelMode, JobStateStatus, PlanDecision
 from ewp_transcripts.domain.errors import UnsupportedPipelineScopeError
 from ewp_transcripts.engines import (
@@ -226,13 +226,22 @@ def test_diarization_pipeline_builds_schema_valid_overlapping_result(tmp_path: P
         destination.write_bytes(b"working audio")
         return destination
 
+    asr = FakeAsr(events)
+    asr.warnings = (
+        CanonicalWarning(
+            code="CLOUD_SPEAKER_CONTINUITY_UNCERTAIN",
+            severity="warning",
+            message="Check speaker continuity",
+            stage="transcribe",
+        ),
+    )
     result = run_diarization_pipeline(
         inspection,
         reservation,
         workspace,
         config=ApplicationConfig(diarization=DiarizationConfig(speaker_count=2)),
         environment=_environment(),
-        asr_engine=FakeAsr(events),
+        asr_engine=asr,
         alignment_engine=FakeAlignment(events),
         diarization_engine=FakeDiarization(events),
         audio_preparer=prepare,
@@ -240,6 +249,7 @@ def test_diarization_pipeline_builds_schema_valid_overlapping_result(tmp_path: P
     )
 
     _assert_schema_valid(result.model_dump(mode="json"))
+    assert asr.warnings[0] in result.warnings
     assert result.episode.source_topology == "single_file"
     assert result.sources[0].channel_selection == "all"
     assert result.sources[0].speaker_id is None

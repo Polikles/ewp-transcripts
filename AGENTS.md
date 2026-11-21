@@ -33,7 +33,8 @@ for B8a without asking again; no broader provider/media/spending scope is implie
 is now explicitly authorized for B5–B9 to completion (2026-11-21). Earlier planning-only holds are
 revoked; follow the active B execution checkpoint and interrupt only for concrete missing inputs
 or blockers. Owner still performs native Windows acceptance after delivery. The short live PL pilot is complete
-at USD 0.0095832333762821113; EN live qualification is waived by the owner (no EN sample).
+at USD 0.0095832333762821113; the later chunking follow-up brings cumulative cloud spend to
+USD 0.0153610111540591670 (see its checkpoint). EN live qualification is waived by the owner (no EN sample).
 Do not reopen passed A or rerun paid qualification merely after a context reset. Task 10 waits
 for B owner acceptance/function freeze.
 

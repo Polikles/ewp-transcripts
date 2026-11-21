@@ -17,7 +17,10 @@ from typing import Any
 
 from ewp_transcripts.cancellation import CancellationToken, check_cancellation
 from ewp_transcripts.config import SpeechConfig
+from ewp_transcripts.domain.canonical import CanonicalWarning
 from ewp_transcripts.domain.errors import SpeechEngineError
+from ewp_transcripts.engines import cloud_chunks
+from ewp_transcripts.engines.cloud_chunks import MixedChunkMerger, plan_audio_chunks
 from ewp_transcripts.engines.protocols import (
     AlignedSegment,
     AlignedTranscript,
@@ -197,6 +200,7 @@ class CloudSpeechSession:
         self._cache: dict[Path, CloudTranscript] = {}
         self.calls: list[dict[str, Any]] = []
         self._charged = Decimal(0)
+        self.speaker_notes: list[dict[str, Any]] = []
 
     @property
     def provenance(self) -> dict[str, Any]:
@@ -210,6 +214,7 @@ class CloudSpeechSession:
             "budget_usd": self.config.max_cost_usd,
             "accounted_cost_usd": str(self._charged),
             "calls": list(self.calls),
+            "speaker_reconciliation": list(self.speaker_notes),
         }
 
     def transcribe(self, path: Path, language: str, *, diarize: bool) -> CloudTranscript:
@@ -229,26 +234,39 @@ class CloudSpeechSession:
                 source.getsampwidth(),
             )
             total = source.getnframes()
-            estimate = (Decimal(total) / rate + 1) * self._rate * 2
+            chunks = plan_audio_chunks(
+                total,
+                rate=rate,
+                frame_bytes=channels * width,
+                seconds=self.config.chunk_seconds,
+                diarize=diarize,
+            )
+            estimate = sum(
+                (
+                    (Decimal(chunk.end - chunk.start) / rate).to_integral_value(
+                        rounding="ROUND_CEILING"
+                    )
+                    + 1
+                )
+                * self._rate
+                * 2
+                for chunk in chunks
+            )
             if self._charged + estimate > Decimal(str(self.config.max_cost_usd)):
                 raise SpeechEngineError(
                     "Cloud ASR cost estimate exceeds the remaining job budget; "
                     "no further audio was sent"
                 )
-            # Provider speaker IDs are local to one request. Never stitch identities from
-            # independent mixed-speaker requests or infer identities from voice biometrics.
-            if diarize and total * channels * width > 24 * 1024 * 1024:
-                raise SpeechEngineError(
-                    "Mixed-speaker cloud audio exceeds the single-request limit; use "
-                    "separate synchronized speaker tracks or local ASR"
-                )
-            step = total if diarize else rate * self.config.chunk_seconds
+            merger = MixedChunkMerger() if diarize else None
             aligned: list[AlignedSegment] = []
             turns: list[DiarizationTurn] = []
             detected = language
-            for position in range(0, total, step):
+            language_seen: str | None = None
+            for chunk_index, chunk in enumerate(chunks, 1):
+                position = chunk.start
                 check_cancellation(self._cancellation)
-                data = source.readframes(min(step, total - position))
+                source.setpos(position)
+                data = source.readframes(chunk.end - chunk.start)
                 buffer = io.BytesIO()
                 with wave.open(buffer, "wb") as output:
                     output.setparams((channels, width, rate, 0, "NONE", "not compressed"))
@@ -294,17 +312,27 @@ class CloudSpeechSession:
                     "audio_sha256": hashlib.sha256(audio).hexdigest(),
                     "seconds": float(seconds),
                     "offset_ms": round(Decimal(position) / rate * 1000),
+                    "core_start_ms": round(Decimal(chunk.core_start) / rate * 1000),
+                    "core_end_ms": round(Decimal(chunk.core_end) / rate * 1000),
+                    "chunk_index": chunk_index,
+                    "chunk_count": len(chunks),
                     "reserved_usd": str(reserve),
                     "reported_usd": None,
                     "status": "uncertain",
                 }
+                body = json.dumps(payload).encode()
+                if len(body) > cloud_chunks.MAX_REQUEST_BYTES:
+                    raise SpeechEngineError(
+                        "Cloud ASR request exceeds the upload size limit; no audio was sent"
+                    )
+                record["request_bytes"] = len(body)
                 self._charged += reserve
                 self.calls.append(record)
                 self._write_usage(path.parent)
                 document = self._transport(
                     f"{BASE}/audio/transcriptions",
                     {"Authorization": f"Bearer {self._key}", "Content-Type": "application/json"},
-                    json.dumps(payload).encode(),
+                    body,
                     self.config.timeout_seconds,
                 )
                 usage = document.get("usage")
@@ -334,14 +362,38 @@ class CloudSpeechSession:
                         "OpenRouter ASR omitted speaker labels; choose a diarization-capable "
                         "model or separate speaker tracks"
                     )
-                if aligned and detected != parsed.aligned.language:
+                if (
+                    parsed.aligned.segments
+                    and language_seen is not None
+                    and language_seen != parsed.aligned.language
+                ):
                     raise SpeechEngineError(
                         "Cloud ASR detected different languages across chunks; select the "
                         "recording language explicitly"
                     )
-                detected = parsed.aligned.language
-                aligned.extend(parsed.aligned.segments)
-                turns.extend(parsed.diarization.turns)
+                if parsed.aligned.segments:
+                    detected = parsed.aligned.language
+                    language_seen = detected
+                if merger is not None:
+                    previous_notes = len(merger.notes)
+                    merger.add(
+                        parsed.aligned,
+                        parsed.diarization,
+                        core_start_ms=round(Decimal(chunk.core_start) / rate * 1000),
+                        core_end_ms=round(Decimal(chunk.core_end) / rate * 1000),
+                        final=chunk_index == len(chunks),
+                        chunk_index=chunk_index,
+                    )
+                    self.speaker_notes.extend(merger.notes[previous_notes:])
+                    record["speaker_mapping"] = dict(merger.mapping)
+                    self._write_usage(path.parent)
+                else:
+                    aligned.extend(parsed.aligned.segments)
+                    turns.extend(parsed.diarization.turns)
+            if merger is not None:
+                merged_segments, merged_turns = merger.result()
+                aligned.extend(merged_segments)
+                turns.extend(merged_turns)
         result = CloudTranscript(
             AlignedTranscript(language=detected, segments=tuple(aligned)),
             DiarizationResult(turns=tuple(turns)),
@@ -365,6 +417,7 @@ class CloudAsr:
     def __init__(self, session: CloudSpeechSession, diarize: bool) -> None:
         self.session, self.diarize = session, diarize
         self._provenance: dict[str, Any] = {}
+        self.warnings: tuple[CanonicalWarning, ...] = ()
         self.model_info = EngineModelInfo(role="asr", name=session.config.model)
 
     @property
@@ -373,14 +426,29 @@ class CloudAsr:
 
     def transcribe(self, audio_path: Path, *, language: str, batch_size: int) -> TranscriptionDraft:
         first_call = len(self.session.calls)
+        first_note = len(self.session.speaker_notes)
         result = self.session.transcribe(audio_path, language, diarize=self.diarize)
         calls = self.session.calls[first_call:]
+        self.warnings = tuple(
+            CanonicalWarning(
+                code="CLOUD_SPEAKER_CONTINUITY_UNCERTAIN",
+                severity="warning",
+                stage="transcribe",
+                message=(
+                    "Speaker identities across cloud chunks require manual review; "
+                    "unmatched labels were kept separate."
+                ),
+                context=note,
+            )
+            for note in self.session.speaker_notes[first_note:]
+        )
         # A grouped result contains several transcription stages. Store each paid call
         # once, so summing stream charges does not double-count cumulative job snapshots.
         self._provenance = {
             **self.session.provenance,
             "accounting_scope": "stream",
             "calls": list(calls),
+            "speaker_reconciliation": list(self.session.speaker_notes[first_note:]),
             "accounted_cost_usd": str(
                 sum(
                     (

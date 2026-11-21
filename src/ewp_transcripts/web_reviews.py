@@ -150,6 +150,9 @@ class GuiReviewController:
             ],
             "source_verification": verification,
             "sentence_boundary_warning": review_sentence_warning(parsed),
+            "speaker_continuity_warning": any(
+                warning.code == "CLOUD_SPEAKER_CONTINUITY_UNCERTAIN" for warning in base.warnings
+            ),
             "canonical_speakers": base_speakers,
             "configured_speaker_colors": {
                 speaker_id: self._config.subtitles.ytt_speaker_palette[

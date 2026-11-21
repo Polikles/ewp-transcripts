@@ -3,6 +3,17 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Completed B8a follow-up: large cloud recordings
+
+- [x] Replace the mixed-audio 24 MiB rejection with automatic byte/time-bounded requests.
+- [x] Merge word times/text on the original timeline, with overlap ownership/deduplication that preserves real repetitions.
+- [x] Reconcile request-local speaker IDs using shared timed words; flag unresolved identity instead of guessing or blocking the recording.
+- [x] Account for context/rounding in budget preflight, keep cancellation/no-auto-retry/secret boundaries.
+- [x] Add boundary/large-input/cost/cancellation/downstream regressions; update EN/PL UI, guides/checklist, checkpoints and roadmap; commit/push.
+
+Evidence: [chunking checkpoint](docs/checkpoints/2026-11-21-cloud-chunking.md). 982 tests / 15
+integrations pass; live Scribe/MAI boundary/review/export cases pass. Owner B acceptance remains next.
+
 ## Current state: B5–B9 agent delivery complete; owner acceptance next
 
 Owner explicitly instructed execution of B5–B9 to completion, returning only for missing
@@ -90,7 +101,7 @@ remains present. The feedback fixes and the complete focused retest are now acce
 - [x] B6 agent implementation/checks: Opt-in OS credential storage: save/read/remove API keys; preserve session-only fallback and exclude secrets from profiles/exports/logs.
 - [x] B7 agent implementation/checks: Recent projects/sessions, named input/output locations, canonical-result directory scanning and optional profile export without embedded dictionaries.
 - [x] B8 agent implementation/checks: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
-- [x] B8a agent implementation/checks: OpenRouter four-model ASR delivered and short PL live cases pass within the shared USD 2 budget. Owner explicitly waives EN live material. Mixed audio has a documented single-request limit; separate tracks/single-speaker inputs chunk safely.
+- [x] B8a agent implementation/checks: OpenRouter four-model ASR delivered and short PL live cases pass within the shared USD 2 budget. Owner explicitly waives EN live material. Long mixed audio now chunks automatically with timed context, remapped speakers and explicit uncertain-assignment review.
 - [x] B9 agent implementation/checks: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
 - [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
 

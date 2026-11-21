@@ -32,6 +32,14 @@ remove redundant preparation, merge controls into two rows and rename Restore sa
 See [the closure checkpoint](checkpoints/2026-11-21-package-a-closure.md). Retain all earlier
 WSL cancellation/recovery/cleanup/download/player success evidence.
 
+### B8a owner follow-up delivered — automatic large-request splitting
+
+The owner requires recordings above the per-request upload limit to split automatically and
+merge into one result. This supersedes the initial single-request mixed-audio restriction.
+See [the completed chunking checkpoint](checkpoints/2026-11-21-cloud-chunking.md): bounded complete
+requests, shared timed context for speaker continuity, original timeline/text, explicit uncertain
+speaker review and overlap-aware costs. Keep A closed; B acceptance/task-10 gates unchanged.
+
 ### Accepted package sequence — A accepted, B agent delivery complete
 
 Execution update 2026-11-21: owner explicitly authorizes B5–B9 to completion, returning only for

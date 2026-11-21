@@ -368,3 +368,62 @@ def test_cloud_words_publish_same_canonical_and_export_without_local_models(tmp_
         outcome.result_path, formats=("srt", "vtt"), output_directory=tmp_path / "exports"
     )
     assert len(list((tmp_path / "exports").glob("*.srt"))) == 1
+
+
+def test_mixed_cloud_chunks_publish_one_canonical_timeline_and_export(tmp_path, monkeypatch):
+    from ewp_transcripts.application import export_result
+    from ewp_transcripts.config import SpeechConfig
+    from ewp_transcripts.engines import openrouter
+
+    source = tmp_path / "s0e40.wav"
+    with wave.open(str(source), "wb") as output:
+        output.setparams((1, 2, 16000, 0, "NONE", ""))
+        output.writeframes(b"\0\0" * 16000 * 30)
+    calls = []
+
+    def request(url, headers, body, timeout):
+        if body is None:
+            return {"data": {"endpoints": [{"pricing": {"prompt": "0.00001"}}]}}
+        call = len(calls)
+        calls.append(body)
+        offset = 10 * call
+        return {
+            "language": "pl",
+            "words": [
+                {
+                    "word": f"w{offset + i}.",
+                    "start": i + 0.1,
+                    "end": i + 0.7,
+                    "speaker_id": str(((offset + i) // 3 % 2) ^ call),
+                }
+                for i in range(20)
+            ],
+            "usage": {"cost": "0.0001"},
+        }
+
+    monkeypatch.setattr(openrouter, "request_json", request)
+    config = ApplicationConfig(
+        speech=SpeechConfig(provider="openrouter", model="elevenlabs/scribe-v2", chunk_seconds=15),
+        diarization=DiarizationConfig(speaker_count=2),
+        runtime=RuntimeConfig(work_root=tmp_path / "work"),
+    )
+    outcome = transcribe_one(
+        source,
+        config=config,
+        output_directory=tmp_path / "out",
+        allow_cloud=True,
+        api_key="fake-key",
+    )
+    result = load_canonical_result(outcome.result_path)
+    words = [word for segment in result.transcript.segments for word in segment.words]
+    assert [word.text for word in words] == [f"w{i}." for i in range(30)]
+    assert [word.start_ms for word in words] == [i * 1000 + 100 for i in range(30)]
+    assert len(result.speakers) == 2 and len(calls) == 2
+    assert not any(w.code == "CLOUD_SPEAKER_CONTINUITY_UNCERTAIN" for w in result.warnings)
+    assert result.sources[0].sha256 == sha256_file(source)
+    stage = next(x for x in result.processing.stages if x.name == "transcribe")
+    assert len(stage.details["calls"]) == 2
+    exported = export_result(
+        outcome.result_path, formats=("srt", "vtt", "ytt"), output_directory=tmp_path / "exports"
+    )
+    assert len(exported.written) == 3

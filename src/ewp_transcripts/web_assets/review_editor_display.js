@@ -98,7 +98,15 @@ reviewSentenceWarning.id = "review-sentence-warning"; reviewSentenceWarning.clas
 reviewSentenceWarning.setAttribute("role", "note"); reviewSentenceWarning.hidden = true;
 reviewSentenceWarning.textContent = "ASR sentence boundaries appear incomplete. Text may be divided incorrectly; pay extra attention to punctuation and speaker assignments during correction.";
 reviewSectionGuidance.after(reviewSentenceWarning);
+const reviewSpeakerContinuityWarning = document.createElement("p");
+reviewSpeakerContinuityWarning.id = "review-speaker-continuity-warning";
+reviewSpeakerContinuityWarning.className = "review-sentence-warning";
+reviewSpeakerContinuityWarning.setAttribute("role", "note");
+reviewSpeakerContinuityWarning.hidden = true;
+reviewSpeakerContinuityWarning.textContent = "Some cloud chunks could not be matched to earlier speakers. Check and correct speaker assignments across sections.";
+reviewSentenceWarning.after(reviewSpeakerContinuityWarning);
 function syncReviewSentenceWarning() {
+  reviewSpeakerContinuityWarning.hidden = !reviewDocument?.speaker_continuity_warning;
   reviewSectionGuidance.hidden = !reviewDocument;
   reviewSentenceWarning.hidden = !reviewDocument?.sentence_boundary_warning;
 }

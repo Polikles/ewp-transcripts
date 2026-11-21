@@ -4,6 +4,14 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Latest owner follow-up delivered: cloud recordings split automatically into requests below 24 MB
+and merge on one timeline. [Chunking checkpoint](docs/checkpoints/2026-11-21-cloud-chunking.md).
+Shared timed context remaps local speaker IDs; ambiguous identities stay distinct with a visible
+source-review note. 982 tests / 15 integrations, Ruff/format/mypy 114 files pass. Live Scribe/MAI
+3-request PL cases pass schema/review/SRT/VTT/YTT. Cumulative live cost USD 0.0153610111540591670
+within the original USD 2 budget. Prior single-request mixed limit is superseded. B owner acceptance
+is next; EN live waived, artist frozen. Disposable root /tmp/ewp-cloud-chunks.BKHH1C removed after evidence capture. Delivery targets main; next is the owner B checklist.
+
 Current request: B5–B9 agent implementation and delivery complete; owner acceptance next.
 [Execution checkpoint](docs/checkpoints/2026-11-21-package-b-execution.md),
 [B9 verification](docs/checkpoints/2026-11-21-b9-verification.md),

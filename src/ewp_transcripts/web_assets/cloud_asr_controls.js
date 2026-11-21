@@ -7,7 +7,7 @@ cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
     <label>Cloud ASR model<select id="cloud-asr-model"></select></label>
     <label>Cost guard per queued job (USD)<input id="cloud-asr-budget" type="number" min="0.01" max="100" step="0.01" value="2"></label>
     <p class="field-hint">Uses the same OpenRouter key as correction and translation. Audio is uploaded only after Start queue with consent. Provider prices are checked before upload; uncertain charges are reserved without automatic retries. The guard is an estimate, not a provider billing cap.</p>
-    <p class="field-hint">Whisper models need one speaker or separate synchronized speaker tracks. Mixed-speaker audio needs Scribe or MAI and fits in one request (up to 24 MiB of normalized WAV); longer mixed recordings use local ASR or separate speaker tracks. Provider word times are required for subtitles.</p>
+    <p class="field-hint">Whisper models need one speaker or separate synchronized speaker tracks. Mixed-speaker audio uses Scribe or MAI. Long recordings are split automatically into bounded requests and merged on the original timeline. Shared audio context helps keep speakers consistent; uncertain assignments are flagged for manual review. Provider word times are required for subtitles.</p>
     <button type="button" id="cloud-asr-key">Manage OpenRouter key</button>
   </div>`;
 mediaOptionsPanel.after(cloudAsrPanel);

@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-21",
+  "baseline_commit": "ec6d8d8",
+  "scope": "automatic bounded mixed-audio requests and merged result; short PL boundary tests, not accuracy benchmark",
+  "request_limit_bytes": 24000000,
+  "default_core_seconds": 120,
+  "maximum_context_each_side_seconds": 5,
+  "checks": {
+    "make_check_tests": 982,
+    "ruff": "pass",
+    "format": "pass",
+    "mypy_source_files": 114,
+    "ffmpeg_integration_passed": 15,
+    "integration_deselected": 4,
+    "oversized_normalized_input_bytes": 25600044,
+    "large_input_stitching": "pass, original timeline and permuted speaker labels",
+    "full_serialized_size_cap": "pass, includes JSON/base64",
+    "boundary_jitter_and_repetitions": "pass",
+    "budget_includes_context_rounding": "pass before first upload",
+    "cancellation_no_retry": "pass",
+    "uncertain_speaker_warning": "canonical + source review payload pass"
+  },
+  "live_cases": [
+    {
+      "model": "elevenlabs/scribe-v2",
+      "status": "pass",
+      "requests": 3,
+      "words": 92,
+      "speakers": 2,
+      "speaker_continuity_warning": true,
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": 3,
+      "maximum_request_bytes": 1067029,
+      "reported_usd": "0.0039722222222215"
+    },
+    {
+      "model": "microsoft/mai-transcribe-2",
+      "status": "pass",
+      "requests": 3,
+      "words": 92,
+      "speakers": 2,
+      "speaker_continuity_warning": true,
+      "schema": "pass",
+      "review_save_preview_apply": "pass",
+      "exports": 3,
+      "maximum_request_bytes": 1067053,
+      "reported_usd": "0.0018055555555555557"
+    }
+  ],
+  "new_paid_requests": 6,
+  "new_reported_cost_usd": "0.0057777777777770557",
+  "prior_pilot_usd": "0.0095832333762821113",
+  "cumulative_reported_cost_usd": "0.0153610111540591670",
+  "original_budget_usd": "2",
+  "uncertain_charges": 0,
+  "live_english": "not run; owner previously waived unavailable EN sample",
+  "native_windows_gpu": "owner acceptance pending",
+  "browser_followup": "review-warning DOM follows existing warning synchronization; source-review metadata unit tested; no new browser run",
+  "privacy": "only content-free evidence retained; private derived clips/responses/outputs removed with the dedicated disposable root"
+}

@@ -75,6 +75,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Automatically split long cloud mixed-speaker recordings instead of rejecting them above 24 MiB.
+  Bound full JSON/base64 uploads below 24 MB, merge timed context without duplicate boundary words,
+  remap speaker IDs from shared words and expose uncertain continuity in source review. Cost
+  preflight includes overlap and per-request rounding; cancellation/no-auto-retry behavior remains.
+
 - Subtitle partitioning keeps same-speaker words with overlapping provider time windows inside
   one cue, preserving canonical word timestamps and explicit cross-speaker overlaps.
 - Portable staged manifests accept explicit recording IDs; new native picker/discovery buttons

@@ -89,9 +89,11 @@ No benchmark or live EN sample is required: owner explicitly accepted PL-only pi
 - [ ] Whisper: use separate synchronized speaker tracks, or explicitly select one speaker for a
   single source. Scribe/MAI: use a short mixed two-speaker source. Provider word timestamps and
   labels must survive into canonical results; missing capabilities fail with actionable details.
-- [ ] Mixed-speaker cloud audio stays in one request, up to 24 MiB normalized WAV (~13 minutes).
-  Longer mixed recordings currently use local ASR or separate speaker tracks. Single-speaker and
-  separate-track inputs use bounded chunks; do not infer globally stable speaker IDs across calls.
+- [ ] Long mixed recordings split automatically; the full recording may exceed 24 MB. Every
+  serialized JSON/base64 request stays below 24 MB, normally with 120-second core intervals plus
+  shared context. Check the merged original timeline, text without boundary duplicates, real
+  repetitions and consistent speaker labels. If overlap does not identify a voice confidently,
+  source review shows a warning and preserves a distinct label for manual reassignment.
 - [ ] Open the cloud canonical result in the same source review; save/apply a draft and export
   SRT/VTT/YTT. Cloud processing must not load local WhisperX/alignment/pyannote models.
 - [ ] An intentionally low cost guard rejects audio before sending when the estimate exceeds it.

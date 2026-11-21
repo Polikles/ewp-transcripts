@@ -498,3 +498,21 @@ def test_source_filename_follows_original_words_after_speaker_reassignment(tmp_p
         anchors=prepared["anchors"],
     )
     assert saved["anchors"][0]["block_sources"][0] == [names[0]]
+
+
+def test_source_review_exposes_uncertain_cloud_speaker_continuity(tmp_path):
+    import json
+
+    result = tmp_path / "result.json"
+    document = json.loads(EXAMPLE.read_text())
+    document["warnings"].append(
+        {
+            "code": "CLOUD_SPEAKER_CONTINUITY_UNCERTAIN",
+            "severity": "warning",
+            "message": "Check speaker continuity",
+            "stage": "transcribe",
+        }
+    )
+    result.write_text(json.dumps(document))
+    prepared = controller(tmp_path).prepare(str(result), str(tmp_path / "reviews"))
+    assert prepared["speaker_continuity_warning"] is True

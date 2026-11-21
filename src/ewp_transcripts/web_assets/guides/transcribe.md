@@ -108,12 +108,15 @@ key used by correction/translation. No audio is uploaded during discovery, plann
 3. Provider word timestamps must be returned; text-only responses fail visibly instead of making
    up alignment. The same canonical JSON, raw TXT/segments, review and immutable exports follow.
 4. Whisper needs one speaker or separate synchronized speaker tracks. Use Scribe/MAI for one
-   mixed-speaker source. To keep provider speaker identities consistent, mixed audio is sent in
-   one request, limited to 24 MiB of normalized WAV (about 13 minutes at 16 kHz mono PCM16).
-   Longer mixed recordings currently use local ASR or separate speaker tracks. Independent
-   tracks/single-speaker audio are uploaded in bounded chunks with timeline offsets preserved.
+   mixed-speaker source. Long audio is split automatically (normally 120-second core intervals),
+   with every complete JSON/base64 request kept below 24 MB. The recording itself has no 24 MB cap.
+   Mixed chunks share up to five seconds of context on each side of the cut. Shared timed words
+   reconcile request-local speaker IDs and prevent duplicate/missing boundary words. Provider word
+   times return to the original recording timeline; intentional repetitions remain intact.
+   If a speaker cannot be matched confidently, its label stays separate and source review shows
+   a warning to check assignments across sections. There is no biometric speaker database.
 5. Prices are fetched when explicitly starting cloud work. The guard reserves conservative costs,
-   including uncertain requests, and stops subsequent requests when exhausted. It is an estimate,
+   including overlapping context, per-request rounding and uncertain requests, and stops subsequent requests when exhausted. It is an estimate,
    not a hard provider billing cap; use a dedicated low-limit OpenRouter key. There is no automatic
    retry after a timeout/error. Explicit Retry starts again and can incur new charges.
 6. Success records model, provider, word-timing provenance and reported/reserved charges in the
