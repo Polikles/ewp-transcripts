@@ -70,6 +70,11 @@ is chosen by implication; cloud uploads, paid requests and model downloads are n
 A is closed; B preparation is next. B implementation is not part of
 this closure task.
 
+B execution detail is recorded in the [2026-11-21 planning checkpoint](checkpoints/2026-11-21-package-b-plan.md).
+The remaining owner decisions are the initial cloud ASR provider/model (or a request to compare
+options), permitted live-test recordings/excerpts and budget/currency. They precede B8a and do
+not block B5–B8. This planning request does not start product implementation.
+
 ### Final classification of the recovered inventory
 
 Old R/E identifiers are retained only to reconcile earlier discussions; the package sequence above

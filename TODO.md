@@ -5,6 +5,13 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 
 ## Current state: package A closed; B5 preparation next
 
+Current planning request (2026-11-21): describe B agreements, execution order and remaining
+owner decisions. [B planning checkpoint](docs/checkpoints/2026-11-21-package-b-plan.md).
+
+- [x] Reconcile B5–B9 with the accepted roadmap and confirmed Windows 11 x64 execution split.
+- [x] Describe deliverables, verification and the final Win/WSL acceptance checklist.
+- [x] Identify remaining decisions without reopening A or starting B features/provider calls.
+
 The owner passed the entire focused checklist on 2026-11-21 and accepts A. No new owner retest
 is requested for the final UI adjustment below, now implemented and verified. Package A is closed.
 
@@ -65,6 +72,11 @@ remains present. The feedback fixes and the complete focused retest are now acce
 B5 execution arrangement confirmed 2026-11-21: Windows 11 x64. Agent implements/checks on this
 Linux VM and pushes to GitHub; owner pulls the repository and performs native-Windows launch and
 full-workflow testing. This does not imply agent access to native Windows or claim its qualification.
+
+[Execution detail and remaining questions](docs/checkpoints/2026-11-21-package-b-plan.md): cloud
+provider/model (or request for comparison), authorized ASR test recordings/excerpts and total
+live-test budget/currency. These decisions belong before B8a and do not block B5–B8. Current
+request is planning, not a B product-start instruction; no implementation/provider calls yet.
 
 ## After package B acceptance
 

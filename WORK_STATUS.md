@@ -4,6 +4,18 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Current request: [package B execution plan and remaining questions](docs/checkpoints/2026-11-21-package-b-plan.md).
+Baseline clean main 56f597e. Planning only; no product implementation/provider calls. Order remains
+B5 native Windows → B6 OS keys → B7 projects/profiles → B8 media selection → B8a cloud ASR →
+B9 integrated qualification and the owner's full Win/WSL checklist. Windows 11 x64 execution
+split is confirmed: agent changes/checks/push on Linux VM; owner pulls/tests natively.
+Only B8a provider/model, permitted test excerpts and live-test budget/currency remain undecided;
+they do not block earlier slices. Present the plan/questions; record replies, then start B5 on
+owner product-start instruction. A stays closed. EN–PL approval follows B acceptance/function
+freeze; full manuals follow terminology approval. Artist package remains frozen.
+
+Earlier closure/delivery records below are historical.
+
 Current request: [A closure and B preparation](docs/checkpoints/2026-11-21-package-a-closure.md).
 Baseline clean main edda543. Owner passed the entire focused retest and accepts A on 2026-11-21.
 Final no-owner-retest adjustment: remove redundant source-review preparation, merge action panels
