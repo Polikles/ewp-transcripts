@@ -13,6 +13,7 @@ separately for **Windows native** and **WSL**. Send diagnostic codes/technical d
   `powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install`.
 - [ ] Windows: explicitly prepare missing model snapshots with
   `uv run --locked --no-sync python scripts/setup-models.py`; gated models need accepted HF terms.
+  Model preparation must complete without an NLTK blocked-regex import error.
   Model downloads must not occur during ordinary discovery/planning/transcription.
 - [ ] WSL: pull main in the existing WSL checkout and run `uv sync --locked`.
   Existing model caches remain usable. Use the documented repair only if diagnostics fail.

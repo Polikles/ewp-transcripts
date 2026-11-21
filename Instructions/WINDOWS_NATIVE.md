@@ -16,6 +16,10 @@ Use the [full package B acceptance checklist](GUI_PACKAGE_B_TEST_CHECKLIST.md). 
    Accept the gated pyannote model's terms first. Supply the read token privately when prompted,
    or through HF_TOKEN in the local terminal. `--public-only` skips the gated snapshot.
    Normal transcription remains offline and does not download missing models.
+   Language-data setup runs in an isolated child outside the checkout so NLTK's import guard
+   does not mistake `.venv` dependencies for local code. If an older script reports
+   `Blocked import of regex`, pull the current repository and rerun this same command;
+   no security-disable environment variable or dependency reinstall is needed.
 5. Run `uv run --locked transcriber doctor --test-speech-runtime`, then
    `uv run --locked transcriber gui`.
 

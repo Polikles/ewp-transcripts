@@ -3,6 +3,14 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Completed Windows model-setup fix
+
+- [x] Fix NLTK 3.10.1 blocking regex inside the checkout's .venv during setup-models.py; -P alone also reproduces the failure.
+- [x] Prepare NLTK data from an isolated child/neutral working directory, preserving safety hook, model pins, caller paths and explicit downloads.
+- [x] Test the locked NLTK import without network and the model setup flow/failures with stubs; update Windows instructions/checkpoints, verify, commit/push.
+
+- [ ] Owner reruns Windows model preparation (step 4), then doctor and the B checklist. [Fix checkpoint](docs/checkpoints/2026-11-21-windows-model-setup-nltk.md).
+
 ## Completed B8a follow-up: large cloud recordings
 
 - [x] Replace the mixed-audio 24 MiB rejection with automatic byte/time-bounded requests.

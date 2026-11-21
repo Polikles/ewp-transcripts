@@ -32,6 +32,10 @@ remove redundant preparation, merge controls into two rows and rename Restore sa
 See [the closure checkpoint](checkpoints/2026-11-21-package-a-closure.md). Retain all earlier
 WSL cancellation/recovery/cleanup/download/player success evidence.
 
+Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is corrected via an
+isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
+Owner repeats model preparation/doctor before proceeding with native B acceptance.
+
 ### B8a owner follow-up delivered — automatic large-request splitting
 
 The owner requires recordings above the per-request upload limit to split automatically and

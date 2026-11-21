@@ -5,8 +5,37 @@ from __future__ import annotations
 import argparse
 import getpass
 import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
 
 from ewp_transcripts.config import load_config
+
+
+def prepare_language_data() -> None:
+    """Keep NLTK's import guard active without treating the checkout's .venv as CWD code."""
+    environment = dict(os.environ)
+    if environment.get("NLTK_DATA"):
+        # The child has a different cwd. Preserve caller-relative data search directories.
+        environment["NLTK_DATA"] = os.pathsep.join(
+            str(Path(path).expanduser().resolve())
+            for path in environment["NLTK_DATA"].split(os.pathsep)
+            if path
+        )
+    script = (
+        "from nltk import download; "
+        "raise SystemExit(0 if download('punkt_tab', quiet=True, raise_on_error=True) else 1)"
+    )
+    with tempfile.TemporaryDirectory(prefix="ewp-nltk-setup-") as directory:
+        result = subprocess.run(
+            [sys.executable, "-I", "-c", script],
+            cwd=directory,
+            env=environment,
+            check=False,
+        )
+    if result.returncode:
+        raise SystemExit("Language data setup failed; see the NLTK diagnostic above and retry.")
 
 
 def main() -> None:
@@ -17,7 +46,8 @@ def main() -> None:
     if not args.yes and input("Download pinned models/language data? [y/N] ").lower() != "y":
         raise SystemExit("Cancelled")
     from huggingface_hub import snapshot_download
-    from nltk import download
+
+    prepare_language_data()
 
     config = load_config()
     models = config.models
@@ -45,8 +75,6 @@ def main() -> None:
             if not token:
                 raise SystemExit("A read token is required for the gated model")
         snapshot_download(repo_id=repository, revision=revision, local_dir=target, token=token)
-    if not download("punkt_tab", quiet=True, raise_on_error=True):
-        raise SystemExit("Language data setup failed")
     print("Pinned model preparation complete. Run transcriber doctor.")
 
 

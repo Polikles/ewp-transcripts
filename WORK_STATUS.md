@@ -4,6 +4,13 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Windows owner step-4 defect fixed: setup-models.py isolates NLTK language-data preparation in a
+child with -I and neutral cwd, preserving its security hook and caller paths. Locked NLTK import
+regression passes without downloads. [Fix checkpoint](docs/checkpoints/2026-11-21-windows-model-setup-nltk.md).
+987 tests / 15 integrations and explicit script Ruff/format pass; model/dependency pins unchanged.
+Next: owner pulls and repeats the same Windows model-preparation command, then doctor/B checklist.
+Native qualification remains pending. Disposable test root /tmp/ewp-nltk-setup.AScITi removed after evidence capture; no paid calls, models, private audio or artist package changes in this fix.
+
 Owner requested installation/run/test instructions; [handoff checkpoint](docs/checkpoints/2026-11-21-owner-b-test-handoff.md).
 Next: owner native Windows 11 x64 installation/doctor and the B checklist, then full WSL comparison.
 No product change or new qualification is implied by this instructions-only handoff.

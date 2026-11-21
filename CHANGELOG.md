@@ -75,6 +75,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Prepare NLTK language data in an isolated child with a private neutral working directory.
+  This fixes native Windows model setup rejecting installed regex inside the checkout's .venv
+  under NLTK 3.10.1, without disabling import protection or changing locked dependencies.
+  Caller-relative NLTK_DATA locations and the model/config working directory are preserved.
+
 - Automatically split long cloud mixed-speaker recordings instead of rejecting them above 24 MiB.
   Bound full JSON/base64 uploads below 24 MB, merge timed context without duplicate boundary words,
   remap speaker IDs from shared words and expose uncertain continuity in source review. Cost
