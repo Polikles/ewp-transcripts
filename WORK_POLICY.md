@@ -39,6 +39,7 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
    B arrangements/decisions are now confirmed: Windows 11 x64 owner tests; OpenRouter B8a shares
    one key with correction/translation, uses the four selected ASR model IDs and short supplied
    PL/EN functional samples within USD 2 total including retries. Follow the B planning checkpoint
-   for exact scope and retain permission without asking again. B implementation still waits for
-   the owner start instruction; no calls in this planning update. Declined historical roadmap
+   for exact scope and retain permission without asking again. Owner now explicitly authorizes
+   B5–B9 execution to completion; earlier planning-only holds are revoked. Interrupt only for
+   concrete missing information or blockers. Declined historical roadmap
    ideas must not return as gates.

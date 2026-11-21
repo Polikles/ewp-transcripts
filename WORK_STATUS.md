@@ -4,6 +4,15 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Current request: [execute B5–B9](docs/checkpoints/2026-11-21-package-b-execution.md).
+Baseline clean main 743318d. Owner explicitly authorizes all selected B slices to completion;
+return only for missing information/concrete blockers. B5 agent implementation/checks complete:
+[Windows checkpoint](docs/checkpoints/2026-11-21-b5-windows.md), 935 tests/12 integrations pass;
+owner Windows native/GPU execution remains B9 acceptance. Next B6 keys, then B7 projects/profiles,
+B8 media, B8a OpenRouter ASR, B9 verification/checklist. Disposable root /tmp/ewp-package-b.Yz9JAl.
+Previous planning-only statements are historical and superseded. Preserve the USD 2 total
+cloud-ASR test scope and the owner Windows 11 x64 execution arrangement.
+
 Current request: [package B execution plan and remaining questions](docs/checkpoints/2026-11-21-package-b-plan.md).
 Baseline clean main 56f597e. Planning only; no product implementation/provider calls. Order remains
 B5 native Windows → B6 OS keys → B7 projects/profiles → B8 media selection → B8a cloud ASR →

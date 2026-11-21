@@ -2916,4 +2916,7 @@ def _emit_jsonl(
 def main() -> None:
     """Run the command-line adapter."""
 
+    from ewp_transcripts.platform_runtime import prepare_native_environment
+
+    prepare_native_environment()
     app()

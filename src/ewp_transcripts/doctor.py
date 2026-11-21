@@ -211,6 +211,13 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
         message=(
             "Speech libraries, TorchCodec/FFmpeg and CTranslate2 CUDA load successfully."
             if completed.returncode == 0
+            else (
+                "Speech dependencies failed to load. Save work, stop the GUI and run "
+                "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Repair. "
+                "See Instructions/WINDOWS_NATIVE.md (GUI: /help/windows-native) for native "
+                "FFmpeg shared DLL, Visual C++ and CUDA diagnostics."
+            )
+            if sys.platform == "win32"
             else "Speech dependencies failed to load. For missing FFmpeg 4–7 shared libraries, "
             "stop the GUI and run bash scripts/repair-dependencies.sh from the transcription "
             "checkout. Settings & About provides the repair steps. Check technical details "
@@ -223,8 +230,12 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
             "detail": detail,
             **(
                 {
-                    "help_url": "/help/ubuntu-upgrade",
-                    "instructions_file": "WSL config/UBUNTU_UPGRADE.md",
+                    "help_url": "/help/windows-native"
+                    if sys.platform == "win32"
+                    else "/help/ubuntu-upgrade",
+                    "instructions_file": "Instructions/WINDOWS_NATIVE.md"
+                    if sys.platform == "win32"
+                    else "WSL config/UBUNTU_UPGRADE.md",
                 }
                 if completed.returncode
                 else {}
@@ -291,15 +302,29 @@ def run_doctor(
     kernel_release: str = platform.release(),
     os_release: Mapping[str, str] | None = None,
     test_speech_runtime: bool = False,
+    system: str = platform.system(),
 ) -> DoctorResult:
     """Run deterministic lightweight checks without importing ML backends."""
 
+    from ewp_transcripts.platform_runtime import prepare_native_environment
+
+    prepare_native_environment()
     release = _read_os_release(Path("/etc/os-release")) if os_release is None else os_release
     effective_config = ApplicationConfig() if config is None else config
     checks = (
         _python_check(python_version),
-        _wsl_check(kernel_release),
-        _ubuntu_check(release),
+        *(
+            (
+                DiagnosticCheck(
+                    code="platform",
+                    status=DiagnosticStatus.PASS,
+                    message="Native Windows environment detected.",
+                    context={"system": system, "release": kernel_release},
+                ),
+            )
+            if system == "Windows"
+            else (_wsl_check(kernel_release), _ubuntu_check(release))
+        ),
         _command_check("ffmpeg", ["-version"], finder, runner),
         _command_check("ffprobe", ["-version"], finder, runner),
         _gpu_check(finder, runner),

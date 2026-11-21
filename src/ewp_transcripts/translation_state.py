@@ -16,6 +16,7 @@ from ewp_transcripts.domain.automated_translation import (
     AutomatedTranslationResponse,
 )
 from ewp_transcripts.domain.errors import InvalidTranslationResponseError
+from ewp_transcripts.platform_runtime import private_descriptor_mode
 from ewp_transcripts.translation_execution import (
     TranslationExecutionMetrics,
     TranslationExecutionPolicy,
@@ -83,7 +84,7 @@ def call_translation_resumable(
     try:
         descriptor, temporary_name = tempfile.mkstemp(prefix=".translation-", dir=state_directory)
         temporary_path = Path(temporary_name)
-        os.fchmod(descriptor, 0o600)
+        private_descriptor_mode(descriptor)
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(payload)
             stream.flush()

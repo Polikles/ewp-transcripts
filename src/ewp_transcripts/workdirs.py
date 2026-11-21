@@ -16,6 +16,7 @@ from uuid import UUID
 
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.errors import UnsafeWorkDirectoryError
+from ewp_transcripts.platform_runtime import process_is_alive
 
 MARKER_FILENAME = ".ewp-transcripts-work.json"
 
@@ -237,14 +238,8 @@ def cleanup_identity(
     blocker = ""
     if reason == "legacy-unknown":
         blocker = "legacy-unknown"
-    elif reason == "active":
-        try:
-            os.kill(marker["owner_pid"], 0)
-            blocker = "active"
-        except ProcessLookupError:
-            pass  # A crashed owner's workdir is explicitly previewed as interrupted.
-        except (PermissionError, OSError):
-            blocker = "active"
+    elif reason == "active" and process_is_alive(marker["owner_pid"]):
+        blocker = "active"
     base = workspace.path.resolve()
     for reference in references:
         resolved = reference.expanduser().resolve()

@@ -21,6 +21,7 @@ from ewp_transcripts.domain.correction import (
     CorrectionResponse,
 )
 from ewp_transcripts.domain.errors import InvalidCorrectionResponseError
+from ewp_transcripts.platform_runtime import private_descriptor_mode
 
 
 class CorrectionResumeEntry(BaseModel):
@@ -100,7 +101,7 @@ def call_correction_resumable(
     try:
         descriptor, temporary_name = tempfile.mkstemp(prefix=".correction-", dir=state_directory)
         temporary_path = Path(temporary_name)
-        os.fchmod(descriptor, 0o600)
+        private_descriptor_mode(descriptor)
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(payload)
             stream.flush()

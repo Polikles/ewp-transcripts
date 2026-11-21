@@ -2,6 +2,9 @@
 const guiDiagnosticPattern = /^([A-Z][A-Z0-9]*_[A-Z0-9_]+):\s*([\s\S]*)$/;
 // Additional audited UI copy. Keys remain English; codes and user content are preserved.
 for (const [en, pl] of [
+  ["Native Windows environment detected.", "Wykryto natywne środowisko Windows."],
+  ["Native Windows setup and repair instructions", "Instrukcje konfiguracji i naprawy natywnego Windows"],
+  ["This restores locked Python dependencies and the pinned private FFmpeg 7 shared runtime. Internet access is required. Save work and stop the GUI first.", "Przywraca przypięte zależności Pythona i prywatne biblioteki współdzielone FFmpeg 7. Wymaga internetu. Najpierw zapisz pracę i zatrzymaj GUI."],
   [
     "Jobs",
     "Zadania"

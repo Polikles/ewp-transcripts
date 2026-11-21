@@ -90,6 +90,20 @@ def test_doctor_fails_when_gpu_is_missing(tmp_path) -> None:
     assert gpu_check.status is DiagnosticStatus.FAIL
 
 
+def test_native_windows_does_not_report_missing_wsl_or_ubuntu(tmp_path) -> None:
+    result = run_doctor(
+        config=_config_with_models(tmp_path),
+        finder=_all_executables,
+        runner=_successful_runner,
+        environ={},
+        system="Windows",
+        kernel_release="11",
+    )
+    assert result.ready
+    assert all(check.status is DiagnosticStatus.PASS for check in result.checks)
+    assert {check.code for check in result.checks}.isdisjoint({"wsl2", "distribution"})
+
+
 def test_doctor_fails_when_ffmpeg_is_missing(tmp_path) -> None:
     def finder(name: str) -> str | None:
         return None if name == "ffmpeg" else f"/usr/bin/{name}"

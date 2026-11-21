@@ -18,6 +18,7 @@ GUIDE_FILES = {
         "saved-work",
         "settings",
         "ubuntu-upgrade",
+        "windows-native",
     )
 }
 

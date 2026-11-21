@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import string
+import sys
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -54,7 +56,11 @@ def default_gui_prohibited_roots() -> tuple[Path, ...]:
     they are not a security boundary against the local user who started the service.
     """
 
-    roots = {path.resolve(strict=False) for path in _LINUX_PROHIBITED_ROOTS}
+    roots = (
+        {path.resolve(strict=False) for path in _LINUX_PROHIBITED_ROOTS}
+        if sys.platform != "win32"
+        else set()
+    )
     mount_root = Path("/mnt")
     try:
         drives = tuple(
@@ -62,6 +68,12 @@ def default_gui_prohibited_roots() -> tuple[Path, ...]:
         )
     except OSError:
         drives = ()
+    if sys.platform == "win32":
+        drives = tuple(
+            Path(f"{letter}:\\")
+            for letter in string.ascii_uppercase
+            if Path(f"{letter}:\\").is_dir()
+        )
     for drive in drives:
         roots.update(
             (drive / name).resolve(strict=False) for name in _WINDOWS_PROHIBITED_DIRECTORY_NAMES
@@ -319,7 +331,7 @@ class GuiWorkflowController:
         # Browser copy/paste commonly carries an accidental outer space. Trim only the GUI
         # field boundary: whitespace within a path and filesystem names remains significant.
         candidate = normalize_input_path(raw_path.strip())
-        if candidate.is_symlink():
+        if candidate.is_symlink() or candidate.is_junction():
             raise ValueError("Symbolic-link paths are not allowed")
         resolved = candidate.resolve(strict=not directory)
         if is_gui_prohibited_path(resolved, prohibited_roots=self.prohibited_roots):

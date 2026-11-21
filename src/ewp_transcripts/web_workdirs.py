@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import secrets
 import threading
 import time
@@ -10,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.platform_runtime import process_is_alive
 from ewp_transcripts.workdirs import (
     cleanup_identity,
     cleanup_work_directory,
@@ -32,14 +32,12 @@ class GuiWorkdirController:
             marker = work_directory_metadata(workspace)
             fingerprint, size, blocker = cleanup_identity(workspace, references)
             retention = marker.get("retention_reason", "legacy-unknown")
-            if retention == "active" and blocker != "active":
-                # The owner may still be live but a stronger blocker won; don't mislabel it.
-                try:
-                    os.kill(marker["owner_pid"], 0)
-                except ProcessLookupError:
-                    retention = "interrupted"
-                except (OSError, ApplicationError):
-                    pass
+            if (
+                retention == "active"
+                and blocker != "active"
+                and not process_is_alive(marker["owner_pid"])
+            ):
+                retention = "interrupted"
             if reason and retention != reason:
                 continue
             entries.append(

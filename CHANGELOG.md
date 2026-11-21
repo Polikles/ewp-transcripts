@@ -6,6 +6,11 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package B5 native Windows x64 lock resolution and repository setup/repair script with a
+  SHA-256-pinned private FFmpeg 7 shared runtime and explicit cross-platform model preparation.
+  Native launch prepares per-process media/CUDA DLL paths; doctor identifies Windows separately.
+  Windows execution/GPU qualification is performed on the owner's machine after delivery.
+
 - Package A: cancel waiting/running GUI transcription tasks at safe stage checkpoints, show
   requested versus completed cancellation, and stage retries as fresh attempts with source hashes
   rechecked. Cancellation stops being available when final publication begins.
@@ -42,6 +47,10 @@ All notable changes to EWP-transcripts are documented here.
   GPU acceptance requirements, followed by the phase-based indicator and optional calibrated ETA.
 
 ### Fixed
+
+- Remove POSIX-only startup/storage assumptions for Windows: native output locks, guarded
+  descriptor permissions, Windows drive paths/system-directory checks and native folder picking.
+  Workdir ownership probes never send Windows process-termination signals.
 
 - Close owner-accepted package A with one source-review action panel: Undo, Redo, Save draft and
   Restore saved draft above Apply and Clear current draft. Remove the redundant Prepare text for

@@ -3,7 +3,20 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Current state: package A closed; B5 preparation next
+## Current state: B5–B9 implementation authorized and active
+
+Owner explicitly instructed execution of B5–B9 to completion, returning only for missing
+information or concrete blockers. A stays closed. Active execution checkpoint:
+[package B execution](docs/checkpoints/2026-11-21-package-b-execution.md).
+
+- [x] B5 agent implementation: native lock resolution, Windows setup/repair/model preparation, guarded OS primitives/paths/launch/doctor; 935 model-free tests and 12 FFmpeg integration tests pass. Owner Windows execution remains B9 acceptance.
+- [ ] B6: Shared OpenRouter credential save/use/remove through optional OS storage and session-only fallback.
+- [ ] B7: Recent projects, named locations, canonical-directory scanning, dictionary-free profile export and cross-platform profile handling.
+- [ ] B8: Stream selection, native picker coverage, content-based discovery and unambiguous same-name input identities.
+- [ ] B8a: Four-model OpenRouter ASR, same canonical/downstream workflow and one key; functional short PL/EN live tests within USD 2 total.
+- [ ] B9: Complete applicable regression/package/browser checks and deliver full Windows/WSL owner acceptance checklist; commit/push all slices.
+
+The historical planning-only statements below are superseded by this execution instruction.
 
 Current decisions update: OpenRouter ASR with one shared provider key, a four-model dropdown,
 short functional PL/EN podcast tests and a total live-ASR budget of USD 2. Record/verify the

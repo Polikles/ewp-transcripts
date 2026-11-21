@@ -1,8 +1,8 @@
-"""Linux/WSL output-directory locking for mutable storage operations."""
+"""Native Windows and POSIX output locking for mutable storage operations."""
 
 from __future__ import annotations
 
-import fcntl
+import errno
 import json
 import os
 import time
@@ -12,8 +12,23 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from ewp_transcripts.domain.errors import OutputLockUnavailableError
+from ewp_transcripts.platform_runtime import WINDOWS, private_descriptor_mode
 
 LOCK_FILENAME = ".ewp-transcripts.lock"
+
+
+def _lock_descriptor(descriptor: int, *, unlock: bool = False) -> None:
+    if WINDOWS:
+        import msvcrt
+
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        msvcrt.locking(  # type: ignore[attr-defined]
+            descriptor, getattr(msvcrt, "LK_UNLCK" if unlock else "LK_NBLCK"), 1
+        )
+    else:
+        import fcntl
+
+        fcntl.flock(descriptor, fcntl.LOCK_UN if unlock else fcntl.LOCK_EX | fcntl.LOCK_NB)
 
 
 @contextmanager
@@ -43,7 +58,7 @@ def output_directory_lock(
         )
 
     lock_path = output_directory / LOCK_FILENAME
-    flags = os.O_RDWR | os.O_CREAT
+    flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_BINARY", 0)
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
     try:
@@ -56,10 +71,12 @@ def output_directory_lock(
     try:
         while True:
             try:
-                fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                _lock_descriptor(descriptor)
                 acquired = True
                 break
-            except BlockingIOError as error:
+            except OSError as error:
+                if error.errno not in {errno.EACCES, errno.EAGAIN, errno.EDEADLK}:
+                    raise OutputLockUnavailableError("Cannot acquire output lock") from error
                 if time.monotonic() >= deadline:
                     raise OutputLockUnavailableError(
                         f"Output directory is locked by another process: {output_directory}"
@@ -71,7 +88,7 @@ def output_directory_lock(
             "acquired_at": datetime.now(UTC).isoformat(),
         }
         payload = (json.dumps(metadata) + "\n").encode("utf-8")
-        os.fchmod(descriptor, 0o600)
+        private_descriptor_mode(descriptor)
         os.ftruncate(descriptor, 0)
         os.lseek(descriptor, 0, os.SEEK_SET)
         remaining = memoryview(payload)
@@ -81,5 +98,5 @@ def output_directory_lock(
         yield lock_path
     finally:
         if acquired:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
+            _lock_descriptor(descriptor, unlock=True)
         os.close(descriptor)

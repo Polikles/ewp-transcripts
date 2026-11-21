@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.correction_consent import ConsentChoice, correction_api_warning
 from ewp_transcripts.domain.errors import TranslationProviderError
+from ewp_transcripts.platform_runtime import private_descriptor_mode
 
 
 class ConsentModel(BaseModel):
@@ -96,7 +97,7 @@ def persist_translation_consent(path: Path, scope: TranslationConsentScope) -> N
     descriptor, temporary_name = tempfile.mkstemp(prefix=".translation-consent-", dir=path.parent)
     temporary = Path(temporary_name)
     try:
-        os.fchmod(descriptor, 0o600)
+        private_descriptor_mode(descriptor)
         with os.fdopen(descriptor, "wb") as stream:
             stream.write((document.model_dump_json(indent=2) + "\n").encode())
             stream.flush()

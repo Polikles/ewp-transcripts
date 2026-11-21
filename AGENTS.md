@@ -30,7 +30,9 @@ Previously declined proposals must not return as requirements. Explicit owner B8
 OpenRouter (one key shared with correction/translation), the four ASR presets in the B plan and
 short supplied PL/EN functional samples with USD 2 total including retries. Retain that permission
 for B8a without asking again; no broader provider/media/spending scope is implied. B implementation
-has not started; the current request records planning decisions.
+is now explicitly authorized for B5–B9 to completion (2026-11-21). Earlier planning-only holds are
+revoked; follow the active B execution checkpoint and interrupt only for concrete missing inputs
+or blockers. Owner still performs native Windows acceptance after delivery.
 
 ## 2. Scope discipline
 

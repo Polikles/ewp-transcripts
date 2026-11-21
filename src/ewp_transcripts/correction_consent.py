@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.domain.errors import CorrectionConsentError
+from ewp_transcripts.platform_runtime import private_descriptor_mode
 
 ConsentChoice = Literal["reject", "accept_once", "accept_persistently"]
 EndpointKind = Literal["local", "cloud", "mock"]
@@ -139,7 +140,7 @@ def persist_correction_consent(path: Path, scope: CorrectionConsentScope) -> Non
     descriptor, temporary_name = tempfile.mkstemp(prefix=".consent-", dir=path.parent)
     temporary = Path(temporary_name)
     try:
-        os.fchmod(descriptor, 0o600)
+        private_descriptor_mode(descriptor)
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(payload)
             stream.flush()

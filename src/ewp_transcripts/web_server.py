@@ -150,7 +150,7 @@ def _select_local_directory() -> str | None:
     """Ask the deployment's desktop for one server-visible output directory."""
 
     attempts: list[tuple[list[str], str | None]] = []
-    if _is_wsl_environment() and shutil.which("powershell.exe"):
+    if (_is_wsl_environment() or sys.platform == "win32") and shutil.which("powershell.exe"):
         script = (
             "try { Add-Type -TypeDefinition 'using System.Runtime.InteropServices; "
             'public class EwpDpi { [DllImport("user32.dll")] '
@@ -412,6 +412,9 @@ class LocalGuiServer(ThreadingHTTPServer):
     daemon_threads = True
 
     def __init__(self, config: WebConfiguration) -> None:
+        from ewp_transcripts.platform_runtime import prepare_native_environment
+
+        prepare_native_environment()
         application_config = load_config()
         local_provider_lock = threading.Lock()
         self.gui_config = config
@@ -539,6 +542,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             if urlsplit(self.path).path == "/api/v1/session":
                 payload: dict[str, object] = {
+                    "platform": sys.platform,
                     "csrf_token": self.server.gui_csrf_token,
                     "openrouter_key_configured": bool(
                         self.server.gui_openrouter_api_key

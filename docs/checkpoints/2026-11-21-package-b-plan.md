@@ -1,5 +1,8 @@
 # Package B agreements and execution plan
 
+Execution update: owner now explicitly authorizes B5–B9 to completion. This planning record's
+earlier no-start wording is historical; use [the execution checkpoint](2026-11-21-package-b-execution.md).
+
 Date: 2026-11-21. Initial baseline: clean main 56f597e. Owner-decision update baseline:
 clean main b97422b. Planning only; no B feature implementation or live ASR requests in this turn.
 Authoritative scope/order stays in [the roadmap](../99-roadmap-v2.md); this checkpoint records

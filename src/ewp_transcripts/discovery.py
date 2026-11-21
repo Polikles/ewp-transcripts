@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import sys
 import unicodedata
 from collections.abc import Iterable
 from hashlib import sha256
@@ -39,7 +40,7 @@ def normalize_input_path(
 
     raw_path = str(supplied_path)
     windows_match = _WINDOWS_DRIVE_PATH.match(raw_path)
-    if windows_match:
+    if windows_match and sys.platform != "win32":
         drive = windows_match.group("drive").casefold()
         tail_parts = [part for part in re.split(r"[\\/]", windows_match.group("tail")) if part]
         return wsl_mount_root / drive / Path(*tail_parts)

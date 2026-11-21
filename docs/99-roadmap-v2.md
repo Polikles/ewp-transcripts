@@ -34,6 +34,11 @@ WSL cancellation/recovery/cleanup/download/player success evidence.
 
 ### Accepted package sequence — A accepted, B preparation next
 
+Execution update 2026-11-21: owner explicitly authorizes B5–B9 to completion, returning only for
+concrete missing information/blockers. Earlier planning-only statements below are historical.
+Follow [the active B execution checkpoint](checkpoints/2026-11-21-package-b-execution.md).
+B5 agent implementation/checks are complete; native Windows qualification remains owner B9 work.
+
 A1–A4 and their feedback fixes are implemented, automatically verified and owner accepted.
 The final no-retest action-layout adjustment passed ordinary checks; A is closed. Next: B5 native
 Windows preparation with the confirmed test execution arrangement. B product features are not implemented in this

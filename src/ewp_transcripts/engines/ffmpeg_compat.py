@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ctypes
 import os
+import sys
 from functools import cache
 from pathlib import Path
 
@@ -29,11 +30,29 @@ def compatibility_prefix() -> Path:
     override = os.environ.get("EWP_FFMPEG_PREFIX")
     if override:
         return Path(override).expanduser().resolve()
+    if sys.platform == "win32":
+        return (
+            Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData/Local"))
+            / "ewp-transcripts/ffmpeg-7"
+        )
     configured_home = os.environ.get("XDG_DATA_HOME", "")
     data_home = Path(configured_home) if configured_home else Path.home() / ".local/share"
     if not data_home.is_absolute():
         data_home = Path.home() / ".local/share"
     return data_home / "ewp-transcripts" / f"ffmpeg-{FFMPEG_VERSION}"
+
+
+@cache
+def _windows_dll_directories(prefix: Path) -> tuple[object, ...]:
+    # Retain add_dll_directory handles. Torch's own wheel supplies CUDA/cuDNN DLLs;
+    # TorchCodec uses the separately installed FFmpeg 7 shared build.
+    paths = [prefix / "bin", Path(sys.prefix) / "Lib/site-packages/torch/lib"]
+    paths.extend(Path(part) for part in os.environ.get("PATH", "").split(os.pathsep) if part)
+    handles = []
+    for path in dict.fromkeys(paths):
+        if path.is_dir():
+            handles.append(os.add_dll_directory(str(path)))  # type: ignore[attr-defined]
+    return tuple(handles)
 
 
 @cache
@@ -49,6 +68,9 @@ def prepare_speech_libraries() -> None:
     """Use a repaired installation when present; otherwise retain system loading."""
 
     prefix = compatibility_prefix()
+    if sys.platform == "win32":
+        _windows_dll_directories(prefix)
+        return
     if prefix.exists():
         try:
             _load_libraries(prefix)
