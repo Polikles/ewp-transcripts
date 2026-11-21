@@ -16,6 +16,7 @@ from uuid import NAMESPACE_URL, UUID, uuid5
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from ewp_transcripts.gui_library import GuiLibrary
+from ewp_transcripts.web_projects import GuiProjects, ProjectCatalog
 from ewp_transcripts.web_workspaces import (
     _FIELD_NAMES,
     GuiWorkspaceController,
@@ -61,6 +62,7 @@ class GuiUserProfile(BaseModel):
     workspaces: tuple[GuiWorkspaceDocument, ...] = Field(default=(), max_length=50)
     dictionaries: tuple[ProfileDictionary, ...] = Field(default=(), max_length=200)
     palettes: dict[str, list[str]] = Field(default_factory=dict, max_length=50)
+    projects: ProjectCatalog = Field(default_factory=ProjectCatalog)
 
 
 def _portable_fields(fields: dict[str, Any]) -> None:
@@ -150,11 +152,17 @@ def _without_runtime(workspace: GuiWorkspaceDocument) -> GuiWorkspaceDocument:
 
 class GuiProfileController:
     def __init__(
-        self, *, state_directory: Path, workspaces: GuiWorkspaceController, library: GuiLibrary
+        self,
+        *,
+        state_directory: Path,
+        workspaces: GuiWorkspaceController,
+        library: GuiLibrary,
+        projects: GuiProjects | None = None,
     ) -> None:
         self.directory = state_directory
         self.path = state_directory / "user-profile.json"
         self.workspaces, self.library = workspaces, library
+        self.projects = projects
 
     @staticmethod
     def validate(document: dict[str, Any]) -> GuiUserProfile:
@@ -224,6 +232,9 @@ class GuiProfileController:
                 "workspaces": [item.model_dump(mode="json") for item in workspaces],
                 "dictionaries": dictionaries,
                 "palettes": palettes,
+                "projects": self.projects.catalog().model_dump(mode="json")
+                if self.projects
+                else {},
             }
         )
         profile = profile.model_copy(
@@ -239,6 +250,8 @@ class GuiProfileController:
 
     def restore(self, document: dict[str, Any]) -> dict[str, Any]:
         profile = self.validate(document)
+        if self.projects is not None:
+            self.projects.merge(profile.projects)
         palette_names: dict[str, str] = {}
         existing = {item["id"]: item for item in self.library.profiles()["profiles"]}
         for name, colors in profile.palettes.items():

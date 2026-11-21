@@ -6,6 +6,12 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package B7 recent project/review references, named input/output locations and bounded canonical
+  directory scanning with explicit queue selection. Discovery does not start ASR; changed results
+  must be scanned again before adding durable canonical copies. Removing references preserves files.
+  Portable profiles retain the project catalog and can deliberately omit embedded dictionaries;
+  foreign/missing paths remain visible and are validated when used on another computer.
+
 - Package B6 opt-in OS credential save/use/remove with a single OpenRouter key for ASR,
   correction and translation. Use the saved key explicitly after a restart; session-only and
   environment keys remain supported. Only Windows Credential Manager/Secret Service backends

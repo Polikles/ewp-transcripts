@@ -33,3 +33,18 @@ Temporary-workdir cleanup is a separate Settings & About action with an explicit
 Loading shows a modal with loaded/total queue jobs until the queue and saved editors are ready.
 Failed/cancelled history may reference moved media without being omitted; actual retry still
 requires unchanged original sources. Retry replaces its selected old row with a new staged attempt.
+
+## Projects and named locations
+
+Expand Projects and locations to reopen recent recording reviews or remember a named project.
+Opening/preparing a review also records its own result/output reference. These are references,
+not complete backups. Remove from list deletes only the catalog entry. Named input/output
+directories fill the transcription fields without starting jobs; changing input replaces the
+pending file selection, while staged queue tasks remain intact.
+
+Find saved results scans the selected directory only (up to 500 entries), validates canonical
+JSON content and shows checkboxes. Add selected results to queues copies only those validated
+canonical results into the shared output's durable source area; it never reruns transcription.
+A result changed after scanning must be scanned again. Up to 50 selected results can be added
+at once. Paths unavailable marks missing or foreign-computer references; restoring original
+files/path access is separate from loading a profile.

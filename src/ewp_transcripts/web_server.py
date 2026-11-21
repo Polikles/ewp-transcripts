@@ -46,6 +46,7 @@ from ewp_transcripts.web_jobs import (
 )
 from ewp_transcripts.web_media import GuiMediaController, media_byte_range
 from ewp_transcripts.web_profiles import PROFILE_LIMIT, GuiProfileController
+from ewp_transcripts.web_projects import GuiProjects
 from ewp_transcripts.web_restore import GuiRestoreProgress
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_source_cleanup import (
@@ -390,6 +391,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("user_profiles.js").read_bytes()
         body += b"\n" + assets.joinpath("workspace_restore.js").read_bytes()
         body += b"\n" + assets.joinpath("credential_controls.js").read_bytes()
+        body += b"\n" + assets.joinpath("project_controls.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -427,6 +429,10 @@ class LocalGuiServer(ThreadingHTTPServer):
             resolve_path=self.gui_workflows.resolve_allowed_path,
             temporary_selection_root=self.gui_selections.root,
         )
+        self.gui_projects = GuiProjects(
+            default_workspace_directory().parent / "project-catalog.json",
+            self.gui_workflows.resolve_allowed_path,
+        )
         self.gui_reviews = GuiReviewController(
             config=application_config,
             resolve_path=self.gui_workflows.resolve_allowed_path,
@@ -444,6 +450,7 @@ class LocalGuiServer(ThreadingHTTPServer):
             state_directory=default_workspace_directory().parent,
             workspaces=self.gui_workspaces,
             library=self.gui_library,
+            projects=self.gui_projects,
         )
         self.gui_corrections = GuiCorrectionController(
             config=application_config,
@@ -961,6 +968,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         {"error": {"code": "GUI_WORKDIR_INVALID", "message": str(error)}},
                     )
                 )
+            return
+        if path.startswith("/api/v1/projects/"):
+            self._handle_projects_request(path, document)
             return
         if path.startswith("/api/v1/profile/"):
             self._handle_profile_request(path, document)
@@ -2529,6 +2539,87 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         status = HTTPStatus.OK if operation.status == "completed" else HTTPStatus.BAD_REQUEST
         self._write_response(_json_response(status, operation.model_dump(mode="json")))
 
+    def _handle_projects_request(self, path: str, document: dict[str, Any]) -> None:
+        if not secrets.compare_digest(
+            self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+        ):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.FORBIDDEN,
+                    {"error": {"code": "GUI_CSRF_REJECTED", "message": "Invalid session."}},
+                )
+            )
+            return
+        service = self.server.gui_projects
+        try:
+            action = path.rsplit("/", 1)[-1]
+            if action == "list":
+                payload = service.listing()
+            elif action == "location":
+                service.location(
+                    name=str(document.get("name", "")),
+                    kind=str(document.get("kind", "")),
+                    path=str(document.get("path", "")),
+                    remove=document.get("remove") is True,
+                )
+                payload = service.listing()
+            elif action == "remember":
+                service.remember(
+                    output_root=str(document.get("output_root", "")),
+                    result_path=str(document.get("result_path", "")),
+                    name=str(document.get("name", "")),
+                )
+                payload = service.listing()
+            elif action == "forget":
+                service.forget(str(document.get("id", "")))
+                payload = service.listing()
+            elif action == "scan":
+                payload = service.scan(str(document.get("directory", "")))
+            elif action == "import-results":
+                items = document.get("items")
+                if not isinstance(items, list) or not 1 <= len(items) <= 50:
+                    raise ValueError("Select 1–50 canonical results")
+                output = service.resolve(str(document.get("output_root", "")), directory=True)
+                checked = []
+                for item in items:
+                    if not isinstance(item, dict):
+                        raise ValueError("Canonical selection is invalid")
+                    source = service.resolve(str(item.get("path", "")))
+                    if source.stat().st_size > 64 * 1024 * 1024:
+                        raise ValueError("Canonical result exceeds scan limit")
+                    canonical = require_completed_canonical_result(source)
+                    digest = sha256_file(source)
+                    if digest != item.get("sha256"):
+                        raise ValueError("Canonical result changed since scanning; scan again")
+                    checked.append((source, canonical, digest))
+                added = 0
+                for source, canonical, digest in checked:
+                    preserved, copied_digest = preserve_gui_selected_source(
+                        source, output_directory=output, category="canonical"
+                    )
+                    if copied_digest != digest:
+                        raise ValueError("Canonical result changed while copying; scan again")
+                    _, imported = self.server.gui_transcriptions.register_completed_result(
+                        preserved,
+                        output_directory=output,
+                        planned_job_id=canonical.job_id,
+                        language=LanguageMode(canonical.episode.language),
+                        source_sha256=digest,
+                    )
+                    added += int(imported)
+                payload = {"added": added}
+            else:
+                raise ValueError("Unknown project action")
+        except (OSError, ValueError) as error:
+            self._write_response(
+                _json_response(
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": {"code": "GUI_PROJECT_INVALID", "message": str(error)}},
+                )
+            )
+            return
+        self._write_response(_json_response(HTTPStatus.OK, payload))
+
     def _handle_profile_request(self, path: str, document: dict[str, Any]) -> None:
         if not secrets.compare_digest(
             self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
@@ -2554,7 +2645,14 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 workspaces = tuple(
                     item for _, _, controller in catalogs for item in controller.documents()
                 )
-                directories = [str(document.get("dictionary_directory", "dictionaries"))]
+                include_dictionaries = document.get("include_dictionaries", True)
+                if type(include_dictionaries) is not bool:
+                    raise ValueError("Dictionary export option must be true or false")
+                directories = (
+                    [str(document.get("dictionary_directory", "dictionaries"))]
+                    if include_dictionaries
+                    else []
+                )
                 # Dictionaries referenced by workspace fields are included even when
                 # they live outside the currently selected catalog.
                 dictionary_paths = [
@@ -2568,7 +2666,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 preferences = document.get("preferences", {})
                 if not isinstance(fields, dict) or not isinstance(preferences, dict):
                     raise ValueError("Profile preferences and fields must be objects")
-                for saved_fields in [fields, *(item.fields for item in workspaces)]:
+                for saved_fields in (
+                    [fields, *(item.fields for item in workspaces)] if include_dictionaries else []
+                ):
                     for key in (
                         "correction-dictionary",
                         "translation-dictionary",

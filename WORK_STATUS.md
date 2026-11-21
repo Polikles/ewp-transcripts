@@ -9,8 +9,9 @@ Baseline clean main 743318d. Owner explicitly authorizes all selected B slices t
 return only for missing information/concrete blockers. B5 agent implementation/checks complete:
 [Windows checkpoint](docs/checkpoints/2026-11-21-b5-windows.md), 935 tests/12 integrations pass;
 owner Windows native/GPU execution remains B9 acceptance. B6 OS keys implemented (937 tests);
-see [credential checkpoint](docs/checkpoints/2026-11-21-b6-credentials.md). Next B7 projects/profiles,
-B8 media, B8a OpenRouter ASR, B9 verification/checklist. Disposable root /tmp/ewp-package-b.Yz9JAl.
+see [credential checkpoint](docs/checkpoints/2026-11-21-b6-credentials.md). B7 projects/profiles
+implemented ([checkpoint](docs/checkpoints/2026-11-21-b7-projects.md), 942 tests/12 integrations).
+Next B8 media, B8a OpenRouter ASR, B9 verification/checklist. Disposable root /tmp/ewp-package-b.Yz9JAl.
 Previous planning-only statements are historical and superseded. Preserve the USD 2 total
 cloud-ASR test scope and the owner Windows 11 x64 execution arrangement.
 

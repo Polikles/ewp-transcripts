@@ -72,3 +72,8 @@ Windows uses Credential Manager (local-machine persistence). Linux/WSL requires 
 Secret Service; otherwise use the session-only option. No plaintext keyring fallback is used.
 An OS unlock prompt may appear only when you request storage access. Profiles, workspaces,
 transcripts, exports and browser storage never include keys.
+
+Include dictionaries in profile is checked by default. Clear it for a smaller reference-only
+profile; dictionary paths remain references and the exact editions must be transferred separately
+using dictionary import/export. Profiles include named locations/recent project references.
+Importing a profile does not create missing media directories or automatically start processing.

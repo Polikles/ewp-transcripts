@@ -9,6 +9,7 @@ import pytest
 from ewp_transcripts.config import SubtitlesConfig
 from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.web_profiles import GuiProfileController
+from ewp_transcripts.web_projects import GuiProjects, ProjectCatalog
 from ewp_transcripts.web_workflows import GuiWorkflowController
 from ewp_transcripts.web_workspaces import GuiWorkspaceController, GuiWorkspaceDocument
 
@@ -33,6 +34,36 @@ def capture(service: GuiProfileController, **kwargs):
         dictionary_paths=[],
         **kwargs,
     )
+
+
+def test_profile_can_transfer_locations_without_embedded_dictionary_bytes(tmp_path):
+    first, second = controller(tmp_path / "first"), controller(tmp_path / "second")
+    for service in (first, second):
+        service.projects = GuiProjects(
+            service.directory / "projects.json", GuiWorkflowController().resolve_allowed_path
+        )
+    first.projects.merge(
+        ProjectCatalog.model_validate(
+            {
+                "locations": [
+                    {"name": "Windows input", "kind": "input", "path": "C:\\Podcasts\\Audio"}
+                ]
+            }
+        )
+    )
+    profile = first.capture(
+        name="References only",
+        preferences={},
+        fields={"correction-dictionary": "C:\\Podcasts\\dictionary.json"},
+        workspaces=(),
+        dictionary_paths=[],
+    )
+    payload = profile.model_dump(mode="json")
+    assert not payload["dictionaries"]
+    assert payload["fields"]["correction-dictionary"] == "C:\\Podcasts\\dictionary.json"
+    second.restore(payload)
+    assert not second.projects.listing()["locations"][0]["available"]
+    assert not (second.directory / "profile-dictionaries").exists()
 
 
 def test_profile_transfer_preserves_immutable_dictionaries_and_missing_workspace_paths(
