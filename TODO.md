@@ -5,6 +5,13 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 
 ## Current state: package A closed; B5 preparation next
 
+Current decisions update: OpenRouter ASR with one shared provider key, a four-model dropdown,
+short functional PL/EN podcast tests and a total live-ASR budget of USD 2. Record/verify the
+provider capability details; no product implementation or paid/media calls in this update.
+
+- [x] Verify public OpenRouter model IDs/transcription response capabilities in official documentation.
+- [x] Record accepted provider/model/media/budget scope in the B plan, roadmap and status; retain serial B5–B9 order and closed A.
+
 Current planning request (2026-11-21): describe B agreements, execution order and remaining
 owner decisions. [B planning checkpoint](docs/checkpoints/2026-11-21-package-b-plan.md).
 
@@ -65,7 +72,7 @@ remains present. The feedback fixes and the complete focused retest are now acce
 - [ ] B6: Opt-in OS credential storage: save/read/remove API keys; preserve session-only fallback and exclude secrets from profiles/exports/logs.
 - [ ] B7: Recent projects/sessions, named input/output locations, canonical-result directory scanning and optional profile export without embedded dictionaries.
 - [ ] B8: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
-- [ ] B8a: Optional cloud ASR, after B8 and before B9. Select the initial provider/model and cost/consent boundary before implementing/calling that integration; no paid calls or media uploads are authorized now.
+- [ ] B8a: Optional cloud ASR, after B8 and before B9. Select the initial provider/model and cost/consent boundary before implementing/calling that integration. Owner now selects OpenRouter/four model presets/shared key and permits short supplied PL/EN functional tests within USD 2 total, including retries; permission applies to B8a, no calls now.
 - [ ] B9: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
 - [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
 
@@ -73,10 +80,14 @@ B5 execution arrangement confirmed 2026-11-21: Windows 11 x64. Agent implements/
 Linux VM and pushes to GitHub; owner pulls the repository and performs native-Windows launch and
 full-workflow testing. This does not imply agent access to native Windows or claim its qualification.
 
-[Execution detail and remaining questions](docs/checkpoints/2026-11-21-package-b-plan.md): cloud
-provider/model (or request for comparison), authorized ASR test recordings/excerpts and total
-live-test budget/currency. These decisions belong before B8a and do not block B5–B8. Current
-request is planning, not a B product-start instruction; no implementation/provider calls yet.
+[Execution detail and resolved decisions](docs/checkpoints/2026-11-21-package-b-plan.md):
+OpenRouter with one key shared by ASR/correction/translation. ASR dropdown:
+`openai/whisper-large-v3`, `openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`,
+`microsoft/mai-transcribe-2`. Owner permits short supplied podcast/English excerpts (PL two
+speakers, EN one), functional canonical/downstream compatibility checks, USD 2 total live-ASR
+spending including retries across all models. No full-corpus/accuracy benchmark. Locate actual
+material and recheck current capabilities/costs at B8a; preserve this authorization. Planning
+questions are resolved; B product implementation still awaits the start instruction.
 
 ## After package B acceptance
 

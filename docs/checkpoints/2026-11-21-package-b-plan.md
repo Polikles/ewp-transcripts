@@ -1,8 +1,9 @@
 # Package B agreements and execution plan
 
-Date: 2026-11-21. Baseline: clean main 56f597e. Planning only; no B feature implementation.
+Date: 2026-11-21. Initial baseline: clean main 56f597e. Owner-decision update baseline:
+clean main b97422b. Planning only; no B feature implementation or live ASR requests in this turn.
 Authoritative scope/order stays in [the roadmap](../99-roadmap-v2.md); this checkpoint records
-the execution detail and unanswered decisions for the current owner request.
+the execution detail and accepted decisions for the current owner request.
 
 ## Confirmed agreements
 
@@ -40,6 +41,8 @@ checklist still belongs after B9.
 ### B6 — Optional OS credential storage
 
 Add deliberate save/use/remove for provider API keys using an available OS credential store.
+The owner requires one OpenRouter credential shared by ASR, correction and translation, with
+independent model choices for each operation; do not create a second ASR-only key requirement.
 Keep session-only operation and an honest fallback when secure storage is unavailable in WSL.
 Do not export keys into profiles/workspaces/artifacts/logs or persist them in browser storage.
 Verify restart reuse, removal, unavailable-store behavior and existing session-key handling.
@@ -63,9 +66,42 @@ Advanced channel editing, denoising and subtitle timing authoring stay outside t
 
 ### B8a — Optional cloud ASR
 
-Before provider-specific implementation, settle the initial provider/model, permitted test media
-and spending boundary. Research current official provider capabilities/limits/pricing then;
-none is chosen or qualified by this planning record. No upload/paid call is authorized now.
+Owner decisions accepted 2026-11-21:
+
+- Provider: **OpenRouter**, reusing the same OpenRouter API key for ASR, LLM correction and
+  translation. Local ASR remains the startup/default processing path.
+- An ordinary ASR model dropdown, like correction/translation selection, offers these exact IDs:
+  `openai/whisper-large-v3`, `openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`,
+  `microsoft/mai-transcribe-2`. The Whisper pair is the initial primary path; Scribe/MAI are
+  additional functional comparison choices. This does not reopen a general model catalog,
+  favorites or local model-management scope.
+- Owner permits short representative excerpts/short episodes from the supplied podcast and
+  English recordings: PL with two speakers and EN with one. The collection is approximately
+  nine podcast hours plus several English hours; it is available material, not a processing
+  mandate. Locate/verify accessible files at B8a; do not claim they are already present or send
+  the whole corpus. If required examples are absent, request only the missing material.
+- Total live cloud-ASR test budget: **USD 2**, across all models, calls and retries. Earlier LLM
+  spending is separate. Tests establish feasibility, canonical structure, timing/speaker mapping
+  and downstream correction/export compatibility; no model accuracy ranking/WER campaign.
+- Authorization persists for these B8a tests within the stated source/provider/budget scope.
+  Do not ask for the same permission again. First run model-free tests; reserve/check costs
+  before live requests, count actual usage/cost and any uncertain charges conservatively, and
+  stop before the remaining allowance is exhausted. Do not assume every error is unbilled or
+  multiply the budget by the number of models. A larger scope/budget needs a new owner decision.
+
+Public documentation check (2026-11-21): OpenRouter lists all four exact model IDs. Its
+[speech-to-text guide](https://openrouter.ai/docs/guides/overview/multimodal/stt) describes a
+separate `/api/v1/audio/transcriptions` endpoint authenticated by an OpenRouter bearer key,
+structured `verbose_json`, requested word/segment timestamps and provider-specific speaker
+options. Field availability differs across providers/models: listing is not integration
+qualification. Verify the returned structure at B8a; never fabricate timing/speaker identity.
+The four public model pages were checked without authentication or uploading audio:
+[Whisper V3](https://openrouter.ai/openai/whisper-large-v3),
+[Whisper V3 Turbo](https://openrouter.ai/openai/whisper-large-v3-turbo),
+[Scribe v2](https://openrouter.ai/elevenlabs/scribe-v2),
+[MAI-Transcribe 2](https://openrouter.ai/microsoft/mai-transcribe-2).
+Recheck relevant capability/pricing information immediately before implementation/live tests;
+no mutable price is promised from this planning snapshot.
 
 Add a bounded adapter producing the existing canonical contract, explicitly recording source
 identity, provider/model, usage/cost where available, disclosure consent and failures. Preserve
@@ -85,26 +121,22 @@ Retain already accepted evidence, while checking the complete integrated package
 Owner executes full Win/WSL workflow; fix/retest until accepted, then freeze functionality and
 proceed to task 10.
 
-## Questions for the owner — before B8a, not blockers for B5–B8
+## Remaining decisions / execution status
 
-1. Is there a preferred cloud ASR provider/model or existing account, or should the agent research
-   and propose a short comparison before implementation?
-2. Which recordings/excerpts may be sent to that provider for testing (language, duration and
-   single-/multiple-speaker examples)? Permission for earlier LLM workflows is not ASR permission.
-3. What currency and total spending cap apply to live ASR qualification? Limit implementation
-   calls to mocks until the scope/cap and provider choice are explicitly agreed.
-
-No additional owner product decision is currently needed for the already selected B5–B8 scope.
-Routine implementation details belong to the agent, with new concrete incompatibilities reported
-when found. Provider choices do not block the earlier slices. Do not infer authorization to start
-B implementation merely from this request to describe the plan.
+The three owner decisions (provider/model list, permitted material, budget) are resolved above.
+No further product-scope question currently blocks B5–B8 or B8a preparation. Concrete capability,
+source-file or credential availability issues are checked when their dependent slice begins;
+credentials must not be printed or requested in chat. Do not reopen accepted Windows/A decisions.
+The request answers planning questions; it does not itself start B product implementation.
 
 ## Verification and resume
 
-Only TODO/status/roadmap/checkpoint planning documents changed. Check git diff --check, local
+Only TODO/status/roadmap/checkpoint and work-policy planning documents changed. Check git diff --check, local
 Markdown link targets and changed-file scope; no product tests/builds/provider calls needed.
-No disposable runtime artifacts or artist-package changes. Next: present this plan/questions,
-record replies and proceed with B5 when the owner authorizes product implementation.
+No disposable runtime artifacts or artist-package changes. Next: report the accepted decisions,
+then proceed with B5 when the owner authorizes product implementation. The B8a test permission above
+is retained for that later slice; no request was sent in this planning turn.
 
-Planning verification PASS: git diff --check, four-file planning-only scope and 61 local Markdown
-link targets. No product tests/builds were run; the source, lockfile and artist ZIP are unchanged.
+Owner-decision verification PASS: git diff --check, six-file documentation-only scope and 61 local
+Markdown link targets. No product tests/builds, key reads,
+model downloads, live ASR requests or audio uploads were performed. Source/lockfile/artist ZIP unchanged.

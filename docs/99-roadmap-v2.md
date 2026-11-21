@@ -51,7 +51,7 @@ terminology approval remains task 10.
 | B6 | Opt-in OS credential storage with read/delete and session-only fallback; secrets never enter profiles, exports or logs. |
 | B7 | Recent projects/sessions, named media/output roots, saved-result directory scanning and optional profile export without embedded dictionaries. |
 | B8 | Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit identities for same-name inputs. |
-| B8a | Optional cloud speech-to-text, after 8 and before 9. Choose initial provider/model and explicit media disclosure/spending boundary before the integration or any paid/media call. |
+| B8a | Optional OpenRouter ASR after 8/before 9: four selected models, one shared API key. Owner permits short supplied PL/EN functional samples, USD 2 total live-test budget including retries. See the linked B plan for exact IDs and scope. |
 | B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
 | 10 | Produce the complete editable EN–PL file for labels/messages/errors/states/hints/tooltips/guide copy/dynamic templates; owner corrections and approval. |
 | 11 | Consistent English instructions and full Polish textual documentation after task-10 approval. |
@@ -64,16 +64,18 @@ that gate when preparing B. Full profile transfer, provisionally accepted as cur
 implemented, can be checked while preparing/testing native Windows rather than blocking A.
 
 B5 test arrangement confirmed 2026-11-21: Windows 11 x64; agent implements/checks on the Linux
-VM and pushes to GitHub, owner pulls and executes native-Windows/full-workflow tests. Before B8a, select the initial cloud provider,
-exact model and allowed media/cost scope. Those decisions do not reopen or delay A closure. No cloud provider
-is chosen by implication; cloud uploads, paid requests and model downloads are not authorized.
-A is closed; B preparation is next. B implementation is not part of
-this closure task.
+VM and pushes to GitHub, owner pulls and executes native-Windows/full-workflow tests.
+A is closed. The current B request is planning/decision recording, not a product-start instruction.
 
-B execution detail is recorded in the [2026-11-21 planning checkpoint](checkpoints/2026-11-21-package-b-plan.md).
-The remaining owner decisions are the initial cloud ASR provider/model (or a request to compare
-options), permitted live-test recordings/excerpts and budget/currency. They precede B8a and do
-not block B5–B8. This planning request does not start product implementation.
+B execution detail and accepted cloud decisions are in the
+[2026-11-21 planning checkpoint](checkpoints/2026-11-21-package-b-plan.md). Owner selects OpenRouter
+with one key for ASR/correction/translation and an ASR dropdown containing `openai/whisper-large-v3`,
+`openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`, `microsoft/mai-transcribe-2`. Short supplied
+podcast/English samples (PL two speakers, EN one) may be used in B8a under **USD 2 total**, including
+retries across models. Test canonical structure, timing/speaker mapping and downstream workflow;
+no full-corpus/accuracy benchmark. This explicit permission supersedes earlier pending-cloud-choice
+wording, applies to B8a and does not start calls now. Recheck current capabilities/pricing before
+execution; preserve the permission without repeated confirmation within its stated scope.
 
 ### Final classification of the recovered inventory
 

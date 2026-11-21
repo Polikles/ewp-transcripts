@@ -36,5 +36,9 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
    next is B5 preparation for Windows 11 x64 (agent changes/checks/push on Linux VM, owner pulls/tests
    natively). Do not reopen the passed A acceptance gate.
    B feature implementation/cloud calls are not part of the A closure task.
-   Cloud provider/model/spending/media scope and native-Windows test arrangements are decisions
-   for package B, not new blockers for A. Declined historical roadmap ideas must not return as gates.
+   B arrangements/decisions are now confirmed: Windows 11 x64 owner tests; OpenRouter B8a shares
+   one key with correction/translation, uses the four selected ASR model IDs and short supplied
+   PL/EN functional samples within USD 2 total including retries. Follow the B planning checkpoint
+   for exact scope and retain permission without asking again. B implementation still waits for
+   the owner start instruction; no calls in this planning update. Declined historical roadmap
+   ideas must not return as gates.

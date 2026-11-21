@@ -26,8 +26,11 @@ with a final source-review action layout adjustment that needs no new owner rete
 is implemented/verified and A is closed. Next: B5 preparation for Windows 11 x64; agent changes/checks
 on this Linux VM and pushes to GitHub, owner pulls and tests natively.
 Do not reopen the accepted A gate. B features/cloud calls are not part of the A closure task.
-Previously declined proposals must not return as requirements. No provider/media/spending
-authorization is implied.
+Previously declined proposals must not return as requirements. Explicit owner B8a scope now selects
+OpenRouter (one key shared with correction/translation), the four ASR presets in the B plan and
+short supplied PL/EN functional samples with USD 2 total including retries. Retain that permission
+for B8a without asking again; no broader provider/media/spending scope is implied. B implementation
+has not started; the current request records planning decisions.
 
 ## 2. Scope discipline
 

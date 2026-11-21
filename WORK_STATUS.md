@@ -9,10 +9,15 @@ Baseline clean main 56f597e. Planning only; no product implementation/provider c
 B5 native Windows → B6 OS keys → B7 projects/profiles → B8 media selection → B8a cloud ASR →
 B9 integrated qualification and the owner's full Win/WSL checklist. Windows 11 x64 execution
 split is confirmed: agent changes/checks/push on Linux VM; owner pulls/tests natively.
-Only B8a provider/model, permitted test excerpts and live-test budget/currency remain undecided;
-they do not block earlier slices. Present the plan/questions; record replies, then start B5 on
-owner product-start instruction. A stays closed. EN–PL approval follows B acceptance/function
-freeze; full manuals follow terminology approval. Artist package remains frozen.
+Owner cloud decisions are resolved: OpenRouter with the same API key for ASR/correction/translation;
+four ASR dropdown IDs `openai/whisper-large-v3`, `openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`,
+`microsoft/mai-transcribe-2`. Owner permits short supplied podcast/English samples (PL two speakers,
+EN one) for B8a functional canonical/downstream tests, USD 2 total including all calls/retries/models.
+This is not a corpus/accuracy benchmark. Public official pages/STT response docs verified; no key
+read, upload or paid call performed. Locate actual files/recheck live capabilities/costs at B8a;
+retain this authorization without asking again. B implementation still waits for a start instruction.
+A stays closed; EN–PL approval follows B acceptance/function freeze; manuals follow terminology
+approval and artist package remains frozen.
 
 Earlier closure/delivery records below are historical.
 
