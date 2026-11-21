@@ -1,6 +1,6 @@
 .review-control-groups {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: .6rem;
   margin-block: .65rem;
   align-items: start;
@@ -11,11 +11,6 @@
   border: 1px solid #d9d5cb;
   border-radius: .5rem;
   padding: .6rem;
-}
-
-.review-control-group h3 {
-  margin: 0 0 .4rem;
-  font-size: 1rem;
 }
 
 .review-control-line {
@@ -48,11 +43,6 @@
 
 .review-control-line .inline-working { position: static; min-width: 0; }
 
-.review-clear-line {
-  align-items: start;
-  justify-content: start;
-}
-
 .review-speaker-label-row {
   display: flex;
   align-items: end;
@@ -66,8 +56,4 @@
 
 .review-remove-speaker {
   margin-top: 1rem;
-}
-
-@media (max-width: 35rem) {
-  .review-control-groups { grid-template-columns: 1fr; }
 }

@@ -1,6 +1,6 @@
 # Work policy and context recovery
 
-Updated: 2026-11-20. Read `AGENTS.md` first; this file supplements its rules.
+Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
 
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
    and `docs/99-roadmap-v2.md`. Inspect Git status before edits. Historical handoff sections
@@ -31,8 +31,10 @@ Updated: 2026-11-20. Read `AGENTS.md` first; this file supplements its rules.
 9. Latest sequencing decision (2026-11-20): the roadmap package table and TODO govern order.
    A1–A4 → concrete owner checklist → fix/retest acceptance → B5–B8 → B8a cloud ASR → B9 full
    native-Windows/WSL workflow acceptance → task 10 EN–PL approval. The owner has now explicitly
-   authorized package A; its earlier planning-only hold is revoked. Do not start package B
-   before owner acceptance of A. A implementation/automated checks are complete; use its owner
-   checklist and fix/retest feedback as the current resume point.
+   accepted package A on 2026-11-21 after the complete focused retest. The final source-review
+   action layout adjustment passed ordinary verification, with no new owner retest. A is closed;
+   next is B5 preparation for Windows 11 x64 (agent changes/checks/push on Linux VM, owner pulls/tests
+   natively). Do not reopen the passed A acceptance gate.
+   B feature implementation/cloud calls are not part of the A closure task.
    Cloud provider/model/spending/media scope and native-Windows test arrangements are decisions
    for package B, not new blockers for A. Declined historical roadmap ideas must not return as gates.

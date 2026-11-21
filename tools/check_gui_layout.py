@@ -56,6 +56,32 @@ def stage(page: Page, name: str) -> None:
     page.locator(f'[data-gui-stage="{name}"]').click()
 
 
+def check_source_control_rows(page: Page) -> None:
+    """Keep draft/history and validation in one panel with two ordered action rows."""
+    expect(page.locator("#prepare-review")).to_have_count(0)
+    expect(page.locator(".review-control-group")).to_have_count(1)
+    lines = page.locator(".review-control-group > .review-control-line")
+    expect(lines).to_have_count(2)
+    assert lines.nth(0).locator("button").evaluate_all("es=>es.map(e=>e.id)") == [
+        "undo-review",
+        "redo-review",
+        "save-review",
+        "restore-review",
+    ]
+    assert lines.nth(1).locator("button").evaluate_all("es=>es.map(e=>e.id)") == [
+        "preview-review",
+        "clear-review",
+    ]
+    boxes = lines.evaluate_all("es=>es.map(e=>e.getBoundingClientRect().toJSON())")
+    assert boxes[0]["bottom"] <= boxes[1]["top"], boxes
+    if page.viewport_size["width"] >= 960:
+        for line in lines.all():
+            tops = line.locator("button").evaluate_all(
+                "es=>es.map(e=>e.getBoundingClientRect().top)"
+            )
+            assert max(tops) - min(tops) <= 2, tops
+
+
 def capture(page: Page, output: Path, label: str, baseline: bool) -> list[dict]:
     results = []
     for locale in ("en", "pl"):
@@ -527,7 +553,6 @@ def check_localized_interface(page: Page) -> None:
         "queue-table library-comparison",
         "queue-table plan-table",
         "review-bottom-navigation actions",
-        "review-control-line review-prepare-line",
         "use strict",
     }
     assert set(missing) <= non_ui, missing
@@ -578,26 +603,29 @@ def check_localized_interface(page: Page) -> None:
     dialog.get_by_role("button", name="Anuluj", exact=True).click()
     stage(page, "review")
     expect(page.locator("#preview-review")).to_have_text("Zatwierdź")
-    expect(page.locator("#prepare-review")).to_have_text("Przygotuj tekst do sprawdzenia")
+    expect(page.locator("#prepare-review")).to_have_count(0)
+    expect(page.locator("#restore-review")).to_have_text("Przywróć zapisany szkic")
+    expect(page.locator("#clear-review")).to_have_text("Wyczyść bieżący szkic")
     expect(page.locator("#apply-review")).to_have_text("Zapisz i przygotuj do eksportu")
     assert page.locator("#gui-review-step-5").evaluate("e=>e.tagName==='H3'")
     page.locator("#gui-locale").select_option("en")
     expect(page.locator("#preview-review")).to_have_text("Apply")
-    expect(page.locator("#prepare-review")).to_have_text("Prepare text for review")
+    expect(page.locator("#restore-review")).to_have_text("Restore saved draft")
+    expect(page.locator("#clear-review")).to_have_text("Clear current draft")
 
 
 def check_motion_feedback(page: Page, output: Path) -> None:
     """Use the owner asset for real status/feedback hooks, including reduced motion."""
     page.wait_for_function("() => guiPendingRequests === 0")
-    page.evaluate("setGuiWorking(true, document.querySelector('#prepare-review'))")
-    for selector in ("#gui-working", "#prepare-review + .inline-working"):
+    page.evaluate("setGuiWorking(true, document.querySelector('#preview-review'))")
+    for selector in ("#gui-working", "#preview-review + .inline-working"):
         marker = page.locator(selector)
         assert marker.evaluate(
             "e=>getComputedStyle(e,'::before').backgroundImage.includes('/assets/brand/gear.svg')"
         )
         assert marker.evaluate("e=>getComputedStyle(e,'::before').borderTopWidth==='0px'")
-    page.evaluate("setGuiWorking(false, document.querySelector('#prepare-review'))")
-    assert page.locator("#prepare-review + .inline-working").evaluate(
+    page.evaluate("setGuiWorking(false, document.querySelector('#preview-review'))")
+    assert page.locator("#preview-review + .inline-working").evaluate(
         "e=>getComputedStyle(e,'::before').backgroundImage==='none'"
     )
     for selector, message in [
@@ -971,14 +999,7 @@ def check_workflow_polish(page: Page) -> None:
     stage(page, "review")
     for width in (960, 1920):
         page.set_viewport_size({"width": width, "height": 1080})
-        measured = page.locator(".review-control-groups").evaluate("""e => {
-          const a=e.children[0].getBoundingClientRect(), b=e.children[1].getBoundingClientRect();
-          const boxes=['#undo-review','#redo-review','#clear-review']
-            .map(id=>document.querySelector(id).getBoundingClientRect());
-          return {height:Math.abs(a.height-b.height),
-            row:Math.max(...boxes.map(r=>r.top))-Math.min(...boxes.map(r=>r.top))};
-        }""")
-        assert measured["height"] <= 1 and measured["row"] <= 2, measured
+        check_source_control_rows(page)
     # Export the already verified source revision of the translated recording as well.
     page.evaluate("""async () => {
       const job=stageQueueJobs.find(item=>item.result_path===translationReview.result_path);
@@ -1178,11 +1199,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
         "e => e.getBoundingClientRect().top >= "
         "document.querySelector('#review-editor').getBoundingClientRect().bottom"
     )
-    assert page.locator(".review-control-group").evaluate_all(
-        """es => es.length === 2 &&
-          Math.abs(es[0].getBoundingClientRect().top - es[1].getBoundingClientRect().top) < 2 &&
-          es.every(e => e.getBoundingClientRect().height < 250)"""
-    )
+    check_source_control_rows(page)
     page.locator("#preview-review").scroll_into_view_if_needed()
     before_preview = page.evaluate("window.scrollY")
     page.locator("#preview-review").click()

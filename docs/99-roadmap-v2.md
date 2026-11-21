@@ -17,7 +17,7 @@ research metrics and optional presets do not block completion or release readine
 | Previous summary item | Current status |
 |---|---|
 | 1: recent GUI fixes | Accepted with the small summary/navigation fixes in the current checkpoint; full user-profile import/export was not tested by the owner and is provisionally accepted as implemented. |
-| 2: complete workflow | Owner tested the workflow except restart recovery. Keep only that recovery check open; retain earlier historical recovery evidence separately. |
+| 2: complete workflow | Owner passed the complete focused package A retest on 2026-11-21, including restart recovery. Keep native Windows/full profile exchange as separate B checks. |
 | 3: browser/platform presentation | Owner accepts browsers and the palette. Actual browser zoom at 200% was not explicitly performed/understood; retain as an optional unchecked layout check, not a new blocking gate. |
 | 4: precise progress/ETA calibration | Removed as a required task by owner. Progress primarily communicates continued activity; keep existing approximate percentage, elapsed timer and optional ETA without a new accuracy study. |
 | 5: terminology/docs | Wait for feature completion, then export every UI label/message as editable EN–PL pairs, including errors, states, hints and dynamic templates. Owner correction/approval comes next, then full Polish documentation. Screenshots wait for final custom GUI/icons. |
@@ -26,22 +26,19 @@ research metrics and optional presets do not block completion or release readine
 | 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
 | Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |
 
-Current A owner test: WSL data recovery, waiting/running cancellation (`USER_CANCELLED`), no ASR
-rerun for completed work, temporary cleanup and versioned export recovery/downloads are confirmed.
-Follow-up UI/planning/retry/save/player fixes are implemented; use the [focused retest](../Instructions/GUI_PACKAGE_A_RETEST.md)
-and [feedback checkpoint](checkpoints/2026-11-20-package-a-feedback.md). B still waits for A acceptance.
+Current A owner test: the owner passed the entire focused retest on 2026-11-21 and accepts A.
+The sole final source-review action layout adjustment is accepted without a new owner retest:
+remove redundant preparation, merge controls into two rows and rename Restore saved draft.
+See [the closure checkpoint](checkpoints/2026-11-21-package-a-closure.md). Retain all earlier
+WSL cancellation/recovery/cleanup/download/player success evidence.
 
-### Accepted package sequence — package A authorized
+### Accepted package sequence — A accepted, B preparation next
 
-The owner approved the consolidated plan and now explicitly instructed “ok, zaczynaj z A”.
-Package A is authorized, including its regression checks and concrete manual checklist. The
-earlier planning-only hold is revoked for A. Package B still waits for owner acceptance of A.
-Original task numbers are retained, with cloud ASR inserted as 8a to avoid shifting documentation
-approval task 10.
-
-A1–A4 are now implemented with automated regression, browser/restart/download and package checks.
-Owner acceptance remains pending: use the [package A checklist](../Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md)
-and [execution checkpoint](checkpoints/2026-11-20-package-a.md). Fix/retest A before starting B.
+A1–A4 and their feedback fixes are implemented, automatically verified and owner accepted.
+The final no-retest action-layout adjustment passed ordinary checks; A is closed. Next: B5 native
+Windows preparation with the confirmed test execution arrangement. B product features are not implemented in this
+closure task. Original task numbers remain, with cloud ASR inserted as 8a before task 9;
+terminology approval remains task 10.
 
 | Package / task | Work and completion boundary |
 |---|---|
@@ -49,7 +46,7 @@ and [execution checkpoint](checkpoints/2026-11-20-package-a.md). Fix/retest A be
 | A2 | Safe cancellation of waiting/running work; honest requested/cancelled status, no incomplete final publication, retry from the beginning. |
 | A3 | Immutable workdir creation time, failed/cancelled/successful-retained reason and preview/filter explicit cleanup, protecting references/final artifacts. |
 | A4 | GUI downloads of verified existing export versions, without ASR reruns. |
-| A acceptance gate | Deliver an implementation-specific test checklist after A is complete. Owner tests; fix defects and repeat until accepted before starting B. |
+| A acceptance gate | Passed 2026-11-21: entire focused retest accepted. Final source-review layout adjustment needs no new owner retest. B preparation follows closure. |
 | B5 | Native Windows dependencies, audio/model setup, paths, CLI/GUI launch using the same application/frontend as WSL. |
 | B6 | Opt-in OS credential storage with read/delete and session-only fallback; secrets never enter profiles, exports or logs. |
 | B7 | Recent projects/sessions, named media/output roots, saved-result directory scanning and optional profile export without embedded dictionaries. |
@@ -62,15 +59,16 @@ and [execution checkpoint](checkpoints/2026-11-20-package-a.md). Fix/retest A be
 | Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
 
 The sequence is serial within each package. A test checklist is delivered against concrete reviewed
-behavior after implementation; it is not treated as already written or passed. B does not start
-while A acceptance fixes are outstanding. Full profile transfer, provisionally accepted as currently
+behavior after implementation; package A's checklist is now passed by the owner. Do not reopen
+that gate when preparing B. Full profile transfer, provisionally accepted as currently
 implemented, can be checked while preparing/testing native Windows rather than blocking A.
 
-No further scope decision blocks package A. Before B, confirm the target Windows
-test environment and execution/access arrangement. Before B8a, select the initial cloud provider,
-exact model and allowed media/cost scope. Those decisions do not need to delay A. No cloud provider
+B5 test arrangement confirmed 2026-11-21: Windows 11 x64; agent implements/checks on the Linux
+VM and pushes to GitHub, owner pulls and executes native-Windows/full-workflow tests. Before B8a, select the initial cloud provider,
+exact model and allowed media/cost scope. Those decisions do not reopen or delay A closure. No cloud provider
 is chosen by implication; cloud uploads, paid requests and model downloads are not authorized.
-A and its acceptance fixes are authorized; B still waits for the owner gate.
+A is closed; B preparation is next. B implementation is not part of
+this closure task.
 
 ### Final classification of the recovered inventory
 

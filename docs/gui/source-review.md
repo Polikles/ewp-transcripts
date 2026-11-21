@@ -5,7 +5,7 @@ Use this guide with the matching stage in EwP Transcripts. Interface language do
 1. Choose recording: Choose a completed recording from the queue to prepare or reopen its own review.
 2. Speaker names and colors: Check display names, speaker assignments and the YTT color profile. Add speaker creates another editable speaker.
 3. Review transcript: Correct wording and speaker assignments. Place a caret between whole words for Split at cursor; use Separate selected text for a selection.
-4. Check and save revision: Use Apply to save and validate the draft. Confirm manual verification, then Save and prepare for export. Prepare text for review creates a draft when needed.
+4. Check and save revision: Use Apply to save and validate the draft. Confirm manual verification, then Save and prepare for export.
 5. Export subtitles: Choose formats and Export verified revision. Translation is optional and can follow later.
 
 ## Detailed instructions
@@ -49,7 +49,7 @@ both mixed episodes and individual recordings. The redundant permanent speed sel
 
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 
-Prepare and validate and Draft and history are below the transcript. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Prepare text for review creates the draft when required.
+Draft controls are below the transcript in one panel: Undo, Redo, Save draft and Restore saved draft in the first row; Apply and Clear current draft in the second row. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Opening review/export from the queue prepares or restores the draft automatically.
 
 Only confirm I manually verified wording, speakers… after reviewing all sections. Save and prepare for export creates an immutable child while retaining the original ASR result. Choose TXT, SRT, VTT, YouTube YTT, HTML or Segments JSON and export. Repeated export allocates a new version rather than overwriting earlier files. Example default is the startup choice; explicit production settings remain available as Configured palette when different. EwP Brand® retains the owner’s identity colors. New-palette YouTube qualification is separate.
 

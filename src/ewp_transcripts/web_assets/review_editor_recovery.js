@@ -7,29 +7,17 @@ let reviewHistoryRecordingScheduled = false;
 let reviewHistoryRestoring = false;
 
 function arrangeReviewControls() {
-  const prepare = document.querySelector("#prepare-review");
   const preview = document.querySelector("#preview-review");
   const save = document.querySelector("#save-review");
   const restore = document.querySelector("#restore-review");
   const clear = document.querySelector("#clear-review");
-  if (!prepare || !preview || !save || !restore || !clear) return;
+  if (!preview || !save || !restore || !clear) return;
 
-  const originalActions = prepare.parentElement;
+  const originalActions = preview.closest(".actions");
   const layout = document.createElement("div");
   layout.className = "review-control-groups";
-  const preparation = document.createElement("div");
-  preparation.className = "review-control-group";
-  preparation.innerHTML = "<h3>Prepare and validate</h3>";
   const editing = document.createElement("div");
   editing.className = "review-control-group";
-  editing.innerHTML = "<h3>Draft and history</h3>";
-  const prepareLine = document.createElement("div");
-  prepareLine.className = "review-control-line review-prepare-line";
-  prepareLine.append(preview, prepare);
-  preparation.append(prepareLine);
-  const saveLine = document.createElement("div");
-  saveLine.className = "review-control-line";
-  saveLine.append(save, restore);
   const historyLine = document.createElement("div");
   historyLine.className = "review-control-line";
   const undo = document.createElement("button");
@@ -43,9 +31,12 @@ function arrangeReviewControls() {
   redo.textContent = "Redo";
   redo.title = "Redo a current-editor change. This does not change saved files.";
   historyLine.classList.add("review-history-line");
-  historyLine.append(undo, redo, clear);
-  editing.append(saveLine, historyLine);
-  layout.append(preparation, editing);
+  historyLine.append(undo, redo, save, restore);
+  const validationLine = document.createElement("div");
+  validationLine.className = "review-control-line";
+  validationLine.append(preview, clear);
+  editing.append(historyLine, validationLine);
+  layout.append(editing);
   document.querySelector('#review-workflow input[name="verified"]').closest("label").before(layout);
   originalActions.remove();
   undo.addEventListener("click", () => restoreReviewHistory(-1));

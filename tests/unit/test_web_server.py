@@ -176,7 +176,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"review-speaker-labels" in response.body
     assert b"Add revision-only speaker" in script_response.body
     assert b"reviewSpeakerNamesPanel" in script_response.body
-    assert b"Draft and history" in script_response.body
+    assert b"Restore saved draft" in response.body
     assert b"Undo applied to the current draft" in script_response.body
     assert b"Preview the current draft before applying." in script_response.body
     assert b"if (reviewDirty) await saveReviewDraft();" in script_response.body

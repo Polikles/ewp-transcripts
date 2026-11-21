@@ -85,8 +85,6 @@
 .review-summary-table th { width: 8rem; min-width: 7rem; white-space: nowrap; overflow-wrap: normal; word-break: normal; }
 .review-control-groups { align-items: stretch; }
 .review-control-group { display: flex; flex-direction: column; }
-.review-history-line { margin-top: auto; padding-top: .35rem; }
-.review-history-line > :has(#clear-review), .review-history-line > #clear-review { margin-inline-start: auto; }
 .gui-workbench #clear-review, .gui-workbench #clear-translation-review { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; padding: .4rem .6rem; }
 .translation-clear-line { display: flex; justify-content: flex-end; margin-block: .35rem; }
 #transcription-jobs th:nth-child(1) { width: 14%; }
@@ -94,13 +92,6 @@
 #transcription-jobs th:nth-child(3) { width: 20%; }
 #transcription-jobs th:nth-child(4) { width: 22%; }
 #transcription-jobs th:nth-child(5) { width: 15%; }
-@media (min-width: 100rem) {
-  .review-control-group { flex-direction: row; align-items: center; gap: .4rem; flex-wrap: wrap; }
-  .review-control-group h3 { flex-basis: 100%; }
-  .review-control-group .review-control-line { margin-top: 0; padding-top: 0; }
-  .review-control-group .review-history-line { flex: 1; }
-}
-
 .library-item { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--gui-line); padding: .4rem 0; }
 .library-item > span { flex: 1 1 12rem; overflow-wrap: anywhere; }
 .library-item button, .library-entry button { padding: .35rem .5rem; font-size: .8rem; }
@@ -120,7 +111,6 @@
 .stage-queue + .feedback-anchor .inline-working { position: static; }
 .review-history-line > button { padding: .4rem .5rem; font-size: .8rem; min-height: 2.25rem; }
 #gui-translation-directions button[aria-pressed=true] { background: #355880; }
-@media (min-width: 100rem) { .review-control-groups { grid-template-columns: minmax(0, .8fr) minmax(0, 1.7fr); } }
 
 .gui-workbench #clear-review { margin: 0; }
 
@@ -129,9 +119,6 @@
 
 .gui-workbench pre { font-size: .72rem; line-height: 1.45; }
 .review-add-speaker { display: block; margin-top: .65rem; clear: both; }
-.review-prepare-line { flex-wrap: nowrap; align-items: flex-start; }
-.review-prepare-line > .feedback-anchor { flex: 1 1 auto; min-width: 0; }
-.review-prepare-line > .feedback-anchor > button { width: 100%; font-size: .78rem; padding: .4rem; }
 
 .gui-error-diagnostic > summary { color: var(--gui-muted); font-size: .75rem; font-weight: 400; }
 
@@ -153,8 +140,6 @@
 .gui-recording[data-status="running"] > span::before { margin-inline-end: .35rem; }
 .inline-working.inline-done::before { content: "✓"; background: none; color: #1d9b50; }
 .inline-working.inline-error::before { content: "×"; background: none; color: #c4302b; }
-
-.review-prepare-line > .feedback-anchor { min-width: 6rem; }
 
 #gui-source-playback { margin-top: .7rem; padding-top: .65rem; border-top: 1px solid var(--gui-line); min-width: 0; }
 #gui-source-playback[hidden] { display: none; }
@@ -180,7 +165,6 @@
 #gui-source-playback audio { display: block; height: 54px; }
 @media (min-width: 56.251rem) and (max-width: 75rem) {
   .gui-workbench[data-gui-active-stage="review"] #gui-stage-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .gui-workbench[data-gui-active-stage="review"] .review-control-groups { grid-template-columns: minmax(0, .65fr) minmax(0, 1.35fr); }
 }
 @media (min-width: 90rem) {
   .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr) minmax(11rem, 13rem); }

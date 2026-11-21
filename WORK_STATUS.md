@@ -1,8 +1,23 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-20**.
+Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
+
+Current request: [A closure and B preparation](docs/checkpoints/2026-11-21-package-a-closure.md).
+Baseline clean main edda543. Owner passed the entire focused retest and accepts A on 2026-11-21.
+Final no-owner-retest adjustment: remove redundant source-review preparation, merge action panels
+into two rows and use Restore saved draft / Clear current draft. Implemented and verified; A closed.
+make check PASS: 928 tests, Ruff/format, mypy 106 source files. Focused Chromium check PASS:
+24 EN/PL/theme/width cases, queue/correction-candidate opening, Undo/Redo/Save/Apply/Clear/Restore
+and custom gear; zero page errors/external requests. Ordinary checks suffice; no owner retest needed.
+Next is B5 preparation, with the execution arrangement confirmed by the owner: Windows 11 x64;
+agent implements/checks on this Linux VM and pushes to GitHub, owner pulls/tests natively.
+No B feature implementation/cloud calls in this closure task.
+Complete EN–PL approval and full manuals remain after B/function freeze; artist ZIP stays frozen.
+
+Earlier A feedback/execution records below are historical; their pending-owner-acceptance wording
+is superseded by the 2026-11-21 acceptance above.
 
 Current request: [package A acceptance fixes](docs/checkpoints/2026-11-20-package-a-feedback.md).
 Baseline clean main abe9ed2. Reported A acceptance fixes are implemented and verified; use the

@@ -1,5 +1,9 @@
 # Package A owner acceptance checklist
 
+Owner update 2026-11-21: the entire focused retest passed and A is accepted. The final action-layout
+adjustment requires no new owner retest. See [A closure](../docs/checkpoints/2026-11-21-package-a-closure.md).
+Earlier pending-acceptance wording below is historical.
+
 Current owner-feedback retest: [focused follow-up](GUI_PACKAGE_A_RETEST.md).
 
 Date: 2026-11-20. Scope: A1 recovery, A2 cancellation/retry, A3 temporary-workdir maintenance,

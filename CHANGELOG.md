@@ -43,6 +43,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Close owner-accepted package A with one source-review action panel: Undo, Redo, Save draft and
+  Restore saved draft above Apply and Clear current draft. Remove the redundant Prepare text for
+  review button while preserving automatic queue/correction-candidate draft preparation.
+
 - Package A acceptance feedback: transcription-first rail labels and distinct ASR/workflow
   completion, blocking saved-work restore progress with real queue counts, immediate save/load
   busy feedback, and valid failed/cancelled history when a retry publishes its former planned path.

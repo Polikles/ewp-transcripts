@@ -1,5 +1,9 @@
 # Package A owner-feedback fixes
 
+Owner update 2026-11-21: the entire focused retest passed and A is accepted. The final action-layout
+adjustment requires no new owner retest. See [A closure](2026-11-21-package-a-closure.md).
+Earlier pending-acceptance wording below is historical.
+
 Date: 2026-11-20. Baseline: clean main abe9ed2. Scope: the owner's A1–A4 feedback and active TODO.
 Implementation and automated verification are complete. Owner focused retest/acceptance is next;
 package B remains gated. Use [the focused retest](../../Instructions/GUI_PACKAGE_A_RETEST.md).

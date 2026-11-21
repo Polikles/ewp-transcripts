@@ -1,5 +1,9 @@
 # Package A feedback retest
 
+Owner update 2026-11-21: the entire focused retest passed and A is accepted. The final action-layout
+adjustment requires no new owner retest. See [A closure](../docs/checkpoints/2026-11-21-package-a-closure.md).
+Earlier pending-acceptance wording below is historical.
+
 Date: 2026-11-20. Follow-up to the owner's A1–A4 test. Keep the already confirmed WSL
 cancellation, source/translation export versions and restart download results. Package B remains
 blocked on acceptance of these fixes; there is no need to repeat all previous qualification.

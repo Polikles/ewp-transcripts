@@ -1,17 +1,26 @@
 # Immediate work queue
 
-Updated: 2026-11-20. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
+Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Current state: package A owner-feedback fixes implemented; focused retest pending
+## Current state: package A closed; B5 preparation next
 
-Active checkpoint: [package A execution](docs/checkpoints/2026-11-20-package-a.md).
-The owner explicitly instructed “ok, zaczynaj z A”. The earlier planning-only hold is revoked
-for A1–A4 and its verification/checklist. A is implemented and automatically verified; use the
-[owner checklist](Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md). Package B remains gated on
-owner acceptance of A.
+The owner passed the entire focused checklist on 2026-11-21 and accepts A. No new owner retest
+is requested for the final UI adjustment below, now implemented and verified. Package A is closed.
 
-## Active A acceptance fixes — owner feedback
+- [x] Remove the redundant Prepare text for review button from source-review step 4, retaining automatic preparation when opening review/export from the queue.
+- [x] Merge the two action panels: first row Undo, Redo, Save draft, Restore saved draft; second row Apply, Clear current draft. Rename the restore/clear labels coherently in EN/PL.
+- [x] Run the normal quality gate and focused UI verification; record owner acceptance and close A in TODO, roadmap, policy and checkpoints. Commit/push the change.
+- [x] Record B preparation as the next resume point, including native Windows test environment/execution arrangements; no B feature implementation or cloud calls in this closure task.
+
+## Package A acceptance record
+
+Active checkpoint: [A closure and B preparation](docs/checkpoints/2026-11-21-package-a-closure.md).
+The owner passed the entire [focused retest](Instructions/GUI_PACKAGE_A_RETEST.md) on 2026-11-21.
+The final layout adjustment above requires no additional owner retest. B preparation follows A
+closure; implementation of B is not part of this closure task.
+
+## Completed A acceptance fixes — owner feedback
 
 Checkpoint: [A acceptance fixes](docs/checkpoints/2026-11-20-package-a-feedback.md).
 
@@ -24,14 +33,14 @@ Checkpoint: [A acceptance fixes](docs/checkpoints/2026-11-20-package-a-feedback.
 - [x] Infer skipped optional LLM correction when manual review/downstream work begins, so next-step/finished state follows actual work.
 - [x] Explain raw ASR results/segments/transcript files and distinguish retained durable media from temporary cleanup; preserve owner-qualified cleanup/export behavior.
 - [x] Fix cramped/unstable native audio controls; remove the redundant permanent speed selector once browser controls have sufficient room, preserving seeking/mixed playback.
-- [x] Run focused regression/browser/restart/package checks, update retest checklist and commit/push A fixes. Package B remains gated.
+- [x] Run focused regression/browser/restart/package checks, update retest checklist and commit/push A fixes; owner subsequently accepted A.
 - [x] Record the final two-column EN–PL approval requirement after functional additions and before the full EN/PL manual rewrite. The actual task-10 export is still pending; no artist ZIP changes.
-- [ ] Owner runs [the focused feedback retest](Instructions/GUI_PACKAGE_A_RETEST.md); fix/retest any remaining A defects before B.
+- [x] Owner passed [the entire focused feedback retest](Instructions/GUI_PACKAGE_A_RETEST.md) on 2026-11-21; A accepted with the final layout adjustment above, no new owner retest.
 
 Owner evidence: restart preserves edits and leaves ASR/checkboxes stopped/unset; waiting/running
 cancellation and no rerun of completed ASR work on WSL; temporary cancelled workdir deletion and
 versioned export downloads/restart recovery pass. Legacy workdirs remain protected, durable media
-remains present. These successes are retained while the reported defects are fixed.
+remains present. The feedback fixes and the complete focused retest are now accepted.
 
 ## Package A — original tasks 1–4, in order
 
@@ -40,8 +49,8 @@ remains present. These successes are retained while the reported defects are fix
 - [x] A3: Workdir immutable creation time and retained reason (failed/cancelled/successful-retained); preview/filter explicit cleanup without deleting referenced or final artifacts.
 - [x] A4: Download verified existing exports through the GUI, preserving exact artifact/version identity and avoiding ASR reruns.
 - [x] Run relevant regression/packaging checks, then deliver one concrete manual checklist for the implemented A package.
-- [ ] Owner tests A; fix reported defects, update checkpoint/checklist and repeat until accepted.
-- [ ] Gate: package B starts only after A fixes pass and owner approves progression. Package A is authorized; package B is not started.
+- [x] Owner tested A; reported defects were fixed and the complete focused retest passed on 2026-11-21.
+- [x] A acceptance gate passed and final no-retest layout adjustment verified. A is closed; B implementation is not started.
 
 ## Package B — original tasks 5–9, with cloud ASR inserted as 8a
 
@@ -53,8 +62,9 @@ remains present. These successes are retained while the reported defects are fix
 - [ ] B9: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
 - [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
 
-Before B, confirm the target Windows test environment and how the owner and agent will divide
-native-Windows execution. This does not block A planning or its later authorized implementation.
+B5 execution arrangement confirmed 2026-11-21: Windows 11 x64. Agent implements/checks on this
+Linux VM and pushes to GitHub; owner pulls the repository and performs native-Windows launch and
+full-workflow testing. This does not imply agent access to native Windows or claim its qualification.
 
 ## After package B acceptance
 
@@ -79,8 +89,10 @@ native-Windows execution. This does not block A planning or its later authorized
 
 ## Acceptance already retained
 
-Owner accepts recent GUI/workflow, browsers/palette and current profiles provisionally. Owner confirms restart recovery (with missing progress feedback); full profile exchange remains
-provisionally accepted without a complete owner test. Actual browser page zoom
+Owner accepts recent GUI/workflow and browsers/palette. Restart recovery including progress feedback
+is accepted; full profile exchange remains
+provisionally accepted without a complete owner test. The full focused A checklist passed on
+2026-11-21, including recovery/player feedback. Actual browser page zoom
 200% remains optional/unchecked. Existing regression/security/lineage checks remain required.
 Tested hardware is RTX 3090 24 GB; >=8 GB VRAM elsewhere is an unqualified expectation, without
 a compatibility/performance guarantee. No completed acceptance is reopened because an old plan

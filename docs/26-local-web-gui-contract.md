@@ -546,6 +546,16 @@ Older custom palette files without records may need their original settings, rat
 provenance. Missing/changed files are withheld; older registered palette/version hashes stay exact.
 Public canonical/revision/translation schemas and pinned ML packages remain unchanged.
 
+## Owner A closure — 2026-11-21
+
+The owner passed the complete focused A checklist. The final source-review adjustment needs no
+new owner retest: step 4 uses one action panel with Undo, Redo, Save draft and Restore saved draft
+above Apply and Clear current draft. The redundant Prepare text for review button is removed;
+queue review/export and correction-candidate actions still prepare/load the draft automatically.
+Validation, explicit manual-verification consent and immutable publication are unchanged.
+Package A is closed. B preparation targets Windows 11 x64: agent implementation/checks/push on
+the Linux VM, owner pull and native execution/full-workflow testing.
+
 ## Owner A acceptance corrections — 2026-11-20
 
 The public GUI has one checking/planning action, Dry-run, which performs the existing inspection

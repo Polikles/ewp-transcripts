@@ -21,8 +21,11 @@ waiting for the artist has no deadline and blocks no other work. Do not modify t
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
 by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL
 workflow test), then 10 complete EN–PL approval. The owner explicitly authorized A1–A4 and its
-verification/checklist; implementation and automated checks are now complete. The earlier planning-
-only hold is revoked for A. Package B still waits for owner acceptance of A after testing/fixes.
+verification/checklist. On 2026-11-21 the owner passed the complete focused retest and accepted A,
+with a final source-review action layout adjustment that needs no new owner retest. That adjustment
+is implemented/verified and A is closed. Next: B5 preparation for Windows 11 x64; agent changes/checks
+on this Linux VM and pushes to GitHub, owner pulls and tests natively.
+Do not reopen the accepted A gate. B features/cloud calls are not part of the A closure task.
 Previously declined proposals must not return as requirements. No provider/media/spending
 authorization is implied.
 
