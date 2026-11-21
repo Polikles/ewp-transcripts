@@ -445,6 +445,7 @@ async function exportEnhancedTranslationReview() {
     document.querySelector("#translation-review-result").textContent = JSON.stringify(payload, null, 2);
     document.querySelector("#translation-review-status").textContent =
       "Verified translation audited and exported.";
+    await refreshExportDownloads("translation");
     await enableProceedNextOutput();
   } catch (error) {
     document.querySelector("#translation-review-status").textContent = error.message;

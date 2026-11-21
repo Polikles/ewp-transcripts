@@ -636,8 +636,10 @@ class GuiTranscriptionQueue:
                         "exception_type": type(error).__name__,
                         "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
                         "action": (
-                            "Cloud ASR failed. Check the shared key, credits, selected model, "
-                            "timed-word support and job cost limit; retry explicitly."
+                            ""
+                            if "OpenRouter API key is missing;" in str(error)
+                            else "Cloud ASR failed. Check the shared key, credits, selected model, "
+                            "timed-word support and current cost estimate; retry explicitly."
                             if job.speech.provider == "openrouter"
                             else "Transcription failed. Open Settings & About and use "
                             "Test local dependencies, "
@@ -746,7 +748,11 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
         candidate_root = root / directory
         if not candidate_root.is_dir():
             return None
-        matches = sorted(candidate_root.glob(pattern))
+        matches = sorted(
+            path
+            for path in candidate_root.glob(pattern)
+            if path.is_file() and not path.is_symlink()
+        )
         return str(matches[-1]) if matches else None
 
     if job.status == "cancelled":
@@ -760,7 +766,29 @@ def workflow_progress(job: GuiTranscriptionJob) -> GuiWorkflowProgress:
 
     correction_path = first("correction-candidates", f"{revision_prefix}revision_*.json")
     review_path = first("revisions", f"{revision_prefix}revision_*.json")
-    original_export_path = first("exports", f"{revision_prefix}transcript_revision_*.txt")
+    # A verified source export can contain only subtitles (no TXT). Exporter places
+    # the canonical version after its role, unlike revision JSON filenames.
+    suffix = (version_match.group("suffix") or "") if version_match else ""
+    export_pattern = re.compile(
+        rf"{re.escape(job.planned_job_id)}_(?:transcript|subtitles|subtitles_srv3|segments)"
+        rf"{re.escape(suffix)}_revision_[0-9]{{3,}}(?:_v[0-9]{{3,}})?"
+        r"\.(?:txt|html|srt|vtt|ytt|json)"
+    )
+    exports = root / "exports"
+    source_exports = (
+        sorted(
+            path
+            for path in exports.iterdir()
+            if path.is_file() and not path.is_symlink() and export_pattern.fullmatch(path.name)
+        )
+        if exports.is_dir()
+        else []
+    )
+    original_export_path = (
+        str(source_exports[-1])
+        if source_exports
+        else first("exports", f"{revision_prefix}transcript_revision_*.txt")
+    )
     translation_path = first("accepted-translations", f"{prefix}*_translation_*.json")
     translation_candidate_path = first("translation-candidates", f"{prefix}*_translation_*.json")
     translated_export_path = first(

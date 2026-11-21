@@ -1377,3 +1377,92 @@ def test_cloud_read_only_checks_require_csrf_and_use_shared_session_key(action, 
     else:
         speech.refresh.assert_called_once_with([{"path": "selected.wav"}])
         speech.check_key.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", [BrokenPipeError, ConnectionResetError, ConnectionAbortedError])
+@pytest.mark.parametrize("at_headers", [False, True])
+def test_review_audio_browser_disconnect_closes_file_without_stack(tmp_path, failure, at_headers):
+    path = tmp_path / "preview.wav"
+    path.write_bytes(b"audio" * 20000)
+    audio = path.open("rb")
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.path = "/api/v1/review-audio/preview"
+    handler.headers = Message()
+    handler.headers["Host"] = "127.0.0.1:8765"
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_media=Mock(open=Mock(return_value=audio))
+    )
+    handler.send_response = Mock()
+    handler._headers = Mock()
+    handler.send_header = Mock()
+    handler.end_headers = Mock(side_effect=failure() if at_headers else None)
+    handler.wfile = Mock()
+    if not at_headers:
+        handler.wfile.write.side_effect = failure()
+    handler._stream_review_audio()
+    assert audio.closed
+
+
+def test_review_audio_does_not_hide_other_stream_failures(tmp_path):
+    path = tmp_path / "preview.wav"
+    path.write_bytes(b"audio")
+    audio = path.open("rb")
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.path = "/api/v1/review-audio/preview"
+    handler.headers = Message()
+    handler.headers["Host"] = "127.0.0.1:8765"
+    handler.server = SimpleNamespace(
+        server_port=8765, gui_media=Mock(open=Mock(return_value=audio))
+    )
+    handler.send_response = Mock()
+    handler._headers = Mock()
+    handler.send_header = Mock()
+    handler.end_headers = Mock()
+    handler.wfile = Mock(write=Mock(side_effect=OSError("genuine I/O error")))
+    with pytest.raises(OSError, match="genuine I/O"):
+        handler._stream_review_audio()
+    assert audio.closed
+
+
+@pytest.mark.parametrize("failure", [BrokenPipeError, ConnectionResetError, ConnectionAbortedError])
+@pytest.mark.parametrize("at_headers", [False, True])
+def test_json_response_browser_disconnect_is_not_an_application_failure(failure, at_headers):
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.send_response = Mock()
+    handler._headers = Mock()
+    handler.end_headers = Mock(side_effect=failure() if at_headers else None)
+    handler.wfile = Mock()
+    if not at_headers:
+        handler.wfile.write.side_effect = failure()
+    handler._write_response(WebResponse(HTTPStatus.OK, "application/json", b"{}"))
+
+
+def test_read_only_key_check_can_check_typed_key_without_setting_or_saving_it():
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    body = json.dumps({"api_key": "typed-fake-key"}).encode()
+    handler.path = "/api/v1/speech/check"
+    handler.headers = Message()
+    for key, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": "expected",
+    }.items():
+        handler.headers[key] = value
+    handler.rfile = BytesIO(body)
+    speech = Mock(check_key=Mock(return_value={"status": "ok"}))
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_speech=speech,
+        gui_openrouter_api_key="existing-fake-key",
+        gui_openrouter_api_key_env="EWP_TEST_UNUSED_KEY",
+        gui_credentials=Mock(),
+    )
+    handler._write_response = Mock()
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    assert response.status == 200 and b"typed-fake-key" not in response.body
+    speech.check_key.assert_called_once_with("typed-fake-key")
+    assert handler.server.gui_openrouter_api_key == "existing-fake-key"
+    assert not handler.server.gui_credentials.method_calls

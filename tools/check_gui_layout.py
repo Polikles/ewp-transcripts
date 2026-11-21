@@ -59,19 +59,17 @@ def stage(page: Page, name: str) -> None:
 def check_source_control_rows(page: Page) -> None:
     """Keep draft/history and validation in one panel with two ordered action rows."""
     expect(page.locator("#prepare-review")).to_have_count(0)
-    expect(page.locator(".review-control-group")).to_have_count(1)
-    lines = page.locator(".review-control-group > .review-control-line")
+    expect(page.locator("#review-workflow .review-control-group")).to_have_count(1)
+    lines = page.locator("#review-workflow .review-control-group > .review-control-line")
     expect(lines).to_have_count(2)
     assert lines.nth(0).locator("button").evaluate_all("es=>es.map(e=>e.id)") == [
+        "preview-review",
         "undo-review",
         "redo-review",
         "save-review",
         "restore-review",
     ]
-    assert lines.nth(1).locator("button").evaluate_all("es=>es.map(e=>e.id)") == [
-        "preview-review",
-        "clear-review",
-    ]
+    assert lines.nth(1).locator("button").evaluate_all("es=>es.map(e=>e.id)") == ["clear-review"]
     boxes = lines.evaluate_all("es=>es.map(e=>e.getBoundingClientRect().toJSON())")
     assert boxes[0]["bottom"] <= boxes[1]["top"], boxes
     if page.viewport_size["width"] >= 960:
@@ -564,6 +562,9 @@ def check_localized_interface(page: Page) -> None:
         "queue-table library-comparison",
         "queue-table plan-table",
         "review-bottom-navigation actions",
+        "review-control-group translation-review-controls",
+        "review-control-line review-clear-line",
+        "review-control-line review-clear-line translation-clear-line",
         "use strict",
     }
     assert set(missing) <= non_ui, missing
@@ -611,7 +612,7 @@ def check_localized_interface(page: Page) -> None:
     dialog = page.get_by_role("dialog")
     expect(dialog).to_contain_text("Klucz trafia wyłącznie do tego lokalnego serwera")
     expect(dialog.get_by_role("button", name="Ustaw klucz na tę sesję", exact=True)).to_be_visible()
-    dialog.get_by_role("button", name="Anuluj", exact=True).click()
+    dialog.locator("#cancel-openrouter-key").click()
     stage(page, "review")
     expect(page.locator("#preview-review")).to_have_text("Zatwierdź")
     expect(page.locator("#prepare-review")).to_have_count(0)

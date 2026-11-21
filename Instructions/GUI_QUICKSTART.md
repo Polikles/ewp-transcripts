@@ -129,7 +129,7 @@ same error persists in the confirmed `ewp-transcripts` project, run `uv sync --l
   **Run doctor** and **Reinstall dependencies…**. The repair button provides terminal steps to run
   after saving work and stopping the GUI; see [native repair](../WSL%20config/TROUBLESHOOTING.md).
 - Choose a shared output root and select audio/video or saved canonical result JSON. Main picker and
-  **Add audio** in the left rail use the same selection. Matching tracks such as `s0e00-Szymon.wav`
+  **Add files** in the left rail use the same selection. Matching tracks such as `s0e00-Szymon.wav`
   and `s0e00-Damian.wav` form one episode. Set language/count directly per recording; multiple
   audio streams reveal a choice automatically. Dry-run checks/plans all pending episodes in one
   combined table. Review/confirm it, Add to queue once, then Start queue. Selection alone runs no ASR.

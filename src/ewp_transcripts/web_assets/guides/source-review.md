@@ -49,7 +49,7 @@ both mixed episodes and individual recordings. The redundant permanent speed sel
 
 Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
 
-Draft controls are below the transcript in one panel: Undo, Redo, Save draft and Restore saved draft in the first row; Apply and Clear current draft in the second row. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Opening review/export from the queue prepares or restores the draft automatically.
+Draft controls are below the transcript in one panel: Apply, Undo, Redo, Save draft and Restore saved draft in the main row; Clear current draft alone below aligned right. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Opening review/export from the queue prepares or restores the draft automatically.
 
 Only confirm I manually verified wording, speakers… after reviewing all sections. Save and prepare for export creates an immutable child while retaining the original ASR result. Choose TXT, SRT, VTT, YouTube YTT, HTML or Segments JSON and export. Repeated export allocates a new version rather than overwriting earlier files. Example default is the startup choice; explicit production settings remain available as Configured palette when different. EwP Brand® retains the owner’s identity colors. New-palette YouTube qualification is separate.
 
@@ -73,3 +73,18 @@ Compatible older exports can be checked read-only against the deterministic rend
 custom palette without a download record may need its original export settings; the application
 does not guess its identity. New GUI exports keep a private download registry with artifact and
 source/revision hashes. Back up the local application state as well as the output root when needed.
+
+
+## Review actions and saved exports (Windows feedback follow-up)
+
+The common main action row starts with Apply (Apply translation in translation review), followed
+by Undo, Redo, Save draft and Restore saved draft. Clear current draft is alone below, aligned
+with the rightmost main action. On desktop/half-screen widths, long labels wrap within buttons
+instead of moving an action to a new row; phone widths can reflow. Clear affects the current
+browser view; saved drafts and published files remain on disk.
+
+Download a file. Exports are also saved in the selected destination folder.
+Refreshing checks whether exports already exist in the selected directory.
+
+Exporting selected SRT/VTT/YTT formats is sufficient for source-export completion; TXT is optional.
+Canonical and export version suffixes are retained in artifact names and status discovery.

@@ -84,7 +84,7 @@ No benchmark or live EN sample is required: owner explicitly accepted PL-only pi
 
 - [ ] In Transcription engine choose OpenRouter and verify the four IDs: `openai/whisper-large-v3`,
   `openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`, `microsoft/mai-transcribe-2`.
-  Set the model before planning. Use Check key and OpenRouter connection, then Refresh models and estimate cost: no audio upload, four-model availability, current hourly prices and duration-based estimates. No user-entered job cap appears. Queue rows identify cloud jobs and their model.
+  Set the model before planning. Use Check key and OpenRouter connection, then Refresh and estimate cost: no audio upload, four-model availability, current hourly prices and duration-based estimates. No user-entered job cap appears. Queue rows identify cloud jobs and their model.
 - [ ] Plan/stage without audio upload. Start without cloud consent is rejected and jobs stay
   staged. Check upload/paid-usage consent and Start: only then may provider requests begin.
 - [ ] Whisper: use separate synchronized speaker tracks, or explicitly select one speaker for a
@@ -134,7 +134,7 @@ wait for custom artwork/icons; the existing artist ZIP remains frozen and blocks
   Retry the failed audio group and MP4. Both should progress beyond initial state reservation,
   produce canonical/raw outputs and allow revision/translation/export publication. Keep old partial
   state for diagnosis; output versions are allocated without overwriting it.
-- [ ] Main picker and Add audio accept both media and canonical result JSON. No input-directory
+- [ ] Main picker and Add files accept both media and canonical result JSON. No input-directory
   picker, Add media from this directory or Select episode buttons remain. Output picker remains.
 - [ ] Set different language/count for two pending episodes. One Dry-run table lists both with
   their settings and selection footnotes; Add to queue stages both.
@@ -146,3 +146,28 @@ wait for custom artwork/icons; the existing artist ZIP remains frozen and blocks
 - [ ] Cloud checks use the same key as correction/translation. Refresh with selected/staged media,
   compare four hourly prices and estimates; change source/settings and check the stale-estimate
   notice. No audio is uploaded by these checks. Start still requires fresh paid-upload consent.
+
+
+## Follow-up native workflow polish (2026-11-21)
+
+Owner has confirmed local ASR, subtitle export and cloud ASR work on native Windows after the
+storage fix. These checks target the remaining feedback; A stays accepted.
+
+- [ ] Add files / Dodaj pliki accepts media and canonical JSON. Plan headings do not split words;
+  Polish action is przetwórz and automatic speaker count is automatycznie.
+- [ ] Source/translation main review row: Apply first, Undo, Redo, Save draft, Restore saved draft.
+  Clear current draft sits alone below aligned right. Check EN/PL full and half-screen widths.
+- [ ] Export only SRT (no TXT), including a repeated/versioned result. Source export becomes complete
+  and the next step advances. Download guidance explains the destination and refresh; translation
+  guidance additionally names translation-exports, and actual links appear after exporting.
+- [ ] Key dialog: Set session, Save/Use OS key, Check API key, Close window/×/Escape. Closing leaves
+  activated keys usable; no unsubmitted text remains. Check typed key without saving it and check
+  the active key with an empty input. After restart, missing-key guidance offers enter or load.
+- [ ] Start staged cloud work without consent, and generate correction/translation without its
+  disclosure: explanatory text, highlighted/focused checkbox, no request. Tick it and proceed.
+- [ ] Generate one translation: assisted translation becomes complete, generation is disabled for
+  that source until Reopen translation, manual review remains pending. Apply a verified manual
+  translation and export: manual/translated-export status becomes complete despite retained candidate.
+- [ ] The translation dictionary native file chooser stays inside its optional disclosure.
+- [ ] Play/seek/switch recording audio and close/reopen the page. Expected browser-aborted streams
+  do not spam Windows10053 tracebacks. Report any actual playback problem separately with code/details.

@@ -219,7 +219,7 @@ function installGuiShell() {
   recordings.setAttribute("aria-label", "Recordings");
   const queueTitle = document.createElement("h2"); queueTitle.textContent = "Recording queue";
   const addAudio = document.createElement("button"); addAudio.type = "button";
-  addAudio.id = "gui-add-audio"; addAudio.textContent = "Add audio";
+  addAudio.id = "gui-add-audio"; addAudio.textContent = "Add files";
   addAudio.disabled = nativeMediaButton.disabled;
   new MutationObserver(() => { addAudio.disabled = nativeMediaButton.disabled; }).observe(nativeMediaButton, {attributes:true, attributeFilter:["disabled"]});
   addAudio.addEventListener("click", () => { if (nativeMediaButton.disabled) return; showGuiStage("workspace"); nativeMediaInput.click(); });
@@ -567,7 +567,12 @@ function refreshGuiTranslationDirection() {
   const mismatch = job && job.language === target;
   const generate = document.querySelector("#generate-translation");
   generate.dataset.directionMismatch = String(Boolean(mismatch));
-  generate.disabled = Boolean(mismatch) || generate.getAttribute("aria-busy") === "true";
+  const path=String(translationForm.elements.namedItem("result_path").value || "");
+  const batch=stageQueueJobs.some(item=>stageQueueSelections.translation.has(item.job_id) && stageQueueItemIsActionable(item,"translation"));
+  const completed=job?.result_path===path && job.workflow?.assisted_translation?.state==="complete";
+  generate.disabled = Boolean(mismatch) || generate.dataset.generationBusy==="true" || generate.getAttribute("aria-busy")==="true"
+    || (!batch && (!path || generate.dataset.generatedFor===path || (completed && generate.dataset.allowRegenerationFor!==path)));
+
   directionStatus.textContent = mismatch
     ? "This direction needs a recording in the other source language. Choose a matching recording before generating."
     : `Current direction: ${target === "en" ? "PL → EN" : "EN → PL"}.`;

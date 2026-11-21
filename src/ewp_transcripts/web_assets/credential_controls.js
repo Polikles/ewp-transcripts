@@ -38,3 +38,15 @@ credentialSettingsButton.textContent = "Manage OpenRouter key";
 credentialSettingsButton.addEventListener("click", () => openRouterKeyButton.click());
 credentialSettings.append(credentialSettingsButton);
 document.querySelector("#dependency-panel").before(credentialSettings);
+
+document.querySelector("#close-openrouter-key-icon").addEventListener("click",closeOpenRouterKeyDialog);
+openRouterKeyDialog.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();closeOpenRouterKeyDialog();}});
+document.querySelector("#check-openrouter-key").addEventListener("click",async event=>{
+  const button=event.currentTarget,input=document.querySelector("#openrouter-api-key"),status=document.querySelector("#openrouter-key-dialog-status");
+  const key=input.value;input.value="";button.disabled=true;status.textContent="Checking OpenRouter key and connection…";
+  try {
+    await queuePost("/api/v1/speech/check",key ? {api_key:key} : {},{trigger:button});
+    status.textContent="OpenRouter key and connection are ready. No audio was uploaded.";
+  }catch(error){status.textContent=error.message;}
+  finally{input.value="";button.disabled=false;}
+});

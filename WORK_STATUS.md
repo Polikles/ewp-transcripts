@@ -4,6 +4,18 @@ Last updated: **2026-11-21**.
 
 ## Active task and resume pointers
 
+Latest B native feedback is implemented/verified: [checkpoint](docs/checkpoints/2026-11-21-b-workflow-state-polish.md).
+Owner confirms native local ASR, source export, cloud ASR and OS-key save/use actions work. Source
+status now recognizes subtitle-only/versioned exports; generated translation refreshes assisted
+progress and blocks duplicate generation until explicit reopen. Manual translation status remains
+complete after publication despite retained candidates. Cloud/correction/translation disclosures
+highlight missing consent; key dialog has Close/×/Escape/API check and clearer enter/load guidance.
+Review rows/copy/plan labels and optional native picker placement are fixed. Expected Windows
+aborted playback requests no longer log stack traces; unrelated I/O failures remain visible.
+1031 tests / 17 integrations / mypy115, full/focused Chromium and actual restart/recovery pass.
+Evidence is recorded; delivery targets main. Next is the focused owner B retest. A closed, artist ZIP frozen;
+no paid calls/model/uninstall changes. Task10/manual approval remains after functional B acceptance.
+
 Windows queue/GUI fixes delivered: [checkpoint](docs/checkpoints/2026-11-21-windows-queue-gui-feedback.md).
 Baseline 761109f. Shared Windows-safe publication fixes the reproduced directory-descriptor defect;
 unexpected failures now retain safe OS/frame diagnostics. Single media/results picker, per-recording

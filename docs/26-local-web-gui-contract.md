@@ -615,3 +615,27 @@ safe locations are logged to the local terminal. Each failed job has one collaps
 with technical JSON nested inside. Storage retains file fsync and atomic publication on Windows;
 it skips POSIX directory-descriptor flushing there, without claiming directory-metadata power-loss
 durability. See the Windows feedback checkpoint and owner retest checklist.
+
+## B native workflow feedback clarification — 2026-11-21
+
+Add files names the rail's mixed media/canonical-result picker. Plan headers preserve word boundaries;
+phone widths can scroll that table locally. The source/translation review main row starts with Apply,
+then Undo/Redo/Save draft/Restore saved draft; Clear current draft is a secondary row aligned right.
+Source export progress recognizes any supported verified export format, including subtitle-only sets,
+and the actual exporter version suffix order. Existing accepted translations remain complete when
+an older generated candidate is retained. Assisted generation completion and manual semantic review
+are distinct; generating a candidate does not approve its content. Single generation refreshes the
+queue immediately and blocks repeat submission for that source until explicit Reopen translation.
+
+Missing cloud-upload or correction/translation disclosure is rejected in the frontend before requests,
+with an accessible focused/highlighted checkbox and explanatory text. Server checks remain required.
+The OpenRouter dialog exposes explicit Close/×/Escape and a read-only API-key check. A nonempty
+api_key in POST /api/v1/speech/check tests that value without replacing the active session key or
+saving it; no value is echoed, stored in workspaces, or unlocked from OS storage automatically.
+With no supplied key, check uses the existing shared session/environment key. After restart, users
+enter or explicitly load the saved key. Session activation leaves the dialog open for save/check/use.
+
+Review audio treats BrokenPipeError, ConnectionResetError and ConnectionAbortedError as client
+request termination during headers or body transfer, closing the source descriptor. Ordinary JSON
+responses also tolerate those disconnected writes. General media/OS errors still propagate. No
+claim is made about which native host/browser component caused a particular Windows10053 event.

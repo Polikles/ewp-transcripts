@@ -91,7 +91,7 @@ def main():
         expect(page.locator("#gui-audio-choices li")).to_have_count(2)
         expect(page.locator("#transcription-jobs tbody tr")).to_have_count(1)
         page.wait_for_function("() => !nativeMediaButton.disabled")
-        expect(page.locator("#gui-add-audio")).to_have_text("Add audio")
+        expect(page.locator("#gui-add-audio")).to_have_text("Add files")
         expect(page.locator("#workflow button[aria-pressed]")).to_have_count(0)
         expect(page.locator("#read-media-options")).to_have_count(0)
         expect(page.locator("#discover-media-directory")).to_have_count(0)
@@ -197,7 +197,7 @@ def main():
                     )
                 )
                 assert measurements[-1]["page"] <= width
-        expect(page.locator("#gui-add-audio")).to_have_text("Dodaj audio")
+        expect(page.locator("#gui-add-audio")).to_have_text("Dodaj pliki")
         expect(page.locator("#cloud-asr-check")).to_have_text(
             "Sprawdź klucz i połączenie z OpenRouter"
         )

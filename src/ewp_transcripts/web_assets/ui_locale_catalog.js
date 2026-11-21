@@ -1930,3 +1930,26 @@ for(const [en,pl] of [
   ["Transcription failed unexpectedly. Use Test local dependencies and inspect retained job state.","Transkrypcja nie powiodła się. Otwórz szczegóły techniczne błędu i sprawdź zachowany stan zadania."]
 ])guiPolish.set(en,pl);
 guiPolishErrorDescriptions.set("MULTIPLE_AUDIO_STREAMS","Plik ma kilka strumieni audio. Wybierz strumień pod nagraniem, a następnie ponownie zaplanuj przetwarzanie.");
+
+// Native workflow acceptance follow-up; final EN–PL terminology approval stays separate.
+for(const [en,pl] of [
+  ["Add files","Dodaj pliki"], ["process","przetwórz"],
+  ["Automatically","automatycznie"], ["Automatically **","automatycznie **"],
+  ["Close window","Zamknij okno"], ["Check API key","Sprawdź klucz API"],
+  ["Refresh and estimate cost","Odśwież i oszacuj koszt"],
+  ["Download a file. Exports are also saved in the selected destination folder.","Pobierz plik. Eksporty są także zapisane w wybranym folderze docelowym."],
+  ["Refreshing checks whether exports already exist in the selected directory.","Odświeżanie sprawdza czy w wybranym katalogu już istnieją eksporty."],
+  ["Translations are saved in the translation-exports folder.","Tłumaczenia są zapisane w folderze translation-exports."],
+  ["OpenRouter key is active for this session. You can save it or close this window.","Klucz OpenRouter jest aktywny w tej sesji. Możesz go zapisać lub zamknąć okno."],
+  ["OpenRouter API key is missing; enter it or load a previously saved key","Brak klucza API OpenRouter; wprowadź lub wczytaj wcześniej zapisany klucz."],
+  ["OpenRouter API key is missing; set the shared provider key","Brak klucza API OpenRouter; wprowadź lub wczytaj wcześniej zapisany klucz."],
+  ["Set the shared OpenRouter key before checking the connection","Brak klucza API OpenRouter; wprowadź lub wczytaj wcześniej zapisany klucz."],
+  ["Confirm audio upload and paid API usage before starting cloud ASR.","Zaznacz zgodę na wysłanie audio i płatne użycie API przed uruchomieniem ASR w chmurze."],
+  ["Confirm the API disclosure and manual review requirements before generating a candidate.","Zaznacz potwierdzenie zasad użycia API i wymaganej ręcznej weryfikacji przed wygenerowaniem propozycji."],
+  ["Consent confirmed. Continue with the selected action.","Zgoda potwierdzona. Możesz kontynuować wybrane działanie."],
+  ["I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not permanently saved.","Zgadzam się na wysłanie audio z zadań chmurowych do OpenRouter i dostawcy modelu oraz płatne użycie API. Zgoda nie jest trwale zapisywana."],
+  ["Cloud ASR failed. Check the shared key, credits, selected model, timed-word support and current cost estimate; retry explicitly.","ASR w chmurze nie powiodło się. Sprawdź wspólny klucz, środki, wybrany model, obsługę czasów słów i aktualne oszacowanie kosztu; ponów ręcznie."]
+])guiPolish.set(en,pl);
+
+guiPolish.set("Next step: translation review","Następny krok: weryfikacja tłumaczenia");
+guiPolish.set("Cloud ASR failed. Check the shared key, credits, selected model, timed-word support and job cost limit; retry explicitly.","ASR w chmurze nie powiodło się. Sprawdź wspólny klucz, środki, wybrany model, obsługę czasów słów i aktualne oszacowanie kosztu; ponów ręcznie.");

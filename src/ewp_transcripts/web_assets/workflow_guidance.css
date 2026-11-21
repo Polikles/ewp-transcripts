@@ -37,7 +37,7 @@
 .stage-queue-controls { gap: .4rem; margin-block: .35rem; }
 .stage-queue-controls .feedback-anchor { min-height: 0; padding-bottom: 0; }
 .review-control-line .feedback-anchor, .stage-queue-controls .feedback-anchor { display: inline-flex; flex-direction: column; align-items: flex-start; }
-.gui-workbench #preview-review:not(:disabled) { background: #355880; color: #fff; }
+.gui-workbench #preview-review:not(:disabled), .gui-workbench #preview-translation-review:not(:disabled) { background: #355880; color: #fff; }
 .gui-workbench .review-clear-line #clear-review { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; margin: 0; padding: .35rem .55rem; }
 .stage-queue-controls .inline-working { position: static; min-width: 0; }
 .stage-queue-controls > button, .stage-queue-controls > .feedback-anchor > button { min-height: 2.2rem; padding: .35rem .55rem; font-size: .8rem; }
@@ -168,4 +168,25 @@
 }
 @media (min-width: 90rem) {
   .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr) minmax(11rem, 13rem); }
+}
+
+/* A plan keeps word boundaries; very narrow windows scroll only the table. */
+.plan-table-scroll { grid-column: 1 / -1; min-width: 0; max-width: 100%; overflow-x: auto; }
+.plan-table { min-width: 30rem; }
+.plan-table th { overflow-wrap: normal; word-break: normal; hyphens: none; }
+.plan-table th:nth-child(2), .plan-table th:nth-child(3) { white-space: nowrap; }
+.plan-table td:nth-child(2), .plan-table td:nth-child(4), .plan-table td:nth-child(5) { overflow-wrap: normal; word-break: normal; }
+.review-clear-line { justify-content: flex-end; }
+.translation-review-controls { margin-block: .65rem; }
+#cloud-asr-consent { font-size: .82rem; line-height: 1.5; }
+.credential-dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.credential-dialog-heading h3 { margin-top: 0; }
+#close-openrouter-key-icon { flex-shrink: 0; padding: .15rem .5rem; font-size: 1.35rem; line-height: 1.2; }
+.review-control-line:not(.review-clear-line) { justify-content: space-between; }
+@media (min-width: 45rem) {
+  .review-control-line:not(.review-clear-line) { flex-wrap: nowrap; }
+  .review-control-line > .feedback-anchor > button { overflow-wrap: normal; word-break: normal; }
+}
+@media (min-width: 45rem) and (max-width: 70rem) {
+  .review-control-line > .feedback-anchor > button { font-size: .8rem; padding-inline: .35rem; }
 }

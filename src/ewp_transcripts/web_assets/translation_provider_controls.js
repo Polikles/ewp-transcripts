@@ -136,12 +136,14 @@ translationForm.addEventListener("submit", async event => {
   const summary = document.querySelector("#translation-summary");
   translationCandidate = null;
   document.querySelector("#review-translation").disabled = true;
-  submit.disabled = true;
+  submit.dataset.generationBusy="true";submit.disabled = true;
   status.textContent = "Translation is running; do not close the server.";
   result.textContent = "";
   summary.replaceChildren();
   try {
     const payload = await queuePost("/api/v1/translations/generate", request);
+    submit.dataset.generatedFor=String(request.result_path);delete submit.dataset.allowRegenerationFor;
+    await reportWorkflowSuccess(String(request.result_path),"assisted_translation");
     translationCandidate = {...payload, revision_path: String(form.get("source_revision_path") || ""), output_root: root};
     status.textContent = payload.source_verification === "manually_verified"
       ? "Non-final translation candidate generated; semantic manual review is required."
@@ -168,7 +170,8 @@ translationForm.addEventListener("submit", async event => {
     document.querySelector("#review-translation").disabled = false;
   } catch (error) {
     status.textContent = error.message;
+    await reportWorkflowError(String(request.result_path || ""),"assisted_translation",error);
   } finally {
-    submit.disabled = false;
+    delete submit.dataset.generationBusy;refreshGuiTranslationDirection();
   }
 }, true);

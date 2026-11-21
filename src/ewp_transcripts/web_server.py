@@ -678,7 +678,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         if not head:
             try:
                 self.wfile.write(data)
-            except (BrokenPipeError, ConnectionResetError):
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
 
     def _stream_review_audio(self, *, head: bool = False) -> None:
@@ -706,34 +706,34 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             self.send_error(HTTPStatus.NOT_FOUND)
             return
         with audio:
-            size = os.fstat(audio.fileno()).st_size
             try:
-                start, end = media_byte_range(self.headers.get("Range"), size)
-            except ValueError:
-                self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
-                self._headers(content_type="audio/wav", content_length=0)
-                self.send_header("Content-Range", f"bytes */{size}")
+                size = os.fstat(audio.fileno()).st_size
+                try:
+                    start, end = media_byte_range(self.headers.get("Range"), size)
+                except ValueError:
+                    self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+                    self._headers(content_type="audio/wav", content_length=0)
+                    self.send_header("Content-Range", f"bytes */{size}")
+                    self.end_headers()
+                    return
+                partial = self.headers.get("Range") is not None
+                self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
+                self._headers(content_type="audio/wav", content_length=end - start + 1)
+                self.send_header("Accept-Ranges", "bytes")
+                if partial:
+                    self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
                 self.end_headers()
-                return
-            partial = self.headers.get("Range") is not None
-            self.send_response(HTTPStatus.PARTIAL_CONTENT if partial else HTTPStatus.OK)
-            self._headers(content_type="audio/wav", content_length=end - start + 1)
-            self.send_header("Accept-Ranges", "bytes")
-            if partial:
-                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
-            self.end_headers()
-            if head:
-                return
-            audio.seek(start)
-            remaining = end - start + 1
-            try:
+                if head:
+                    return
+                audio.seek(start)
+                remaining = end - start + 1
                 while remaining > 0:
                     chunk = audio.read(min(remaining, 64 * 1024))
                     if not chunk:
                         break
                     self.wfile.write(chunk)
                     remaining -= len(chunk)
-            except (BrokenPipeError, ConnectionResetError):
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 return
 
     def do_POST(self) -> None:  # noqa: N802
@@ -1368,6 +1368,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 key = self.server.gui_openrouter_api_key or os.environ.get(
                     self.server.gui_openrouter_api_key_env, ""
                 )
+                if path.endswith("/check") and document.get("api_key"):
+                    key = validate_api_key(document["api_key"])
                 speech_payload = (
                     self.server.gui_speech.check_key(key)
                     if path.endswith("/check")
@@ -3006,12 +3008,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             self.send_header(name, value)
 
     def _write_response(self, response: WebResponse) -> None:
-        self.send_response(response.status)
-        self._headers(content_type=response.content_type, content_length=len(response.body))
-        self.end_headers()
         try:
+            self.send_response(response.status)
+            self._headers(content_type=response.content_type, content_length=len(response.body))
+            self.end_headers()
             self.wfile.write(response.body)
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             # A browser can abandon a completed request while navigating or refreshing.
             # The response has no stateful side effect, so the disconnect is not an error.
             return

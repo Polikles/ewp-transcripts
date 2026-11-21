@@ -12,7 +12,7 @@ Picking files does not start ASR. Dry-run inspects and plans the selected files 
 
 Failed items retain a diagnostic code and technical details; other completed work remains available. Settings & About contains optional dependency diagnostics and the Ubuntu upgrade repair guide.
 
-Use the same main file picker or Add audio in the left rail to add existing canonical JSON without repeating transcription; stage queues also retain Add saved results. Save current work state before stopping the GUI.
+Use the same main file picker or Add files in the left rail to add existing canonical JSON without repeating transcription; stage queues also retain Add saved results. Save current work state before stopping the GUI.
 
 ## Next step
 
@@ -86,7 +86,7 @@ Retry and saved-work recovery retain it.
 Only an actual duplicate-ID collision reveals Recording ID fields. Assign distinct IDs and replan;
 source names/bytes remain unchanged and an ID names the whole multi-file group.
 
-Choose audio or video files and Add audio share one picker, including saved canonical result JSON.
+Choose audio or video files and Add files share one picker, including saved canonical result JSON.
 Removing a pending entry only removes it from the list. Direct server paths remain available.
 Native file/directory buttons remain for output, result, dictionary and workspace paths.
 Without a desktop picker, enter the path directly. Windows/WSL dialog output uses UTF-8.
@@ -99,7 +99,7 @@ key used by correction/translation. No audio is uploaded during discovery, plann
 
 1. Choose the recording language, speaker count, media/streams and cloud model before planning.
    Check key and OpenRouter connection verifies the shared session/environment key with /key.
-   Refresh models and estimate cost checks availability of the four presets, their live endpoint
+   Refresh and estimate cost checks availability of the four presets, their live endpoint
    prices in USD per audio hour, and estimates pending selected/staged-cloud source durations.
    Both are explicit read-only actions: no audio/transcript is uploaded. No key is needed for
    public pricing. A missing/unpriced model is shown explicitly. After settings/selection changes,
@@ -134,3 +134,11 @@ uploading media or substituting local models. Secure OS key storage is optional;
 **Use saved OpenRouter key**, or enter a session key again.
 
 Protocol reference: [OpenRouter speech-to-text](https://openrouter.ai/docs/guides/overview/multimodal/stt).
+
+
+Cloud Start without paid-upload consent highlights/focuses the disclosure and sends no start
+request. Consent is not permanently saved and is cleared after starting/restoring work. Missing
+OpenRouter key after restart means enter a session key or explicitly use the saved OS key; it
+does not require reinstalling models. Dry-run plan headings keep word boundaries; narrow phone
+views may scroll only the plan table. Speaker-count automatic selection uses the shorter label
+Automatically in the plan, while the language detection control keeps its normal wording.

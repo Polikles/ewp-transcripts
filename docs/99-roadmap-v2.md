@@ -36,6 +36,16 @@ Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is cor
 isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
 Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
 
+### Latest B native workflow feedback
+
+Owner now confirms local ASR, source subtitle export and cloud ASR work on native Windows.
+The [workflow/state polish checkpoint](checkpoints/2026-11-21-b-workflow-state-polish.md) addresses
+remaining status, consent/credentials, action layout/copy and audio-disconnect traceback feedback.
+These fixes pass 1031 tests, 17 integrations, full/focused Chromium and actual restart/recovery.
+Focused owner native retest and remaining full native/WSL B acceptance are next. Keep A closed;
+do not rerun paid qualification.
+Task10 and final manuals still wait for feature freeze/B acceptance and terminology approval.
+
 ### Current B owner feedback and later Windows distribution
 
 Owner confirms native installation/GUI/doctor pass; queue/workflow is not accepted yet. Follow

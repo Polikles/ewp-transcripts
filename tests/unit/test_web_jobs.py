@@ -964,3 +964,39 @@ def test_retry_of_cancelled_waiting_entry_does_not_run_the_stale_pending_item(tm
     finally:
         release.set()
         queue.close()
+
+
+@pytest.mark.parametrize(
+    "extension,role",
+    [("srt", "subtitles"), ("vtt", "subtitles"), ("ytt", "subtitles_srv3"), ("html", "transcript")],
+)
+@pytest.mark.parametrize("version", [1, 3])
+def test_source_export_progress_does_not_require_txt_and_uses_exporter_version_order(
+    tmp_path, extension, role, version
+):
+    suffix = "" if version == 1 else f"_v{version:03d}"
+    now = datetime.now(UTC)
+    job = GuiTranscriptionJob(
+        job_id="queue",
+        status="completed",
+        input_path=str(tmp_path / "episode.mp4"),
+        output_directory=str(tmp_path),
+        planned_job_id="episode",
+        planned_result_path=str(tmp_path / f"episode_results{suffix}.json"),
+        result_path=str(tmp_path / f"episode_results{suffix}.json"),
+        language="pl",
+        speaker_count=2,
+        created_at=now,
+        updated_at=now,
+    )
+    exports = tmp_path / "exports"
+    exports.mkdir()
+    # A different canonical version, unrelated names or directory entries are not completion.
+    (exports / "other_subtitles_revision_001.srt").write_text("other")
+    (exports / f"episode_{role}{suffix}_revision_001.{extension}").mkdir()
+    assert workflow_progress(job).original_export.state == "pending"
+    artifact = exports / f"episode_{role}{suffix}_revision_002_v002.{extension}"
+    artifact.write_text("published")
+    progress = workflow_progress(job)
+    assert progress.original_export.state == "complete"
+    assert progress.original_export.path == str(artifact)

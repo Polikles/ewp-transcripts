@@ -63,3 +63,10 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
     changes are delivered in the Windows queue/GUI checkpoint. Continue from that checkpoint and
     owner B retest; do not repeat model setup or paid pilots. Uninstall/model-removal script and
     standalone EXE installer/desktop shortcut/Add-Remove Programs/GUI uninstall are later TODO only.
+
+13. Latest B native feedback: owner confirms local/cloud ASR and source subtitle export work.
+    Continue from docs/checkpoints/2026-11-21-b-workflow-state-polish.md and its focused B checklist
+    for remaining native acceptance. Status, consent/key-dialog, layout/copy and expected browser
+    audio-disconnect fixes are verified with synthetic media/deterministic translation; no new paid
+    qualification is needed. A stays closed, artist ZIP stays frozen, final terminology/manual gate
+    is unchanged. Do not interpret missing session key after restart as a model-install failure.

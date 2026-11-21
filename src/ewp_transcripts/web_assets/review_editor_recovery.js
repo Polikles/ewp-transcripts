@@ -31,10 +31,10 @@ function arrangeReviewControls() {
   redo.textContent = "Redo";
   redo.title = "Redo a current-editor change. This does not change saved files.";
   historyLine.classList.add("review-history-line");
-  historyLine.append(undo, redo, save, restore);
+  historyLine.append(preview, undo, redo, save, restore);
   const validationLine = document.createElement("div");
-  validationLine.className = "review-control-line";
-  validationLine.append(preview, clear);
+  validationLine.className = "review-control-line review-clear-line";
+  validationLine.append(clear);
   editing.append(historyLine, validationLine);
   layout.append(editing);
   document.querySelector('#review-workflow input[name="verified"]').closest("label").before(layout);

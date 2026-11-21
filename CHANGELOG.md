@@ -6,6 +6,23 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Source workflow progress recognizes subtitle-only exports and the real canonical-version filename
+  ordering, without requiring TXT. Translation generation refreshes durable candidate state, blocks
+  accidental duplicate generation until explicit reopening, and keeps manual review pending until
+  a verified translation is applied. Verified manual translations no longer appear pending merely
+  because their earlier candidate still exists.
+- Native Windows aborted audio/browser responses close cleanly, including header writes, without
+  noisy disconnect tracebacks; unrelated media/I/O failures still propagate. Missing OpenRouter
+  session-key guidance now explicitly offers entering or loading a saved key after restart.
+- Missing cloud-ASR/correction/translation disclosures highlight and focus their checkbox before
+  requests. The key dialog has Close/×/Escape and a read-only API key check, including a typed key
+  without activating/saving it. Session-key activation keeps the dialog open for save/check actions.
+- Main review action rows match across source/translation, with Apply first and Clear draft below
+  aligned right. Plan words keep boundaries, rail says Add files, cloud price refresh has a shorter
+  label, optional dictionary pickers stay inside disclosures and export-download guidance names
+  actual output locations. EN/PL copy and focused acceptance instructions updated.
+
+
 - Native Windows job state/revision/translation/subtitle publication no longer opens unsupported
   POSIX directory descriptors. File-content flushes and atomic immutable publication remain;
   unexpected queue failures retain safe exception/OS codes/frame locations and log them locally.

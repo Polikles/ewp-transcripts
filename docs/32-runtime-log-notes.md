@@ -47,3 +47,19 @@ its word limit. One long speaker could therefore appear as one large review sect
 of codec. Review preparation now honors both the word and speaker-block limits. Existing draft
 presentation is bounded without silently rewriting the saved file or changing canonical times;
 explicit saving persists the server-owned projected structure while preserving edits.
+
+
+## Native Windows audio ConnectionAbortedError / WinError 10053
+
+The reported traceback ends in _stream_review_audio -> socket.sendall, so that particular request
+was interrupted while the browser was receiving its playback preview. It is separate from ASR and
+canonical/subtitle publication. Seeking, switching previews or closing a page can abandon such
+requests; the traceback alone does not identify which browser/host component ended the connection.
+The handler now catches ConnectionAbortedError along with reset/broken-pipe errors during headers
+and audio writes and closes the audio file. General I/O failures are still reported; there is no
+blanket suppression of OSError or backend/runtime warnings. Focused tests cover all three disconnect
+classes and genuine I/O failure propagation. Native playback remains an owner qualification.
+
+The separately reported SPEECH_ENGINE_ERROR at the cloud adapter's missing-key check means the
+server session has no API key after a restart. Workspace loading deliberately does not restore it.
+Enter a key or choose Use saved OpenRouter key explicitly; this is not a missing local model/library.

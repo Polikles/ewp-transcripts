@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-21",
+  "baseline_commit": "3c413ce",
+  "owner_native_evidence": {
+    "local_asr": "passed",
+    "source_subtitle_export": "passed",
+    "cloud_asr": "passed",
+    "os_key_save_use_actions": "worked; close/check flow needed polish",
+    "full_b_acceptance": "pending"
+  },
+  "fixes": {
+    "source_export_progress": "all supported verified formats; actual canonical/export version filename order; regular files only",
+    "translation": "immediate assisted status refresh and duplicate-generation lock with explicit reopen; manual review remains separate and accepted manual state survives candidate presence",
+    "audio_disconnect": "BrokenPipeError/ConnectionResetError/ConnectionAbortedError at headers/body close descriptors; other I/O failures propagate",
+    "ui": "all opening TODO actions and ENPL labels/copy/layout"
+  },
+  "verification": {
+    "make_check": {
+      "passed": 1031,
+      "ruff": "pass",
+      "format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "chromium": "159.0.8154.6",
+    "playwright": "1.65.2",
+    "full_gui_layout_cases": 144,
+    "page_errors": [],
+    "external_browser_requests": [],
+    "focused_workflow": {
+      "sourceSrtOnlyVersion3": "pass",
+      "translationCandidateStatusAndGenerationLock": "pass",
+      "manualTranslationStatusAndExports": "pass",
+      "consentAndKeyDialog": "pass (mock key/OS responses)",
+      "planHeaderAndControlRows": "pass ENPL / 1440,960,720; plan also 390",
+      "pageErrors": [],
+      "externalRequests": [],
+      "paidProviderCalls": 0
+    },
+    "restart_recovery": "pass: actual server stop/restart, saved source/translation drafts and existing immutable exports"
+  },
+  "provider_boundary": {
+    "paid_calls_this_task": 0,
+    "deterministic_translation": "real application/review/publication with existing test provider; no model/accuracy qualification",
+    "credential_browser": "mock local API check/OS actions; no real keys/stores accessed",
+    "credential_http": "supplied typed key validates without setting/saving/echoing it; shared-key fallback retained"
+  },
+  "limitations": [
+    "Actual host/browser component causing owner Windows10053 is not established",
+    "Owner native follow-up and full WSL/native B acceptance remain pending",
+    "Actual browser zoom200% not run; viewport resizing is not zoom",
+    "Final terminology/manual approval not started"
+  ],
+  "artist_zip_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+  "disposable_root": "/tmp/ewp-b-polish.RgQFAl",
+  "cleanup": "complete: test servers stopped and dedicated disposable root removed after reviewed evidence capture"
+}

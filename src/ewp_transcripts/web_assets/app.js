@@ -39,7 +39,7 @@ function showSummary(kind, result, operation = {}) {
   const summary = document.querySelector("#operation-summary"); summary.replaceChildren();
   const selected = operation.language ?? document.querySelector("#workflow-language").value;
   const count = operation.speaker_count ?? (document.querySelector("#workflow-speaker-auto").checked ? "auto" : document.querySelector("#workflow-speaker-count").value);
-  const speakers = count === "auto" ? "Auto-detect" : count;
+  const speakers = count === "auto" ? "Automatically" : count;
   const language = selected === "auto" ? "Auto-detect" : selected;
   let entries;
   if (kind === "inspect") entries = [["Episodes", result.episodes?.length ?? 0], ["Files", result.discovery?.files?.length ?? 0], ["Skipped", result.discovery?.skipped?.length ?? 0]];
@@ -63,12 +63,12 @@ function showSummary(kind, result, operation = {}) {
       const files = episode?.sources?.map(source => source.fingerprint?.filename).filter(Boolean).join(", ") || "—";
       const row = document.createElement("tr");
       const rowLanguage=job.gui_language ?? selected,rowSpeakers=job.gui_speaker_count ?? count;
-      for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None", `${rowLanguage==="auto" ? "Auto-detect" : rowLanguage} *`, `${rowSpeakers==="auto" ? "Auto-detect" : rowSpeakers} **`]) {
+      for (const value of [files, job.decision, job.warnings?.map(warning => warning.code).join(", ") || "None", `${rowLanguage==="auto" ? "Auto-detect" : rowLanguage} *`, `${rowSpeakers==="auto" ? "Automatically" : rowSpeakers} **`]) {
         const cell = document.createElement("td"); cell.textContent = value; row.append(cell);
       }
       body.append(row);
     }
-    table.append(body); summary.append(table);
+    table.append(body); const scroll=document.createElement("div");scroll.className="plan-table-scroll";scroll.append(table);summary.append(scroll);
   }
   appendSelectionFootnotes(summary);
 }
@@ -121,8 +121,8 @@ removeCompletedQueueItems.addEventListener("click", async () => {
   } catch (error) { document.querySelector("#operation-status").textContent = error.message; }
 });
 function clearCorrectionForResult(resultPath, outputRoot, workflow = {}) { correctionCandidate = null; document.querySelector("#review-correction").disabled = true; document.querySelector("#correction-result").textContent = ""; document.querySelector("#correction-summary").replaceChildren(); correctionForm.elements.namedItem("result_path").value = resultPath; correctionForm.elements.namedItem("output_root").value = outputRoot; correctionForm.elements.namedItem("confirmed").checked = false; correctionForm.elements.namedItem("allow_remote_endpoint").checked = false; const candidatePath = workflow.correction?.path || ""; if (candidatePath) { correctionCandidate = {candidate_path: candidatePath, result_path: resultPath, output_root: outputRoot}; document.querySelector("#correction-status").textContent = "Existing non-final correction candidate found for this canonical result; manual review is still required."; const table = document.createElement("table"); table.className = "review-summary-table"; table.innerHTML = `<tbody><tr><th scope="row">Candidate</th><td>${shortName(candidatePath)}</td></tr><tr><th scope="row">Final</th><td>No — manual review required</td></tr></tbody>`; document.querySelector("#correction-summary").append(table); document.querySelector("#review-correction").disabled = false; return; } document.querySelector("#correction-status").textContent = "Completed canonical transcription loaded; configure optional correction before generating a candidate."; }
-function nextWorkflowStage(job) { if (job.status !== "completed" || !job.result_path) return "transcription"; const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
-function nextWorkflowLabel(stage) { return ({transcription: "Next step: transcription", correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
+function nextWorkflowStage(job) { if (job.status !== "completed" || !job.result_path) return "transcription"; const workflow = job.workflow || {}; if (["pending", "failed"].includes(workflow.correction?.state)) return "correction"; if (["pending", "failed"].includes(workflow.review?.state)) return "review"; if (["pending", "failed"].includes(workflow.original_export?.state)) return "original-export"; if (["pending", "failed"].includes(workflow.assisted_translation?.state)) return "translation"; if (["pending", "failed"].includes(workflow.translation?.state)) return workflow.assisted_translation?.candidate_path || workflow.assisted_translation?.state==="skipped" ? "semantic-review" : "translation"; if (["pending", "failed"].includes(workflow.translated_export?.state)) return "translated-export"; return "finished"; }
+function nextWorkflowLabel(stage) { return ({transcription: "Next step: transcription", correction: "Next step: correction", review: "Next step: manual review", "original-export": "Next step: export verified transcript", translation: "Next step: translation", "semantic-review": "Next step: translation review", "translated-export": "Next step: export verified translation", finished: "Completed"})[stage]; }
 function advanceQueueJob(job) {
   guiActiveResult = job.result_path || "";
   const resultPath = job.result_path;
@@ -146,19 +146,7 @@ function advanceQueueJob(job) {
     guiScrollTo(document.querySelector("#translation-heading"), {behavior: "smooth", block: "start"});
     return;
   }
-  const candidatePath = job.workflow?.assisted_translation?.candidate_path;
-  if (!candidatePath) {
-    document.querySelector("#translation-review-status").textContent = "GUI_TRANSLATION_CANDIDATE_NOT_FOUND: Cannot reopen semantic review because its non-final candidate is unavailable.";
-    guiScrollTo(document.querySelector("#translation-review-heading"), {behavior: "smooth", block: "start"});
-    return;
-  }
-  void openEnhancedTranslationReview({
-    result_path: resultPath,
-    revision_path: job.workflow?.review?.path || "",
-    candidate_path: candidatePath,
-    output_root: outputRoot,
-    target_language: job.language === "pl" ? "en" : "pl",
-  });
+  void openStageQueueItem(job,"semantic-review");
 }
 function queueJobStatusLabel(job) {
   if (job.status === "completed") return queueJobFinished(job) ? "Workflow completed" : "ASR completed";
@@ -331,6 +319,8 @@ function updateGuiQueueStart() {
 }
 document.querySelector("#start-queue").addEventListener("click", async () => {
   if (guiQueueStarting) return;
+  const consent=document.querySelector("#cloud-asr-confirmed");
+  if(guiQueueJobs.some(job=>job.status==="staged" && job.speech?.provider==="openrouter") && consent && !requireGuiVerification(consent,document.querySelector("#operation-status"),"Confirm audio upload and paid API usage before starting cloud ASR.","GUI_CLOUD_CONSENT_REQUIRED"))return;
   guiQueueStarting = true; updateGuiQueueStart();
   try {
     const payload = await queuePost("/api/v1/transcriptions/start", {cloud_confirmed:document.querySelector("#cloud-asr-confirmed")?.checked === true});
@@ -441,13 +431,14 @@ openRouterKeyDialog.hidden = true;
 openRouterKeyDialog.setAttribute("role", "dialog");
 openRouterKeyDialog.setAttribute("aria-modal", "true");
 openRouterKeyDialog.setAttribute("aria-labelledby", "openrouter-key-dialog-heading");
-openRouterKeyDialog.innerHTML = '<div class="credential-dialog-panel"><h3 id="openrouter-key-dialog-heading">Set an OpenRouter API key</h3><p class="notice">Treat API keys as secrets. Use a dedicated key with a low spending limit; the project\'s 20-episode testing used substantially less than a USD $2 limit.</p><p>The key is sent only to this loopback server. Session-only keys are erased when it stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.</p><label for="openrouter-api-key">API key</label><input id="openrouter-api-key" type="password" autocomplete="new-password" spellcheck="false"><div class="actions"><button type="button" class="primary" id="save-openrouter-key">Set key for this session</button><button type="button" id="cancel-openrouter-key">Cancel</button></div><p id="openrouter-key-dialog-status" role="status"></p></div>';
+openRouterKeyDialog.innerHTML = '<div class="credential-dialog-panel"><div class="credential-dialog-heading"><h3 id="openrouter-key-dialog-heading">Set an OpenRouter API key</h3><button type="button" id="close-openrouter-key-icon" aria-label="Close window">×</button></div><p class="notice">Treat API keys as secrets. Use a dedicated key with a low spending limit; the project\'s 20-episode testing used substantially less than a USD $2 limit.</p><p>The key is sent only to this loopback server. Session-only keys are erased when it stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.</p><label for="openrouter-api-key">API key</label><input id="openrouter-api-key" type="password" autocomplete="new-password" spellcheck="false"><div class="actions"><button type="button" class="primary" id="save-openrouter-key">Set key for this session</button><button type="button" id="check-openrouter-key">Check API key</button><button type="button" id="cancel-openrouter-key">Close window</button></div><p id="openrouter-key-dialog-status" role="status"></p></div>';
 document.body.append(openRouterKeyDialog);
-function closeOpenRouterKeyDialog() { document.querySelector("#openrouter-api-key").value = ""; openRouterKeyDialog.hidden = true; openRouterKeyButton.focus(); }
+let openRouterKeyReturnFocus=null;
+function closeOpenRouterKeyDialog() { document.querySelector("#openrouter-api-key").value = ""; openRouterKeyDialog.hidden = true; (openRouterKeyReturnFocus || openRouterKeyButton).focus(); }
 function updateOpenRouterKeyStatus() { openRouterKeyStatus.textContent = openRouterKeyConfigured ? "One OpenRouter key is available for ASR, correction and translation on this server. Session memory is cleared on exit; an explicitly saved OS entry remains until removed." : "No API key is configured for this active GUI server process."; }
-openRouterKeyButton.addEventListener("click", () => { document.querySelector("#openrouter-api-key").value = ""; document.querySelector("#openrouter-key-dialog-status").textContent = ""; openRouterKeyDialog.hidden = false; document.querySelector("#openrouter-api-key").focus(); });
+openRouterKeyButton.addEventListener("click", () => { openRouterKeyReturnFocus=document.activeElement; document.querySelector("#openrouter-api-key").value = ""; document.querySelector("#openrouter-key-dialog-status").textContent = ""; openRouterKeyDialog.hidden = false; document.querySelector("#openrouter-api-key").focus(); });
 document.querySelector("#cancel-openrouter-key").addEventListener("click", closeOpenRouterKeyDialog);
-document.querySelector("#save-openrouter-key").addEventListener("click", async () => { const input = document.querySelector("#openrouter-api-key"); const status = document.querySelector("#openrouter-key-dialog-status"); const key = input.value; input.value = ""; try { await queuePost("/api/v1/credentials/openrouter", {api_key: key}); input.value = ""; openRouterKeyConfigured = true; updateOpenRouterKeyStatus(); closeOpenRouterKeyDialog(); } catch (error) { input.value = ""; status.textContent = error.message; } });
+document.querySelector("#save-openrouter-key").addEventListener("click", async () => { const input = document.querySelector("#openrouter-api-key"); const status = document.querySelector("#openrouter-key-dialog-status"); const key = input.value; input.value = ""; try { await queuePost("/api/v1/credentials/openrouter", {api_key: key}); input.value = ""; openRouterKeyConfigured = true; updateOpenRouterKeyStatus(); status.textContent="OpenRouter key is active for this session. You can save it or close this window."; } catch (error) { input.value = ""; status.textContent = error.message; } });
 function setProviderCheckState(state, message) { providerCheckLight.className = `connection-light connection-${state}`; providerCheckStatus.textContent = message; }
 updateCorrectionModelChoice();
 providerCheckButton.addEventListener("click", async () => { const form = new FormData(correctionForm); const reasoning = String(form.get("reasoning_max_tokens") || ""); providerCheckButton.disabled = true; setProviderCheckState("unknown", "Checking…"); try { const payload = await queuePost("/api/v1/corrections/check", {provider: form.get("provider"), model: form.get("model"), endpoint: form.get("endpoint"), allow_remote_endpoint: form.get("allow_remote_endpoint") === "on", reasoning_max_tokens: reasoning === "" ? null : Number(reasoning)}); setProviderCheckState("ok", `API OK · ${payload.model}`); } catch (error) { setProviderCheckState("error", error.message); } finally { providerCheckButton.disabled = false; } });
@@ -614,7 +605,7 @@ document.querySelector("#preview-review").addEventListener("click", async () => 
 });
 document.querySelector("#apply-review").addEventListener("click", async () => { if (!reviewDocument) return; if (!requireGuiVerification(reviewForm.elements.namedItem("verified"), document.querySelector("#review-status"), "Confirm that you manually verified the text before saving and preparing for export.", "GUI_REVIEW_REQUEST_INVALID")) return; try { const payload = await postReview("apply", {result_path: reviewDocument.result_path, review_path: reviewDocument.review_path, revision_output_directory: reviewValue("revision_output_directory"), source_revision_path: reviewSourceRevisionPath, confirmed: reviewForm.elements.namedItem("verified").checked}); appliedRevisionPath = payload.revision_path; const apply = document.querySelector("#apply-review"); apply.disabled = true; apply.title = "This saved review has already been applied."; const exportButton = document.querySelector("#export-review"); exportButton.disabled = false; exportButton.title = "Export publication files from the applied verified revision."; unlockTranslationHandoff(); persistReview(); await rememberReviewSession(); setReviewStatus("Verified immutable revision applied", payload); showReviewSummary([["Publication", "Immutable revision written"], ["Revision", payload.revision_number], ["Revision file", shortName(payload.revision_path)], ["Warnings", payload.warnings?.length || 0]]); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "review", error); } });
 document.querySelector("#export-review").addEventListener("click", async () => { if (!reviewDocument || !appliedRevisionPath) return; const formats = [...reviewForm.querySelectorAll('input[name="format"]:checked')].map(item => item.value); try { const payload = await postReview("export", {result_path: reviewDocument.result_path, revision_path: appliedRevisionPath, export_output_directory: reviewValue("export_output_directory"), formats, ...guiExportPreferences()}); setReviewStatus("Verified exports completed", payload); await refreshExportDownloads("source"); showReviewSummary([["Revision", shortName(appliedRevisionPath)], ["Files written", payload.written?.length || 0], ["Files skipped", payload.skipped?.length || 0]]); await refreshJobs(); } catch (error) { setReviewStatus(error.message); await reportWorkflowError(reviewDocument.result_path, "original_export", error); } });
-proceedToTranslation.addEventListener("click", () => { if (!reviewDocument || !appliedRevisionPath) return; translationForm.elements.namedItem("result_path").value = reviewDocument.result_path; translationForm.elements.namedItem("source_revision_path").value = appliedRevisionPath; translationForm.elements.namedItem("output_root").value = reviewValue("project_output_directory"); translationForm.elements.namedItem("target_language").value = reviewDocument.language === "pl" ? "en" : "pl"; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from the completed review step."; guiScrollTo(document.querySelector("#translation-heading"), {behavior: "smooth", block: "start"}); });
+proceedToTranslation.addEventListener("click", () => { if (!reviewDocument || !appliedRevisionPath) return; const generate=document.querySelector("#generate-translation");delete generate.dataset.generatedFor;generate.dataset.allowRegenerationFor=reviewDocument.result_path; translationForm.elements.namedItem("result_path").value = reviewDocument.result_path; translationForm.elements.namedItem("source_revision_path").value = appliedRevisionPath; translationForm.elements.namedItem("output_root").value = reviewValue("project_output_directory"); translationForm.elements.namedItem("target_language").value = reviewDocument.language === "pl" ? "en" : "pl"; document.querySelector("#translation-status").textContent = "Verified transcript source loaded from the completed review step."; guiScrollTo(document.querySelector("#translation-heading"), {behavior: "smooth", block: "start"}); });
 function parentPath(path) { const normalized = path.replace(/[\\/]+$/, ""); const separator = normalized.includes("\\") && !normalized.includes("/") ? "\\" : "/"; return normalized.split(/[\\/]/).slice(0, -1).join(separator) || separator; }
 window.addEventListener("beforeunload", event => { if (!reviewDirty) return; event.preventDefault(); event.returnValue = ""; });
 const translationResultElement = document.querySelector("#translation-result");
@@ -1252,8 +1243,7 @@ function stageState(job, stage) {
   if (stage === "translation") return job.workflow?.assisted_translation || {state: "pending"};
   if (stage === "semantic-review") {
     const translation = job.workflow?.translation || {state: "pending"};
-    const assisted = job.workflow?.assisted_translation || {};
-    return {...translation, state: assisted.candidate_path ? "pending" : translation.state};
+    return translation;
   }
   return job.workflow?.[stage] || {state: "pending"};
 }
@@ -1285,6 +1275,13 @@ function stageQueueItemDetails(job, stage) {
     return indicator;
   });
 }
+
+for(const [form,statusId,code] of [[correctionForm,"correction-status","GUI_CORRECTION_CONFIRMATION_REQUIRED"],[translationForm,"translation-status","GUI_TRANSLATION_CONFIRMATION_REQUIRED"]]) {
+  form.addEventListener("submit",event=>{
+    if(!requireGuiVerification(form.elements.namedItem("confirmed"),document.getElementById(statusId),"Confirm the API disclosure and manual review requirements before generating a candidate.",code)) {event.preventDefault();event.stopImmediatePropagation();}
+  },true);
+}
+
 
 correctionForm.addEventListener("submit", async event => {
   const selected = stageQueueJobs.filter(job => (
@@ -1393,7 +1390,7 @@ translationForm.addEventListener("submit", async event => {
   const reasoning = String(form.get("reasoning_max_tokens") || "");
   const completed = [];
   const failed = [];
-  submit.disabled = true;
+  submit.dataset.generationBusy="true";submit.disabled = true;
   translationCandidate = null;
   document.querySelector("#review-translation").disabled = true;
   document.querySelector("#translation-result").textContent = "";
@@ -1460,6 +1457,7 @@ translationForm.addEventListener("submit", async event => {
   translationForm.elements.namedItem("result_path").value = "";
   translationForm.elements.namedItem("source_revision_path").value = "";
   translationForm.elements.namedItem("output_root").value = "";
+  delete submit.dataset.generationBusy;refreshGuiTranslationDirection();
 }, true);
 
 async function openStageQueueItem(job, stage) {
@@ -1488,6 +1486,7 @@ async function openStageQueueItem(job, stage) {
     return;
   }
   if (stage === "translation") {
+    const generate=document.querySelector("#generate-translation");delete generate.dataset.generatedFor;generate.dataset.allowRegenerationFor=resultPath;
     translationCandidate = null;
     translationForm.elements.namedItem("result_path").value = resultPath;
     translationForm.elements.namedItem("source_revision_path").value = job.workflow?.review?.path || "";
@@ -1607,6 +1606,7 @@ refreshJobs = async function() {
   renderStageQueues(payload?.jobs || []);
   return payload;
 };
+document.addEventListener("ewp-jobs",()=>{if(typeof refreshGuiTranslationDirection==="function")refreshGuiTranslationDirection();});
 function installFeedbackSlots() {
   const selectors = [
     "#restore-review", "#save-review", "#preview-review",
@@ -1691,12 +1691,14 @@ document.querySelector("#workdir-delete").addEventListener("click", async () => 
 function createExportDownloads(kind, buttonId) {
   const details = document.createElement("details"); details.id = `${kind}-export-downloads`;
   const summary = document.createElement("summary"); summary.textContent = "Existing export downloads";
-  const hint = document.createElement("p"); hint.className = "field-hint"; hint.textContent = "Download the exact published file. Refreshing checks existing artifacts and does not run transcription or create exports.";
+  const hint = document.createElement("p"); hint.className = "field-hint"; hint.textContent = "Download a file. Exports are also saved in the selected destination folder.";
+  const refreshHint=document.createElement("p");refreshHint.className="field-hint";refreshHint.textContent="Refreshing checks whether exports already exist in the selected directory.";
+  const locationHint=document.createElement("p");locationHint.className="field-hint";locationHint.textContent="Translations are saved in the translation-exports folder.";
   const button = document.createElement("button"); button.type = "button"; button.textContent = "Refresh existing exports";
   button.id = `${kind}-refresh-downloads`; button.addEventListener("click", () => refreshExportDownloads(kind));
   const status = document.createElement("p"); status.role = "status"; status.className = "field-hint";
   const list = document.createElement("ul"); list.className = "export-download-list";
-  details.append(summary, hint, button, status, list); document.getElementById(buttonId).after(details);
+  details.append(summary, hint, refreshHint);if(kind==="translation")details.append(locationHint);details.append(button, status, list); document.getElementById(buttonId).after(details);
 }
 createExportDownloads("source", "export-review");
 createExportDownloads("translation", "export-translation-review");

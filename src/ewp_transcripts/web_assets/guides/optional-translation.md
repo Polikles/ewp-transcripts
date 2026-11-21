@@ -20,3 +20,9 @@ Choose a recording for single-item work or explicitly check recordings for batch
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
 
 The highlighted direction shows the current target choice. A change requires the inline Accept direction change action. If it conflicts with the immutable source language, choose a matching source recording before generation; the application never relabels the source audio. Queue-filled source/target details and the optional translation dictionary start collapsed.
+
+
+The dictionary file picker belongs inside its optional dictionary disclosure. Generating a candidate
+refreshes the queue immediately and disables the generation button for that source. Use Reopen
+translation explicitly to request a new attempt; generating a candidate never marks semantic
+verification complete. Missing disclosure highlights the required checkbox before any API request.

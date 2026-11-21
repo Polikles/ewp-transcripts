@@ -5,7 +5,7 @@ cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
   <label>ASR provider<select id="cloud-asr-provider"><option value="local">Local GPU (default)</option><option value="openrouter">OpenRouter cloud ASR</option></select></label>
   <div id="cloud-asr-options" hidden>
     <label>Cloud ASR model<select id="cloud-asr-model"></select></label>
-    <div class="actions"><button type="button" id="cloud-asr-key">Manage OpenRouter key</button><button type="button" id="cloud-asr-check">Check key and OpenRouter connection</button><button type="button" id="cloud-asr-refresh">Refresh models and estimate cost</button></div>
+    <div class="actions"><button type="button" id="cloud-asr-key">Manage OpenRouter key</button><button type="button" id="cloud-asr-check">Check key and OpenRouter connection</button><button type="button" id="cloud-asr-refresh">Refresh and estimate cost</button></div>
     <p id="cloud-asr-check-status" role="status">Not checked</p>
     <p id="cloud-asr-estimate-status" role="status">Refresh models to see current hourly prices and an estimate for pending recordings.</p>
     <div id="cloud-asr-prices" class="table-scroll"></div>
@@ -18,7 +18,7 @@ for(const model of ["openai/whisper-large-v3","openai/whisper-large-v3-turbo","e
   const option=document.createElement("option"); option.value=model; option.textContent=model; cloudModel.append(option);
 }
 const cloudConsent=document.createElement("label"); cloudConsent.id="cloud-asr-consent"; cloudConsent.className="confirmation";
-cloudConsent.innerHTML=`<input type="checkbox" id="cloud-asr-confirmed"> <span>I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not saved.</span>`;
+cloudConsent.innerHTML=`<input type="checkbox" id="cloud-asr-confirmed"> <span>I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not permanently saved.</span>`;
 document.querySelector("#start-queue").before(cloudConsent);
 function updateCloudAsrControls() {
   document.querySelector("#cloud-asr-options").hidden=cloudProvider.value!=="openrouter";

@@ -18,3 +18,7 @@ For batch work, select recordings explicitly, then use the batch generation or s
 ## Next step
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+
+
+If API disclosure/manual review consent is missing, generation stops before the request and focuses
+and highlights the checkbox with an explanation. Tick it only after reading the disclosure.

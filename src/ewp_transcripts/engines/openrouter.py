@@ -223,7 +223,9 @@ class CloudSpeechSession:
 
     def transcribe(self, path: Path, language: str, *, diarize: bool) -> CloudTranscript:
         if not self._key:
-            raise SpeechEngineError("OpenRouter API key is missing; set the shared provider key")
+            raise SpeechEngineError(
+                "OpenRouter API key is missing; enter it or load a previously saved key"
+            )
         if self._rate is None:
             self._rate = maximum_rate(self.config.model, self._transport)
         if diarize and self.config.model.startswith("openai/whisper"):

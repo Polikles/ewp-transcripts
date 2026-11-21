@@ -308,3 +308,13 @@ def test_automatic_guard_refuses_excessive_workload_before_audio_upload(tmp_path
         with pytest.raises(SpeechEngineError, match="internal safety ceiling"):
             session.transcribe(path, "pl", diarize=False)
     transport.assert_not_called()
+
+
+def test_missing_shared_key_explains_enter_or_load_and_never_reads_audio_or_calls_provider(
+    tmp_path,
+):
+    transport = Mock()
+    session = CloudSpeechSession(SpeechConfig(), "", transport=transport)
+    with pytest.raises(SpeechEngineError, match="enter it or load a previously saved key"):
+        session.transcribe(tmp_path / "not-opened.wav", "pl", diarize=False)
+    transport.assert_not_called()

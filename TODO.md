@@ -3,6 +3,27 @@
 Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Active B Windows workflow polish and state feedback
+
+Baseline main 3c413ce. Owner confirms native Windows local ASR, source subtitle export and cloud
+ASR work; shared-key OS save/load actions also work. Full B acceptance is still pending.
+[Checkpoint](docs/checkpoints/2026-11-21-b-workflow-state-polish.md).
+
+- [x] Rename rail action Add files / Dodaj pliki (media and completed JSON).
+- [x] Prevent plan header/word squeezing; Polish process -> Przetwórz, speaker auto -> Automatycznie in the plan.
+- [x] Source-review controls: Apply first on the common main action row, remaining draft/history controls there; Clear current draft alone below aligned right. Mirror this in translation review.
+- [x] Rewrite source download guidance as two clear lines; translation guidance matches and names translation-exports.
+- [x] Credential dialog: explicit Close window and top-right close, plus shared-key API check; maintain session/OS-store semantics and no automatic restore/unlock.
+- [x] Shorten Refresh models and estimate cost to Refresh and estimate cost / Odśwież i oszacuj koszt.
+- [x] Missing ASR cloud consent highlights/focuses checkbox, explains failure; smaller text and Consent is not permanently saved.
+- [x] Missing key clearly requests entering or loading an already saved key after restart; remove obsolete cost-limit guidance.
+- [x] Missing optional-correction consent explains which checkbox is required, highlights/focuses it instead of generic Error.
+- [x] Diagnose/fix source-export progress for cloud results; generate translation updates queue stage/status and disables duplicate generation for that source until explicitly reopened.
+- [x] Keep translation dictionary file picker inside its optional disclosure; audit sibling native pickers after DOM reparenting.
+- [x] Review Windows audio disconnect exceptions (WinError10053) and handle expected browser disconnects without stack spam; retain genuine media/file failures.
+- [x] Meaningful regressions/browser/normal gate and integration; changed-step docs/ENPL copy/checkpoint/evidence/changelog; cleanup, commit/push and focused owner checklist. 1031 tests, 17 integrations, full/focused Chromium and actual restart/recovery pass.
+- [ ] Owner: focused native retest from the final section of Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md; then remaining full native/WSL B acceptance.
+
 ## Delivered B owner Windows/GUI fixes — native retest next
 
 Owner confirms Windows installation and GUI launch work; doctor/dependency checks all pass.
@@ -18,7 +39,7 @@ The reproduced Windows publication defect and requested UI changes are fixed; se
 - [x] Use Local GPU (default) / Lokalne GPU (domyślne); merge duplicate dry-run tables into one source/decision/warnings/language/count table.
 - [x] Update necessary EN/PL copy, tests/checklist, changelog/checkpoints/roadmap; verify and push; native owner re-test remains required.
 
-- [ ] Owner: pull/restart/refresh native GUI, retry grouped audio and MP4, then revision/translation/exports. Full B Windows/WSL acceptance remains pending; no model reinstall is needed for the storage fix.
+- [x] Owner confirms native local ASR and subtitle exports, and cloud ASR now succeed. Continue the new status/consent/layout feedback above; full Windows/WSL B acceptance remains pending.
 
 ## Later Windows installation/distribution TODO — explicitly deferred
 

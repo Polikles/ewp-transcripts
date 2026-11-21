@@ -31,11 +31,14 @@ function markWorkflowStep(stage, number, target, {rename = false} = {}) {
 function installOptionalDictionaryDetails(selector) {
   const input = document.querySelector(selector), picker = input.previousElementSibling;
   const label = document.querySelector(`label[for="${input.id}"]`);
-  const hint = input.nextElementSibling;
+  let hint = input.nextElementSibling;
+  if(hint?.matches(`[data-picker-for="${input.id}"]`))hint=hint.nextElementSibling;
   const details = document.createElement("details"); details.className = "gui-optional-dictionary";
   const summary = document.createElement("summary"); summary.textContent = label.textContent;
   label.before(details); details.append(summary, picker, label, input);
   if (hint?.classList.contains("field-hint")) details.append(hint);
+  const nativePicker=document.querySelector(`[data-picker-for="${input.id}"]`);
+  if(nativePicker)details.append(nativePicker.closest(".feedback-anchor") || nativePicker);
 }
 
 function numberWorkflowSections() {
@@ -83,16 +86,22 @@ function numberWorkflowSections() {
   }
   translationForm.prepend(translationInputs);
   refreshGuiTranslationDirection();
-  const clearTranslation = document.querySelector("#clear-translation-review");
-  const clearLine = document.createElement("div"); clearLine.className = "translation-clear-line";
-  const clearHost = clearTranslation.closest(".feedback-anchor") || clearTranslation;
-  document.querySelector("#save-translation-review").closest(".actions").after(clearLine);
-  clearLine.append(clearHost);
+  document.querySelector("#save-translation-review").textContent="Save draft";
+  document.querySelector("#clear-translation-review").textContent="Clear current draft";
+  const translationActions=document.querySelector("#save-translation-review").closest(".actions");
+  const translationControls=document.createElement("div");translationControls.className="review-control-group translation-review-controls";
+  const mainLine=document.createElement("div");mainLine.className="review-control-line";
+  const clearLine=document.createElement("div");clearLine.className="review-control-line review-clear-line translation-clear-line";
+  for(const id of ["preview-translation-review","undo-translation-review","redo-translation-review","save-translation-review","restore-translation-review","clear-translation-review"]) {
+    const host=document.createElement("span");host.className="feedback-anchor";host.append(document.getElementById(id));
+    (id==="clear-translation-review" ? clearLine : mainLine).append(host);
+  }
+  translationControls.append(mainLine,clearLine);translationActions.before(translationControls);translationActions.remove();
   document.querySelector("#apply-translation-review").title = "Preview the saved draft, then confirm that you verified meaning and speaker attribution before applying an immutable translation.";
   document.querySelector("#export-translation-review").title = "Apply the verified translation first. Audit checks its source lineage before generating the selected subtitle formats.";
   markWorkflowStep("translation", 4, document.querySelector("#translation-status").closest(".status-panel"));
   markWorkflowStep("semantic-review", 2, document.querySelector("#translation-review-editor"));
-  markWorkflowStep("semantic-review", 3, document.querySelector("#save-translation-review").closest(".actions"));
+  markWorkflowStep("semantic-review", 3, translationControls);
   markWorkflowStep("semantic-review", 4, document.querySelector("#translation-review-confirmed").closest("label"));
   markWorkflowStep("semantic-review", 5, document.querySelector('input[name="translation-format"]').closest("fieldset").querySelector("legend"), {rename:true});
 

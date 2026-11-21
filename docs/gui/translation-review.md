@@ -20,7 +20,7 @@ Save and prepare for export publishes an immutable manual child. Apply translati
 
 Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
 
-Queue legends sit below the queue. Clear current translation review is a secondary action below Apply translation and affects the current browser view; saved files remain available. Hover over Apply and Audit/export for their verification and lineage requirements.
+Queue legends sit below the queue. Clear current draft is a secondary action below Apply translation and affects the current browser view; saved files remain available. Hover over Apply and Audit/export for their verification and lineage requirements.
 
 After saving a verified translation, you can visit other stages and return to export without regenerating an API candidate. Export uses the active saved review identity and its own output root.
 
@@ -31,3 +31,20 @@ its provenance JSON. Refresh checks their exact bytes and source/revision/transl
 does not regenerate a candidate, run ASR or write an export. Click the exact filename to download.
 After restarting, load saved work and refresh to obtain new session download links. A missing or
 changed artifact cannot be downloaded. The original publication/version stays unchanged.
+
+
+## Review actions and saved exports (Windows feedback follow-up)
+
+The common main action row starts with Apply (Apply translation in translation review), followed
+by Undo, Redo, Save draft and Restore saved draft. Clear current draft is alone below, aligned
+with the rightmost main action. On desktop/half-screen widths, long labels wrap within buttons
+instead of moving an action to a new row; phone widths can reflow. Clear affects the current
+browser view; saved drafts and published files remain on disk.
+
+Download a file. Exports are also saved in the selected destination folder.
+Refreshing checks whether exports already exist in the selected directory.
+
+Translations are saved in the translation-exports folder. Download links populate after exporting.
+A generated API candidate completes assisted translation; semantic review remains pending until
+you explicitly verify and save a manual translation. Its existing candidate does not undo that
+manual completion.

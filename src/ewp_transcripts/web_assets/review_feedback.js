@@ -54,22 +54,20 @@ function installReviewFeedback() {
       details.querySelector("summary").focus({preventScroll:true});
     }
   });
-  for (const input of [reviewForm.elements.namedItem("verified"), document.querySelector("#translation-review-confirmed")]) {
-    input.addEventListener("change", () => {
-      if (!input.checked || input.dataset.guiConfirmationMissing !== "true") return;
-      input.dataset.guiConfirmationMissing = "false";
-      input.setAttribute("aria-invalid", "false");
-      const row = input.closest("label"); row.classList.remove("field-error");
-      const feedback = row.nextElementSibling;
-      if (feedback?.classList.contains("gui-verification-feedback")) {
-        feedback.hidden = true; feedback.textContent = "";
-        const status = document.getElementById(feedback.id.replace("-verification-feedback", ""));
-        if (status) status.textContent = "Manual verification confirmed. Save and prepare for export when ready.";
-        const described = (input.getAttribute("aria-describedby") || "").split(/\s+/).filter(id=>id && id !== feedback.id);
-        if (described.length) input.setAttribute("aria-describedby", described.join(" "));
-        else input.removeAttribute("aria-describedby");
-      }
-    });
-  }
+  document.addEventListener("change",event=>{
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement) || input.type!=="checkbox" || !input.checked || input.dataset.guiConfirmationMissing!=="true")return;
+    input.dataset.guiConfirmationMissing="false";input.setAttribute("aria-invalid","false");
+    const label=input.closest("label");label.classList.remove("field-error");
+    const feedback=label.nextElementSibling;
+    if(feedback?.classList.contains("gui-verification-feedback")) {
+      feedback.hidden=true;feedback.textContent="";
+      const status=document.getElementById(feedback.id.replace("-verification-feedback",""));
+      if(status)status.textContent=input===reviewForm.elements.namedItem("verified") || input.id==="translation-review-confirmed"
+        ? "Manual verification confirmed. Save and prepare for export when ready." : "Consent confirmed. Continue with the selected action.";
+      const described=(input.getAttribute("aria-describedby") || "").split(/\s+/).filter(id=>id && id!==feedback.id);
+      if(described.length)input.setAttribute("aria-describedby",described.join(" "));else input.removeAttribute("aria-describedby");
+    }
+  });
 }
 installReviewFeedback();

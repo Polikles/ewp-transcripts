@@ -77,3 +77,11 @@ Include dictionaries in profile is checked by default. Clear it for a smaller re
 profile; dictionary paths remain references and the exact editions must be transferred separately
 using dictionary import/export. Profiles include named locations/recent project references.
 Importing a profile does not create missing media directories or automatically start processing.
+
+
+The key dialog has Close window, a top-right × and Escape. Closing clears unsubmitted input and
+keeps any explicitly activated session/saved OS key. Set key for this session now keeps the dialog
+open so Check API key, Save and Use can follow before closing. Check API key verifies a typed key
+without activating/saving it, or checks the current shared session/environment key when the input
+is empty. Input is cleared immediately; the check uploads no audio/text and never accesses the OS
+store implicitly. After restarting, enter a key or explicitly load a previously saved key.
