@@ -48,6 +48,7 @@ def measure_file_channels(
     executable: str = "ffmpeg",
     sample_rate_hz: int = ANALYSIS_SAMPLE_RATE_HZ,
     window_ms: int = 500,
+    stream_index: int | None = None,
 ) -> ChannelMetrics:
     """Decode and measure one stream incrementally without writing temporary audio."""
 
@@ -58,7 +59,7 @@ def measure_file_channels(
         "-i",
         str(path.absolute()),
         "-map",
-        "0:a:0",
+        "0:a:0" if stream_index is None else f"0:{stream_index}",
         "-ac",
         "2",
         "-ar",

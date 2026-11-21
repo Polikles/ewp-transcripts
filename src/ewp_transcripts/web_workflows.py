@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ewp_transcripts.application import dry_run, inspect_input
 from ewp_transcripts.config import load_config
@@ -20,6 +20,7 @@ from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.input_options import recording_identity, stream_choices
 
 _LINUX_PROHIBITED_ROOTS = (
     Path("/bin"),
@@ -98,6 +99,8 @@ class GuiOperation(BaseModel):
     input_path: str
     group_paths: tuple[str, ...] = ()
     group_id: str | None = None
+    recording_id: str | None = None
+    selected_streams: dict[str, int] = Field(default_factory=dict)
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -196,6 +199,11 @@ class GuiWorkflowController:
                     str(path) for path in group_options.get("explicit_group_paths", ())
                 ),
                 group_id=group_options.get("explicit_group_id"),
+                recording_id=group_options.get("recording_id"),
+                selected_streams={
+                    str(path): index
+                    for path, index in group_options.get("selected_streams", {}).items()
+                },
                 language=language,
                 speaker_count=speaker_count,
                 created_at=datetime.now(UTC),
@@ -244,6 +252,8 @@ class GuiWorkflowController:
         speaker_count: Literal["auto"] | int = "auto",
         group_paths: tuple[str, ...] = (),
         group_id: str | None = None,
+        recording_id: str | None = None,
+        selected_streams: dict[str, int] | None = None,
     ) -> dict[str, Any] | None:
         """Return the newest exact dry-run produced by this server session."""
 
@@ -256,6 +266,8 @@ class GuiWorkflowController:
                 and operation.input_path == str(input_path)
                 and operation.group_paths == group_paths
                 and operation.group_id == group_id
+                and operation.recording_id == recording_id
+                and operation.selected_streams == (selected_streams or {})
                 and operation.language == language
                 and operation.speaker_count == speaker_count
                 and operation.result is not None
@@ -273,6 +285,8 @@ class GuiWorkflowController:
         speaker_count: Literal["auto"] | int = "auto",
         group_paths: tuple[str, ...] = (),
         group_id: str | None = None,
+        recording_id: str | None = None,
+        selected_streams: dict[str, int] | None = None,
     ) -> bool:
         """Confirm this server session produced the exact dry-run being authorized."""
 
@@ -284,15 +298,34 @@ class GuiWorkflowController:
                 speaker_count=speaker_count,
                 group_paths=group_paths,
                 group_id=group_id,
+                recording_id=recording_id,
+                selected_streams=selected_streams,
             )
             is not None
         )
 
     def resolve_group_options(self, document: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(document.get("group_paths", []), list):
+            raise ValueError("Group paths must be a list")
+        extras: dict[str, Any] = {}
+        identity = recording_identity(document.get("recording_id"))
+        if identity:
+            extras["recording_id"] = identity
+        choices = stream_choices(document.get("selected_streams", {}))
+        known = [str(self.resolve_allowed_path(str(document.get("path", ""))))]
+        known.extend(
+            str(self.resolve_allowed_path(str(path))) for path in document.get("group_paths", [])
+        )
+        normalized = {
+            str(self.resolve_allowed_path(path)): index for path, index in choices.items()
+        }
+        stream_choices(normalized, known)
+        if normalized:
+            extras["selected_streams"] = {Path(path): index for path, index in normalized.items()}
         raw_paths = document.get("group_paths", [])
         group_id = document.get("group_id")
         if not raw_paths and group_id is None:
-            return {}
+            return extras
         if (
             not isinstance(raw_paths, list)
             or not 2 <= len(raw_paths) <= 6
@@ -304,7 +337,11 @@ class GuiWorkflowController:
         paths = tuple(self.resolve_allowed_path(path) for path in raw_paths)
         if len(set(paths)) != len(paths) or any(not path.is_file() for path in paths):
             raise ValueError("Group sources must be distinct regular files")
-        return {"explicit_group_paths": paths, "explicit_group_id": group_id}
+        return {
+            **extras,
+            "explicit_group_paths": paths,
+            "explicit_group_id": recording_identity(group_id),
+        }
 
     @staticmethod
     def resolve_transcription_options(

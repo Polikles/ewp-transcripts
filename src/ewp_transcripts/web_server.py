@@ -33,11 +33,13 @@ from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.gui_library import GuiLibrary
+from ewp_transcripts.native_picker import select_native_file
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_downloads import GuiExportDownloads
 from ewp_transcripts.web_guides import render_guide
+from ewp_transcripts.web_inputs import GuiInputs
 from ewp_transcripts.web_jobs import (
     GuiTranscriptionJob,
     GuiTranscriptionQueue,
@@ -154,7 +156,8 @@ def _select_local_directory() -> str | None:
     attempts: list[tuple[list[str], str | None]] = []
     if (_is_wsl_environment() or sys.platform == "win32") and shutil.which("powershell.exe"):
         script = (
-            "try { Add-Type -TypeDefinition 'using System.Runtime.InteropServices; "
+            "try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); "
+            "Add-Type -TypeDefinition 'using System.Runtime.InteropServices; "
             'public class EwpDpi { [DllImport("user32.dll")] '
             "public static extern bool SetProcessDPIAware(); }'; "
             "[void][EwpDpi]::SetProcessDPIAware(); "
@@ -202,6 +205,7 @@ def _select_local_directory() -> str | None:
                 check=False,
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
                 timeout=600,
             )
         except (OSError, subprocess.TimeoutExpired) as error:
@@ -392,6 +396,8 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("workspace_restore.js").read_bytes()
         body += b"\n" + assets.joinpath("credential_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("project_controls.js").read_bytes()
+        body += b"\n" + assets.joinpath("media_choices.js").read_bytes()
+        body += b"\n" + assets.joinpath("native_picker_controls.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -423,6 +429,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         local_provider_lock = threading.Lock()
         self.gui_config = config
         self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
+        self.gui_inputs = GuiInputs(self.gui_workflows.resolve_allowed_path)
         self.gui_selections = GuiSelectionCache()
         self.gui_workspaces = GuiWorkspaceController(
             state_directory=default_workspace_directory(),
@@ -969,11 +976,74 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                 )
             return
+        if path in {"/api/v1/media/probe", "/api/v1/media/discover"}:
+            if not secrets.compare_digest(
+                self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {"error": {"code": "GUI_CSRF_REJECTED", "message": "Invalid session."}},
+                    )
+                )
+                return
+            try:
+                media_method = (
+                    self.server.gui_inputs.probe
+                    if path.endswith("/probe")
+                    else self.server.gui_inputs.discover
+                )
+                media_payload = media_method(str(document.get("path", "")))
+                self._write_response(_json_response(HTTPStatus.OK, media_payload))
+            except (ValueError, OSError, ApplicationError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_MEDIA_SELECTION_INVALID", "message": str(error)}},
+                    )
+                )
+            return
         if path.startswith("/api/v1/projects/"):
             self._handle_projects_request(path, document)
             return
         if path.startswith("/api/v1/profile/"):
             self._handle_profile_request(path, document)
+            return
+        if path == "/api/v1/select-path":
+            if not secrets.compare_digest(
+                self.headers.get("X-EWP-CSRF", ""), self.server.gui_csrf_token
+            ):
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.FORBIDDEN,
+                        {"error": {"code": "GUI_CSRF_REJECTED", "message": "Invalid session."}},
+                    )
+                )
+                return
+            try:
+                kind = document.get("kind")
+                if kind not in {"file", "directory"}:
+                    raise ValueError("Choose file or directory selection")
+                native_selected = (
+                    _select_local_directory() if kind == "directory" else select_native_file()
+                )
+                native_selected_path = (
+                    str(
+                        self.server.gui_workflows.resolve_allowed_path(
+                            native_selected, directory=kind == "directory"
+                        )
+                    )
+                    if native_selected
+                    else None
+                )
+                self._write_response(_json_response(HTTPStatus.OK, {"path": native_selected_path}))
+            except (ValueError, OSError) as error:
+                self._write_response(
+                    _json_response(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": {"code": "GUI_NATIVE_PICKER_UNAVAILABLE", "message": str(error)}},
+                    )
+                )
             return
         if path == "/api/v1/select-output-directory":
             supplied = self.headers.get("X-EWP-CSRF", "")
@@ -1178,6 +1248,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                                 "source_sha256": job.source_sha256,
                                 "language": job.language.value,
                                 "speaker_count": job.speaker_count,
+                                **({"recording_id": job.recording_id} if job.recording_id else {}),
+                                **(
+                                    {"selected_streams": job.selected_streams}
+                                    if job.selected_streams
+                                    else {}
+                                ),
                                 **(
                                     {"group_sources": job.group_sources}
                                     if job.group_sources
@@ -2336,6 +2412,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     raise ValueError("The first transcription slice accepts one file")
                 group_options = self.server.gui_workflows.resolve_group_options(document)
                 group_paths = group_options.get("explicit_group_paths", ())
+                selected_streams = {
+                    str(path): index
+                    for path, index in group_options.get("selected_streams", {}).items()
+                }
                 language, speaker_count = self.server.gui_workflows.resolve_transcription_options(
                     document
                 )
@@ -2375,6 +2455,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     speaker_count=speaker_count,
                     group_paths=tuple(str(path) for path in group_paths),
                     group_id=group_options.get("explicit_group_id"),
+                    recording_id=group_options.get("recording_id"),
+                    selected_streams=selected_streams,
                 )
                 if plan is None:
                     self._write_response(
@@ -2472,6 +2554,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     return
                 group_sources: dict[str, str] = {}
+                durable_streams: dict[str, int] = {}
                 if group_paths:
                     if group_options["explicit_group_id"] != planned_job_id:
                         raise ValueError("The group identity differs from the reviewed plan")
@@ -2483,6 +2566,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     if len(sources) != len(group_paths):
                         raise ValueError("The group differs from the reviewed plan")
                     for source_path in group_paths:
+                        original_path = str(source_path)
                         digest = sha256_file(source_path)
                         if digest != reviewed.get(str(source_path)):
                             raise ValueError("A grouped source changed after dry-run")
@@ -2497,8 +2581,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         if self.server.gui_transcriptions.contains_active_input(source_path):
                             raise ValueError("A grouped source is already staged or running")
                         group_sources[str(source_path)] = digest
+                        if original_path in selected_streams:
+                            durable_streams[str(source_path)] = selected_streams[original_path]
                     input_path = Path(next(iter(group_sources)))
                     source_sha256 = group_sources[str(input_path)]
+                original_input = str(input_path)
                 if not group_paths and self.server.gui_selections.root in input_path.parents:
                     input_path, preserved_sha256 = preserve_gui_selected_source(
                         input_path, output_directory=output_path, category="media"
@@ -2515,6 +2602,14 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     planned_result_path=planned_result_path,
                     source_sha256=source_sha256,
                     group_sources=group_sources,
+                    recording_id=group_options.get("recording_id"),
+                    selected_streams=(
+                        durable_streams
+                        if group_paths
+                        else {str(input_path): selected_streams[original_input]}
+                        if original_input in selected_streams
+                        else {}
+                    ),
                     language=language,
                     speaker_count=speaker_count,
                 )
@@ -2724,12 +2819,20 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 item["planned_job_id"],
                 item["source_sha256"],
                 tuple(sorted(item.get("group_sources", {}).items())),
+                tuple(sorted(item.get("selected_streams", {}).items())),
+                item.get("recording_id"),
             )
             for item in staged_jobs
         }
         if active:
             actual = {
-                (job.planned_job_id, job.source_sha256, tuple(sorted(job.group_sources.items())))
+                (
+                    job.planned_job_id,
+                    job.source_sha256,
+                    tuple(sorted(job.group_sources.items())),
+                    tuple(sorted(job.selected_streams.items())),
+                    job.recording_id,
+                )
                 for job in active
             }
             if actual == expected:
@@ -2764,6 +2867,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     **(
                         {"group_paths": list(group_sources), "group_id": item["planned_job_id"]}
                         if group_sources
+                        else (
+                            {"recording_id": item["recording_id"]}
+                            if item.get("recording_id")
+                            else {}
+                        )
+                    ),
+                    **(
+                        {"selected_streams": item["selected_streams"]}
+                        if item.get("selected_streams")
                         else {}
                     ),
                 },
@@ -2787,6 +2899,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 planned_result_path=str(item["planned_result_path"]),
                 source_sha256=str(item["source_sha256"]),
                 group_sources=group_sources,
+                selected_streams=item.get("selected_streams", {}),
+                recording_id=item.get("recording_id"),
                 language=language,
                 speaker_count=speaker_count,
             )

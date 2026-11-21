@@ -5,7 +5,7 @@ from __future__ import annotations
 import platform
 import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -1579,6 +1579,8 @@ def inspect_input(
     allow_duration_mismatch: bool = False,
     explicit_group_paths: tuple[Path, ...] | None = None,
     explicit_group_id: str | None = None,
+    selected_streams: Mapping[Path, int] | None = None,
+    recording_id: str | None = None,
 ) -> InspectionResult:
     """Discover, group, probe, and classify input without loading ML models."""
 
@@ -1604,10 +1606,30 @@ def inspect_input(
             separator=effective_config.grouping.speaker_suffix_separator,
             speaker_count=effective_config.diarization.speaker_count,
         )
+    if recording_id is not None:
+        from ewp_transcripts.input_options import recording_identity
+
+        identity = recording_identity(recording_id)
+        if len(episodes) != 1 or identity is None:
+            raise UnsupportedPipelineScopeError("Recording ID requires exactly one episode")
+        episodes = (episodes[0].model_copy(update={"job_id": identity}),)
+    stream_selection = dict(selected_streams or {})
+    if stream_selection:
+        from ewp_transcripts.input_options import stream_choices
+
+        stream_choices(
+            {str(path): index for path, index in stream_selection.items()},
+            (str(file.path) for file in discovery.files),
+        )
     inspections = tuple(
         inspect_episode(
             episode,
-            channel_analyzer=measure_file_channels,
+            selected_streams=selected_streams,
+            channel_analyzer=(
+                lambda path: measure_file_channels(path, stream_index=stream_selection.get(path))
+            )
+            if selected_streams
+            else measure_file_channels,
             channels_config=effective_config.channels,
             quality_config=effective_config.quality,
             duration_warning_ms=effective_config.grouping.duration_warning_ms,
@@ -1628,6 +1650,8 @@ def dry_run(
     allow_duration_mismatch: bool = False,
     explicit_group_paths: tuple[Path, ...] | None = None,
     explicit_group_id: str | None = None,
+    selected_streams: Mapping[Path, int] | None = None,
+    recording_id: str | None = None,
 ) -> DryRunResult:
     """Build a complete batch execution plan without creating outputs or workdirs."""
 
@@ -1638,6 +1662,8 @@ def dry_run(
         allow_duration_mismatch=allow_duration_mismatch,
         explicit_group_paths=explicit_group_paths,
         explicit_group_id=explicit_group_id,
+        selected_streams=selected_streams,
+        recording_id=recording_id,
     )
     _require_unique_job_ids(inspection)
     destination = resolve_output_directory(
@@ -1694,6 +1720,8 @@ def transcribe_one(
     speaker_map: dict[str, str] | None = None,
     explicit_group_paths: tuple[Path, ...] | None = None,
     explicit_group_id: str | None = None,
+    selected_streams: Mapping[Path, int] | None = None,
+    recording_id: str | None = None,
     progress: ProgressObserver | None = None,
     cancellation: CancellationToken | None = None,
 ) -> TranscriptionOutcome:
@@ -1707,6 +1735,8 @@ def transcribe_one(
         allow_duration_mismatch=allow_duration_mismatch,
         explicit_group_paths=explicit_group_paths,
         explicit_group_id=explicit_group_id,
+        selected_streams=selected_streams,
+        recording_id=recording_id,
     )
     inspected = apply_explicit_speaker_labels(
         inspected,

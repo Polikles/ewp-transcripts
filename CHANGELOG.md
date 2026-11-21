@@ -6,6 +6,12 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Added
 
+- Package B8 explicit per-source audio-stream selection carried through planning, durable staging,
+  retry and saved-work recovery, including channel analysis of the chosen stream. Optional recording
+  IDs distinguish same-name episodes while preserving original source filenames and fingerprints.
+- Content-based GUI media-folder discovery (bounded, non-recursive) and native file/directory
+  picker handoffs for remaining path fields, with direct-entry fallback and UTF-8 Windows paths.
+
 - Package B7 recent project/review references, named input/output locations and bounded canonical
   directory scanning with explicit queue selection. Discovery does not start ASR; changed results
   must be scanned again before adding durable canonical copies. Removing references preserves files.

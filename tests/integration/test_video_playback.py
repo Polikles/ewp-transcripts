@@ -148,6 +148,7 @@ def test_video_through_discovery_plan_pipeline_and_private_playback(
     base = load_canonical_result(outcome.result_path)
     assert base.sources[0].media_type == "video"
     assert base.sources[0].normalized_path == str(source)
+
     assert base.sources[0].sha256 == digest
     assert base.sources[0].stream_index == 1
     paths = GuiWorkflowController()
@@ -162,6 +163,40 @@ def test_video_through_discovery_plan_pipeline_and_private_playback(
     assert sha256_file(source) == digest
     assert not list(output.rglob("*.wav"))
     assert json.loads(outcome.result_path.read_text())["status"] == "completed"
+
+
+def test_explicit_second_audio_stream_and_recording_id_flow_to_canonical(tmp_path: Path) -> None:
+    source = tmp_path / "presentation.mp4"
+    video(source, tracks=2)
+    before = sha256_file(source)
+    config = ApplicationConfig(
+        diarization=DiarizationConfig(speaker_count=1),
+        runtime=RuntimeConfig(work_root=tmp_path / "work"),
+    )
+    with pytest.raises(MultipleAudioStreamsError):
+        inspect_input(source, config=config)
+    selected = {source: 2}
+    plan = dry_run(
+        source,
+        config=config,
+        selected_streams=selected,
+        recording_id="presentation-EN",
+        output_directory=tmp_path / "output",
+    )
+    assert plan.jobs[0].job_id == "presentation-EN"
+    assert plan.inspection.episodes[0].sources[0].stream.index == 2
+    outcome = transcribe_one(
+        source,
+        config=config,
+        selected_streams=selected,
+        recording_id="presentation-EN",
+        output_directory=tmp_path / "output",
+        asr_factory=lambda _: Asr(),
+        alignment_factory=lambda _: Alignment(),
+    )
+    base = load_canonical_result(outcome.result_path)
+    assert base.job_id == "presentation-EN" and base.sources[0].stream_index == 2
+    assert sha256_file(source) == before
 
 
 @pytest.mark.parametrize(

@@ -15,6 +15,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, Field
 
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.input_options import recording_identity, stream_choices
 from ewp_transcripts.storage import is_preserved_gui_result
 from ewp_transcripts.web_jobs import GuiTranscriptionJob
 
@@ -360,9 +361,10 @@ class GuiWorkspaceController:
         }
         clean: builtin_list[dict[str, Any]] = []
         for item in staged_jobs:
-            if not isinstance(item, dict) or set(item) not in (
-                required,
-                required | {"group_sources"},
+            if (
+                not isinstance(item, dict)
+                or not required.issubset(item)
+                or set(item) - required - {"group_sources", "selected_streams", "recording_id"}
             ):
                 raise ValueError("Workspace staged job is invalid")
             speaker_count = item["speaker_count"]
@@ -375,8 +377,16 @@ class GuiWorkspaceController:
             if item["language"] not in {"pl", "en", "auto"} or len(item["source_sha256"]) != 64:
                 raise ValueError("Workspace staged job is invalid")
             try:
+                recording_identity(item.get("recording_id"))
                 self._resolve_path(item["input_path"])
                 group_sources = item.get("group_sources", {})
+                selected_streams = stream_choices(
+                    item.get("selected_streams", {}),
+                    [
+                        item["input_path"],
+                        *(group_sources if isinstance(group_sources, dict) else {}),
+                    ],
+                )
                 if not isinstance(group_sources, dict) or (
                     group_sources and not 2 <= len(group_sources) <= 6
                 ):
@@ -400,6 +410,8 @@ class GuiWorkspaceController:
                 {
                     **{key: item[key] for key in required},
                     **({"group_sources": group_sources} if group_sources else {}),
+                    **({"selected_streams": selected_streams} if selected_streams else {}),
+                    **({"recording_id": item["recording_id"]} if item.get("recording_id") else {}),
                 }
             )
         return tuple(clean)

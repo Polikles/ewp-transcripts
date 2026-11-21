@@ -13,7 +13,7 @@ from queue import Queue
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ewp_transcripts.application import transcribe_one
 from ewp_transcripts.cancellation import CancellationToken, TranscriptionCancelled
@@ -21,6 +21,7 @@ from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
 from ewp_transcripts.domain.revision import sha256_file
+from ewp_transcripts.input_options import stream_choices
 from ewp_transcripts.progress import ProgressHistory, RuntimeProgress, runtime_profile
 
 WorkflowStageName = Literal[
@@ -64,6 +65,8 @@ class GuiTranscriptionJob(BaseModel):
     planned_result_path: str
     source_sha256: str = ""
     group_sources: dict[str, str] = Field(default_factory=dict)
+    selected_streams: dict[str, int] = Field(default_factory=dict)
+    recording_id: str | None = None
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -73,6 +76,11 @@ class GuiTranscriptionJob(BaseModel):
     workflow_errors: dict[WorkflowStageName, str] = Field(default_factory=dict)
     workflow_skips: set[WorkflowStageName] = Field(default_factory=set)
     runtime_progress: GuiRuntimeProgress | None = None
+
+    @field_validator("selected_streams", mode="before")
+    @classmethod
+    def valid_stream_choices(cls, value: object) -> dict[str, int]:
+        return stream_choices(value)
 
 
 class GuiWorkflowStage(BaseModel):
@@ -139,6 +147,8 @@ class GuiTranscriptionQueue:
         planned_result_path: str,
         source_sha256: str = "",
         group_sources: dict[str, str] | None = None,
+        selected_streams: dict[str, int] | None = None,
+        recording_id: str | None = None,
         language: LanguageMode = LanguageMode.POLISH,
         speaker_count: Literal["auto"] | int = "auto",
     ) -> GuiTranscriptionJob:
@@ -152,6 +162,8 @@ class GuiTranscriptionQueue:
             planned_result_path=planned_result_path,
             source_sha256=source_sha256,
             group_sources=group_sources or {},
+            selected_streams=selected_streams or {},
+            recording_id=recording_id,
             language=language,
             speaker_count=speaker_count,
             created_at=now,
@@ -544,7 +556,7 @@ class GuiTranscriptionQueue:
                         ),
                     }
                 )
-                group_options = (
+                group_options: dict[str, Any] = (
                     {
                         "explicit_group_paths": tuple(Path(path) for path in job.group_sources),
                         "explicit_group_id": job.planned_job_id,
@@ -552,6 +564,12 @@ class GuiTranscriptionQueue:
                     if job.group_sources
                     else {}
                 )
+                if job.recording_id:
+                    group_options["recording_id"] = job.recording_id
+                if job.selected_streams:
+                    group_options["selected_streams"] = {
+                        Path(path): index for path, index in job.selected_streams.items()
+                    }
                 tracker = RuntimeProgress(
                     self._history,
                     runtime_profile(

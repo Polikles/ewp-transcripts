@@ -76,3 +76,21 @@ The JSON is the source of truth; the other two outputs are derived and may be di
 These are raw ASR results, not a manually verified publication. Review the transcript and export
 from the accepted revision for publication. A `*_results.failed.json` records failure/cancellation
 state and is not a completed canonical result.
+
+## Audio streams and recording identities
+
+Audio streams and recording ID applies to the selected episode. Read audio streams displays each
+source's stream index/language/title. A multi-stream source requires an explicit choice; channel
+analysis and ASR use that same selected stream. Changing the choice invalidates the processing
+plan. Queue retry and saved-work recovery retain it. A single audio stream needs no manual choice.
+
+Recording ID is optional. For separate inputs with the same basename, select each episode and
+assign a distinct ID before planning; IDs are visible in the input list and output plan. Source
+filenames/bytes remain unchanged. Multi-file episode grouping is retained; an ID names the whole
+group. Duplicate planned IDs are rejected rather than overwriting another episode.
+
+Choose directory fills the server input path. Add media from this directory then scans its first
+500 entries by decodable content, including unusual extensions. It is non-recursive and never
+starts ASR. Review the resulting list, language/count and any stream choices, then plan/add/start.
+Native file/directory buttons are also available for result, dictionary and workspace paths.
+Without a desktop picker, use direct path entry. Windows/WSL dialog output uses UTF-8.

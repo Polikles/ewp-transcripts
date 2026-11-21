@@ -11,7 +11,10 @@ return only for missing information/concrete blockers. B5 agent implementation/c
 owner Windows native/GPU execution remains B9 acceptance. B6 OS keys implemented (937 tests);
 see [credential checkpoint](docs/checkpoints/2026-11-21-b6-credentials.md). B7 projects/profiles
 implemented ([checkpoint](docs/checkpoints/2026-11-21-b7-projects.md), 942 tests/12 integrations).
-Next B8 media, B8a OpenRouter ASR, B9 verification/checklist. Disposable root /tmp/ewp-package-b.Yz9JAl.
+B8 media implemented ([checkpoint](docs/checkpoints/2026-11-21-b8-media.md), 957 tests/13 integrations).
+Next B8a OpenRouter ASR then B9 verification/checklist. Local key/PL media missing; async owner
+questions sent, continue implementation/mocks meanwhile. USD 2 budget unused.
+Disposable root /tmp/ewp-package-b.Yz9JAl.
 Previous planning-only statements are historical and superseded. Preserve the USD 2 total
 cloud-ASR test scope and the owner Windows 11 x64 execution arrangement.
 

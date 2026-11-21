@@ -11,7 +11,7 @@ A is closed; artist ZIP frozen; terminology approval/manual rewrite stay after B
 - [x] B5 agent implementation/checks: see [Windows checkpoint](2026-11-21-b5-windows.md).
 - [x] B6 optional OS credentials; see [credential checkpoint](2026-11-21-b6-credentials.md).
 - [x] B7 projects/profile implementation; see [project checkpoint](2026-11-21-b7-projects.md).
-- [ ] B8 streams/pickers/content discovery/same-name identities.
+- [x] B8 media implementation; see [media checkpoint](2026-11-21-b8-media.md).
 - [ ] B8a OpenRouter ASR and functional qualification, exact four model IDs in B plan, short
   authorized PL two-speaker / EN one-speaker material, USD 2 total including retries.
 - [ ] B9 regression/packaging/browser verification and full owner Windows/WSL checklist.
@@ -22,4 +22,5 @@ immutable artifacts, staged source checks and explicit manual publication consen
 cost/provenance with no secrets/private transcripts. Disposable pilots belong in dedicated /tmp.
 
 Active disposable package root: /tmp/ewp-package-b.Yz9JAl. Remove after package evidence capture.
-Current resume: B8 media/stream/identity conveniences. No live ASR calls/cost yet.
+Current resume: B8a OpenRouter ASR implementation. Owner asked for local key/podcast source paths;
+continue independent implementation and mocks. No live ASR calls/cost yet.

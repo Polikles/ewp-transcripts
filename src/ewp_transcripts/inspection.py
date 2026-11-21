@@ -49,7 +49,8 @@ def _select_audio_stream(
     if len(result.audio_streams) != 1:
         raise MultipleAudioStreamsError(
             f"Input has multiple audio streams and requires an explicit selection: {result.path}. "
-            "Export the intended audio track to a separate file, "
+            "Choose its stream in GUI audio options. Export the intended audio track "
+            "to a separate file, "
             "then inspect and process that file."
         )
     return result.audio_streams[0]

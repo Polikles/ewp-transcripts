@@ -5,6 +5,7 @@ function guiBatchRequests() {
   return guiAudioEpisodes().filter(episode => !episode.files.some(file => file.staged)).map(episode => {
     const request = {path:episode.paths[0], output_directory:workflowOutput.value.trim(), language:episode.files[0].language || "pl", speaker_count:episode.files[0].speaker_count ?? 2};
     if (episode.paths.length > 1) Object.assign(request, {group_paths:[...episode.paths], group_id:episode.name});
+    if (typeof decorateGuiMediaRequest === "function") decorateGuiMediaRequest(request,episode);
     return {episode, request};
   });
 }
@@ -25,6 +26,9 @@ function appendBatchSettings(entries) {
 }
 async function runGuiBatch(kind, trigger) {
   if (guiBatchBusy) return;
+  if(kind !== "transcriptions" && typeof prepareGuiMediaBatch === "function") {
+    try { await prepareGuiMediaBatch(); } catch(error) { document.querySelector("#operation-status").textContent=error.message; return; }
+  }
   const entries = guiBatchRequests(), signature = JSON.stringify(entries.map(item=>item.request));
   const status = document.querySelector("#operation-status"), technical = document.querySelector("#operation-result");
   const form = document.querySelector("#workflow");
@@ -67,6 +71,8 @@ async function runGuiBatch(kind, trigger) {
         results.push(operation.result);
       }
       if (JSON.stringify(guiBatchRequests().map(item=>item.request)) !== signature) throw new Error("GUI_BATCH_CHANGED: Selection or settings changed during planning. Inspect and plan the current list again.");
+      const identifiers=results.flatMap(item=>item.jobs || []).map(job=>job.job_id);
+      if(new Set(identifiers).size!==identifiers.length) throw new Error("GUI_RECORDING_ID_COLLISION: Choose distinct recording IDs for same-name episodes before planning again.");
       const combined = {episodes:results.flatMap(item=>item.episodes || []), discovery:{files:results.flatMap(item=>item.discovery?.files || []), skipped:results.flatMap(item=>item.discovery?.skipped || [])}, jobs:results.flatMap(item=>item.jobs || []), inspection:{episodes:results.flatMap(item=>item.inspection?.episodes || [])}};
       const languages = [...new Set(entries.map(item=>item.request.language))].join(", ");
       const speakers = [...new Set(entries.map(item=>item.request.speaker_count))].join(", ");

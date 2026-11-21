@@ -46,6 +46,38 @@ def test_inspect_calls_injected_application_service_and_records_result(tmp_path:
     assert controller.operations() == (operation,)
 
 
+def test_reviewed_plan_requires_the_same_stream_and_recording_id(tmp_path):
+    source = tmp_path / "source.mp4"
+    source.write_bytes(b"media")
+    controller = GuiWorkflowController(
+        dry_run_service=lambda path, **kwargs: StubResult(
+            selected=str(path), mode="dry-run", output_directory=str(kwargs["output_directory"])
+        )
+    )
+    body = {
+        "path": str(source),
+        "output_directory": str(tmp_path),
+        "recording_id": "one",
+        "selected_streams": {str(source): 2},
+    }
+    assert controller.run("dry-run", body).status == "completed"
+    assert controller.completed_plan(
+        source, tmp_path, recording_id="one", selected_streams={str(source): 2}
+    )
+    assert (
+        controller.completed_plan(
+            source, tmp_path, recording_id="one", selected_streams={str(source): 1}
+        )
+        is None
+    )
+    assert (
+        controller.completed_plan(
+            source, tmp_path, recording_id="other", selected_streams={str(source): 2}
+        )
+        is None
+    )
+
+
 def test_gui_paths_trim_accidental_outer_whitespace(tmp_path: Path) -> None:
     media = tmp_path / "episode.wav"
     media.write_bytes(b"audio")
