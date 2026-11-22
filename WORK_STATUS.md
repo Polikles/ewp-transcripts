@@ -4,14 +4,15 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
-Current task: [EN/PL manuals and new artist delivery](docs/checkpoints/2026-11-22-user-documentation.md).
-Owner passes checklist1–5 and closes GUI/interface approval. Complete EN review and full PL user
-manuals now prepared: fifteen chapters per language, bilingual offline help, actual CLI/options/
-install/update/repair audit and maintained language reference.1081 tests/mypy115,17 integrations,
-64 help popups, source/wheel packaging and synthetic artist preview pass; no paid/model calls.
-Next: final new artist ZIP from committed source, record hash, clean only task temporary root,
-commit delivery metadata and push. Preserve original ZIP and all accepted native behavior.
-[Manual EN](docs/gui/README.md) · [Manual PL](docs/gui/pl/README.md).
+Current delivery: [complete EN/PL manuals and new artist reference](docs/checkpoints/2026-11-22-user-documentation.md).
+Owner passed checklist1–5 and closed GUI/interface approval. EN audit/update and full PL user docs
+are delivered: fifteen chapters per language and bilingual offline help.1081 tests/mypy115,
+17 integrations,64 help popups, CLI/options/links, source/wheel/installed help and exact final artist
+archive checks pass. Source commitcca698b. New `deliveries/ewp-gui-artist-review-2026-11-22.zip`
+is outside Git, with manifest/source stamp/hash recorded in evidence. Original sent ZIP unchanged.
+Task temporary root removed and servers stopped; no new model/provider/reinstall qualification.
+[Manual EN](docs/gui/README.md) · [Manual PL](docs/gui/pl/README.md). Next: owner documentation or
+artist feedback; screenshots wait for final custom icons, uninstall/GUI installer remains later TODO.
 
 Earlier handoffs below are historical.
 

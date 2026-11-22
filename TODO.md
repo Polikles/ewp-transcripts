@@ -3,7 +3,7 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## EN/PL documentation complete / final artist delivery — 2026-11-22
+## Delivered EN/PL documentation and updated artist reference — 2026-11-22
 
 Baseline clean `main` at `fea5e7f`. Owner explicitly passed Windows retest1–5, closes GUI/interface gate
 and requests documentation. Preserve all native startup/queue/cancel/Escape/wording passes; no
@@ -15,8 +15,14 @@ further mandatory GUI retest, paid ASR or installation qualification for this do
 - [x] Prepare full matching PL user docs: Windows11x64 and WSL setup/updates, local/cloud transcription, optional correction/translation, review/export, settings, dictionaries, saved work/profiles/cleanup and common errors.
 - [x] Package EN/PL offline help with language-aware navigation/full-article links; preserve current approved UI labels and route restrictions.
 - [x] Validate guide numbering/packaged mirrors/local links/commands/HTML/language switching and ordinary appropriate checks. Screenshots wait for custom icons.
-- [ ] Record evidence/checkpoints, remove disposable test outputs, commit/push and deliver EN/PL entry points.
-- [ ] Then refresh a NEW artist review package with approved GUI/language/docs, preserving original sent ZIP (already authorized sequence).
+- [x] Record evidence/checkpoints, remove disposable test outputs, commit/push and deliver EN/PL entry points.
+- [x] Then refresh a NEW artist review package with approved GUI/language/docs, preserving original sent ZIP (already authorized sequence).
+
+Delivered: [EN manual](docs/gui/README.md), [PL manual](docs/gui/pl/README.md), bilingual offline
+help and `deliveries/ewp-gui-artist-review-2026-11-22.zip` outside Git. Source commitcca698b; final
+archive/manifest/source stamp and offline browser checks pass. Original sent ZIP preserved. Follow
+[checkpoint/evidence](docs/checkpoints/2026-11-22-user-documentation.md). Await documentation or
+artist feedback; later uninstall/graphical installer remains queued, not started.
 
 ## Delivered Windows startup / queue refresh correction — 2026-11-22
 

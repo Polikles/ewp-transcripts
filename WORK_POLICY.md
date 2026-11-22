@@ -128,3 +128,8 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     contracts, user-oriented procedures, honest platform limits and deferred uninstall/installer
     scope. Package usable EN/PL offline help. New artist review package follows documentation under
     existing authorization; original ZIP remains untouched. Screenshots still wait for custom icons.
+
+21. Documentation stage delivered2026-11-22: EN review/update, complete PL user manuals and bilingual
+    offline help, followed by the authorized NEW artist reference. Original archive preserved.
+    Follow the documentation checkpoint/evidence and await the next owner-selected work. Do not
+    reopen accepted UI/GPU/paid gates or redo the artist package merely after a context reset.

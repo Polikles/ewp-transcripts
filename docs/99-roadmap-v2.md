@@ -16,7 +16,7 @@ research metrics and optional presets do not block completion or release readine
 
 Owner passes Windows checklist 1–5 and accepts the resulting interface/terminology. Task 10 and
 the focused regression gate are closed. EN user-manual audit/update, complete PL manuals and
-bilingual offline help are implemented/verified; final delivery of a NEW updated artist package follows. Preserve the original sent
+bilingual offline help are delivered. A NEW updated artist reference (`ewp-gui-artist-review-2026-11-22.zip`) is available in workspace deliveries; its final offline checks pass. Preserve the original sent
 ZIP. Screenshots await final artwork and do not block text documentation. Windows 11 x64 is now
 owner-tested; retain provisional full-profile-exchange qualification. Earlier pending-approval and
 planned-Windows notes below are historical, not new gates. See the [documentation checkpoint](checkpoints/2026-11-22-user-documentation.md).
@@ -162,7 +162,7 @@ terminology approval remains task 10.
 | B8a | Optional OpenRouter ASR after 8/before 9: four selected models, one shared API key. Owner permits short supplied PL/EN functional samples, USD 2 total live-test budget including retries. See the linked B plan for exact IDs and scope. |
 | B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
 | 10 | Complete: stable-ID EN–PL file returned, corrections integrated and resulting interface accepted (checklist1–5 PASS). |
-| 11 | EN audit/update and full PL manuals prepared/verified, with fifteen chapters per language and offline help. New artist-reference delivery follows; screenshots wait for final icons. |
+| 11 | EN audit/update and full PL manuals prepared/verified, with fifteen chapters per language and offline help. New artist-reference ZIP delivered; screenshots wait for final icons. |
 | 12 | Later installer/distribution preparation. Release/publishing is a separate owner decision, not authorized by this plan update. |
 | Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
 

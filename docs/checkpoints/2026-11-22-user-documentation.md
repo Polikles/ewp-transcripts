@@ -1,5 +1,7 @@
 # EN documentation review and complete PL user manuals
 
+Status: complete and verified; see Final delivery below.
+
 2026-11-22. Baseline clean `main` at `fea5e7f`. Owner passes Windows checklist1–5 and explicitly closes
 this stage. Interface/terminology approval gate is satisfied; EN review/update then full PL docs
 are authorized. Read opening TODO/WORK_POLICY after resume. No new paid/GPU/install qualification.
@@ -57,9 +59,18 @@ Synthetic file:// preview passes stage/queue/audio/edit/review/export/palette/di
 settings/theme/layout/inventory and all thirty manual links, with HTTP(S) blocked. Source commit
 will identify the final new ZIP. Original sent archive hash is unchanged; no message to artist.
 
-## Resume / delivery
+## Final delivery
 
-Generate the new final artist ZIP from committed code, verify its archive/manifest and source
-stamp, record new filename/hash in evidence and this checkpoint, remove only this task's dedicated
-`/tmp/ewp-documentation.iKIk5E` root, commit delivery metadata and push main. No new paid or owner
-workflow retest is needed. Model caches/outputs and original artist ZIP must remain untouched.
+EN/PL docs/help and artist tooling committed as `cca698b`. Final new archive:
+`deliveries/ewp-gui-artist-review-2026-11-22.zip` in the shared workspace, outside Git. Size1248877 bytes;
+SHA256 `634b399903d31e2b970f6fbc9a85889ff1d67fda9bd511985e6815aea267ef3b`.63 manifested files,30 local manual pages; archive integrity, every digest and
+SOURCE-COMMIT stamp pass. The exact final archive passes the offline browser check with no JS
+errors or external requests. It contains synthetic text/tone/job state only, current frontend,
+custom/Lucide/native/generic icon inventory and notices. No models/backend/private recordings/keys.
+Original2026-11-19 ZIP remains unchanged; no file or message was sent to the artist.
+
+Task-owned `/tmp/ewp-documentation.iKIk5E` was removed after content-free evidence capture; local
+servers stopped. Prior cloud spend is unchanged. Documentation, roadmap, TODO, policy and approved
+language reference agree. No new mandatory owner workflow/reinstall test. Text docs are ready for
+reading; screenshots remain deferred until final custom icons. New functional/distribution work
+waits for the owner's next selected task. Uninstall/graphical installer remain later TODO items.

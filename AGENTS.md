@@ -5,8 +5,10 @@ This file defines implementation rules for coding agents working on **ewp-transc
 ## Latest accepted instruction — 2026-11-22
 
 Owner passes checklist 1–5 and closes GUI/interface terminology acceptance on main fea5e7f.
-The earlier manual-writing hold is satisfied. Current authorized work: audit/update EN user docs,
-complete PL user documentation and bilingual offline help, then build a NEW updated artist package.
+The earlier manual-writing hold is satisfied. EN audit/update, complete PL user docs and bilingual
+offline help are now delivered (source cca698b), with a NEW verified artist ZIP dated2026-11-22.
+Use the documentation checkpoint for artifact hash/evidence. This task is complete; do not rebuild
+again or start later uninstall/GUI-installer work without the next owner task.
 Preserve the already-sent original ZIP. No new screenshot, installation, GPU or paid-provider gate.
 Follow WORK_STATUS/TODO and the user-documentation checkpoint; historical pending-approval statements
 below do not reopen this accepted gate.

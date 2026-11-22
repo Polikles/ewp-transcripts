@@ -108,5 +108,18 @@
   ],
   "prior_cloud_spend_usd": "0.0291461230985028369",
   "original_artist_archive_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
-  "delivery": "Documentation ready; generate the new artist ZIP from the committed source, then record its manifest/hash and remove task-owned temporary outputs."
+  "delivery": {
+    "status": "PASS",
+    "source_commit": "cca698b698130a8a110902d30b7b66e8fb5f3502",
+    "artifact": "ewp-gui-artist-review-2026-11-22.zip",
+    "directory": "workspace deliveries (outside Git)",
+    "sha256": "634b399903d31e2b970f6fbc9a85889ff1d67fda9bd511985e6815aea267ef3b",
+    "size_bytes": 1248877,
+    "manifest_files": 63,
+    "manual_pages": 30,
+    "archive_manifest_source_stamp": "PASS",
+    "final_archive_browser_check": "PASS: file://, all controls/help checks; zero JS errors or external requests",
+    "original_artist_archive": "unchanged",
+    "cleanup": "Task-owned temporary test/build root removed after evidence capture."
+  }
 }
