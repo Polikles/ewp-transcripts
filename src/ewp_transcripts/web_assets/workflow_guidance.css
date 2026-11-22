@@ -122,9 +122,11 @@
 
 .gui-error-diagnostic > summary { color: var(--gui-muted); font-size: .75rem; font-weight: 400; }
 
-.gui-language-choice { position: relative; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; }
+.gui-language-choice { position: relative; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: .3rem; }
+.gui-language-caption { display: flex; align-items: center; gap: .4rem; }
+.gui-language-caption > label { margin: 0; min-width: 0; }
 .gui-language-choice > label { min-width: 0; }
-.gui-language-info { position: static; margin-top: 1rem; }
+.gui-language-info { position: static; margin: 0; flex: 0 0 auto; }
 .gui-language-info > summary { display: grid; place-items: center; width: 1.15rem; height: 1.15rem; border: 1px solid var(--gui-muted); border-radius: 50%; font-size: .75rem; list-style: none; }
 .gui-language-info > summary::-webkit-details-marker { display: none; }
 .gui-language-info > p { position: absolute; z-index: 5; top: 1.5rem; inset-inline-end: 0; width: min(23rem, calc(100vw - 4rem)); box-sizing: border-box; padding: .65rem; background: var(--gui-surface); border: 1px solid var(--gui-line); border-radius: .4rem; color: var(--gui-ink); }

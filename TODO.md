@@ -3,6 +3,25 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered Windows startup / queue refresh correction — 2026-11-22
+
+Baseline clean mainb0c2ddf. Owner reports startup null href error, About Loading placeholders,
+no live phases/progress/completion despite GPU activity, stale cancellation and initial output-root
+mismatch, key dialog Escape, language-info position and new EN/PL subtitle. No docs/artist stage yet.
+
+- [x] Reproduce Windows-specific bootstrap after localized help links; fix null href and About metadata, ensure queue refresh survives optional startup failures.
+- [x] Verify live queue status/phases/progress/result completion and cancellation against changing backend state; diagnose mismatch without weakening shared-output guard.
+- [x] Fix Escape handling/focus from every key-dialog entry point, without saving/unloading credentials accidentally.
+- [x] Place per-recording language (i) beside the label, before the select; preserve dismissal and per-file settings.
+- [x] Subtitle EN "Local-first transcript workflow", PL "Lokalne narzędzie do transkrypcji"; update maintained language reference.
+- [x] Add focused Windows-session browser regression plus ordinary appropriate checks; update plans/checkpoint/evidence, clean temp outputs, commit/push main.
+- [ ] Owner retests startup/live queue and approves interface; then EN docs → complete PL docs → NEW artist package.
+
+Reproduced before fix: Windows null-href/About Loading, backend completed while UI remained
+running. Fixed/verified with real queue and synthetic phases:1056 tests,17 integrations,216 full
+layouts,8 modal locale/entry cases and3 caption widths. See Instructions/GUI_WINDOWS_REFRESH_RETEST.md.
+No paid/model/reinstall changes. Original output mismatch not reproduced; guard eligibility7 cases pass.
+
 ## Delivered task10 corrections / awaiting interface approval — 2026-11-22
 
 Baseline clean maince9ddfc. Owner returned the same-named workbook in private benchmark.

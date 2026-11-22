@@ -49,7 +49,21 @@ credentialSettings.append(credentialSettingsButton);
 document.querySelector("#dependency-panel").before(credentialSettings);
 
 document.querySelector("#close-openrouter-key-icon").addEventListener("click",closeOpenRouterKeyDialog);
-openRouterKeyDialog.addEventListener("keydown",event=>{if(event.key==="Escape"){event.preventDefault();closeOpenRouterKeyDialog();}});
+document.addEventListener("keydown", event => {
+  if (openRouterKeyDialog.hidden) return;
+  if (event.key === "Escape") {
+    event.preventDefault(); event.stopPropagation(); closeOpenRouterKeyDialog(); return;
+  }
+  if (event.key !== "Tab") return;
+  const controls = [...openRouterKeyDialog.querySelectorAll("button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href]")].filter(control => control.getClientRects().length);
+  const first = controls[0], last = controls.at(-1);
+  if (!first) return;
+  if (!openRouterKeyDialog.contains(document.activeElement) || (!event.shiftKey && document.activeElement === last)) {
+    event.preventDefault(); first.focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault(); last.focus();
+  }
+}, true);
 const keyCheckButton=document.querySelector("#check-openrouter-key");
 const keyCheckGroup=document.createElement("div");keyCheckGroup.className="credential-key-check";keyCheckButton.before(keyCheckGroup);keyCheckGroup.append(keyCheckButton);
 const keyCheckStatus=document.createElement("p");keyCheckStatus.id="openrouter-key-check-status";keyCheckStatus.setAttribute("role","status");keyCheckStatus.className="field-hint";keyCheckGroup.append(keyCheckStatus);

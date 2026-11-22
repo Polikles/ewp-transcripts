@@ -14,6 +14,12 @@ research metrics and optional presets do not block completion or release readine
 
 ### Owner acceptance of the recent GUI
 
+Current Windows startup follow-up: owner accepts the UI generally but reported null-href startup,
+About Loading and stale running jobs. [Checkpoint](checkpoints/2026-11-22-windows-startup-refresh.md)
+records the reproduced language-query/exact-link regression and fixed early polling, plus modal
+Escape, language-icon placement and subtitle. Use the [targeted Windows retest](../Instructions/GUI_WINDOWS_REFRESH_RETEST.md).
+Retain earlier wording/ASR passes; docs and the new artist package remain after interface approval.
+
 Current terminology application (2026-11-22): owner returned the workbook and requests an updated
 interface for approval.106 reviewed rows (18 EN /105 PL edits) are integrated with stable-ID
 [reference and notes](ui-language/README.md). Use [focused approval](../Instructions/GUI_TERMINOLOGY_APPROVAL.md).

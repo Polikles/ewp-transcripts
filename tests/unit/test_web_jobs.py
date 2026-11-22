@@ -333,18 +333,33 @@ def test_queue_rejects_source_changed_after_dry_run_before_transcription(tmp_pat
     assert calls == []
 
 
-def test_active_queue_exposes_shared_output_and_rejectable_job_identity(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ("status", "active"),
+    [
+        ("staged", True),
+        ("queued", True),
+        ("running", True),
+        ("cancel_requested", True),
+        ("completed", False),
+        ("failed", False),
+        ("cancelled", False),
+    ],
+)
+def test_active_queue_exposes_shared_output_and_rejectable_job_identity(
+    tmp_path: Path, status: str, active: bool
+) -> None:
     output = tmp_path / "output"
     queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=lambda *a, **k: None)
     try:
-        queue.stage(
+        job = queue.stage(
             tmp_path / "episode.wav",
             output,
             planned_job_id="episode",
             planned_result_path=str(output / "episode_results.json"),
         )
-        assert queue.active_output_directory() == str(output)
-        assert queue.contains_active_planned_job("episode")
+        queue._replace(job.job_id, status=status)
+        assert queue.active_output_directory() == (str(output) if active else None)
+        assert queue.contains_active_planned_job("episode") is active
         assert not queue.contains_active_planned_job("different")
     finally:
         queue.close()

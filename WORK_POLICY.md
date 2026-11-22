@@ -114,3 +114,10 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     Commit the corrected reference; keep initial/returned private workbooks unchanged. Record small
     integration adjustments explicitly. Full EN review, complete PL manuals and NEW artist package
     remain sequential after interface approval, not part of the integration gate. No paid tests.
+
+19. Windows startup feedback (2026-11-22): exact-href lookup broke after localized help URLs,
+    before About/polling initialization. A synthetic Windows-session browser reproduction confirms
+    backend completion while UI stays running. Follow the startup-refresh checkpoint/retest; do
+    not treat this as proven ASR/GPU failure or rerun paid tests. Stable IDs and early idempotent
+    polling fix it; preserve the shared-output guard. Owner accepts UI generally, with new subtitle,
+    info placement and modal Escape changes. Docs/artist work still waits for this approval gate.

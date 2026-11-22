@@ -1,6 +1,6 @@
 {
   "status": "Owner corrections integrated; interface acceptance pending",
-  "rows": 2218,
+  "rows": 2219,
   "submitted_changes": 106,
   "submitted_EN_changes": 18,
   "submitted_PL_changes": 105,
@@ -1180,6 +1180,20 @@
       "en": "View and compare versions",
       "pl": "Wyświetl i porównaj wersje",
       "integration_note": "Synchronized with reviewed numbered dictionary heading; quick-guide metadata otherwise overwrote its corrected translation."
+    }
+  ],
+  "post_review_changes": [
+    {
+      "id": "ui.5d21ec8e0ecfe163",
+      "en": "Local-first transcript workflow",
+      "pl": "Lokalne narzędzie do transkrypcji",
+      "reason": "Owner follow-up on 2026-11-22: use the transcription-tool subtitle instead of podcast workflow."
+    },
+    {
+      "id": "error.GUI_INITIALIZATION_FAILED",
+      "en": "GUI_INITIALIZATION_FAILED: {message}",
+      "pl": "GUI_INITIALIZATION_FAILED: Nie udało się zainicjalizować interfejsu. Odśwież stronę i sprawdź szczegóły techniczne.",
+      "reason": "Startup diagnostics after connected API request; queue polling remains installed."
     }
   ]
 }

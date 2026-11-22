@@ -26,6 +26,9 @@ the original already-sent archive and do not rebuild it during terminology revie
 The workbook has now been returned and integrated; use the current terminology-application
 checkpoint and focused interface approval instructions. Do not regenerate or overwrite the
 owner's file, start manuals, or rebuild the artist package before interface approval.
+Current follow-up is the Windows startup/live-queue regression in WORK_STATUS: exact help-href
+lookup failed after language-query insertion and prevented polling. Keep Windows-session browser
+coverage and the output-root safety guard; no GPU/pilot requalification or reinstall for this fix.
 
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
 by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL

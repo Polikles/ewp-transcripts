@@ -2203,7 +2203,7 @@ ui.3831c9874e4de886,LLM-assisted transcript correction,Korekta transkrypcji z po
 ui.b2c21d0d46a2423f,LLM-assisted translation,Tłumaczenie z pomocą LLM,,Catalog entry; not found in current UI literals,
 ui.c2b5477cf713dbaf,Leaving this blank translates raw ASR and records that unverified source with a warning.,Puste pole oznacza tłumaczenie surowego ASR; niezweryfikowane źródło zostanie oznaczone ostrzeżeniem.,,Catalog entry; not found in current UI literals,
 ui.0bcbc15375775966,License and warranty,Licencja i gwarancja,,Catalog entry; not found in current UI literals,
-ui.5d21ec8e0ecfe163,Local-first podcast workflow,Lokalny proces pracy nad podcastem,,Catalog entry; not found in current UI literals,
+ui.5d21ec8e0ecfe163,Local-first transcript workflow,Lokalne narzędzie do transkrypcji,src/ewp_transcripts/web_assets/index.html:3 · header .eyebrow,Active header subtitle; owner follow-up,Owner follow-up on 2026-11-22: use the transcription-tool subtitle instead of podcast workflow.
 ui.cf2698c2d26c51ba,"Manage project dictionaries, compare editions, edit terms and save new versions. Dictionaries are optional; previous versions remain available.","Zarządzaj słownikami projektu, porównuj wersje, edytuj terminy i zapisuj nowe wersje. Słowniki są opcjonalne, a wcześniejsze wersje pozostają dostępne.",,Catalog entry; not found in current UI literals,
 ui.b50b481341c87818,Managed source inventory,Inwentarz zarządzanych źródeł,,Catalog entry; not found in current UI literals,
 ui.59d4d23c4a2741fc,Manual revisions directory,Katalog wersji zweryfikowanych,,Catalog entry; not found in current UI literals,
@@ -3002,3 +3002,4 @@ ui.4a7d35513fad8a3f,Cannot inspect work root,Cannot inspect work root,src/ewp_tr
 ui.d5274ff5e3ac11ab,Unsafe {label} for work directory: {value},Unsafe {label} for work directory: {value},src/ewp_transcripts/workdirs.py:79 · backend detail,Technical detail; may remain English in JSON,
 ui.dbeab8959c532741,Work root must not be a symbolic link: {work_root},Work root must not be a symbolic link: {work_root},src/ewp_transcripts/workdirs.py:92 · backend detail,Technical detail; may remain English in JSON,
 ui.7155dd5d6550c591,Run directory must not be a symbolic link: {run_directory},Run directory must not be a symbolic link: {run_directory},src/ewp_transcripts/workdirs.py:98 · backend detail,Technical detail; may remain English in JSON,
+error.GUI_INITIALIZATION_FAILED,GUI_INITIALIZATION_FAILED: {message},GUI_INITIALIZATION_FAILED: Nie udało się zainicjalizować interfejsu. Odśwież stronę i sprawdź szczegóły techniczne.,Connected API / failed browser initialization,Keep error code unchanged,Distinguishes browser initialization errors from an unavailable server.

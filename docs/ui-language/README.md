@@ -3,6 +3,9 @@
 Status: owner corrections integrated; the resulting interface awaits owner approval.
 The source workbook returned on 2026-11-22 contains 2218 stable IDs and 106 changed rows
 (18 English changes and 105 Polish changes; some rows change both).
+The maintained reference now has2219 IDs: the owner-requested transcription-tool subtitle keeps
+its existing ID, and a new `GUI_INITIALIZATION_FAILED` diagnostic distinguishes browser setup from
+server reachability. `post_review_changes` records this startup follow-up.
 
 - `ewp-ui-en-pl-review-2026-11-22.xlsx`: integrated review workbook, including original hidden
   baselines and integration notes; author metadata is normalized to EwP Transcripts.

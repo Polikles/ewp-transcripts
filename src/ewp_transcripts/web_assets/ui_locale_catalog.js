@@ -2482,3 +2482,7 @@ for (const [en, pl] of [
     "Modele Whisper najlepiej działają, gdy w pliku jest jeden mówca. Zmiksowane audio wielu mówców lepiej obsługują Scribe i MAI. Wspólny kontekst audio pomaga zachować oznaczenia mówców. Napisy opierają się na określeniu czasów słów zwróconych przez dostawcę."
   ]
 ]) guiPolish.set(en, pl);
+
+// Owner startup feedback and requested product subtitle.
+guiPolish.set("Local-first transcript workflow", "Lokalne narzędzie do transkrypcji");
+guiPolishErrorDescriptions.set("GUI_INITIALIZATION_FAILED", "Nie udało się zainicjalizować interfejsu. Odśwież stronę i sprawdź szczegóły techniczne.");

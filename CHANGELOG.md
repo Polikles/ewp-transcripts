@@ -6,6 +6,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Fix native-Windows GUI startup after help links acquire a language query: resolve the repair
+  link by stable ID, load About metadata and start idempotent queue polling before optional UI
+  setup/review restoration. Frontend initialization errors are distinguished from unreachable API
+  errors. Running phases/progress/completion and cancel actions now stay synchronized.
+- Handle Escape at the document level while the key modal is open and keep Tab focus inside it.
+  Put the language information icon beside its associated label, above the per-recording select.
+  Update the subtitle to Local-first transcript workflow / Lokalne narzędzie do transkrypcji and
+  maintain its stable-ID language reference. Add a reproducible synthetic Windows-session fixture.
+
 - Integrate the owner's 106 reviewed EN/PL copy rows, including 18 English and 105 Polish edits,
   dynamic statuses, error messages, speaker/dictionary labels, tooltips and quick guides. Keep
   reviewed full-message errors ahead of generic code fallbacks and synchronize the dictionary

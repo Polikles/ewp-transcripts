@@ -29,15 +29,21 @@ function syncGuiStatusMotion() {
   }
 }
 
+let guiLanguageChoiceCount = 0;
 function createGuiLanguageChoice(label) {
   const choice = document.createElement("div"); choice.className = "gui-language-choice";
-  if(label.parentNode)label.before(choice);choice.append(label);
+  if(label.parentNode)label.before(choice);
+  const select = label.querySelector("select");
+  if (!select.id) select.id = `gui-episode-language-${++guiLanguageChoiceCount}`;
+  select.remove(); label.htmlFor = select.id;
+  const caption = document.createElement("div"); caption.className = "gui-language-caption";
+  caption.append(label);
   const details = document.createElement("details"); details.className = "gui-language-info";
   const summary = document.createElement("summary"); summary.textContent = "i";
   const message = "Choosing EN for Polish recordings had sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.";
   summary.title = message; summary.setAttribute("aria-label", "Language selection information");
   const info = document.createElement("p"); info.className = "field-hint"; info.textContent = message;
-  details.append(summary, info); choice.append(details);
+  details.append(summary, info); caption.append(details); choice.append(caption, select);
   return choice;
 }
 function installReviewFeedback() {

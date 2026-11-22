@@ -1,5 +1,9 @@
 # Interface terminology approval
 
+Latest follow-up: the owner accepts the interface generally. Complete the small
+[Windows startup/live-queue retest](GUI_WINDOWS_REFRESH_RETEST.md) after the startup correction;
+preserve passed wording checks rather than repeat the entire language review below.
+
 Owner corrections are integrated from the returned EN/PL workbook. This step approves the updated
 interface wording before the English-documentation review and full Polish manuals. It does not
 require reinstalling, downloading models, rerunning paid ASR or repeating the full workflow.

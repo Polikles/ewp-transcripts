@@ -4,6 +4,22 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
+Current handoff: [Windows startup/live queue correction](docs/checkpoints/2026-11-22-windows-startup-refresh.md).
+Baseline mainb0c2ddf. Reproduced win32 bootstrap null href after help-language query insertion:
+About stayed Loading and backend completed while UI stayed running. Stable help ID plus early
+idempotent polling fixes it; optional UI/restore errors get a distinct initialization code.
+Document-level modal Escape/Tab containment, label-row language info and requested EN/PL subtitle
+are corrected; stable-ID language reference updated.1056 tests/mypy115,17 integrations,216 layouts
+and focused Windows-session/synthetic queue phases/completion/queued+active cancellation pass.
+Eight modal entry/locale cases and3 caption widths pass. No real GPU/provider qualification claimed.
+Next owner step: Instructions/GUI_WINDOWS_REFRESH_RETEST.md; preserve accepted wording/workflow
+passes and do not reinstall models or repeat paid ASR. One-off output mismatch not reproduced;
+shared-output guard unchanged and all7 status eligibility cases pass. Root cleanup/evidence is in
+the checkpoint. Delivery targets main. After owner approval: EN docs → complete PL docs → NEW
+artist package. Original artist ZIP/returned workbooks unchanged; prior spend unchanged.
+
+Earlier handoffs below are historical.
+
 Current handoff: [owner terminology integration](docs/checkpoints/2026-11-22-terminology-application.md).
 Baseline maince9ddfc.106 owner-reviewed rows integrated (18 EN /105 PL); three rows include noted
 spelling/actual-queue-target adjustments and one quick-guide title is synchronized. XLSX/CSV and

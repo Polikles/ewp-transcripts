@@ -131,7 +131,7 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert response.status == 200
     assert b"EWP Transcriber" in response.body
     assert response.body.index(b"EWP Transcriber") < response.body.index(
-        b"Local-first podcast workflow"
+        b"Local-first transcript workflow"
     )
     assert b"Status: connecting" in response.body
     assert b'id="clear-workflow"' in response.body
