@@ -1,7 +1,28 @@
 # Immediate work queue
 
-Updated: 2026-11-21. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
+Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+
+## Delivered B saved-work, pending-media and cloud timing feedback — 2026-11-22
+
+Baseline main 7a1c2da. [Checkpoint](docs/checkpoints/2026-11-22-b-recovery-cloud-timing.md).
+Owner confirms favicon, API check and restored cloud consent blocking now work; mixed local/cloud
+queue starts correctly. Preserve those passes. No model reinstallation, artist ZIP changes or
+full terminology/manual generation during these remaining functional fixes.
+
+- [x] Extend artwork background across full viewport while keeping content width bounded.
+- [x] Disable Set session key with empty input, including after Use saved key; input enables it.
+- [x] Inspect supplied ZIPs privately; reproduce/fix restoration of failed/cancelled tasks and progress/failure reporting. Retained source/result state remains intact and no ASR auto-starts.
+- [x] Restore loaded workspace name and clear stale validation highlight; avoid silently renaming selected saves, retain explicit Save as new behavior.
+- [x] Persist/recover pending media/planning selections and valid source paths before staging; invalidate stale plans safely, deduplicate repeated selections by identity without grouping collisions.
+- [x] Diagnose OpenRouter missing word timing for Whisper/Scribe from archives/protocol; meaningful provider/parser regression, no invented timing and no deleting failure files as a workaround.
+- [x] Preserve server-session key independently from browser/workspace clearing; document process/session distinction.
+- [x] Record task-10 format: stable field/message ID + editable EN/PL, owner can correct both; initial review file local VM, approved/applied version committed as translation reference. Generate after function freeze.
+- [x] Update changed-step docs/checklist, changelog, roadmap, checkpoints/evidence; meaningful ordinary/integration/browser/restart checks; clean disposable root and commit/push main.
+
+Owner follow-up: use the current update-only checklist. Whisper missing timings reproduced/fixed;
+Scribe supplied sample/tail pass, original native Scribe incident remains to observe with new diagnostics.
+Full B acceptance stays pending; no paid agent requalification or artist-package changes.
 
 ## Delivered B restore-consent, workspace and wide-screen feedback
 

@@ -86,3 +86,10 @@ open so Check API key, Save and Use can follow before closing. Check API key ver
 without activating/saving it, or checks the current shared session/environment key when the input
 is empty. Input is cleared immediately; the check uploads no audio/text and never accesses the OS
 store implicitly. After restarting, enter a key or explicitly load a previously saved key.
+
+Use saved OpenRouter key already activates the key for this server session. Set key for this session
+is disabled when its text input is empty; type another key to enable it. Checking a typed key alone
+does not activate/store it. Clearing browser/workflow state does not clear the active server key.
+Stopping the server clears its memory-only key; an environment-supplied key can remain available,
+and an OS-stored key can be explicitly loaded again. Saved work and profiles never contain keys.
+Pending-media workspace references are included in profiles without embedding audio or approvals.

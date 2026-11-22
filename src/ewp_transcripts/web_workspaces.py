@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ewp_transcripts.config import SpeechConfig
 from ewp_transcripts.domain.revision import sha256_file
@@ -128,10 +128,42 @@ class GuiWorkspaceSummary(BaseModel):
     queue_count: int = Field(default=0, ge=0)
 
 
+class GuiWorkspaceMedia(BaseModel):
+    """Hash-bound selection metadata; no media bytes or saved plan approval."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    path: str = Field(min_length=1, max_length=4096)
+    name: str = Field(min_length=1, max_length=255)
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    language: Literal["pl", "en", "auto"] = "pl"
+    speaker_count: Literal["auto"] | int = "auto"
+    recording_id: str | None = None
+    stream_index: int | None = Field(default=None, ge=0)
+
+    @field_validator("speaker_count", mode="before")
+    @classmethod
+    def valid_speaker_count(cls, value: object) -> object:
+        if value != "auto" and (type(value) is not int or not 1 <= value <= 32):
+            raise ValueError("Workspace pending media selection is invalid")
+        return value
+
+    @field_validator("name")
+    @classmethod
+    def valid_name(cls, value: str) -> str:
+        if Path(value).name != value or "\\" in value or value in {".", ".."}:
+            raise ValueError("Workspace pending media selection is invalid")
+        return value
+
+    @field_validator("recording_id")
+    @classmethod
+    def valid_recording_id(cls, value: str | None) -> str | None:
+        return recording_identity(value)
+
+
 class GuiWorkspaceDocument(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    workspace_version: Literal[1, 2] = 2
+    workspace_version: Literal[1, 2, 3] = 3
     workspace_id: str
     name: str
     saved_at: datetime
@@ -139,6 +171,7 @@ class GuiWorkspaceDocument(BaseModel):
     fields: dict[str, str | bool | int]
     staged_jobs: tuple[dict[str, Any], ...] = ()
     terminal_jobs: tuple[GuiTranscriptionJob, ...] = ()
+    pending_media: tuple[GuiWorkspaceMedia, ...] = Field(default=(), max_length=300)
 
 
 ResolvePath = Callable[..., Path]
@@ -217,6 +250,7 @@ class GuiWorkspaceController:
         fields: dict[str, Any],
         staged_jobs: builtin_list[dict[str, Any]] | None = None,
         terminal_jobs: builtin_list[dict[str, Any]] | None = None,
+        pending_media: builtin_list[dict[str, Any]] | None = None,
         workspace_id: str = "",
         omit_unavailable: bool = False,
     ) -> GuiWorkspaceDocument:
@@ -230,10 +264,12 @@ class GuiWorkspaceController:
         clean_terminal_jobs = self._validate_terminal_jobs(
             terminal_jobs or [], omit_unavailable=omit_unavailable
         )
+        clean_media = self._validate_pending_media(pending_media or [])
         identifier = (
             self._normalize_workspace_id(workspace_id) if workspace_id.strip() else str(uuid4())
         )
         document = GuiWorkspaceDocument(
+            workspace_version=3,
             workspace_id=identifier,
             name=clean_name,
             saved_at=datetime.now(UTC),
@@ -241,6 +277,7 @@ class GuiWorkspaceController:
             fields=clean_fields,
             staged_jobs=clean_staged_jobs,
             terminal_jobs=clean_terminal_jobs,
+            pending_media=clean_media,
         )
         self._state_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         destination = self._state_directory / f"{identifier}.json"
@@ -267,7 +304,10 @@ class GuiWorkspaceController:
             try:
                 document = self._read(path)
                 available = self._paths_available(
-                    document.fields, document.staged_jobs, document.terminal_jobs
+                    document.fields,
+                    document.staged_jobs,
+                    document.terminal_jobs,
+                    document.pending_media,
                 )
                 summaries.append(
                     GuiWorkspaceSummary(
@@ -292,6 +332,9 @@ class GuiWorkspaceController:
         if on_read is not None:
             on_read(len(document.staged_jobs) + len(document.terminal_jobs))
         self._validate_fields(document.fields)
+        self._validate_pending_media(
+            [item.model_dump(mode="json") for item in document.pending_media]
+        )
         self._validate_staged_jobs(list(document.staged_jobs))
         self._validate_terminal_jobs(
             [job.model_dump(mode="json") for job in document.terminal_jobs]
@@ -316,6 +359,7 @@ class GuiWorkspaceController:
             fields=document.fields,
             staged_jobs=list(document.staged_jobs),
             terminal_jobs=[item.model_dump(mode="json") for item in document.terminal_jobs],
+            pending_media=[item.model_dump(mode="json") for item in document.pending_media],
             workspace_id=document.workspace_id,
         )
 
@@ -432,6 +476,24 @@ class GuiWorkspaceController:
             )
         return tuple(clean)
 
+    def _validate_pending_media(
+        self, items: builtin_list[dict[str, Any]]
+    ) -> tuple[GuiWorkspaceMedia, ...]:
+        if not isinstance(items, builtin_list) or len(items) > 300:
+            raise ValueError("Workspace pending media selection is invalid")
+        clean: builtin_list[GuiWorkspaceMedia] = []
+        seen: set[tuple[str, str]] = set()
+        for item in items:
+            media = GuiWorkspaceMedia.model_validate(item)
+            path = self._resolve_path(media.path)
+            if not path.is_file() or sha256_file(path) != media.source_sha256:
+                raise ValueError("A pending source changed since this workspace was saved")
+            identity = (media.name, media.source_sha256)
+            if identity not in seen:
+                clean.append(media)
+                seen.add(identity)
+        return tuple(clean)
+
     def _validate_terminal_jobs(
         self,
         terminal_jobs: builtin_list[dict[str, Any]],
@@ -494,8 +556,10 @@ class GuiWorkspaceController:
         fields: dict[str, str | bool | int],
         staged_jobs: tuple[dict[str, Any], ...],
         terminal_jobs: tuple[GuiTranscriptionJob, ...],
+        pending_media: tuple[GuiWorkspaceMedia, ...] = (),
     ) -> bool:
         try:
+            self._validate_pending_media([item.model_dump(mode="json") for item in pending_media])
             self._validate_fields(fields)
             self._validate_staged_jobs(list(staged_jobs))
             self._validate_terminal_jobs([job.model_dump(mode="json") for job in terminal_jobs])

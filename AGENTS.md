@@ -35,6 +35,10 @@ revoked; follow the active B execution checkpoint and interrupt only for concret
 or blockers. Owner still performs native Windows acceptance after delivery. The short live PL pilot is complete
 at USD 0.0095832333762821113; the later chunking follow-up brings cumulative cloud spend to
 USD 0.0153610111540591670 (see its checkpoint). EN live qualification is waived by the owner (no EN sample).
+Further 2026-11-22 targeted recovery/timing diagnosis reproduced Together omitting word times and
+verified corrected Whisper routing plus the supplied Scribe tail. Cumulative live spend is now
+USD 0.0291461230985028369; see the current recovery/cloud-timing checkpoint and WORK_POLICY item15.
+No more paid tests for this delivered fix; preserve totals and raw-data cleanup evidence.
 Do not reopen passed A or rerun paid qualification merely after a context reset. Task 10 waits
 for B owner acceptance/function freeze.
 

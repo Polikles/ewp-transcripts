@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-22",
+  "baseline_commit": "7a1c2da",
+  "owner_passes_retained": [
+    "favicon",
+    "API key check",
+    "restored cloud consent blocking",
+    "mixed local/cloud queue"
+  ],
+  "private_archives": {
+    "inspected_read_only": true,
+    "workspace_manifest_present": false,
+    "source_and_failure_artifacts_present": true,
+    "original_missing_manifest_location": "unproven; actual save path now visible, including legacy private catalog"
+  },
+  "workspace": {
+    "version": 3,
+    "reads_versions": [
+      1,
+      2,
+      3
+    ],
+    "pending_media": "bounded typed hash references; durable picker copy before staging; fresh plan and unset approval on restore",
+    "deduplication": "same filename and content digest; distinct contents remain distinct",
+    "history": "matching later failed/cancelled state supersedes staged snapshot with source/signature checks; preserved failure file; no auto start/retry",
+    "name": "loaded, old validation cleared; readonly existing name; explicit Save as new; async refresh revision guard; intended save identity captured before awaits",
+    "cleanup": "all pending tracks protected",
+    "portable_profiles": "references preserved without audio/approvals; foreign unavailable paths remain unavailable"
+  },
+  "cloud_timing": {
+    "reproduced": "single supplied s0e01 track chunks1-9 DeepInfra returned words; chunk10 Together returned nonempty text, one segment and words:[]",
+    "confirmed_provider_metadata": [
+      "DeepInfra",
+      "Together"
+    ],
+    "fix": "Whisper Large/Turbo allow only DeepInfra/Groq with external fallback disabled; estimates filter same endpoints",
+    "original_tail": {
+      "whisper_real_timed_words": 17,
+      "scribe_real_timed_words": 14,
+      "groq_short_probe": "timed words returned"
+    },
+    "replay": {
+      "requests_replayed": 10,
+      "real_timed_words": 777,
+      "last_word_end_ms": 1110070,
+      "new_provider_calls": 0
+    },
+    "scribe_native_incident": "not reproduced on supplied live samples/tail; do not attribute it to Together",
+    "empty_speech": "only explicit blank text with no lexical segment/word content and supported language",
+    "diagnostics": "invalid-response ledger status and model/chunk/type/count context, no raw transcript/key; no automatic paid retry",
+    "protocol_reference": "https://openrouter.ai/docs/guides/overview/multimodal/stt"
+  },
+  "verification": {
+    "make_check": {
+      "passed": 1043,
+      "ruff_format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "browser": {
+      "playwright": "1.65.2",
+      "chromium": "159.0.8154.6",
+      "full_cases": 216,
+      "widths": [
+        390,
+        720,
+        768,
+        900,
+        960,
+        1440,
+        1920,
+        2560,
+        3840
+      ],
+      "page_errors": [],
+      "external_requests": [],
+      "actual_zoom_200": "not run; separate optional owner check"
+    },
+    "pending_recovery": {
+      "recover": true,
+      "page_errors": [],
+      "external_requests": [],
+      "pending_media": "durable, hashed, replanned and deduplicated",
+      "failed_snapshot": "restored after real restart",
+      "auto_starts": 0,
+      "real_provider_calls": 0
+    },
+    "fresh_consent": {
+      "cases": 48,
+      "boolean_only_and_programmatic_check_blocked": true
+    },
+    "source_translation_export_real_process_restart": "pass",
+    "workflow_polish": "key/OS mocked actions and deterministic translation; previous progress/export checks pass",
+    "changed_javascript_syntax_files": 4,
+    "patterned_gutters": "visible full viewport; measured both themes at 960,1920,3840 and inspected 4K screenshot"
+  },
+  "cloud_spend": {
+    "this_task_usd": "0.0137851119444436699",
+    "previous_total_usd": "0.0153610111540591670",
+    "cumulative_usd": "0.0291461230985028369",
+    "original_budget_usd": "2",
+    "paid_requests": 18,
+    "further_paid_tests": "not needed; stopped"
+  },
+  "scope": {
+    "new_native_windows_qualification": false,
+    "installer_or_model_reinstall": false,
+    "artist_zip_changed": false,
+    "artist_zip_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+    "full_B_owner_acceptance": "pending",
+    "task10": "local stable ID/EN/PL review after functional acceptance; owner edits both languages; approved/applied catalog committed before manuals"
+  },
+  "disposable_cleanup": {
+    "root": "/tmp/ewp-b-recovery.nTxlJ0",
+    "removed": true
+  }
+}

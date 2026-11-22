@@ -185,6 +185,8 @@ def _exact_references(
             continue
         seen_workspaces.add(workspace.workspace_id)
         label = f"saved workspace: {workspace.name}"
+        for media in workspace.pending_media:
+            add(media.path, label)
         for workspace_field_value in workspace.fields.values():
             add(workspace_field_value, label)
         for staged_job in workspace.staged_jobs:

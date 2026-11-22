@@ -1965,3 +1965,17 @@ for(const [en,pl] of [
   ["Select fresh cloud audio upload and paid-usage consent before starting","Przed uruchomieniem ponownie zaznacz zgodę na wysłanie audio do chmury i płatne użycie API."],
   ["Cloud queue selection is invalid","Wybór zadań chmurowych jest nieprawidłowy."]
 ])guiPolish.set(en,pl);
+
+// Pending-media and recovery feedback.
+for(const [en,pl] of [
+  ["Saved work file:","Plik zapisu pracy:"],
+  ["These files are already in the list.","Te pliki są już na liście."],
+  ["Workspace pending media selection is invalid","Lista oczekujących plików w zapisie pracy jest nieprawidłowa."],
+  ["A pending source changed since this workspace was saved","Plik oczekujący na przetwarzanie zmienił się od zapisu obszaru pracy."],
+  ["A pending source changed while preserving it","Plik oczekujący na przetwarzanie zmienił się podczas zachowywania kopii."],
+  ["Choose an output directory before saving pending media","Wybierz katalog wyników przed zapisaniem oczekujących plików."],
+  ["No word-timing-capable OpenRouter endpoint is available for this model","Brak dostępnego dostawcy OpenRouter z obsługą czasów słów dla tego modelu."],
+  ["OpenRouter returned a provider error response; no automatic retry was made","OpenRouter zwrócił błąd dostawcy; nie wykonano automatycznej ponownej próby."],
+  ["Saved job state is too large","Zapis stanu zadania jest zbyt duży."],
+  ["Retained transcription failure","Zachowany błąd transkrypcji"]
+])guiPolish.set(en,pl);

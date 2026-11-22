@@ -10,7 +10,13 @@ from typing import Any
 from ewp_transcripts.config import SpeechConfig
 from ewp_transcripts.domain.errors import SpeechEngineError
 from ewp_transcripts.engines.cloud_chunks import plan_audio_chunks
-from ewp_transcripts.engines.openrouter import BASE, HttpCall, _number, request_json
+from ewp_transcripts.engines.openrouter import (
+    BASE,
+    HttpCall,
+    _number,
+    request_json,
+    timing_endpoints,
+)
 from ewp_transcripts.web_inputs import GuiInputs
 
 ASR_MODELS = (
@@ -93,6 +99,9 @@ class GuiSpeechController:
             endpoints = document.get("data", {}).get("endpoints")
             if not isinstance(endpoints, list) or not endpoints:
                 raise ValueError("No current endpoint prices")
+            endpoints = timing_endpoints(model, endpoints)
+            if not endpoints:
+                return {"id": model, "available": False, "status": "unavailable"}
             rates = [_number(endpoint["pricing"]["prompt"]) for endpoint in endpoints]
             divisor = 3600 if model == "microsoft/mai-transcribe-2" else 1
             low, high = min(rates) / divisor, max(rates) / divisor

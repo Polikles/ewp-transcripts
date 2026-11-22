@@ -356,7 +356,7 @@ def test_workspace_retains_terminal_queue_history_without_credentials(
 
     restored = workspaces.load(saved.workspace_id)
 
-    assert restored.workspace_version == 2
+    assert restored.workspace_version == 3
     assert len(restored.terminal_jobs) == 2
     assert restored.terminal_jobs[0].workflow_skips == {"correction"}
     assert restored.terminal_jobs[0].workflow_errors == {

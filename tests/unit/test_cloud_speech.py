@@ -115,7 +115,12 @@ def test_diarization_requires_capable_model_and_labels(tmp_path):
 def test_pricing_uses_worst_endpoint_and_explicit_duration_unit():
     def transport(*args):
         return {
-            "data": {"endpoints": [{"pricing": {"prompt": "0.1"}}, {"pricing": {"prompt": "0.2"}}]}
+            "data": {
+                "endpoints": [
+                    {"tag": "deepinfra/us", "pricing": {"prompt": "0.1"}},
+                    {"tag": "groq", "pricing": {"prompt": "0.2"}},
+                ]
+            }
         }
 
     assert maximum_rate("microsoft/mai-transcribe-2", transport) == Decimal("0.2") / 3600
@@ -397,3 +402,78 @@ def test_cloud_retry_cannot_reuse_a_consumed_http_grant(tmp_path):
         assert queue.start(allow_cloud=True, cloud_consent_token=fresh) == 1
     finally:
         queue.close()
+
+
+@pytest.mark.parametrize("words", [None, []])
+def test_empty_speech_without_word_array_is_not_a_capability_failure(words):
+    payload = {"text": " \n", "language": "pol", "words": words, "segments": []}
+    parsed = parse_transcript(payload, duration_ms=1000, offset_ms=2000, language="auto")
+    assert parsed.aligned.language == "pl" and not parsed.aligned.segments
+    with pytest.raises(SpeechEngineError, match="word timestamps"):
+        parse_transcript(
+            {**payload, "segments": [{"text": "Real speech"}]},
+            duration_ms=1000,
+            offset_ms=0,
+            language="pl",
+        )
+
+
+def test_whisper_routes_and_prices_only_word_timing_providers(tmp_path):
+    def prices(*args):
+        return {
+            "data": {
+                "endpoints": [
+                    {"tag": "deepinfra/us", "pricing": {"prompt": "0.00001"}},
+                    {"tag": "groq", "pricing": {"prompt": "0.00002"}},
+                    {"tag": "together", "pricing": {"prompt": "1"}},
+                ]
+            }
+        }
+
+    assert maximum_rate("openai/whisper-large-v3", prices) == Decimal("0.00002")
+    seen = []
+
+    def transport(url, headers, body, timeout):
+        seen.append(json.loads(body))
+        return response()
+
+    session = CloudSpeechSession(
+        SpeechConfig(model="openai/whisper-large-v3"),
+        "fake-key",
+        transport=transport,
+        rate=Decimal("0.00001"),
+    )
+    session.transcribe(audio(tmp_path / "audio.wav"), "pl", diarize=False)
+    assert seen[0]["provider"] == {"only": ["deepinfra", "groq"], "allow_fallbacks": False}
+    assert seen[0]["response_format"] == "verbose_json"
+    assert "word" in seen[0]["timestamp_granularities"]
+
+
+def test_missing_timing_retains_only_noncontent_diagnostics_and_never_retries(tmp_path):
+    from ewp_transcripts.engines.openrouter import CloudResponseError
+    from ewp_transcripts.web_jobs import _backend_failure_detail
+
+    transport = Mock(
+        return_value={
+            "text": "private words",
+            "segments": [{"text": "private words"}],
+            "words": [],
+            "usage": {"cost": "0.001"},
+        }
+    )
+    session = CloudSpeechSession(
+        SpeechConfig(), "secret-test-key", transport=transport, rate=Decimal("0.00001")
+    )
+    with pytest.raises(CloudResponseError) as caught:
+        session.transcribe(audio(tmp_path / "audio.wav"), "pl", diarize=False)
+    assert transport.call_count == 1
+    details = _backend_failure_detail(caught.value)
+    assert json.loads(details["cloud_response"])["word_count"] == "0"
+    ledger = (tmp_path / "cloud-asr-usage.json").read_text()
+    assert json.loads(ledger)["calls"][0]["status"] == "invalid-response"
+    assert "private words" not in ledger + json.dumps(details)
+    assert "secret-test-key" not in ledger + json.dumps(details)
+    with pytest.raises(SpeechEngineError, match="provider error response"):
+        parse_transcript(
+            {"error": {"code": 402}, "words": []}, duration_ms=1000, offset_ms=0, language="pl"
+        )

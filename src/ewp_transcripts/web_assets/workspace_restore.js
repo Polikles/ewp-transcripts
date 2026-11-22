@@ -40,9 +40,11 @@ async function loadSelectedWorkspace() {
     const total = (payload.workspace.staged_jobs?.length || 0) + (payload.workspace.terminal_jobs?.length || 0);
     update(total, total);
     resetActiveReviewState(); clearActiveTranslationReview();
+    selectedGuiAudio.length=0;activeGuiAudio=null;guiBatchPlan=null;renderGuiAudioChoices();
     await applyWorkspaceFields(payload.workspace.fields);
     await refreshJobs();
-    workspaceName.value = payload.workspace.name;
+    await restorePendingGuiMedia(payload.workspace.pending_media);
+    workspaceName.value = payload.workspace.name;clearWorkspaceNameError();showWorkspaceFile(payload.workspace_file);
     lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep;
     activateWorkspace(payload.workspace, selected.storageDirectory);
     workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`;

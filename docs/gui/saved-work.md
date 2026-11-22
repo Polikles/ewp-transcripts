@@ -57,3 +57,26 @@ canonical results into the shared output's durable source area; it never reruns 
 A result changed after scanning must be scanned again. Up to 50 selected results can be added
 at once. Paths unavailable marks missing or foreign-computer references; restoring original
 files/path access is separate from loading a profile.
+
+## Pending selections and retained failures
+
+Save also preserves browser-selected media that has only been planned, before Add to queue.
+Load restores those files, their per-file language/count/stream options and input path, then
+replans metadata against the current files. It does not run ASR or restore plan approval; review
+and confirm the refreshed plan before adding. Selecting the same named file with the same content
+again keeps one entry. Different content remains a distinct selection and may need an explicit ID.
+Older saves without pending-selection metadata cannot recover expired temporary browser copies;
+choose them again. New workspaces use version 3; earlier versions 1/2 remain readable.
+
+Loading a snapshot taken before a later failed/cancelled attempt recognizes its retained matching
+failure state and restores that inactive row. Completed rows also remain. The source hashes and
+current episode signature must agree; failure files stay on disk. Retry is explicit and restarts
+processing from the beginning, with fresh cloud consent when needed. Do not delete failed JSON
+files to try to repair provider timing or workspace restoration.
+
+The loaded name fills its field and clears an old missing-name highlight. Existing names are
+readonly to avoid accidental rename. Select **Save as a new workspace** to enter a different name
+and create a separate record. The original remains. The **Saved work file** line shows the actual
+manifest location: updating a selected legacy entry keeps it in its private/custom catalog even
+when the optional catalog input is blank. For a new output-folder copy, select Save as new.
+A complete output-folder ZIP may therefore lack a manifest stored in an older separate catalog.

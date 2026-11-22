@@ -21,7 +21,7 @@ def test_refresh_prices_without_key_or_audio_upload_and_normalizes_hourly_mai():
         if url.endswith("?output_modalities=transcription"):
             return {"data": [{"id": model} for model in ASR_MODELS]}
         rate = "0.36" if "microsoft/" in url else "0.0001"
-        return {"data": {"endpoints": [{"pricing": {"prompt": rate}}]}}
+        return {"data": {"endpoints": [{"tag": "deepinfra/us", "pricing": {"prompt": rate}}]}}
 
     inputs = SimpleNamespace(probe=Mock(return_value=source()))
     payload = GuiSpeechController(inputs, transport).refresh(

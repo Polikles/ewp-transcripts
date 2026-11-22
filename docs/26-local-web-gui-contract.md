@@ -663,3 +663,29 @@ The application is centered and bounded to 100rem, with main reading content bou
 The engine disclosure never encloses planning actions/headings. Key-check feedback follows its
 button. The derived favicon uses visible-artwork bounds instead of the original SVG's stray
 registration mark; the main logo and sent artist package remain unchanged.
+
+### Pending selection / provider timing follow-up — 2026-11-22
+
+Workspace v3 extends v1/v2 reading with `pending_media`: bounded typed path/name/SHA256,
+per-file language/count and optional recording ID/stream index. Save preserves GUI-owned temporary
+copies under the output root before validating form paths; no media bytes, plan approvals or
+credentials enter JSON. Load checks paths/hashes, restores selections and creates a fresh metadata
+plan with confirmation unset. Native upload replies expose the source hash to deduplicate repeated
+same-name/content selections. Profiles carry references only; cleanup audits every pending track.
+A retained failed/cancelled state may supersede a saved staged snapshot only when current source
+hashes and the freshly planned episode signature match. Restore keeps it inactive, preserves its
+failure file and requires explicit Retry. A changed free output version alone cannot abort restore.
+
+Existing-save names are readonly; Save as new creates a new ID. Selection-revision/request counters
+prevent an asynchronous list refresh from undoing a newer user choice. Save captures name/reference
+before awaits. List/save/load expose `workspace_file`; the UI shows the actual catalog location.
+Loading clears name-field validation. Viewport background artwork extends beyond bounded content.
+
+Whisper Large V3/Turbo requests use `provider.only=[deepinfra,groq]` with external fallback disabled,
+plus verbose JSON and word granularity. Price estimates use that same endpoint subset. A reproduced
+Together response returned text/segments with an empty words array despite those timing parameters.
+No speculative alignment or automatic paid retry is allowed. Explicit empty speech is accepted only
+without lexical text/timed words in any segment and with a supported requested/detected language.
+Unexpected timing responses persist `invalid-response` plus counts/type metadata in the usage ledger;
+GUI technical details receive only controlled model/chunk/count context, never raw provider text.
+Session-key input action is disabled when empty; OS Use immediately activates the shared key.

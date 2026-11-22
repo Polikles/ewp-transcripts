@@ -1,8 +1,22 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-21**.
+Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
+
+Current task: [B recovery / pending media / cloud timing](docs/checkpoints/2026-11-22-b-recovery-cloud-timing.md),
+baseline main 7a1c2da. Fixes implemented; pending-browser Save/restart/Load passes with completed+
+failed rows, restored media paths/deduplication, stable saved-name identity and visible manifest path.
+Async refresh could undo Save as new; revision counters and captured Save identity fix that race.
+Whisper's missing-word issue reproduced on a supplied full track: Together dropped word timing after
+9 DeepInfra chunks. Restrict route/price subset to DeepInfra/Groq; original tail now returns real
+words for Whisper and Scribe. All10 responses replay successfully (777 words), no fabricated times.
+Scribe's original native failure remains unproven; content-free diagnostics added for future defects.
+No more paid calls; cumulative USD0.0291461230985028369. Disposable servers stopped and root
+/tmp/ewp-b-recovery.nTxlJ0 removed after saving content-free evidence and exact spend totals.
+1043 tests/mypy115,17 integrations, full GUI216 cases, fresh-consent48 and full review restart pass.
+Changed-step docs/checkpoints/evidence saved. Delivered on main; next is the owner update-only retest.
+A stays closed, artist ZIP frozen; task10 local ID/EN/PL draft waits for functional acceptance.
 
 Current follow-up is implemented/verified: [restore consent / workspace / layout](docs/checkpoints/2026-11-21-b-restore-consent-layout.md).
 Baseline main dee74cd. Fresh exact-queue one-use consent now gates HTTP cloud starts; load revokes it,

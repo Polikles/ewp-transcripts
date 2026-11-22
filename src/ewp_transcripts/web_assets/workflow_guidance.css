@@ -208,4 +208,4 @@
   .workspace-primary-actions, .workspace-secondary-actions { grid-template-columns: minmax(0,1fr); }
   .workspace-removal-actions { grid-column: 1; }
 }
-:root { background: var(--gui-bg); }
+:root { background-color: var(--gui-bg); }

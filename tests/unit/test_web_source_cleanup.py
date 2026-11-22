@@ -131,3 +131,33 @@ def test_changed_managed_source_is_never_eligible_for_cleanup(tmp_path: Path) ->
 
     assert not item.removable
     assert item.references == ("content hash no longer matches its managed path",)
+
+
+def test_saved_pending_media_protects_every_track_before_it_is_staged(tmp_path: Path) -> None:
+    output = tmp_path / "output"
+    pending = []
+    for index in range(2):
+        source = tmp_path / f"track-{index}.wav"
+        source.write_bytes(f"source {index}".encode())
+        preserved, digest = preserve_gui_selected_source(
+            source, output_directory=output, category="media"
+        )
+        pending.append({"path": str(preserved), "name": source.name, "source_sha256": digest})
+    workspace = GuiWorkspaceDocument(
+        workspace_id="4bf6dd33-d48c-4eb7-bd9b-15f5e6c20a29",
+        name="pending",
+        saved_at=datetime.now(UTC),
+        current_step="workspace-heading",
+        fields={},
+        pending_media=pending,
+    )
+    inventory = inventory_managed_sources(output, queue_jobs=(), workspaces=(workspace,))
+    assert len(inventory) == 2 and all(not item.removable for item in inventory)
+    with pytest.raises(GuiManagedSourceCleanupError):
+        cleanup_managed_sources(
+            output,
+            tuple(item.relative_path for item in inventory),
+            queue_jobs=(),
+            workspaces=(workspace,),
+        )
+    assert all(Path(item["path"]).exists() for item in pending)

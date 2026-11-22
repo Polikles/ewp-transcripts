@@ -149,6 +149,7 @@ def _portable_workspace(workspace: GuiWorkspaceDocument) -> None:
 def _without_runtime(workspace: GuiWorkspaceDocument) -> GuiWorkspaceDocument:
     return workspace.model_copy(
         update={
+            "workspace_version": 3,
             "fields": {
                 key: False
                 if key in {"correction-allow-remote", "translation-allow-remote"}

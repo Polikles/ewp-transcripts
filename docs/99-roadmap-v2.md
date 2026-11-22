@@ -36,6 +36,22 @@ Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is cor
 isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
 Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
 
+### Current recovery and provider timing feedback — 2026-11-22
+
+Owner confirms favicon, API check, mixed local/cloud queue and restored upload-consent blocking.
+Follow [the new checkpoint](checkpoints/2026-11-22-b-recovery-cloud-timing.md) for pending-media v3
+save/restart/deduplication, failed/cancelled snapshot outcomes, saved-name identity/list-refresh race,
+visible catalog path, full-viewport artwork and empty key-input action. The original Whisper error
+reproduced when Together returned no word times; corrected routing/tail checks pass. Scribe samples
+and the failing tail pass, but its original native incident is not reproduced. Diagnostic cumulative
+cloud spend is USD0.0291461230985028369 within the original USD2; no further paid requalification.
+Use the [update-only checklist](../Instructions/GUI_UPDATE_TEST_CHECKLIST.md); no reinstalls.
+
+Task10 format is confirmed: stable field/message ID + editable EN and PL, allowing owner changes
+to both languages. Draft stays locally on the VM for review; after correction/application, commit
+the approved table as the maintained translation reference. Do this after functional freeze/B
+acceptance; manuals follow approval. The artist ZIP remains unchanged and blocks no current work.
+
 ### Current restored-consent and layout follow-up
 
 Owner confirms native SRT/VTT-only progress, translation candidate status/generation lock and

@@ -6,6 +6,20 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Preserve pending media in workspace v3 before staging: durable source copies, hashes, per-file
+  options and fresh metadata planning survive restart; repeated same-name/same-content selections
+  do not duplicate the list. Versions 1/2 remain readable. Profiles keep references only, and cleanup
+  protects all pending tracks. Restore a staged snapshot's later failed/cancelled outcome instead of
+  aborting when its reserved output version has changed; preserve failed files and explicit Retry.
+- Keep the loaded workspace name and clear stale validation; existing names are readonly until
+  Save as new is selected. Background list refresh cannot undo the user's latest selection or
+  change the save identity. Display the actual manifest path, including legacy private catalogs.
+- Restrict OpenRouter Whisper routes/prices to word-timing-capable DeepInfra/Groq endpoints after
+  reproducing Together's text/segment-only response. Preserve real word timing, handle explicit
+  empty speech, and retain content-free model/chunk/response-shape diagnostics for failures.
+- Draw patterned artwork across the full viewport around bounded content. Disable Set session key
+  with empty input, including after Use saved key, which already activates the shared server key.
+
 - Cloud queue starts over HTTP require a fresh, one-use upload-consent grant for the exact staged
   queue. Restoring work revokes it; retries/queue changes invalidate it. Saved profiles/workspaces
   never contain the grant, and stale/programmatically restored checkbox state cannot authorize a start.

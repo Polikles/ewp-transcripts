@@ -31,6 +31,7 @@ from ewp_transcripts.credentials import OSCredentialStore, validate_api_key
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
 from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.domain.models import JobStateRecord
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.native_picker import select_native_file
@@ -67,6 +68,7 @@ from ewp_transcripts.web_workflows import (
 )
 from ewp_transcripts.web_workspaces import (
     GuiWorkspaceController,
+    GuiWorkspaceMedia,
     default_workspace_directory,
     resolve_optional_workspace_file,
 )
@@ -840,7 +842,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     saved = workspace.import_file(selected_path)
                     selected_payload = {"workspace": saved.model_dump(mode="json")}
                 else:
-                    selected_payload = {"path": str(selected_path)}
+                    selected_payload = {
+                        "path": str(selected_path),
+                        "source_sha256": sha256_file(selected_path),
+                    }
             except (FileNotFoundError, OSError, ValueError) as error:
                 self._write_response(
                     _json_response(
@@ -1214,6 +1219,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                             {
                                 **item.model_dump(mode="json"),
                                 "storage_directory": catalog_storage,
+                                "workspace_file": str(
+                                    controller.state_directory / f"{item.workspace_id}.json"
+                                ),
                                 "catalog": catalog_label,
                             }
                             for catalog_storage, catalog_label, controller in (
@@ -1226,6 +1234,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     fields = document.get("fields")
                     if not isinstance(fields, dict):
                         raise ValueError("Workspace fields must be an object")
+                    pending_media = self._preserve_workspace_media(
+                        document.get("pending_media", []), fields
+                    )
                     queue_jobs = self.server.gui_transcriptions.jobs()
                     durable_staged = tuple(
                         job
@@ -1270,6 +1281,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                             for job in durable_staged
                         ],
                         terminal_jobs=[job.model_dump(mode="json") for job in durable_terminal],
+                        pending_media=pending_media,
                         workspace_id=str(document.get("workspace_id", "")),
                         omit_unavailable=True,
                     )
@@ -1287,6 +1299,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     payload = {
                         "workspace": saved.model_dump(mode="json"),
+                        "workspace_file": str(
+                            workspaces.state_directory / f"{saved.workspace_id}.json"
+                        ),
                         "temporary_jobs_omitted": sum(
                             job.status in {"staged", "completed", "failed", "cancelled"}
                             for job in queue_jobs
@@ -1317,6 +1332,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                         payload = {
                             "workspace": loaded.model_dump(mode="json"),
+                            "workspace_file": str(
+                                workspaces.state_directory / f"{loaded.workspace_id}.json"
+                            ),
                             "restored_staged_jobs": restored,
                             "restored_terminal_jobs": restored_terminal,
                         }
@@ -2891,6 +2909,40 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
         self._write_response(_json_response(HTTPStatus.OK, payload))
         return
 
+    def _preserve_workspace_media(
+        self, items: object, fields: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Preserve pending picker media on explicit Save, before validating form paths."""
+        if not isinstance(items, list) or len(items) > 300:
+            raise ValueError("Workspace pending media selection is invalid")
+        if not items:
+            return []
+        if not str(fields.get("output-path", "")).strip():
+            raise ValueError("Choose an output directory before saving pending media")
+        output = self.server.gui_workflows.resolve_allowed_path(
+            str(fields.get("output-path", "")), directory=True
+        )
+        clean = []
+        for raw in items:
+            if not isinstance(raw, dict):
+                raise ValueError("Workspace pending media selection is invalid")
+            original = str(raw.get("path", ""))
+            source = self.server.gui_workflows.resolve_allowed_path(original)
+            digest = sha256_file(source)
+            if raw.get("source_sha256") and raw["source_sha256"] != digest:
+                raise ValueError("A pending source changed since this workspace was saved")
+            media = GuiWorkspaceMedia.model_validate({**raw, "source_sha256": digest})
+            if self.server.gui_selections.root in source.parents:
+                source, preserved = preserve_gui_selected_source(
+                    source, output_directory=output, category="media"
+                )
+                if digest != preserved:
+                    raise ValueError("A pending source changed while preserving it")
+            clean.append(media.model_copy(update={"path": str(source)}).model_dump(mode="json"))
+            if fields.get("input-path") == original:
+                fields["input-path"] = str(source)
+        return clean
+
     def _restore_workspace_staged_jobs(
         self,
         staged_jobs: tuple[dict[str, Any], ...],
@@ -2980,18 +3032,83 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 raise ValueError("A staged job could not be safely replanned")
             planned = jobs[0]
             outputs = planned.get("outputs") if isinstance(planned, dict) else None
-            if (
-                not isinstance(planned, dict)
-                or not isinstance(outputs, dict)
-                or planned.get("job_id") != item["planned_job_id"]
-                or outputs.get("results") != item["planned_result_path"]
-            ):
+            if not isinstance(planned, dict) or planned.get("job_id") != item["planned_job_id"]:
                 raise ValueError("A staged job plan changed since this workspace was saved")
+            failed_path = Path(str(item["planned_result_path"])).with_suffix(".failed.json")
+            state = None
+            try:
+                failed_path = self.server.gui_workflows.resolve_allowed_path(str(failed_path))
+                with failed_path.open(encoding="utf-8") as failure:
+                    raw = failure.read(64_001)
+                if len(raw) > 64_000:
+                    raise ValueError("Saved job state is too large")
+                state = JobStateRecord.model_validate_json(raw)
+            except FileNotFoundError:
+                pass
+            if state is not None and (
+                state.job_id == item["planned_job_id"]
+                and state.episode_signature_sha256 == planned.get("episode_signature_sha256")
+                and state.status.value in {"failed", "cancelled"}
+            ):
+                recovered = GuiTranscriptionJob(
+                    job_id=str(uuid4()),
+                    status=state.status.value,
+                    input_path=str(input_path),
+                    output_directory=str(output_path),
+                    planned_job_id=str(item["planned_job_id"]),
+                    planned_result_path=str(item["planned_result_path"]),
+                    source_sha256=str(item["source_sha256"]),
+                    group_sources=group_sources,
+                    selected_streams=item.get("selected_streams", {}),
+                    recording_id=item.get("recording_id"),
+                    speech=SpeechConfig.model_validate(item.get("speech", {})),
+                    language=language,
+                    speaker_count=speaker_count,
+                    created_at=state.created_at,
+                    updated_at=state.updated_at,
+                    error={
+                        "code": state.failure_code or "GUI_TRANSCRIPTION_FAILED",
+                        "message": state.failure_message or "Retained transcription failure",
+                    },
+                )
+                self.server.gui_transcriptions.replace_terminal_jobs(
+                    (
+                        *(
+                            job
+                            for job in self.server.gui_transcriptions.jobs()
+                            if job.status in {"completed", "failed", "cancelled"}
+                            and not (
+                                job.planned_result_path == recovered.planned_result_path
+                                and job.source_sha256 == recovered.source_sha256
+                            )
+                        ),
+                        recovered,
+                    )
+                )
+                if progress is not None:
+                    progress(1)
+                continue
+            if not isinstance(outputs, dict) or not isinstance(outputs.get("results"), str):
+                existing = planned.get("existing_result")
+                if not isinstance(existing, dict) or not isinstance(existing.get("path"), str):
+                    raise ValueError("A staged job could not be safely replanned")
+                result_path = self.server.gui_workflows.resolve_allowed_path(existing["path"])
+                require_completed_canonical_result(result_path)
+                self.server.gui_transcriptions.register_completed_result(
+                    result_path,
+                    output_directory=output_path,
+                    planned_job_id=str(item["planned_job_id"]),
+                    language=language,
+                    source_sha256=sha256_file(result_path),
+                )
+                if progress is not None:
+                    progress(1)
+                continue
             self.server.gui_transcriptions.stage(
                 input_path,
                 output_path,
                 planned_job_id=str(item["planned_job_id"]),
-                planned_result_path=str(item["planned_result_path"]),
+                planned_result_path=str(outputs["results"]),
                 source_sha256=str(item["source_sha256"]),
                 group_sources=group_sources,
                 selected_streams=item.get("selected_streams", {}),

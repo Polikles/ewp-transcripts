@@ -1,6 +1,6 @@
 # Work policy and context recovery
 
-Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
+Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
 
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
    and `docs/99-roadmap-v2.md`. Inspect Git status before edits. Historical handoff sections
@@ -78,3 +78,16 @@ Updated: 2026-11-21. Read `AGENTS.md` first; this file supplements its rules.
     actually ran in the reported unchecked-consent incident; test exact restored cloud identity
     and server-side fresh consent, without another paid run. Do not infer a proven root cause
     merely from hardening the boundary. Follow the current restore-consent checkpoint.
+
+15. 2026-11-22 feedback: use the current recovery/cloud-timing checkpoint and update-only
+    checklist. Owner confirms favicon/API check/fresh consent/mixed queue pass. Targeted supplied
+    s0e01 diagnosis reproduced Together dropping word times after DeepInfra returned them; Whisper
+    routing/price subset is now DeepInfra/Groq. The corrected tail and Scribe tail return real words.
+    No further paid tests after this diagnosis: cumulative authorized spend is now
+    USD 0.0291461230985028369, including this task's USD 0.0137851119444436699. Preserve exact totals
+    after disposable cleanup. Do not claim the original native Scribe failure was reproduced.
+    New workspace v3 preserves pending media; versions 1/2 remain readable. Retain file-backed
+    failed/cancelled history, no auto retry, protected source copies, explicit Save as new identity.
+    Task 10 must include stable field/message ID and editable EN/PL (owner may edit EN too): initial
+    local VM review file, then apply owner corrections and commit the approved catalog as the
+    reference for later revisions/translations. Generate only after functional freeze, then manuals.

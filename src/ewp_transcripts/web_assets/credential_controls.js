@@ -56,3 +56,16 @@ document.querySelector("#check-openrouter-key").addEventListener("click",async e
 
 openRouterKeyButton.addEventListener("click",()=>{keyCheckStatus.textContent="";});
 document.querySelector("#openrouter-api-key").addEventListener("input",()=>{keyCheckStatus.textContent="";});
+
+// Loading a stored key already activates the session; only entered text can set another key.
+function updateSessionKeyButton() {
+  document.querySelector("#save-openrouter-key").disabled=!document.querySelector("#openrouter-api-key").value.trim();
+}
+document.querySelector("#openrouter-api-key").addEventListener("input",updateSessionKeyButton);
+openRouterKeyButton.addEventListener("click",updateSessionKeyButton);
+new MutationObserver(updateSessionKeyButton).observe(document.querySelector("#openrouter-key-dialog-status"),{childList:true,subtree:true,characterData:true});
+for(const button of credentialStoreButtons.querySelectorAll("button"))button.addEventListener("click",updateSessionKeyButton);
+keyCheckButton.addEventListener("click",updateSessionKeyButton);
+updateSessionKeyButton();
+
+document.querySelector("#save-openrouter-key").addEventListener("click",updateSessionKeyButton);

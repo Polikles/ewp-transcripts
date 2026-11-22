@@ -34,6 +34,24 @@ from ewp_transcripts.engines.protocols import (
 
 BASE = "https://openrouter.ai/api/v1"
 HttpCall = Callable[[str, Mapping[str, str], bytes | None, float], dict[str, Any]]
+WORD_TIMING_PROVIDERS = {
+    "openai/whisper-large-v3": ("deepinfra", "groq"),
+    "openai/whisper-large-v3-turbo": ("deepinfra", "groq"),
+}
+
+
+def timing_endpoints(model: str, endpoints: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Exclude routes known to drop requested word timing instead of inventing alignment."""
+    allowed = WORD_TIMING_PROVIDERS.get(model)
+    if allowed is None:
+        return endpoints
+    return [
+        endpoint
+        for endpoint in endpoints
+        if isinstance(endpoint, dict)
+        and str(endpoint.get("tag") or endpoint.get("provider_name") or "").lower().split("/")[0]
+        in allowed
+    ]
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -93,6 +111,11 @@ def maximum_rate(model: str, transport: HttpCall = request_json) -> Decimal:
     endpoints = data.get("endpoints") if isinstance(data, dict) else None
     if not isinstance(endpoints, list) or not endpoints:
         raise SpeechEngineError("OpenRouter ASR pricing is unavailable; no audio was sent")
+    endpoints = timing_endpoints(model, endpoints)
+    if not endpoints:
+        raise SpeechEngineError(
+            "No word-timing-capable OpenRouter endpoint is available for this model"
+        )
     rates = []
     for endpoint in endpoints:
         pricing = endpoint.get("pricing") if isinstance(endpoint, dict) else None
@@ -110,24 +133,49 @@ class CloudTranscript:
     diarization: DiarizationResult
 
 
+class CloudResponseError(SpeechEngineError):
+    """Preserve non-content response diagnostics for the GUI's technical disclosure."""
+
+    def __init__(self, message: str, context: dict[str, str]) -> None:
+        super().__init__(message)
+        self.technical_context = context
+
+
 def parse_transcript(
     document: dict[str, Any], *, duration_ms: int, offset_ms: int, language: str
 ) -> CloudTranscript:
     """Require actual timed words; no invented alignment/speaker labels or text-only fallback."""
+    if document.get("error"):
+        raise SpeechEngineError(
+            "OpenRouter returned a provider error response; no automatic retry was made"
+        )
     raw = document.get("words")
-    if raw == [] and document.get("text") == "" and language in {"pl", "en"}:
+    segments = document.get("segments") or []
+    detected = document.get("language") or language
+    detected = {"english": "en", "polish": "pl", "pol": "pl", "eng": "en"}.get(
+        str(detected).lower(), str(detected).lower()
+    )
+    if (
+        raw in (None, [])
+        and isinstance(document.get("text"), str)
+        and not document["text"].strip()
+        and isinstance(segments, list)
+        and not any(
+            not isinstance(segment, dict)
+            or str(segment.get("text", "")).strip()
+            or segment.get("words")
+            for segment in segments
+        )
+        and detected in {"pl", "en"}
+    ):
         return CloudTranscript(
-            AlignedTranscript(language=language, segments=()), DiarizationResult(turns=())
+            AlignedTranscript(language=detected, segments=()), DiarizationResult(turns=())
         )
     if not isinstance(raw, list) or not raw:
         raise SpeechEngineError(
             "OpenRouter ASR returned no word timestamps; this model/endpoint cannot "
             "complete the subtitle workflow"
         )
-    detected = document.get("language") or language
-    detected = {"english": "en", "polish": "pl", "pol": "pl", "eng": "en"}.get(
-        str(detected).lower(), str(detected).lower()
-    )
     if detected not in {"pl", "en"}:
         raise SpeechEngineError("OpenRouter ASR must identify Polish or English for this workflow")
     segments = []
@@ -329,6 +377,11 @@ class CloudSpeechSession:
                 }
                 if language != "auto":
                     payload["language"] = language
+                if self.config.model in WORD_TIMING_PROVIDERS:
+                    payload["provider"] = {
+                        "only": list(WORD_TIMING_PROVIDERS[self.config.model]),
+                        "allow_fallbacks": False,
+                    }
                 if self.config.model == "elevenlabs/scribe-v2":
                     payload["provider"] = {
                         "options": {
@@ -382,6 +435,20 @@ class CloudSpeechSession:
                     self._charged += actual - reserve
                     record["reported_usd"] = str(actual)
                 record["status"] = "response-received"
+                response_shape = {
+                    "has_provider_error": bool(document.get("error")),
+                    "text_characters": len(document.get("text", ""))
+                    if isinstance(document.get("text"), str)
+                    else None,
+                    "words_type": type(document.get("words")).__name__,
+                    "word_count": len(document["words"])
+                    if isinstance(document.get("words"), list)
+                    else None,
+                    "segment_count": len(document["segments"])
+                    if isinstance(document.get("segments"), list)
+                    else None,
+                }
+                record["response_shape"] = response_shape
                 record["generation_id"] = document.get("_generation_id")
                 self._write_usage(path.parent)
                 if self._charged > self._limit:
@@ -389,12 +456,24 @@ class CloudSpeechSession:
                         "OpenRouter reported charges above the job budget; "
                         "no further request will be made"
                     )
-                parsed = parse_transcript(
-                    document,
-                    duration_ms=round(seconds * 1000),
-                    offset_ms=round(Decimal(position) / rate * 1000),
-                    language=language,
-                )
+                try:
+                    parsed = parse_transcript(
+                        document,
+                        duration_ms=round(seconds * 1000),
+                        offset_ms=round(Decimal(position) / rate * 1000),
+                        language=language,
+                    )
+                except SpeechEngineError as error:
+                    record["status"] = "invalid-response"
+                    self._write_usage(path.parent)
+                    raise CloudResponseError(
+                        str(error),
+                        {
+                            "asr_model": self.config.model,
+                            "chunk": f"{chunk_index}/{len(chunks)}",
+                            **{key: str(value) for key, value in response_shape.items()},
+                        },
+                    ) from None
                 if diarize and len(parsed.diarization.turns) != sum(
                     len(x.words) for x in parsed.aligned.segments
                 ):

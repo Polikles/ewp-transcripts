@@ -312,6 +312,7 @@ def stage_audio_without_models(page: Page, output: Path) -> None:
 def check_pending_restore(page: Page) -> None:
     """Restore two staged recordings plus completed history with visible real job counters."""
     stage(page, "saved")
+    page.locator("#workspace-list").select_option("")
     page.locator("#workspace-name").fill("Pending restore progress")
     page.locator("#save-workspace").click()
     expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
@@ -1263,6 +1264,7 @@ def exercise(page: Page, output: Path, baseline: bool) -> list[dict]:
     recovery_text = "Welcome to another episode. Saved recovery Żółć"
     page.locator("#review-editor textarea").first.fill(recovery_text)
     stage(page, "saved")
+    page.locator("#workspace-list").select_option("")
     page.locator("#workspace-name").fill("GUI integrated preview recovery")
     page.locator("#save-workspace").click()
     expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")

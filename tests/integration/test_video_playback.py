@@ -351,7 +351,9 @@ def test_cloud_words_publish_same_canonical_and_export_without_local_models(tmp_
     def request(url, headers, body, timeout):
         calls.append((url, body))
         if body is None:
-            return {"data": {"endpoints": [{"pricing": {"prompt": "0.0001"}}]}}
+            return {
+                "data": {"endpoints": [{"tag": "deepinfra/us", "pricing": {"prompt": "0.0001"}}]}
+            }
         return {
             "language": "pl",
             "text": "Test audio.",

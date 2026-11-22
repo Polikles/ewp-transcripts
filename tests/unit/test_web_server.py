@@ -703,13 +703,13 @@ def test_workspace_list_combines_default_and_selected_catalogs(tmp_path: Path) -
     handler.headers = headers
     handler.path = "/api/v1/workspaces/list"
     handler.rfile = BytesIO(body)
-    default_summary = Mock()
+    default_summary = Mock(workspace_id="default-id")
     default_summary.model_dump.return_value = {"workspace_id": "default-id", "name": "Default"}
-    custom_summary = Mock()
+    custom_summary = Mock(workspace_id="custom-id")
     custom_summary.model_dump.return_value = {"workspace_id": "custom-id", "name": "Custom"}
-    default_catalog = Mock()
+    default_catalog = Mock(state_directory=tmp_path / "default")
     default_catalog.list.return_value = (default_summary,)
-    custom_catalog = Mock()
+    custom_catalog = Mock(state_directory=tmp_path / "custom")
     custom_catalog.list.return_value = (custom_summary,)
     handler.server = SimpleNamespace(
         server_port=8765,
@@ -735,12 +735,14 @@ def test_workspace_list_combines_default_and_selected_catalogs(tmp_path: Path) -
             "name": "Default",
             "storage_directory": "",
             "catalog": "Default",
+            "workspace_file": str(tmp_path / "default/default-id.json"),
         },
         {
             "workspace_id": "custom-id",
             "name": "Custom",
             "storage_directory": str(tmp_path / "custom"),
             "catalog": "Custom",
+            "workspace_file": str(tmp_path / "custom/custom-id.json"),
         },
     ]
 
@@ -1566,3 +1568,117 @@ def test_restored_cloud_job_requires_fresh_http_consent_even_if_start_boolean_is
         )
     finally:
         queue.close()
+
+
+@pytest.mark.parametrize("terminal_status", ["failed", "cancelled"])
+def test_restore_staged_snapshot_recovers_later_terminal_state(tmp_path, terminal_status):
+    from datetime import UTC, datetime
+    from uuid import uuid4
+
+    from ewp_transcripts.config import ApplicationConfig
+    from ewp_transcripts.domain.models import JobStateRecord
+    from ewp_transcripts.web_jobs import GuiTranscriptionQueue
+
+    source = tmp_path / "source.wav"
+    source.write_bytes(b"fixed source")
+    result = tmp_path / "episode_results.json"
+    failed = result.with_suffix(".failed.json")
+    now = datetime.now(UTC)
+    code = "USER_CANCELLED" if terminal_status == "cancelled" else "SPEECH_ENGINE_ERROR"
+    state = JobStateRecord(
+        application_version="0.20.0",
+        run_id=uuid4(),
+        job_id="episode",
+        episode_signature_sha256="a" * 64,
+        result_version=1,
+        status=terminal_status,
+        created_at=now,
+        updated_at=now,
+        failure_code=code,
+        failure_message="Retained failure",
+    )
+    failed.write_text(state.model_dump_json())
+    service = Mock()
+    queue = GuiTranscriptionQueue(config=ApplicationConfig(), service=service)
+    workflows = GuiWorkflowController()
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(
+        gui_transcriptions=queue,
+        gui_workflows=SimpleNamespace(
+            resolve_allowed_path=workflows.resolve_allowed_path,
+            resolve_transcription_options=workflows.resolve_transcription_options,
+            run=Mock(
+                return_value=SimpleNamespace(
+                    status="completed",
+                    result={
+                        "jobs": [
+                            {
+                                "job_id": "episode",
+                                "episode_signature_sha256": "a" * 64,
+                                "outputs": {"results": str(tmp_path / "episode_results_v002.json")},
+                            }
+                        ]
+                    },
+                )
+            ),
+        ),
+    )
+    progress = Mock()
+    try:
+        item = dict(
+            input_path=str(source),
+            output_directory=str(tmp_path),
+            planned_job_id="episode",
+            planned_result_path=str(result),
+            source_sha256=sha256_file(source),
+            language="pl",
+            speaker_count=1,
+            speech={"provider": "openrouter", "model": "openai/whisper-large-v3"},
+        )
+        assert handler._restore_workspace_staged_jobs((item,), progress=progress) == 1
+        job = queue.jobs()[0]
+        assert job.status == terminal_status and job.error["code"] == code
+        assert job.speech.provider == "openrouter" and job.result_path is None
+        assert job.planned_result_path == str(result) and failed.exists()
+        progress.assert_called_once_with(1)
+        service.assert_not_called()
+        assert handler._restore_workspace_staged_jobs((item,)) == 1
+        assert len(queue.jobs()) == 1  # Loading the same retained attempt never duplicates history.
+    finally:
+        queue.close()
+
+
+def test_save_preserves_pending_media_before_clearing_temporary_picker(tmp_path):
+    from ewp_transcripts.web_workspaces import GuiWorkspaceController
+
+    selection = tmp_path / "picked"
+    selection.mkdir()
+    source = selection / "episode.wav"
+    source.write_bytes(b"selected source bytes")
+    output = tmp_path / "output"
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(
+        gui_workflows=GuiWorkflowController(), gui_selections=SimpleNamespace(root=selection)
+    )
+    fields = {"input-path": str(source), "output-path": str(output)}
+    media = handler._preserve_workspace_media(
+        [{"path": str(source), "name": source.name, "language": "en", "speaker_count": 1}], fields
+    )
+    assert fields["input-path"] == media[0]["path"] != str(source)
+    source.unlink()
+    controller = GuiWorkspaceController(
+        state_directory=output,
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+        temporary_selection_root=selection,
+    )
+    saved = controller.save(
+        name="Pending source", current_step="workspace-heading", fields=fields, pending_media=media
+    )
+    loaded = controller.load(saved.workspace_id)
+    assert loaded.workspace_version == 3 and len(loaded.pending_media) == 1
+    assert loaded.pending_media[0].language == "en"
+    assert Path(loaded.pending_media[0].path).read_bytes() == b"selected source bytes"
+    assert not loaded.staged_jobs and not loaded.terminal_jobs
+    Path(loaded.pending_media[0].path).write_bytes(b"changed")
+    with pytest.raises(ValueError, match="pending source changed"):
+        controller.load(saved.workspace_id)

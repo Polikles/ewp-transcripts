@@ -147,3 +147,21 @@ Each cloud start now needs a fresh one-use confirmation for the exact staged que
 work invalidates an earlier confirmation; a changed/retried queue needs its checkbox selected again.
 The server rejects an old browser's confirmation boolean without the matching grant, before any
 worker is queued. The grant is not a credential and is never written to saved work or profiles.
+
+## Provider timing and pending selections
+
+Whisper Large V3/Turbo use the DeepInfra/Groq routes qualified for word timing. Text-only routes
+are excluded from routing and current-price estimates. A model without an available compatible
+endpoint is unavailable; no audio is sent to an arbitrary substitute. Scribe/MAI keep their own
+model-provider options. Provider word times remain required; the application never estimates word
+positions from plain text. An explicitly empty transcript can represent a no-speech fragment.
+
+If a provider still omits timing, technical details include the model, chunk and response counts,
+without transcript text or keys. Retained `cloud-asr-usage.json` has an `invalid-response` entry
+and response-shape counts. There is no automatic paid retry. A key/connection check confirms
+access, rather than guaranteeing that a later routed transcription response contains timed words.
+
+Saving before Add to queue now preserves pending files and settings. Loading replans metadata
+without ASR/upload and leaves confirmation unchecked. Repeat file selection does not duplicate
+same-name/same-content items. Failure JSON files are not a cache of upstream transcript responses;
+removing them does not fix missing word timestamps.

@@ -213,3 +213,39 @@ def test_native_playback_rates_can_be_saved_in_profiles(speed):
     from ewp_transcripts.web_profiles import GuiPreferences
 
     assert GuiPreferences(playbackSpeed=speed).playbackSpeed == speed
+
+
+def test_portable_profile_keeps_pending_media_references_without_media_or_approval(tmp_path):
+    from datetime import UTC, datetime
+
+    service = controller(tmp_path / "first")
+    workspace = GuiWorkspaceDocument(
+        workspace_id=str(uuid4()),
+        name="Pending",
+        saved_at=datetime.now(UTC),
+        current_step="workspace-heading",
+        fields={},
+        pending_media=[
+            {
+                "path": "C:\\Podcast\\pending.wav",
+                "name": "pending.wav",
+                "source_sha256": "a" * 64,
+                "language": "pl",
+                "speaker_count": 2,
+            }
+        ],
+    )
+    profile = service.capture(
+        name="Pending references",
+        preferences={},
+        fields={},
+        workspaces=(workspace,),
+        dictionary_paths=[],
+    )
+    target = controller(tmp_path / "second")
+    target.restore(profile.model_dump(mode="json"))
+    restored = target.workspaces.documents()[0]
+    assert restored.pending_media[0].path == "C:\\Podcast\\pending.wav"
+    assert restored.workspace_version == 3 and not restored.staged_jobs
+    assert target.workspaces.list()[0].available is False
+    assert not list((tmp_path / "second").rglob("*.wav"))

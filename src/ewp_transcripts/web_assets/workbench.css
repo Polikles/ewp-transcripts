@@ -11,7 +11,8 @@
 .gui-brand-title { display: grid; gap: .3rem; }
 .gui-brand-title .eyebrow { margin: 0; font-size: .7rem; }
 .gui-workbench #compatibility { margin: 0 0 .75rem; font-size: .75rem; }
-.gui-workbench { background-image: linear-gradient(var(--gui-pattern-veil), var(--gui-pattern-veil)), var(--gui-pattern); background-size: auto, 24rem; }
+:root { background-image: linear-gradient(var(--gui-pattern-veil), var(--gui-pattern-veil)), var(--gui-pattern); background-size: auto, 24rem; }
+.gui-workbench { background-color: transparent; }
 :root[data-theme=light] { --gui-pattern: url(/assets/brand/web-pattern-light.svg); --gui-pattern-veil: #eef3f7bb; }
 :root[data-theme=dark] { --gui-pattern: url(/assets/brand/web-pattern-dark.svg); --gui-pattern-veil: #10232dbb; }
 .gui-workbench .next-required { outline: .2rem solid var(--gui-accent); outline-offset: .25rem; }

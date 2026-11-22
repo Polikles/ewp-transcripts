@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -729,8 +730,25 @@ def _unexpected_failure_detail(error: BaseException) -> dict[str, str]:
 def _backend_failure_detail(error: ApplicationError) -> dict[str, str]:
     # Backend exception text is only shown in the local technical-details disclosure.
     # Do not expose arbitrary unexpected exceptions or environment credentials.
+    context = getattr(error, "technical_context", None)
+    cloud_details = {}
+    if (
+        isinstance(context, dict)
+        and set(context)
+        <= {
+            "asr_model",
+            "chunk",
+            "has_provider_error",
+            "text_characters",
+            "words_type",
+            "word_count",
+            "segment_count",
+        }
+        and all(isinstance(value, str) for value in context.values())
+    ):
+        cloud_details = {"cloud_response": json.dumps(context)}
     if error.__cause__ is None:
-        return {}
+        return cloud_details
     if error.code != "SPEECH_ENGINE_ERROR":
         cause = error.__cause__
         details = _unexpected_failure_detail(cause)
@@ -755,7 +773,7 @@ def _backend_failure_detail(error: ApplicationError) -> dict[str, str]:
         if any(word in detail.casefold() for word in ("torchcodec", "libavutil", "ffmpeg"))
         else {}
     )
-    return {"backend_detail": detail[:4000], **instructions}
+    return {"backend_detail": detail[:4000], **instructions, **cloud_details}
 
 
 def _matches_staged_source(path: Path, expected_sha256: str) -> bool:

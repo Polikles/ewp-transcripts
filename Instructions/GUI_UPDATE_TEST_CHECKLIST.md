@@ -1,29 +1,35 @@
-# Focused update check — restored consent and layout
+# Focused update check — pending work and cloud timing
 
-2026-11-21. This is the active follow-up for the already installed Windows/WSL application.
-Installation, local/cloud ASR, source SRT/VTT export and translation progress have already passed
-owner checks. Do not reinstall Python dependencies, FFmpeg or models for this retest.
+2026-11-22. Use the existing installation. Favicon, API checking, mixed local/cloud queue and restored
+upload-consent blocking are owner-confirmed passes. No reinstall, model download, full four-model
+benchmark or repeat installation checks are required.
 
-1. Stop the GUI, `git pull`, then `uv run --locked transcriber gui`. Refresh the browser page.
-   Check that the framed favicon is centered. At half width the controls remain usable; on a
-   very wide/full screen the interface stays centered with side gutters and readable review text.
-2. Collapse **Transcription engine**. Step **2. Plan and add to queue** and its actions remain
-   visible. Expand OpenRouter options: the two hints are short. In Manage OpenRouter key, use
-   **Check API key**: its result appears directly below that button. This check uploads no audio.
-3. Open **Saved work & cleanup**. The list refreshes automatically. Save with an empty name:
-   the name field receives focus/highlight and an explanation. Enter a name and save.
-   The optional catalog hint is above its input; leaving it blank saves the workspace JSON
-   in the output directory. Existing saves in a separate/legacy catalog remain accessible.
-   Refresh is below Save; Remove/Clear are subdued and aligned right below the main row.
-4. Plan/stage a short **OpenRouter Whisper** job. Click Start without checking upload consent:
-   the checkbox is highlighted/focused, an explanation appears, and no transcription starts.
-   Check consent, then save work **without starting**. Stop/restart the server, load that save
-   and try Start again: it must still be blocked. Provider/model persist, consent stays unchecked.
-   Re-entering/loading the API key must not grant upload consent. No paid successful retry is
-   required for this check; stop here and report if anything starts unexpectedly.
-5. If these checks pass, report the commit, Windows/WSL, browser and any remaining issue.
-   Existing acceptance evidence remains valid. The remaining full package-B workflow gate and
-   final EN–PL terminology approval are separate; do not repeat installation checks after updates.
+1. Stop GUI, `git pull`, `uv run --locked transcriber gui`, refresh the page (Ctrl+F5).
+   At full width the background artwork continues into both side gutters, in light/dark themes.
+   In the key dialog, Use saved key activates it immediately. Set session key is disabled with
+   empty input, enabled after typing and disabled again after clearing it.
+2. Choose a test output directory and two tracks from one episode. Plan, then Save work **before
+   Add to queue**. Confirm the displayed Saved work file path. Restart/load: the name fills its
+   field, old validation clears, two files and their input path return, and metadata is replanned.
+   Plan approval remains unchecked. Select those same files again: still two files/one episode.
+   Review/confirm the plan, then Add to queue should work without a native required-input error.
+3. Existing workspace names are readonly. Select Save as a new workspace, give a different name
+   and Save: two separate entries/manifests remain. Background list refresh must not undo the choice.
+   A selected older save may live in the private catalog; its displayed path explains why it is
+   absent from an output-folder ZIP. Save as new with blank optional catalog creates an output-root copy.
+4. Load a saved queue with completed and failed/cancelled work. Also check a snapshot saved before
+   an attempt later failed/cancelled: its retained matching failure state restores the inactive row.
+   All rows should return, no ASR starts automatically, and retry remains explicit. Do not delete
+   failure JSON files. Media/final artifacts and prior exports remain intact.
+5. One cloud follow-up is enough: use the previously failing s0e01 tracks with Whisper Large,
+   deliberately grant upload consent and start. The complete result should include real word times
+   and open in source review/export. Do not repeat already passed local ASR or all four cloud models.
+   If Scribe still fails, send the new technical details (`cloud_response` model/chunk/counts) and
+   the affected content-free usage-ledger entry. Do not send keys or full transcripts.
+6. Clearing browser/current workflow state may leave the server-session key available; that is
+   intentional. Report commit, Windows/WSL, action and expected/actual behavior for any new defect.
 
-[Full B workflow reference](GUI_PACKAGE_B_TEST_CHECKLIST.md).
-[Deferred install/uninstall qualification](INSTALLER_QUALIFICATION_PLAN.md).
+Full B acceptance and terminology review remain separate. After functions settle, the agent prepares
+one local editable field/message-ID + EN/PL table; owner can correct both languages. Applied/approved
+version becomes the repository reference, followed by consistent EN/PL manuals. The artist ZIP stays
+frozen. [Deferred installation/removal checks](INSTALLER_QUALIFICATION_PLAN.md).
