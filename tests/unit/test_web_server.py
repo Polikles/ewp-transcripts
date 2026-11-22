@@ -711,6 +711,8 @@ def test_workspace_list_combines_default_and_selected_catalogs(tmp_path: Path) -
     default_catalog.list.return_value = (default_summary,)
     custom_catalog = Mock(state_directory=tmp_path / "custom")
     custom_catalog.list.return_value = (custom_summary,)
+    default_catalog.document_path.return_value = tmp_path / "default/default-id.json"
+    custom_catalog.document_path.return_value = tmp_path / "custom/custom-id.json"
     handler.server = SimpleNamespace(
         server_port=8765,
         gui_csrf_token="expected",
@@ -1481,8 +1483,11 @@ def test_restored_cloud_job_requires_fresh_http_consent_even_if_start_boolean_is
     result = tmp_path / "episode_results.json"
     workflows = GuiWorkflowController()
     seen = []
+    active_key = {"value": ""}
+    key_check = Mock(return_value={"status": "ok"})
     queue = GuiTranscriptionQueue(
         config=ApplicationConfig(),
+        api_key_provider=lambda: active_key["value"],
         service=lambda path, **kw: seen.append(kw) or SimpleNamespace(result_path=result),
     )
     handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
@@ -1490,6 +1495,7 @@ def test_restored_cloud_job_requires_fresh_http_consent_even_if_start_boolean_is
         server_port=8765,
         gui_csrf_token="expected",
         gui_transcriptions=queue,
+        gui_speech=SimpleNamespace(check_key=key_check),
         gui_workflows=SimpleNamespace(
             resolve_allowed_path=workflows.resolve_allowed_path,
             resolve_transcription_options=workflows.resolve_transcription_options,
@@ -1559,7 +1565,24 @@ def test_restored_cloud_job_requires_fresh_http_consent_even_if_start_boolean_is
         token = post("cloud-consent", {"cloud_confirmed": True, "cloud_job_ids": [job.job_id]})[1][
             "cloud_consent_token"
         ]
+        status, payload = post("start", {"cloud_confirmed": True, "cloud_consent_token": token})
+        assert status == 400 and payload["error"]["code"] == "GUI_OPENROUTER_KEY_REQUIRED"
+        key_check.assert_not_called()
+        assert not seen and queue.jobs()[0].status == "staged" and not result.exists()
+        active_key["value"] = "fake-key"
+        token = post("cloud-consent", {"cloud_confirmed": True, "cloud_job_ids": [job.job_id]})[1][
+            "cloud_consent_token"
+        ]
+        key_check.side_effect = ValueError("synthetic invalid key")
+        status, payload = post("start", {"cloud_confirmed": True, "cloud_consent_token": token})
+        assert status == 400 and payload["error"]["code"] == "GUI_OPENROUTER_PREFLIGHT_FAILED"
+        assert not seen and queue.jobs()[0].status == "staged" and not result.exists()
+        key_check.side_effect = None
+        token = post("cloud-consent", {"cloud_confirmed": True, "cloud_job_ids": [job.job_id]})[1][
+            "cloud_consent_token"
+        ]
         assert post("start", {"cloud_confirmed": True, "cloud_consent_token": token})[0] == 202
+        assert key_check.call_count == 2
         deadline = time.monotonic() + 2
         while not seen and time.monotonic() < deadline:
             time.sleep(0.005)

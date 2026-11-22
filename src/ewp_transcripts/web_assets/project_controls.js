@@ -137,3 +137,37 @@ rememberReviewSession = async function(...args) {
 };
 if (csrfToken) void refreshProjectCatalog().catch(error=>{projectStatus.textContent=error.message;});
 else document.addEventListener("ewp-session-ready",()=>{void refreshProjectCatalog().catch(error=>{projectStatus.textContent=error.message;});},{once:true});
+
+// Last directories are local server preferences, not workspace approval or provider credentials.
+let restoringWorkspaceLocations=false,workspaceLocationWrites=Promise.resolve();
+function rememberWorkspaceLocations() {
+  if(!csrfToken || restoringWorkspaceLocations || workspaceRestoreBusy)return;
+  const fields={remember:true,output_directory:workflowOutput.value.trim(),workspace_directory:workspaceDirectory.value.trim()};
+  workspaceLocationWrites=workspaceLocationWrites.catch(()=>{}).then(()=>queuePost("/api/v1/workspaces/locations",fields,{feedback:false}));
+  void workspaceLocationWrites.catch(error=>{workspaceStatus.textContent=error.message;});
+}
+for(const input of [workflowOutput,workspaceDirectory])input.addEventListener("change",()=>{
+  if(restoringWorkspaceLocations || workspaceRestoreBusy)return;
+  rememberWorkspaceLocations();
+  void workspaceLocationWrites.then(()=>refreshWorkspaces(workspaceList.value,{feedback:false})).catch(error=>{workspaceStatus.textContent=error.message;});
+});
+async function restoreWorkspaceLocations() {
+  const initialOutput=workflowOutput.value,initialStorage=workspaceDirectory.value;
+  try {
+    const payload=await queuePost("/api/v1/workspaces/locations",{},{feedback:false});
+    const untouched=!initialOutput && !initialStorage && workflowOutput.value===initialOutput && workspaceDirectory.value===initialStorage;
+    restoringWorkspaceLocations=true;
+    if(untouched && !initialOutput && workflowOutput.value===initialOutput && payload.locations.output_directory) {
+      workflowOutput.value=payload.locations.output_directory;
+      workflowOutput.dispatchEvent(new Event("input",{bubbles:true}));workflowOutput.dispatchEvent(new Event("change",{bubbles:true}));
+    }
+    if(untouched && !initialStorage && workspaceDirectory.value===initialStorage && payload.locations.storage_directory) {
+      workspaceDirectory.value=payload.locations.storage_directory;
+      workspaceDirectory.dispatchEvent(new Event("change",{bubbles:true}));
+    }
+    await refreshWorkspaces(workspaceList.value,{feedback:false});
+  }catch(error){workspaceStatus.textContent=error.message;}
+  finally{restoringWorkspaceLocations=false;}
+}
+if(csrfToken)void restoreWorkspaceLocations();
+else document.addEventListener("ewp-session-ready",()=>{void restoreWorkspaceLocations();},{once:true});

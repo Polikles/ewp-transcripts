@@ -30,7 +30,7 @@ from ewp_transcripts.config import SpeechConfig, load_config
 from ewp_transcripts.credentials import OSCredentialStore, validate_api_key
 from ewp_transcripts.domain import WorkDirectory
 from ewp_transcripts.domain.enums import LanguageMode
-from ewp_transcripts.domain.errors import ApplicationError
+from ewp_transcripts.domain.errors import ApplicationError, SpeechEngineError
 from ewp_transcripts.domain.models import JobStateRecord
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.gui_library import GuiLibrary
@@ -42,6 +42,8 @@ from ewp_transcripts.web_downloads import GuiExportDownloads
 from ewp_transcripts.web_guides import render_guide
 from ewp_transcripts.web_inputs import GuiInputs
 from ewp_transcripts.web_jobs import (
+    GuiCloudKeyRequired,
+    GuiCloudPreflightFailed,
     GuiTranscriptionJob,
     GuiTranscriptionQueue,
     WorkflowStageName,
@@ -68,6 +70,7 @@ from ewp_transcripts.web_workflows import (
 )
 from ewp_transcripts.web_workspaces import (
     GuiWorkspaceController,
+    GuiWorkspaceLocations,
     GuiWorkspaceMedia,
     default_workspace_directory,
     resolve_optional_workspace_file,
@@ -441,6 +444,10 @@ class LocalGuiServer(ThreadingHTTPServer):
             resolve_path=self.gui_workflows.resolve_allowed_path,
             temporary_selection_root=self.gui_selections.root,
         )
+        self.gui_workspace_locations = GuiWorkspaceLocations(
+            default_workspace_directory().parent / "workspace-locations.json",
+            self.gui_workflows.resolve_allowed_path,
+        )
         self.gui_projects = GuiProjects(
             default_workspace_directory().parent / "project-catalog.json",
             self.gui_workflows.resolve_allowed_path,
@@ -527,6 +534,12 @@ class LocalGuiServer(ThreadingHTTPServer):
         catalogs = [("", "Default", self.gui_workspaces)]
         if selected.state_directory != self.gui_workspaces.state_directory:
             catalogs.append((storage_directory, "Custom", selected))
+        seen = {controller.state_directory for _, _, controller in catalogs}
+        for directory in self.gui_workspace_locations.available().catalogs:
+            controller = self.workspace_controller(directory)
+            if controller.state_directory not in seen:
+                catalogs.append((directory, "Custom", controller))
+                seen.add(controller.state_directory)
         return tuple(catalogs)
 
 
@@ -1213,15 +1226,26 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 if not isinstance(storage_directory, str):
                     raise ValueError("Workspace storage directory is invalid")
                 workspaces = self.server.workspace_controller(storage_directory)
-                if path == "/api/v1/workspaces/list":
+                if path == "/api/v1/workspaces/locations":
+                    locations_registry = self.server.gui_workspace_locations
+                    if document.get("remember") is True:
+                        output = document.get("output_directory", "")
+                        storage = document.get("workspace_directory", "")
+                        if not isinstance(output, str) or not isinstance(storage, str):
+                            raise ValueError("Workspace storage directory is invalid")
+                        locations_registry.remember(
+                            output_directory=output, storage_directory=storage
+                        )
                     payload: dict[str, object] = {
+                        "locations": locations_registry.available().model_dump(mode="json")
+                    }
+                elif path == "/api/v1/workspaces/list":
+                    payload = {
                         "workspaces": [
                             {
                                 **item.model_dump(mode="json"),
                                 "storage_directory": catalog_storage,
-                                "workspace_file": str(
-                                    controller.state_directory / f"{item.workspace_id}.json"
-                                ),
+                                "workspace_file": str(controller.document_path(item.workspace_id)),
                                 "catalog": catalog_label,
                             }
                             for catalog_storage, catalog_label, controller in (
@@ -1285,6 +1309,14 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         workspace_id=str(document.get("workspace_id", "")),
                         omit_unavailable=True,
                     )
+                    locations = getattr(self.server, "gui_workspace_locations", None)
+                    if isinstance(locations, GuiWorkspaceLocations):
+                        output = str(saved.fields.get("output-path", ""))
+                        catalog = str(workspaces.state_directory)
+                        locations.remember(
+                            output_directory=output,
+                            storage_directory="" if catalog == output else catalog,
+                        )
                     unavailable_fields_omitted = sum(
                         isinstance(value, str)
                         and bool(value.strip())
@@ -1299,9 +1331,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     payload = {
                         "workspace": saved.model_dump(mode="json"),
-                        "workspace_file": str(
-                            workspaces.state_directory / f"{saved.workspace_id}.json"
-                        ),
+                        "workspace_file": str(workspaces.document_path(saved.workspace_id)),
                         "temporary_jobs_omitted": sum(
                             job.status in {"staged", "completed", "failed", "cancelled"}
                             for job in queue_jobs
@@ -1332,12 +1362,18 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         )
                         payload = {
                             "workspace": loaded.model_dump(mode="json"),
-                            "workspace_file": str(
-                                workspaces.state_directory / f"{loaded.workspace_id}.json"
-                            ),
+                            "workspace_file": str(workspaces.document_path(loaded.workspace_id)),
                             "restored_staged_jobs": restored,
                             "restored_terminal_jobs": restored_terminal,
                         }
+                        locations = getattr(self.server, "gui_workspace_locations", None)
+                        if isinstance(locations, GuiWorkspaceLocations):
+                            output = str(loaded.fields.get("output-path", ""))
+                            catalog = str(workspaces.state_directory)
+                            locations.remember(
+                                output_directory=output,
+                                storage_directory="" if catalog == output else catalog,
+                            )
                         succeeded = True
                     finally:
                         self.server.gui_restore.finish(restore_id, succeeded=succeeded)
@@ -2181,21 +2217,34 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/v1/transcriptions/start":
                 try:
+                    allow_cloud = document.get("cloud_confirmed") is True
+                    start_token_value = document.get("cloud_consent_token")
+                    start_token = start_token_value if isinstance(start_token_value, str) else ""
+                    cloud_key = self.server.gui_transcriptions.cloud_start_key(
+                        allow_cloud=allow_cloud, token=start_token
+                    )
+                    if cloud_key is not None:
+                        try:
+                            self.server.gui_speech.check_key(cloud_key)
+                        except (SpeechEngineError, ValueError):
+                            raise GuiCloudPreflightFailed(
+                                "OpenRouter key check failed before queue start. "
+                                "Check the key and connection; no audio was sent."
+                            ) from None
                     count = self.server.gui_transcriptions.start(
-                        allow_cloud=document.get("cloud_confirmed") is True,
-                        cloud_consent_token=(
-                            document.get("cloud_consent_token")
-                            if isinstance(document.get("cloud_consent_token"), str)
-                            else ""
-                        ),
+                        allow_cloud=allow_cloud,
+                        cloud_consent_token=start_token,
+                        validated_api_key=cloud_key,
                     )
                 except ValueError as error:
+                    if isinstance(error, (GuiCloudKeyRequired, GuiCloudPreflightFailed)):
+                        self.server.gui_transcriptions.revoke_cloud_consent()
                     self._write_response(
                         _json_response(
                             HTTPStatus.BAD_REQUEST,
                             {
                                 "error": {
-                                    "code": "GUI_CLOUD_CONSENT_REQUIRED",
+                                    "code": getattr(error, "code", "GUI_CLOUD_CONSENT_REQUIRED"),
                                     "message": str(error),
                                 }
                             },

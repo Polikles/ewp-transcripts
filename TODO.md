@@ -3,6 +3,24 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered B recent locations, save filenames and cloud preflight — 2026-11-22
+
+Baseline clean main 5d60f7f. [Checkpoint](docs/checkpoints/2026-11-22-b-locations-key-preflight.md).
+Owner confirms output-folder save/load, cloud ASR after key activation, full subtitle workflow and
+queue progress pass. Old retained-failure checklist item not repeated (files no longer present);
+retain automatic recovery evidence, do not claim another native pass or repeat paid ASR/model setup.
+
+- [x] Remember last used output/workspace catalog locations across server/browser restart; auto list saved work without manual refresh/path rediscovery.
+- [x] Human-readable workspace filenames beginning with saved name; retain stable UUID identity, old UUID-only saves, copies/import/delete and safe Windows filenames.
+- [x] Key modal: Close bottom-right; short session-only/save/use labels; Save/Use share one row; Remove/Clear session secondary on one row. Preserve session activation and empty-input disabling.
+- [x] Reject cloud queue Start immediately if shared key absent, before staging worker/media/outputs; preserve fresh consent, local-only queue and explicit OS-key loading. No audio/readiness call on consent alone.
+- [x] Explain supplied terminal stack: one missing-key exception with frame list, not separate exceptions per frame; preserve meaningful diagnostics.
+- [x] Changed-step docs/mirrors, checklist/changelog/roadmap/policy/checkpoint/evidence; focused regressions/browser/restart + ordinary/integration gates, clean disposable outputs, commit/push main.
+
+Implemented/verified:1046 tests,17 integrations, mypy115, full Chromium216 layouts,
+key-dialog12 cases and actual directory/preflight/editor/export restart checks pass. No paid calls.
+Dedicated test root removed; delivery main, next focused owner update check. A remains closed.
+
 ## Delivered B saved-work, pending-media and cloud timing feedback — 2026-11-22
 
 Baseline main 7a1c2da. [Checkpoint](docs/checkpoints/2026-11-22-b-recovery-cloud-timing.md).

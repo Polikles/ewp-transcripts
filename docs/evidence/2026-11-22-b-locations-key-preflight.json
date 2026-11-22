@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-22",
+  "baseline_commit": "5d60f7f",
+  "owner_passes_retained": [
+    "output-folder save/load",
+    "cloud ASR after key activation",
+    "subtitle export",
+    "workflow queue status"
+  ],
+  "owner_retained_failure_retest": "not repeated; old native files no longer available; preserve previous automated recovery evidence",
+  "directories": {
+    "registry": "private workspace-locations.json",
+    "recent_catalog_limit": 20,
+    "automatic_fields_and_list_after_actual_restart": true,
+    "existing_user_edits_preserved": true,
+    "secrets_or_approvals_restored": false
+  },
+  "manifests": {
+    "filename": "<safe name>--<UUID>.workspace.json",
+    "stable_identity": true,
+    "duplicate_names_independent": true,
+    "legacy_uuid_only_read_and_resave_migration": true,
+    "versions_read": [
+      1,
+      2,
+      3
+    ],
+    "windows_reserved_invalid_and_utf8_length_checked": true,
+    "profile_import_same_naming": true
+  },
+  "cloud_preflight": {
+    "order": [
+      "fresh exact-queue consent",
+      "active shared key presence",
+      "read-only /key authentication",
+      "locked key/grant/staged-ID recheck",
+      "worker start"
+    ],
+    "missing_code": "GUI_OPENROUTER_KEY_REQUIRED",
+    "rejected_code": "GUI_OPENROUTER_PREFLIGHT_FAILED",
+    "failure_leaves_whole_queue_staged": true,
+    "local_only_skips_network": true,
+    "changed_key_rejected": true,
+    "implicit_OS_key_loading": false,
+    "absent_key_authentication_calls": 0,
+    "fake_key_checks": [
+      {
+        "valid": false
+      },
+      {
+        "valid": true
+      }
+    ],
+    "fake_service_starts": 1,
+    "real_provider_calls": 0,
+    "audio_uploaded": false
+  },
+  "terminal_diagnosis": "One SpeechEngineError and its call frames; supplied openrouter.py:274 is the missing-key raise. New preflight rejects before workers/media prep.",
+  "verification": {
+    "make_check": {
+      "tests_passed": 1046,
+      "ruff_format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "full_browser": {
+      "playwright": "1.65.2",
+      "chromium": "159.0.8154.6",
+      "cases": 216,
+      "widths": [
+        390,
+        720,
+        768,
+        900,
+        960,
+        1440,
+        1920,
+        2560,
+        3840
+      ],
+      "page_errors": [],
+      "external_requests": []
+    },
+    "focused_save_dialog": {
+      "recovery": false,
+      "page_errors": [],
+      "external_requests": [],
+      "dialog_cases": 12,
+      "readable_filenames": true,
+      "folder_recall_without_picker_or_refresh": false,
+      "missing_and_invalid_keys_stay_staged": false,
+      "real_provider_calls": 0
+    },
+    "focused_actual_restart_preflight": {
+      "recovery": true,
+      "page_errors": [],
+      "external_requests": [],
+      "dialog_cases": 0,
+      "readable_filenames": true,
+      "folder_recall_without_picker_or_refresh": true,
+      "missing_and_invalid_keys_stay_staged": true,
+      "real_provider_calls": 0
+    },
+    "source_translation_export_actual_process_restart": {
+      "passed": true,
+      "page_errors": [],
+      "external_requests": []
+    },
+    "changed_javascript_syntax_files": 5,
+    "bundled_guides_match_docs": true,
+    "helper_ruff_format": "pass",
+    "actual_browser_zoom_200": "not run; existing optional owner check"
+  },
+  "scope": {
+    "new_native_windows_qualification": false,
+    "new_GPU_model_tests": false,
+    "paid_requests_this_task": 0,
+    "cumulative_live_spend_usd": "0.0291461230985028369",
+    "full_B_owner_acceptance": "pending",
+    "task10": "local stable ID/EN/PL after functional acceptance; owner edits both; approved/applied catalog committed before manuals",
+    "artist_zip_changed": false,
+    "artist_zip_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1"
+  },
+  "disposable_cleanup": {
+    "root": "/tmp/ewp-b-locations.QrHmIZ",
+    "removed": true
+  }
+}

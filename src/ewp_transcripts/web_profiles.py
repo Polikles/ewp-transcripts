@@ -23,6 +23,7 @@ from ewp_transcripts.web_workspaces import (
     _FIELD_NAMES,
     GuiWorkspaceController,
     GuiWorkspaceDocument,
+    workspace_filename,
 )
 
 PROFILE_LIMIT = 16 * 1024 * 1024
@@ -327,7 +328,9 @@ class GuiProfileController:
             imported_workspace = sanitized.model_copy(
                 update={"workspace_id": identifier, "fields": remap(sanitized.fields)}
             )
-            destination = self.workspaces.state_directory / f"{identifier}.json"
+            destination = self.workspaces.state_directory / workspace_filename(
+                imported_workspace.name, identifier
+            )
             if destination.is_symlink():
                 raise ValueError("Imported workspace destination cannot be a symlink")
             if destination.exists():

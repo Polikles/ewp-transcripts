@@ -56,6 +56,14 @@ class GuiRuntimeProgress(BaseModel):
     stream_count: int = Field(ge=1)
 
 
+class GuiCloudKeyRequired(ValueError):
+    code = "GUI_OPENROUTER_KEY_REQUIRED"
+
+
+class GuiCloudPreflightFailed(ValueError):
+    code = "GUI_OPENROUTER_PREFLIGHT_FAILED"
+
+
 class GuiTranscriptionJob(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -248,7 +256,43 @@ class GuiTranscriptionQueue:
             self._cloud_consent_grant = token, staged
             return token
 
-    def start(self, *, allow_cloud: bool = False, cloud_consent_token: str | None = None) -> int:
+    def _validate_cloud_grant(self, allow_cloud: bool, token: str) -> None:
+        """Check under the queue lock without consuming before read-only authentication."""
+        grant = self._cloud_consent_grant
+        staged = tuple(sorted(job.job_id for job in self._jobs.values() if job.status == "staged"))
+        if (
+            not allow_cloud
+            or not grant
+            or grant[1] != staged
+            or not secrets.compare_digest(grant[0].encode(), token.encode())
+        ):
+            raise ValueError(
+                "Select fresh cloud audio upload and paid-usage consent before starting"
+            )
+
+    def cloud_start_key(self, *, allow_cloud: bool, token: str) -> str | None:
+        """Return the active shared key for preflight, without queuing or preparing media."""
+        with self._lock:
+            if not any(
+                job.status == "staged" and job.speech.provider == "openrouter"
+                for job in self._jobs.values()
+            ):
+                return None
+            self._validate_cloud_grant(allow_cloud, token)
+            key = self._api_key_provider()
+            if not key:
+                raise GuiCloudKeyRequired(
+                    "OpenRouter API key is missing; enter it or load a previously saved key"
+                )
+            return key
+
+    def start(
+        self,
+        *,
+        allow_cloud: bool = False,
+        cloud_consent_token: str | None = None,
+        validated_api_key: str | None = None,
+    ) -> int:
         """Queue every staged job in stable insertion order."""
 
         pending: list[tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int]] = []
@@ -257,22 +301,20 @@ class GuiTranscriptionQueue:
                 job.status == "staged" and job.speech.provider == "openrouter"
                 for job in self._jobs.values()
             )
-            grant, self._cloud_consent_grant = self._cloud_consent_grant, None
             # Trusted Python callers may explicitly authorize with allow_cloud=True.
             # The HTTP adapter always supplies a string, requiring a one-use queue grant.
             if cloud_pending and cloud_consent_token is not None:
-                staged = tuple(
-                    sorted(job.job_id for job in self._jobs.values() if job.status == "staged")
-                )
-                if (
-                    not allow_cloud
-                    or not grant
-                    or grant[1] != staged
-                    or not secrets.compare_digest(grant[0].encode(), cloud_consent_token.encode())
-                ):
-                    raise ValueError(
-                        "Select fresh cloud audio upload and paid-usage consent before starting"
+                try:
+                    self._validate_cloud_grant(allow_cloud, cloud_consent_token)
+                finally:
+                    self._cloud_consent_grant = None
+                if validated_api_key is not None and self._api_key_provider() != validated_api_key:
+                    raise GuiCloudKeyRequired(
+                        "OpenRouter key changed during the start check; "
+                        "check it again before starting"
                     )
+            else:
+                self._cloud_consent_grant = None
             if not allow_cloud and cloud_pending:
                 raise ValueError(
                     "Confirm sending staged cloud audio to OpenRouter and its model "

@@ -80,3 +80,19 @@ and create a separate record. The original remains. The **Saved work file** line
 manifest location: updating a selected legacy entry keeps it in its private/custom catalog even
 when the optional catalog input is blank. For a new output-folder copy, select Save as new.
 A complete output-folder ZIP may therefore lack a manifest stored in an older separate catalog.
+
+## Recognizable files and remembered directories
+
+New saves use `<workspace name>--<UUID>.workspace.json`. Characters forbidden in Windows filenames
+are replaced with underscores; Polish letters and spaces remain recognizable. The UUID preserves
+identity when different workspaces have the same display name. Earlier UUID-only JSON saves still
+load, and saving them again migrates their filename while keeping that identity. Save as new makes
+a separate ID/file; removing a save deletes only its manifest.
+
+Last-used output and optional catalog directories, plus up to 20 recent catalogs, are remembered
+locally by the server. On reopening, accessible saved work is listed without reselecting paths or
+clicking Refresh. An input already changed by the user is not overwritten by a delayed recall.
+Unavailable directories are ignored; no audio, key, approvals or automatic queue start are restored
+by directory recall. The registry is `workspace-locations.json` beside the private `gui-workspaces`
+catalog (`XDG_STATE_HOME/ewp-transcripts`, or `~/.local/state/ewp-transcripts`). It is a local directory
+reference list, separate from portable workspace files and browser storage.

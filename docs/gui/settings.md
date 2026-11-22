@@ -63,9 +63,9 @@ managed source-copy cleanup and never targets final output or model directories.
 ## Optional saved OpenRouter key
 
 Manage OpenRouter key opens the same session-key dialog used by correction/translation. One key
-serves all OpenRouter operations, including cloud ASR. Set key for this session keeps it in server
-memory only. Save key in OS credential store deliberately retains it on this computer; after
-restarting, choose Use saved OpenRouter key. Remove saved OpenRouter key deletes that OS entry
+serves all OpenRouter operations, including cloud ASR. Set session only keeps it in server
+memory only. Save key deliberately retains it in the OS credential store on this computer; after
+restarting, choose Use saved key. Remove saved key deletes that OS entry
 and clears the active session key. Clear session key leaves a saved OS entry intact. An environment
 key still applies until removed from the launching terminal; the UI reports that explicitly.
 
@@ -81,15 +81,20 @@ Importing a profile does not create missing media directories or automatically s
 
 
 The key dialog has Close window, a top-right × and Escape. Closing clears unsubmitted input and
-keeps any explicitly activated session/saved OS key. Set key for this session now keeps the dialog
+keeps any explicitly activated session/saved OS key. Set session only keeps the dialog
 open so Check API key, Save and Use can follow before closing. Check API key verifies a typed key
 without activating/saving it, or checks the current shared session/environment key when the input
 is empty. Input is cleared immediately; the check uploads no audio/text and never accesses the OS
 store implicitly. After restarting, enter a key or explicitly load a previously saved key.
 
-Use saved OpenRouter key already activates the key for this server session. Set key for this session
+Use saved key already activates the key for this server session. Set session only
 is disabled when its text input is empty; type another key to enable it. Checking a typed key alone
 does not activate/store it. Clearing browser/workflow state does not clear the active server key.
 Stopping the server clears its memory-only key; an environment-supplied key can remain available,
 and an OS-stored key can be explicitly loaded again. Saved work and profiles never contain keys.
 Pending-media workspace references are included in profiles without embedding audio or approvals.
+
+Save key and Use saved key share one row. Remove saved key and Clear session key are smaller,
+secondary actions on the next row; Close window is at the bottom right. API-check feedback stays
+immediately below Check API key. A cloud queue start also checks the active key before any local
+media preparation or upload; an absent or rejected key leaves every queued job staged.

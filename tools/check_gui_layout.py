@@ -569,6 +569,7 @@ def check_localized_interface(page: Page) -> None:
         "EwP Transcripts",
         "EwP brand",
         "actions dictionary-evidence-navigation",
+        "actions credential-store-primary",
         "confirmation is required",
         "connection-light connection-unknown",
         "example misspelling",
@@ -628,7 +629,7 @@ def check_localized_interface(page: Page) -> None:
     page.get_by_role("button", name="Ustaw klucz API OpenRouter", exact=True).click()
     dialog = page.get_by_role("dialog")
     expect(dialog).to_contain_text("Klucz trafia wyłącznie do tego lokalnego serwera")
-    expect(dialog.get_by_role("button", name="Ustaw klucz na tę sesję", exact=True)).to_be_visible()
+    expect(dialog.get_by_role("button", name="Ustaw tylko na sesję", exact=True)).to_be_visible()
     dialog.locator("#cancel-openrouter-key").click()
     stage(page, "review")
     expect(page.locator("#preview-review")).to_have_text("Zatwierdź")

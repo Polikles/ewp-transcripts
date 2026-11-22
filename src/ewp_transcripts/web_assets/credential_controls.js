@@ -1,11 +1,11 @@
 "use strict";
 
 const credentialStoreButtons = document.createElement("div");
-credentialStoreButtons.className = "actions";
+credentialStoreButtons.className = "actions credential-store-primary";
 for (const [action, label] of [
-  ["save", "Save key in OS credential store"],
-  ["use", "Use saved OpenRouter key"],
-  ["remove", "Remove saved OpenRouter key"],
+  ["save", "Save key"],
+  ["use", "Use saved key"],
+  ["remove", "Remove saved key"],
   ["clear-session", "Clear session key"],
 ]) {
   const button = document.createElement("button"); button.type = "button";
@@ -14,7 +14,7 @@ for (const [action, label] of [
     const input = document.querySelector("#openrouter-api-key");
     const status = document.querySelector("#openrouter-key-dialog-status");
     const apiKey = action === "save" ? input.value : "";
-    input.value = ""; button.disabled = true;
+    input.value = ""; updateSessionKeyButton();keyCheckStatus.textContent="";button.disabled = true;
     try {
       const payload = await queuePost("/api/v1/credentials/openrouter", {action, api_key:apiKey});
       openRouterKeyConfigured = payload.configured === true; updateOpenRouterKeyStatus();
@@ -28,6 +28,15 @@ for (const [action, label] of [
   credentialStoreButtons.append(button);
 }
 document.querySelector("#openrouter-key-dialog-status").before(credentialStoreButtons);
+const credentialSecondary=document.createElement("div");credentialSecondary.className="credential-store-secondary";
+credentialSecondary.append(document.querySelector("#credential-remove"),document.querySelector("#credential-clear-session"));
+credentialStoreButtons.after(credentialSecondary);
+document.querySelector("#credential-save").title="Save key in OS credential store";
+document.querySelector("#credential-use").title="Use saved OpenRouter key";
+const credentialFooter=document.createElement("div");credentialFooter.className="credential-dialog-footer";
+credentialFooter.append(document.querySelector("#cancel-openrouter-key"));
+document.querySelector("#openrouter-key-dialog-status").after(credentialFooter);
+
 const credentialSettings = document.createElement("div");
 credentialSettings.id = "gui-credentials";
 credentialSettings.innerHTML = `<h3>OpenRouter API key</h3>

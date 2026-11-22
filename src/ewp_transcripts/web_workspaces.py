@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
+import threading
+import unicodedata
 from builtins import list as builtin_list
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import Any, Literal
+from pathlib import Path, PureWindowsPath
+from typing import Any, ClassVar, Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -177,6 +180,33 @@ class GuiWorkspaceDocument(BaseModel):
 ResolvePath = Callable[..., Path]
 
 
+def workspace_filename(name: str, workspace_id: str) -> str:
+    """Keep the display name recognizable and the identity portable on Windows and Linux."""
+    stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", unicodedata.normalize("NFC", name))
+    stem = stem.strip(" ._")[:100].encode("utf-8")[:180].decode("utf-8", errors="ignore")
+    stem = stem.rstrip(" .") or "workspace"
+    if PureWindowsPath(stem).is_reserved():
+        stem = "_" + stem
+    return f"{stem}--{UUID(workspace_id)}.workspace.json"
+
+
+def _write_private_json(path: Path, document: dict[str, Any]) -> None:
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise ValueError("Saved state must not be a symbolic link")
+    fd, temporary = tempfile.mkstemp(prefix=".workspace-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            json.dump(document, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
 def resolve_optional_workspace_file(raw: str, resolve_path: ResolvePath) -> Path:
     """Validate a saved file location without confusing a future result with a directory."""
     candidate = Path(raw.strip()).expanduser()
@@ -201,6 +231,8 @@ def default_workspace_directory() -> Path:
 
 class GuiWorkspaceController:
     """Store a bounded catalog of non-secret form values outside project artifacts."""
+
+    _publication_lock: ClassVar[threading.RLock] = threading.RLock()
 
     def __init__(
         self,
@@ -279,21 +311,14 @@ class GuiWorkspaceController:
             terminal_jobs=clean_terminal_jobs,
             pending_media=clean_media,
         )
-        self._state_directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-        destination = self._state_directory / f"{identifier}.json"
-        descriptor, temporary_name = tempfile.mkstemp(
-            prefix=".workspace-", dir=self._state_directory
-        )
-        try:
-            with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
-                json.dump(document.model_dump(mode="json"), handle, ensure_ascii=False, indent=2)
-                handle.write("\n")
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.chmod(temporary_name, 0o600)
-            os.replace(temporary_name, destination)
-        finally:
-            Path(temporary_name).unlink(missing_ok=True)
+        with self._publication_lock:
+            previous = self._workspace_path(identifier)
+            if previous.exists() and self._read(previous).workspace_id != identifier:
+                raise ValueError("Saved workspace identity does not match its file")
+            destination = self._state_directory / workspace_filename(clean_name, identifier)
+            _write_private_json(destination, document.model_dump(mode="json"))
+            if previous != destination and previous.exists():
+                previous.unlink()
         return document
 
     def list(self) -> tuple[GuiWorkspaceSummary, ...]:
@@ -568,7 +593,19 @@ class GuiWorkspaceController:
         return True
 
     def _workspace_path(self, workspace_id: str) -> Path:
-        return self._state_directory / f"{self._normalize_workspace_id(workspace_id)}.json"
+        identifier = self._normalize_workspace_id(workspace_id)
+        with self._publication_lock:
+            matches = sorted(self._state_directory.glob(f"*--{identifier}.workspace.json"))
+            if len(matches) > 1:
+                raise ValueError("Saved workspace has duplicate identity files")
+            path = matches[0] if matches else self._state_directory / f"{identifier}.json"
+            if path.is_symlink():
+                raise ValueError("Saved workspace must not be a symbolic link")
+            return path
+
+    def document_path(self, workspace_id: str) -> Path:
+        """Resolve a stable ID to its readable filename or an older UUID-only filename."""
+        return self._workspace_path(workspace_id)
 
     @staticmethod
     def _normalize_workspace_id(workspace_id: str) -> str:
@@ -585,3 +622,64 @@ class GuiWorkspaceController:
             raise ValueError("Saved workspace does not exist") from None
         except (OSError, ValueError):
             raise ValueError("Saved workspace is invalid") from None
+
+
+class GuiWorkspaceLocationState(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    version: Literal[1] = 1
+    output_directory: str = Field(default="", max_length=4096)
+    storage_directory: str = Field(default="", max_length=4096)
+    catalogs: tuple[str, ...] = Field(default=(), max_length=20)
+
+
+class GuiWorkspaceLocations:
+    """Remember only local directory references, independently of browser/session secrets."""
+
+    def __init__(self, path: Path, resolve_path: ResolvePath) -> None:
+        self.path, self.resolve = path, resolve_path
+        self._lock = threading.RLock()
+
+    def _read(self) -> GuiWorkspaceLocationState:
+        try:
+            if self.path.is_symlink():
+                return GuiWorkspaceLocationState()
+            with self.path.open(encoding="utf-8") as handle:
+                text = handle.read(262_145)
+            if len(text) > 262_144:
+                return GuiWorkspaceLocationState()
+            return GuiWorkspaceLocationState.model_validate_json(text)
+        except (OSError, ValueError):
+            return GuiWorkspaceLocationState()
+
+    def _directory(self, raw: str) -> str:
+        if not raw.strip():
+            return ""
+        return str(self.resolve(raw, directory=True))
+
+    def remember(self, *, output_directory: str, storage_directory: str) -> None:
+        output, storage = self._directory(output_directory), self._directory(storage_directory)
+        with self._lock:
+            old = self._read()
+            catalog = storage or output
+            catalogs = tuple(dict.fromkeys([catalog, *old.catalogs])) if catalog else old.catalogs
+            record = GuiWorkspaceLocationState(
+                output_directory=output, storage_directory=storage, catalogs=catalogs[:20]
+            )
+            _write_private_json(self.path, record.model_dump(mode="json"))
+
+    def available(self) -> GuiWorkspaceLocationState:
+        with self._lock:
+            old = self._read()
+
+        def readable(raw: str) -> str:
+            try:
+                path = self._directory(raw)
+                return path if path and Path(path).is_dir() else ""
+            except (OSError, ValueError):
+                return ""
+
+        return GuiWorkspaceLocationState(
+            output_directory=readable(old.output_directory),
+            storage_directory=readable(old.storage_directory),
+            catalogs=tuple(path for raw in old.catalogs if (path := readable(raw))),
+        )

@@ -91,3 +91,11 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     Task 10 must include stable field/message ID and editable EN/PL (owner may edit EN too): initial
     local VM review file, then apply owner corrections and commit the approved catalog as the
     reference for later revisions/translations. Generate only after functional freeze, then manuals.
+
+16. Latest saved-location/key feedback (2026-11-22): owner confirms output-root save/load, cloud ASR
+    once a key is active, export and progress. Continue from the recent-locations/named-save/key
+    preflight checkpoint; retain old automatic failed/cancelled recovery evidence without claiming
+    a new native retest. Remember local directories independently of workspace identity/credentials;
+    readable filenames preserve UUID/legacy compatibility. Validate active cloud credentials before
+    worker/media startup while keeping fresh consent and explicit OS-key loading. No further paid
+    pilot/reinstall, no artist changes; task10/manual gate remains after functional acceptance.

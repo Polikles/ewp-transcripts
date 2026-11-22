@@ -4,6 +4,20 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
+Latest follow-up implemented/verified: [recent locations / named saves / key preflight](docs/checkpoints/2026-11-22-b-locations-key-preflight.md).
+Baseline main 5d60f7f. Last directories/catalog list return automatically; name-prefixed manifests
+preserve UUID/legacy compatibility. Key dialog rows/short labels/secondary clear-delete/bottom-right
+Close are fixed. Missing/rejected keys stop the entire cloud/mixed queue before workers/media;
+fresh consent is rechecked and no OS key is loaded implicitly. Supplied terminal chain is one
+missing-key exception.1046 tests/mypy115,17 integrations,216 browser layouts,12 dialog cases and
+actual process-restart directory/preflight/source/translation/export recovery pass. Changed-step
+checklist/docs/evidence updated; dedicated root removed and artist ZIP unchanged. No paid calls;
+cumulative USD0.0291461230985028369. Delivery main; next is the focused owner update check. Preserve
+new owner save/load/cloud/export/progress passes; retained-failure native retest was not repeated
+(old files gone). A closed, full B acceptance/task10 terminology/manual gate remain separate.
+
+Previous delivery records below are historical.
+
 Current task: [B recovery / pending media / cloud timing](docs/checkpoints/2026-11-22-b-recovery-cloud-timing.md),
 baseline main 7a1c2da. Fixes implemented; pending-browser Save/restart/Load passes with completed+
 failed rows, restored media paths/deduplication, stable saved-name identity and visible manifest path.

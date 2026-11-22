@@ -106,6 +106,11 @@ key used by correction/translation. No audio is uploaded during discovery, plann
    refresh the estimate; there are no automatic network refreshes. Replan after job settings change.
 2. Plan, review and add the jobs. Starting a queue with cloud jobs requires explicit audio-upload
    and paid-usage consent. It clears after starting and is never saved in a workspace/profile.
+   Before starting any worker (including local tasks in a mixed queue), the server checks that
+   the shared key exists and authenticates it with OpenRouter's read-only `/key` endpoint.
+   Missing/invalid keys or a failed connection leave the whole queue staged, without preparing
+   media, creating transcription failure files or sending audio. Enter/load a key and explicitly
+   confirm Start again. Local-only queues do not require this network check.
 3. Provider word timestamps must be returned; text-only responses fail visibly instead of making
    up alignment. The same canonical JSON, raw TXT/segments, review and immutable exports follow.
 4. Whisper needs one speaker or separate synchronized speaker tracks. Use Scribe/MAI for one
@@ -131,7 +136,7 @@ key used by correction/translation. No audio is uploaded during discovery, plann
 Cloud ASR is exposed through the reviewed GUI queue and the explicitly authorized application
 API. Existing CLI batch transcription remains local; it rejects a cloud config instead of silently
 uploading media or substituting local models. Secure OS key storage is optional; after restart use
-**Use saved OpenRouter key**, or enter a session key again.
+**Use saved key**, or enter a session key again.
 
 Protocol reference: [OpenRouter speech-to-text](https://openrouter.ai/docs/guides/overview/multimodal/stt).
 

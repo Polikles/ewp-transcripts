@@ -1979,3 +1979,17 @@ for(const [en,pl] of [
   ["Saved job state is too large","Zapis stanu zadania jest zbyt duży."],
   ["Retained transcription failure","Zachowany błąd transkrypcji"]
 ])guiPolish.set(en,pl);
+
+// Short credential actions and pre-start key feedback.
+for(const [en,pl] of [
+  ["Set session only","Ustaw tylko na sesję"],
+  ["Save key","Zapisz klucz"],
+  ["Use saved key","Użyj zapisanego klucza"],
+  ["Remove saved key","Usuń zapisany klucz"],
+  ["OpenRouter key check failed before queue start. Check the key and connection; no audio was sent.","Sprawdzenie klucza OpenRouter przed uruchomieniem kolejki nie powiodło się. Sprawdź klucz i połączenie; nie wysłano audio."],
+  ["OpenRouter key changed during the start check; check it again before starting","Klucz OpenRouter zmienił się podczas sprawdzania. Sprawdź go ponownie przed uruchomieniem."],
+  ["Saved workspace has duplicate identity files","Istnieją różne pliki zapisu z tym samym ID obszaru pracy."],
+  ["Saved workspace identity does not match its file","ID zapisu pracy nie odpowiada jego plikowi."],
+  ["Saved workspace must not be a symbolic link","Zapis pracy nie może być dowiązaniem symbolicznym."],
+  ["Saved state must not be a symbolic link","Plik zapisanego stanu nie może być dowiązaniem symbolicznym."]
+])guiPolish.set(en,pl);

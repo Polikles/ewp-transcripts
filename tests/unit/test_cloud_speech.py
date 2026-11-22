@@ -477,3 +477,48 @@ def test_missing_timing_retains_only_noncontent_diagnostics_and_never_retries(tm
         parse_transcript(
             {"error": {"code": 402}, "words": []}, duration_ms=1000, offset_ms=0, language="pl"
         )
+
+
+def test_cloud_key_preflight_keeps_mixed_queue_staged_and_rechecks_key_before_start(tmp_path):
+    from ewp_transcripts.web_jobs import GuiCloudKeyRequired
+
+    key = {"value": ""}
+    service = Mock(return_value=SimpleNamespace(result_path=None))
+    queue = GuiTranscriptionQueue(
+        config=ApplicationConfig(), service=service, api_key_provider=lambda: key["value"]
+    )
+    try:
+        local = queue.stage(
+            tmp_path / "local.wav",
+            tmp_path,
+            planned_job_id="local",
+            planned_result_path=str(tmp_path / "local_results.json"),
+        )
+        cloud = queue.stage(
+            tmp_path / "cloud.wav",
+            tmp_path,
+            planned_job_id="cloud",
+            planned_result_path=str(tmp_path / "cloud_results.json"),
+            speech=SpeechConfig(provider="openrouter"),
+        )
+        token = queue.authorize_cloud_start((cloud.job_id,))
+        with pytest.raises(GuiCloudKeyRequired, match="missing"):
+            queue.cloud_start_key(allow_cloud=True, token=token)
+        assert all(job.status == "staged" for job in queue.jobs())
+        service.assert_not_called()
+        key["value"] = "first-fake-key"
+        checked_key = queue.cloud_start_key(allow_cloud=True, token=token)
+        key["value"] = "second-fake-key"
+        with pytest.raises(GuiCloudKeyRequired, match="changed"):
+            queue.start(allow_cloud=True, cloud_consent_token=token, validated_api_key=checked_key)
+        assert all(job.status == "staged" for job in queue.jobs())
+        queue.remove(cloud.job_id)
+        assert queue.cloud_start_key(allow_cloud=False, token="") is None
+        assert queue.start() == 1
+        deadline = time.monotonic() + 2
+        while queue.jobs()[0].status != "completed" and time.monotonic() < deadline:
+            time.sleep(0.005)
+        assert queue.jobs()[0].job_id == local.job_id
+        assert service.call_count == 1
+    finally:
+        queue.close()

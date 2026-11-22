@@ -689,3 +689,25 @@ without lexical text/timed words in any segment and with a supported requested/d
 Unexpected timing responses persist `invalid-response` plus counts/type metadata in the usage ledger;
 GUI technical details receive only controlled model/chunk/count context, never raw provider text.
 Session-key input action is disabled when empty; OS Use immediately activates the shared key.
+
+### Last directories, readable manifests and cloud preflight — 2026-11-22
+
+The server's private `workspace-locations.json` stores only bounded validated output/catalog
+directory references and up to 20 recent catalogs. CSRF/Origin-protected
+`POST /api/v1/workspaces/locations` reads them, or writes them with `remember:true`,
+`output_directory` and `workspace_directory`. Startup fills untouched empty fields and refreshes
+the merged catalog list. Missing paths are filtered; recall never loads work or credentials,
+restores approvals or starts jobs. Saving/loading also records the actual owning catalog.
+
+New manifests are `<safe display name>--<UUID>.workspace.json`, published atomically with private
+file permissions. IDs remain authoritative; duplicate display names are independent. Lookup keeps
+UUID-only JSON compatibility; updating an older file migrates its name only after successful
+publication. Profiles use the same filename convention. List/save/load return the actual path.
+
+HTTP cloud Start validates fresh exact-queue consent, obtains the shared active key and performs
+read-only `/key` authentication before starting any worker. Missing key returns
+`GUI_OPENROUTER_KEY_REQUIRED`; rejected/unreachable authentication returns
+`GUI_OPENROUTER_PREFLIGHT_FAILED`. Both leave all jobs staged and revoke that consent grant.
+After authentication, Start rechecks the staged IDs, grant and key under the queue lock before
+consuming authorization. Local-only starts need no provider check. No OS key is silently loaded,
+and no transcription partial/failed files or media conversion precede this check.

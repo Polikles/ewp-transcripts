@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
@@ -165,7 +166,7 @@ def test_workspace_round_trip_contains_only_allowlisted_non_secret_fields(tmp_pa
     assert loaded.fields["input-path"] == str(media)
     assert listed[0].workspace_id == saved.workspace_id
     assert listed[0].available is True
-    assert (tmp_path / "state" / f"{saved.workspace_id}.json").stat().st_mode & 0o777 == 0o600
+    assert workspaces.document_path(saved.workspace_id).stat().st_mode & 0o777 == 0o600
 
 
 def test_workspace_rejects_unknown_fields_and_prohibited_paths(tmp_path: Path) -> None:
@@ -229,7 +230,7 @@ def test_workspace_import_copies_a_valid_selected_state_into_the_chosen_catalog(
     imported = GuiWorkspaceController(
         state_directory=tmp_path / "backup-catalog",
         resolve_path=GuiWorkflowController().resolve_allowed_path,
-    ).import_file(tmp_path / "state" / f"{saved.workspace_id}.json")
+    ).import_file(workspaces.document_path(saved.workspace_id))
 
     assert imported.workspace_id == saved.workspace_id
     assert imported.name == "Backup"
@@ -404,3 +405,65 @@ def test_cancelled_history_is_saved_when_retry_published_the_planned_result(
     )
     assert len(saved.terminal_jobs) == 1
     assert workspaces.load(saved.workspace_id).terminal_jobs[0].status == "cancelled"
+
+
+def test_named_workspace_files_preserve_identity_and_migrate_legacy_names(tmp_path: Path) -> None:
+    from pathlib import PureWindowsPath
+
+    workspaces, _ = controller(tmp_path)
+    first = workspaces.save(name="Odcinek Żółć", current_step="", fields={})
+    first_path = workspaces.document_path(first.workspace_id)
+    assert first_path.name.startswith("Odcinek Żółć--")
+    second = workspaces.save(name="Odcinek Żółć", current_step="", fields={})
+    assert first.workspace_id != second.workspace_id
+    assert len(list(first_path.parent.glob("*.workspace.json"))) == 2
+    legacy = first_path.parent / f"{first.workspace_id}.json"
+    data = first.model_dump(mode="json")
+    data["workspace_version"] = 2
+    data.pop("pending_media")
+    legacy.write_text(json.dumps(data))
+    first_path.unlink()
+    assert workspaces.load(first.workspace_id).workspace_version == 2
+    updated = workspaces.save(
+        name=first.name,
+        current_step="workspace-heading",
+        fields={},
+        workspace_id=first.workspace_id,
+    )
+    assert (
+        updated.workspace_id == first.workspace_id and first_path.exists() and not legacy.exists()
+    )
+    workspaces.delete(first.workspace_id)
+    assert workspaces.load(second.workspace_id).name == second.name
+    for name in ["CON", "AUX.txt", 'a/b:c?*<>|"', "..", "   ", "🎙" * 100]:
+        from ewp_transcripts.web_workspaces import workspace_filename
+
+        filename = workspace_filename(name, second.workspace_id)
+        assert Path(filename).name == filename and not PureWindowsPath(filename).is_reserved()
+        assert not any(c in filename for c in '<>:"/\\|?*')
+        assert len(filename.encode("utf-8")) <= 255
+
+
+def test_last_workspace_directories_survive_restart_and_validate_paths(tmp_path: Path) -> None:
+    from ewp_transcripts.web_workspaces import GuiWorkspaceLocations
+
+    output, catalog = tmp_path / "Desktop output", tmp_path / "Saved work"
+    output.mkdir()
+    catalog.mkdir()
+    path = tmp_path / "private" / "workspace-locations.json"
+    resolve = GuiWorkflowController().resolve_allowed_path
+    first = GuiWorkspaceLocations(path, resolve)
+    first.remember(output_directory=str(output), storage_directory=str(catalog))
+    second = GuiWorkspaceLocations(path, resolve)
+    restored = second.available()
+    assert restored.output_directory == str(output) and restored.storage_directory == str(catalog)
+    assert restored.catalogs == (str(catalog),)
+    another = tmp_path / "other"
+    another.mkdir()
+    second.remember(output_directory=str(another), storage_directory="")
+    assert second.available().catalogs == (str(another), str(catalog))
+    catalog.rmdir()
+    assert second.available().catalogs == (str(another),)
+    assert "key" not in path.read_text() and path.stat().st_mode & 0o777 == 0o600
+    with pytest.raises(ValueError):
+        second.remember(output_directory="/etc", storage_directory="")

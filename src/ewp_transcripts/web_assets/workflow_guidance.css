@@ -209,3 +209,8 @@
   .workspace-removal-actions { grid-column: 1; }
 }
 :root { background-color: var(--gui-bg); }
+
+.credential-store-primary, .credential-store-secondary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; margin-top:.75rem; }
+.credential-store-primary button, .credential-store-secondary button { width:100%; }
+#openrouter-key-dialog .credential-store-secondary button { background:transparent; color:var(--gui-muted); border:1px solid var(--gui-line); font-size:.8rem; font-weight:500; padding:.4rem .6rem; }
+.credential-dialog-footer { display:flex; justify-content:flex-end; margin-top:.8rem; }

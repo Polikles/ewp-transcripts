@@ -732,7 +732,7 @@ function guiUiText(value) {
   if (coded) {
     const description = guiPolishErrorDescriptions.get(coded[1]);
     const translatedBody = guiUiText(coded[2]);
-    if (["GUI_WORKSPACE_REQUEST_INVALID", "GUI_CORRECTION_CONFIRMATION_REQUIRED", "GUI_TRANSLATION_CONFIRMATION_REQUIRED", "SPEECH_ENGINE_ERROR", "GUI_ASR_CHECK_FAILED", "GUI_TRANSCRIPTION_FAILED", "GUI_CLOUD_CONSENT_REQUIRED", "GUI_PROFILE_INVALID", "GUI_DICTIONARY_REQUEST_INVALID", "GUI_QUEUE_ACTION_REJECTED", "GUI_WORKDIR_INVALID", "GUI_EXPORT_DOWNLOAD_INVALID"].includes(coded[1]) && translatedBody !== coded[2]) return `${coded[1]}: ${translatedBody}`;
+    if (["GUI_OPENROUTER_KEY_REQUIRED", "GUI_OPENROUTER_PREFLIGHT_FAILED", "GUI_WORKSPACE_REQUEST_INVALID", "GUI_CORRECTION_CONFIRMATION_REQUIRED", "GUI_TRANSLATION_CONFIRMATION_REQUIRED", "SPEECH_ENGINE_ERROR", "GUI_ASR_CHECK_FAILED", "GUI_TRANSCRIPTION_FAILED", "GUI_CLOUD_CONSENT_REQUIRED", "GUI_PROFILE_INVALID", "GUI_DICTIONARY_REQUEST_INVALID", "GUI_QUEUE_ACTION_REJECTED", "GUI_WORKDIR_INVALID", "GUI_EXPORT_DOWNLOAD_INVALID"].includes(coded[1]) && translatedBody !== coded[2]) return `${coded[1]}: ${translatedBody}`;
     return `${coded[1]}: ${description || (translatedBody !== coded[2] ? translatedBody : guiPolishFallbackError(coded[1]))}`;
   }
   const exact = guiPolish.get(trimmed);

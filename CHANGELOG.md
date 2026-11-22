@@ -6,6 +6,17 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Recall the last output/workspace directories and recent saved-work catalogs after server/browser
+  restart, refreshing the list automatically. Saved JSON filenames now start with the workspace
+  name and retain their UUID; old UUID-only files still load and migrate on save. Windows-invalid
+  filename characters are sanitized and duplicate display names keep independent identities.
+- Check the active shared OpenRouter key and read-only authentication before starting any worker
+  in a cloud/mixed queue. Missing/rejected keys leave the queue staged with actionable errors;
+  fresh exact-queue upload consent is still required and rechecked after authentication.
+- Simplify the key dialog: short session/save/use labels, Save/Use in one row, muted Remove/Clear
+  in another, and Close window at the bottom right. Empty-input activation and inline check feedback
+  remain consistent in EN/PL, both themes and narrow/full-width layouts.
+
 - Preserve pending media in workspace v3 before staging: durable source copies, hashes, per-file
   options and fresh metadata planning survive restart; repeated same-name/same-content selections
   do not duplicate the list. Versions 1/2 remain readable. Profiles keep references only, and cleanup

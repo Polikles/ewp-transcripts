@@ -36,7 +36,17 @@ Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is cor
 isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
 Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
 
-### Current recovery and provider timing feedback — 2026-11-22
+### Current saved-location and pre-start key follow-up — 2026-11-22
+
+Owner now confirms output-folder save/load, cloud ASR after key activation, subtitle exports and
+workflow status. Follow [the new checkpoint](checkpoints/2026-11-22-b-locations-key-preflight.md)
+for automatic last-directory/catalog recall, name-prefixed compatible save files, simplified key
+dialog and missing/rejected key blocking before any queue worker/media preparation. Earlier
+failed/cancelled native recovery was not repeated because old files are gone; automated evidence
+remains. Use the focused update-only checklist; no new paid pilot or reinstall. B full acceptance
+and task10 ordering remain unchanged. Cumulative spend stays USD0.0291461230985028369.
+
+### Previous recovery and provider timing feedback — 2026-11-22
 
 Owner confirms favicon, API check, mixed local/cloud queue and restored upload-consent blocking.
 Follow [the new checkpoint](checkpoints/2026-11-22-b-recovery-cloud-timing.md) for pending-media v3
