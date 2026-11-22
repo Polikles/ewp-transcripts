@@ -1,6 +1,6 @@
 # Translation review & export
 
-Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
+Use the numbered steps below with the matching GUI stage.
 
 1. Choose recording: Open the recording’s manual translation or saved candidate from its queue. Check source and direction.
 2. Review source and target: Compare every source unit with the target and correct meaning, names, omissions and additions.
@@ -8,43 +8,26 @@ Use this guide with the matching stage in EwP Transcripts. Interface language do
 4. Save translation: Confirm manual semantic verification, then Save and prepare for export to publish an immutable translation.
 5. Save and export: Choose formats and Save and export. The source lineage is audited before export; Proceed with next output returns to the queue.
 
-## Detailed instructions
+## 1. Choose recording
 
-The source text and ownership are immutable. Review the editable target in context; provider output is not evidence of correctness. Check direction and the exact source revision, especially when a newer verified source is available.
+Open the selected recording's manual translation or generated candidate. Verify canonical source, optional source revision and direction. Each recording restores its own review; switching stages must not require generating another paid candidate. If a path/hash no longer matches, restore the correct original rather than editing provenance fields in JSON.
 
-Empty targets are rejected by default. Only enable Allow empty translation units when intentionally omitting a unit, then Apply translation again. Omission provenance is retained and omitted units are excluded from exported text/captions. Verification and omission confirmation are not restored from a saved workspace.
+## 2. Review source and target
 
-Save and prepare for export publishes an immutable manual child. Apply translation saves and validates the draft without publication. Exports use the approved translation and support TXT, SRT, VTT and HTML. Existing artifacts remain intact. Source-language YTT is handled in Source review & export; this stage does not add a translated YTT renderer.
+Read the immutable source beside each editable target unit. Check meaning, negatives, names, numbers, quotations, speaker identity, omissions, additions and style. Keep uncertainty faithful to the source. Save translation draft checkpoints unfinished work; Undo/Redo concern the current draft. Restore saved draft reopens its last saved contents; Clear current translation review only clears the view after confirmation.
 
-## Next step
+Empty targets fail by default. If an omission is intentional, enable Allow empty translation units before validation and publication. The immutable translation/audit records the omission; exported text/subtitles omit it rather than inserting a blank cue. The confirmation is not carried between unrelated reviews.
 
-Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+## 3. Apply translation
 
-Queue legends sit below the queue. Clear current draft is a secondary action below Apply translation and affects the current browser view; saved files remain available. Hover over Apply and Audit/export for their verification and lineage requirements.
+Apply translation saves and validates the draft. Read warnings and resolve errors. This does not publish a verified translation. Editing after validation invalidates that validation; apply again. Draft controls follow the source-review layout with Apply first and clear separated below.
 
-After saving a verified translation, you can visit other stages and return to export without regenerating an API candidate. Export uses the active saved review identity and its own output root.
+## 4. Save translation
 
-## Download an existing translation export
+After checking every unit, tick manual semantic verification and use Save and prepare for export. This writes an immutable translation tied to the exact source lineage. It does not alter the source revision. Technical IDs/hashes identify provenance; they are not editable wording.
 
-Existing export downloads lists the selected applied manual translation's published files, including
-its provenance JSON. Refresh checks their exact bytes and source/revision/translation identity; it
-does not regenerate a candidate, run ASR or write an export. Click the exact filename to download.
-After restarting, load saved work and refresh to obtain new session download links. A missing or
-changed artifact cannot be downloaded. The original publication/version stays unchanged.
+## 5. Save and export
 
+Choose formats and Save and export. The app audits source lineage before generating files. Exports go to `translation-exports` beneath the translation output root. Existing export downloads retrieves those actual files; Refresh checks for existing versions and does not run translation or regenerate files. Back up immutable translations and their audits/source revisions with the exports.
 
-## Review actions and saved exports (Windows feedback follow-up)
-
-The common main action row starts with Apply (Apply translation in translation review), followed
-by Undo, Redo, Save draft and Restore saved draft. Clear current draft is alone below, aligned
-with the rightmost main action. On desktop/half-screen widths, long labels wrap within buttons
-instead of moving an action to a new row; phone widths can reflow. Clear affects the current
-browser view; saved drafts and published files remain on disk.
-
-Download a file. Exports are also saved in the selected destination folder.
-Refreshing checks whether exports already exist in the selected directory.
-
-Translations are saved in the translation-exports folder. Download links populate after exporting.
-A generated API candidate completes assisted translation; semantic review remains pending until
-you explicitly verify and save a manual translation. Its existing candidate does not undo that
-manual completion.
+Proceed with next output returns to the queue. Translation workflow status changes after candidate generation, verified save and export; exporting only SRT or only VTT is sufficient to record export. To continue later, [save work](saved-work.md), then reopen this recording's own review after restart.

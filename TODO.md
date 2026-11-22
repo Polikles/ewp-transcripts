@@ -3,6 +3,21 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## EN/PL documentation complete / final artist delivery — 2026-11-22
+
+Baseline clean `main` at `fea5e7f`. Owner explicitly passed Windows retest1–5, closes GUI/interface gate
+and requests documentation. Preserve all native startup/queue/cancel/Escape/wording passes; no
+further mandatory GUI retest, paid ASR or installation qualification for this documentation task.
+
+- [x] Record owner acceptance in policy/roadmap/checkpoints and approved language reference.
+- [x] Audit existing EN user-facing docs against current code, CLI help, install scripts and approved UI names; consolidate stale/contradictory workflow advice.
+- [x] Update EN quickstart/install/step guides plus complete user-manual navigation, outputs, privacy, profiles, dictionaries, recovery, maintenance and troubleshooting.
+- [x] Prepare full matching PL user docs: Windows11x64 and WSL setup/updates, local/cloud transcription, optional correction/translation, review/export, settings, dictionaries, saved work/profiles/cleanup and common errors.
+- [x] Package EN/PL offline help with language-aware navigation/full-article links; preserve current approved UI labels and route restrictions.
+- [x] Validate guide numbering/packaged mirrors/local links/commands/HTML/language switching and ordinary appropriate checks. Screenshots wait for custom icons.
+- [ ] Record evidence/checkpoints, remove disposable test outputs, commit/push and deliver EN/PL entry points.
+- [ ] Then refresh a NEW artist review package with approved GUI/language/docs, preserving original sent ZIP (already authorized sequence).
+
 ## Delivered Windows startup / queue refresh correction — 2026-11-22
 
 Baseline clean mainb0c2ddf. Owner reports startup null href error, About Loading placeholders,
@@ -15,14 +30,14 @@ mismatch, key dialog Escape, language-info position and new EN/PL subtitle. No d
 - [x] Place per-recording language (i) beside the label, before the select; preserve dismissal and per-file settings.
 - [x] Subtitle EN "Local-first transcript workflow", PL "Lokalne narzędzie do transkrypcji"; update maintained language reference.
 - [x] Add focused Windows-session browser regression plus ordinary appropriate checks; update plans/checkpoint/evidence, clean temp outputs, commit/push main.
-- [ ] Owner retests startup/live queue and approves interface; then EN docs → complete PL docs → NEW artist package.
+- [x] Owner passes targeted Windows retest1–5 and explicitly closes this stage on2026-11-22. Interface accepted; EN docs → complete PL docs → NEW artist package now authorized.
 
 Reproduced before fix: Windows null-href/About Loading, backend completed while UI remained
 running. Fixed/verified with real queue and synthetic phases:1056 tests,17 integrations,216 full
 layouts,8 modal locale/entry cases and3 caption widths. See Instructions/GUI_WINDOWS_REFRESH_RETEST.md.
 No paid/model/reinstall changes. Original output mismatch not reproduced; guard eligibility7 cases pass.
 
-## Delivered task10 corrections / awaiting interface approval — 2026-11-22
+## Delivered task10 corrections / interface approved — 2026-11-22
 
 Baseline clean maince9ddfc. Owner returned the same-named workbook in private benchmark.
 Integrate the edits and deliver an interface update for owner approval. Later docs/package stages
@@ -33,7 +48,7 @@ remain ordered after that approval; do not start them as part of this integratio
 - [x] Commit corrected reference table/workbook with stable IDs and change provenance; keep original/returned private files untouched.
 - [x] Run copy coverage, focused EN/PL browser/workflow tests and ordinary checks; no paid API/GPU/reinstall.
 - [x] Update changelog/policy/roadmap/checkpoint/evidence; clean disposable root, commit/push and provide approval instructions.
-- [ ] Owner approves updated interface; then EN documentation review/update → full PL user documentation → NEW artist review package.
+- [x] Owner approves interface after Windows retest1–5 on2026-11-22; documentation stages now active.
 
 Implemented and verified:106 owner rows (18 EN /105 PL), plus one synchronized quick-guide
 title.1050 tests,17 integrations,216 full browser layouts and36 focused copy cases pass. Use

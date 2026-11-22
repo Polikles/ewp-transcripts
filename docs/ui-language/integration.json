@@ -1,5 +1,5 @@
 {
-  "status": "Owner corrections integrated; interface acceptance pending",
+  "status": "Owner interface approval complete 2026-11-22; EN/PL manuals prepared",
   "rows": 2219,
   "submitted_changes": 106,
   "submitted_EN_changes": 18,
@@ -1194,6 +1194,12 @@
       "en": "GUI_INITIALIZATION_FAILED: {message}",
       "pl": "GUI_INITIALIZATION_FAILED: Nie udało się zainicjalizować interfejsu. Odśwież stronę i sprawdź szczegóły techniczne.",
       "reason": "Startup diagnostics after connected API request; queue polling remains installed."
+    },
+    {
+      "id": "ui.1fce95c06b54480e",
+      "en": "Full instructions",
+      "pl": "Pełne instrukcje",
+      "reason": "Complete Polish offline manuals are now available; the old English-only qualifier is obsolete. Stable ID retained."
     }
   ]
 }

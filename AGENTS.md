@@ -2,6 +2,15 @@
 
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
 
+## Latest accepted instruction — 2026-11-22
+
+Owner passes checklist 1–5 and closes GUI/interface terminology acceptance on main fea5e7f.
+The earlier manual-writing hold is satisfied. Current authorized work: audit/update EN user docs,
+complete PL user documentation and bilingual offline help, then build a NEW updated artist package.
+Preserve the already-sent original ZIP. No new screenshot, installation, GPU or paid-provider gate.
+Follow WORK_STATUS/TODO and the user-documentation checkpoint; historical pending-approval statements
+below do not reopen this accepted gate.
+
 ## 1. Project goal
 
 `ewp-transcripts` is a local-first transcription application for edited podcast and training recordings. The MVP runs under Ubuntu in WSL2, uses an NVIDIA GPU through CUDA, and produces a canonical `*_results.json` plus optional TXT, SRT, VTT, and `*_segments.json` exports.

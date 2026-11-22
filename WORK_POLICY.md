@@ -121,3 +121,10 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     not treat this as proven ASR/GPU failure or rerun paid tests. Stable IDs and early idempotent
     polling fix it; preserve the shared-output guard. Owner accepts UI generally, with new subtitle,
     info placement and modal Escape changes. Docs/artist work still waits for this approval gate.
+
+20. Owner closes the Windows/GUI/interface stage on2026-11-22 after passing retest1–5. EN docs
+    review/update and complete PL user documentation are now authorized and active; do not wait
+    for another wording approval or repeat native tests. Keep exact approved UI terms and source
+    contracts, user-oriented procedures, honest platform limits and deferred uninstall/installer
+    scope. Package usable EN/PL offline help. New artist review package follows documentation under
+    existing authorization; original ZIP remains untouched. Screenshots still wait for custom icons.

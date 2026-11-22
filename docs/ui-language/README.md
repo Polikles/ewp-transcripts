@@ -1,6 +1,6 @@
 # Reviewed interface copy
 
-Status: owner corrections integrated; the resulting interface awaits owner approval.
+Status: owner corrections integrated and the resulting interface approved on 2026-11-22 (focused checklist 1–5 PASS).
 The source workbook returned on 2026-11-22 contains 2218 stable IDs and 106 changed rows
 (18 English changes and 105 Polish changes; some rows change both).
 The maintained reference now has2219 IDs: the owner-requested transcription-tool subtitle keeps
@@ -33,10 +33,11 @@ unknown variants retain the existing diagnostic fallback. Placeholder values and
 
 Use [the focused language approval checklist](../../Instructions/GUI_TERMINOLOGY_APPROVAL.md).
 This is an interface-language approval, not another installation, GPU or paid-provider benchmark.
-The application carries the current UI language into help navigation; full help content remains
-English until the documentation stages.
+The application carries the current UI language into help navigation. The documentation stage now supplies complete EN/PL help.
 
-After interface approval: review/update English documentation, prepare complete Polish user
+Interface approval is complete. Current sequence: review/update English documentation, prepare complete Polish user
 manuals, then create a NEW updated artist package. Keep the already-sent original artist archive
 unchanged. Retain stable IDs in future corrections; update this maintained reference and actual
 copy together rather than regenerating IDs from edited English text.
+
+Documentation availability update: `ui.1fce95c06b54480e` now reads Full instructions / Pełne instrukcje because full EN/PL manuals are bundled. The stable ID is unchanged; the maintained workbook, CSV and integration note agree. Original owner workbooks remain untouched.

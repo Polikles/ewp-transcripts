@@ -1,28 +1,26 @@
 # Optional translation
 
-Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
+Use the numbered steps below with the matching GUI stage.
 
 1. Choose source recording: Choose a recording and its verified source revision. Skip LLM-assisted translation below the queue to translate manually.
 2. Choose translation direction: The source language selects the default direction. Accept a direction change explicitly and choose a matching source recording.
 3. Generate candidate: For API assistance, choose provider/model, check readiness, consent and generate a non-final candidate. Source details and the optional dictionary can be expanded.
 4. Continue to translation review: Review meaning and speakers in Translation review & export before applying and exporting.
 
-## Detailed instructions
+## 1. Choose source recording
 
-Translation is optional and never blocks source-language exports. Manual translation needs no API, provider or paid operation. Assisted candidates remain non-final until human semantic review and explicit application.
+Select a recording and preferably its manually verified source revision. An unreviewed ASR result or correction candidate can be translated explicitly, but its weaker verification status is recorded; it is not promoted to human-verified text. To translate manually, use Skip LLM-assisted translation below the queue, then open translation review.
 
-Verify source language, target language, canonical result and exact source revision. A later source edit marks the old translation as stale; it never silently replaces old translations or exports. Dictionaries are optional.
+## 2. Choose translation direction
 
-Choose a recording for single-item work or explicitly check recordings for batch assistance. Provider changes and queue selection do not send text. Read the disclosure and consent for the exact operation before generating. Open the saved candidate in semantic review after generation.
+The source language selects PL → EN or EN → PL. A direction change needs explicit acceptance and a matching source. Interface language does not control this direction. Check source identity before generating; do not use the same translation draft for an unrelated canonical result.
 
-## Next step
+## 3. Generate candidate
 
-Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+For assistance, select OpenRouter or a separately hosted LM Studio endpoint and its exact model. Check readiness, expand the optional project translation dictionary if needed, and read the disclosure. The shared OpenRouter key serves ASR/correction/translation, but each operation has its own data and consent scope.
 
-The highlighted direction shows the current target choice. A change requires the inline Accept direction change action. If it conflicts with the immutable source language, choose a matching source recording before generation; the application never relabels the source audio. Queue-filled source/target details and the optional translation dictionary start collapsed.
+After explicit consent, Generate translation candidate sends source text, not audio, in this stage. OpenRouter may bill the request. A project dictionary supplies approved terms/conventions for the selected direction; it does not guarantee meaning or fluency. Missing consent highlights its checkbox. Success records the candidate in the queue and disables accidental duplicate generation for that state.
 
+## 4. Continue to translation review
 
-The dictionary file picker belongs inside its optional dictionary disclosure. Generating a candidate
-refreshes the queue immediately and disables the generation button for that source. Use Reopen
-translation explicitly to request a new attempt; generating a candidate never marks semantic
-verification complete. Missing disclosure highlights the required checkbox before any API request.
+Open the generated candidate in [Translation review & export](translation-review.md). Read every source/target unit and correct meaning, omissions, additions, names and register. A successful API response is not semantic approval. Save work to return later. If you do not need a translation, you may stop after source export without calling an API.

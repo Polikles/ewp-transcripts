@@ -155,7 +155,8 @@ def test_shell_is_served(tmp_path: Path) -> None:
     assert b"Review status" in response.body
     help_response = dispatch_get(config, server_port=8765, host="localhost:8765", target="/help")
     assert help_response.status == 200
-    assert b"Build and start a queue" in help_response.body
+    assert b"User manual" in help_response.body
+    assert b"/help/installation?lang=en" in help_response.body
     script_response = dispatch_get(
         config, server_port=8765, host="localhost:8765", target="/assets/app.js"
     )

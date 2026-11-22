@@ -1,101 +1,44 @@
 # Saved work & cleanup
 
-Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
+Use the numbered steps below with the matching GUI stage.
 
 1. Choose output root and catalog: Leave the optional catalog blank to store new saved-work JSON files in the output directory, or choose a separate catalog for saves and backups.
 2. Save current work state: Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.
 3. Load saved work: The list refreshes when this stage opens. Select the workspace and Load selected work state after a restart. Re-enter or explicitly load provider credentials; upload consent stays unchecked.
 4. Inspect cleanup before deleting: Refresh the managed-source inventory and read retention reasons before any explicit cleanup.
 
-## Detailed instructions
+## 1. Choose output root and catalog
 
-A workspace references durable files; it does not embed audio, transcript text, credentials or human approval. Back up the output root including dot-directories and any separate workspace catalog. Interrupted transcription restarts from the beginning.
+Choose the output root before working. An empty optional work-storage directory saves NEW workspace JSON files in that output folder; choose another catalog for a separate save/backup location. Updating a selected older save keeps its actual owning catalog. Read Saved work file to see the manifest's real path. The server remembers accessible recent output/catalog locations locally; the list refreshes when this section opens. This recall does not start work or supply consent.
 
-Auto-save defaults off. Enabling it replaces the active saved checkpoint periodically; leave it off for a stable explicit recovery point. Loading work preserves exact recording/review/translation identity and checks current file hashes.
+## 2. Save current work state
 
-An empty name highlights/focuses the name field before saving. Existing entries in the private
-default catalog remain listed alongside the chosen output/custom catalog; saving an already selected
-entry keeps its original catalog. Refresh is available below Save. Remove/Clear actions affect
-saved/current state and are visually secondary. A workspace JSON alone is not a media backup.
+Enter a recognizable unique workspace name and Save current work state. Dirty source/translation drafts are checkpointed first. New filenames begin with the name and end with `--<UUID>.workspace.json`. Windows-forbidden filename characters are replaced; Polish letters can remain. Do not identify a workspace only by its UUID.
 
-Loading work also invalidates any earlier cloud-upload confirmation. Select the checkbox again
-only when you intend to start the currently staged cloud jobs. A saved API key and upload consent
-are separate; loading a key never supplies consent.
+The loaded name is filled automatically and locked against accidental renaming. Updating it saves the same workspace. Save as a new workspace requires another name and keeps the original. A duplicate name in known catalogs is rejected; case, surrounding whitespace and equivalent Unicode spellings do not create distinct names. An empty/duplicate name highlights the field.
 
-Remove from list only removes a selection entry. Forgetting an inactive queue item and deleting a saved workspace do not delete publication files. Managed-source cleanup is a separate explicit operation and retains copies still referenced by current work, workspace catalogs or review lineage.
+Auto-save is off by default. If enabled, it periodically updates the active checkpoint when tracked work changes; it is not a substitute for deliberately saving important editor work. Explicit save is the recommended recovery point before stopping the server.
 
-## Next step
+## 3. Load saved work
 
-Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+Select a listed workspace and Load selected work state, or open its manifest file. The progress overlay reports loaded/total jobs while checking paths, sources and editors. Wait for completion. Completed, failed and cancelled jobs are restored, along with staged jobs and their per-file options. Interrupted work is never silently resumed. Retry is explicit and starts from the beginning.
 
-## Restart and completed/cancelled history
+Pending files that were planned but not queued are retained in new saves and replanned on load. Review and confirm the refreshed plan before Add to queue. Selecting the same named file with the same content again does not duplicate it. Distinct content may need a distinct recording ID. Older saves without durable pending-selection metadata may require selecting the original files again.
 
-Save the current work state after saving/applying a review or changing the queue. Cancel unwanted
-waiting/running tasks and wait for terminal status before stopping if you do not want them to finish.
-On restart, load the same named workspace/catalog. Saved staged work is hash-checked and re-staged;
-completed, failed and cancelled history is restored as history, never as a running GPU operation.
-Completed review/export can recover without original audio when the canonical result still exists;
-playback still requires the original media. Credentials and human consent/verification remain unset.
-Refresh Existing export downloads in either review stage to download an existing applied version.
-Temporary-workdir cleanup is a separate Settings & About action with an explicit preview.
+Credentials and upload/manual-verification checkboxes are excluded. Re-enter or explicitly load the OpenRouter key if the server no longer has one, then give fresh cloud consent. A key still present in the same server process is independent of loading work. Missing paths remain a recovery issue; a saved manifest is not an embedded copy of every file.
 
-Loading shows a modal with loaded/total queue jobs until the queue and saved editors are ready.
-Failed/cancelled history may reference moved media without being omitted; actual retry still
-requires unchanged original sources. Retry replaces its selected old row with a new staged attempt.
+## Back up or move a project
 
-## Projects and named locations
+Back up the entire output folder INCLUDING hidden directories such as `.ewp-gui-sources`, and all separately configured review, revision, translation, dictionary and workspace catalogs. Preserve source recordings too if they remain external. New GUI pending-media copies are durable references below the output root; temporary browser-selection copies alone are not backups.
 
-Expand Projects and locations to reopen recent recording reviews or remember a named project.
-Opening/preparing a review also records its own result/output reference. These are references,
-not complete backups. Remove from list deletes only the catalog entry. Named input/output
-directories fill the transcription fields without starting jobs; changing input replaces the
-pending file selection, while staged queue tasks remain intact.
+The workspace JSON contains references, hashes, options and workflow identity, not media bytes, secrets or consent. Reopening a completed result can permit editing/export without audio; playback needs unchanged media. Moving to another computer requires transferring these files and checking paths. A [user profile](settings.md) transfers preferences/catalog records and optional dictionaries, not recordings or transcripts. Do not edit hashes to bypass a changed source.
 
-Find saved results scans the selected directory only (up to 500 entries), validates canonical
-JSON content and shows checkboxes. Add selected results to queues copies only those validated
-canonical results into the shared output's durable source area; it never reruns transcription.
-A result changed after scanning must be scanned again. Up to 50 selected results can be added
-at once. Paths unavailable marks missing or foreign-computer references; restoring original
-files/path access is separate from loading a profile.
+## 4. Inspect cleanup before deleting
 
-## Pending selections and retained failures
+Remove selected work state deletes only that workspace manifest. Clear current work state forgets inactive in-memory/browser workflow state after confirmation; it refuses while active work is running. Neither deletes published revisions/exports or all source media.
 
-Save also preserves browser-selected media that has only been planned, before Add to queue.
-Load restores those files, their per-file language/count/stream options and input path, then
-replans metadata against the current files. It does not run ASR or restore plan approval; review
-and confirm the refreshed plan before adding. Selecting the same named file with the same content
-again keeps one entry. Different content remains a distinct selection and may need an explicit ID.
-Older saves without pending-selection metadata cannot recover expired temporary browser copies;
-choose them again. New workspaces use version 3; earlier versions 1/2 remain readable.
+Managed source copies inventory lists app-owned durable copies and why each is retained. Preview deletion only for unreferenced copies, inspect the plan, then confirm explicitly. Current work, known saved catalogs and lineage references protect files. Other catalogs outside those known to this operation must be audited separately. This is separate from temporary-workdir cleanup in Settings; it does not delete original external recordings or model caches.
 
-Loading a snapshot taken before a later failed/cancelled attempt recognizes its retained matching
-failure state and restores that inactive row. Completed rows also remain. The source hashes and
-current episode signature must agree; failure files stay on disk. Retry is explicit and restarts
-processing from the beginning, with fresh cloud consent when needed. Do not delete failed JSON
-files to try to repair provider timing or workspace restoration.
+## Projects and locations
 
-The loaded name fills its field and clears an old missing-name highlight. Existing names are
-readonly to avoid accidental rename. Select **Save as a new workspace** to enter a different name
-and create a separate record. The original remains. The **Saved work file** line shows the actual
-manifest location: updating a selected legacy entry keeps it in its private/custom catalog even
-when the optional catalog input is blank. For a new output-folder copy, select Save as new.
-A complete output-folder ZIP may therefore lack a manifest stored in an older separate catalog.
-
-## Recognizable files and remembered directories
-
-New saves use `<workspace name>--<UUID>.workspace.json`. Characters forbidden in Windows filenames
-are replaced with underscores; Polish letters and spaces remain recognizable. The UUID preserves
-identity for older saves even if their names coincide. New names must be unique across the known
-catalogs: Save as new rejects an existing name and highlights the name field. Comparison ignores
-case, surrounding whitespace and equivalent Unicode spellings. Choose another name; updating the
-selected existing save still works. Earlier UUID-only JSON saves still
-load, and saving them again migrates their filename while keeping that identity. Save as new makes
-a separate ID/file; removing a save deletes only its manifest.
-
-Last-used output and optional catalog directories, plus up to 20 recent catalogs, are remembered
-locally by the server. On reopening, accessible saved work is listed without reselecting paths or
-clicking Refresh. An input already changed by the user is not overwritten by a delayed recall.
-Unavailable directories are ignored; no audio, key, approvals or automatic queue start are restored
-by directory recall. The registry is `workspace-locations.json` beside the private `gui-workspaces`
-catalog (`XDG_STATE_HOME/ewp-transcripts`, or `~/.local/state/ewp-transcripts`). It is a local directory
-reference list, separate from portable workspace files and browser storage.
+Recent projects reopen result/output references. Named locations fill input/output fields without starting ASR; changing the input location replaces the pending selection, not staged jobs. Find saved results scans the selected directory, validates canonical JSON and allows adding selected results without ASR. It scans up to 500 entries and imports at most 50 selected results in one action. Unavailable paths are references needing restoration, not permission to regenerate data.

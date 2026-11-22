@@ -1,6 +1,6 @@
 # Source review & export
 
-Use this guide with the matching stage in EwP Transcripts. Interface language does not change recording or translation language.
+Use the numbered steps below with the matching GUI stage.
 
 1. Choose recording: Choose a completed recording from the queue to prepare or reopen its own review.
 2. Speaker names and colors: Check display names, speaker assignments and the YTT color profile. Add speaker creates another editable speaker.
@@ -8,83 +8,32 @@ Use this guide with the matching stage in EwP Transcripts. Interface language do
 4. Check and save revision: Use Apply to save and validate the draft. Confirm manual verification, then Save and prepare for export.
 5. Export subtitles: Choose formats and Export verified revision. Translation is optional and can follow later.
 
-## Detailed instructions
+## 1. Choose recording
 
-Choose one recording for the editor; batch checkboxes are independent. The queue action restores that recording’s saved review or prepares a new draft. Direct source/output paths remain available as an advanced fallback.
+Open the recording's review/export action in its queue. This prepares a new draft or restores that recording's saved draft. Existing canonical result JSON can be imported instead of transcribing again. The selected result and output root determine review identity; do not combine unrelated result/revision paths. Direct paths remain an advanced fallback.
 
-Speaker names and colors keeps stable speaker IDs. Switching the YTT profile updates visible colors for the next export and retains custom overrides. Preview tries a configured profile, Apply commits colors for this recording, and Save keeps a reusable custom profile; previous exports stay unchanged. Add speaker adds a revision-local identity, not a new ASR run or voice-recognition identity. An in-use speaker cannot be removed until its blocks are reassigned.
+## 2. Speaker names and colors
 
-The left recording rail contains Recording audio while this stage is open. All synchronized
-files/channels in the episode are mixed from their shared time zero into one private mono preview,
-so a guest on a separate track remains audible when seeking to their words. Original paths,
-stream/channel choices and hashes are verified. The mix uses the longest source duration without
-concatenation, timing offsets or source modification. Go to this fragment below a speaker selector
-saves any dirty draft, then seeks to a real source-word start and starts the complete episode mix.
-Changed/inserted text may use the nearest known timestamp, explicitly marked in player status.
+Set display names and check each block's speaker assignment. Add speaker creates an editable identity for this revision; it is not automatic voice recognition or a new ASR run. Reassign an in-use speaker's blocks before removing it.
 
-Small source-file hints below Speaker come from immutable source-word provenance, not the current
-speaker label. Renaming or reassigning a speaker does not rewrite where the words originated.
-An ambiguous mapping lists relevant section sources conservatively. Changing stages pauses audio;
-returning restores the per-recording position in this browser session. Original recordings must
-remain available and match their canonical hashes. If any source is missing, restore it and use
-Reload recording audio; transcript editing still works. Server restart prepares a new private mix.
+Choose a YTT color profile. Example default is the initial choice; EwP Brand® is the owner's podcast identity preset. Preview displays the selected colors, Apply uses them for this recording and Save creates a reusable custom profile. Existing per-speaker overrides are retained. Colors affect future YTT exports; files already exported remain unchanged. SRT does not carry the YTT palette.
 
-Review sections aim for anchor_target_words (default 200) and anchor_target_speaker_blocks
-(default 5), then choose a nearby sentence end, including closing quotes and common EN/PL
-abbreviation handling. These are presentation targets, not hard sentence cuts. A search extends
-up to twice the word target. Without a usable sentence end, a bounded fallback keeps the editor
-usable and a red note above the first section requests extra attention to punctuation and speakers.
-This is a structural heuristic, not an ASR confidence score. Correcting speaker assignments matters
-more than presentation splits; splitting a block here does not determine subtitle line breaks.
+## 3. Review transcript and listen
 
-Unchanged legacy text can be repartitioned at source-word sentence boundaries while retaining
-speaker assignments. Edited legacy and parent-revision anchors keep their identities and use sentence-aware within-block
-presentation; unresolved old section boundaries receive the same caution. Reading does not replace
-saved bytes. Explicit Save persists the displayed draft structure. Canonical JSON/timing and published
-revisions remain unchanged. These changes do not require repeating ASR.
+Correct every section's wording, punctuation, names, quotations and speaker labels. The source-file hint below Speaker identifies word provenance; renaming a speaker does not change it. Large blocks/sections are divided around sentence endings for convenient review. These presentation splits do not determine subtitle cue boundaries. If punctuation cannot supply useful boundaries, the first section shows a caution; inspect those divisions and speaker assignments particularly carefully.
 
-The recording player has room for the browser's native controls, including its overflow menu
-and playback-speed option where supported. Rate changes persist as a display preference for
-both mixed episodes and individual recordings. The redundant permanent speed selector is removed.
+Recording audio in the left rail plays the episode. Synchronized tracks/channels are mixed on one timeline from time zero, not concatenated. Go to this fragment seeks to a real word timestamp and starts playback. New or changed words may use the nearest known timestamp, which the player reports. Playback speed can be adjusted. If audio is unavailable, restore unchanged source files and Reload recording audio; editing a saved result can continue without playback. Leaving the stage pauses audio.
 
-Text boxes grow to fit their text. Use All sections or Previous section / Next section to navigate. Split at cursor requires one caret, complete words and nonempty text on both sides. Selecting text uses Separate selected text instead. Neither operation invents timestamps. Undo and Redo change only the current editor.
+Place the caret between whole words and use Split at cursor, or select whole text and Separate selected text to isolate a passage. Merge with previous block joins it back. Assign the resulting blocks to the right speaker. Text areas resize automatically. Undo/Redo affect current draft history, not already published revisions. Structural actions checkpoint dirty text; Save draft remains available whenever you want a checkpoint.
 
-Draft controls are below the transcript in one panel: Apply, Undo, Redo, Save draft and Restore saved draft in the main row; Clear current draft alone below aligned right. Save draft creates a durable checkpoint. Apply saves dirty changes and validates the exact draft; it does not publish or scroll away. An edit invalidates validation and verification. Opening review/export from the queue prepares or restores the draft automatically.
+## 4. Check and save revision
 
-Only confirm I manually verified wording, speakers… after reviewing all sections. Save and prepare for export creates an immutable child while retaining the original ASR result. Choose TXT, SRT, VTT, YouTube YTT, HTML or Segments JSON and export. Repeated export allocates a new version rather than overwriting earlier files. Example default is the startup choice; explicit production settings remain available as Configured palette when different. EwP Brand® retains the owner’s identity colors. New-palette YouTube qualification is separate.
+Apply saves and validates the current draft; review errors and warnings. It does not publish a final revision. After reading the complete text, tick manual verification and select Save and prepare for export. This writes an immutable verified revision and enables its export. Missing verification highlights the checkbox; do not tick it until wording, speakers and sentence boundaries have actually been checked.
 
-## Next step
+Save draft can checkpoint unfinished work. Restore saved draft loads the previous saved draft; Clear current draft clears the current view after confirmation and does not delete published files. Changing a draft after validation requires Apply again. To revise an already verified result, make another revision; do not edit the canonical result or immutable revision JSON in place.
 
-Return to the application and use the numbered sections and actions above. Saving a draft is separate from human approval and immutable publication.
+## 5. Export subtitles
 
-Example default is a visibly different six-color example palette and the first choice in a fresh session. EwP Brand® is the owner’s identity preset; its registered-mark symbol and original colors are retained. Named profiles are defined in subtitles.ytt_color_profiles; explicitly configured subtitles.ytt_speaker_palette colors remain available as Configured palette if they differ from Example default. Legacy configured/brand workspace IDs and legacy EwP brand configuration names still load. Selecting a profile previews its speaker colors immediately. Preview does not change export preferences: Apply commits the visible colors for this recording’s next export. Save stores a named custom profile for other recordings and future sessions; use a custom name to preserve configured presets. Existing exports stay unchanged.
+Select formats and Export verified revision. The default directory is `exports` below the review project root; custom paths are available in advanced controls. Existing export downloads links download the actual saved files. Refresh checks the directory for prior exports without regenerating them. New palette exports create a new artifact; older versions remain available. See [Files and exports](outputs.md) for formats and the difference from raw ASR exports.
 
-Save and prepare for export requires the human-verification checkbox. Missing verification outlines that row and shows a message immediately below it; no revision is submitted. Checking it clears the local error, and saving still requires the explicit Save action. Saved per-recording colors and existing exports are retained when profiles change.
-
-## Download a published export
-
-After export, open Existing export downloads. Refresh existing exports also works after loading
-saved work; it validates existing files without running ASR or writing new exports. Click the
-exact filename/version to download the original bytes. The displayed SHA-256 identifies that file;
-older registered palette/export versions stay available. Download links expire after 30 minutes
-and are renewed by refresh after a restart. Missing/changed files are withheld, never repaired silently.
-
-Compatible older exports can be checked read-only against the deterministic renderer. A historical
-custom palette without a download record may need its original export settings; the application
-does not guess its identity. New GUI exports keep a private download registry with artifact and
-source/revision hashes. Back up the local application state as well as the output root when needed.
-
-
-## Review actions and saved exports (Windows feedback follow-up)
-
-The common main action row starts with Apply (Apply translation in translation review), followed
-by Undo, Redo, Save draft and Restore saved draft. Clear current draft is alone below, aligned
-with the rightmost main action. On desktop/half-screen widths, long labels wrap within buttons
-instead of moving an action to a new row; phone widths can reflow. Clear affects the current
-browser view; saved drafts and published files remain on disk.
-
-Download a file. Exports are also saved in the selected destination folder.
-Refreshing checks whether exports already exist in the selected directory.
-
-Exporting selected SRT/VTT/YTT formats is sufficient for source-export completion; TXT is optional.
-Canonical and export version suffixes are retained in artifact names and status discovery.
+Proceed to the next queue item or [Optional translation](optional-translation.md). Translation is not required to complete source review/export. Save work before ending the session; export files and immutable revisions remain on disk after the browser/server closes.

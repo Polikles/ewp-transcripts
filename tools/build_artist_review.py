@@ -7,6 +7,7 @@ import hashlib
 import html
 import json
 import math
+import re
 import shutil
 import struct
 import subprocess
@@ -14,6 +15,7 @@ import tempfile
 import wave
 import zipfile
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.gui_library import GuiLibrary
@@ -156,25 +158,26 @@ def build(output: Path) -> None:
             audio.writeframes(struct.pack(f"<{len(frames)}h", *frames))
         guides = package / "guides"
         guides.mkdir()
-        for slug in GUIDE_FILES:
-            rendered = render_guide(slug)
-            assert rendered is not None
-            (guides / f"{slug}.html").write_text(
-                rendered.decode()
-                .replace("/assets/", "../assets/")
-                .replace('href="/"', 'href="../index.html"')
-            )
-        (guides / "index.html").write_text(
-            page(
-                "GUI guides",
-                "<ul>"
-                + "".join(f'<li><a href="{slug}.html">{slug}</a></li>' for slug in GUIDE_FILES)
-                + "</ul>",
-            )
-            .replace('href="index.html"', 'href="../index.html"')
-            .replace('href="icon-inventory.html"', 'href="../icon-inventory.html"')
-            .replace('href="review-docs.css"', 'href="../review-docs.css"')
-        )
+        for locale in ("en", "pl"):
+            target = guides / ("pl" if locale == "pl" else "")
+            target.mkdir(exist_ok=True)
+            prefix = "../../" if locale == "pl" else "../"
+
+            def help_link(match: re.Match[str], source_locale: str = locale) -> str:
+                url = urlsplit(match[1])
+                language = parse_qs(url.query).get("lang", ["en"])[0]
+                slug = url.path.removeprefix("/help/")
+                relative = "../" if source_locale == "pl" else ""
+                relative += ("pl/" if language == "pl" else "") + slug + ".html"
+                return f'href="{relative}{"#" + url.fragment if url.fragment else ""}"'
+
+            for slug in GUIDE_FILES:
+                rendered = render_guide(slug, locale=locale)
+                assert rendered is not None
+                content = rendered.decode().replace("/assets/", prefix + "assets/")
+                content = content.replace('href="/"', f'href="{prefix}index.html"')
+                content = re.sub(r'href="(/help/[^" ]+)"', help_link, content)
+                (target / f"{slug}.html").write_text(content)
         inventory = [
             {
                 "asset": "logo.svg",
@@ -304,7 +307,9 @@ Try the queue, all five workflow stages, source and translation editors, split/u
 speaker names/colors, palette preview/apply/save, dictionaries, saved work, settings and dialogs.
 The demo toolbar offers queue state presets for running/failed/completed visual states. Read
 icon-inventory.html for custom / Lucide / generic / native elements and replacement guidance.
-Review at full and half desktop widths in both themes. Short instructions and bundled guides work.
+Review at full and half desktop widths in both themes. Current approved EN/PL interface copy
+and complete offline EN/PL manuals are included. Open help links in either language; no help
+server is required.
 
 Software: AGPL-3.0-only (LICENSE.txt). Frontend source is assets/app.js, assets/app.css,
 demo-runtime.js and demo-data.js. Original repository: https://github.com/Polikles/ewp-transcripts.

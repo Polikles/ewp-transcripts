@@ -26,7 +26,7 @@ const guiPolish = new Map([
   ["Local dependency checks passed. This checks library loading, CUDA visibility and local model paths; it does not run transcription.", "Test lokalnych zależności zakończony pomyślnie. Sprawdzono ładowanie bibliotek, dostępność CUDA i ścieżki modeli; transkrypcja nie została uruchomiona."],
   ["Use for inspect / plan", "Wybierz do inspekcji i planu"], ["Remove from list", "Usuń z listy"],
   ["Local dependencies", "Lokalne zależności"], ["Run doctor", "Uruchom doctor"],
-  ["Quick steps", "Krótkie instrukcje"], ["Full instructions (English)", "Pełne instrukcje (angielski)"],
+  ["Quick steps", "Krótkie instrukcje"], ["Full instructions", "Pełne instrukcje"],
   ["Stage instructions", "Instrukcje etapu"], ["Add speaker", "Dodaj mówcę"],
   ["Recording queue", "Kolejka nagrań"], ["Add audio files…", "Dodaj pliki audio…"],
   ["Tools and settings", "Narzędzia i ustawienia"], ["Task context", "Kontekst zadania"],
@@ -807,7 +807,7 @@ function translateGui() {
     }
     guiAttributeSources.set(element, originals);
   }
-  for (const link of document.querySelectorAll('a[href^="/help/"]')) {
+  for (const link of document.querySelectorAll('a[href^="/help/"], a[href="/help"], a[href^="/help?"]')) {
     const target = new URL(link.href, location.href);
     target.searchParams.set("lang", guiLocale);
     link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);

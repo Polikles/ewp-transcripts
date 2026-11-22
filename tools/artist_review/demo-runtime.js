@@ -12,7 +12,7 @@
       created_at:new Date().toISOString(), updated_at:new Date().toISOString(), group_sources:{}, source_sha256:"0".repeat(64), error:null,
       workflow:Object.fromEntries(stages.map(stage=>[stage,{state:stage==="transcription"&&index!==3?"complete":"pending",path:stage==="transcription"&&index!==3?result:null}]))};
   }
-  let jobs=[job(1),job(2),job(3)], dictionaries=[], reviews={}, translations={}, workspaces=[], serial=0, simulationStarted=0;
+  let jobs=[job(1),job(2),job(3)], dictionaries=[], reviews={}, translations={}, workspaces=[], serial=0, simulationStarted=0, credentialConfigured=false, credentialSaved=false, savedProfile=null;
   const profiles=copy(data.profiles);
   const dictionary={dictionary_version:"1.1",dictionary_id:"demo-pl-v1",project_id:"artist-demo",job_ids:["*"],language:"pl",proposal_sha256:"0".repeat(64),manual_conventions:[],entries:[{source:"przykładowy termin",target:"preferowany termin",status:"approved"}]};
   dictionaries.push({document:dictionary,path:"/demo/dictionaries/demo-pl-v1.json",sha256:"0".repeat(64),kind:"correction",dictionary_id:dictionary.dictionary_id,project_id:dictionary.project_id,language:"pl",version:"1.1",hidden:false});
@@ -35,12 +35,12 @@
   const stamp = () => String(++serial).padStart(64,"0");
   window.fetch=async (input,options={})=>{
     const raw=String(input instanceof Request?input.url:input);
-    const path=raw.startsWith("/")?raw:new URL(raw,location.href).pathname;
+    const path=new URL(raw,location.href).pathname;
     let request={};try { request=JSON.parse(options.body||"{}"); } catch (_) { /* Native file selection is ignored. */ }
     const headers=new Headers(options.headers||{});
     if(path==="/api/v1/health")return response({status:"ok",api_version:"1.0",application_version:"0.20.0-design-demo"});
     if(path==="/api/v1/about")return response({application:"EwP design demo",application_version:"0.20.0",api_version:"1.0",license_url:"LICENSE.txt",repository_url:"README.html",issues_url:"README.html"});
-    if(path==="/api/v1/session")return response({csrf_token:"artist-demo-not-a-secret",openrouter_key_configured:false});
+    if(path==="/api/v1/session")return response({csrf_token:"artist-demo-not-a-secret",openrouter_key_configured:credentialConfigured});
     if(path==="/api/v1/guides")return response(data.guides);
     if(path==="/api/v1/operations")return response({operations:[]});
     if(path==="/api/v1/transcriptions" && (!options.method||options.method==="GET")) {
@@ -48,6 +48,26 @@
       if(active){const elapsed=Math.floor((Date.now()-simulationStarted)/1000);active.runtime_progress={phase:"transcribe",percent:Math.min(85,12+elapsed),estimated:true,elapsed_seconds:elapsed,phase_elapsed_seconds:elapsed,eta_seconds:60,eta_min_seconds:30,eta_max_seconds:100,calibrated:true,overdue:false,stream_index:1,stream_count:2};}
       return response({jobs:copy(jobs)});
     }
+    if(path==="/api/v1/workspaces/locations")return response({locations:{output_directory:root,workspace_directory:"",recent_directories:[]}});
+    if(path==="/api/v1/projects/list")return response({recent:[],locations:[]});
+    if(path.startsWith("/api/v1/projects/"))return response({updated:true,results:[]});
+    if(path==="/api/v1/credentials/openrouter") {
+      if(request.action==="remove"){credentialSaved=false;credentialConfigured=false;}
+      else if(request.action==="clear-session")credentialConfigured=false;
+      else if(request.action==="save"){credentialSaved=true;credentialConfigured=true;}
+      else if(request.action==="use")credentialConfigured=credentialSaved;
+      else credentialConfigured=true;
+      return response({configured:credentialConfigured,stored:credentialSaved,environment_configured:false});
+    }
+    if(path==="/api/v1/speech/check")return response({ready:true,detail:"Synthetic connection check only; no key or recording is sent."});
+    if(path==="/api/v1/speech/estimate")return response({models:[],estimates:[],estimated_total_usd:0});
+    if(path.startsWith("/api/v1/profile/")) {
+      if(path.endsWith("save"))savedProfile={name:request.name,preferences:copy(request.preferences),fields:copy(request.fields),workspaces:[],dictionaries:[]};
+      if(path.endsWith("import"))savedProfile=copy(request.profile);
+      return savedProfile?response({profile:copy(savedProfile)}):failure("GUI_PROFILE_INVALID","Save a synthetic demo profile first.");
+    }
+    if(path==="/api/v1/exports/list")return response({exports:[],directory:request.export_output_directory});
+    if(path==="/api/v1/workdirs/inventory")return response({entries:[]});
     if(path==="/api/v1/select-output-directory")return response({path:root});
     if(path==="/api/v1/selected-media/upload")return response({path:`/demo/media/${decodeURIComponent(headers.get("X-EWP-Filename")||"selected.mp4")}`});
     if(path==="/api/v1/import-canonical-file")return response({imported:true,job:copy(jobs[0])});
@@ -100,7 +120,7 @@
     if(path.includes("openrouter"))return response({configured:false,ready:true});
     return failure("GUI_DEMO_ROUTE_UNAVAILABLE","This backend action is simulated in the artist reference. Use the demo stage controls to review the interface.");
   };
-  document.addEventListener("click",event=>{const anchor=event.target.closest("a");const href=anchor?.getAttribute("href")||"";if(href.startsWith("/help")){event.preventDefault();const slug=href.split("/").filter(Boolean).pop();window.open(`guides/${slug==="help"?"index":slug}.html`,"_blank","noopener");}},true);
+  document.addEventListener("click",event=>{const anchor=event.target.closest("a");const href=anchor?.getAttribute("href")||"";if(href.startsWith("/help")){event.preventDefault();const url=new URL(href,"https://demo.invalid"),slug=url.pathname==="/help"?"index":url.pathname.slice(6);const locale=url.searchParams.get("lang")==="pl"?"pl/":"";window.open(`guides/${locale}${slug}.html`,"_blank","noopener");}},true);
   document.addEventListener("DOMContentLoaded",()=>{
     const toolbar=document.createElement("aside");toolbar.id="artist-demo-toolbar";toolbar.dataset.guiContent="true";
     toolbar.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:30;background:#fff7df;color:#243d4c;border-top:2px solid #c69d44;padding:.4rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font:12px system-ui";

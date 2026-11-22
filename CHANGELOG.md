@@ -4,6 +4,21 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+### Added
+
+- Complete English and Polish user manuals: fifteen chapters per language covering installation,
+  updates, every mandatory/optional GUI stage, raw versus verified outputs, dictionaries, saved
+  work, backups, profiles, credentials, cleanup and actionable troubleshooting. Consolidate stale
+  CLI-only/Inspect/native-Windows guidance and preserve the advanced CLI runbook.
+- Bundle both full manuals for offline GUI help, including a localized index, real document links,
+  readable code/lists and EN/PL switching. Keep fixed resource routes and escaped markup; no new
+  runtime dependency or model/provider call. Remove the obsolete English-only help-link qualifier
+  while retaining its reviewed language ID.
+- Refresh the standalone artist-reference builder for current approved UI copy and bilingual help;
+  its in-memory adapter remains synthetic and makes no transcription/provider requests. Preserve
+  the original sent archive and create the updated reference under a new filename.
+
+
 ### Fixed
 
 - Fix native-Windows GUI startup after help links acquire a language query: resolve the repair
@@ -19,8 +34,7 @@ All notable changes to EWP-transcripts are documented here.
   dynamic statuses, error messages, speaker/dictionary labels, tooltips and quick guides. Keep
   reviewed full-message errors ahead of generic code fallbacks and synchronize the dictionary
   quick-step title so late metadata cannot overwrite its reviewed heading.
-- Preserve the interface language in offline help navigation. Full manual contents remain English
-  until interface approval and the separate EN/PL documentation stages. Add the reviewed workbook,
+- Preserve the interface language in offline help navigation. The subsequent documentation stage now supplies full EN/PL manual contents. Add the reviewed workbook,
   stable-ID CSV, integration notes and focused approval instructions as maintained language references.
 - Parse actual JavaScript literals in the optional GUI copy scan, avoiding false untranslated
   fragments from apostrophes/regex/template HTML. Existing Playwright tooling also needs

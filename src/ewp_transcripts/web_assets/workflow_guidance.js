@@ -129,7 +129,7 @@ function renderWorkflowInstructions() {
   const title = document.createElement("p"); title.className = "gui-guide-title";
   const label = document.createElement("strong"); label.textContent = "Quick steps";
   const full = document.createElement("a"); full.href = `/help/${guide.slug}`;
-  full.textContent = "Full instructions (English)";
+  full.textContent = "Full instructions";
   full.target = "_blank"; full.rel = "noopener noreferrer";
   title.append(label, full);
   const list = document.createElement("ol");

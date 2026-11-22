@@ -1,6 +1,8 @@
 """Keep the general-user operator entry point complete and discoverable."""
 
+import re
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNBOOK = ROOT / "Instructions" / "README.md"
@@ -12,8 +14,9 @@ def test_primary_readme_links_complete_operator_runbook() -> None:
     assert "Instructions/README.md" in primary
     assert "./scripts/install-fresh-ubuntu.sh --install" in primary
     assert "./scripts/setup-models.sh" in primary
-    assert "transcriber transcribe" in primary
-    assert "transcriber export" in primary
+    assert "docs/gui/README.md" in primary
+    assert "docs/gui/pl/README.md" in primary
+    assert "scripts/setup-windows.ps1 -Install" in primary
     assert RUNBOOK.is_file()
 
 
@@ -44,7 +47,7 @@ def test_operator_runbook_covers_every_shipped_command_and_safety_boundary() -> 
         "transcriber COMMAND --help",
         "transcriber revise COMMAND --help",
         "$HOME/.config/ewp-transcripts/config.toml",
-        "/home/<user>/transkrypcje/ewp-transcripts/transcriber.toml",
+        "`transcriber.toml` is optional",
         "one synchronized mono file per speaker",
         "Avoid 3+ channel sources",
         "speaker attribution is not guaranteed",
@@ -80,3 +83,20 @@ def test_operator_runbook_links_all_required_detailed_guides() -> None:
     for filename in required:
         assert filename in document
         assert (ROOT / "WSL config" / filename).is_file()
+
+
+def test_current_bilingual_manual_and_operator_links_resolve() -> None:
+    documents = [
+        ROOT / "README.md",
+        RUNBOOK,
+        ROOT / "Instructions/GUI_QUICKSTART.md",
+        ROOT / "Instructions/WINDOWS_NATIVE.md",
+        ROOT / "WSL config/UBUNTU_UPGRADE.md",
+        *list((ROOT / "docs/gui").rglob("*.md")),
+    ]
+    for document in documents:
+        for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", document.read_text()):
+            url = urlsplit(target)
+            if url.scheme or target.startswith("#"):
+                continue
+            assert (document.parent / unquote(url.path)).exists(), (document, target)

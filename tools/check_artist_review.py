@@ -3,7 +3,9 @@
 import argparse
 import hashlib
 import json
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -20,6 +22,23 @@ def main() -> None:
     manifest = json.loads((root / "manifest-sha256.json").read_text())
     for name, digest in manifest.items():
         assert hashlib.sha256((root / name).read_bytes()).hexdigest() == digest, name
+
+    class LocalLinks(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            for name, value in attrs:
+                if name not in {"href", "src"} or not value:
+                    continue
+                parsed = urlsplit(value)
+                if parsed.scheme or parsed.netloc or not parsed.path:
+                    continue
+                target = (document.parent / unquote(parsed.path)).resolve()
+                assert target.is_relative_to(root), (document, value)
+                assert target.is_file(), (document, value)
+
+    guides = list((root / "guides").rglob("*.html"))
+    assert len(guides) == 30
+    for document in guides:
+        LocalLinks().feed(document.read_text())
     with sync_playwright() as play:
         browser = play.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 1000})
@@ -116,6 +135,19 @@ def main() -> None:
                     page.set_viewport_size({"width": width, "height": 1080})
                     page.screenshot(path=str(args.output / f"artist-{locale}-{theme}-{width}.png"))
                     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        # Help must work from file://, including locale query removal and cross-language links.
+        for locale in ("en", "pl"):
+            page.locator("#gui-locale").select_option(locale)
+            with page.expect_popup() as opened:
+                page.locator('#gui-stage-instructions a[href^="/help/"]').first.click()
+            guide = opened.value
+            guide.wait_for_load_state()
+            expect(guide.locator("html")).to_have_attribute("lang", locale)
+            expect(guide.locator("h1")).to_be_visible()
+            other = "pl" if locale == "en" else "en"
+            guide.locator(f".guide-languages a[lang={other}]").click()
+            expect(guide.locator("html")).to_have_attribute("lang", other)
+            guide.close()
         page.goto((root / "icon-inventory.html").as_uri())
         expect(page.locator("tr")).to_have_count(15)
         assert not errors, errors
@@ -126,7 +158,7 @@ def main() -> None:
                     "result": "PASS",
                     "frontend": "file://, no backend/network",
                     "checks": "stages, playback, editors, palettes, exports, dictionaries, "
-                    "saved work, settings, EN/PL/themes, layout and inventory",
+                    "saved work, settings, EN/PL/themes, layout, 30 offline manuals and inventory",
                     "pageErrors": errors,
                     "externalRequests": external,
                 }

@@ -4,6 +4,17 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
+Current task: [EN/PL manuals and new artist delivery](docs/checkpoints/2026-11-22-user-documentation.md).
+Owner passes checklist1–5 and closes GUI/interface approval. Complete EN review and full PL user
+manuals now prepared: fifteen chapters per language, bilingual offline help, actual CLI/options/
+install/update/repair audit and maintained language reference.1081 tests/mypy115,17 integrations,
+64 help popups, source/wheel packaging and synthetic artist preview pass; no paid/model calls.
+Next: final new artist ZIP from committed source, record hash, clean only task temporary root,
+commit delivery metadata and push. Preserve original ZIP and all accepted native behavior.
+[Manual EN](docs/gui/README.md) · [Manual PL](docs/gui/pl/README.md).
+
+Earlier handoffs below are historical.
+
 Current handoff: [Windows startup/live queue correction](docs/checkpoints/2026-11-22-windows-startup-refresh.md).
 Baseline mainb0c2ddf. Reproduced win32 bootstrap null href after help-language query insertion:
 About stayed Loading and backend completed while UI stayed running. Stable help ID plus early

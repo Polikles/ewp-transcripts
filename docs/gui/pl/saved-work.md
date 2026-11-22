@@ -1,0 +1,44 @@
+# Zapisana praca i porządkowanie
+
+Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
+
+1. Wybierz katalog wyników i zapisu: Pozostaw opcjonalny katalog pusty, aby zapisywać nowe pliki stanu pracy w katalogu wyników, lub wybierz osobny katalog zapisów i kopii zapasowych.
+2. Zapisz bieżący stan pracy: Nazwij obszar pracy i zapisz jego stan przed zatrzymaniem programu. Zmienione szkice są najpierw zapisywane.
+3. Wczytaj zapisaną pracę: Lista odświeża się przy otwarciu tej sekcji. Wybierz zapis i wczytaj stan po restarcie. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona.
+4. Sprawdź porządkowanie przed usunięciem: Odśwież spis zarządzanych źródeł i przeczytaj przyczyny zachowania plików przed jawnym porządkowaniem.
+
+## 1. Wybierz katalog wyników i zapisu
+
+Wybierz katalog wyników przed pracą. Puste pole opcjonalnego katalogu zapisów umieszcza NOWE pliki stanu pracy w katalogu wyników. Możesz wybrać inny katalog zapisów i kopii zapasowych. Aktualizacja wybranego starszego zapisu zachowuje jego faktyczny katalog. Wiersz pliku zapisu pokazuje rzeczywistą ścieżkę manifestu. Serwer lokalnie pamięta dostępne ostatnie lokalizacje wyników i zapisów. Lista odświeża się przy otwarciu sekcji. Zapamiętanie katalogów nie uruchamia pracy i nie przywraca zgód.
+
+## 2. Zapisz bieżący stan pracy
+
+Wprowadź czytelną, unikalną nazwę obszaru i zapisz bieżący stan. Zmienione szkice źródła i tłumaczenia są najpierw zapisywane. Nowe nazwy plików zaczynają się nazwą i kończą `--<UUID>.workspace.json`. Znaki niedozwolone w nazwach Windows są zastępowane; polskie litery mogą pozostać. Nie trzeba rozpoznawać zapisu po samym UUID.
+
+Nazwa wczytanego obszaru wypełnia się automatycznie i jest chroniona przed przypadkową zmianą. Aktualizacja zapisuje ten sam obszar. Zapisz jako nowy obszar wymaga innej nazwy i zachowuje oryginał. Powtórzona nazwa w znanych katalogach jest odrzucana. Wielkość liter, spacje na brzegach i równoważne zapisy Unicode nie tworzą odrębnych nazw. Pusta lub zajęta nazwa podświetla pole.
+
+Autozapis jest domyślnie wyłączony. Po włączeniu okresowo aktualizuje aktywny punkt zapisu przy zmianach śledzonej pracy. Nie zastępuje świadomego zapisywania ważnych zmian w edytorze. Jawny zapis to zalecany punkt odzyskiwania przed zatrzymaniem serwera.
+
+## 3. Wczytaj zapisaną pracę
+
+Wybierz obszar z listy i wczytaj stan albo otwórz jego plik manifestu. Okno postępu pokazuje liczbę wczytanych i wszystkich zadań podczas sprawdzania ścieżek, źródeł i edytorów. Poczekaj do końca. Przywracane są zadania ukończone, nieudane i anulowane oraz oczekujące z indywidualnymi opcjami. Przerwane przetwarzanie nigdy nie wznawia się samo. Ponowienie jest jawne i rozpoczyna pracę od początku.
+
+Nowe zapisy przechowują również pliki zaplanowane, ale jeszcze niedodane do kolejki. Po wczytaniu program planuje je ponownie. Sprawdź i potwierdź odświeżony plan przed dodaniem. Ponowny wybór pliku o tej samej nazwie i treści nie tworzy duplikatu. Inna treść może wymagać odrębnego ID. Starsze zapisy bez trwałych danych wyboru mogą wymagać ponownego wskazania oryginałów.
+
+Klucze i zgody na wysłanie lub ręczną weryfikację nie są zapisywane. Wprowadź albo jawnie wczytaj klucz OpenRouter, jeśli serwer już go nie ma, i zaznacz nową zgodę dla chmury. Klucz nadal obecny w tej samej sesji serwera jest niezależny od wczytania pracy. Brakujące ścieżki trzeba odtworzyć; sam manifest nie zawiera wszystkich plików.
+
+## Kopia zapasowa i przenoszenie projektu
+
+Kopiuj cały katalog wyników RAZEM z ukrytymi katalogami, np. `.ewp-gui-sources`, oraz osobno ustawione katalogi weryfikacji, rewizji, tłumaczeń, słowników i zapisów pracy. Zachowaj także nagrania, jeśli pozostają poza nimi. Nowe trwałe kopie wybranych mediów znajdują się pod katalogiem wyników; same tymczasowe kopie wyboru przeglądarki nie są kopią zapasową.
+
+JSON obszaru zawiera odwołania, hashe, opcje i tożsamość etapów, a nie bajty nagrań, klucze ani zgody. Gotowy wynik można edytować i eksportować bez audio, ale odsłuch wymaga niezmienionych mediów. Przeniesienie na inny komputer wymaga skopiowania plików i sprawdzenia ścieżek. [Profil użytkownika](settings.md) przenosi preferencje, wpisy katalogów i opcjonalne słowniki, a nie nagrania i transkrypcje. Nie zmieniaj hashy, aby obejść zmienione źródło.
+
+## 4. Sprawdź porządkowanie przed usunięciem
+
+Usunięcie wybranego zapisu kasuje wyłącznie jego manifest. Wyczyść bieżący stan pracy zapomina nieaktywny stan interfejsu i pamięci po potwierdzeniu. Nie działa w czasie aktywnego przetwarzania. Żadna z tych czynności nie usuwa opublikowanych rewizji, eksportów ani wszystkich mediów.
+
+Spis zarządzanych kopii źródeł pokazuje trwałe kopie programu i powód ich zachowania. Przygotuj podgląd usuwania tylko nieużywanych kopii, sprawdź plan i jawnie potwierdź. Bieżąca praca, znane katalogi zapisów i odwołania etapów chronią pliki. Inne katalogi poza znanymi tej operacji trzeba sprawdzić osobno. To osobna funkcja od czyszczenia tymczasowych katalogów w Ustawieniach. Nie kasuje zewnętrznych oryginałów ani modeli.
+
+## Projekty i lokalizacje
+
+Ostatnie projekty otwierają odwołania wyniku i katalogu. Nazwane lokalizacje wypełniają pola wejścia i wyjścia bez uruchamiania ASR. Zmiana wejścia zastępuje oczekujący wybór, nie zadania w kolejce. Wyszukiwanie zapisanych wyników sprawdza canonical JSON we wskazanym katalogu i pozwala dodać je bez ASR. Skan obejmuje do 500 wpisów, a pojedynczy import do 50 wyników. Niedostępna ścieżka wymaga odtworzenia pliku, a nie automatycznego generowania go od nowa.

@@ -1,251 +1,64 @@
 # EWP Transcriber
 
-**GUI preview:** [Update and launch in WSL](Instructions/GUI_QUICKSTART.md) · [Consolidated manual test plan](Instructions/GUI_PREVIEW_TEST_PLAN.md).
+Local-first transcript workflow for podcasts and similar recordings: local GPU or optional cloud ASR, human correction, optional translation and verified subtitle exports. The executable is `transcriber`; the browser GUI is served locally.
 
-Workflow help: [instructions for every GUI stage](docs/gui/README.md), also available offline
-through each stage’s Quick steps / Full instructions link.
+[English user manual](docs/gui/README.md) · [Polska instrukcja użytkownika](docs/gui/pl/README.md) · [Quick start](Instructions/GUI_QUICKSTART.md) · [Advanced CLI runbook](Instructions/README.md)
 
-> EWP-transcripts is a local-first CLI application for accurate transcription of audio recordings. The executable is named `transcriber`.
+## Current status
 
-EWP Transcriber is designed as one component in a wider media-production ecosystem, not as
-a sealed all-in-one product. Speech, alignment, and diarization models come from their upstream
-authors, while optional assisted correction and translation can use separately operated local
-or cloud APIs. This is why setup includes explicit external-model downloads, gated-model terms,
-and optional provider API keys. The application records provenance and keeps every network use
-explicit, but it cannot control an external provider's retention or data-use policies.
-An API key entered in the browser lives only in the active GUI server process: browsers connected
-to that process share it, saved projects/workspaces never contain it, and stopping the GUI erases it.
-This process-wide scope is intentional for the supported single-user or single-organization
-pipeline deployment. Multi-user credential isolation is not currently on the roadmap.
+Version 0.20.0 is an internal preview on `main`. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
 
-## Status
+The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
 
-- MVP implementation: functional and operational gates complete for the validated Polish workflows; version `0.20.0` remains an internal preview, not a public release.
-- Development remains untagged on `main` while requirements work continues. The first public
-  release is planned only as the checkpoint immediately before Docker-image work begins.
-- MVP reference environment: Windows + WSL2 + Ubuntu + NVIDIA CUDA.
-- Reference hardware: NVIDIA RTX 3090 with 24 GB VRAM. Other NVIDIA machines with at least
-  8 GB VRAM are expected to work, without validation or a compatibility/performance guarantee.
-- Validated source language: Polish.
-- Reference backend: WhisperX with pyannote speaker diarization.
-- The v0.2.0 transcript-revision workflow is implemented and acceptance-audited on
-  `main`; local wheel/sdist packaging and model-free installed-wheel validation passed.
-- The v0.3.0 local/cloud automated-correction workflow is implemented and benchmarked;
-  its output remains a non-final review candidate requiring human acceptance.
-- The v0.4.0 translation, project-dictionary, timed-event, YouTube srv3 YTT, and embeddable
-  synchronized HTML workflows are implemented and acceptance-audited.
-- The locked test gate, wheel/source build, archive privacy inspection, isolated
-  installed-wheel CLI/export smoke tests, and clean-WSL cross-workflow pilot pass.
+## Install and launch
 
-## Known limitations before the first MVP release
+Follow [Installation and updates](docs/gui/installation.md) for prerequisites and explicit model preparation. Do not share a virtual environment between native Windows and WSL.
 
-- English and automatic language selection are part of the MVP contract because large-v2 is multilingual. The complete English path, especially word alignment, still requires validation with an English sample before its quality can be characterized.
-- Local LLM translation is supported as a non-final review candidate, but is not currently
-  recommended for publication-quality translation: the Bielik gate validated compatibility
-  and auditability, while its language remained too mechanical for acceptance without
-  comprehensive human review.
-- The current manually verified quality corpus contains three Polish cases and has no timestamp or diarization annotations. WER/CER are baselined; timestamp accuracy and DER/JER remain to be baselined after the corpus is expanded.
-- Subtitle syntax, readability, and timing passed short and complete-episode YouTube reviews.
-- The wheel passed isolated offline transcription, and the complete locked source installation passed in a fresh Ubuntu 24.04 WSL2 distribution.
-- Three-speaker and full-English quality validation remain deferred until representative archive-derived material exists.
+Windows PowerShell, inside this checkout:
 
-Current planning: [owner scope and backlog](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
-Research benchmarks/universal dictionaries are optional. Native Windows is planned; current WSL
-success does not establish native Windows compatibility. Polish manuals follow feature completion
-and approval of the complete EN–PL UI string list. Artist feedback is non-blocking.
-
-## Requirements
-
-- Ubuntu 24.04 and 26.04 on WSL2 are accepted baselines. The complete historical release
-  gate passed on 24.04; the 26.04 local-only transcription/source-export workflow is now
-  owner-qualified on WSL/RTX 3090. The owner accepts the recent GUI/workflow and browser/palette behavior; current restart
-  recovery and full profile exchange remain untested by the owner. Bare-metal Ubuntu and an Ubuntu
-  virtual machine with working NVIDIA GPU passthrough are expected deployment shapes but
-  have not yet passed the complete release gate.
-- An NVIDIA CUDA-capable GPU is required for the current presets. Validation was
-  performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA machines with
-  at least 8 GB VRAM are expected to work; this is unqualified and carries no compatibility
-  or performance guarantee. Hardware-preset studies are optional, not a delivery requirement.
-- At least 20 GB of free Linux-filesystem space is recommended, preferably on an SSD.
-  This minimum applies across the planned presets; audio inputs and generated results
-  require additional space. RAM/VRAM requirements vary with configuration; no lower-memory performance guarantee is made.
-
-See [`Instructions/README.md`](Instructions/README.md) for the current manual installation
-workflow and its approximate download sizes.
-
-## How to install
-
-Create Ubuntu 24.04 or 26.04 under WSL2, install `git`, clone the public repository into the Linux
-filesystem, then use the reviewable installer from the checkout:
-
-```bash
-sudo apt update
-sudo apt install git
-mkdir -p "$HOME/transkrypcje"
-git clone https://github.com/Polikles/ewp-transcripts.git \
-  "$HOME/transkrypcje/ewp-transcripts"
-cd "$HOME/transkrypcje/ewp-transcripts"
-./scripts/install-fresh-ubuntu.sh --install
-source "$HOME/.local/bin/env" 2>/dev/null || export PATH="$HOME/.local/bin:$PATH"
-./scripts/setup-models.sh
-```
-
-The script explicitly confirms system changes, installs the required Ubuntu tools
-(including FFmpeg and `ripgrep`), installs the locked application
-environment, and verifies diagnostics. It does not update an existing checkout or download
-models. The separate model script downloads exact pinned snapshots, privately prompts for
-the gated Hugging Face token, and verifies readiness. The
-[`Hugging Face token guide`](WSL%20config/HUGGING_FACE_TOKEN.md) explains account access,
-terms acceptance, creation of a read-only token, secure entry, and revocation. Review the
-manual equivalent in [`WSL config/MODEL_SETUP.md`](WSL%20config/MODEL_SETUP.md). Run the read-only application
-verification again at any time with `./scripts/install-fresh-ubuntu.sh --verify-only`.
-
-## How to use
-
-The local browser GUI can be started without loading ML models:
-
-```bash
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install
+uv run --locked --no-sync python scripts/setup-models.py
+uv run --locked transcriber doctor --test-speech-runtime
 uv run --locked transcriber gui
 ```
 
-It binds only to `127.0.0.1`, opens the same bundled interface used on WSL2 and Ubuntu,
-and accepts accessible user-space paths from the local operator. Operating-system directories
-and symlinks are blocked. Choose a durable shared output directory in the page before importing
-saved canonical results; a local folder dialog is available without uploading folder contents.
-Inspect and dry-run are read-only; dry-run includes its
-own inspection, so running Inspect separately is optional and intended for examining media before
-choosing output settings. Each reviewed file
-can be staged without starting GPU work; collect distinct episode files under one shared
-output directory, review/remove rows, then select **Start queue** to process them serially.
-Brief instructions and a complete local help page are bundled into the GUI. Review workflows
-now provide structured draft editing, exact-hash preview, immutable manual apply, and verified
-export. Translation and provider workflows remain under implementation, so retain the CLI
-workflow below for production work.
-
-Transcribe one file or a directory after `doctor` reports model readiness:
+WSL Ubuntu, inside this checkout:
 
 ```bash
-uv run --locked transcriber transcribe "/path/to/input" \
-  --output-dir "/path/to/results"
-
-uv run --locked transcriber export "/path/to/results" \
-  --format txt --format srt --format vtt --format ytt --format html --format segments \
-  --output-dir "/path/to/exports"
+./scripts/install-fresh-ubuntu.sh --install
+./scripts/setup-models.sh
+uv run --locked transcriber doctor --test-speech-runtime
+uv run --locked transcriber gui
 ```
 
-By default, transcription writes canonical JSON, machine-readable segments, and a TXT
-preview. The TXT is not evidence of manual verification. The model-free `export` command
-can generate every format—including raw SRT/VTT, YouTube srv3 YTT, and embeddable HTML—from
-that immutable result. Review and apply corrections before publishing subtitles or using
-the transcript as a translation source. Explicit raw export remains available for urgent
-or diagnostic use and must be labelled unreviewed.
+Model preparation is an explicit download with upstream model terms; normal local transcription does not silently download missing models. Open the printed loopback URL, normally `http://127.0.0.1:8765/`. GUI help includes complete English and Polish user guides offline. An ordinary update is `git pull` then `uv sync --locked` after saving work and stopping the server; it does not require a fresh installation or another model download.
 
-The recommended correction workflow stages editable reviews before publishing immutable
-revisions:
+## Normal workflow
 
-```bash
-uv run --locked transcriber revise prepare "/path/to/results" \
-  --output-dir "/path/to/reviews"
-uv run --locked transcriber revise preview "/path/to/reviews" \
-  --results-dir "/path/to/results"
-uv run --locked transcriber revise apply "/path/to/reviews" \
-  --results-dir "/path/to/results" --output-dir "/path/to/revisions" --audit
-```
+1. Choose the output folder and add audio/video or existing canonical result JSON.
+2. Dry-run checks all unqueued selections. Review/confirm the plan, Add to queue, then Start queue.
+3. Optionally generate assisted correction, or go directly to source review.
+4. Correct speakers/text, Apply the draft, confirm manual verification, Save and prepare for export, then export subtitles.
+5. Optionally translate, review meaning, save a verified translation and export it.
 
-See [`Instructions/README.md`](Instructions/README.md) for every command, batch operation,
-export mode, recovery path, and automated-correction privacy warning.
+The default raw ASR files are `*_results.json`, `*_segments.json` and `*_transcript.txt`. They are not manually verified publication files. Canonical JSON stays unchanged; verified source revisions and translations are immutable. GUI source exports default to `exports`; translation exports use `translation-exports`. See [files and downloads](docs/gui/outputs.md) and [saving/backups](docs/gui/saved-work.md).
 
-## Primary outputs
+## Local processing and optional providers
 
-Every successfully completed job creates a canonical file:
+Local ASR uses pinned WhisperX/pyannote/alignment snapshots. Optional OpenRouter ASR uploads audio; assisted correction/translation sends text to OpenRouter or a separately operated LM Studio endpoint after scoped consent. Provider prices, availability and data policies can change. No API response is human approval. Cloud ASR requires real word timestamps and splits long audio into bounded requests; paid retries are explicit.
 
-```text
-<job_id>_results.json
-```
+One OpenRouter key serves ASR, correction and translation. It can live only in the GUI server's memory or be deliberately saved in the OS credential store. Connected browsers share the server's active key. Workspaces/profiles/browser storage never contain it or upload/verification confirmations. The app is a single-user loopback tool, not a multi-user hosted service.
 
-Optional exports are generated from that canonical file:
+## Documentation and development
 
-```text
-<job_id>_segments.json
-<job_id>_transcript.txt
-<job_id>_subtitles.srt
-<job_id>_subtitles.vtt
-<job_id>_subtitles_srv3.ytt
-<job_id>_transcript.html
-```
+- [Complete EN manual](docs/gui/README.md) and [complete PL manual](docs/gui/pl/README.md).
+- [Advanced CLI](Instructions/README.md), [Windows](Instructions/WINDOWS_NATIVE.md), [Ubuntu upgrade repair](WSL%20config/UBUNTU_UPGRADE.md).
+- [Configuration defaults](src/ewp_transcripts/resources/default-config.toml), [schemas](schemas), [examples](examples).
+- [Changelog](CHANGELOG.md), [testing strategy](docs/TESTING_STRATEGY.md), [current checkpoint](WORK_STATUS.md), [tasks](TODO.md), [roadmap](docs/99-roadmap-v2.md).
+- [Reviewed EN/PL interface reference](docs/ui-language/README.md), [artwork and third-party notices](src/ewp_transcripts/web_assets/brand/NOTICE.txt).
 
-Reprocessing the same source with `--force` creates a consistently versioned result set:
-
-```text
-<job_id>_results_v002.json
-<job_id>_transcript_v002.txt
-<job_id>_subtitles_v002.srt
-<job_id>_subtitles_v002.vtt
-<job_id>_subtitles_srv3_v002.ytt
-<job_id>_transcript_v002.html
-```
-
-## Documentation
-
-Start with the complete current CLI operator runbook in
-[`Instructions/README.md`](Instructions/README.md). It covers installation links and all
-shipped commands, including batch transcription, revision, export, recovery, and cleanup.
-
-The complete index is available in [`docs/README.md`](docs/README.md).
-
-Release history is recorded in [`CHANGELOG.md`](CHANGELOG.md).
-
-Operational WSL2 setup and verification instructions are in [`WSL config/`](WSL%20config/README.md).
-The current manual correction workflow is in
-[`WSL config/REVISE_TRANSCRIPTS.md`](WSL%20config/REVISE_TRANSCRIPTS.md).
-
-Recommended starting documents:
-
-1. [`docs/01-product-scope.md`](docs/01-product-scope.md) — MVP purpose and boundaries.
-2. [`docs/02-requirements.md`](docs/02-requirements.md) — functional and non-functional requirements.
-3. [`docs/03-architecture.md`](docs/03-architecture.md) — architecture and processing pipeline.
-4. [`docs/05-cli-specification.md`](docs/05-cli-specification.md) — CLI contract.
-5. [`docs/07-results-data-model.md`](docs/07-results-data-model.md) — canonical data model.
-6. [`docs/12-testing-and-acceptance.md`](docs/12-testing-and-acceptance.md) — tests and acceptance criteria.
-7. [`docs/13-transcript-revisions.md`](docs/13-transcript-revisions.md) — implemented v0.2.0 revision contract.
-8. [`docs/21-v0.2.0-transcript-revision-plan.md`](docs/21-v0.2.0-transcript-revision-plan.md) — implementation and acceptance plan.
-9. [`docs/99-roadmap-v2.md`](docs/99-roadmap-v2.md) — post-0.1 priorities.
-10. [`docs/22-v0.3-automated-correction.md`](docs/22-v0.3-automated-correction.md) — accepted v0.3 correction contract and acceptance checklist.
-11. [`docs/23-v0.4-translation-contract.md`](docs/23-v0.4-translation-contract.md) — accepted v0.4 translation and semantic-benchmark contract.
-12. [`docs/24-v0.4-timed-event-semantics.md`](docs/24-v0.4-timed-event-semantics.md) — canonical timed-event semantics used by YTT and HTML.
-
-## Examples and schemas
-
-- [`examples/config.example.toml`](examples/config.example.toml)
-- [`examples/html-player/`](examples/html-player/) — consuming synchronized-player example.
-- [`examples/results.example.json`](examples/results.example.json)
-- [`examples/segments.example.json`](examples/segments.example.json)
-- [`examples/review.example.txt`](examples/review.example.txt)
-- [`examples/revision.example.json`](examples/revision.example.json)
-- [`schemas/results.schema.json`](schemas/results.schema.json)
-- [`schemas/segments.schema.json`](schemas/segments.schema.json)
-- [`schemas/ewp-review.schema.md`](schemas/ewp-review.schema.md)
-- [`schemas/revision.schema.json`](schemas/revision.schema.json)
-
-## Core project rules
-
-- Audio and transcript text remain on the local machine during transcription.
-- Final JSON files are the source of truth; TXT, SRT, VTT, YTT, and HTML are derived exports.
-- Source files are never modified.
-- Completed jobs with the same SHA-256 signature are skipped unless `--force` is used.
-
-### Additional rules:
-- Subdirectories are ignored unless recursion is explicitly enabled.
-- Ambiguous stereo is handled conservatively as a single channel and produces a warning.
-
-## Normative precedence
-
-If documents conflict, use the following order:
-
-1. ADRs accepted at a later date.
-2. `docs/02-requirements.md`.
-3. Detailed specifications in `docs/`.
-4. Examples in `examples/`.
+Run `make check` for lint, formatting, typing and model-free tests. Relevant media/filesystem changes also require `make test-integration`. GPU or paid-provider tests need actual hardware/material and explicit scope; model-free tests do not establish GPU quality. Keep private recordings, transcripts, secrets and generated work out of Git.
 
 ## License
 

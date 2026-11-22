@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-22",
+  "baseline": "fea5e7f",
+  "owner_acceptance": "Focused Windows checklist 1–5 PASS; GUI/interface terminology gate closed.",
+  "manuals": {
+    "languages": [
+      "en",
+      "pl"
+    ],
+    "chapters_per_language": 15,
+    "gui_stage_guides_per_language": 8,
+    "scope": [
+      "installation/update/repair",
+      "all mandatory and optional workflow stages",
+      "files/exports",
+      "saved work/backups/cleanup",
+      "dictionaries/import/export",
+      "profiles/preferences/credentials",
+      "troubleshooting",
+      "ordinary CLI usage"
+    ],
+    "packaged_mirrors": "30 chapters match source bytes"
+  },
+  "verification": {
+    "make_check": {
+      "tests_passed": 1081,
+      "ruff": "PASS",
+      "format": "PASS",
+      "mypy_source_files": 115
+    },
+    "integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "document_links": {
+      "documents": 35,
+      "missing_local_links": []
+    },
+    "cli_audit": {
+      "snippets": 102,
+      "command_paths": 29,
+      "unknown_flags_or_commands": [],
+      "models_imported": false,
+      "method": "Inspect actual Typer command/option definitions; do not execute sample processing or install commands."
+    },
+    "browser": {
+      "result": "PASS",
+      "guide_popups": 64,
+      "locales": [
+        "en",
+        "pl"
+      ],
+      "widths": [
+        960,
+        1920
+      ],
+      "sessions": [
+        "Linux",
+        "synthetic Windows browser platform"
+      ],
+      "page_errors": [],
+      "external_requests": [],
+      "http_errors": [],
+      "checks": [
+        "eight stage help links",
+        "full article language",
+        "cross-language navigation",
+        "localized help index",
+        "readability/overflow",
+        "key dialog Escape"
+      ]
+    },
+    "wheel_and_sdist": "PASS: all 30 help/user-manual chapters included; matching resource bytes; isolated installed-wheel renders every guide without ML imports",
+    "language_reference": {
+      "ids": 2219,
+      "changed_or_noted_rows": 110,
+      "stable_help_link_id": "ui.1fce95c06b54480e",
+      "new_text": "Full instructions / Pełne instrukcje",
+      "original_workbooks": "unchanged"
+    },
+    "artist_preview": {
+      "result": "PASS",
+      "mode": "file://; no backend or network",
+      "guides": 30,
+      "checks": [
+        "queue",
+        "all stages",
+        "audio seek",
+        "source and translation draft/apply/export",
+        "palettes",
+        "dictionary edit",
+        "saved work",
+        "settings",
+        "EN/PL/themes",
+        "960/1920 layout",
+        "icon inventory",
+        "help links and language switching"
+      ],
+      "page_errors": [],
+      "external_requests": []
+    }
+  },
+  "limits": [
+    "No new native-Windows/GPU execution, reinstall, model download or paid ASR call.",
+    "No new English sample qualification; retain earlier owner passes.",
+    "Full portable-profile exchange remains provisionally owner-accepted, not fully manually tested.",
+    "Screenshots for published manuals wait for final artist icons."
+  ],
+  "prior_cloud_spend_usd": "0.0291461230985028369",
+  "original_artist_archive_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+  "delivery": "Documentation ready; generate the new artist ZIP from the committed source, then record its manifest/hash and remove task-owned temporary outputs."
+}

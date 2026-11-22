@@ -343,11 +343,11 @@ def dispatch_get(
     path = urlsplit(target).path
     if path == "/":
         return _asset_response("index.html", "text/html; charset=utf-8")
-    if path == "/help":
-        return _asset_response("help.html", "text/html; charset=utf-8")
-    if path.startswith("/help/"):
+    if path == "/help" or path.startswith("/help/"):
         locale = parse_qs(urlsplit(target).query).get("lang", ["en"])[0]
-        guide = render_guide(path.removeprefix("/help/"), locale=locale)
+        guide = render_guide(
+            "index" if path == "/help" else path.removeprefix("/help/"), locale=locale
+        )
         if guide is not None:
             return WebResponse(HTTPStatus.OK, "text/html; charset=utf-8", guide)
     if path == "/api/v1/guides":

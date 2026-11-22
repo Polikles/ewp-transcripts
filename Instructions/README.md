@@ -1,6 +1,6 @@
 # EWP Transcriber — complete CLI runbook
 
-**GUI preview:** [Update and launch in WSL](GUI_QUICKSTART.md) · [Consolidated manual test plan](GUI_PREVIEW_TEST_PLAN.md).
+**GUI:** [Quick start](GUI_QUICKSTART.md) · [English manual](../docs/gui/README.md) · [Polish manual](../docs/gui/pl/README.md).
 
 For the numbered GUI workflow, use the [per-stage guides](../docs/gui/README.md); full guides
 are also bundled in the application for offline reading.
@@ -10,79 +10,23 @@ covers every shipped command. The application is not yet a public release.
 
 ## 1. Install and prepare the machine
 
-The supported baselines are Ubuntu 24.04 and 26.04 under WSL2 with Python 3.12, FFmpeg, `uv`, and
-an NVIDIA CUDA-capable GPU. Follow the detailed setup documents in order:
+Use the maintained [installation guide](../docs/gui/installation.md) for Windows 11 x64 or WSL2 Ubuntu 24.04/26.04, explicit pinned-model setup and ordinary updates. The complete GUI manuals are available in [English](../docs/gui/README.md) and [Polish](../docs/gui/pl/README.md), including offline help. This file covers advanced terminal operations; its CLI prepare/preview/apply names are not the GUI's button sequence.
 
-The current locked environment downloads approximately 4–4.5 GB before model setup.
-The pinned ASR, Polish/English alignment, and diarization snapshots add approximately
-8.5 GB, making the complete network transfer roughly 13 GB. Reserve at least 20 GB of
-free space on the Linux filesystem, preferably on an SSD, plus space for source audio
-and outputs. The recommended storage minimum is not expected to vary materially by
-configuration. Validation was performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA CUDA-capable machines with at least 8 GB VRAM are expected to work, but that is an unqualified owner expectation, not a measured minimum or a compatibility/performance guarantee. Memory needs depend on the recording and configuration; hardware-preset qualification is optional.
+From the transcriber checkout:
 
-1. [`../WSL config/SYSTEM_REQUIREMENTS.md`](../WSL%20config/SYSTEM_REQUIREMENTS.md)
-2. [`../WSL config/INSTALL_WSL.md`](../WSL%20config/INSTALL_WSL.md)
-3. [`../WSL config/INSTALL_TOOLS.md`](../WSL%20config/INSTALL_TOOLS.md)
-4. [`../WSL config/CUDA_SETUP.md`](../WSL%20config/CUDA_SETUP.md)
-5. [`../WSL config/INSTALL_APPLICATION.md`](../WSL%20config/INSTALL_APPLICATION.md)
-6. [`../WSL config/HUGGING_FACE_TOKEN.md`](../WSL%20config/HUGGING_FACE_TOKEN.md)
-7. [`../WSL config/MODEL_SETUP.md`](../WSL%20config/MODEL_SETUP.md)
-8. [`../WSL config/OFFLINE_MODE.md`](../WSL%20config/OFFLINE_MODE.md)
-
-Normal source-checkout use begins in the repository:
-
-```bash
-cd "$HOME/transkrypcje/ewp-transcripts"
-uv sync --locked
-uv pip check
+```text
 uv run --locked transcriber --version
 uv run --locked transcriber --help
-```
-
-The local browser interface is available on loopback:
-
-```bash
 uv run --locked transcriber gui
-```
-
-Use `--no-open-browser` when launching from a terminal that cannot open the host browser.
-The printed `http://127.0.0.1:PORT/` URL can then be opened manually. Only the explicitly
-accessible user-space paths are accepted while system directories and symlinks are blocked.
-Inspect/dry-run are non-mutating. The current queue accepts one
-file per staged row and requires a reviewed dry-run plus explicit confirmation. Add distinct
-episode files to one durable shared output directory, review/remove the staged
-rows, then select **Start queue**. The bundled **GUI workflow** help page explains this without
-requiring Internet access. Closing the browser does not stop a job; stopping the server waits
-for active transcription.
-
-The **Review and export** section accepts one completed canonical result. Keep its editable
-review, immutable revision, and derived exports in separate allowed-root directories. Prepare
-the draft, edit visible speaker/text blocks, save it, and run Preview. Apply remains locked
-until the exact saved draft previews successfully and the manual-verification confirmation is
-checked. Export then uses only the newly applied immutable revision. Automated candidates and
-translation remain CLI workflows in this slice.
-
-After cloning, a fresh Ubuntu 24.04 or 26.04 checkout can install the base packages, uv/Python,
-locked environment, and run diagnostics through the reviewable script:
-
-```bash
-./scripts/install-fresh-ubuntu.sh --install
-```
-
-It asks before system changes, does not update Git, and never downloads gated models.
-Use `./scripts/install-fresh-ubuntu.sh --verify-only` for a read-only recheck. Model setup
-remains the separate explicit step in `WSL config/MODEL_SETUP.md`.
-
-The top-level help lists commands. Every command has its own options:
-
-```bash
 uv run --locked transcriber COMMAND --help
 uv run --locked transcriber revise COMMAND --help
 ```
 
-The staged private-corpus procedure for v0.3 local LLM correction candidates is in
-[`../WSL config/RUN_V03_LOCAL_LLM_BENCHMARK.md`](../WSL%20config/RUN_V03_LOCAL_LLM_BENCHMARK.md).
-It requires a three-case pilot before any full-corpus run.
+The GUI plans every unqueued selection, supports grouped tracks, local/cloud ASR, optional LLM correction/translation and manual review. It no longer has a separate Inspect step or redundant preparation button. Use [the current per-stage guides](../docs/gui/README.md) for its exact actions. Terminal `inspect` remains available. Closing the browser does not stop a running job; save work before stopping the server.
+
+RTX 3090 24 GB is the tested reference. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a guarantee. Broad benchmarks/hardware studies are optional; the historical private benchmark procedures linked later are research tools, not installation or normal workflow gates.
+
+For detailed WSL setup/maintenance references, see [system requirements](../WSL%20config/SYSTEM_REQUIREMENTS.md), [WSL installation](../WSL%20config/INSTALL_WSL.md), [tools](../WSL%20config/INSTALL_TOOLS.md), [CUDA](../WSL%20config/CUDA_SETUP.md), [application setup](../WSL%20config/INSTALL_APPLICATION.md), [Hugging Face access](../WSL%20config/HUGGING_FACE_TOKEN.md), [model preparation](../WSL%20config/MODEL_SETUP.md) and [offline mode](../WSL%20config/OFFLINE_MODE.md).
 
 ## 2. Configuration and paths
 
@@ -95,13 +39,11 @@ Configuration precedence, from lowest to highest, is:
 5. the file supplied with `--config PATH`;
 6. CLI options.
 
-For the normal source checkout, the project file is exactly:
+The packaged defaults are `src/ewp_transcripts/resources/default-config.toml`. A project
+`transcriber.toml` is optional and is not tracked at the repository root. Create it only for
+intentional overrides; never put credentials in it.
 
-```text
-/home/<user>/transkrypcje/ewp-transcripts/transcriber.toml
-```
-
-Run commands from that directory or pass `--config` explicitly. Paths containing spaces
+Run commands from the intended checkout or pass `--config` explicitly. Paths containing spaces
 are supported and preserved; quote the complete path. Windows paths such as
 `C:\Users\name\recordings` and WSL paths such as `/mnt/c/Users/name/recordings` are both
 accepted. Linux-side output/work directories are faster for large jobs.
@@ -115,8 +57,7 @@ uv run --locked transcriber doctor --json-output
 
 `doctor` checks Python, WSL/Ubuntu, FFmpeg, GPU/CUDA, pinned local models, and whether
 `HF_TOKEN` is present without printing the secret. On a fresh installation, missing model
-messages point to `WSL config/MODEL_SETUP.md`. Do not transcribe until required checks
-pass.
+messages point to `WSL config/MODEL_SETUP.md`. Resolve checks required by the selected local workflow before transcribing. Cloud ASR uses separate provider checks and does not load local ML snapshots; local-model absence on a deliberately cloud-only setup is distinct from a native media-runtime failure.
 
 ## 4. Inspect inputs: `inspect`
 
@@ -807,7 +748,7 @@ caches, configuration, or tokens.
 
 ## 14. Privacy and evidence
 
-Normal transcription and manual revision are local-first. Keep `HF_TOKEN`, source
+Local GPU transcription and manual revision are local-first. Cloud ASR is configured through the GUI with explicit audio-upload consent; the ordinary CLI transcribe command does not expose that cloud queue authorization. Keep `HF_TOKEN`, source
 recordings, canonical paths, transcripts, revisions, audits, correction resume state,
 and private benchmark material out of Git and shared logs. LM Studio correction is an
 explicit local API boundary and is not equivalent to in-process offline execution.
