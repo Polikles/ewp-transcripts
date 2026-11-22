@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-22",
+  "baseline_commit": "8475723",
+  "owner_acceptance": "Focused tests pass; no further manual retest after final polish; proceed to local task10 workbook",
+  "workspace_names": {
+    "scope": "default/current/recent known catalogs",
+    "comparison": "NFC/casefold/trim",
+    "duplicate_new_save_rejected": true,
+    "no_manifest_mutation": true,
+    "legacy_duplicates_and_selected_updates_preserved": true,
+    "check_before_preserving_media_and_under_publication_lock": true
+  },
+  "key_feedback": {
+    "short_two_lines_right_of_button": true,
+    "PL_screenshot_inspected": true
+  },
+  "verification": {
+    "make_check": {
+      "tests_passed": 1047,
+      "ruff_format": "pass",
+      "mypy_source_files": 115
+    },
+    "integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "focused_browser": {
+      "duplicate_save_rejected_without_mutation": true,
+      "existing_update_passes": true,
+      "dialog_cases": 12,
+      "page_errors": [],
+      "external_requests": [],
+      "real_provider_calls": 0
+    },
+    "changed_js_syntax_files": 3,
+    "optional_tools_ruff_format": "pass",
+    "guide_mirrors": "match"
+  },
+  "review_artifact": {
+    "file": "/home/linuch/project-ewp/deliveries/ewp-ui-en-pl-review-2026-11-22.xlsx",
+    "rows": 2218,
+    "sheets": {
+      "UI": 693,
+      "Templates": 145,
+      "Diagnostics": 468,
+      "Quick guides": 76,
+      "Other catalog": 216,
+      "Backend details": 620
+    },
+    "effective_exact_catalog_coverage": {
+      "present": 984,
+      "total": 984
+    },
+    "stable_IDs_unique": true,
+    "context_specific_override": "field.preview-review.text included separately",
+    "base_commit": "8475723e69f0da53a74076fd5e269f7701b89864",
+    "source_sha256": "0e0be3ef7c5be49ee9477f96d4b7ba1c7d806f5f1586fff6421f041a2d086384",
+    "sha256": "dfaf4da7ccd467687a1655d8b1e121e895bf43413d417f049b759d6c2571148b",
+    "outside_git_until_reviewed": true,
+    "original_workbook_roundtrip": "pass",
+    "edited_EN_and_PL_roundtrip": "pass, one changed row",
+    "invalid_ID_and_removed_placeholder": "rejected",
+    "original_unchanged_after_edit_tests": true,
+    "external_OS_provider_payloads": "not fixed built-in copy; no runtime/private responses read"
+  },
+  "scope": {
+    "paid_requests_this_task": 0,
+    "cumulative_live_spend_usd": "0.0291461230985028369",
+    "new_native_GPU_qualification": false,
+    "manual_retest_requested": false,
+    "full_manual_rewrite_started": false,
+    "artist_archive_changed": false,
+    "artist_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+    "future_order": [
+      "owner EN/PL edits",
+      "apply corrections and commit approved reference",
+      "owner interface approval",
+      "EN documentation review/update",
+      "full PL user documentation",
+      "new artist review package"
+    ]
+  },
+  "disposable_cleanup": {
+    "root": "/tmp/ewp-ui-catalog.QKJjtL",
+    "removed": true
+  }
+}

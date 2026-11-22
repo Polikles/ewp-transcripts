@@ -3,6 +3,24 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered final B polish / active owner terminology review and task 10 EN–PL review — 2026-11-22
+
+Baseline clean main8475723. Owner reports all focused checks pass; duplicate new workspace names
+are the remaining issue. No further manual retest requested after this small fix. Location recall
+and mixed-queue missing-key blocking explicitly accepted. Transition to terminology review is authorized.
+
+- [x] Reject Save as new with an existing name, highlight name and show "Taki zapis już istnieje, spróbuj innej nazwy"; preserve updates/legacy saves.
+- [x] Short two-line key success feedback to the right of Check API key; preserve responsive dialog.
+- [x] Automated targeted/browser/ordinary/integration checks; no paid ASR, reinstall or owner retest.
+- [x] Generate complete local editable stable-ID / EN / PL review workbook, including messages, states, errors, hints/tooltips, quick guides and dynamic templates; document safe editing/round-trip mapping.
+- [x] Update plans/checkpoint/evidence and deliver product changes/tooling to main; initial review file stays local for owner editing.
+- [ ] After owner corrections: apply EN and PL edits, commit approved reference table, obtain interface approval.
+- [ ] Then review/update English documentation, then prepare full Polish user documentation.
+- [ ] Finally update a NEW artist review package with approved GUI/language changes. Latest owner instruction supersedes the earlier freeze at that later stage; keep already sent ZIP unchanged now.
+
+Local review: [instructions](Instructions/UI_LANGUAGE_REVIEW.md). Workbook2218 rows; no owner
+manual retest required. Await edited workbook; do not regenerate/overwrite it or start full manuals.
+
 ## Delivered B recent locations, save filenames and cloud preflight — 2026-11-22
 
 Baseline clean main 5d60f7f. [Checkpoint](docs/checkpoints/2026-11-22-b-locations-key-preflight.md).
@@ -217,7 +235,7 @@ remains present. The feedback fixes and the complete focused retest are now acce
 - [x] B8 agent implementation/checks: Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit IDs for same-name recordings.
 - [x] B8a agent implementation/checks: OpenRouter four-model ASR delivered and short PL live cases pass within the shared USD 2 budget. Owner explicitly waives EN live material. Long mixed audio now chunks automatically with timed context, remapped speakers and explicit uncertain-assignment review.
 - [x] B9 agent implementation/checks: Complete package regression and prepare the one full native-Windows + WSL workflow test/checklist.
-- [ ] Owner runs full Win/WSL workflow; fix issues and repeat until accepted, then freeze chosen functionality.
+- [x] Owner accepts focused workflow checks and explicitly authorizes task10 after final automated polish, with no further manual retest. Retain documented platform qualification limits.
 
 B5 execution arrangement confirmed 2026-11-21: Windows 11 x64. Agent implements/checks on this
 Linux VM and pushes to GitHub; owner pulls the repository and performs native-Windows launch and
@@ -231,10 +249,13 @@ speakers, EN one), functional canonical/downstream compatibility checks, USD 2 t
 spending including retries across all models. No full-corpus/accuracy benchmark. Locate actual
 material and recheck current capabilities/costs at B8a; preserve this authorization. Original planning questions are resolved; B agent delivery is complete and owner native Windows/full WSL acceptance is next.
 
-## After package B acceptance
+## Terminology, documentation and distribution — current owner sequence
 
-- [ ] Task 10: Generate the complete editable EN–PL label/message/error/state/hint/tooltip/guide/dynamic-template file, preserving diagnostic codes; owner corrects and approves it.
-- [ ] Task 11: Finalize English instructions and full Polish documentation after terminology approval.
+- [x] Task 10 export: local editable ID/EN/PL workbook for owner corrections, including dynamic copy, guides and diagnostics; preserve placeholders/codes.
+- [ ] Task 10 application: apply owner EN/PL corrections, commit approved reference, then owner interface approval.
+- [ ] Task 11a: Review/update English documentation after corrected interface approval.
+- [ ] Task 11b: Review/prepare full Polish user documentation next.
+- [ ] Then create a NEW updated artist review package with approved GUI/language; preserve original archive.
 - [ ] Task 12: Later installer/distribution preparation; actual release/publishing remains a separate owner decision.
 - [ ] Parallel, no deadline/non-blocking: integrate artist icons/feedback when supplied. Do not modify the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons.
 

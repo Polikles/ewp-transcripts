@@ -99,3 +99,12 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     readable filenames preserve UUID/legacy compatibility. Validate active cloud credentials before
     worker/media startup while keeping fresh consent and explicit OS-key loading. No further paid
     pilot/reinstall, no artist changes; task10/manual gate remains after functional acceptance.
+
+17. Latest owner acceptance (2026-11-22): focused save/load/directory/key/mixed-queue checks pass.
+    Finish unique-new-save names and short right-side key feedback with automated verification;
+    no more manual retest. Task10 is now explicitly authorized. Produce the complete local editable
+    ID/EN/PL workbook, await owner edits, apply both languages and commit the approved reference.
+    After interface approval: review/update EN docs, prepare full PL docs, then create a NEW artist
+    review package reflecting approved GUI/language. This supersedes the earlier permanent package
+    freeze at that future stage only; keep the already sent original archive unchanged now.
+    Do not infer additional native/WSL/GPU qualification or repeat paid pilots during language work.

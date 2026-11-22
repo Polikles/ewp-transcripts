@@ -4,6 +4,19 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
+Current handoff: [final B polish and EN–PL review](docs/checkpoints/2026-11-22-terminology-review.md).
+Baseline main8475723. Duplicate Save as new names now reject across known catalogs, preserving
+updates/legacy records; short two-line key feedback sits to button right. Owner requested no manual
+retest.1047 tests/mypy115,17 integrations,12 focused EN/PL/theme/width browser cases pass; screenshot
+inspected. Local editable workbook2218 rows (all984 effective exact catalog entries plus templates,
+diagnostics/guide copy) is ready at project deliveries/ewp-ui-en-pl-review-2026-11-22.xlsx, outside Git.
+See Instructions/UI_LANGUAGE_REVIEW.md. Roundtrip EN/PL/ID/placeholder/source-snapshot validation
+passes. Await owner's edited workbook; never overwrite/regenerate that delivered file.
+Next: apply EN/PL edits and commit approved reference → owner interface approval → update EN docs
+→ full PL docs → NEW updated artist package. Original ZIP unchanged. No paid ASR/reinstall; old
+pending-function-freeze gates are superseded for task10 by owner's explicit request. Temporary
+verification root cleanup is recorded in the checkpoint/evidence; delivery targets main.
+
 Latest follow-up implemented/verified: [recent locations / named saves / key preflight](docs/checkpoints/2026-11-22-b-locations-key-preflight.md).
 Baseline main 5d60f7f. Last directories/catalog list return automatically; name-prefixed manifests
 preserve UUID/legacy compatibility. Key dialog rows/short labels/secondary clear-delete/bottom-right

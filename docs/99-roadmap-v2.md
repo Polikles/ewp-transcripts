@@ -14,6 +14,14 @@ research metrics and optional presets do not block completion or release readine
 
 ### Owner acceptance of the recent GUI
 
+Latest instruction (2026-11-22): all focused checks pass apart from the final duplicate-new-save
+name correction; that fix and shorter right-side key feedback need automatic verification only,
+with no further owner retest. Then move directly to task10 local editable ID/EN/PL review. Apply
+owner corrections (EN may change too), commit the approved table, obtain interface approval, review
+and update EN docs, prepare full PL user docs, then create a NEW updated artist package. This later
+package refresh is authorized; preserve the original sent ZIP now. No additional manual platform
+gate blocks the explicitly requested terminology handoff; retain precise previous qualifications.
+
 | Previous summary item | Current status |
 |---|---|
 | 1: recent GUI fixes | Accepted with the small summary/navigation fixes in the current checkpoint; full user-profile import/export was not tested by the owner and is provisionally accepted as implemented. |
@@ -21,7 +29,7 @@ research metrics and optional presets do not block completion or release readine
 | 3: browser/platform presentation | Owner accepts browsers and the palette. Actual browser zoom at 200% was not explicitly performed/understood; retain as an optional unchecked layout check, not a new blocking gate. |
 | 4: precise progress/ETA calibration | Removed as a required task by owner. Progress primarily communicates continued activity; keep existing approximate percentage, elapsed timer and optional ETA without a new accuracy study. |
 | 5: terminology/docs | Wait for feature completion, then export every UI label/message as editable EN–PL pairs, including errors, states, hints and dynamic templates. Owner correction/approval comes next, then full Polish documentation. Screenshots wait for final custom GUI/icons. |
-| 6: artist | Waiting for supplied icons/feedback, no deadline, does not block other work. The already sent ZIP/demo must remain unchanged. |
+| 6: artist | Waiting for supplied icons/feedback, no deadline. Original ZIP remains unchanged; a new updated package follows approved interface copy and EN/PL docs per latest owner request. |
 | 10/11/12/14: benchmarks/research | Nice-to-have outside required project scope: private-corpus expansion/comparisons, translation quality suites, public datasets/universal dictionary research, automated model benchmark matrices. |
 | 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
 | Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |

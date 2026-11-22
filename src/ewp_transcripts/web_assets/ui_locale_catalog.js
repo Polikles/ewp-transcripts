@@ -1993,3 +1993,8 @@ for(const [en,pl] of [
   ["Saved workspace must not be a symbolic link","Zapis pracy nie może być dowiązaniem symbolicznym."],
   ["Saved state must not be a symbolic link","Plik zapisanego stanu nie może być dowiązaniem symbolicznym."]
 ])guiPolish.set(en,pl);
+
+// Final save-name and key-dialog wording for owner terminology review.
+guiPolish.set("A workspace with this name already exists; try a different name", "Taki zapis już istnieje, spróbuj innej nazwy");
+guiPolish.set("Key and connection are ready.\nNo audio was uploaded.", "Klucz i połączenie działają.\nNie wysłano audio.");
+guiPolishErrorDescriptions.set("GUI_WORKSPACE_NAME_EXISTS", "Taki zapis już istnieje, spróbuj innej nazwy");

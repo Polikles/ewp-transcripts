@@ -1,5 +1,9 @@
 # Focused update check — saved locations and pre-start key validation
 
+Owner acceptance update 2026-11-22: focused checks passed. The final unique-save-name and key-feedback
+polish requires automatic verification only; no further owner retest. Next is the local EN/PL
+workbook review. The checklist below is retained as historical test detail.
+
 2026-11-22. Use the existing installation: stop GUI, `git pull`,
 `uv run --locked transcriber gui`, refresh the page (Ctrl+F5). No reinstall or model downloads.
 The owner already confirms output-folder save/load, successful cloud ASR after key activation,

@@ -711,3 +711,18 @@ read-only `/key` authentication before starting any worker. Missing key returns
 After authentication, Start rechecks the staged IDs, grant and key under the queue lock before
 consuming authorization. Local-only starts need no provider check. No OS key is silently loaded,
 and no transcription partial/failed files or media conversion precede this check.
+
+### Final naming and terminology handoff — 2026-11-22
+
+Save as new requires a distinct name across current/default/recent known catalogs, normalized with
+NFC, edge trimming and case folding. Check before preserving selected media, then recheck under
+the publication lock before creating a manifest. Conflicts return `GUI_WORKSPACE_NAME_EXISTS` and
+highlight the name field. Selected-record updates remain allowed, including older duplicate names.
+The key dialog shows its short success text on two lines to the right of Check API key.
+
+Task10 now follows these owner-accepted final functional changes without another manual retest.
+The editable local workbook has stable IDs, EN/PL columns, source/field context, dynamic templates,
+diagnostics and quick guides. Preserve its hidden originals and protected placeholders/codes.
+Owner edits may change either language; applying/committing the approved catalog precedes the
+English documentation review, full Polish user documentation and a NEW updated artist package.
+The original artist archive stays unchanged. No full-documentation rewrite occurs before approval.

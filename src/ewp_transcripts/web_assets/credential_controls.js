@@ -58,7 +58,7 @@ document.querySelector("#check-openrouter-key").addEventListener("click",async e
   const key=input.value;input.value="";button.disabled=true;status.textContent="Checking OpenRouter key and connection…";
   try {
     await queuePost("/api/v1/speech/check",key ? {api_key:key} : {},{trigger:button});
-    status.textContent="OpenRouter key and connection are ready. No audio was uploaded.";
+    status.textContent="Key and connection are ready.\nNo audio was uploaded.";
   }catch(error){status.textContent=error.message;}
   finally{input.value="";button.disabled=false;}
 });

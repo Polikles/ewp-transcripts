@@ -202,8 +202,9 @@
 .workspace-secondary-actions { margin-top: .5rem; }
 .workspace-removal-actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
 .gui-workbench .workspace-removal-actions button { background: transparent; color: var(--gui-muted); border: 1px solid var(--gui-line); font-size: .8rem; font-weight: 500; padding: .4rem .6rem; }
-.credential-key-check { flex: 1 1 13rem; min-width: 0; }
-.credential-key-check p { margin-block: .35rem 0; }
+.credential-key-check { flex: 1 1 21rem; min-width: 0; display:flex; align-items:center; gap:.6rem; }
+.credential-key-check button { flex:0 0 auto; }
+.credential-key-check p { margin:0; white-space:pre-line; font-size:.8rem; min-width:0; }
 @media (max-width: 35rem) {
   .workspace-primary-actions, .workspace-secondary-actions { grid-template-columns: minmax(0,1fr); }
   .workspace-removal-actions { grid-column: 1; }

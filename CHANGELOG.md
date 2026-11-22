@@ -6,6 +6,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Reject new workspaces with an existing name across known catalogs, with inline name validation
+  and explicit EN/PL guidance. Compare names without case/edge whitespace/Unicode ambiguity;
+  preserve updating selected records and older duplicate-name saves. Move short two-line key-check
+  feedback to the right of the dialog button. Owner requests no further manual retest.
+- Add reproducible optional tooling for the local editable ID/EN/PL terminology workbook and
+  validation of returned edits, preserving field provenance, placeholders and diagnostic codes.
+  The initial workbook stays outside Git until owner corrections; manuals and the next artist
+  package follow interface-language approval in the agreed order.
+
 - Recall the last output/workspace directories and recent saved-work catalogs after server/browser
   restart, refreshing the list automatically. Saved JSON filenames now start with the workspace
   name and retain their UUID; old UUID-only files still load and migrate on save. Windows-invalid

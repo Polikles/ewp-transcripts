@@ -414,7 +414,7 @@ def test_named_workspace_files_preserve_identity_and_migrate_legacy_names(tmp_pa
     first = workspaces.save(name="Odcinek Żółć", current_step="", fields={})
     first_path = workspaces.document_path(first.workspace_id)
     assert first_path.name.startswith("Odcinek Żółć--")
-    second = workspaces.save(name="Odcinek Żółć", current_step="", fields={})
+    second = workspaces.save(name="Odcinek Drugi", current_step="", fields={})
     assert first.workspace_id != second.workspace_id
     assert len(list(first_path.parent.glob("*.workspace.json"))) == 2
     legacy = first_path.parent / f"{first.workspace_id}.json"
@@ -442,6 +442,40 @@ def test_named_workspace_files_preserve_identity_and_migrate_legacy_names(tmp_pa
         assert Path(filename).name == filename and not PureWindowsPath(filename).is_reserved()
         assert not any(c in filename for c in '<>:"/\\|?*')
         assert len(filename.encode("utf-8")) <= 255
+
+
+def test_workspace_names_are_unique_without_blocking_updates_or_legacy_saves(
+    tmp_path: Path,
+) -> None:
+    from unicodedata import normalize
+    from uuid import uuid4
+
+    from ewp_transcripts.web_workspaces import GuiWorkspaceNameExists, workspace_filename
+
+    workspaces, _ = controller(tmp_path)
+    saved = workspaces.save(name="Żółć", current_step="", fields={})
+    original = workspaces.document_path(saved.workspace_id).read_bytes()
+    for name in ["Żółć", "  żółć  ", normalize("NFD", "Żółć")]:
+        with pytest.raises(GuiWorkspaceNameExists, match="already exists"):
+            workspaces.save(name=name, current_step="", fields={})
+    assert workspaces.document_path(saved.workspace_id).read_bytes() == original
+    assert len(workspaces.documents()) == 1
+    other = GuiWorkspaceController(
+        state_directory=tmp_path / "another",
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+    )
+    with pytest.raises(GuiWorkspaceNameExists):
+        other.save(name=saved.name, current_step="", fields={}, catalogs=(workspaces,))
+    assert not other.state_directory.exists()
+    legacy_id = str(uuid4())
+    legacy = saved.model_copy(update={"workspace_id": legacy_id})
+    (workspaces.state_directory / workspace_filename(legacy.name, legacy_id)).write_text(
+        legacy.model_dump_json()
+    )
+    updated = workspaces.save(
+        name=saved.name, current_step="review-heading", fields={}, workspace_id=saved.workspace_id
+    )
+    assert updated.workspace_id == saved.workspace_id and len(workspaces.documents()) == 2
 
 
 def test_last_workspace_directories_survive_restart_and_validate_paths(tmp_path: Path) -> None:

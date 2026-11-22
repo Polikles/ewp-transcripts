@@ -72,6 +72,7 @@ from ewp_transcripts.web_workspaces import (
     GuiWorkspaceController,
     GuiWorkspaceLocations,
     GuiWorkspaceMedia,
+    GuiWorkspaceNameExists,
     default_workspace_directory,
     resolve_optional_workspace_file,
 )
@@ -1258,6 +1259,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     fields = document.get("fields")
                     if not isinstance(fields, dict):
                         raise ValueError("Workspace fields must be an object")
+                    name = str(document.get("name", ""))
+                    workspace_id = str(document.get("workspace_id", ""))
+                    catalogs = tuple(
+                        controller
+                        for _, _, controller in self.server.workspace_catalogs(storage_directory)
+                    )
+                    workspaces.ensure_name_available(
+                        name, workspace_id=workspace_id, catalogs=catalogs
+                    )
                     pending_media = self._preserve_workspace_media(
                         document.get("pending_media", []), fields
                     )
@@ -1277,7 +1287,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         and not workspaces.is_temporary_selection(job.result_path or "")
                     )
                     saved = workspaces.save(
-                        name=str(document.get("name", "")),
+                        name=name,
                         current_step=str(document.get("current_step", "")),
                         fields=fields,
                         staged_jobs=[
@@ -1306,8 +1316,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         ],
                         terminal_jobs=[job.model_dump(mode="json") for job in durable_terminal],
                         pending_media=pending_media,
-                        workspace_id=str(document.get("workspace_id", "")),
+                        workspace_id=workspace_id,
                         omit_unavailable=True,
+                        catalogs=catalogs,
                     )
                     locations = getattr(self.server, "gui_workspace_locations", None)
                     if isinstance(locations, GuiWorkspaceLocations):
@@ -1399,7 +1410,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         HTTPStatus.BAD_REQUEST,
                         {
                             "error": {
-                                "code": "GUI_WORKSPACE_REQUEST_INVALID",
+                                "code": (
+                                    "GUI_WORKSPACE_NAME_EXISTS"
+                                    if isinstance(error, GuiWorkspaceNameExists)
+                                    else "GUI_WORKSPACE_REQUEST_INVALID"
+                                ),
                                 "message": str(error),
                             }
                         },

@@ -1084,7 +1084,12 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
     if (unavailableFieldsOmitted) omissions.push(`${unavailableFieldsOmitted} stale file field${unavailableFieldsOmitted === 1 ? "" : "s"} cleared.`);
     workspaceStatus.textContent = `Workspace saved: ${saved.name}.`;
     for (const message of omissions) { const detail = document.createElement("span"); detail.textContent = message; workspaceStatus.append(" ", detail); }
-  } catch (error) { workspaceStatus.textContent = error.message; }
+  } catch (error) {
+    workspaceStatus.textContent = error.message;
+    if(error.message.includes("GUI_WORKSPACE_NAME_EXISTS")) {
+      workspaceName.classList.add("field-error");workspaceName.setAttribute("aria-invalid","true");workspaceName.setAttribute("aria-describedby","workspace-status");workspaceName.focus({preventScroll:true});
+    }
+  }
 });
 document.querySelector("#load-workspace").addEventListener("click", loadSelectedWorkspace);
 importWorkspaceInput.addEventListener("change", async () => { const file = importWorkspaceInput.files?.[0]; importWorkspaceInput.value = ""; if (!file) return; try { const targetStorageDirectory = workspaceStorageDirectory(); const payload = await postSelectedFile("/api/v1/import-workspace-file", file, importWorkspaceButton, {"X-EWP-Workspace-Directory": encodeURIComponent(targetStorageDirectory)}); workspaceName.value = payload.workspace.name; await refreshWorkspaces(workspaceKey(payload.workspace.workspace_id, targetStorageDirectory), {feedback: false}); workspaceStatus.textContent = `Saved work state file imported: ${payload.workspace.name}.`; } catch (error) { workspaceStatus.textContent = error.message; } });

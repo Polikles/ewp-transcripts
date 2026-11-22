@@ -96,5 +96,5 @@ Pending-media workspace references are included in profiles without embedding au
 
 Save key and Use saved key share one row. Remove saved key and Clear session key are smaller,
 secondary actions on the next row; Close window is at the bottom right. API-check feedback stays
-immediately below Check API key. A cloud queue start also checks the active key before any local
+to the right of Check API key, in two short lines. A cloud queue start also checks the active key before any local
 media preparation or upload; an absent or rejected key leaves every queued job staged.

@@ -200,11 +200,11 @@ def main():
             positions = page.locator(".credential-key-check").evaluate(
                 """e=>{const b=e.querySelector('button').getBoundingClientRect();
                   const s=e.querySelector('p').getBoundingClientRect();
-                  return {bottom:b.bottom,top:s.top,left:b.left,statusLeft:s.left};}"""
+                  return {right:b.right,top:b.top,statusTop:s.top,statusLeft:s.left};}"""
             )
             assert (
-                positions["bottom"] <= positions["top"]
-                and abs(positions["left"] - positions["statusLeft"]) <= 1
+                positions["right"] <= positions["statusLeft"]
+                and abs(positions["top"] - positions["statusTop"]) <= 20
             ), positions
             page.locator("#close-openrouter-key-icon").click()
             stage(page, "saved")

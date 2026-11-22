@@ -85,7 +85,10 @@ A complete output-folder ZIP may therefore lack a manifest stored in an older se
 
 New saves use `<workspace name>--<UUID>.workspace.json`. Characters forbidden in Windows filenames
 are replaced with underscores; Polish letters and spaces remain recognizable. The UUID preserves
-identity when different workspaces have the same display name. Earlier UUID-only JSON saves still
+identity for older saves even if their names coincide. New names must be unique across the known
+catalogs: Save as new rejects an existing name and highlights the name field. Comparison ignores
+case, surrounding whitespace and equivalent Unicode spellings. Choose another name; updating the
+selected existing save still works. Earlier UUID-only JSON saves still
 load, and saving them again migrates their filename while keeping that identity. Save as new makes
 a separate ID/file; removing a save deletes only its manifest.
 

@@ -180,6 +180,10 @@ class GuiWorkspaceDocument(BaseModel):
 ResolvePath = Callable[..., Path]
 
 
+class GuiWorkspaceNameExists(ValueError):
+    """A new save would introduce an ambiguous display name."""
+
+
 def workspace_filename(name: str, workspace_id: str) -> str:
     """Keep the display name recognizable and the identity portable on Windows and Linux."""
     stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", unicodedata.normalize("NFC", name))
@@ -285,6 +289,7 @@ class GuiWorkspaceController:
         pending_media: builtin_list[dict[str, Any]] | None = None,
         workspace_id: str = "",
         omit_unavailable: bool = False,
+        catalogs: tuple[GuiWorkspaceController, ...] = (),
     ) -> GuiWorkspaceDocument:
         clean_name = name.strip()
         if not clean_name or len(clean_name) > 100:
@@ -312,6 +317,7 @@ class GuiWorkspaceController:
             pending_media=clean_media,
         )
         with self._publication_lock:
+            self.ensure_name_available(clean_name, workspace_id=workspace_id, catalogs=catalogs)
             previous = self._workspace_path(identifier)
             if previous.exists() and self._read(previous).workspace_id != identifier:
                 raise ValueError("Saved workspace identity does not match its file")
@@ -320,6 +326,35 @@ class GuiWorkspaceController:
             if previous != destination and previous.exists():
                 previous.unlink()
         return document
+
+    def ensure_name_available(
+        self,
+        name: str,
+        *,
+        workspace_id: str = "",
+        catalogs: tuple[GuiWorkspaceController, ...] = (),
+    ) -> None:
+        """Reject ambiguous new names, preserving updates to older duplicate-name records."""
+        clean = name.strip()
+        key = unicodedata.normalize("NFC", clean).casefold()
+        with self._publication_lock:
+            if workspace_id:
+                previous = self._workspace_path(workspace_id)
+                if previous.exists() and self._read(previous).name == clean:
+                    return
+            for catalog in (self, *catalogs):
+                for saved in catalog.documents():
+                    same_record = (
+                        catalog.state_directory == self.state_directory
+                        and saved.workspace_id == workspace_id
+                    )
+                    if (
+                        not same_record
+                        and unicodedata.normalize("NFC", saved.name.strip()).casefold() == key
+                    ):
+                        raise GuiWorkspaceNameExists(
+                            "A workspace with this name already exists; try a different name"
+                        )
 
     def list(self) -> tuple[GuiWorkspaceSummary, ...]:
         if not self._state_directory.exists():

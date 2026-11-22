@@ -17,6 +17,12 @@ Generate the complete editable EN–PL string-pair approval file only after func
 finish, then owner approval before the full English-manual revision and Polish manuals.
 Keep only necessary changed-step/raw-output instructions current before that approval. Documentation screenshots wait for custom icons;
 waiting for the artist has no deadline and blocks no other work. Do not modify the sent artist ZIP.
+Latest owner instruction (2026-11-22) accepts focused behavior and moves to task10 after final
+duplicate-save-name/key-feedback polish, with no further manual retest. Generate the local editable
+ID/EN/PL workbook now; apply owner edits and commit the approved reference, then obtain interface
+approval, update EN docs, prepare full PL docs, and finally create an updated artist package.
+That later new-package step is authorized and supersedes the older permanent freeze; preserve
+the original already-sent archive and do not rebuild it during terminology review.
 
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
 by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL
