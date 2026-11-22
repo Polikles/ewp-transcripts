@@ -161,7 +161,7 @@ for (const [en, pl] of [
     "Ścieżki źródła i wyników"
   ],
   [
-    "Save or restore non-secret workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.",
+    "Save or restore workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.",
     "Zapisz lub przywróć niesekretne ustawienia i trwałe źródła kolejki po zmianie przeglądarki lub ponownym uruchomieniu programu. Zapis najpierw utrwala zmienione szkice w wybranym katalogu. JSON obszaru pracy nie zawiera tekstu transkrypcji, kluczy API ani potwierdzeń."
   ],
   [
@@ -169,7 +169,7 @@ for (const [en, pl] of [
     "Wpisz katalog użytkownika dla plików JSON obszaru pracy i kopii zapasowych. Puste pole oznacza domyślny prywatny katalog."
   ],
   [
-    "Automatically replace the active saved workspace every 60 seconds when its non-secret fields or queue change.",
+    "Automatically replace the active saved workspace every 60 seconds when changes occur.",
     "Automatycznie zastępuj aktywny zapis pracy co 60 sekund, gdy zmienią się niesekretne pola lub kolejka."
   ],
   [
@@ -185,7 +185,7 @@ for (const [en, pl] of [
     "Zarządzane kopie źródeł"
   ],
   [
-    "Inventory durable browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.",
+    "Inventory browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.",
     "Sprawdź trwałe kopie wybrane w przeglądarce we wspólnym katalogu wyników. Porządkowanie uwzględnia bieżącą kolejkę, domyślny i wybrany katalog obszarów pracy oraz pochodzenie plików. Katalogi obszarów pracy w innych miejscach należy sprawdzić oddzielnie."
   ],
   [
@@ -229,7 +229,7 @@ for (const [en, pl] of [
     "Wybierz katalog wyników…"
   ],
   [
-    "Choose 1–6 speakers when known. Speaker attribution usually becomes less accurate as the number of speakers increases.",
+    "Choose 1–6 speakers when known. Speaker attribution usually becomes less accurate as the number of speakers increases. You can add more speakers during verification later.",
     "Wybierz 1–6 mówców, jeśli znasz ich liczbę. Większa liczba mówców zwykle utrudnia poprawne przypisanie. Podczas weryfikacji można dodać kolejnych mówców."
   ],
   [
@@ -421,7 +421,7 @@ for (const [en, pl] of [
     "Nie otwarto propozycji słownika."
   ],
   [
-    "Artwork: Cyryl. Creator URL is an unverified placeholder (blogcyryla.pl); TODO replace when supplied.",
+    "Artwork: Cyryl. Creator URL is a placeholder (blogcyryla.pl); TODO replace when supplied.",
     "Grafika: Cyryl. Adres twórcy jest niezweryfikowanym adresem zastępczym (blogcyryla.pl); TODO: zastąpić po otrzymaniu właściwego adresu."
   ],
   [
@@ -728,6 +728,9 @@ guiPolish.set("Saving custom profile…", "Zapisywanie własnego profilu…");
 function guiUiText(value) {
   if (guiLocale !== "pl") return value;
   const trimmed = value.trim();
+  // Reviewed full messages take precedence over a generic description for their code.
+  const exact = guiPolish.get(trimmed);
+  if (exact !== undefined) return value.replace(trimmed, exact);
   const coded = guiDiagnosticPattern.exec(trimmed);
   if (coded) {
     const description = guiPolishErrorDescriptions.get(coded[1]);
@@ -735,8 +738,6 @@ function guiUiText(value) {
     if (["GUI_OPENROUTER_KEY_REQUIRED", "GUI_OPENROUTER_PREFLIGHT_FAILED", "GUI_WORKSPACE_REQUEST_INVALID", "GUI_CORRECTION_CONFIRMATION_REQUIRED", "GUI_TRANSLATION_CONFIRMATION_REQUIRED", "SPEECH_ENGINE_ERROR", "GUI_ASR_CHECK_FAILED", "GUI_TRANSCRIPTION_FAILED", "GUI_CLOUD_CONSENT_REQUIRED", "GUI_PROFILE_INVALID", "GUI_DICTIONARY_REQUEST_INVALID", "GUI_QUEUE_ACTION_REJECTED", "GUI_WORKDIR_INVALID", "GUI_EXPORT_DOWNLOAD_INVALID"].includes(coded[1]) && translatedBody !== coded[2]) return `${coded[1]}: ${translatedBody}`;
     return `${coded[1]}: ${description || (translatedBody !== coded[2] ? translatedBody : guiPolishFallbackError(coded[1]))}`;
   }
-  const exact = guiPolish.get(trimmed);
-  if (exact !== undefined) return value.replace(trimmed, exact);
   const indicator = /^(ASR|Correction|Review|Original export|LLM translation|Translation|Translated export): (.*)$/.exec(trimmed);
   if (indicator) return `${guiUiText(indicator[1])}: ${guiUiText(indicator[2])}`;
   const dynamic = guiPolishDynamicText(trimmed);
@@ -766,7 +767,7 @@ function guiUiText(value) {
       .replace(/^Transcript section (\d+)$/, "Sekcja transkrypcji $1")
       .replace(/^Translation unit (\d+)$/, "Jednostka tłumaczenia $1")
       .replace(/^Section (\d+) of (\d+)$/, "Sekcja $1 z $2")
-      .replace(/^(speaker_\d+) display name$/, "Nazwa wyświetlana $1")
+      .replace(/^(speaker_\d+) display name$/, "$1 wyświetlana nazwa")
       .replace(/^Speaker color (speaker_\d+)$/, "Kolor mówcy $1")
       .replace(/^Remove (speaker_\d+)$/, "Usuń $1")
       .replace(/^Next step: correction$/, "Następny krok: korekta")
@@ -805,6 +806,11 @@ function translateGui() {
       originals[name] = {source, last: translated};
     }
     guiAttributeSources.set(element, originals);
+  }
+  for (const link of document.querySelectorAll('a[href^="/help/"]')) {
+    const target = new URL(link.href, location.href);
+    target.searchParams.set("lang", guiLocale);
+    link.setAttribute("href", `${target.pathname}${target.search}${target.hash}`);
   }
   syncGuiStatusMotion();
   guiTranslationObserver?.observe(document.body, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:["title", "aria-label", "placeholder", "hidden"]});

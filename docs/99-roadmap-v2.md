@@ -14,6 +14,12 @@ research metrics and optional presets do not block completion or release readine
 
 ### Owner acceptance of the recent GUI
 
+Current terminology application (2026-11-22): owner returned the workbook and requests an updated
+interface for approval.106 reviewed rows (18 EN /105 PL edits) are integrated with stable-ID
+[reference and notes](ui-language/README.md). Use [focused approval](../Instructions/GUI_TERMINOLOGY_APPROVAL.md).
+Full EN documentation review, complete PL manuals and a NEW artist package follow that approval;
+do not start them prematurely. Originals and the already-sent artist archive remain unchanged.
+
 Latest instruction (2026-11-22): all focused checks pass apart from the final duplicate-new-save
 name correction; that fix and shorter right-side key feedback need automatic verification only,
 with no further owner retest. Then move directly to task10 local editable ID/EN/PL review. Apply

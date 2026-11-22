@@ -3,6 +3,23 @@
 Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Delivered task10 corrections / awaiting interface approval — 2026-11-22
+
+Baseline clean maince9ddfc. Owner returned the same-named workbook in private benchmark.
+Integrate the edits and deliver an interface update for owner approval. Later docs/package stages
+remain ordered after that approval; do not start them as part of this integration.
+
+- [x] Validate returned workbook against delivered originals, IDs/placeholders/formulas and source snapshot; inspect all EN/PL edits and notes.
+- [x] Apply owner text changes in both languages, including dynamic templates, tooltips/errors and quick guides; preserve technical values/workflow behavior.
+- [x] Commit corrected reference table/workbook with stable IDs and change provenance; keep original/returned private files untouched.
+- [x] Run copy coverage, focused EN/PL browser/workflow tests and ordinary checks; no paid API/GPU/reinstall.
+- [x] Update changelog/policy/roadmap/checkpoint/evidence; clean disposable root, commit/push and provide approval instructions.
+- [ ] Owner approves updated interface; then EN documentation review/update → full PL user documentation → NEW artist review package.
+
+Implemented and verified:106 owner rows (18 EN /105 PL), plus one synchronized quick-guide
+title.1050 tests,17 integrations,216 full browser layouts and36 focused copy cases pass. Use
+Instructions/GUI_TERMINOLOGY_APPROVAL.md next; no full manual rewrite or artist refresh before approval.
+
 ## Delivered final B polish / active owner terminology review and task 10 EN–PL review — 2026-11-22
 
 Baseline clean main8475723. Owner reports all focused checks pass; duplicate new workspace names

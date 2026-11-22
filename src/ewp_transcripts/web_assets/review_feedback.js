@@ -34,7 +34,7 @@ function createGuiLanguageChoice(label) {
   if(label.parentNode)label.before(choice);choice.append(label);
   const details = document.createElement("details"); details.className = "gui-language-info";
   const summary = document.createElement("summary"); summary.textContent = "i";
-  const message = "Choosing EN for Polish recordings has sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.";
+  const message = "Choosing EN for Polish recordings had sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.";
   summary.title = message; summary.setAttribute("aria-label", "Language selection information");
   const info = document.createElement("p"); info.className = "field-hint"; info.textContent = message;
   details.append(summary, info); choice.append(details);

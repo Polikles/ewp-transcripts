@@ -27,12 +27,23 @@ def _inline(text: str) -> str:
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(text))
 
 
-def render_guide(slug: str) -> bytes | None:
+def render_guide(slug: str, *, locale: str = "en") -> bytes | None:
     """Render only allowlisted bundled guides; never resolve a requested filesystem path."""
 
     filename = GUIDE_FILES.get(slug)
     if filename is None:
         return None
+    locale = "pl" if locale == "pl" else "en"
+    chrome = {
+        "open": "Otwórz EwP Transcripts" if locale == "pl" else "Open EwP Transcripts",
+        "return": (
+            "Zamknij tę kartę aby powrócić do swojej pracy."
+            if locale == "pl"
+            else "Close this tab to return to your existing work."
+        ),
+        "navigation": "Instrukcje pracy z programem" if locale == "pl" else "Workflow instructions",
+        "other": "Inne instrukcje" if locale == "pl" else "Other workflow guides",
+    }
     source = files("ewp_transcripts.web_assets").joinpath("guides", filename).read_text()
     title = source.splitlines()[0].removeprefix("# ")
     output = [
@@ -40,8 +51,7 @@ def render_guide(slug: str) -> bytes | None:
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         f"<title>{html.escape(title)} · EwP Transcripts instructions</title>",
         '<link rel="stylesheet" href="/assets/app.css"></head><body class="gui-guide">',
-        '<main><p><a href="/">Open EwP Transcripts</a> · '
-        "Close this tab to return to your existing work.</p>",
+        f'<main><p lang="{locale}"><a href="/">{chrome["open"]}</a> · {chrome["return"]}</p>',
     ]
     list_open = False
     code_open = False
@@ -76,10 +86,13 @@ def render_guide(slug: str) -> bytes | None:
         output.append("</ol>")
     if code_open:
         output.append("</code></pre>")
-    output.append('<nav aria-label="Workflow instructions"><h2>Other workflow guides</h2><ul>')
+    output.append(
+        f'<nav lang="{locale}" aria-label="{chrome["navigation"]}"><h2>{chrome["other"]}</h2><ul>'
+    )
     for name in GUIDE_FILES:
         output.append(
-            f'<li><a href="/help/{name}">{html.escape(name.replace("-", " ").title())}</a></li>'
+            f'<li><a href="/help/{name}?lang={locale}">'
+            f"{html.escape(name.replace('-', ' ').title())}</a></li>"
         )
     output.append("</ul></nav></main></body></html>")
     return "\n".join(output).encode()

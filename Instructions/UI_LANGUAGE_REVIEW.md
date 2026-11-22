@@ -1,5 +1,11 @@
 # Interface-language review (task 10)
 
+Current state (2026-11-22): the owner returned the workbook and its106 changed rows are integrated.
+The maintained [reference](../docs/ui-language/README.md) now contains XLSX/CSV and integration
+notes. Use [interface approval](GUI_TERMINOLOGY_APPROVAL.md) next. The original local files below
+remain untouched; do not overwrite them. EN manuals, PL manuals and the new artist package wait
+for interface approval.
+
 Owner authorized this handoff on 2026-11-22 after accepting the focused workflow checks. Final
 unique-save-name and short key-dialog feedback corrections need automatic verification only;
 no further owner manual retest. This review precedes the full manual rewrite.

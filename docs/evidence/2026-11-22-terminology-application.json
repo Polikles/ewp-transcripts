@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-22",
+  "baseline_commit": "ce9ddfc",
+  "owner_request": "Integrate returned EN/PL corrections and deliver GUI for interface approval, then EN docs, complete PL docs and new artist package",
+  "input": {
+    "rows": 2218,
+    "owner_changed_rows": 106,
+    "EN_edits": 18,
+    "PL_edits": 105,
+    "IDs_placeholders_formulas_validated": true,
+    "hidden_baselines_match_initial": true,
+    "initial_workbook_unchanged": true,
+    "returned_workbook_unchanged": true,
+    "returned_sha256": "c4def9a7f224bf3342286335bb61b39331df644cc91bdf1767e3dffb9dc3857f"
+  },
+  "application": {
+    "static_pairs_checked": 102,
+    "dynamic_templates": 2,
+    "owner_quick_guide_edits": 2,
+    "derived_quick_guide_sync": 1,
+    "english_sources_updated": true,
+    "full_error_messages_precede_generic_code_fallbacks": true,
+    "help_chrome_follows_interface_locale": true,
+    "full_help_manuals_remain_English": true,
+    "integration_adjustments": "two spelling fixes and two actual-return-target instructions across three rows; one derived guide title synced to its reviewed heading",
+    "runtime_model_path_credentials_formats_behavior_changed": false
+  },
+  "reference": {
+    "directory": "docs/ui-language",
+    "workbook_sha256": "0c8e9713ef31c3f6388fb67a0a55f68c158043fb303fd9d2ef01d5533bf1574f",
+    "csv_matches_workbook": true,
+    "unique_stable_IDs": 2218,
+    "submitted_applied_provenance": "integration.json",
+    "interface_acceptance": "pending"
+  },
+  "verification": {
+    "make_check": {
+      "tests_passed": 1050,
+      "ruff_format": "pass",
+      "mypy_source_files": 115
+    },
+    "make_test_integration": {
+      "passed": 17,
+      "deselected": 4
+    },
+    "full_browser": {
+      "playwright": "1.65.2",
+      "chromium": "159.0.8154.6",
+      "cases": 216,
+      "page_errors": [],
+      "external_requests": []
+    },
+    "focused_copy": {
+      "reference_rows": 2218,
+      "owner_changed_rows": 106,
+      "exact_copy_checked": 102,
+      "dynamic_templates_checked": 2,
+      "quick_guides_checked": 2,
+      "derived_quick_guides_checked": 1,
+      "help_chrome_checked": 4,
+      "locale_roundtrips": 4,
+      "layout_cases": 36,
+      "page_errors": [],
+      "external_requests": [],
+      "real_provider_calls": 0
+    },
+    "changed_JS_syntax_files": 5,
+    "source_workbook_validation": "pass; applied workbook107 changed rows including derived title",
+    "screenshots_inspected": [
+      "Polish dictionary page"
+    ],
+    "actual_browser_zoom_200": "not run; previous optional owner check"
+  },
+  "scope": {
+    "paid_requests_this_task": 0,
+    "cumulative_live_spend_usd": "0.0291461230985028369",
+    "new_native_GPU_qualification": false,
+    "full_manual_rewrite_started": false,
+    "artist_package_changed": false,
+    "artist_sha256": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+    "next_gate": "owner interface approval",
+    "later_order": [
+      "EN documentation review/update",
+      "complete Polish user documentation",
+      "NEW artist package"
+    ]
+  },
+  "disposable_cleanup": {
+    "root": "/tmp/ewp-terminology-apply.RogGT6",
+    "removed": true
+  }
+}

@@ -110,11 +110,11 @@
       {
         "title": {
           "en": "Speaker names and colors",
-          "pl": "Nazwy i kolory mówców"
+          "pl": "Imiona i kolory mówców"
         },
         "text": {
           "en": "Check display names, speaker assignments and the YTT color profile. Add speaker creates another editable speaker.",
-          "pl": "Sprawdź nazwy, przypisania mówców i profil kolorów YTT. Dodaj mówcę tworzy kolejnego mówcę do edycji."
+          "pl": "Sprawdź nazwy, przypisania mówców i profil kolorów YTT. \"Dodaj mówcę\" tworzy kolejnego mówcę do edycji."
         }
       },
       {
@@ -280,7 +280,7 @@
       {
         "title": {
           "en": "View and compare versions",
-          "pl": "Przeglądaj i porównuj wersje"
+          "pl": "Wyświetl i porównaj wersje"
         },
         "text": {
           "en": "Choose View / edit for an edition. Select a second edition and Compare versions to see changed terms, scope and conventions.",

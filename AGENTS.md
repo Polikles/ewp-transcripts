@@ -23,6 +23,9 @@ ID/EN/PL workbook now; apply owner edits and commit the approved reference, then
 approval, update EN docs, prepare full PL docs, and finally create an updated artist package.
 That later new-package step is authorized and supersedes the older permanent freeze; preserve
 the original already-sent archive and do not rebuild it during terminology review.
+The workbook has now been returned and integrated; use the current terminology-application
+checkpoint and focused interface approval instructions. Do not regenerate or overwrite the
+owner's file, start manuals, or rebuild the artist package before interface approval.
 
 Latest owner sequencing: follow TODO and the roadmap package table. Package A (1–4) is followed
 by an owner checklist/fix/retest gate, then package B (5–8, 8a cloud ASR, 9 full native-Windows/WSL

@@ -4,6 +4,22 @@ Last updated: **2026-11-22**.
 
 ## Active task and resume pointers
 
+Current handoff: [owner terminology integration](docs/checkpoints/2026-11-22-terminology-application.md).
+Baseline maince9ddfc.106 owner-reviewed rows integrated (18 EN /105 PL); three rows include noted
+spelling/actual-queue-target adjustments and one quick-guide title is synchronized. XLSX/CSV and
+submitted/applied provenance are in docs/ui-language. Original local workbooks remain unchanged.
+Full-message translations precede generic code fallbacks; help navigation follows interface locale,
+while full manuals remain English.1050 tests/mypy115,17 integrations,216 full browser layouts and36
+focused copy layouts pass;102 static pairs,2 templates,2 reviewed guide edits,1 derived guide and4
+help labels checked across locale roundtrips. No page errors/external requests/paid calls.
+Next: owner interface approval using Instructions/GUI_TERMINOLOGY_APPROVAL.md. After that approval:
+EN documentation review/update → complete PL user documentation → NEW updated artist package.
+Original artist ZIP unchanged. Source/spend/privacy qualifications retained; no reinstall/GPU test.
+Temporary-root cleanup/evidence recorded in checkpoint; delivery targets main. Do not start later
+documentation/package stages before owner approval or overwrite returned/delivered workbooks.
+
+Earlier handoffs below are historical and superseded by the current gate above.
+
 Current handoff: [final B polish and EN–PL review](docs/checkpoints/2026-11-22-terminology-review.md).
 Baseline main8475723. Duplicate Save as new names now reject across known catalogs, preserving
 updates/legacy records; short two-line key feedback sits to button right. Owner requested no manual

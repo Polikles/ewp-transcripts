@@ -21,7 +21,7 @@ from importlib.resources import files
 from io import BufferedIOBase
 from pathlib import Path
 from typing import Any, ClassVar, cast
-from urllib.parse import quote, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 from uuid import uuid4
 
 from ewp_transcripts import __version__
@@ -346,7 +346,8 @@ def dispatch_get(
     if path == "/help":
         return _asset_response("help.html", "text/html; charset=utf-8")
     if path.startswith("/help/"):
-        guide = render_guide(path.removeprefix("/help/"))
+        locale = parse_qs(urlsplit(target).query).get("lang", ["en"])[0]
+        guide = render_guide(path.removeprefix("/help/"), locale=locale)
         if guide is not None:
             return WebResponse(HTTPStatus.OK, "text/html; charset=utf-8", guide)
     if path == "/api/v1/guides":

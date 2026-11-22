@@ -180,7 +180,7 @@ function installGuiShell() {
     <p>Audio is processed locally. Correction and translation send transcript text only after explicit scoped consent. Keys stay in server memory and are never saved in workspaces.</p>
     <p><a href="/help" target="_blank" rel="noreferrer">Open the complete local GUI instructions</a></p>
     <p><a href="/assets/brand/NOTICE.txt">Asset credits and notices</a> · <a href="/assets/brand/LICENSE-ASSETS.txt">Identity asset terms</a></p>
-    <p class="gui-artwork-credit">Artwork: Cyryl. Creator URL is an unverified placeholder (blogcyryla.pl); TODO replace when supplied.</p>`;
+    <p class="gui-artwork-credit">Artwork: Cyryl. Creator URL is a placeholder (blogcyryla.pl); TODO replace when supplied.</p>`;
   main.append(settings);
   settings.append(document.querySelector("#dependency-panel"), document.querySelector("#temporary-workdirs"));
   settings.append(document.querySelector("footer"));

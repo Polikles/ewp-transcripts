@@ -6,6 +6,17 @@ All notable changes to EWP-transcripts are documented here.
 
 ### Fixed
 
+- Integrate the owner's 106 reviewed EN/PL copy rows, including 18 English and 105 Polish edits,
+  dynamic statuses, error messages, speaker/dictionary labels, tooltips and quick guides. Keep
+  reviewed full-message errors ahead of generic code fallbacks and synchronize the dictionary
+  quick-step title so late metadata cannot overwrite its reviewed heading.
+- Preserve the interface language in offline help navigation. Full manual contents remain English
+  until interface approval and the separate EN/PL documentation stages. Add the reviewed workbook,
+  stable-ID CSV, integration notes and focused approval instructions as maintained language references.
+- Parse actual JavaScript literals in the optional GUI copy scan, avoiding false untranslated
+  fragments from apostrophes/regex/template HTML. Existing Playwright tooling also needs
+  tree-sitter and tree-sitter-javascript; application dependency pins are unchanged.
+
 - Reject new workspaces with an existing name across known catalogs, with inline name validation
   and explicit EN/PL guidance. Compare names without case/edge whitespace/Unicode ambiguity;
   preserve updating selected records and older duplicate-name saves. Move short two-line key-check

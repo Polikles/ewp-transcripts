@@ -9,7 +9,7 @@ for (const [en, pl] of [
   ["Cloud ASR model", "Model ASR w chmurze"],
   ["Cost guard per queued job (USD)", "Limit szacowanego kosztu zadania w kolejce (USD)"],
   ["Uses the same OpenRouter key as correction and translation. Audio is uploaded only after Start queue with consent. Provider prices are checked before upload; uncertain charges are reserved without automatic retries. The guard is an estimate, not a provider billing cap.", "Używa tego samego klucza OpenRouter co korekta i tłumaczenia. Audio jest wysyłane dopiero po uruchomieniu kolejki i wyrażeniu zgody. Ceny są sprawdzane przed wysłaniem; niepewne opłaty są rezerwowane bez automatycznych ponowień. Limit jest szacunkowy i nie stanowi blokady rozliczeń po stronie dostawcy."],
-  ["Whisper models need one speaker or separate synchronized speaker tracks. Mixed-speaker audio uses Scribe or MAI. Long recordings are split automatically into bounded requests and merged on the original timeline. Shared audio context helps keep speakers consistent; uncertain assignments are flagged for manual review. Provider word times are required for subtitles.", "Modele Whisper wymagają jednego mówcy lub osobnych zsynchronizowanych ścieżek mówców. Zmiksowane audio wielu mówców obsługują Scribe i MAI. Długie nagrania są automatycznie dzielone na żądania o ograniczonym rozmiarze i łączone na wspólnej osi czasu. Wspólny kontekst audio pomaga zachować oznaczenia mówców; niepewne przypisania są oznaczane do ręcznej weryfikacji. Napisy wymagają czasów słów zwróconych przez dostawcę."],
+  ["Whisper models work better with one speaker per track. Mixed-speaker audio works better with Scribe or MAI. Shared audio context helps keep speakers tags consistent. Provider word times are the base for subtitles.", "Modele Whisper wymagają jednego mówcy lub osobnych zsynchronizowanych ścieżek mówców. Zmiksowane audio wielu mówców obsługują Scribe i MAI. Długie nagrania są automatycznie dzielone na żądania o ograniczonym rozmiarze i łączone na wspólnej osi czasu. Wspólny kontekst audio pomaga zachować oznaczenia mówców; niepewne przypisania są oznaczane do ręcznej weryfikacji. Napisy wymagają czasów słów zwróconych przez dostawcę."],
   ["I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage within each job's cost guard. This consent is not saved.", "Zgadzam się na wysłanie audio z zadań chmurowych do OpenRouter i dostawcy modelu oraz płatne użycie API w ramach szacunkowego limitu każdego zadania. Zgoda nie jest zapisywana."],
   ["Confirm sending staged cloud audio to OpenRouter and its model provider, with paid API usage", "Potwierdź wysłanie audio z kolejki do OpenRouter i dostawcy modelu oraz płatne użycie API."],
   ["Cloud ASR failed. Check the shared key, credits, selected model, timed-word support and job cost limit; retry explicitly.", "ASR w chmurze nie powiodło się. Sprawdź wspólny klucz, środki, wybrany model, obsługę czasów słów i limit kosztu zadania; ponów ręcznie."],
@@ -80,7 +80,7 @@ for (const [en, pl] of [
   ["No OpenRouter key is saved in the OS store.", "W magazynie systemowym nie ma zapisanego klucza OpenRouter."],
   ["Unknown credential action.", "Nieznane działanie dotyczące klucza API."],
   ["One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, choose Use saved OpenRouter key.", "Jeden klucz służy do ASR, korekty i tłumaczeń. Zapis systemowy jest opcjonalny. Jeśli bezpieczny magazyn nie jest dostępny, użyj klucza tylko na sesję. Po restarcie wybierz Użyj zapisanego klucza OpenRouter."],
-  ["The key is sent only to this loopback server. Session-only keys are erased when it stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.", "Klucz trafia wyłącznie do tego lokalnego serwera. Klucz sesji znika po jego zatrzymaniu. Możesz jawnie zapisać klucz w magazynie systemowym i użyć go po restarcie. ASR, korekta i tłumaczenia korzystają z tego samego klucza; profile i pamięć przeglądarki go nie zawierają."],
+  ["The key is saved only to this local server. Session-only keys are erased when server stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.", "Klucz trafia wyłącznie do tego lokalnego serwera. Klucz sesji znika po jego zatrzymaniu. Możesz jawnie zapisać klucz w magazynie systemowym i użyć go po restarcie. ASR, korekta i tłumaczenia korzystają z tego samego klucza; profile i pamięć przeglądarki go nie zawierają."],
   ["One OpenRouter key is available for ASR, correction and translation on this server. Session memory is cleared on exit; an explicitly saved OS entry remains until removed.", "Na serwerze jest dostępny jeden klucz OpenRouter do ASR, korekty i tłumaczeń. Pamięć sesji jest czyszczona po zakończeniu; jawnie zapisany klucz systemowy pozostaje do usunięcia."],
   ["Native Windows environment detected.", "Wykryto natywne środowisko Windows."],
   ["Native Windows setup and repair instructions", "Instrukcje konfiguracji i naprawy natywnego Windows"],
@@ -214,7 +214,7 @@ for (const [en, pl] of [
     "Wygeneruj propozycję tłumaczenia"
   ],
   [
-    "Manual model ID",
+    "Model ID",
     "Wpisz ID modelu"
   ],
   [
@@ -250,7 +250,7 @@ for (const [en, pl] of [
     "Ta czynność wysyła zapytanie do wybranego dostawcy o dostępne modele i ceny wejścia/wyjścia. Nie wysyła transkrypcji i nigdy nie uruchamia się automatycznie."
   ],
   [
-    "Treat API keys as secrets. Use a dedicated key with a low spending limit; the project's 20-episode testing used substantially less than a USD $2 limit.",
+    "Treat API keys as secrets. Use a dedicated key with a low spending limit. Our testing on LLM correction of 20 podcast episodes used substantially less than a $2 limit.",
     "Traktuj klucze API jak hasła. Używaj osobnego klucza z niskim limitem wydatków; testy projektu na 20 odcinkach wykorzystały znacznie mniej niż limit 2 USD."
   ],
   [
@@ -258,7 +258,7 @@ for (const [en, pl] of [
     "Klucz trafia wyłącznie do tego lokalnego serwera i pozostaje tylko w pamięci jego procesu. Nie jest zapisywany w plikach projektu ani pamięci przeglądarki. Po ponownym uruchomieniu GUI trzeba podać go ponownie."
   ],
   [
-    "Use the server environment or set a key for the active GUI server process. The key is shared with browsers connected to that process, but is never written to project files, saved workspaces, or browser storage.",
+    "Set a key for the active process or save it on local server. The key is shared with browsers connected to that process, but is never written to project files, saved workspaces, or browser storage.",
     "Skorzystaj ze zmiennej środowiskowej serwera lub ustaw klucz dla bieżącego procesu GUI. Klucz jest dostępny dla przeglądarek połączonych z tym procesem, ale nie trafia do plików projektu, zapisów pracy ani pamięci przeglądarki."
   ],
   [
@@ -278,11 +278,11 @@ for (const [en, pl] of [
     "Zapisz zweryfikowaną rewizję przed przejściem do tłumaczenia."
   ],
   [
-    "Ask this deployment's operating system for a server-visible folder; no folder contents are uploaded.",
+    "Choose a server-visible folder; no folder contents are uploaded.",
     "Wybierz katalog dostępny dla serwera w oknie systemowym. Zawartość katalogu nie jest przesyłana."
   ],
   [
-    "Auto-save checked: no tracked workflow-field changes to save.",
+    "Auto-save checked: no tracked changes to save.",
     "Sprawdzono autozapis: brak zmian ustawień do zapisania."
   ],
   [
@@ -346,7 +346,7 @@ for (const [en, pl] of [
     "Generowanie wstępnej korekty…"
   ],
   [
-    "LLM-assisted correction skipped; this output is now open in manual review.",
+    "LLM-assisted correction skipped; this output is now ready for manual review.",
     "Pominięto korektę z LLM. Tekst jest otwarty do ręcznego sprawdzenia."
   ],
   [
@@ -695,7 +695,7 @@ function guiPolishDynamicText(text) {
     [/^(\d+) units$/, 'Liczba jednostek: $1'], [/^(\d+) sections$/, 'Liczba sekcji: $1'],
     [/^(.+) · (pl|en|auto) · speakers: (auto|\d+)$/, '$1 · $2 · liczba mówców: $3'],
     [/^(.*) · source: (.*)$/, (all, before, state) => `${before} · źródło: ${guiUiText(state)}`],
-    [/^WARNING: source is (.+), not manually verified\. The non-final translation requires semantic manual review\.$/, (all, state) => `OSTRZEŻENIE: źródło to ${guiUiText(state)} i nie zostało ręcznie zweryfikowane. Wstępne tłumaczenie wymaga sprawdzenia znaczenia.`],
+    [/^WARNING: source is (.+), not manually verified\. The non-final translation requires semantic manual review\.$/, (all, state) => `OSTRZEŻENIE: źródło to ${guiUiText(state)} i nie zostało ręcznie zweryfikowane. Wstępne tłumaczenie wymaga sprawdzenia i zatwierdzenia.`],
     [/^Error: (.+)$/, (all, error) => `Błąd: ${guiUiText(error)}`],
     [/^Status: (.+)$/, (all, status) => `Stan: ${guiUiText(status)}`],
     [/^Available correction dictionaries$/, 'Dostępne słowniki korekty'],
@@ -758,7 +758,7 @@ for (const [en, pl] of [
     "Dołącz cały fragment do poprzedniego. W razie potrzeby najpierw ustaw mówcę poprzedniego fragmentu."
   ],
   [
-    "Auto-save active. The next change-sensitive check runs within 60 seconds.",
+    "Auto-save active. The next check runs within 60 seconds.",
     "Autozapis aktywny. Kolejne sprawdzenie zmian nastąpi w ciągu 60 sekund."
   ],
   [
@@ -774,7 +774,7 @@ for (const [en, pl] of [
     "Sprawdzanie; tekst transkrypcji nie jest wysyłany"
   ],
   [
-    "Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved editor changes will be lost.",
+    "Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved changes will be lost.",
     "Wyczyścić stan EWP w przeglądarce i odświeżyć stronę? Usunięte zostaną zapamiętane ścieżki, otwarte przeglądy i ustawienia wyświetlania. Zapisane szkice, rewizje, eksporty, słowniki, zadania serwera i pliki na dysku pozostaną bez zmian. Niezapisane zmiany edytora zostaną utracone."
   ],
   [
@@ -1328,12 +1328,12 @@ for (const [en, pl] of [
   ["Session file", "Plik sesji"], ["Show fewer occurrences", "Pokaż mniej wystąpień"],
   ["Source tokens", "Tokeny źródła"], ["Target tokens", "Tokeny tłumaczenia"], ["Speaker changes", "Zmiany mówcy"],
   ["The first block in a transcript section has no previous block to merge with.", "Pierwszy fragment sekcji nie ma poprzedniego fragmentu, z którym można go połączyć."],
-  ["This saved workspace references unavailable paths. It can still be removed or overwritten.", "Ten zapis pracy wskazuje niedostępne ścieżki. Nadal można go usunąć lub zastąpić nowym zapisem."],
+  ["This saved workspace references unavailable paths. It can be removed or overwritten.", "Ten zapis pracy wskazuje niedostępne ścieżki. Nadal można go usunąć lub zastąpić nowym zapisem."],
 ]) guiPolish.set(en, pl);
 
 for (const [en, pl] of [
   ["Language selection information", "Informacja o wyborze języka"],
-  ["Choosing EN for Polish recordings has sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.", "Wybranie EN dla polskiego nagrania czasem dawało sensowny tekst po angielsku. To nie jest gwarantowany tryb tłumaczenia — wynik nadal wymaga sprawdzenia i korekty."],
+  ["Choosing EN for Polish recordings had sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.", "Wybranie EN dla polskiego nagrania czasem dawało sensowny tekst po angielsku. To nie jest gwarantowany tryb tłumaczenia — wynik nadal wymaga sprawdzenia i korekty."],
   ["Confirm that you manually verified the text before saving and preparing for export.", "Zaznacz „Ręcznie sprawdziłem treść…” przed zapisaniem i przygotowaniem do eksportu."],
   ["Confirm that you manually verified the translation before saving and preparing for export.", "Zaznacz potwierdzenie ręcznej weryfikacji tłumaczenia przed zapisaniem i przygotowaniem do eksportu."],
 ]) guiPolish.set(en, pl);
@@ -1573,7 +1573,7 @@ for (const [en, pl] of [
 
 for (const [en, pl] of [
   ["Auto-detect **", "Wykryj automatycznie **"],
-  ["* Recording language: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "* Język nagrania: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."],
+  ["* Recording language: selected processing value; media metadata does not provide it. Auto-detect requests detection during processing.", "* Język nagrania: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."],
   ["** Number of speakers: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.", "** Liczba mówców: wybrana wartość, ponieważ metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."]
 ]) guiPolish.set(en, pl);
 
@@ -1998,3 +1998,487 @@ for(const [en,pl] of [
 guiPolish.set("A workspace with this name already exists; try a different name", "Taki zapis już istnieje, spróbuj innej nazwy");
 guiPolish.set("Key and connection are ready.\nNo audio was uploaded.", "Klucz i połączenie działają.\nNie wysłano audio.");
 guiPolishErrorDescriptions.set("GUI_WORKSPACE_NAME_EXISTS", "Taki zapis już istnieje, spróbuj innej nazwy");
+
+// Owner-reviewed copy; stable IDs and original/applied text are in docs/ui-language.
+for (const [en, pl] of [
+  [
+    "This saved workspace references unavailable paths. It can be removed or overwritten.",
+    "Ten zapis pracy wskazuje niedostępne ścieżki. Można go usunąć lub zastąpić."
+  ],
+  [
+    "This saved workspace references unavailable paths. It can still be removed or overwritten.",
+    "Ten zapis pracy wskazuje niedostępne ścieżki. Można go usunąć lub zastąpić."
+  ],
+  [
+    "GUI_WORKSPACE_REVIEW_SAVE_FAILED: The open translation draft could not be saved.",
+    "GUI_WORKSPACE_REVIEW_SAVE_FAILED: Nie udało się zapisać otwartego szkicu."
+  ],
+  [
+    "Legend:",
+    "Opis:"
+  ],
+  [
+    "Auto-save active. The next check runs within 60 seconds.",
+    "Autozapis aktywny. Kolejne sprawdzenie nastąpi w ciągu 60 sekund."
+  ],
+  [
+    "Auto-save active. The next change-sensitive check runs within 60 seconds.",
+    "Autozapis aktywny. Kolejne sprawdzenie nastąpi w ciągu 60 sekund."
+  ],
+  [
+    "Auto-save checked: no tracked changes to save.",
+    "Sprawdzono autozapis: brak zmian do zapisania."
+  ],
+  [
+    "Auto-save checked: no tracked workflow-field changes to save.",
+    "Sprawdzono autozapis: brak zmian do zapisania."
+  ],
+  [
+    "Choose one canonical result to reopen its optional correction stage. Selection lasts only for this page and does not start provider work.",
+    "Wybierz wynik kanoniczny, aby otworzyć opcjonalną korektę. Zaznaczenie obowiązuje tylko na tej stronie i nie uruchamia dostawcy."
+  ],
+  [
+    "Open one recording's saved review or prepare its own editable review. This never changes another recording's draft.",
+    "Otwórz zapisaną weryfikację nagrania lub przygotuj jego szkic. Nie zmienia to szkicu innych nagrań."
+  ],
+  [
+    "Choose one verified source to reopen its optional translation stage. Selection lasts only for this page and does not start provider work.",
+    "Wybierz źródło, aby otworzyć opcjonalne tłumaczenie. Zaznaczenie obowiązuje tylko na tej stronie i nie uruchamia dostawcy."
+  ],
+  [
+    "Completed canonical transcription loaded; configure optional correction before generating a candidate.",
+    "Wczytano ukończoną transkrypcję. Skonfiguruj opcjonalną korektę przed wygenerowaniem szkicu."
+  ],
+  [
+    "Next step: translation review",
+    "Następny krok: korekta tłumaczenia"
+  ],
+  [
+    "Completed",
+    "Ukończone"
+  ],
+  [
+    "Next step: manual review",
+    "Następny krok: ręczna korekta"
+  ],
+  [
+    "Workflow completed",
+    "Zadanie ukończone"
+  ],
+  [
+    "No completed canonical results are available in this GUI queue yet.",
+    "W tej kolejce nie ma jeszcze podstawowych wyników."
+  ],
+  [
+    "Only the configured temporary root is inspected. Active jobs, referenced paths, legacy workdirs and unknown artifacts are protected. Durable media copies are separate; use Managed source copies to remove unreferenced sources. References cover the current queue and the default and selected workspace catalogs; check other catalogs separately.",
+    "Sprawdzany jest tylko skonfigurowany katalog tymczasowy. Aktywne zadania, używane ścieżki, starsze katalogi i nieznane pliki są chronione. Trwałe kopie nagrań są osobne; nieużywane kopie usuwa się w sekcji \"Zarządzane kopie plików źródłowych\". Sprawdzane są odwołania w bieżącej kolejce oraz domyślnym i wybranym katalogu obszarów roboczych; pozostałe katalogi sprawdź osobno."
+  ],
+  [
+    "No verified exports found for this applied version. Export it first. Legacy exports with a custom palette may require their original settings.",
+    "Brak sprawdzonych eksportów tej zapisanej wersji. Najpierw wykonaj eksport. Starsze eksporty z własną paletą kolorów mogą wymagać wcześniejszych ustawień."
+  ],
+  [
+    "This restores locked TorchCodec and pyannote packages. If compatible FFmpeg libraries are missing, it downloads and builds private FFmpeg 7 audio libraries. Internet access and build tools are needed; missing tools are listed with their install command. System FFmpeg and model caches are preserved.",
+    "Przywraca przypięte wersje TorchCodec i pyannote. Jeśli brakuje zgodnych bibliotek FFmpeg, pobiera i kompiluje prywatne biblioteki audio FFmpeg 7. Wymaga dostępu do sieci i narzędzi; brakujące narzędzia są wypisane wraz z komendą ich instalacji. Zachowuje systemowy FFmpeg i pamięć podręczną modeli."
+  ],
+  [
+    "Test the environment to enable Doctor and dependency repair. These tools are optional maintenance actions.",
+    "Przetestuj środowisko, aby włączyć doctor i naprawę zależności. To opcjonalne narzędzia naprawy."
+  ],
+  [
+    "Testing local dependencies… This can take a minute. No models are downloaded.",
+    "Testowanie lokalnych zależności… Może to potrwać. Modele nie są pobierane."
+  ],
+  [
+    "Native Windows setup and repair instructions",
+    "Instrukcje konfiguracji i naprawy instalacji na Windows"
+  ],
+  [
+    "Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved changes will be lost.",
+    "Wyczyścić stan EWP w przeglądarce i odświeżyć stronę? Usunięte zostaną zapamiętane ścieżki, otwarte przeglądy i ustawienia wyświetlania. Zapisane szkice, eksporty, słowniki, zadania serwera i pliki na dysku pozostaną bez zmian. Niezapisane zmiany zostaną utracone."
+  ],
+  [
+    "Clear EWP browser state and reload? This removes browser-stored paths, active review pointers, and display choices. It does not delete saved reviews, revisions, exports, dictionaries, queued server jobs, or any other files on disk. Unsaved editor changes will be lost.",
+    "Wyczyścić stan EWP w przeglądarce i odświeżyć stronę? Usunięte zostaną zapamiętane ścieżki, otwarte przeglądy i ustawienia wyświetlania. Zapisane szkice, eksporty, słowniki, zadania serwera i pliki na dysku pozostaną bez zmian. Niezapisane zmiany zostaną utracone."
+  ],
+  [
+    "Transcription failed.",
+    "Transkrypcja nie powiodła się."
+  ],
+  [
+    "* Recording language: selected processing value; media metadata does not provide it. Auto-detect requests detection during processing.",
+    "* Język nagrania: wartość z listy; metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."
+  ],
+  [
+    "* Recording language: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.",
+    "* Język nagrania: wartość z listy; metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."
+  ],
+  [
+    "All completed queue outputs have verified translated exports or an explicitly skipped translation. Return to the transcription queue.",
+    "Wszystkie zakończone wyniki z kolejki mają zatwierdzone eksporty tłumaczeń bądź pominięte tłumaczenia. Wróć do kolejki transkrypcji."
+  ],
+  [
+    "Return to the transcription queue to continue the next output.",
+    "Wróć do kolejki transkrypcji, aby przejść do kolejnego wyniku."
+  ],
+  [
+    "Inspection",
+    "Przegląd"
+  ],
+  [
+    "The local service returned no result.",
+    "Lokalna usługa nie zwróciła wyniku."
+  ],
+  [
+    "** Number of speakers: selected processing value because media metadata does not provide it. Auto-detect requests detection during processing.",
+    "** Liczba mówców: wartość z listy; metadane pliku jej nie podają. Opcja automatyczna oznacza wykrywanie podczas przetwarzania."
+  ],
+  [
+    "Confirm audio upload and paid API usage before starting cloud ASR.",
+    "Zaznacz zgodę na wysłanie audio i użycie płatnego API przed uruchomieniem ASR w chmurze."
+  ],
+  [
+    "GUI_CORRECTION_OUTPUT_ROOT_REQUIRED: Choose a correction output root before skipping correction.",
+    "GUI_CORRECTION_OUTPUT_ROOT_REQUIRED: Wybierz katalog wyników przed pominięciem korekty."
+  ],
+  [
+    "LLM-assisted correction skipped; this output is now ready for manual review.",
+    "Pominięto korektę z LLM. Tekst jest gotowy do ręcznego sprawdzenia."
+  ],
+  [
+    "LLM-assisted correction skipped; this output is now open in manual review.",
+    "Pominięto korektę z LLM. Tekst jest gotowy do ręcznego sprawdzenia."
+  ],
+  [
+    "Model ID",
+    "ID modelu"
+  ],
+  [
+    "Manual model ID",
+    "ID modelu"
+  ],
+  [
+    "This makes an external request to the selected provider to read current model availability and listed input/output prices. It does not send transcript text and never runs automatically.",
+    "Ta czynność wysyła zapytanie do wybranego dostawcy o dostępne modele i ceny wejścia/wyjścia. Nie wysyła transkrypcji i nie uruchamia się automatycznie."
+  ],
+  [
+    "Set a key for the active process or save it on local server. The key is shared with browsers connected to that process, but is never written to project files, saved workspaces, or browser storage.",
+    "Ustaw klucz dla bieżącej pracy lub zapisz klucz na lokalnym serwerze. Klucz jest dostępny dla przeglądarek połączonych z tym procesem, ale nie trafia do plików projektu, zapisów pracy ani pamięci przeglądarki."
+  ],
+  [
+    "Use the server environment or set a key for the active GUI server process. The key is shared with browsers connected to that process, but is never written to project files, saved workspaces, or browser storage.",
+    "Ustaw klucz dla bieżącej pracy lub zapisz klucz na lokalnym serwerze. Klucz jest dostępny dla przeglądarek połączonych z tym procesem, ale nie trafia do plików projektu, zapisów pracy ani pamięci przeglądarki."
+  ],
+  [
+    "The key is saved only to this local server. Session-only keys are erased when server stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.",
+    "Klucz trafia wyłącznie do tego lokalnego serwera. Klucz sesji znika po zatrzymaniu serwera. Możesz zapisać klucz w magazynie systemowym i użyć go po restarcie. ASR, korekta i tłumaczenia korzystają z tego samego klucza; profile i pamięć przeglądarki go nie zapisują."
+  ],
+  [
+    "The key is sent only to this loopback server. Session-only keys are erased when it stops. You can explicitly save a key in the OS credential store and use it after a restart. ASR, correction and translation share this key; profiles and browser storage never contain it.",
+    "Klucz trafia wyłącznie do tego lokalnego serwera. Klucz sesji znika po zatrzymaniu serwera. Możesz zapisać klucz w magazynie systemowym i użyć go po restarcie. ASR, korekta i tłumaczenia korzystają z tego samego klucza; profile i pamięć przeglądarki go nie zapisują."
+  ],
+  [
+    "Treat API keys as secrets. Use a dedicated key with a low spending limit. Our testing on LLM correction of 20 podcast episodes used substantially less than a $2 limit.",
+    "Traktuj klucze API jak hasła. Używaj klucza z niskim limitem wydatków. Nasze testy korekty LLM 20 odcinków podkastu użyły znacznie poniżej limitu $2."
+  ],
+  [
+    "Treat API keys as secrets. Use a dedicated key with a low spending limit; the project's 20-episode testing used substantially less than a USD $2 limit.",
+    "Traktuj klucze API jak hasła. Używaj klucza z niskim limitem wydatków. Nasze testy korekty LLM 20 odcinków podkastu użyły znacznie poniżej limitu $2."
+  ],
+  [
+    "One OpenRouter key is available for ASR, correction and translation on this server. Session memory is cleared on exit; an explicitly saved OS entry remains until removed.",
+    "Na serwerze jest dostępny jeden klucz OpenRouter do ASR, korekty i tłumaczeń. Pamięć sesji jest czyszczona po zakończeniu; zapisany klucz systemowy pozostaje dostępny do momentu ręcznego usunięcia."
+  ],
+  [
+    "Checking…",
+    "Sprawdzanie…"
+  ],
+  [
+    "Listed input",
+    "Lista wejść"
+  ],
+  [
+    "Listed output",
+    "Lista wyników"
+  ],
+  [
+    "Changes",
+    "Zmiany"
+  ],
+  [
+    "GUI_TRANSLATION_OUTPUT_REQUIRED: Choose a translation output root before starting manual translation.",
+    "GUI_TRANSLATION_OUTPUT_REQUIRED: Wybierz katalog wyników przed rozpoczęciem ręcznego tłumaczenia."
+  ],
+  [
+    "Direction",
+    "Kierunek"
+  ],
+  [
+    "Units",
+    "Jednostki"
+  ],
+  [
+    "Non-final translation candidate generated; semantic manual review is required.",
+    "Wygenerowano propozycję tłumaczenia. Wymaga ręcznej weryfikacji."
+  ],
+  [
+    "Saved review restored; preview is required again",
+    "Przywrócono tekst; zatwierdź go ponownie"
+  ],
+  [
+    "Revision file",
+    "Plik przeglądu"
+  ],
+  [
+    "Review check",
+    "Sprawdzenie korekty"
+  ],
+  [
+    "Planned revision",
+    "Planowany przegląd"
+  ],
+  [
+    "Revision tokens",
+    "Tokeny przeglądu"
+  ],
+  [
+    "Immutable revision written",
+    "Zapisano niezmienną wersję"
+  ],
+  [
+    "Candidates",
+    "Propozycje"
+  ],
+  [
+    "Pending",
+    "Oczekujące"
+  ],
+  [
+    "confirmation is required",
+    "Wymagane jest potwierdzenie"
+  ],
+  [
+    "Choose a server-visible folder; no folder contents are uploaded.",
+    "Wybierz katalog dostępny dla serwera. Zawartość katalogu nie jest przesyłana."
+  ],
+  [
+    "Ask this deployment's operating system for a server-visible folder; no folder contents are uploaded.",
+    "Wybierz katalog dostępny dla serwera. Zawartość katalogu nie jest przesyłana."
+  ],
+  [
+    "Choose 1–6 speakers when known. Speaker attribution usually becomes less accurate as the number of speakers increases. You can add more speakers during verification later.",
+    "Wybierz 1–6 mówców, jeśli znasz ich liczbę. Większa liczba mówców zwykle utrudnia poprawne przypisanie. Później można dodać kolejnych mówców podczas ręcznej weryfikacji."
+  ],
+  [
+    "Choose 1–6 speakers when known. Speaker attribution usually becomes less accurate as the number of speakers increases.",
+    "Wybierz 1–6 mówców, jeśli znasz ich liczbę. Większa liczba mówców zwykle utrudnia poprawne przypisanie. Później można dodać kolejnych mówców podczas ręcznej weryfikacji."
+  ],
+  [
+    "Automatically replace the active saved workspace every 60 seconds when changes occur.",
+    "Automatycznie zastępuj aktywny zapis pracy co 60 sekund, gdy pojawią się zmiany."
+  ],
+  [
+    "Automatically replace the active saved workspace every 60 seconds when its non-secret fields or queue change.",
+    "Automatycznie zastępuj aktywny zapis pracy co 60 sekund, gdy pojawią się zmiany."
+  ],
+  [
+    "Save or restore workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.",
+    "Zapisz lub przywróć ustawienia i źródła kolejki po zmianie przeglądarki lub ponownym uruchomieniu programu. Zapis najpierw utrwala zmienione szkice w wybranym katalogu. JSON obszaru pracy nie zawiera tekstu transkrypcji, kluczy API ani potwierdzeń."
+  ],
+  [
+    "Save or restore non-secret workflow fields and durable queue sources across browsers and program restarts. Saving current work state first saves dirty review drafts in the chosen output folder; the workspace JSON does not embed transcript text, API keys, or confirmations.",
+    "Zapisz lub przywróć ustawienia i źródła kolejki po zmianie przeglądarki lub ponownym uruchomieniu programu. Zapis najpierw utrwala zmienione szkice w wybranym katalogu. JSON obszaru pracy nie zawiera tekstu transkrypcji, kluczy API ani potwierdzeń."
+  ],
+  [
+    "Changes pending for auto-save. They will be validated at the next 60-second check.",
+    "Zmiany oczekują na autozapis. Zostaną sprawdzone podczas kolejnej kontroli co 60 sekund."
+  ],
+  [
+    "Inventory has not been loaded.",
+    "Lista nie została wczytana."
+  ],
+  [
+    "Refresh source inventory",
+    "Odśwież listę źródeł"
+  ],
+  [
+    "Inventory browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.",
+    "Sprawdź kopie w przeglądarce we wspólnym katalogu wyników. Porządkowanie uwzględnia bieżącą kolejkę, domyślny i wybrany katalog obszarów pracy oraz pochodzenie plików. Katalogi obszarów pracy w innych miejscach należy sprawdzić oddzielnie."
+  ],
+  [
+    "Inventory durable browser-selected copies under the shared output directory. Cleanup audits the current queue, the default workspace catalog, the selected custom workspace catalog, and workflow lineage in this output directory. Workspace catalogs stored elsewhere are unknown and must be checked separately.",
+    "Sprawdź kopie w przeglądarce we wspólnym katalogu wyników. Porządkowanie uwzględnia bieżącą kolejkę, domyślny i wybrany katalog obszarów pracy oraz pochodzenie plików. Katalogi obszarów pracy w innych miejscach należy sprawdzić oddzielnie."
+  ],
+  [
+    "No managed source copies exist under this output directory.",
+    "Brak zarządzanych kopii źródeł w tym folderze wyników."
+  ],
+  [
+    "File",
+    "Plik"
+  ],
+  [
+    "Retention",
+    "Czas zachowania"
+  ],
+  [
+    "Select",
+    "Wybierz"
+  ],
+  [
+    "Size",
+    "Rozmiar"
+  ],
+  [
+    "Type",
+    "Typ"
+  ],
+  [
+    "Media",
+    "Audio"
+  ],
+  [
+    "Stored/session key cleared. The server environment still supplies a key.",
+    "Usunięto zapisany klucz lub klucz sesji. Środowisko serwera nadal zawiera klucz."
+  ],
+  [
+    "Save key in OS credential store",
+    "Zapisz klucz w systemie"
+  ],
+  [
+    "One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, choose Use saved OpenRouter key.",
+    "Jeden klucz służy do ASR, korekty i tłumaczeń. Zapis systemowy jest opcjonalny. Po restarcie wybierz Użyj zapisanego klucza OpenRouter jeśli klucz został zapisany w systemie."
+  ],
+  [
+    "1. Choose dictionary library",
+    "1. Wybierz bibliotekę słowników"
+  ],
+  [
+    "2. View and compare versions",
+    "2. Wyświetl i porównaj wersje"
+  ],
+  [
+    "3. Edit a new version",
+    "3. Edytuj nową wersję"
+  ],
+  [
+    "4. Save new dictionary version",
+    "4. Zapisz nową wersję słownika"
+  ],
+  [
+    "Save new dictionary version",
+    "Zapisz nową wersję słownika"
+  ],
+  [
+    "Choosing EN for Polish recordings had sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.",
+    "Wybranie EN dla polskiego nagrania czasem dawało sensowny tekst po angielsku. To nie jest gwarantowany tryb tłumaczenia — wynik nadal wymaga sprawdzenia i korekty."
+  ],
+  [
+    "Choosing EN for Polish recordings has sometimes produced readable English text. This is not a guaranteed translation mode; the result still needs review and correction.",
+    "Wybranie EN dla polskiego nagrania czasem dawało sensowny tekst po angielsku. To nie jest gwarantowany tryb tłumaczenia — wynik nadal wymaga sprawdzenia i korekty."
+  ],
+  [
+    "2. Speaker names and colors",
+    "2. Imiona i kolory mówców"
+  ],
+  [
+    "Add a speaker available only in this editable review and its descendant revision.",
+    "Dodaj mówcę do tego tekstu i utworzonej z niego rewizji."
+  ],
+  [
+    "Complete episode (mixed audio)",
+    "Cały odcinek (połączone ścieżki)"
+  ],
+  [
+    "OpenRouter is a cloud API. Use the session-only key control; the key is never written to a project, workspace, browser storage, or translation artifact.",
+    "OpenRouter jest API w chmurze. Klucz ustawiony na czas sesji nigdy nie jest zapisywany w projekcie, obszarze pracy, pamięci przeglądarki ani pliku tłumaczenia, chyba, że wybierzesz opcję zapisania klucza w systemie."
+  ],
+  [
+    "I understand that OpenRouter is a separately operated cloud API: transcript text leaves this application, and EWP Transcriber cannot control how the provider logs, retains, uses, or forwards it. The translation remains non-final and requires semantic manual review.",
+    "Rozumiem, że OpenRouter to niezależne API w chmurze: tekst opuszcza aplikację, która nie kontroluje jego logowania, przechowywania, wykorzystania ani przekazywania przez dostawcę. Tłumaczenie pozostaje propozycją wymagającą ręcznej weryfikacji."
+  ],
+  [
+    "I understand that transcript text is sent to a separately operated LM Studio API whose logging, retention, or forwarding EWP Transcriber cannot control. The translation remains non-final and requires semantic manual review.",
+    "Rozumiem, że tekst transkrypcji trafia do API LM Studio. EWP Transcriber nie kontroluje jego rejestrowania, przechowywania ani przekazywania danych. Tłumaczenie przez LLM nadal wymaga ręcznej weryfikacji."
+  ],
+  [
+    "Saved translation draft restored for this output; preview is required again.",
+    "Przywrócono szkic tłumaczenia wyniku; ponownie zastosuj tłumaczenie."
+  ],
+  [
+    "Saved applied translation review restored from disk.",
+    "Przywrócono zapisane zweryfikowane tłumaczenie z dysku."
+  ],
+  [
+    "Preview passed: intentional empty units were recorded and will be omitted from exports. No translation was published.",
+    "Sprawdzenie zakończone: zapisano puste jednostki, które zostaną pominięte w eksporcie. Tłumaczenie nie zostało jeszcze zapisane do eksportu."
+  ],
+  [
+    "Profile loaded. Open Saved work & cleanup to select a restored workspace. Missing recordings or outputs must be restored before loading that workspace. The active queue and editor are unchanged.",
+    "Profil wczytany. W sekcji \"Zapisana praca i porządkowanie\" wybierz przywrócony obszar pracy. Brakujące nagrania i wyniki trzeba przywrócić przed jego wczytaniem. Aktywna kolejka i edytor pozostają bez zmian."
+  ],
+  [
+    "ETA is off by default. Estimates become available after 3 successful transcriptions with comparable language, models and track configuration on this computer. Timing history stays on this computer and is not transferred with a profile.",
+    "ETA jest domyślnie wyłączone. Oszacowanie będzie dostępne po 3 udanych transkrypcjach z porównywalnym językiem, modelami i układem ścieżek na tym komputerze. Historia czasów przetwarzania pozostaje na tym komputerze i nie jest przenoszona z profilem."
+  ],
+  [
+    "One JSON file contains preferences, current workflow settings, saved workspace manifests, custom palettes, project references and optionally dictionaries from the selected library and referenced workspaces. Media, transcripts, API keys, permissions and running jobs are excluded. Other workspace catalogs must be selected before saving. Referenced recordings and outputs must be transferred separately.",
+    "Jeden plik JSON zawiera preferencje, ustawienia workflow, manifesty zapisanej pracy, własne palety kolorów, odwołania do projektów i opcjonalnie słowniki. Nie zawiera plików audio, transkrypcji, kluczy API, zgód ani uruchomionych zadań. Inne katalogi zapisanej pracy wybierz przed zapisem. Nagrania i wyniki przenieś osobno."
+  ],
+  [
+    "Artwork: Cyryl. Creator URL is a placeholder (blogcyryla.pl); TODO replace when supplied.",
+    "Grafika: Cyryl. Adres twórcy jest adresem zastępczym (blogcyryla.pl); TODO: zastąpić po otrzymaniu właściwego adresu."
+  ],
+  [
+    "Artwork: Cyryl. Creator URL is an unverified placeholder (blogcyryla.pl); TODO replace when supplied.",
+    "Grafika: Cyryl. Adres twórcy jest adresem zastępczym (blogcyryla.pl); TODO: zastąpić po otrzymaniu właściwego adresu."
+  ],
+  [
+    "Open EwP Transcripts",
+    "Otwórz EwP Transcripts"
+  ],
+  [
+    "· Close this tab to return to your existing work.",
+    "· Zamknij tę kartę aby powrócić do swojej pracy."
+  ],
+  [
+    "Workflow instructions",
+    "Instrukcje pracy z programem"
+  ],
+  [
+    "Other workflow guides",
+    "Inne instrukcje"
+  ],
+  [
+    "Checks and price refresh do not upload audio. Estimates use current endpoint prices, source duration and chunk overlap; stereo processing may cost more. Final billing can differ. An internal safety guard is calculated before upload; it is not a provider billing cap.",
+    "Sprawdzanie klucza i odświeżanie cen nie wysyłają audio. Szacunki uwzględniają aktualne ceny dostawców, długość źródeł i nakładanie się fragmentów. Końcowe rozliczenie może się różnić. Obliczenie kosztu nie powoduje rozliczeń po stronie dostawcy."
+  ],
+  [
+    "Existing custom colors are retained. Brand colors require a new YouTube check; existing exports are never recolored.",
+    "Zachowujemy własne kolory. Nowa paleta wymaga testu w YouTube; istniejące eksporty nie są zmieniane."
+  ],
+  [
+    "Finding media by content…",
+    "Rozpoznawanie plików na podstawie zawartości…"
+  ],
+  [
+    "I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage within each job's cost guard. This consent is not saved.",
+    "Zgadzam się na wysłanie audio z zadań chmurowych do OpenRouter i dostawcy modelu oraz płatne użycie API. Zgoda nie jest trwale zapisywana."
+  ],
+  [
+    "I agree to upload the staged cloud audio to OpenRouter and its model provider, with paid API usage. This consent is not saved.",
+    "Zgadzam się na wysłanie audio z zadań chmurowych do OpenRouter i dostawcy modelu oraz płatne użycie API. Zgoda nie jest trwale zapisywana."
+  ],
+  [
+    "I understand that using this API is not a local operation: transcript text leaves this application, and EWP Transcriber cannot control how the provider logs, retains, uses, or forwards it. The result is still a non-final candidate requiring manual review.",
+    "Rozumiem, że użycie tego API nie jest operacją lokalną: tekst opuszcza aplikację, która nie kontroluje jego logowania, przechowywania, wykorzystania ani przekazywania przez dostawcę. Wynik pozostaje propozycją wymagającą ręcznej korekty."
+  ],
+  [
+    "Whisper models work better with one speaker per track. Mixed-speaker audio works better with Scribe or MAI. Shared audio context helps keep speakers tags consistent. Provider word times are the base for subtitles.",
+    "Modele Whisper najlepiej działają, gdy w pliku jest jeden mówca. Zmiksowane audio wielu mówców lepiej obsługują Scribe i MAI. Wspólny kontekst audio pomaga zachować oznaczenia mówców. Napisy opierają się na określeniu czasów słów zwróconych przez dostawcę."
+  ],
+  [
+    "Whisper models need one speaker or separate synchronized speaker tracks. Mixed-speaker audio uses Scribe or MAI. Long recordings are split automatically into bounded requests and merged on the original timeline. Shared audio context helps keep speakers consistent; uncertain assignments are flagged for manual review. Provider word times are required for subtitles.",
+    "Modele Whisper najlepiej działają, gdy w pliku jest jeden mówca. Zmiksowane audio wielu mówców lepiej obsługują Scribe i MAI. Wspólny kontekst audio pomaga zachować oznaczenia mówców. Napisy opierają się na określeniu czasów słów zwróconych przez dostawcę."
+  ]
+]) guiPolish.set(en, pl);

@@ -1,5 +1,7 @@
 """Optional model-free browser check; run with an isolated Playwright installation.
 
+Optional tool dependencies: Playwright, tree-sitter and tree-sitter-javascript.
+
 Point --url at a disposable GUI server and --output at a dedicated temporary directory.
 This clears that server's inactive queue and writes synthetic reviews/exports/workspaces.
 It never starts transcription or calls a provider. See docs/28-integrated-gui-preview.md.
@@ -544,13 +546,20 @@ def check_localized_interface(page: Page) -> None:
         "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Repair",
     }, missing
     # Include conditional messages and confirmation dialogs, not only direct assignments.
+    # Parse real literals: quotes inside template HTML/regex must not become fake UI copy.
+    import tree_sitter
+    import tree_sitter_javascript
+    from export_ui_review import walk
+
+    parser = tree_sitter.Parser(tree_sitter.Language(tree_sitter_javascript.language()))
     all_literals = set()
     for file in (ROOT / "src/ewp_transcripts/web_assets").glob("*.js"):
         if file.name.startswith("ui_locale"):
             continue
-        for match in re.finditer(r"\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'", file.read_text()):
+        nodes = walk(parser.parse(file.read_bytes()).root_node)
+        for literal in (node for node in nodes if node.type == "string"):
             try:
-                value = ast.literal_eval(match[0]).strip()
+                value = ast.literal_eval(literal.text.decode()).strip()
             except (SyntaxError, ValueError):
                 continue
             if re.search(r"[A-Za-z]{3} [A-Za-z]{2}", value) and not any(
@@ -583,6 +592,7 @@ def check_localized_interface(page: Page) -> None:
         "review-control-group translation-review-controls",
         "review-control-line review-clear-line",
         "review-control-line review-clear-line translation-clear-line",
+        "workflow-progress queue-workflow-progress",
         "use strict",
     }
     assert set(missing) <= non_ui, missing

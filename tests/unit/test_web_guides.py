@@ -50,6 +50,34 @@ def test_offline_guides_serve_readable_html_without_scripts(slug: str) -> None:
     assert b"/assets/app.css" in response.body
 
 
+@pytest.mark.parametrize("locale", ["pl", "en", "%3Cscript%3E"])
+def test_help_chrome_uses_requested_interface_language_without_translating_manual(
+    locale: str,
+) -> None:
+    response = dispatch_get(
+        WebConfiguration.create(port=8765),
+        server_port=8765,
+        host="localhost:8765",
+        target=f"/help/source-review?lang={locale}",
+    )
+    assert response.status == 200
+    body = response.body.decode()
+    assert '<html lang="en">' in body  # Full manuals still await interface approval.
+    if locale == "pl":
+        assert 'lang="pl"' in body
+        for text in [
+            "Otwórz EwP Transcripts",
+            "Inne instrukcje",
+            "Instrukcje pracy z programem",
+            "Zamknij tę kartę aby powrócić do swojej pracy.",
+        ]:
+            assert text in body
+        assert "/help/transcribe?lang=pl" in body
+    else:
+        assert "Open EwP Transcripts" in body and "/help/transcribe?lang=en" in body
+    assert "<script" not in body
+
+
 @pytest.mark.parametrize(
     "path", ["/help/../../pyproject.toml", "/help/unknown", "/help/%2e%2e/config"]
 )

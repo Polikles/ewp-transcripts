@@ -108,3 +108,9 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     review package reflecting approved GUI/language. This supersedes the earlier permanent package
     freeze at that future stage only; keep the already sent original archive unchanged now.
     Do not infer additional native/WSL/GPU qualification or repeat paid pilots during language work.
+
+18. Returned terminology workbook (2026-11-22): owner now authorizes integrating the corrected
+    EN/PL file and delivering the interface for approval. Use the terminology-application checkpoint.
+    Commit the corrected reference; keep initial/returned private workbooks unchanged. Record small
+    integration adjustments explicitly. Full EN review, complete PL manuals and NEW artist package
+    remain sequential after interface approval, not part of the integration gate. No paid tests.
