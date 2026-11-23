@@ -42,3 +42,12 @@ cropped the right edge when targeting content; wrap in a padded root Border. Vis
 found folder action stretched and the model card too tall at CI's768px desktop; align compact
 buttons left, add input/action gap, compact model rows and combine size/terms link. Last Next
 includes the selected operation; no hidden install trigger. Re-run native previews before final.
+
+Second native run45201335163 PASS foraa0b387. Visually inspected opaque EN/PL welcome/folder/
+models, before/after-token states, both credential dialogs, narrow folder layout, removal preview,
+progress and completion. Header/EXE use the same centered framed original mark; required fields
+fit; model page includes optional OR without clipping at the hosted768px desktop. The token
+window and key-error window are complete and masked. Final compact GB formatting removes
+unnecessary .0 from20GB/100GB. One final native run will qualify the exact final bytes, then
+copy all14 native PNG previews with package/checklist, verify local-vs-CI hashes, and cleanup.
+No owner install/real token/model download has happened in these agent checks.

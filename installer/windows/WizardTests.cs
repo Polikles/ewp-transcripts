@@ -40,7 +40,7 @@ sealed partial class Wizard
         DiskProbe = _ => (100_000_000_000L, "TEST-VOLUME");
         var cpu = HostStrings(); Assert(cpu.Contains("64-bit processor: Test CPU"), "host structured model");
         language.SelectedIndex = 1; Assert(HostStrings().Contains("Procesor 64-bit") && !HostStrings().Contains("GB free"), "cached host PL");
-        language.SelectedIndex = 0; Assert(HostStrings().Contains("GB free") && !HostStrings().Contains("wolne"), "cached host EN");
+        language.SelectedIndex = 0; Assert(HostStrings().Contains("GB free") && HostStrings().Contains("20 GB required") && !HostStrings().Contains("wolne"), "cached host EN");
         await Next(); Assert(page == 2 && !next.IsEnabled && !terms.IsEnabled, "HF gate initially closed");
         language.SelectedIndex = 1; await Capture(previewDirectory, "pl-models-before-token"); language.SelectedIndex = 0;
         local.IsChecked = false; Assert(next.IsEnabled, "cloud/review install needs no credential");

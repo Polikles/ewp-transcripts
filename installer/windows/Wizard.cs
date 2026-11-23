@@ -411,7 +411,7 @@ sealed partial class Wizard : Window
         while (!Directory.Exists(path)) path = Path.GetDirectoryName(path) ?? throw new IOException();
         var disk = new DriveInfo(Path.GetPathRoot(path)!); return (disk.AvailableFreeSpace, disk.Name);
     }
-    string GB(long bytes) => (bytes / 1e9).ToString("0.0", CultureInfo.GetCultureInfo(Pl ? "pl-PL" : "en-US"));
+    string GB(long bytes) => (bytes / 1e9).ToString("0.#", CultureInfo.GetCultureInfo(Pl ? "pl-PL" : "en-US"));
     string? ModelSpaceProblem()
     {
         if (!GpuReady) return T("A working NVIDIA driver is required for local models. Go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA. Wróć do testu komputera albo odznacz modele lokalne.");
