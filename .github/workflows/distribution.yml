@@ -52,6 +52,7 @@ jobs:
             $parts=$line -split '  ',2
             if ((Get-FileHash -Algorithm SHA256 -LiteralPath $parts[1]).Hash.ToLowerInvariant() -ne $parts[0]) { throw 'Artifact hash mismatch' }
           }
+          Get-Content SHA256SUMS.txt
           $exe=(Get-ChildItem EwP-Setup-*.exe).FullName
           $report=Join-Path $PWD 'windows-self-test.json'
           $p=Start-Process -FilePath $exe -ArgumentList @('--self-test','--self-test-report',"`"$report`"") -Wait -PassThru

@@ -61,3 +61,9 @@ launchers. Tokenizer readiness is checked in isolated neutral cwd; complete cach
 not redownloaded. Removal refuses model-cache symlink/junction ancestors. Build tool/license pins
 and source privacy guards are shared with native CI. Focused checklist is
 Instructions/INSTALLER_ACCEPTANCE.md; no mandatory repeated old full ASR workflow/reinstall gate.
+
+Native CI attempt45155126964 reproduced a frozen WPF Geometry.Parse result during SVG startup.
+Clone parsed path geometry before selecting SVG nonzero fill; preserve original vector data and
+opacity. No owner/public release handed over; automated CI artifacts/local first build are rejected
+candidates, not final0.22.0 delivery. Move those local candidates into task temp for disposal rather
+than overwrite their files. Retry native CI; print exact payload hashes for cross-build comparison.
