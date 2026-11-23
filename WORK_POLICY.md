@@ -147,3 +147,9 @@ Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
     until done or concrete missing information/action is required. Earlier planning-only holds
     are revoked. Prepare reviewable artifacts and checks before any final publication/signing
     decision. No new paid/model qualification campaign or artist-archive rebuild is implied.
+
+24. Distribution0.22.0 implementation/VM checks2026-11-23: preserve previous application/manual
+    acceptance, artist archives and cloud-spend total. Shared installer/terminal/wizard behavior
+    and content-free evidence are in the execution checkpoint. Owner Windows11 native installer
+    acceptance is still required; CI startup/compilation do not qualify local GPU/model install.
+    Online bootstrap URLs require actual matching release publication; never claim them live early.

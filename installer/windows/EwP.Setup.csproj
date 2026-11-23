@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <RuntimeFrameworkVersion>10.0.15</RuntimeFrameworkVersion>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <AssemblyName>EwP-Setup</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <DebugType>none</DebugType>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(BundlePath)" LogicalName="bundle.zip" Condition="'$(BundlePath)' != ''" />
+    <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/logo.svg" LogicalName="logo.svg" />
+    <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/favicon.svg" LogicalName="favicon.svg" />
+    <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/gear.svg" LogicalName="gear.svg" />
+  </ItemGroup>
+</Project>

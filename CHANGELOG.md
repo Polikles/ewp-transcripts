@@ -4,6 +4,34 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.22.0 — 2026-11-23 (managed installer acceptance build)
+
+### Added
+
+- Managed Windows/Ubuntu lifecycle: checked version bundles, owned-file inventory, isolated
+  versioned environments, verified activation, previous-version rollback and obsolete-runtime
+  pruning. Keep user work/models/keys by default; refuse active or unverifiable operations.
+- Preview/confirm uninstall, optional exact-model/shared-blob-aware removal and optional OS-key
+  removal. Preserve extra project files, even inside a retired app directory. Recover known-dead
+  installer locks and partial first installs without adopting an unrelated directory.
+- No-checkout terminal ZIP/tar packages with bundled verified uv; generated fixed-release online
+  entry scripts include payload hashes and become usable only after release publication.
+- Self-contained native Windows WPF wizard with EN/PL copy, original vector logo/framed icon/gear,
+  reduced-motion behavior, host tests, local-model/HF terms/token selection, optional OR key check/
+  OS-store save, progress, sanitized logs, desktop shortcut and Add/Remove Programs uninstaller.
+- Build/verification tooling, pinned SDK/runtime/uv and redistribution notices, source/privacy
+  guards and native Windows startup CI. Installer operations share standard-library code rather
+  than separate script/GUI dependency versions. No new Python application dependency/model pin.
+- Complete EN/PL install/update/rollback/removal instructions and a focused native acceptance
+  checklist. Native startup CI is distinct from owner Windows 11/GPU lifecycle acceptance.
+
+### Changed
+
+- Windows checkout setup accepts a private FFmpeg prefix and explicit cloud-only readiness mode.
+  Model downloads remain deliberate; cached snapshots/language data are reused and keys are never
+  stored in a profile, workspace, config file, command argument or plaintext fallback.
+
+
 ## 0.21.0 — 2026-11-23 (accepted workflow and bilingual manuals)
 
 - Consolidate the accepted changes since 0.20.0 into a distinct MINOR version. Use one version

@@ -1,5 +1,7 @@
 # Natywny Windows: instalacja i naprawa
 
+Ta strona opisuje instalację i naprawę z repozytorium. Nowy kreator i paczki zarządzane opisuje [Instalacja i aktualizacja](installation.md). Ich prywatny FFmpeg jest pod katalogiem instalacji, a nie w osobnej domyślnej lokalizacji checkoutu. Program był sprawdzony przez właściciela na Windows 11; nowa instalacja zarządzana ma osobne zatwierdzenie.
+
 1. Wykonaj [Instalację i aktualizację](installation.md): Git, uv, sterownik NVIDIA Windows i Microsoft Visual C++ x64.
 2. W osobnym repozytorium Windows uruchom `powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install`.
 3. Do lokalnego ASR po przyjęciu warunków modelu wykonaj `uv run --locked --no-sync python scripts/setup-models.py`.

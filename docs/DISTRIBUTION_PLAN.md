@@ -1,5 +1,7 @@
 # Installation, updates, removal and versioning plan
 
+Implementation update: managed0.22.0 and EN/PL instructions are ready for focused installer acceptance. See [execution checkpoint](checkpoints/2026-11-23-distribution-execution.md); native Windows acceptance/publication remain separate. The original planning wording below is retained as the agreed contract.
+
 Status: planned, 2026-11-23. Owner requests the next-step plan and expands distribution scope.
 This document does not announce an installer, change the application version or publish a release.
 Current baseline is main `438f91e`, still reporting `0.20.0`. Current EN/PL manuals, terminology,

@@ -1,0 +1,74 @@
+name: Installer build and Windows startup
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/distribution.yml'
+      - 'installer/**'
+      - 'tools/build_distribution.py'
+      - 'tools/build_setup.py'
+      - 'tools/prepare_distribution_tools.py'
+      - 'src/ewp_transcripts/_version.py'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare verified build tools
+        run: python3 tools/prepare_distribution_tools.py --directory "$RUNNER_TEMP/installer-tools"
+      - name: Installer transaction tests without ML dependencies
+        run: |
+          mkdir -p "$RUNNER_TEMP/test-uv"
+          tar -xzf "$RUNNER_TEMP/installer-tools/uv-linux.tar.gz" -C "$RUNNER_TEMP/test-uv"
+          "$RUNNER_TEMP/test-uv/uv-x86_64-unknown-linux-gnu/uv" run --no-project --python 3.12 --with pytest==9.1.1 python -m pytest -q tests/unit/test_distribution.py
+      - name: Build fixed-version bundles and standalone Windows EXE
+        run: python3 tools/build_setup.py --tools "$RUNNER_TEMP/installer-tools" --output "$RUNNER_TEMP/installer-artifacts"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: installer-test-package
+          path: ${{ runner.temp }}/installer-artifacts/
+          if-no-files-found: error
+          retention-days: 14
+  windows-startup:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installer-test-package
+          path: installers
+      - name: Verify downloads and native WPF startup without installing app/models
+        shell: pwsh
+        run: |
+          Set-Location installers
+          foreach ($line in Get-Content SHA256SUMS.txt) {
+            $parts=$line -split '  ',2
+            if ((Get-FileHash -Algorithm SHA256 -LiteralPath $parts[1]).Hash.ToLowerInvariant() -ne $parts[0]) { throw 'Artifact hash mismatch' }
+          }
+          $exe=(Get-ChildItem EwP-Setup-*.exe).FullName
+          $report=Join-Path $PWD 'windows-self-test.json'
+          $p=Start-Process -FilePath $exe -ArgumentList @('--self-test','--self-test-report',"`"$report`"") -Wait -PassThru
+          if ($p.ExitCode -ne 0) { if(Test-Path $report){Get-Content $report}; throw 'Windows wizard startup failed' }
+          $result=Get-Content $report -Raw|ConvertFrom-Json
+          if($result.result -ne 'PASS'){throw 'No passing self-test report'}
+          Get-Content $report
+          $bundle=Get-ChildItem EwP-*-windows-x64.zip
+          Expand-Archive -LiteralPath $bundle.FullName -DestinationPath extracted
+          foreach($file in @('extracted/control/Install-EwP.ps1','extracted/control/Remove-EwP.ps1','extracted/app/scripts/setup-windows.ps1')){
+            $tokens=$null;$errors=$null
+            [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$errors)|Out-Null
+            if($errors.Count){$errors|Format-List;throw 'PowerShell parse failed'}
+          }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: native-windows-startup-evidence
+          path: installers/windows-self-test.json
+          if-no-files-found: warn

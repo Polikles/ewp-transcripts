@@ -7,19 +7,21 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 
 Owner now authorizes implementing this full package (2026-11-23). Follow the execution checkpoint; planning-only holds are revoked.
 Detailed scope and acceptance: [distribution plan](docs/DISTRIBUTION_PLAN.md). Current program
-still reports 0.20.0. Current accepted application/docs/artist delivery is 438f91e.
+reports 0.22.0 for the managed-installer acceptance build. Baseline0.21.0 is committed; prior application/docs/artist acceptance remains retained.
 
 1. [x] Audit Unreleased changes since 0.20.0; prepare proposed 0.21.0 baseline and a consistent SemVer/build handoff procedure. Every delivered test/install build must have a distinct version; synchronize CLI/GUI/package/lock/installer and current docs, preserving historical evidence.
-2. [ ] Define shared managed install/update operations and installation ownership inventory. Prepare dedicated EN/PL update instructions: safe stop/save/backup, fixed target version, compatible migrations, verified replacement/recovery, readiness/version checks; keep models, user data and OS keys by default.
-3. [ ] Implement Windows AND Ubuntu scripted uninstall with preview, app-owned runtime cleanup and explicit optional model/credential removal. Preserve recordings/publications and avoid wholesale shared-cache/global-tool deletion.
-4. [ ] Deliver Windows PowerShell and Ubuntu 24.04/26.04 terminal bootstraps: one/few copyable README lines, no manual repo clone; install pinned app/deps and deliberately selected models, shared install/update/repair/uninstall paths and integrity-checked versioned payloads.
-5. [ ] Verify clean install/update/recovery/repair/uninstall/reinstall lifecycle; supply focused owner Windows 11 x64 acceptance checklist. Record actual WSL/native-Ubuntu qualification separately; no repeated old full-workflow or paid-ASR campaign by default.
-6. [ ] Build the Windows graphical wizard (EXE/MSI/form chosen after feasibility): clickable host tests, installation location, app/native deps/model selection/downloads, masked transient HF token plus gated-terms instructions, optional OR key deliberately stored in system keyring, progress/results and launch.
-7. [ ] Match installer styling to the app where feasible, EN/PL copy/accessibility, desktop shortcut, Add/Remove Programs integration and matching GUI uninstall using the same operations. Installer key setup never grants cloud upload consent.
-8. [ ] Final short README install/update/uninstall/download instructions and matching complete EN/PL docs; versioned artifacts/release notes/digests. Publication is a deliberate delivery step, not performed by this plan update.
+2. [x] Define shared managed install/update operations and installation ownership inventory. Prepare dedicated EN/PL update instructions: safe stop/save/backup, fixed target version, compatible migrations, verified replacement/recovery, readiness/version checks; keep models, user data and OS keys by default.
+3. [x] Implement Windows AND Ubuntu scripted uninstall with preview, app-owned runtime cleanup and explicit optional model/credential removal. Preserve recordings/publications and avoid wholesale shared-cache/global-tool deletion.
+4. [x] Deliver Windows PowerShell and Ubuntu 24.04/26.04 terminal bootstraps: one/few copyable README lines, no manual repo clone; install pinned app/deps and deliberately selected models, shared install/update/repair/uninstall paths and integrity-checked versioned payloads.
+5. [x] Agent verification: real Ubuntu VM install/update/rollback/reinstall/uninstall; synthetic failure/repair/model-removal guards; supply focused owner Windows 11 x64 acceptance checklist. Record actual WSL/native-Ubuntu qualification separately; no repeated old full-workflow or paid-ASR campaign by default.
+6. [x] Build the Windows graphical wizard (EXE/MSI/form chosen after feasibility): clickable host tests, installation location, app/native deps/model selection/downloads, masked transient HF token plus gated-terms instructions, optional OR key deliberately stored in system keyring, progress/results and launch.
+7. [x] Match installer styling to the app where feasible, EN/PL copy/accessibility, desktop shortcut, Add/Remove Programs integration and matching GUI uninstall using the same operations. Installer key setup never grants cloud upload consent.
+8. [x] Final short README install/update/uninstall/download instructions and matching complete EN/PL docs; versioned artifacts/release notes/digests. Publication is a deliberate delivery step, not performed by this plan update.
+
+Remaining acceptance: owner Windows11x64 focused installer test; no new paid-ASR or old full-workflow repetition. Native Windows CI startup is being run separately. Public release/bootstrap activation and optional code signing follow native acceptance.
 
 Artist feedback/icons and later documentation screenshots remain parallel and non-blocking.
-Existing checkout-based setup scripts remain available; they are not yet no-checkout installers.
+Existing checkout-based setup scripts remain available alongside the new managed no-checkout packages.
 
 ## Delivered EN/PL documentation and updated artist reference — 2026-11-22
 
@@ -331,7 +333,7 @@ material and recheck current capabilities/costs at B8a; preserve this authorizat
 - [x] Task 11a: English documentation reviewed/updated and delivered 2026-11-22.
 - [x] Task 11b: Complete Polish user documentation and bilingual offline help delivered 2026-11-22.
 - [x] NEW artist reference with approved GUI/language/docs delivered 2026-11-22; original archive preserved.
-- [ ] Task 12: Versioning/update/install/uninstall lifecycle and graphical wizard, scoped and ordered in the 2026-11-23 distribution plan above; not implemented in the planning turn.
+- [x] Task12 implementation/VM verification: managed lifecycle, versioned terminal packages and native Windows graphical wizard0.22.0. Owner native installation acceptance/publication remain separate, as above.
 - [ ] Parallel, no deadline/non-blocking: integrate artist icons/feedback when supplied. Do not modify the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons.
 
 ## Nice-to-have only

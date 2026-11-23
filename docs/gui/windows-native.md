@@ -1,5 +1,7 @@
 # Native Windows setup and repair
 
+This page covers source-checkout setup/repair. For the new managed wizard and terminal bundles, use [Installation and updates](installation.md). Managed private FFmpeg is below its installation root, not the separate source-checkout default. The application workflow was owner-tested on Windows 11; new managed installation acceptance is recorded separately.
+
 1. Follow [Installation and updates](installation.md) for Git, uv, the NVIDIA Windows driver and Microsoft Visual C++ x64 runtime.
 2. In a separate Windows checkout, run `powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install`.
 3. For local ASR, run `uv run --locked --no-sync python scripts/setup-models.py` after accepting the gated model terms.

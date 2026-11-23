@@ -1,6 +1,6 @@
 # Run from a source checkout in Windows PowerShell 5.1 or PowerShell 7.
 [CmdletBinding()]
-param([switch]$Install, [switch]$Repair, [switch]$SetupModels, [switch]$PublicOnly)
+param([switch]$Install, [switch]$Repair, [switch]$SetupModels, [switch]$PublicOnly, [switch]$CloudOnly)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 if (-not ($Install -or $Repair)) {
@@ -25,7 +25,7 @@ try {
     if ($Repair) { $syncArgs += @('--reinstall-package', 'torchcodec', '--reinstall-package', 'pyannote-audio') }
     & uv @syncArgs
     if ($LASTEXITCODE -ne 0) { throw 'Locked dependency installation failed.' }
-    $prefix = Join-Path $env:LOCALAPPDATA 'ewp-transcripts\ffmpeg-7'
+    $prefix = if ($env:EWP_FFMPEG_PREFIX) { $env:EWP_FFMPEG_PREFIX } else { Join-Path $env:LOCALAPPDATA 'ewp-transcripts\ffmpeg-7' }
     $dll = Join-Path $prefix 'bin\avutil-59.dll'
     if ($Repair -or -not (Test-Path $dll)) {
         $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ('ewp-windows-setup-' + [Guid]::NewGuid())
@@ -60,7 +60,8 @@ try {
     if ($doctorExit -notin @(0, 3)) { throw 'Dependency diagnostics failed.' }
     $report | Write-Output
     $diagnostics = ($report -join "`n") | ConvertFrom-Json
-    $failedRuntime = @($diagnostics.checks | Where-Object { $_.status -eq 'fail' -and $_.code -notlike '*_model' })
+    $ignored = @('*_model'); if ($CloudOnly) { $ignored += @('gpu', 'cuda', 'speech_runtime') }
+    $failedRuntime = @($diagnostics.checks | Where-Object { $code=$_.code; $_.status -eq 'fail' -and !(@($ignored | Where-Object { $code -like $_ }).Count) })
     if ($failedRuntime.Count -gt 0) { throw 'Runtime checks failed. Follow Instructions/WINDOWS_NATIVE.md before local ASR.' }
     Write-Host 'Setup finished. Check doctor results; prepare missing models before local ASR.'
     Write-Host 'Start: uv run --locked transcriber gui'

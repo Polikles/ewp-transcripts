@@ -6,38 +6,41 @@ Local-first transcript workflow for podcasts and similar recordings: local GPU o
 
 ## Current status
 
-Version 0.21.0 is an internal preview on `main`. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
+Version 0.22.0 is an internal preview on `main`. Managed installation/update/removal and a standalone Windows wizard are new; their focused native Windows 11 acceptance is separate from the already accepted application workflow. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
 
 The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
 
 ## Install and launch
 
-Follow [Installation and updates](docs/gui/installation.md) for prerequisites and explicit model preparation. Do not share a virtual environment between native Windows and WSL.
+Use the standalone Windows wizard `EwP-Setup-0.22.0.exe`, or the terminal packages below.
+Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers will be enabled after native installer acceptance. The test EXE is unsigned. No manual repository clone or preinstalled Python/uv is needed for these packages.
 
-Windows PowerShell, inside this checkout:
+Windows PowerShell, after downloading `EwP-0.22.0-windows-x64.zip`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install
-uv run --locked --no-sync python scripts/setup-models.py
-uv run --locked transcriber doctor --test-speech-runtime
-uv run --locked transcriber gui
+Expand-Archive .\EwP-0.22.0-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.22.0-windows-x64.zip -Local -AcceptModelTerms
 ```
 
-WSL Ubuntu, inside this checkout:
+Ubuntu 24.04/26.04, including WSL2, after downloading the corresponding tar.gz:
 
 ```bash
-./scripts/install-fresh-ubuntu.sh --install
-./scripts/setup-models.sh
-uv run --locked transcriber doctor --test-speech-runtime
+mkdir -p EwPSetup
+tar -xzf EwP-0.22.0-ubuntu-x64.tar.gz -C EwPSetup
+bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip" --local --accept-model-terms
+```
+
+Accept the linked [pyannote model terms](https://huggingface.co/pyannote/speaker-diarization-community-1) first. The HF read-token prompt is hidden; complete cached snapshots are reused. Omit the local/model flags for cloud-only or existing-result review. An OR key is optional and never required for local work. Check `SHA256SUMS.txt`; let the installer finish before closing it. The wizard offers host tests, model/token fields, optional deliberate OR OS-store save and a desktop launch shortcut. Read [complete EN installation/update/uninstall instructions](docs/gui/installation.md) or [pełne instrukcje PL](docs/gui/pl/installation.md).
+
+For a development/source checkout, existing scripts remain supported:
+
+```text
+# Windows: powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install
+# Ubuntu: ./scripts/install-fresh-ubuntu.sh --install
 uv run --locked transcriber gui
 ```
 
-Model preparation is an explicit download with upstream model terms; normal local transcription does not silently download missing models. Open the printed loopback URL, normally `http://127.0.0.1:8765/`. GUI help includes complete English and Polish user guides offline. An ordinary update is `git pull` then `uv sync --locked` after saving work and stopping the server; it does not require a fresh installation or another model download.
-
-Distribution work is planned next: a versioned update/uninstall procedure, short Windows/Ubuntu
-terminal installers without a manual checkout, followed by an optional graphical Windows wizard.
-See the [distribution plan](docs/DISTRIBUTION_PLAN.md). These new installers are not available yet;
-the working checkout-based commands above remain the current installation path.
+Source model preparation is a separate explicit step: `scripts/setup-models.py` on Windows or `./scripts/setup-models.sh` on Ubuntu. Save work/stop the server before a source update, then `git pull --ff-only` and `uv sync --locked`. Managed installs use their Update/Repair/Rollback actions instead. Neither path silently starts ASR or redownloads every model. See [versioning and delivery policy](docs/VERSIONING.md).
 
 ## Normal workflow
 

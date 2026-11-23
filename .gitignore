@@ -11,3 +11,6 @@ dist/
 *.log
 
 output-ewp-transcripts/
+
+installer/windows/bin/
+installer/windows/obj/

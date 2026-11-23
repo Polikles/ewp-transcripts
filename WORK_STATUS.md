@@ -4,19 +4,16 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
-Active implementation: [distribution execution](docs/checkpoints/2026-11-23-distribution-execution.md).
-Owner says proceed through the whole plan until a real need for input. Baseline d78c483 clean;
-first correct versioning, then managed lifecycle and terminal bootstraps, tests, graphical wizard
-and final artifacts/docs. Planning-only holds below are superseded. No paid tests/artist rebuild.
-Temporary root /tmp/ewp-distribution.DJ3laK. Consult opening TODO and persist each completed slice.
+Current delivery: **0.22.0 managed-installer acceptance build**. Source baseline0.21.0 is
+committed. Terminal Windows/Ubuntu installers, ownership-aware update/rollback/removal, styled
+standalone Windows wizard, EN/PL instructions and focused native checklist are implemented.
+[Execution checkpoint](docs/checkpoints/2026-11-23-distribution-execution.md) records actual Ubuntu
+VM lifecycle/GUI/FFmpeg checks,1104 tests/mypy116 and17 integrations. Native Windows startup CI
+and final clean-source artifacts are the current completion steps. Owner actual Windows11x64
+installation acceptance remains separate; online release URLs are not yet published. No new
+paid calls/model download or artist rebuild. Read opening TODO on resume.
 
-Current planning handoff: [versioning/update/install/uninstall package](docs/checkpoints/2026-11-23-distribution-plan.md)
-and [detailed plan](docs/DISTRIBUTION_PLAN.md). Owner requests next-step plan/TODO expansion after
-accepted GUI/EN-PL docs. Record version audit/proposed 0.21.0, shared update/recovery/ownership,
-Windows+Ubuntu short terminal bootstrap and uninstaller, lifecycle tests, then a styled Windows GUI
-wizard with host tests/model downloads/masked HF token/optional OR OS storage, shortcut and GUI
-uninstall registration. Planning only: program remains 0.20.0; no installer/release/paid work started.
-Read opening TODO before implementation; all earlier application/doc/artist passes remain accepted.
+Earlier planning/application handoffs below are historical; their holds do not override this task.
 
 Current delivery: [complete EN/PL manuals and new artist reference](docs/checkpoints/2026-11-22-user-documentation.md).
 Owner passed checklist1–5 and closed GUI/interface approval. EN audit/update and full PL user docs

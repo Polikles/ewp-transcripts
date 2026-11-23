@@ -1,0 +1,31 @@
+{
+  "dotnet": {
+    "version": "10.0.404",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-linux-x64.tar.gz",
+    "sha512": "577d0eb17fec33d029104c5c63a1ab0accc3e28776274abef2218dbac5af18d2109b5406d26b31d76f5c245215e3ba0926a94c20246c672c41847c9e1eb1dc50"
+  },
+  "windows_runtime": "10.0.15",
+  "uv": {
+    "version": "0.13.9",
+    "windows": {
+      "file": "uv-windows.zip",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.13.9/uv-x86_64-pc-windows-msvc.zip",
+      "sha256": "edd61f7f5728a56cc62455386661860bdfc7bab65872f39b0c25bdcc1d8e1beb"
+    },
+    "ubuntu": {
+      "file": "uv-linux.tar.gz",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.13.9/uv-x86_64-unknown-linux-gnu.tar.gz",
+      "sha256": "a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5"
+    }
+  },
+  "licenses": {
+    "LICENSE-MIT": {
+      "url": "https://raw.githubusercontent.com/astral-sh/uv/0.13.9/LICENSE-MIT",
+      "sha256": "860e3d7a86b84e6a7012c7a635fc64df475cebc6cce34dfeb73a5982ec58176c"
+    },
+    "LICENSE-APACHE": {
+      "url": "https://raw.githubusercontent.com/astral-sh/uv/0.13.9/LICENSE-APACHE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  }
+}

@@ -11,7 +11,7 @@ Windows/Ubuntu bootstrap, lifecycle checks and styled Windows graphical installe
 concrete artifacts before any publication/signing question; do not stop at planning. Preserve
 accepted app/docs behavior, all artist archives and prior cloud spend; no new paid tests needed.
 
-## Latest planning instruction — 2026-11-23
+## Historical planning instruction — 2026-11-23
 
 Owner requests the next-step plan and TODO for versioning, update procedure, Windows/Ubuntu short
 terminal installers and a later styled Windows GUI wizard. Follow docs/DISTRIBUTION_PLAN.md and

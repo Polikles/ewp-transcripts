@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Versioned online entry point. Download/inspect before running if preferred.
+bootstrap_download="$(mktemp -d "${TMPDIR:-/tmp}/ewp-download.XXXXXX")"
+trap 'rm -rf -- "$bootstrap_download"' EXIT
+curl --fail --location --proto '=https' --tlsv1.2 --connect-timeout 30 --max-time 600 \
+ 'https://github.com/Polikles/ewp-transcripts/releases/download/v@VERSION@/EwP-@VERSION@-ubuntu-x64.tar.gz' -o "$bootstrap_download/setup.tar.gz"
+printf '%s  %s\n' '@UBUNTU_SHA@' "$bootstrap_download/setup.tar.gz" | sha256sum --check
+tar -xzf "$bootstrap_download/setup.tar.gz" -C "$bootstrap_download"
+if [[ $# == 0 ]]; then set -- install; fi
+bash "$bootstrap_download/control/Install-EwP.sh" "$@" --bundle "$bootstrap_download/bundle.zip"
