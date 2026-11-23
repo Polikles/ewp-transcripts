@@ -18,12 +18,17 @@
   "note": "Preserved retired directory is reported conservatively as a directory after its application manifest is pruned. The original test expected a leaf filename; corrected that expectation after checking retained bytes.",
   "gpu_qualification": false,
   "application_version": "0.22.0",
-  "unit_and_contract_tests": 1104,
-  "installer_tests": 23,
+  "unit_and_contract_tests": 1106,
+  "installer_tests": 25,
   "media_integration_tests": 17,
   "mypy_source_files": 116,
   "native_windows_installer_acceptance": "pending owner",
-  "native_windows_startup_ci": "pending",
+  "native_windows_startup_ci": {
+    "result": "PASS",
+    "run_id": 45155393086,
+    "platform": "Microsoft Windows Server2025 hosted runner",
+    "scope": "WPF SVG/EN-PL/controls/self-test and PowerShell parse; not Win11 local-ASR installation"
+  },
   "prototype_cross_compile": "PASS SDK10.0.404 Windows runtime10.0.15",
   "powershell_and_shell_syntax": "PASS",
   "bundle_privacy_and_manifest_hashes": "PASS"

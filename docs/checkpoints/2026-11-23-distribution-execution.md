@@ -47,7 +47,7 @@ scripts are generated with exact payload hashes for later release publication, n
 Temporary SDK10.0.404/runtime10.0.15/uv0.13.9 pins and licenses are recorded in installer/toolchain.json.
 Current manager tests22 pass; finish syntax/build/docs/privacy checks and native CI before handoff.
 
-Final local checks:1104 tests/mypy116,17 integrations,23 focused installer transaction/privacy
+Final local checks:1106 tests/mypy116,17 integrations,25 focused installer transaction/privacy
 cases PASS. Latest standalone EXE cross-build and shell/PowerShell parsing PASS. Prototype ZIP
 entry sets/digests/private-data exclusion PASS. Complete EN/PL guides remain identical to packaged
 help. Final0.22.0 clean-source artifacts/native CI are next. A temporary-directory quota exhausted
@@ -67,3 +67,9 @@ Clone parsed path geometry before selecting SVG nonzero fill; preserve original 
 opacity. No owner/public release handed over; automated CI artifacts/local first build are rejected
 candidates, not final0.22.0 delivery. Move those local candidates into task temp for disposal rather
 than overwrite their files. Retry native CI; print exact payload hashes for cross-build comparison.
+
+Native retry45155393086 PASS (build and windows-startup); exact hosted platform Windows Server2025,
+not owner Win11. Added final offline maintenance/UTF8/deferred pipe regressions (25 installer cases,
+1106 total), preserving explicit model/key deletion and original application workflow.
+Final clean-source build/re-run from the next reviewed commit, record hashes and remove both own
+task roots before final handoff. Earlier local candidate artifacts never handed to owner/released.

@@ -1066,6 +1066,9 @@ def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None
         ],
         creationflags=0x08000000,
         close_fds=True,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 

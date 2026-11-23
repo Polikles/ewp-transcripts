@@ -8,7 +8,7 @@ Current delivery: **0.22.0 managed-installer acceptance build**. Source baseline
 committed. Terminal Windows/Ubuntu installers, ownership-aware update/rollback/removal, styled
 standalone Windows wizard, EN/PL instructions and focused native checklist are implemented.
 [Execution checkpoint](docs/checkpoints/2026-11-23-distribution-execution.md) records actual Ubuntu
-VM lifecycle/GUI/FFmpeg checks,1104 tests/mypy116 and17 integrations. Native Windows startup CI
+VM lifecycle/GUI/FFmpeg checks,1106 tests/mypy116 and17 integrations. Native Windows startup CI
 and final clean-source artifacts are the current completion steps. Owner actual Windows11x64
 installation acceptance remains separate; online release URLs are not yet published. No new
 paid calls/model download or artist rebuild. Read opening TODO on resume.

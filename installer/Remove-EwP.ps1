@@ -1,7 +1,7 @@
 # Deferred removal runs outside the application after its interpreter/wizard releases Windows files.
 param([Parameter(Mandatory=$true)][string]$Plan)
 $ErrorActionPreference='Stop'
-$p=Get-Content -LiteralPath $Plan -Raw|ConvertFrom-Json
+$p=Get-Content -Encoding UTF8 -LiteralPath $Plan -Raw|ConvertFrom-Json
 try {
  foreach($idToWait in $p.pids){Wait-Process -Id $idToWait -ErrorAction SilentlyContinue}
  $prefix=[IO.Path]::GetFullPath($p.root).TrimEnd('\')+'\'

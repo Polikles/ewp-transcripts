@@ -17,6 +17,12 @@ trap 'rm -rf -- "$bootstrap_root"' EXIT
 export UV_PYTHON_INSTALL_DIR="$bootstrap_root/python"
 export UV_CACHE_DIR="$bootstrap_root/cache"
 export UV_NO_CONFIG=1
+offline_options=()
+if [[ -f "$control_dir/owner.json" && "${1:-}" =~ ^(uninstall|rollback|launch)$ ]]; then
+ # The existing managed Python works without a fresh bootstrap download for maintenance.
+ export UV_PYTHON_INSTALL_DIR="$control_dir/tools/python"
+ offline_options=(--offline)
+fi
 if [[ "${1:-}" == install || "${1:-}" == update || "${1:-}" == repair ]]; then
  missing=()
  for tool in ffmpeg ffprobe gcc make curl xz; do command -v "$tool" >/dev/null || missing+=("$tool"); done
@@ -28,4 +34,4 @@ if [[ "${1:-}" == install || "${1:-}" == update || "${1:-}" == repair ]]; then
   sudo apt-get install -y ffmpeg build-essential ca-certificates curl xz-utils
  fi
 fi
-"$uv_binary" run --no-project --python 3.12 python "$control_dir/manager.py" "$@"
+"$uv_binary" run "${offline_options[@]}" --no-project --python 3.12 python "$control_dir/manager.py" "$@"

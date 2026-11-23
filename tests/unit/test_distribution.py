@@ -445,3 +445,47 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
         )
     with pytest.raises(ValueError, match="immutable"):
         builder.build(tmp_path / "first", downloads)
+
+
+def test_deferred_windows_removal_releases_worker_pipes_and_keeps_unicode_plan(
+    tmp_path, monkeypatch
+):
+    temporary = tmp_path / "deferred"
+    temporary.mkdir()
+    monkeypatch.setattr(manager.tempfile, "mkdtemp", lambda **kw: str(temporary))
+    captured = {}
+
+    def popen(command, **kwargs):
+        captured.update(kwargs)
+        assert command[0] == "powershell.exe"
+
+    monkeypatch.setattr(manager.subprocess, "Popen", popen)
+    root = tmp_path / "Żółty katalog"
+    manager.defer_windows_removal(root, [str(root / "runtime")], 4321)
+    plan = json.loads((temporary / "plan.json").read_text(encoding="utf-8"))
+    assert plan["root"] == str(root)
+    assert 4321 in plan["pids"]
+    for stream in ("stdin", "stdout", "stderr"):
+        assert captured[stream] == manager.subprocess.DEVNULL
+    assert "-Encoding UTF8" in (temporary / "remove.ps1").read_text(encoding="utf-8")
+
+
+def test_installed_ubuntu_uninstall_uses_existing_python_offline(tmp_path):
+    if os.name == "nt":
+        pytest.skip("POSIX shell wrapper")
+    root = tmp_path / "managed Żółć"
+    (root / "tools").mkdir(parents=True)
+    (root / "owner.json").write_text("{}")
+    script = root / "Install-EwP.sh"
+    script.write_bytes((ROOT / "installer/Install-EwP.sh").read_bytes())
+    uv = root / "tools/uv"
+    uv.write_text('#!/bin/sh\nprintf "%s\\n" "$UV_PYTHON_INSTALL_DIR" "$@"\n')
+    import subprocess
+
+    result = subprocess.run(
+        ["bash", str(script), "uninstall"], capture_output=True, text=True, check=True
+    )
+    lines = result.stdout.splitlines()
+    assert lines[0] == str(root / "tools/python")
+    assert "--offline" in lines
+    assert lines[-2:] == ["--root", str(root)]
