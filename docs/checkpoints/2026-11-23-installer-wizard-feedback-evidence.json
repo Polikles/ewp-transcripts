@@ -1,0 +1,47 @@
+{
+  "application_version": "0.22.1",
+  "source_commit": "64cfac8176197d6135fa7a066b82a731de1b5309",
+  "run_id": 45201946297,
+  "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45201946297",
+  "native_report": {
+    "result": "PASS",
+    "platform": "Microsoft Windows NT 10.0.26100.0",
+    "version": "0.22.1",
+    "checks": [
+      "embedded bundle integrity",
+      "framed SVG and executable icon",
+      "operation-specific navigation",
+      "25 GB folder-volume gate",
+      "structured CPU OS disk GPU-driver VC checks",
+      "cached host-result EN/PL rerender",
+      "local-model/HF-terms gates",
+      "masked HF/OR paste validation",
+      "stale credential response rejection",
+      "matching-version model addition",
+      "removal preview gate",
+      "responsive native page previews",
+      "no install worker or external network invocation"
+    ]
+  },
+  "artifact_sha256": {
+    "EwP-0.22.1-windows-x64.zip": "b558c9576417c29855f447030f87610983ed331d66726359cf585adcbeb9adec",
+    "EwP-0.22.1-ubuntu-x64.zip": "e842ef6fe59ee852e8919c86d20f036005678a4f975a1038aaea46b9d11c2c33",
+    "EwP-Setup-0.22.1.exe": "e4118198167d45e4d9f4c151a72748271745566ecea92e2ed978a618eec75251",
+    "EwP-0.22.1-ubuntu-x64.tar.gz": "29e7b4eca72454082bf164332bd3079ccc0e1c794af900d1d9ab89b297c4aae0",
+    "Install-EwP-0.22.1.ps1": "0fae2ba14f9a23ff8b9bc19b8affae2605078e2b0eb0e662f2d5a5f5163840ab",
+    "Install-EwP-0.22.1.sh": "265ae5001ecf5eca1776a560cff1c119186027c2ff1a2c2480f06a9c0509959f"
+  },
+  "native_preview_artifact": {
+    "id": 14832555631,
+    "digest": "sha256:20cda72c2e916d524ebfca3afcd438dd87aeedbc7319df1ecfc0ce2c40fd1acb"
+  },
+  "python_tests": 1111,
+  "installer_python_tests": 30,
+  "media_integrations": 17,
+  "mypy_source_files": 116,
+  "native_installation": "not performed; owner rejected 0.22.0 before installation; 0.22.1 GUI review first",
+  "real_credentials_used": false,
+  "models_downloaded": false,
+  "new_paid_asr_calls": 0,
+  "old_artifacts_preserved": true
+}

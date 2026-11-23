@@ -88,9 +88,13 @@ sealed class CredentialDialog : Window
         check = Wizard.ActionButton(hf ? T("Check token", "Sprawdź token") : T("Check key", "Sprawdź klucz"), async () => await Validate(false), secondary: true);
         row.Children.Add(check); Grid.SetColumn(gear, 1); row.Children.Add(gear);
         Grid.SetColumn(status, 2); status.Margin = new Thickness(12, 0, 0, 0); row.Children.Add(status); body.Children.Add(row);
-        var footer = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 12, 0, 0) };
-        footer.Children.Add(Wizard.ActionButton(T("Cancel", "Anuluj"), () => Close(), secondary: true));
-        accept = Wizard.ActionButton("OK", Accept); accept.IsEnabled = false; accept.IsDefault = true; footer.Children.Add(accept); body.Children.Add(footer);
+        var footer = new Grid { Margin = new Thickness(0, 12, 0, 0) };
+        footer.ColumnDefinitions.Add(new ColumnDefinition()); footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var licenses = Wizard.Link(T("Licenses and artwork", "Licencje i autorstwo"), () => ((Wizard)owner).ShowLicenses()); licenses.VerticalAlignment = VerticalAlignment.Center; footer.Children.Add(licenses);
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+        buttons.Children.Add(Wizard.ActionButton(T("Cancel", "Anuluj"), () => Close(), secondary: true));
+        accept = Wizard.ActionButton("OK", Accept); accept.IsEnabled = false; accept.IsDefault = true; buttons.Children.Add(accept);
+        Grid.SetColumn(buttons, 1); footer.Children.Add(buttons); body.Children.Add(footer);
         input.PasswordChanged += async (_, _) => await Validate(true);
         PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) { e.Handled = true; Close(); } };
         Loaded += (_, _) => input.Focus();

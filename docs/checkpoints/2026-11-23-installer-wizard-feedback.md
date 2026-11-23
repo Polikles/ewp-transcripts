@@ -51,3 +51,8 @@ window and key-error window are complete and masked. Final compact GB formatting
 unnecessary .0 from20GB/100GB. One final native run will qualify the exact final bytes, then
 copy all14 native PNG previews with package/checklist, verify local-vs-CI hashes, and cleanup.
 No owner install/real token/model download has happened in these agent checks.
+
+Run45201946297 PASS for64cfac8; all six local bytes match CI and14 final opaque PNGs inspected.
+Literal final requirement check extends the persistent licenses/artwork footer to credential and
+HF-help windows too, not only main wizard pages. Re-run native once for that final small control
+change; owner delivery remains0.22.1 and no candidate is handed over until the exact final build.

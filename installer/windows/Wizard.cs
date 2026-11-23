@@ -83,7 +83,7 @@ sealed partial class Wizard : Window
         Grid.SetRow(scroll, 2); shell.Children.Add(scroll);
         var footer = new Grid { Margin = new Thickness(24, 14, 24, 16) };
         footer.ColumnDefinitions.Add(new ColumnDefinition()); footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        license = Link("", () => Open(Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE.txt")));
+        license = Link("", ShowLicenses);
         license.VerticalAlignment = VerticalAlignment.Center; footer.Children.Add(license);
         var navigation = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         back = ActionButton("", Back, secondary: true); next = ActionButton("", async () => await Next()); cancel = ActionButton("", Cancel, secondary: true);
@@ -449,7 +449,9 @@ sealed partial class Wizard : Window
         panel.Children.Add(Link(T("Read model terms", "Przeczytaj warunki modelu"), () => Open("https://huggingface.co/pyannote/speaker-diarization-community-1")));
         panel.Children.Add(Link("Settings → Access Tokens", () => Open("https://huggingface.co/settings/tokens")));
         panel.Children.Add(Link(T("Full instructions in the repository", "Pełna instrukcja w repozytorium"), () => Open("https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/HUGGINGFACE_ACCESS" + (Pl ? "_PL" : "") + ".md")));
-        var close = ActionButton(T("Close", "Zamknij"), () => help.Close()); close.HorizontalAlignment = HorizontalAlignment.Right; panel.Children.Add(close);
+        var footer = new Grid { Margin = new Thickness(0, 12, 0, 0) }; footer.ColumnDefinitions.Add(new ColumnDefinition()); footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var licenses = Link(T("Licenses and artwork", "Licencje i autorstwo"), ShowLicenses); licenses.VerticalAlignment = VerticalAlignment.Center; footer.Children.Add(licenses);
+        var close = ActionButton(T("Close", "Zamknij"), () => help.Close()); Grid.SetColumn(close, 1); footer.Children.Add(close); panel.Children.Add(footer);
         help.PreviewKeyDown += (_, e) => { if (e.Key == Key.Escape) help.Close(); }; help.ShowDialog();
     }
     async Task CheckHost()
@@ -547,6 +549,7 @@ sealed partial class Wizard : Window
         string path = Path.Combine(root.Text, "EwP.cmd");
         if (File.Exists(path)) { Process.Start(new ProcessStartInfo(path) { UseShellExecute = true }); Close(); }
     }
+    internal void ShowLicenses() => Open(Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE.txt"));
     static void Open(string value) => Process.Start(new ProcessStartInfo(value) { UseShellExecute = true });
     static string? RegisteredRoot()
     {
