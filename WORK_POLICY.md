@@ -1,6 +1,6 @@
 # Work policy and context recovery
 
-Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
+Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
 
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
    and `docs/99-roadmap-v2.md`. Inspect Git status before edits. Historical handoff sections
@@ -129,7 +129,16 @@ Updated: 2026-11-22. Read `AGENTS.md` first; this file supplements its rules.
     scope. Package usable EN/PL offline help. New artist review package follows documentation under
     existing authorization; original ZIP remains untouched. Screenshots still wait for custom icons.
 
-21. Documentation stage delivered2026-11-22: EN review/update, complete PL user manuals and bilingual
+21. Documentation stage delivered 2026-11-22: EN review/update, complete PL user manuals and bilingual
     offline help, followed by the authorized NEW artist reference. Original archive preserved.
     Follow the documentation checkpoint/evidence and await the next owner-selected work. Do not
     reopen accepted UI/GPU/paid gates or redo the artist package merely after a context reset.
+
+22. Owner distribution planning request 2026-11-23: record SemVer/version-handoff correction,
+    explicit update procedure, Windows/Ubuntu short terminal installers and removal lifecycle,
+    then a styled Windows GUI wizard with host checks, selected model downloads, masked transient
+    HF token and optional deliberate OR OS-keyring storage. Desktop shortcut/Add-Remove Programs
+    and graphical uninstall remain included. Share operations/pins between adapters; preserve user
+    data/models/keys by default and require explicit targeted removal. Current turn is planning,
+    not implementation/release or permission for paid tests. Proposed next baseline 0.21.0; do not
+    claim it is already shipped. Details in docs/DISTRIBUTION_PLAN.md and its checkpoint.

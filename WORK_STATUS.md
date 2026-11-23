@@ -1,8 +1,16 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-22**.
+Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
+
+Current planning handoff: [versioning/update/install/uninstall package](docs/checkpoints/2026-11-23-distribution-plan.md)
+and [detailed plan](docs/DISTRIBUTION_PLAN.md). Owner requests next-step plan/TODO expansion after
+accepted GUI/EN-PL docs. Record version audit/proposed 0.21.0, shared update/recovery/ownership,
+Windows+Ubuntu short terminal bootstrap and uninstaller, lifecycle tests, then a styled Windows GUI
+wizard with host tests/model downloads/masked HF token/optional OR OS storage, shortcut and GUI
+uninstall registration. Planning only: program remains 0.20.0; no installer/release/paid work started.
+Read opening TODO before implementation; all earlier application/doc/artist passes remain accepted.
 
 Current delivery: [complete EN/PL manuals and new artist reference](docs/checkpoints/2026-11-22-user-documentation.md).
 Owner passed checklist1–5 and closed GUI/interface approval. EN audit/update and full PL user docs
@@ -154,7 +162,7 @@ mypy 113 files pass. Chromium full 144-case GUI, real server restart and focused
 wheel/sdist resource/privacy and installed CLI smoke pass with model-free dependencies.
 10 live PL calls cost USD 0.0095832333762821113 total; all four models and Scribe/MAI mixed cases
 pass schema/review/SRT/VTT/YTT. EN live waived by owner (no sample; HD06 MP4 is PL).
-Actual native Windows11x64/GPU/OS store and full owner Win/WSL acceptance remain pending.
+Actual native Windows 11 x64/GPU/OS store and full owner Win/WSL acceptance remain pending.
 No tag/release or artist ZIP changes. Task 10 full EN–PL approval file follows B acceptance;
 manuals follow terminology approval. Disposable root /tmp/ewp-package-b.Yz9JAl and its test outputs were removed after evidence capture;
 servers stopped and frozen artist ZIP hash verified unchanged. B delivery targets main; the

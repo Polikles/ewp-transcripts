@@ -34,6 +34,11 @@ uv run --locked transcriber gui
 
 Model preparation is an explicit download with upstream model terms; normal local transcription does not silently download missing models. Open the printed loopback URL, normally `http://127.0.0.1:8765/`. GUI help includes complete English and Polish user guides offline. An ordinary update is `git pull` then `uv sync --locked` after saving work and stopping the server; it does not require a fresh installation or another model download.
 
+Distribution work is planned next: a versioned update/uninstall procedure, short Windows/Ubuntu
+terminal installers without a manual checkout, followed by an optional graphical Windows wizard.
+See the [distribution plan](docs/DISTRIBUTION_PLAN.md). These new installers are not available yet;
+the working checkout-based commands above remain the current installation path.
+
 ## Normal workflow
 
 1. Choose the output folder and add audio/video or existing canonical result JSON.

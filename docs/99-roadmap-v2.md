@@ -12,6 +12,20 @@ transcription research platform, universal dictionaries and broad model/hardware
 required deliverables. Existing regression, security, lineage and packaging checks remain required;
 research metrics and optional presets do not block completion or release readiness.
 
+### Next distribution package — 2026-11-23
+
+Owner now requests explicit Windows/Ubuntu terminal installers, update procedure and SemVer
+correction, followed by a graphical installer. [Consolidated plan](DISTRIBUTION_PLAN.md) is the
+current scope/order: version audit/proposed 0.21.0 → shared update/installation contract → scripted
+uninstall with optional exact-model removal → short no-checkout terminal bootstrap on each OS →
+installation lifecycle tests → Windows GUI wizard with host checks, HF model-access token and
+optional shared OR key stored in OS keyring, app styling, shortcut and graphical uninstall entry.
+HF gated-model terms remain explicit; storing OR credentials does not grant upload consent.
+Existing source-checkout installers are reused, not claimed to satisfy the new bootstrap target.
+This turn records planning only, with no app version change, installer implementation or release.
+Tasks10/11 and the new artist reference are already delivered. Artist feedback/screenshots are
+parallel/non-blocking; no reopening earlier acceptance or new paid/hardware research campaign.
+
 ### Current documentation stage — 2026-11-22
 
 Owner passes Windows checklist 1–5 and accepts the resulting interface/terminology. Task 10 and
@@ -163,7 +177,7 @@ terminology approval remains task 10.
 | B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
 | 10 | Complete: stable-ID EN–PL file returned, corrections integrated and resulting interface accepted (checklist1–5 PASS). |
 | 11 | EN audit/update and full PL manuals prepared/verified, with fifteen chapters per language and offline help. New artist-reference ZIP delivered; screenshots wait for final icons. |
-| 12 | Later installer/distribution preparation. Release/publishing is a separate owner decision, not authorized by this plan update. |
+| 12 | Current next package: versioning, update/rollback, Windows/Ubuntu terminal install/uninstall and Windows graphical wizard per the 2026-11-23 distribution plan. Planning recorded; implementation/publication not started by this turn. |
 | Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
 
 The sequence is serial within each package. A test checklist is delivered against concrete reviewed

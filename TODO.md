@@ -1,7 +1,25 @@
 # Immediate work queue
 
-Updated: 2026-11-22. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
+Updated: 2026-11-23. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+
+## Next package: versioning, updates and distribution — 2026-11-23
+
+Owner requests this plan/TODO update; implementation/release is not started in this planning turn.
+Detailed scope and acceptance: [distribution plan](docs/DISTRIBUTION_PLAN.md). Current program
+still reports 0.20.0. Current accepted application/docs/artist delivery is 438f91e.
+
+1. [ ] Audit Unreleased changes since 0.20.0; prepare proposed 0.21.0 baseline and a consistent SemVer/build handoff procedure. Every delivered test/install build must have a distinct version; synchronize CLI/GUI/package/lock/installer and current docs, preserving historical evidence.
+2. [ ] Define shared managed install/update operations and installation ownership inventory. Prepare dedicated EN/PL update instructions: safe stop/save/backup, fixed target version, compatible migrations, verified replacement/recovery, readiness/version checks; keep models, user data and OS keys by default.
+3. [ ] Implement Windows AND Ubuntu scripted uninstall with preview, app-owned runtime cleanup and explicit optional model/credential removal. Preserve recordings/publications and avoid wholesale shared-cache/global-tool deletion.
+4. [ ] Deliver Windows PowerShell and Ubuntu 24.04/26.04 terminal bootstraps: one/few copyable README lines, no manual repo clone; install pinned app/deps and deliberately selected models, shared install/update/repair/uninstall paths and integrity-checked versioned payloads.
+5. [ ] Verify clean install/update/recovery/repair/uninstall/reinstall lifecycle; supply focused owner Windows 11 x64 acceptance checklist. Record actual WSL/native-Ubuntu qualification separately; no repeated old full-workflow or paid-ASR campaign by default.
+6. [ ] Build the Windows graphical wizard (EXE/MSI/form chosen after feasibility): clickable host tests, installation location, app/native deps/model selection/downloads, masked transient HF token plus gated-terms instructions, optional OR key deliberately stored in system keyring, progress/results and launch.
+7. [ ] Match installer styling to the app where feasible, EN/PL copy/accessibility, desktop shortcut, Add/Remove Programs integration and matching GUI uninstall using the same operations. Installer key setup never grants cloud upload consent.
+8. [ ] Final short README install/update/uninstall/download instructions and matching complete EN/PL docs; versioned artifacts/release notes/digests. Publication is a deliberate delivery step, not performed by this plan update.
+
+Artist feedback/icons and later documentation screenshots remain parallel and non-blocking.
+Existing checkout-based setup scripts remain available; they are not yet no-checkout installers.
 
 ## Delivered EN/PL documentation and updated artist reference — 2026-11-22
 
@@ -12,7 +30,7 @@ further mandatory GUI retest, paid ASR or installation qualification for this do
 - [x] Record owner acceptance in policy/roadmap/checkpoints and approved language reference.
 - [x] Audit existing EN user-facing docs against current code, CLI help, install scripts and approved UI names; consolidate stale/contradictory workflow advice.
 - [x] Update EN quickstart/install/step guides plus complete user-manual navigation, outputs, privacy, profiles, dictionaries, recovery, maintenance and troubleshooting.
-- [x] Prepare full matching PL user docs: Windows11x64 and WSL setup/updates, local/cloud transcription, optional correction/translation, review/export, settings, dictionaries, saved work/profiles/cleanup and common errors.
+- [x] Prepare full matching PL user docs: Windows 11 x64 and WSL setup/updates, local/cloud transcription, optional correction/translation, review/export, settings, dictionaries, saved work/profiles/cleanup and common errors.
 - [x] Package EN/PL offline help with language-aware navigation/full-article links; preserve current approved UI labels and route restrictions.
 - [x] Validate guide numbering/packaged mirrors/local links/commands/HTML/language switching and ordinary appropriate checks. Screenshots wait for custom icons.
 - [x] Record evidence/checkpoints, remove disposable test outputs, commit/push and deliver EN/PL entry points.
@@ -176,11 +194,11 @@ The reproduced Windows publication defect and requested UI changes are fixed; se
 
 - [x] Owner confirms native local ASR and subtitle exports, and cloud ASR now succeed. Continue the new status/consent/layout feedback above; full Windows/WSL B acceptance remains pending.
 
-## Later Windows installation/distribution TODO — explicitly deferred
+## Earlier installation/distribution request — consolidated into the next package
 
-- [ ] Windows uninstall script with documented removal of application environment/private FFmpeg and optional downloaded models. Inventory exact owned paths and shared caches; preserve recordings/publications and unrelated/shared model editions unless explicitly selected.
+- [ ] Tracked in the new Windows/Ubuntu lifecycle package above: Windows uninstall script with documented removal of application environment/private FFmpeg and optional downloaded models. Inventory exact owned paths and shared caches; preserve recordings/publications and unrelated/shared model editions unless explicitly selected.
 - [ ] Standalone graphical Windows EXE installer without a repository checkout; desktop launch icon and Add/Remove Programs registration.
-- [ ] Matching graphical uninstaller, including explicit optional model removal. Schedule after current workflow fixes; do not build either installer now.
+- [ ] Matching graphical uninstaller, including explicit optional model removal. See the consolidated distribution plan above; this is no longer an unspecified later backlog item.
 
 ## Completed Windows model-setup fix
 
@@ -309,11 +327,11 @@ material and recheck current capabilities/costs at B8a; preserve this authorizat
 ## Terminology, documentation and distribution — current owner sequence
 
 - [x] Task 10 export: local editable ID/EN/PL workbook for owner corrections, including dynamic copy, guides and diagnostics; preserve placeholders/codes.
-- [ ] Task 10 application: apply owner EN/PL corrections, commit approved reference, then owner interface approval.
-- [ ] Task 11a: Review/update English documentation after corrected interface approval.
-- [ ] Task 11b: Review/prepare full Polish user documentation next.
-- [ ] Then create a NEW updated artist review package with approved GUI/language; preserve original archive.
-- [ ] Task 12: Later installer/distribution preparation; actual release/publishing remains a separate owner decision.
+- [x] Task 10 application: owner EN/PL corrections integrated, reference committed and interface approved 2026-11-22.
+- [x] Task 11a: English documentation reviewed/updated and delivered 2026-11-22.
+- [x] Task 11b: Complete Polish user documentation and bilingual offline help delivered 2026-11-22.
+- [x] NEW artist reference with approved GUI/language/docs delivered 2026-11-22; original archive preserved.
+- [ ] Task 12: Versioning/update/install/uninstall lifecycle and graphical wizard, scoped and ordered in the 2026-11-23 distribution plan above; not implemented in the planning turn.
 - [ ] Parallel, no deadline/non-blocking: integrate artist icons/feedback when supplied. Do not modify the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons.
 
 ## Nice-to-have only

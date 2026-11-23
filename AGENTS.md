@@ -2,6 +2,17 @@
 
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
 
+## Latest planning instruction — 2026-11-23
+
+Owner requests the next-step plan and TODO for versioning, update procedure, Windows/Ubuntu short
+terminal installers and a later styled Windows GUI wizard. Follow docs/DISTRIBUTION_PLAN.md and
+the distribution planning checkpoint linked from WORK_STATUS. This turn is planning, not product
+implementation/publication. Current app still 0.20.0; proposed next baseline 0.21.0 after audit.
+Close stale task10/11 TODO markers, preserve accepted docs/UI/artist archives, and do not reopen
+old test gates. GUI scope includes host tests, explicit models/HF access, optional OR OS-keyring
+storage (never upload consent), desktop shortcut and registered matching uninstall. Share actual
+installation/update/removal logic between script and graphical entry points.
+
 ## Latest accepted instruction — 2026-11-22
 
 Owner passes checklist 1–5 and closes GUI/interface terminology acceptance on main fea5e7f.
