@@ -25,11 +25,14 @@
   "native_windows_installer_acceptance": "pending owner",
   "native_windows_startup_ci": {
     "result": "PASS",
-    "run_id": 45155393086,
+    "run_id": 45157522471,
+    "source_commit": "cc8b9b26de30ab0abfb47675b63b8b5872d9429a",
     "platform": "Microsoft Windows Server2025 hosted runner",
-    "scope": "WPF SVG/EN-PL/controls/self-test and PowerShell parse; not Win11 local-ASR installation"
+    "local_artifacts_match_ci": true,
+    "scope": "WPF/SVG/EN-PL/controls and PowerShell parser; not full Win11/GPU installation"
   },
   "prototype_cross_compile": "PASS SDK10.0.404 Windows runtime10.0.15",
   "powershell_and_shell_syntax": "PASS",
-  "bundle_privacy_and_manifest_hashes": "PASS"
+  "bundle_privacy_and_manifest_hashes": "PASS",
+  "final_artifacts": "../deliveries/ewp-0.22.0-installers (outside Git)"
 }

@@ -1,0 +1,30 @@
+{
+  "run_id": 45157522471,
+  "source_commit": "cc8b9b26de30ab0abfb47675b63b8b5872d9429a",
+  "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45157522471",
+  "result": "PASS",
+  "report": {
+    "result": "PASS",
+    "platform": "Microsoft Windows NT 10.0.26100.0",
+    "version": "0.22.0",
+    "checks": [
+      "embedded bundle integrity",
+      "WPF SVG geometry",
+      "EN/PL labels",
+      "install/update/uninstall controls",
+      "model field scoping",
+      "no worker/network/model invocation"
+    ]
+  },
+  "checksums": {
+    "EwP-0.22.0-windows-x64.zip": "58629b94ad1a9c55919b80ba9a73a9fdacba659a6d3dc996714189a52f92eb91",
+    "EwP-0.22.0-ubuntu-x64.zip": "e99ddbf27623fb24f69e0c5a405a7d1d126593f7c455bd5261ada9a7369d2c1f",
+    "EwP-Setup-0.22.0.exe": "e2f36e26a2601857b7778fb262e1b6cee93be6f118fac271b4441736da57db3b",
+    "EwP-0.22.0-ubuntu-x64.tar.gz": "a4231243838e90cd04e26919300c3588ed519b2380ef989aed7281fa0d050a85",
+    "Install-EwP-0.22.0.ps1": "f640637383028def5fb51ac14212b538e39255627c22f30845cca7a6802975f7",
+    "Install-EwP-0.22.0.sh": "6fcc1f0cd30d1b9ecdaf4d49c96ace2230068b36f5608351ec150f0c2760b73a"
+  },
+  "local_artifacts_match_ci": true,
+  "owner_windows11_installer_acceptance": "pending",
+  "public_release": "not published"
+}

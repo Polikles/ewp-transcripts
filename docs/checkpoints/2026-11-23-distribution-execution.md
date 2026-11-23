@@ -78,3 +78,26 @@ Final native run45157155028 PASS for60adcc2. Local-vs-CI hashes exposed clean wo
 conversion of PowerShell scripts; fix final bundle reads to canonical committed Git blobs and map
 compiler source/tool roots. Preserve each candidate, never label different files as the same exact
 artifact. Rebuild/CI once more, then supply the actual CI-tested bytes for the owner handoff.
+
+Final delivery sourcecc8b9b2; run45157522471 PASS (build/native Windows WPF startup/PowerShell).
+All six local artifact SHA256 values match CI exactly, including the self-contained EXE. See
+2026-11-23-native-installer-ci.json for hashes/report. Final folder outside Git:
+../deliveries/ewp-0.22.0-installers, with EXE/Windows ZIP/Ubuntu ZIP+tar/online templates,
+SHA256SUMS/DELIVERY/START-HERE-PL/focused acceptance checklist. Online URLs remain unpublished;
+EXE is unsigned. Actual owner Windows11x64 lifecycle acceptance is the only immediate next gate.
+No old full-workflow/paid ASR/model-quality retest requested. Terminal/update/rollback/removal
+instructions are in README and complete matching EN/PL guides. Baseline0.21.0 and feature0.22.0
+share one version source; no fabricated intermediate release/tag. Artist archives' recorded hashes
+remain unchanged; cumulative cloud spend remains USD0.0291461230985028369, zero new paid calls.
+
+Cleanup: record final removal of both dedicated task roots below; preserve final delivery folder,
+original artist archives/private sources and real user caches. Rejected intermediate installer
+candidates were never owner/public handoffs. Do not rebuild or overwrite delivered0.22.0 after
+handoff; future changes require the next version. Next owner action: focused Win11 installer
+checklist, then deliberate public release/bootstrap activation and signing decision if desired.
+
+Cleanup completed: /tmp/ewp-distribution.DJ3laK and
+/home/linuch/project-ewp/ewp-install-smoke.ff8jeM removed. Final installer delivery folder and both
+artist archives remain. No task server/paid operation is left running. Persisted only content-free
+lifecycle/native/hash evidence. Resume with owner native installer feedback; do not repeat the
+already accepted app workflow, paid pilot, source build or artist-package generation.

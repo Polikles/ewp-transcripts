@@ -9,9 +9,10 @@ committed. Terminal Windows/Ubuntu installers, ownership-aware update/rollback/r
 standalone Windows wizard, EN/PL instructions and focused native checklist are implemented.
 [Execution checkpoint](docs/checkpoints/2026-11-23-distribution-execution.md) records actual Ubuntu
 VM lifecycle/GUI/FFmpeg checks,1106 tests/mypy116 and17 integrations. Native Windows startup CI
-and final clean-source artifacts are the current completion steps. Owner actual Windows11x64
+and final clean-source artifacts PASS; sourcecc8b9b2, run45157522471. Local six artifact hashes
+match CI, including EXE. Artifacts: ../deliveries/ewp-0.22.0-installers outside Git. Owner actual Windows11x64
 installation acceptance remains separate; online release URLs are not yet published. No new
-paid calls/model download or artist rebuild. Read opening TODO on resume.
+paid calls/model download or artist rebuild. Both task temp roots are removed. Next: owner focused native installer checklist, then publication/signing decisions. Read opening TODO on resume.
 
 Earlier planning/application handoffs below are historical; their holds do not override this task.
 

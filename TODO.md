@@ -18,7 +18,7 @@ reports 0.22.0 for the managed-installer acceptance build. Baseline0.21.0 is com
 7. [x] Match installer styling to the app where feasible, EN/PL copy/accessibility, desktop shortcut, Add/Remove Programs integration and matching GUI uninstall using the same operations. Installer key setup never grants cloud upload consent.
 8. [x] Final short README install/update/uninstall/download instructions and matching complete EN/PL docs; versioned artifacts/release notes/digests. Publication is a deliberate delivery step, not performed by this plan update.
 
-Remaining acceptance: owner Windows11x64 focused installer test; no new paid-ASR or old full-workflow repetition. Native Windows CI startup is being run separately. Public release/bootstrap activation and optional code signing follow native acceptance.
+Remaining acceptance: owner Windows11x64 focused installer test; no new paid-ASR or old full-workflow repetition. Native Windows CI startup PASS(run45157522471); exact local artifact hashes match CI. Public release/bootstrap activation and optional code signing follow native acceptance.
 
 Artist feedback/icons and later documentation screenshots remain parallel and non-blocking.
 Existing checkout-based setup scripts remain available alongside the new managed no-checkout packages.
