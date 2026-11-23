@@ -73,3 +73,8 @@ not owner Win11. Added final offline maintenance/UTF8/deferred pipe regressions 
 1106 total), preserving explicit model/key deletion and original application workflow.
 Final clean-source build/re-run from the next reviewed commit, record hashes and remove both own
 task roots before final handoff. Earlier local candidate artifacts never handed to owner/released.
+
+Final native run45157155028 PASS for60adcc2. Local-vs-CI hashes exposed clean working-copy CRLF
+conversion of PowerShell scripts; fix final bundle reads to canonical committed Git blobs and map
+compiler source/tool roots. Preserve each candidate, never label different files as the same exact
+artifact. Rebuild/CI once more, then supply the actual CI-tested bytes for the owner handoff.

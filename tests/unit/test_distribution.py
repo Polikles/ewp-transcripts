@@ -384,6 +384,7 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
     files = {
         "src/ewp_transcripts/_version.py": '__version__ = "0.22.0"\n',
         "src/ewp_transcripts/__init__.py": "# app\n",
+        "scripts/host.ps1": "# committed LF script\n",
         "src/private-key.txt": "UNTRACKED-SECRET-MUST-NOT-SHIP",
         "private benchmark/sample.txt": "PRIVATE-CORPUS-MUST-NOT-SHIP",
         **{
@@ -401,9 +402,12 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
         path.write_text(value, encoding="utf-8")
     link = source / "src/linked-secret.txt"
     link.symlink_to(source / "src/private-key.txt")
+    (source / "scripts/host.ps1").write_bytes(b"# committed LF script\r\n")
     tracked = [n for n in files if "private" not in n] + ["src/linked-secret.txt"]
 
     def git(command, **kwargs):
+        if command[1] == "show":
+            return files[command[2].split(":", 1)[1]].encode()
         if command[1] == "rev-parse":
             return "a" * 40 + "\n"
         if command[1] == "status":
@@ -434,6 +438,7 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
     second = builder.build(tmp_path / "second", downloads)[0]
     assert first.read_bytes() == second.read_bytes()
     with zipfile.ZipFile(first) as archive:
+        assert archive.read("app/scripts/host.ps1") == b"# committed LF script\n"
         assert not any("private" in name or "linked-secret" in name for name in archive.namelist())
         assert not any(b"MUST-NOT-SHIP" in archive.read(n) for n in archive.namelist())
         meta = json.loads(archive.read("bundle.json"))

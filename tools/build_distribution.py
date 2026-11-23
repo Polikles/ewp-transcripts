@@ -32,6 +32,14 @@ def build(output: Path, downloads: Path, *, allow_dirty: bool = False) -> list[P
             "Commit reviewed sources first, or explicitly allow a disposable dirty test build"
         )
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
+
+    def source_bytes(name: str) -> bytes:
+        # Git's clean checkout can still have platform-configured CRLF bytes. Final bundles
+        # use the committed blob so one source SHA yields one source payload on every builder.
+        if dirty:
+            return (ROOT / name).read_bytes()
+        return subprocess.check_output(["git", "show", f"{source}:{name}"], cwd=ROOT)
+
     output.mkdir(parents=True, exist_ok=True)
     sources: dict[str, bytes] = {}
     for directory in ("src", "scripts"):
@@ -43,11 +51,11 @@ def build(output: Path, downloads: Path, *, allow_dirty: bool = False) -> list[P
                 and "__pycache__" not in path.parts
                 and path.suffix not in {".pyc", ".log"}
             ):
-                sources["app/" + path.relative_to(ROOT).as_posix()] = path.read_bytes()
+                sources["app/" + path.relative_to(ROOT).as_posix()] = source_bytes(name)
     for name in ("pyproject.toml", "uv.lock", "README.md", "LICENSE", "LICENSING.md"):
-        sources["app/" + name] = (ROOT / name).read_bytes()
+        sources["app/" + name] = source_bytes(name)
     for name in ("manager.py", "Install-EwP.ps1", "Install-EwP.sh", "Remove-EwP.ps1"):
-        sources["control/" + name] = (ROOT / "installer" / name).read_bytes()
+        sources["control/" + name] = source_bytes("installer/" + name)
     artifacts = []
     for target, (archive_name, digest) in UV_HASHES.items():
         archive = downloads / archive_name

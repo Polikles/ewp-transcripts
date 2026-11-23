@@ -37,6 +37,8 @@ All notable changes to EWP-transcripts are documented here.
 - Native wizard startup clones parsed read-only WPF geometry before applying SVG fill rules.
   Deferred Windows removal reads Unicode plans explicitly as UTF-8 and does not hold GUI worker
   output pipes open. Installed Ubuntu launch/rollback/uninstall reuses its private Python offline.
+- Final source bundles read committed Git blobs, avoiding builder-dependent CRLF conversion;
+  compiler paths are mapped to stable build roots.
 
 
 ## 0.21.0 — 2026-11-23 (accepted workflow and bilingual manuals)

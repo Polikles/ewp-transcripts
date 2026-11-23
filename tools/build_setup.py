@@ -44,6 +44,7 @@ def build_setup(tools: Path, output: Path, *, allow_dirty: bool = False) -> None
         f"-p:BaseIntermediateOutputPath={tools / 'obj'}/",
         f"-p:BaseOutputPath={tools / 'bin'}/",
         f"-p:RuntimeFrameworkVersion={pins['windows_runtime']}",
+        f"-p:PathMap={ROOT}=/_/source%2C{tools}=/_/tools",
     ]
     subprocess.run([dotnet, "restore", project, *properties], env=environment, check=True)
     # Redistribution notices are embedded in the same bundle carried by the EXE.
