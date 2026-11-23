@@ -4,6 +4,16 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
+Active0.22.2: fix owner feedback on installer0.22.1. Follow opening TODO and
+[location/state checkpoint](docs/checkpoints/2026-11-23-installer-location-state.md).
+Valid D:\Transcripts-test-01 is blocked by an arbitrary path-depth guard. Maintenance needs
+real autodetection/reset; Program Files needs actual permission handling. Also radio alignment,
+modern controls, conditional VC help, Windows26H2 display/older-version warnings, info icon and
+readable credits. Defer full EN/PL wording review until GUI approval. Preserve old packages,
+artist archives and accepted application workflow; no paid/model test campaign.
+
+Earlier handoff retained for reference.
+
 Current handoff: **0.22.1 corrected installer wizard**, sourcea2b7a59. The owner rejected0.22.0
 before installing; no native installation success is claimed. All detailed feedback items are
 implemented and recorded in [checkpoint](docs/checkpoints/2026-11-23-installer-wizard-feedback.md).

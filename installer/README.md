@@ -46,3 +46,13 @@ uses `tools/build_installer_icon.py` with system librsvg/cairo; normal builds ne
 the derived ICO is committed. Public pinned-model file sizes/revisions are in `installer/models.json`;
 this is a fixed default set, not a model catalog expansion. Cancel uses a transient marker read by
 the common manager; child work stops while prior active installation and downloaded cache remain.
+
+0.22.2 adds aligned radio cards, operation-state reset and validated managed-install discovery.
+Windows accepts dedicated drive-child and Program Files locations. Host checks stay unprivileged;
+mutations needing access use a same-account UAC worker with SID/PID-authenticated named-pipe
+transport. Tokens never appear in arguments or files. The elevated single-file runtime/payload
+extracts into an admin-only session; normal launch locks live in separate per-user state.
+Native tests include authenticated bootstrap/transport, real D: host validation and a tiny
+stdlib-only Program Files launcher fixture. These do not qualify an interactive UAC prompt,
+full application installation, GPU/model preparation or provider workflow. Full installer EN/PL
+copy approval waits until the GUI is accepted.

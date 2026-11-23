@@ -18,7 +18,10 @@ sealed partial class Wizard
         "25 GB folder-volume gate", "structured CPU OS disk GPU-driver VC checks",
         "cached host-result EN/PL rerender", "local-model/HF-terms gates", "masked HF/OR paste validation",
         "stale credential response rejection", "matching-version model addition", "removal preview gate",
-        "responsive native page previews", "no install worker or external network invocation"
+        "responsive native page previews", "aligned radio glyph and text centers", "action reset and automatic maintenance discovery",
+        "conditional Visual C++ help", "Windows release warning", "accessible vector information icon",
+        "readable lossless credits", "authenticated same-user permission broker",
+        "no installation/model/provider operation; broker transport probe only"
     ];
 
     internal async Task SelfTest(string? previewDirectory)
@@ -31,6 +34,16 @@ sealed partial class Wizard
         using (var resource = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("EwP.ico")!)
             Assert(BitmapDecoder.Create(resource, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad).Frames.Count == 7, "seven ICO sizes");
         language.SelectedIndex = 0; page = 0; Render();
+        UpdateLayout();
+        foreach (var choice in actionChoices)
+        {
+            choice.ApplyTemplate();
+            var glyph = (FrameworkElement)choice.Template.FindName("RadioGlyph", choice);
+            var text = (FrameworkElement)choice.Template.FindName("RadioText", choice);
+            double gy = glyph.TransformToAncestor(choice).Transform(new Point(0, glyph.ActualHeight / 2)).Y;
+            double ty = text.TransformToAncestor(choice).Transform(new Point(0, text.ActualHeight / 2)).Y;
+            Assert(Math.Abs(gy - ty) < .75, "radio glyph and label share one center line");
+        }
         Assert(next.IsEnabled && subtitle.Text == "Local-first transcript workflow", "welcome EN");
         await Next(); Assert(page == 1 && !next.IsEnabled, "host test required");
         hostReady = true; SetFixtureHost(); Render();
@@ -59,8 +72,8 @@ sealed partial class Wizard
         Width = 700; Height = 760; page = 1; Render(); await Capture(previewDirectory, "pl-location-narrow");
         Width = 820; Height = 860;
         string existing = Path.Combine(temporary, "test-existing"); Directory.CreateDirectory(existing);
-        File.WriteAllText(Path.Combine(existing, "owner.json"), "{}");
-        File.WriteAllText(Path.Combine(existing, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", version = "0.0.1", local_models = false, previous = "versions/prior" }));
+        File.WriteAllText(Path.Combine(existing, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing }));
+        File.WriteAllText(Path.Combine(existing, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing, version = "0.0.1", active = "versions/test-1", local_models = false, previous = "versions/prior" }));
         root.Text = existing; await Task.Delay(250); operation = "models"; page = 1; Render();
         Assert(!next.IsEnabled && LocationProblem() != null, "adding models cannot silently upgrade older version");
         operation = "update"; hostReady = true; SetFixtureHost(); Render(); Assert(next.IsEnabled, "explicit update handles older version");
@@ -71,6 +84,7 @@ sealed partial class Wizard
         operation = "install"; page = 3; busy = true; progressStage = "models"; Render();
         await Capture(previewDirectory, "pl-install-progress");
         busy = false; finished = successful = true; Render(); await Capture(previewDirectory, "pl-complete");
+        await TestActionResetAndPresentation(previewDirectory);
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
     }
@@ -106,12 +120,65 @@ sealed partial class Wizard
         Assert(calls == 2 && !stale.CanAccept && stale.Status.Contains("HF_HTTP_401"), "stale success cannot validate new input"); stale.Close();
     }
 
+    async Task TestActionResetAndPresentation(string? previews)
+    {
+        busy = finished = successful = false;
+        string existing = Path.Combine(temporary, "test-existing");
+        var info = InstallationDiscovery.Read(existing)!;
+        Assert(info != null && info.Root == existing, "owned installation metadata detection");
+        FindInstallation = (_, _) => info;
+        foreach (string action in operations.Where(o => o != "install"))
+        {
+            root.Text = Path.Combine(temporary, "old-install-choice");
+            hostReady = hostAttempted = hfValid = orValid = previewReady = true;
+            hfSecret = "synthetic-hf"; orSecret = "synthetic-or"; notice = "check_failed"; log.Text = "OLD-OPERATION-MESSAGE";
+            terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = true;
+            SelectOperation(action); page = 1; Render();
+            Assert(root.Text == existing && !manualLocation, "maintenance location automatically detected");
+            Assert(host == null && !hostReady && !hostAttempted && !previewReady && removal == null && log.Text.Length == 0 && notice.Length == 0, "changing action resets all check/removal/log state");
+            Assert(!hfValid && !orValid && hfSecret.Length == 0 && orSecret.Length == 0 && terms.IsChecked != true && removeModels.IsChecked != true && removeKey.IsChecked != true, "changing action clears credentials and consent");
+        }
+        SelectOperation("repair"); page = 1; Render(); await Capture(previews, "pl-maintenance-detected");
+        FindInstallation = (_, _) => null;
+        foreach (string action in operations.Where(o => o != "install"))
+        {
+            SelectOperation(action); page = 1; Render();
+            Assert(root.Text.Length == 0 && manualLocation && !next.IsEnabled, "missing installation asks for location without reusing prior input");
+        }
+        await Capture(previews, "pl-maintenance-not-found");
+        SelectOperation("install"); Assert(root.Text == InstallationDiscovery.DefaultRoot, "install action restores default location");
+        root.Text = Path.Combine(temporary, "test-target"); await Task.Delay(250);
+        page = 1; hostAttempted = hostReady = true; SetFixtureHost(); Render(); Assert(!ShowVcHelp, "no VC download link after successful runtime check");
+        string old = host!.Value.GetRawText().Replace("Windows 11 26H2", "Windows 11 24H2").Replace("\"code\":\"platform\",\"status\":\"pass\"", "\"code\":\"platform\",\"status\":\"warning\"");
+        using (var json = JsonDocument.Parse(old)) host = json.RootElement.Clone();
+        Render(); Assert(VisibleText((DependencyObject)Content).Contains("Nie gwarantujemy"), "older Windows has a brief compatibility note");
+        await Capture(previews, "pl-windows-older-warning");
+        string failed = host.Value.GetRawText().Replace("\"code\":\"vc_runtime\",\"status\":\"pass\"", "\"code\":\"vc_runtime\",\"status\":\"warning\"");
+        using (var json = JsonDocument.Parse(failed)) host = json.RootElement.Clone();
+        Render(); Assert(ShowVcHelp, "inconclusive VC test exposes download help"); await Capture(previews, "pl-vc-inconclusive");
+        string original = File.ReadAllText(Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE.txt"));
+        string credits = Credits.Format(original);
+        string Normalize(string value) => System.Text.RegularExpressions.Regex.Replace(value, @"\s+", " ").Trim();
+        Assert(Normalize(original) == Normalize(credits), "credits reflow preserves every attribution word");
+        Assert(!credits.Contains("Original bytes\r\nare"), "credits have no hard wrap inside original sentence");
+        page = 2; local.IsChecked = true; Render(); UpdateLayout();
+        Assert(!VisibleText((DependencyObject)Content).Contains("(i)"), "info is a real vector icon");
+        var help = CreateHfHelp(); help.Show(); await CaptureWindow(help, previews, "pl-hf-information"); help.Close();
+        Assert(InstallFolderFromPicker(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)).EndsWith("EwPTranscripts"), "Program Files picker selects a dedicated app subfolder");
+        var output = new List<string>();
+        var request = new OperationRequest("broker-self-test", root.Text, false, false, false, false, false,
+            "synthetic-hf-not-logged", "synthetic-or-not-logged", Environment.ProcessPath!, Environment.ProcessId, CancelFile);
+        int result = await OperationRunner.Elevated(request, line => { output.Add(line); return Task.CompletedTask; }, test: true);
+        Assert(result == 0 && output.Count > 0 && output.All(line => !line.Contains(request.HfToken) && !line.Contains(request.OpenRouterKey)), "authenticated broker never exposes secret frames");
+        FindInstallation = InstallationDiscovery.Find;
+    }
+
     void SetFixtureHost()
     {
         using var fixture = JsonDocument.Parse("""
         {"checks":[
           {"code":"architecture","status":"pass","context":{"cpu_model":"Test CPU 64-bit"}},
-          {"code":"platform","status":"pass","context":{"name":"Windows 11 x64"}},
+          {"code":"platform","status":"pass","context":{"name":"Windows 11 26H2","display_version":"26H2"}},
           {"code":"disk","status":"pass","context":{"free_bytes":100000000000,"installation_bytes":20000000000}},
           {"code":"gpu","status":"pass","context":{"devices":[{"name":"NVIDIA test GPU","driver":"000.00"}]}},
           {"code":"vc_runtime","status":"pass","context":{}}

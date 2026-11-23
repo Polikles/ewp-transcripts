@@ -10,6 +10,13 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        if (args.Contains("--elevated-operation"))
+        {
+            string? pipe = Argument(args, "--pipe");
+            if (pipe == null || !int.TryParse(Argument(args, "--parent"), out int parent)) { Environment.ExitCode = 2; return; }
+            Environment.ExitCode = OperationRunner.WorkerMain(pipe, parent, args.Contains("--broker-self-test")).GetAwaiter().GetResult();
+            return;
+        }
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         bool test = args.Contains("--self-test");
         string? report = Argument(args, "--self-test-report");

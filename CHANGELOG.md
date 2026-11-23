@@ -4,6 +4,26 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.22.2 — 2026-11-23 (installer location and operation fixes)
+
+- Accept dedicated Windows folders directly below a drive, including D:\Transcripts-test-01,
+  and protected locations such as Program Files. Preserve drive/home roots, unrelated files and
+  ownership/link protections. Keep host checks unprivileged; mutations request Windows permission
+  only when needed. Use same-user authenticated IPC, no plaintext credential file/argv, protected
+  worker/runtime extraction and an external per-user application lock for normal protected-root launch.
+- Detect managed installations for every maintenance action. Reset folder defaults, host/log/error
+  state, model/key/terms and removal choices on operation changes; ignore stale delayed work.
+- Align radio dots with labels, use modern selectable cards/fields/step indication, rename step2
+  Location and checks / Lokalizacja i test, and remove the duplicate computer-check caption.
+- Show VC download help only after missing/inconclusive checks. Read Windows DisplayVersion and
+  show concise older/unknown-version compatibility warnings instead of only a technical build.
+- Replace literal (i) with an accessible vector information icon. Reflow the installer credits
+  into paragraphs/sentence lines without changing the original attribution text or artwork.
+- Add drive/protected-location, reset/discovery, release/VC, alignment/info/credits and permission
+  broker regressions and native visual evidence. Full EN/PL copy review remains deferred until
+  the installer GUI is finished, as requested.
+
+
 ## 0.22.1 — 2026-11-23 (installer usability correction)
 
 - Replace the rejected long installer form with operation-specific screens, language/radio action

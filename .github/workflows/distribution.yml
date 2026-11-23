@@ -40,6 +40,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: installer-test-package
@@ -68,6 +71,14 @@ jobs:
             [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$errors)|Out-Null
             if($errors.Count){$errors|Format-List;throw 'PowerShell parse failed'}
           }
+      - name: Native shallow-drive host check and protected-root model-free launch
+        shell: pwsh
+        run: |
+          $env:UV_CACHE_DIR=Join-Path $env:RUNNER_TEMP 'ewp-native-test-cache'
+          $env:UV_PYTHON_INSTALL_DIR=Join-Path $env:RUNNER_TEMP 'ewp-native-test-python'
+          $env:UV_PYTHON_PREFERENCE='only-managed'
+          & .\installers\extracted\tools\uv.exe run --no-project --python 3.12 --with pytest==9.1.1 python -m pytest -q tests/unit/test_distribution_windows.py
+          if($LASTEXITCODE -ne 0){throw 'Native installer filesystem regression failed'}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

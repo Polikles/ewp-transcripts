@@ -19,7 +19,7 @@ import threading
 import time
 import uuid
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any
 
 MAGIC = "ewp-transcripts-managed-v1"
@@ -90,6 +90,14 @@ def default_root() -> Path:
     )
 
 
+def validate_root_shape(value: PurePath, home: PurePath, *, windows: bool) -> None:
+    """A Windows drive child is a valid dedicated folder; depth is not ownership."""
+    if value == home or value == type(value)(value.anchor):
+        raise InstallError("Choose a separate application folder, not a drive or home root")
+    if not windows and len(value.parts) < 4:
+        raise InstallError("Choose a separate application directory")
+
+
 def safe_root(value: Path) -> Path:
     if any(ord(c) < 32 for c in str(value)):
         raise InstallError("Install path must not contain control characters")
@@ -98,9 +106,7 @@ def safe_root(value: Path) -> Path:
         if parent.is_symlink() or (hasattr(parent, "is_junction") and parent.is_junction()):
             raise InstallError("Install path must not contain symbolic links or junctions")
     resolved = value.resolve()
-    forbidden = {Path.home().resolve(), Path(resolved.anchor)}
-    if resolved in forbidden or len(resolved.parts) < 4:
-        raise InstallError("Choose a separate empty user directory for installation")
+    validate_root_shape(resolved, Path.home().resolve(), windows=os.name == "nt")
     if os.name != "nt" and any(
         resolved == Path(p) or Path(p) in resolved.parents
         for p in ("/usr", "/etc", "/bin", "/lib", "/var")
@@ -183,9 +189,37 @@ def process_alive(pid: int) -> bool:
     return True
 
 
+def lifecycle_lock_path(
+    root: Path, *, windows: bool | None = None, local_app_data: Path | None = None
+) -> Path:
+    if windows is None:
+        windows = os.name == "nt"
+    if not windows:
+        return root / ".lifecycle.lock"
+    state = local_app_data or Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData/Local"))
+    name = hashlib.sha256(str(root).casefold().encode()).hexdigest()
+    lock = state / "EwPTranscriptsState" / "locks" / (name + ".lock")
+    for parent in (lock.parent, *lock.parent.parents):
+        if parent.is_symlink() or (hasattr(parent, "is_junction") and parent.is_junction()):
+            raise InstallError("Installer runtime state must not contain links or junctions")
+    return lock
+
+
 @contextlib.contextmanager
 def exclusive(root: Path):
-    lock = root / ".lifecycle.lock"
+    lock = lifecycle_lock_path(root)
+    legacy = root / ".lifecycle.lock"
+    if lock != legacy:
+        # Old launchers wrote here. Read compatibility state without requiring root write access.
+        if legacy.exists():
+            try:
+                if legacy.is_symlink() or process_alive(int(legacy.read_text())):
+                    raise ValueError()
+            except (ValueError, OSError) as error:
+                raise InstallError(
+                    "Another installer/application has an unverified active lock"
+                ) from error
+        lock.parent.mkdir(parents=True, exist_ok=True)
     try:
         descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError as error:
@@ -359,6 +393,36 @@ def check_hf_access(token: str) -> None:
         ) from None
 
 
+def windows_vc_files() -> bool:
+    directory = Path(os.environ.get("SYSTEMROOT", r"C:\Windows")) / "System32"
+    return all(
+        (directory / name).is_file()
+        for name in ("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll")
+    )
+
+
+def validate_elevated_model_targets(paths: list[str], home: Path | None = None) -> None:
+    """Elevated default-model downloads may not follow user-controlled links into system files."""
+    base = (home or Path.home()).resolve()
+    for value in paths:
+        path = Path(value).expanduser()
+        if not path.resolve().is_relative_to(base):
+            raise InstallError(
+                "Prepare custom model caches as a normal user before elevated installation"
+            )
+        for parent in (path, *path.parents):
+            if parent.is_symlink() or (hasattr(parent, "is_junction") and parent.is_junction()):
+                raise InstallError(
+                    "Elevated model download cannot follow directory links or junctions"
+                )
+        if path.exists():
+            for item in path.rglob("*"):
+                if (hasattr(item, "is_junction") and item.is_junction()) or (
+                    item.is_symlink() and not item.resolve().is_relative_to(base)
+                ):
+                    raise InstallError("Elevated model download would leave the user profile")
+
+
 def host_report(root: Path, local: bool) -> dict[str, Any]:
     system = platform.system()
     checks: list[dict[str, Any]] = []
@@ -394,8 +458,32 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
         architecture=platform.machine(),
     )
     if system == "Windows":
-        label = "Windows " + platform.release() + " (" + platform.version() + ")"
-        check("platform", "pass" if platform.release() == "11" else "warning", label, name=label)
+        import re
+        import winreg
+
+        display = ""
+        build = platform.version()
+        with (
+            contextlib.suppress(OSError),
+            winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+            ) as key,
+            contextlib.suppress(OSError),
+        ):
+            display = str(winreg.QueryValueEx(key, "DisplayVersion")[0])
+        major = "11" if platform.release() == "11" else platform.release()
+        label = "Windows " + major + (" " + display if display else " (" + build + ")")
+        version = re.fullmatch(r"(\d{2})H([12])", display.upper())
+        older = major != "11" or version is None or tuple(map(int, version.groups())) < (26, 2)
+        check(
+            "platform",
+            "warning" if older else "pass",
+            label,
+            name=label,
+            display_version=display,
+            build=build,
+            warning="older_windows" if older else "",
+        )
     elif system == "Linux":
         release = platform.freedesktop_os_release()
         ok = release.get("ID") == "ubuntu" and release.get("VERSION_ID") in {"24.04", "26.04"}
@@ -452,22 +540,24 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
     if system == "Windows":
         import winreg
 
+        installed, version = False, ""
         try:
             with winreg.OpenKey(
                 winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
             ) as key:
                 installed = winreg.QueryValueEx(key, "Installed")[0] == 1
-                version = ""
                 with contextlib.suppress(OSError):
                     version = str(winreg.QueryValueEx(key, "Version")[0])
         except OSError:
-            installed = False
-            version = ""
+            pass
+        files_ready = windows_vc_files()
+        status = "fail" if not installed or not files_ready else "pass" if version else "warning"
         check(
             "vc_runtime",
-            "pass" if installed else "fail",
+            status,
             "Microsoft Visual C++ x64",
             version=version,
+            required_dlls_present=files_ready,
         )
     return {"ready": all(c["status"] != "fail" for c in checks), "checks": checks}
 
@@ -707,6 +797,11 @@ def install(
                         raise InstallError(
                             "Provide a Hugging Face read token after accepting the model terms"
                         )
+                    if os.name == "nt":
+                        import ctypes
+
+                        if ctypes.windll.shell32.IsUserAnAdmin():
+                            validate_elevated_model_targets(model_paths)
                     run(
                         [str(python), "scripts/setup-models.py", "--yes"],
                         cwd=release / "app",

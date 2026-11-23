@@ -3,6 +3,23 @@
 Updated: 2026-11-23. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
+## Active installer location/state/presentation fixes — 2026-11-23
+
+Owner feedback on0.22.1. Deliver0.22.2; preserve earlier packages and artist archives. Full
+installer EN/PL copy review is deferred until GUI completion, per owner; only required labels,
+functional warnings/errors and changed-step docs are adjusted now.
+
+- [ ] Align radio dots/text on one center line using explicit control layout; modernize consistent cards, form fields, navigation and focus states. Keep current centered logo/icon/subtitle.
+- [ ] Fix shallow Windows install paths such as D:\Transcripts-test-01 without removing volume/home/system-directory/ownership protections. Support dedicated folders under Program Files and other writable/admin-authorized locations; host check stays unprivileged, protected mutations use Windows elevation without plaintext credential files or changing the user account.
+- [ ] Step2: Location and checks / Lokalizacja i test. Remove duplicate Check computer caption. Show VC download link only after a missing/inconclusive runtime test.
+- [ ] Detect existing managed installs for ALL maintenance actions; use the discovered location automatically, ask only if not found (allow an explicit alternate location). Do not treat source checkouts/unrelated folders as managed installs.
+- [ ] Reset action-specific folder defaults, host results/errors/logs, keys/terms and removal state on changing operation. Invalidate delayed work; prevent old Install state leaking into Update/Repair/Models/Rollback/Uninstall.
+- [ ] Read Windows DisplayVersion for names such as Windows11 26H2; show an actual warning icon and short older/unknown-version compatibility note, including Win11 24H2 and Win10.
+- [ ] Replace literal (i) button with a proper accessible information icon opening HF help.
+- [ ] Reflow installer license/artwork text into paragraphs and meaningful line breaks, preserving original attribution/licensing and asset files.
+- [ ] Add meaningful Python/native tests for drive-root sibling paths, protected permission flow/lock, detection/reset, version/VC outcomes, control alignment and info icon; inspect native screenshots. Run normal gates, clean matching artifacts, docs/checkpoints, commit/push.
+- [ ] After GUI approval: consolidate full installer EN/PL descriptions/communications for owner review. This is intentionally deferred, not part of current wording polish.
+
 ## Active installer usability correction — 2026-11-23
 
 Owner rejected the0.22.0 graphical preview before installing. Preserve that immutable package;

@@ -158,3 +158,7 @@ Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
     detailed0.22.1 usability checklist and inspect native rendered previews before a new handoff.
     Preserve old artifacts and app acceptance; no full workflow/paid requalification. HF/OR masked
     modal checks never imply audio consent, credentials stay transient until deliberate OS save.
+
+26. Owner0.22.1 feedback2026-11-23: implement location/permission/state/presentation fixes as0.22.2.
+    Full installer EN/PL copy review is explicitly deferred until GUI is finished; keep that TODO.
+    Do not reopen accepted app workflow, paid provider tests or artist packages. See active checkpoint.

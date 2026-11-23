@@ -513,7 +513,12 @@ def test_host_checks_are_structured_and_use_selected_volume_and_25gb_margin(tmp_
         HKEY_LOCAL_MACHINE=1,
         OpenKey=lambda hive, path: Key(path),
         QueryValueEx=lambda key, name: (
-            {"ProcessorNameString": "Owner CPU model", "Installed": 1, "Version": "v14.44"}[name],
+            {
+                "ProcessorNameString": "Owner CPU model",
+                "Installed": 1,
+                "Version": "v14.44",
+                "DisplayVersion": "26H2",
+            }[name],
             1,
         ),
     )
@@ -523,6 +528,7 @@ def test_host_checks_are_structured_and_use_selected_volume_and_25gb_margin(tmp_
     monkeypatch.setattr(manager.platform, "release", lambda: "11")
     monkeypatch.setattr(manager.platform, "version", lambda: "10.0.26100")
     monkeypatch.setattr(manager.shutil, "which", lambda tool: "nvidia-smi.exe")
+    monkeypatch.setattr(manager, "windows_vc_files", lambda: True)
     monkeypatch.setattr(
         manager.subprocess,
         "run",
@@ -542,7 +548,7 @@ def test_host_checks_are_structured_and_use_selected_volume_and_25gb_margin(tmp_
     assert report["ready"] is True
     assert probed == [tmp_path]
     assert rows["architecture"]["context"]["cpu_model"] == "Owner CPU model"
-    assert rows["platform"]["context"]["name"] == "Windows 11 (10.0.26100)"
+    assert rows["platform"]["context"]["name"] == "Windows 11 26H2"
     assert rows["gpu"]["context"]["devices"] == [{"name": "NVIDIA Test GPU", "driver": "580.00"}]
     assert rows["disk"]["context"] == {
         "free_bytes": free,
@@ -649,3 +655,137 @@ def test_repair_cannot_silently_upgrade_an_existing_install(tmp_path, lifecycle,
     assert code == 2
     assert "choose update explicitly" in capsys.readouterr().out
     assert manager.load_state(root)["active"] == original["active"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [r"D:\Transcripts-test-01", r"C:\Apps", r"C:\Program Files\EwP Transcripts", r"Z:\New program"],
+)
+def test_windows_install_folder_depth_is_not_a_user_profile_restriction(value):
+    from pathlib import PureWindowsPath
+
+    manager.validate_root_shape(
+        PureWindowsPath(value), PureWindowsPath(r"C:\Users\DS"), windows=True
+    )
+
+
+@pytest.mark.parametrize("value", ["C:\\", "D:\\", r"C:\Users\DS"])
+def test_windows_volume_and_home_roots_still_cannot_be_owned_by_installer(value):
+    from pathlib import PureWindowsPath
+
+    with pytest.raises(manager.InstallError, match="root"):
+        manager.validate_root_shape(
+            PureWindowsPath(value), PureWindowsPath(r"C:\Users\DS"), windows=True
+        )
+
+
+def test_external_windows_runtime_lock_keeps_protected_root_read_only(tmp_path, monkeypatch):
+    root = tmp_path / "Protected program"
+    root.mkdir()
+    state = tmp_path / "User profile"
+    lock = manager.lifecycle_lock_path(root, windows=True, local_app_data=state)
+    assert not lock.is_relative_to(root)
+    monkeypatch.setattr(manager, "lifecycle_lock_path", lambda _: lock)
+    before = list(root.iterdir())
+    with manager.exclusive(root):
+        assert lock.exists()
+        assert list(root.iterdir()) == before
+        with pytest.raises(manager.InstallError), manager.exclusive(root):
+            pass
+    assert not lock.exists()
+
+
+def test_new_windows_runtime_lock_observes_old_running_app_lock(tmp_path, monkeypatch):
+    root = tmp_path / "program"
+    root.mkdir()
+    (root / ".lifecycle.lock").write_text(str(os.getpid()))
+    lock = tmp_path / "profile" / "lock"
+    monkeypatch.setattr(manager, "lifecycle_lock_path", lambda _: lock)
+    with pytest.raises(manager.InstallError, match="active lock"), manager.exclusive(root):
+        pass
+    assert not lock.exists()
+
+
+@pytest.mark.parametrize(
+    ("release", "display", "status"),
+    [
+        ("11", "26H2", "pass"),
+        ("11", "24H2", "warning"),
+        ("11", "25H2", "warning"),
+        ("10", "22H2", "warning"),
+        ("11", "", "warning"),
+    ],
+)
+def test_windows_marketing_release_and_older_warning_are_not_guessed_from_build(
+    tmp_path, monkeypatch, release, display, status
+):
+    from types import SimpleNamespace
+
+    class Key:
+        def __init__(self, value):
+            self.value = value
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    def query(key, name):
+        values = {
+            "ProcessorNameString": "CPU",
+            "Installed": 1,
+            "Version": "v14.44",
+            "DisplayVersion": display,
+        }
+        return values[name], 1
+
+    monkeypatch.setitem(
+        sys.modules,
+        "winreg",
+        SimpleNamespace(HKEY_LOCAL_MACHINE=1, OpenKey=lambda _, key: Key(key), QueryValueEx=query),
+    )
+    monkeypatch.setattr(manager.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(manager.platform, "machine", lambda: "AMD64")
+    monkeypatch.setattr(manager.platform, "release", lambda: release)
+    monkeypatch.setattr(manager.platform, "version", lambda: "10.0.26300")
+    monkeypatch.setattr(manager, "windows_vc_files", lambda: True)
+    monkeypatch.setattr(manager.shutil, "which", lambda _: None)
+    rows = {r["code"]: r for r in manager.host_report(tmp_path, False)["checks"]}
+    result = rows["platform"]
+    assert result["status"] == status
+    assert result["context"]["display_version"] == display
+    assert result["context"]["build"] == "10.0.26300"
+    assert (
+        result["message"] == f"Windows {release} {display}"
+        if display
+        else result["message"] == f"Windows {release} (10.0.26300)"
+    )
+
+
+def test_privileged_model_download_does_not_leave_profile_or_follow_system_link(tmp_path):
+    home = tmp_path / "user"
+    target = home / ".cache/models/pinned"
+    target.mkdir(parents=True)
+    manager.validate_elevated_model_targets([str(target)], home)
+    with pytest.raises(manager.InstallError, match="custom model"):
+        manager.validate_elevated_model_targets([str(tmp_path / "system")], home)
+    system = tmp_path / "system"
+    system.mkdir()
+    file = system / "model.bin"
+    file.write_bytes(b"protected, must remain")
+    (target / "model.bin").symlink_to(file)
+    with pytest.raises(manager.InstallError, match="leave the user profile"):
+        manager.validate_elevated_model_targets([str(target)], home)
+    assert file.read_bytes() == b"protected, must remain"
+
+
+def test_windows_lock_state_cannot_redirect_elevated_writes_via_directory_link(tmp_path):
+    profile = tmp_path / "profile"
+    profile.mkdir()
+    other = tmp_path / "system"
+    other.mkdir()
+    (profile / "EwPTranscriptsState").symlink_to(other, target_is_directory=True)
+    with pytest.raises(manager.InstallError, match="links or junctions"):
+        manager.lifecycle_lock_path(tmp_path / "program", windows=True, local_app_data=profile)
+    assert not list(other.iterdir())

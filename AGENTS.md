@@ -2,6 +2,14 @@
 
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
 
+## Current installer0.22.2 correction — 2026-11-23
+
+Follow opening TODO/WORK_STATUS and docs/checkpoints/2026-11-23-installer-location-state.md.
+Owner0.22.1 feedback is active: Windows folder validation/permissions, autodetection and operation
+reset, aligned modern controls, conditional VC help, DisplayVersion warnings, info icon, credits.
+Full installer EN/PL text review waits until GUI completion. Preserve earlier artifacts; verify
+native behavior/screenshots and exact artifact hashes, not compile alone. No paid/model campaign.
+
 ## Active installer feedback — 2026-11-23
 
 Owner rejected0.22.0 wizard appearance/flow before installation. Execute all opening TODO items
