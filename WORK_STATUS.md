@@ -4,6 +4,12 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
+Active implementation: [distribution execution](docs/checkpoints/2026-11-23-distribution-execution.md).
+Owner says proceed through the whole plan until a real need for input. Baseline d78c483 clean;
+first correct versioning, then managed lifecycle and terminal bootstraps, tests, graphical wizard
+and final artifacts/docs. Planning-only holds below are superseded. No paid tests/artist rebuild.
+Temporary root /tmp/ewp-distribution.DJ3laK. Consult opening TODO and persist each completed slice.
+
 Current planning handoff: [versioning/update/install/uninstall package](docs/checkpoints/2026-11-23-distribution-plan.md)
 and [detailed plan](docs/DISTRIBUTION_PLAN.md). Owner requests next-step plan/TODO expansion after
 accepted GUI/EN-PL docs. Record version audit/proposed 0.21.0, shared update/recovery/ownership,

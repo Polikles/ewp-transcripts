@@ -1,6 +1,6 @@
 [project]
 name = "ewp-transcripts"
-version = "0.20.0"
+dynamic = ["version"]
 description = "Local-first transcription for edited podcast and training recordings"
 readme = "README.md"
 authors = [{ name = "Damian Szczech", email = "szczech.dam+ewptranscript@gmail.com" }]
@@ -32,6 +32,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/ewp_transcripts/_version.py" }]
 environments = [
     "sys_platform == 'linux' and platform_machine == 'x86_64'",
     "sys_platform == 'win32' and platform_machine == 'AMD64'",
@@ -74,3 +75,6 @@ select = ["B", "E", "F", "I", "SIM", "UP"]
 python_version = "3.12"
 strict = true
 files = ["src"]
+
+[tool.hatch.version]
+path = "src/ewp_transcripts/_version.py"

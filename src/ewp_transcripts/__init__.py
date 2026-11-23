@@ -1,15 +1,5 @@
 """Public package interface for EWP-transcripts."""
 
-from importlib.metadata import PackageNotFoundError, version
-
-
-def _installed_version() -> str:
-    try:
-        return version("ewp-transcripts")
-    except PackageNotFoundError:
-        return "0.2.0"
-
-
-__version__ = _installed_version()
+from ewp_transcripts._version import __version__
 
 __all__ = ["__version__"]

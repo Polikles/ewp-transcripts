@@ -5,11 +5,11 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 
 ## Next package: versioning, updates and distribution — 2026-11-23
 
-Owner requests this plan/TODO update; implementation/release is not started in this planning turn.
+Owner now authorizes implementing this full package (2026-11-23). Follow the execution checkpoint; planning-only holds are revoked.
 Detailed scope and acceptance: [distribution plan](docs/DISTRIBUTION_PLAN.md). Current program
 still reports 0.20.0. Current accepted application/docs/artist delivery is 438f91e.
 
-1. [ ] Audit Unreleased changes since 0.20.0; prepare proposed 0.21.0 baseline and a consistent SemVer/build handoff procedure. Every delivered test/install build must have a distinct version; synchronize CLI/GUI/package/lock/installer and current docs, preserving historical evidence.
+1. [x] Audit Unreleased changes since 0.20.0; prepare proposed 0.21.0 baseline and a consistent SemVer/build handoff procedure. Every delivered test/install build must have a distinct version; synchronize CLI/GUI/package/lock/installer and current docs, preserving historical evidence.
 2. [ ] Define shared managed install/update operations and installation ownership inventory. Prepare dedicated EN/PL update instructions: safe stop/save/backup, fixed target version, compatible migrations, verified replacement/recovery, readiness/version checks; keep models, user data and OS keys by default.
 3. [ ] Implement Windows AND Ubuntu scripted uninstall with preview, app-owned runtime cleanup and explicit optional model/credential removal. Preserve recordings/publications and avoid wholesale shared-cache/global-tool deletion.
 4. [ ] Deliver Windows PowerShell and Ubuntu 24.04/26.04 terminal bootstraps: one/few copyable README lines, no manual repo clone; install pinned app/deps and deliberately selected models, shared install/update/repair/uninstall paths and integrity-checked versioned payloads.

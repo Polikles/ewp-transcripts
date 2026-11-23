@@ -6,7 +6,7 @@ Local-first transcript workflow for podcasts and similar recordings: local GPU o
 
 ## Current status
 
-Version 0.20.0 is an internal preview on `main`. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
+Version 0.21.0 is an internal preview on `main`. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
 
 The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
 

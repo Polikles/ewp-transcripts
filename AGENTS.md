@@ -2,6 +2,15 @@
 
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
 
+## Active distribution implementation — 2026-11-23
+
+Owner authorizes executing the entire distribution plan until completion or a concrete need for
+owner input. Earlier planning-only holds are revoked. Follow docs/DISTRIBUTION_PLAN.md, opening
+TODO and the execution checkpoint. Implement versioning, managed install/update/uninstall,
+Windows/Ubuntu bootstrap, lifecycle checks and styled Windows graphical installer. Prepare
+concrete artifacts before any publication/signing question; do not stop at planning. Preserve
+accepted app/docs behavior, all artist archives and prior cloud spend; no new paid tests needed.
+
 ## Latest planning instruction — 2026-11-23
 
 Owner requests the next-step plan and TODO for versioning, update procedure, Windows/Ubuntu short

@@ -298,7 +298,6 @@ wheels = [
 
 [[package]]
 name = "ewp-transcripts"
-version = "0.20.0"
 source = { editable = "." }
 dependencies = [
     { name = "keyring" },

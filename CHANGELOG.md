@@ -4,6 +4,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.21.0 — 2026-11-23 (accepted workflow and bilingual manuals)
+
+- Consolidate the accepted changes since 0.20.0 into a distinct MINOR version. Use one version
+  source for package metadata and runtime reporting; remove the stale 0.2.0 fallback. Check lock
+  and package identity automatically. Prior test evidence keeps its actual original version.
+
+
 ### Added
 
 - Complete English and Polish user manuals: fifteen chapters per language covering installation,

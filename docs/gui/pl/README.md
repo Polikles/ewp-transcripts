@@ -1,6 +1,6 @@
 # Instrukcja użytkownika
 
-Instrukcja opisuje zatwierdzony interfejs wersji 0.20.0. Język interfejsu wybiera się osobno od języka nagrania. Wszystkie rozdziały są dołączone do programu i otwierają się bez internetu. Numeracja instrukcji odpowiada krokom widocznym u góry poszczególnych etapów. Podczas czytania pozostaw otwartą kartę programu.
+Instrukcja opisuje zatwierdzony interfejs wersji 0.21.0. Język interfejsu wybiera się osobno od języka nagrania. Wszystkie rozdziały są dołączone do programu i otwierają się bez internetu. Numeracja instrukcji odpowiada krokom widocznym u góry poszczególnych etapów. Podczas czytania pozostaw otwartą kartę programu.
 
 ## Zacznij tutaj
 

@@ -1,6 +1,7 @@
 """Release metadata and project licensing must remain synchronized."""
 
 import tomllib
+from importlib.metadata import version
 from pathlib import Path
 
 from ewp_transcripts import __version__
@@ -11,7 +12,13 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_release_version_and_license_metadata() -> None:
     metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
-    assert metadata["project"]["version"] == __version__
+    assert metadata["project"]["dynamic"] == ["version"]
+    version_source = ROOT / metadata["tool"]["hatch"]["version"]["path"]
+    assert f'__version__ = "{__version__}"' in version_source.read_text()
+    lock = tomllib.loads((ROOT / "uv.lock").read_text())
+    project = next(item for item in lock["package"] if item["name"] == "ewp-transcripts")
+    assert project["source"] == {"editable": "."}
+    assert version("ewp-transcripts") == __version__
     assert metadata["project"]["authors"] == [
         {"name": "Damian Szczech", "email": "szczech.dam+ewptranscript@gmail.com"}
     ]

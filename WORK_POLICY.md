@@ -142,3 +142,8 @@ Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
     data/models/keys by default and require explicit targeted removal. Current turn is planning,
     not implementation/release or permission for paid tests. Proposed next baseline 0.21.0; do not
     claim it is already shipped. Details in docs/DISTRIBUTION_PLAN.md and its checkpoint.
+
+23. Owner authorizes full distribution implementation2026-11-23: work through the agreed plan
+    until done or concrete missing information/action is required. Earlier planning-only holds
+    are revoked. Prepare reviewable artifacts and checks before any final publication/signing
+    decision. No new paid/model qualification campaign or artist-archive rebuild is implied.
