@@ -33,3 +33,12 @@ next; compilation alone does not qualify appearance. HF/OR dialog validation tes
 injected responses; no new provider/media/paid call. Docs/new HF help updated EN/PL; checklists
 prioritize visual review before owner installation. Use temp tool paths for final build, keep
 all intermediates in task root, then remove after content-free evidence/final handoff.
+
+Native run45199880102 PASS for88db221 (all new page/token/disk/icon tests). Downloaded/reviewed
+14 native PNGs, source artifact14831781188. Original render captured transparent content rather
+than Window.Background, so viewers displayed black; main Window itself uses cream. Explicit
+opaque root surfaces and a capture-alpha assertion fix evidence. Modal content margins also
+cropped the right edge when targeting content; wrap in a padded root Border. Visual review
+found folder action stretched and the model card too tall at CI's768px desktop; align compact
+buttons left, add input/action gap, compact model rows and combine size/terms link. Last Next
+includes the selected operation; no hidden install trigger. Re-run native previews before final.

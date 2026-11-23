@@ -19,6 +19,8 @@ All notable changes to EWP-transcripts are documented here.
   dialogs with paste-triggered/manual checks, status/error codes and OK confirmation; keep main
   pages credential-free. HF access enables a separate pyannote terms acknowledgment. OR remains
   optional and saves only through the existing OS credential mechanism during installation.
+- Compact the models page and keep folder actions aligned; capture opaque full-client native
+  previews, including complete credential dialogs.
 - Add concise HF help/full EN/PL access instructions and focused native navigation/gating/token/
   icon/visual checks. Cancel dependency/model work cooperatively, preserving the active app and
   downloaded cache. Keep reports below technical details and Close at the bottom-right.

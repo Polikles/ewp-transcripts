@@ -78,7 +78,7 @@ sealed partial class Wizard
     async Task TestCredentialModals(string? previews)
     {
         static Task<CredentialResult> Good(bool hf, string value, CancellationToken token) => Task.FromResult(new CredentialResult(true, "OK", "OK", "OK"));
-        var hfDialog = new CredentialDialog(this, true, Pl, Good);
+        var hfDialog = new CredentialDialog(this, true, true, Good);
         Assert(!hfDialog.CanAccept, "empty token cannot be accepted");
         hfDialog.Show(); await hfDialog.TestPaste("synthetic-read-token");
         Assert(hfDialog.CanAccept && hfDialog.Status == "OK" && hfDialog.TestAcceptedValue() == "synthetic-read-token", "paste automatically validates HF");
@@ -133,7 +133,10 @@ sealed partial class Wizard
         Directory.CreateDirectory(folder); window.UpdateLayout(); await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
         var target = (FrameworkElement)window.Content;
         var image = new RenderTargetBitmap((int)Math.Ceiling(target.ActualWidth), (int)Math.Ceiling(target.ActualHeight), 96, 96, PixelFormats.Pbgra32);
-        image.Render(target); var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
+        image.Render(target);
+        var pixel = new byte[4]; image.CopyPixels(new Int32Rect(5, 5, 1, 1), pixel, 4, 0);
+        Assert(pixel[3] == 255, "native preview has opaque real window background");
+        var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
         using var output = File.Create(Path.Combine(folder, name + ".png")); encoder.Save(output);
     }
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern uint ExtractIconEx(string file, int index, out IntPtr large, out IntPtr small, uint count);

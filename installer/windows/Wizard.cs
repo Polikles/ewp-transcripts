@@ -60,7 +60,7 @@ sealed partial class Wizard : Window
         ZipFile.ExtractToDirectory(embedded, Path.Combine(temporary, "payload"));
         using (var source = Assembly.GetExecutingAssembly().GetManifestResourceStream("models.json")!)
             catalog = JsonSerializer.Deserialize<Catalog>(source, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-        var shell = new Grid(); Content = shell;
+        var shell = new Grid { Background = Paper }; Content = shell;
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         shell.RowDefinitions.Add(new RowDefinition());
@@ -110,7 +110,7 @@ sealed partial class Wizard : Window
     internal static TextBlock Copy(string text, bool muted = false) => new() { Text = text, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 14), Foreground = muted ? Muted : Ink, FontSize = muted ? 12 : 14 };
     internal static Button ActionButton(string text, Action callback, bool secondary = false)
     {
-        var button = new Button { Content = text, Padding = new Thickness(16, 9, 16, 9), Margin = new Thickness(0, 0, 8, 0), MinHeight = 36, Background = ColorBrush(secondary ? "#E2E8EB" : "#355880"), Foreground = secondary ? Ink : Brushes.White, BorderThickness = new Thickness(0), Cursor = Cursors.Hand };
+        var button = new Button { Content = text, Padding = new Thickness(16, 9, 16, 9), Margin = new Thickness(0, 0, 8, 0), MinHeight = 36, Background = ColorBrush(secondary ? "#E2E8EB" : "#355880"), Foreground = secondary ? Ink : Brushes.White, BorderThickness = new Thickness(0), HorizontalAlignment = HorizontalAlignment.Left, Cursor = Cursors.Hand };
         var border = new FrameworkElementFactory(typeof(Border)); border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6)); border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty)); border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
         var presenter = new FrameworkElementFactory(typeof(ContentPresenter)); presenter.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center); presenter.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center); border.AppendChild(presenter);
         var template = new ControlTemplate(typeof(Button)) { VisualTree = border };
@@ -195,7 +195,8 @@ sealed partial class Wizard : Window
         body.Children.Add(Copy(OperationHelp, muted: true));
         body.Children.Add(Copy(operation == "install" ? T("Program installation folder", "Folder instalacji programu") : T("Installed program folder", "Folder zainstalowanego programu")));
         body.Children.Add(root);
-        body.Children.Add(ActionButton(T("Choose folder…", "Wybierz folder…"), () => { var picker = new OpenFolderDialog(); if (picker.ShowDialog(this) == true) root.Text = picker.FolderName; }, secondary: true));
+        var chooseFolder = ActionButton(T("Choose folder…", "Wybierz folder…"), () => { var picker = new OpenFolderDialog(); if (picker.ShowDialog(this) == true) root.Text = picker.FolderName; }, secondary: true);
+        chooseFolder.Margin = new Thickness(0, 8, 0, 0); body.Children.Add(chooseFolder);
         body.Children.Add(diskStatus); RefreshLocation();
         if (IsInstall)
         {
@@ -223,19 +224,19 @@ sealed partial class Wizard : Window
             var list = new StackPanel();
             foreach (var model in catalog.Models)
             {
-                var box = new CheckBox { IsChecked = true, IsEnabled = false, Content = new TextBlock { Text = model.Repository, TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 5, 0, 5) };
+                var box = new CheckBox { IsChecked = true, IsEnabled = false, Content = new TextBlock { Text = model.Repository, TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 2, 0, 2) };
                 list.Children.Add(box);
             }
-            body.Children.Add(Card(list));
-            body.Children.Add(Copy(T("Required space: ", "Potrzebne miejsce: ") + GB(catalog.Models.Sum(m => m.Bytes)) + " GB", muted: true));
-            body.Children.Add(Copy(T("Existing pinned model files are reused. Sentence data is prepared automatically.", "Istniejące pliki przypiętych modeli są używane ponownie. Dane językowe są przygotowywane automatycznie."), muted: true));
+            var modelCard = Card(list); modelCard.Padding = new Thickness(10); modelCard.Margin = new Thickness(0, 0, 0, 8); body.Children.Add(modelCard);
+            var spaceRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+            var space = Copy(T("Required space: ", "Potrzebne miejsce: ") + GB(catalog.Models.Sum(m => m.Bytes)) + " GB", muted: true); space.Margin = new Thickness(0, 6, 20, 6); spaceRow.Children.Add(space);
+            spaceRow.Children.Add(Link(T("Read the model terms", "Przeczytaj warunki modelu"), () => Open("https://huggingface.co/pyannote/speaker-diarization-community-1"))); body.Children.Add(spaceRow);
             var hfRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
             var enter = ActionButton(T("Enter Hugging Face token", "Podaj token Hugging Face"), () => EnterCredential(true), secondary: true); enter.IsEnabled = !hfValid; hfRow.Children.Add(enter);
             hfRow.Children.Add(ActionButton("(i)", ShowHfHelp, secondary: true));
             if (hfValid) hfRow.Children.Add(new TextBlock { Text = T("Token valid", "Token prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
             body.Children.Add(hfRow);
             LabelCheck(terms, T("I accepted pyannote terms on Hugging Face", "Zaakceptowałem warunki pyannote w Hugging Face")); terms.IsEnabled = hfValid; body.Children.Add(terms);
-            body.Children.Add(Link(T("Read the model terms", "Przeczytaj warunki modelu"), () => Open("https://huggingface.co/pyannote/speaker-diarization-community-1")));
             string? modelProblem = ModelSpaceProblem();
             if (modelProblem != null) { var warning = Copy(modelProblem); warning.Foreground = Error; body.Children.Add(warning); }
         }
@@ -244,8 +245,8 @@ sealed partial class Wizard : Window
         var keyRow = new StackPanel { Orientation = Orientation.Horizontal };
         var key = ActionButton(T("Enter OpenRouter key", "Podaj klucz OpenRouter"), () => EnterCredential(false), secondary: true); key.IsEnabled = !orValid; keyRow.Children.Add(key);
         if (orValid) keyRow.Children.Add(new TextBlock { Text = T("Key valid", "Klucz prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
-        optional.Children.Add(keyRow); body.Children.Add(Card(optional));
-        body.Children.Add(Copy(T("Next starts the selected operation: ", "Dalej rozpocznie wybraną operację: ") + OperationName(operation) + ".", muted: true));
+        optional.Children.Add(keyRow); var optionalCard = Card(optional); optionalCard.Padding = new Thickness(10); optionalCard.Margin = new Thickness(0, 8, 0, 0); body.Children.Add(optionalCard);
+
     }
 
     void RenderConfirmation()
@@ -314,7 +315,7 @@ sealed partial class Wizard : Window
         back.IsEnabled = !busy; language.IsEnabled = !busy;
         cancel.IsEnabled = !busy || (!(operation is "uninstall" or "rollback" && page == 3) && !File.Exists(CancelFile));
         next.Visibility = finished && (!successful || operation is "uninstall" or "rollback") ? Visibility.Collapsed : Visibility.Visible;
-        next.Content = finished ? T("Launch program", "Uruchom program") : page == 2 && !IsInstall ? OperationName(operation) : T("Next", "Dalej");
+        next.Content = finished ? T("Launch program", "Uruchom program") : page == 2 ? (IsInstall ? T("Next — ", "Dalej — ") + OperationName(operation) : OperationName(operation)) : T("Next", "Dalej");
         next.IsEnabled = !busy && (finished ? successful : page switch
         {
             0 => true,
@@ -439,8 +440,8 @@ sealed partial class Wizard : Window
     }
     void ShowHfHelp()
     {
-        var help = new Window { Owner = this, Title = T("Hugging Face token", "Token Hugging Face"), Width = 540, SizeToContent = SizeToContent.Height, ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner, Background = Paper, FontFamily = FontFamily, FontSize = 14 };
-        var panel = new StackPanel { Margin = new Thickness(24) }; help.Content = panel;
+        var help = new Window { Owner = this, Icon = Icon, ShowInTaskbar = false, Title = T("Hugging Face token", "Token Hugging Face"), Width = 540, SizeToContent = SizeToContent.Height, ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner, Background = Paper, FontFamily = FontFamily, FontSize = 14 };
+        var panel = new StackPanel(); help.Content = new Border { Background = Paper, Padding = new Thickness(24), Child = panel };
         panel.Children.Add(Heading(T("Before entering your token", "Przed podaniem tokenu")));
         panel.Children.Add(Copy(T("The token is used only during installation to download pyannote. It is not saved.", "Token jest używany tylko podczas instalacji do pobrania pyannote. Nie jest zapisywany.")));
         panel.Children.Add(Copy(T("1. Create a Hugging Face account and sign in.\n2. Open the pyannote model page, complete its access form and accept the terms.\n3. In Settings → Access Tokens, create a new read-only token (Read).\n4. Copy it into the installer and check access.", "1. Załóż konto Hugging Face i zaloguj się.\n2. Otwórz stronę modelu pyannote, wypełnij formularz dostępu i zaakceptuj warunki.\n3. W Settings → Access Tokens utwórz nowy token tylko do odczytu (Read).\n4. Wklej go do instalatora i sprawdź dostęp.")));

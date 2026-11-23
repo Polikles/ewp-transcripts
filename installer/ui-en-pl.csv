@@ -1,5 +1,6 @@
 ﻿ID,EN,PL,Context,Notes
 installer.ui.013a130627d5b339,Save report…,Zapisz raport…,Wizard.cs,
+installer.ui.045b64c49a3064c1,Next — ,Dalej — ,Wizard.cs,
 installer.ui.05418011a994f277,Cancelling safely… Downloaded cache files will remain.,Bezpieczne anulowanie… Pobrane pliki cache pozostaną.,Wizard.cs,
 installer.ui.07c03fbccec58123,Unexpected key-check response.,Nieprawidłowa odpowiedź testu klucza.,Credentials.cs credential error,
 installer.ui.0a606e4cbf2f2a9e,Enter OpenRouter key,Podaj klucz OpenRouter,Wizard.cs,
@@ -94,9 +95,7 @@ installer.ui.d615885f76874fe6,The token is used only during installation to down
 installer.ui.d65c76edf691f0fe,1. Action   ›   2. Installed program   ›   3. Confirm   ›   4. Result,1. Działanie   ›   2. Zainstalowany program   ›   3. Potwierdzenie   ›   4. Wynik,Wizard.cs,
 installer.ui.d7e0bc24e8da0dd5,Program installation folder,Folder instalacji programu,Wizard.cs,
 installer.ui.dd91d806ee770e63,Before entering your token,Przed podaniem tokenu,Wizard.cs,
-installer.ui.ddf9dd0be9910b82,Existing pinned model files are reused. Sentence data is prepared automatically.,Istniejące pliki przypiętych modeli są używane ponownie. Dane językowe są przygotowywane automatycznie.,Wizard.cs,
 installer.ui.e0be9bd2b4cd0fa4,Close this window to finish removing locked files.,"Zamknij to okno, aby zakończyć usuwanie zablokowanych plików.",Wizard.cs,
-installer.ui.e0c298b9a155d74e,Next starts the selected operation: ,Dalej rozpocznie wybraną operację: ,Wizard.cs,
 installer.ui.e0c85763bd95c9bf,Token valid,Token prawidłowy,Wizard.cs,
 installer.ui.e63c44f90f39d67f,Preparing removal preview…,Przygotowywanie planu usunięcia…,Wizard.cs,
 installer.ui.e63e558d6ff99dbf,Add the pinned local models to an installed program. Use an installer matching its version.,Doinstaluj przypięte modele lokalne do istniejącego programu. Użyj instalatora zgodnego z jego wersją.,Wizard.cs,

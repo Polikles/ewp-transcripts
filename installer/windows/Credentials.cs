@@ -70,12 +70,12 @@ sealed class CredentialDialog : Window
     public CredentialDialog(Window owner, bool forHf, bool polish,
         Func<bool, string, CancellationToken, Task<CredentialResult>>? checker = null)
     {
-        Owner = owner; hf = forHf; pl = polish; validator = checker ?? CredentialChecks.Check;
+        Owner = owner; Icon = owner.Icon; ShowInTaskbar = false; hf = forHf; pl = polish; validator = checker ?? CredentialChecks.Check;
         Title = hf ? "Hugging Face" : "OpenRouter";
         Width = 570; MinWidth = 460; SizeToContent = SizeToContent.Height;
         WindowStartupLocation = WindowStartupLocation.CenterOwner; ResizeMode = ResizeMode.NoResize;
         Background = Wizard.Paper; Foreground = Wizard.Ink; FontFamily = new FontFamily("Segoe UI"); FontSize = 14;
-        var body = new StackPanel { Margin = new Thickness(24) }; Content = body;
+        var body = new StackPanel(); Content = new Border { Background = Wizard.Paper, Padding = new Thickness(24), Child = body };
         body.Children.Add(Wizard.Heading(hf ? T("Hugging Face read token", "Token odczytu Hugging Face") : T("OpenRouter API key", "Klucz API OpenRouter")));
         body.Children.Add(Wizard.Copy(hf
             ? T("Used only during installation to download pyannote. It is not saved.", "Używany tylko podczas instalacji do pobrania pyannote. Nie jest zapisywany.")
