@@ -58,3 +58,31 @@ there is no source/runtime failure and no delivered archive was touched. Build n
 clean source commit into a new0.22.2 delivery. EN/PL installation docs/offline mirrors and focused
 GUI-first checklist updated; installer-only copy reference118 pairs, broad review remains deferred.
 Native broker/path/UI tests and screenshots still await CI; no native installation PASS claimed.
+
+
+Final source: d51b1068aefc347babc8277b28b08642e025bbc9. Native run45238109373 PASS:
+https://github.com/Polikles/ewp-transcripts/actions/runs/45238109373 . Native report records20
+named coverage groups including actual authenticated PowerShell/EXE broker transport. Both real
+filesystem tests PASS (no skip): D: child host validation with no target writes, and tiny model-free
+Program Files launcher using external per-user lock. This is NOT a full transcription-app install
+or interactive medium-account UAC/model qualification. No real token/key/audio/provider used.
+
+Local final gates:1127 tests,2 native-only skips on Linux, mypy116; installer46 PASS; integration17
+PASS. Final clean-source build succeeded. All six local artifact SHA256 values match the native-
+tested CI values byte-for-byte. New path: ../deliveries/ewp-0.22.2-installers. EXE digest:
+efd99684b69fa5c90d6741471bd5c638cab8483c0e3803d9f106cf46151570b5.
+Native preview ZIP digest was verified against Actions; all19 PNGs visually inspected for radio
+alignment, centered header/icon, install/detected/missing paths, OS/VC warnings, vector info/help,
+models, masked dialogs and progress/result/removal views. preview.html and preview-only ZIP allow
+review without execution; checklist/START-HERE-PL/installer-only118-pair reference included.
+Content-free exact report/digests: 2026-11-23-installer-location-evidence.json; copy DELIVERY.json
+alongside artifacts.0.22.0/.1 checksum entries and both artist ZIP digests reverified unchanged.
+
+Next owner step is the corrected wizard GUI review. Existing Git checkout cannot be detected as
+managed installation; do not adopt/delete it. After appearance acceptance, actual Win11 install
+and interactive UAC/local-model lifecycle remain owner tests. Full installer descriptions EN/PL
+are deliberately deferred until the GUI is finished, not a request to edit the CSV immediately.
+No public online-bootstrap activation, signing, paid test or artist rebuild performed.
+
+Cleanup complete: task SDK build servers stopped, own /tmp/ewp-installer-location.FeRwQy removed.
+No task runtime remains. Final delivery and historical archives remain outside Git.

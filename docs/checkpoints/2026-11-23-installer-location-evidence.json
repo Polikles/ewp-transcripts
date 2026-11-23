@@ -1,0 +1,68 @@
+{
+  "application_version": "0.22.2",
+  "source_commit": "d51b1068aefc347babc8277b28b08642e025bbc9",
+  "run_id": 45238109373,
+  "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45238109373",
+  "native_report": {
+    "result": "PASS",
+    "platform": "Microsoft Windows NT 10.0.26100.0",
+    "version": "0.22.2",
+    "checks": [
+      "embedded bundle integrity",
+      "framed SVG and executable icon",
+      "operation-specific navigation",
+      "25 GB folder-volume gate",
+      "structured CPU OS disk GPU-driver VC checks",
+      "cached host-result EN/PL rerender",
+      "local-model/HF-terms gates",
+      "masked HF/OR paste validation",
+      "stale credential response rejection",
+      "matching-version model addition",
+      "removal preview gate",
+      "responsive native page previews",
+      "aligned radio glyph and text centers",
+      "action reset and automatic maintenance discovery",
+      "conditional Visual C++ help",
+      "Windows release warning",
+      "accessible vector information icon",
+      "readable lossless credits",
+      "authenticated same-user permission broker",
+      "no installation/model/provider operation; broker transport probe only"
+    ]
+  },
+  "artifact_sha256": {
+    "EwP-0.22.2-windows-x64.zip": "bdb4a0de027f84dfb412ca676ac980f44cf7cc07d154f9de3108e2aad8707772",
+    "EwP-0.22.2-ubuntu-x64.zip": "abbc025bbb26f10194f6ee0dc72f9de44fc93d90171ec493af427c931514b4b5",
+    "EwP-Setup-0.22.2.exe": "efd99684b69fa5c90d6741471bd5c638cab8483c0e3803d9f106cf46151570b5",
+    "EwP-0.22.2-ubuntu-x64.tar.gz": "aba0885fec100c8f31f0518ffed2ca43095fe25c58169f24222a10fa2788f46e",
+    "Install-EwP-0.22.2.ps1": "140b108361dc84a69f4d3c6a6dd9f8a8d97fc4806e2e77cf65bb91d7f0fc68df",
+    "Install-EwP-0.22.2.sh": "8a548ce06f33b2c84cd13165c90523f9a823c8f3a22ee89b8844c3c77f358ee6"
+  },
+  "preview_count": 19,
+  "preview_zip_sha256": "5ff0a05027c740bd410344db592c03d6619358a322d0686af25bfebc3f9d3252",
+  "native_preview_artifact": {
+    "id": 14848804860,
+    "digest": "sha256:127addb438d8303d77e95008e0552826aaba3fed3159c8a1c9e05c758d2c5b62"
+  },
+  "visual_previews_reviewed": true,
+  "python_tests": 1127,
+  "python_native_only_skips_on_linux": 2,
+  "installer_python_tests": 46,
+  "native_filesystem_tests": 2,
+  "native_filesystem_tests_skipped": 0,
+  "media_integrations": 17,
+  "mypy_source_files": 116,
+  "local_artifacts_match_ci": true,
+  "native_installation": "not performed; actual Win11 install/UAC consent from normal account/local models remain owner acceptance after GUI review",
+  "credentials": "synthetic broker/modal fixtures only; no real HF/OR keys used",
+  "models_downloaded": false,
+  "new_paid_asr_calls": 0,
+  "retained_cloud_spend_usd": "0.0291461230985028369",
+  "old_artifacts": {
+    "0.22.0": "all frozen checksum entries verified unchanged",
+    "0.22.1": "all frozen checksum entries verified unchanged",
+    "ewp-gui-artist-review-2026-11-19.zip": "1265a795495f37dd0e18b88d57a80bee502dbb707e55289a55551f17b451f6f1",
+    "ewp-gui-artist-review-2026-11-22.zip": "634b399903d31e2b970f6fbc9a85889ff1d67fda9bd511985e6815aea267ef3b"
+  },
+  "full_installer_copy_review": "deferred until GUI approval"
+}

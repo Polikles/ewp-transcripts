@@ -4,13 +4,17 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
-Active0.22.2: fix owner feedback on installer0.22.1. Follow opening TODO and
-[location/state checkpoint](docs/checkpoints/2026-11-23-installer-location-state.md).
-Valid D:\Transcripts-test-01 is blocked by an arbitrary path-depth guard. Maintenance needs
-real autodetection/reset; Program Files needs actual permission handling. Also radio alignment,
-modern controls, conditional VC help, Windows26H2 display/older-version warnings, info icon and
-readable credits. Defer full EN/PL wording review until GUI approval. Preserve old packages,
-artist archives and accepted application workflow; no paid/model test campaign.
+Current delivery: **0.22.2 installer location/state/presentation fixes**, sourced51b106.
+[Checkpoint](docs/checkpoints/2026-11-23-installer-location-state.md) and its evidence record
+Windows drive-child/Program Files path handling, same-account permission worker/external launch
+lock, maintenance discovery/reset, centered modern controls, Windows release warnings, conditional
+VC help, information icon and readable credits.1127 Python tests/mypy116,46 installer cases,
+17 integrations, native WPF/broker and2 real Windows filesystem tests PASS. Final native
+run45238109373 passes; six local artifact hashes match CI exactly.19 native previews visually
+reviewed. Files outside Git: ../deliveries/ewp-0.22.2-installers (EXE, scripts, preview-only ZIP/
+gallery/checklist). Next: owner GUI review, then actual native Win11 installation/UAC/local-model
+acceptance. Full installer EN/PL wording review waits until GUI completion. Preserve0.22.0/.1
+and both artist archives; their checksums were reverified. No paid/model campaign performed.
 
 Earlier handoff retained for reference.
 

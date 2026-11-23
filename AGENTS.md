@@ -7,8 +7,10 @@ This file defines implementation rules for coding agents working on **ewp-transc
 Follow opening TODO/WORK_STATUS and docs/checkpoints/2026-11-23-installer-location-state.md.
 Owner0.22.1 feedback is active: Windows folder validation/permissions, autodetection and operation
 reset, aligned modern controls, conditional VC help, DisplayVersion warnings, info icon, credits.
-Full installer EN/PL text review waits until GUI completion. Preserve earlier artifacts; verify
-native behavior/screenshots and exact artifact hashes, not compile alone. No paid/model campaign.
+Full installer EN/PL text review waits until GUI completion.0.22.2 delivered fromd51b106; native
+run45238109373 PASS,19 previews inspected and six local artifact hashes match CI. Owner GUI review
+precedes actual Win11 install/UAC/local-model acceptance. Preserve earlier artifacts and app passes;
+no paid/model campaign. See current checkpoint/evidence; do not repeat completed implementation.
 
 ## Active installer feedback — 2026-11-23
 
