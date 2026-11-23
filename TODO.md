@@ -3,7 +3,22 @@
 Updated: 2026-11-23. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 
-## Next package: versioning, updates and distribution — 2026-11-23
+## Active installer usability correction — 2026-11-23
+
+Owner rejected the0.22.0 graphical preview before installing. Preserve that immutable package;
+no native installation PASS is claimed. New build0.22.1. Follow the dedicated checkpoint.
+
+- [x] Center the existing framed EwP mark in EXE/Explorer/taskbar/window/header; embed a real multi-size ICO. Restore EN/PL subtitle below EwP Transcripts.
+- [x] Replace the long form with operation-specific pages and Back/Next/Cancel. First screen: language and radio operations. Include adding pinned models to an existing install; no irrelevant bundle picker during installation.
+- [x] Second install page: Program installation folder; automatically validate free space on that volume after selection, minimum25GB (20GB +5GB margin), and block Next when insufficient. Select existing location for maintenance, with relevant operation explanations.
+- [x] Host checks on the relevant page: exact short EN/PL description and Check this computer; structured CPU model/OS/free+required GB/GPU+driver/VC++ rows, OK states; redraw cached results immediately on language change. Replace direct VC EXE download with a Microsoft documentation download link.
+- [x] Local models/keys page: exact owner labels, fixed checked/disabled model list shown only when selected, explicit model disk need/cache location. No redundant cloud-engine comment or download checkbox.
+- [x] HF masked modal: paste auto-check plus Check token and OK; status/code; validated token remains transient, main button disables and shows Token valid; enable separate pyannote terms acknowledgment only after access succeeds. (i) popup has concise account/terms/read-token steps and full repo instructions link.
+- [x] OR masked modal with auto/manual key check, OK and valid status; optional OS-store save only during install. No credentials displayed/persisted in plaintext or upload consent implied.
+- [x] Footer: licenses/artwork link bottom-left on every page; report link below technical log; navigation/Close bottom-right. Real operation progress/outcome screens.
+- [ ] New focused native UI/gating/localization/modal/icon tests and visual previews; normal gates, canonical clean artifacts, exact CI hash comparison, EN/PL copy/docs/checklist/checkpoints; commit/push0.22.1. No paid API/model campaign or artist archive changes.
+
+## Previous package: versioning, updates and distribution — 2026-11-23
 
 Owner now authorizes implementing this full package (2026-11-23). Follow the execution checkpoint; planning-only holds are revoked.
 Detailed scope and acceptance: [distribution plan](docs/DISTRIBUTION_PLAN.md). Current program

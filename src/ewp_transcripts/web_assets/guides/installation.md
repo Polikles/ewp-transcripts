@@ -2,35 +2,62 @@
 
 ## Choose installation mode
 
-1. For the Windows graphical installer, run `EwP-Setup-0.22.0.exe` and follow the wizard below.
+1. For the Windows graphical installer, run `EwP-Setup-0.22.1.exe` and follow the wizard below.
 2. For terminal installation, download the Windows ZIP or Ubuntu tar.gz/ZIP and run the short commands below. No manual repository checkout or preinstalled Python/uv is required.
 3. Keep an existing source checkout if that is how you develop/run the app; use the source-update section instead of treating it as a managed installation.
 
-The managed installer is new in 0.22.0. Current test artifacts are provided with the owner handoff and by the repository's Installer build and Windows startup Actions workflow. Public online bootstrap URLs are activated only when the matching versioned release is published. Do not try a guessed download URL. The GUI EXE is currently unsigned; no code-signing certificate has been supplied.
+Managed installation was introduced in0.22.0;0.22.1 corrects the graphical wizard. Current test artifacts are provided with the owner handoff and by the repository's Installer build and Windows startup Actions workflow. Public online bootstrap URLs are activated only when the matching versioned release is published. Do not try a guessed download URL. The GUI EXE is currently unsigned; no code-signing certificate has been supplied.
 
 Current targets are Windows 11 x64 and Ubuntu 24.04/26.04, including WSL2. Existing application workflow tests on Windows/WSL remain accepted. The new managed lifecycle has real Ubuntu VM evidence; native Windows 11 installation/removal acceptance is separate from compiling or launching the wizard on a Windows CI runner. Reference GPU: RTX 3090 24 GB. At least 8 GB on another NVIDIA GPU remains an unqualified expectation.
 
 ## Windows wizard
 
-Run the EXE from a normal user account. It includes its own GUI runtime and the checked app bundle, not multi-GB speech models. Its host test can prepare a small temporary Python installer runtime and needs network access. Check OS/architecture, disk, NVIDIA driver when choosing local ASR, and Microsoft Visual C++ x64 runtime; a button opens the Microsoft prerequisite installer. Install the NVIDIA host driver separately when missing.
+Run `EwP-Setup-0.22.1.exe` from a normal user account. It embeds the application bundle,
+its own graphical runtime and the centered framed EwP icon, not multi-GB model data.
 
-Choose an empty application directory, normally `%LOCALAPPDATA%\EwPTranscripts`, separate from recordings. An existing registered managed location is offered automatically. Keep the same location for update/repair. A non-managed nonempty directory is rejected, so the old Git checkout is not overwritten.
+1. **Action and language.** Select English/Polski and one radio action: Install, Update, Repair,
+   Add local models, Restore previous version or Uninstall. The next screen follows that choice.
+2. **Folder and computer.** For Install, choose **Program installation folder**, separate from
+   recordings and the old Git checkout. Free space on that volume is checked automatically;
+   Next is blocked below **25 GB** (20 GB installation plus5 GB free margin). Run **Check this
+   computer** for CPU model, OS, disk, NVIDIA GPU/driver and Visual C++ readiness. Results use
+   OK and change language immediately with the language selector. The Visual C++ link opens
+   Microsoft's instructions; it does not trigger a direct executable download. Install a missing
+   NVIDIA driver separately. Host tests prepare a small private Python runtime if needed.
+3. **Local models and keys.** Select **Use local models on my GPU…** to show the fixed checked
+   model list and required space (about8.4 GB before cache reuse, plus sentence data). Existing
+   exact files are reused; the model-cache volume is checked separately. Use **Enter Hugging Face
+   token** to open a masked dialog. Pasting checks automatically; **Check token** repeats it and
+   **OK** accepts a valid result. The main page then shows Token valid and enables the separate
+   pyannote terms acknowledgment. The (i) popup gives account/access/read-token steps and a link
+   to [full HF instructions](https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/HUGGINGFACE_ACCESS.md). The token is transient.
+   The optional OpenRouter key has the same masked/checked flow. Its main-page description explains
+   that it can be configured later. A confirmed key is saved deliberately in the OS store only
+   during installation; no audio or cloud-use consent is granted.
+4. **Installation and result.** Next starts the selected operation. The custom gear and stage
+   feedback show activity. Back/Next/Cancel form the navigation; cancellation during preparation
+   stops child work safely and preserves the prior active program and downloaded cache.
+   The short final activation/removal steps must finish before closing. After success, launch
+   from the wizard or desktop shortcut. Licenses/artwork stays bottom-left on every screen;
+   Save report is a link directly below Technical details/log, with Close bottom-right.
 
-Select local GPU models to prepare pinned ASR, PL/EN alignment, diarization and sentence data. Accept the pyannote model's terms in your HF account, confirm the model download and enter a read token privately. Complete cached snapshots are reused; leaving the token blank is allowed when everything required is already present. A failed HF access check explains token/terms/network issues before model download. The token is transient and is not saved by the installer.
+Maintenance asks for the existing managed location. Update uses the embedded target version;
+Repair and Add local models require a matching installed version so they do not silently upgrade
+an older installation. Add local models uses the same pinned model/access checks. Rollback omits
+model/key forms. Uninstall shows a removal preview and default-preserve model/key choices before
+its explicit confirmation. Windows Add/Remove Programs opens this matching wizard.
 
-Without local models, use the app for existing-result review/export or choose OpenRouter as the recording's ASR engine. Local GPU remains the app's normal default; cloud-only installation does not silently grant an upload consent or change every recording's engine.
-
-The OpenRouter field is optional. Checking it sends only a read-only connection/authentication request, no audio. Installing with a filled key field deliberately saves that key in the same OS store the app uses. There is no plaintext fallback. In the app, use the saved-key action when you want to activate it; upload/paid-operation consent remains separate. Local use needs no OR key. See [Settings](settings.md).
-
-Choose Install, Update, Repair, Restore previous version or Uninstall. Continue shows stage feedback using the custom gear, with diagnostics under Technical details/log. Host checks are summarized separately. Save report preserves sanitized diagnostics. Keep the installer open while work is in progress. After success, launch the app or use the desktop shortcut; Windows Add/Remove Programs provides the matching uninstaller.
+Without local models, use OpenRouter ASR or review/export existing results; the program's normal
+recording default remains local GPU. OR is optional and never required for local work. No token
+or key is written to a profile, report or plaintext fallback. See [Settings](settings.md).
 
 ## Terminal installation from the downloaded package
 
 Windows PowerShell, from the directory containing the downloaded ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.22.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.22.0-windows-x64.zip
+Expand-Archive .\EwP-0.22.1-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.22.1-windows-x64.zip
 ```
 
 Add `-Local -AcceptModelTerms` after accepting the upstream gated-model terms to prepare local models. The token prompt is hidden; blank can reuse complete models. Add `-SaveOpenRouterKey` only if you want a separate hidden prompt and explicit OS-store save. `-Root 'D:\Apps\EwP'` chooses a custom empty location. The execution-policy override applies to this invocation only. Keep filenames/paths quoted when they contain spaces.
@@ -39,13 +66,13 @@ Ubuntu 24.04/26.04, from the downloaded tar.gz directory:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.22.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.22.1-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Add `--local --accept-model-terms` for local models, `--save-openrouter-key` for an optional hidden OR prompt, or `--root "$HOME/Apps/EwP"` for a custom directory. Missing Ubuntu prerequisites can be installed with an explicit sudo prompt. Do not install a Linux display driver inside WSL; the Windows NVIDIA driver provides WSL CUDA. A bare-metal Ubuntu compatibility claim requires actual execution evidence, not inference from WSL alone.
 
-Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.22.0.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
+Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.22.1.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
 
 ## Managed update and rollback
 

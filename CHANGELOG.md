@@ -4,6 +4,26 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.22.1 — 2026-11-23 (installer usability correction)
+
+- Replace the rejected long installer form with operation-specific screens, language/radio action
+  selection, Back/Next/Cancel, folder checks, models/keys, progress and completion. Add local models
+  to an existing matching-version install without an implicit application upgrade.
+- Reuse the accepted centered framed EwP vector for the header/window and embed a real seven-size
+  ICO in the EXE. Restore the EN/PL subtitle and persistent licenses/artwork link.
+- Check the selected install volume automatically and block a fresh install below25GB (20GB plus
+  5GB margin). Return structured CPU model/OS/disk/GPU+driver/VC++ data; rerender cached results on
+  language change and use OK statuses. Link to Microsoft's download instructions, never directly
+  trigger a redistributable download.
+- Show the fixed pinned-model list and public pinned-snapshot disk sizes. Mask HF/OR credential
+  dialogs with paste-triggered/manual checks, status/error codes and OK confirmation; keep main
+  pages credential-free. HF access enables a separate pyannote terms acknowledgment. OR remains
+  optional and saves only through the existing OS credential mechanism during installation.
+- Add concise HF help/full EN/PL access instructions and focused native navigation/gating/token/
+  icon/visual checks. Cancel dependency/model work cooperatively, preserving the active app and
+  downloaded cache. Keep reports below technical details and Close at the bottom-right.
+
+
 ## 0.22.0 — 2026-11-23 (managed installer acceptance build)
 
 ### Added

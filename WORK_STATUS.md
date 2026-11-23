@@ -4,6 +4,15 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
+Active: owner rejected0.22.0 installer UI before installation. Implement the complete
+[usability correction](docs/checkpoints/2026-11-23-installer-wizard-feedback.md), opening TODO,
+and new0.22.1 build. Prior app/manual passes retained;0.22.0 artifact frozen, native install not
+accepted. Split pages/operation routing, centered icon/header/subtitle, disk/host data and masked auto-checked
+modals are implemented.1111 tests/mypy116 and17 integrations PASS. Next: native UI self-tests
+and inspect PNG previews, then clean0.22.1 artifacts; do not hand over on compile alone. No artist/paid/model campaign.
+
+Earlier delivery follows for reference.
+
 Current delivery: **0.22.0 managed-installer acceptance build**. Source baseline0.21.0 is
 committed. Terminal Windows/Ubuntu installers, ownership-aware update/rollback/removal, styled
 standalone Windows wizard, EN/PL instructions and focused native checklist are implemented.

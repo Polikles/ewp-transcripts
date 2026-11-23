@@ -494,3 +494,158 @@ def test_installed_ubuntu_uninstall_uses_existing_python_offline(tmp_path):
     assert lines[0] == str(root / "tools/python")
     assert "--offline" in lines
     assert lines[-2:] == ["--root", str(root)]
+
+
+def test_host_checks_are_structured_and_use_selected_volume_and_25gb_margin(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    class Key:
+        def __init__(self, path):
+            self.path = path
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    registry = SimpleNamespace(
+        HKEY_LOCAL_MACHINE=1,
+        OpenKey=lambda hive, path: Key(path),
+        QueryValueEx=lambda key, name: (
+            {"ProcessorNameString": "Owner CPU model", "Installed": 1, "Version": "v14.44"}[name],
+            1,
+        ),
+    )
+    monkeypatch.setitem(sys.modules, "winreg", registry)
+    monkeypatch.setattr(manager.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(manager.platform, "machine", lambda: "AMD64")
+    monkeypatch.setattr(manager.platform, "release", lambda: "11")
+    monkeypatch.setattr(manager.platform, "version", lambda: "10.0.26100")
+    monkeypatch.setattr(manager.shutil, "which", lambda tool: "nvidia-smi.exe")
+    monkeypatch.setattr(
+        manager.subprocess,
+        "run",
+        lambda *a, **kw: SimpleNamespace(returncode=0, stdout="NVIDIA Test GPU, 580.00\n"),
+    )
+    free = 25_000_000_000
+    probed = []
+
+    def usage(path):
+        probed.append(path)
+        return SimpleNamespace(free=free)
+
+    monkeypatch.setattr(manager.shutil, "disk_usage", usage)
+    root = tmp_path / "selected-volume" / "installation"
+    report = manager.host_report(root, False)
+    rows = {r["code"]: r for r in report["checks"]}
+    assert report["ready"] is True
+    assert probed == [tmp_path]
+    assert rows["architecture"]["context"]["cpu_model"] == "Owner CPU model"
+    assert rows["platform"]["context"]["name"] == "Windows 11 (10.0.26100)"
+    assert rows["gpu"]["context"]["devices"] == [{"name": "NVIDIA Test GPU", "driver": "580.00"}]
+    assert rows["disk"]["context"] == {
+        "free_bytes": free,
+        "required_bytes": free,
+        "installation_bytes": 20_000_000_000,
+        "reserve_bytes": 5_000_000_000,
+    }
+    free -= 1
+    assert manager.host_report(root, False)["ready"] is False
+
+
+def test_cancel_interrupts_a_quiet_dependency_child_without_waiting_for_output(tmp_path):
+    import threading
+    import time
+
+    marker = tmp_path / "cancel"
+    started = tmp_path / "started"
+
+    def request():
+        deadline = time.monotonic() + 5
+        while not started.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        marker.write_text("cancel")
+
+    thread = threading.Thread(target=request)
+    thread.start()
+    token = manager.CANCEL_FILE.set(marker)
+    begin = time.monotonic()
+    try:
+        with pytest.raises(manager.InstallError, match="INSTALL_CANCELLED"):
+            manager.run(
+                [
+                    sys.executable,
+                    "-c",
+                    "from pathlib import Path;import time;"
+                    "Path('started').write_text('yes');time.sleep(60)",
+                ],
+                cwd=tmp_path,
+                environment=dict(os.environ),
+            )
+    finally:
+        manager.CANCEL_FILE.reset(token)
+        thread.join(timeout=6)
+    assert time.monotonic() - begin < 5
+
+
+def test_cancelled_update_discards_candidate_and_keeps_active_version(
+    tmp_path, lifecycle, monkeypatch
+):
+    root, _ = lifecycle
+    first = install(root, bundle(tmp_path, "1.0.0"))
+    original = manager.run
+    marker = tmp_path / "cancel"
+
+    def run(command, **kwargs):
+        if "sync" in command:
+            marker.write_text("cancel")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(manager, "run", run)
+    token = manager.CANCEL_FILE.set(marker)
+    try:
+        with pytest.raises(manager.InstallError, match="INSTALL_CANCELLED"):
+            install(root, bundle(tmp_path, "1.1.0"))
+    finally:
+        manager.CANCEL_FILE.reset(token)
+    assert manager.load_state(root)["active"] == first["active"]
+    assert manager.app_python(root / first["active"]).exists()
+    assert len(list((root / "versions").iterdir())) == 1
+
+
+def test_real_icon_contains_all_windows_sizes_and_model_catalog_matches_pins():
+    import struct
+    import tomllib
+
+    data = (ROOT / "installer/windows/EwP.ico").read_bytes()
+    assert struct.unpack_from("<HHH", data) == (0, 1, 7)
+    sizes = []
+    for i in range(7):
+        width, height, _, _, planes, bits, size, offset = struct.unpack_from(
+            "<BBBBHHII", data, 6 + i * 16
+        )
+        sizes.append(width or 256)
+        assert width == height and planes == 1 and bits == 32
+        assert data[offset : offset + 8] == b"\x89PNG\r\n\x1a\n"
+        assert offset + size <= len(data)
+    assert sizes == [16, 24, 32, 48, 64, 128, 256]
+    config = tomllib.loads((ROOT / "src/ewp_transcripts/resources/default-config.toml").read_text())
+    models = json.loads((ROOT / "installer/models.json").read_text())["models"]
+    assert len(models) == 4
+    assert models[0]["revision"] == config["models"]["asr_revision"]
+    assert models[1]["revision"] == config["models"]["alignment_revision"]
+    assert models[2]["revision"] == config["models"]["english_alignment_revision"]
+    assert models[3]["revision"] == config["diarization"]["model_revision"]
+    assert all(m["bytes"] == sum(m["files"].values()) for m in models)
+
+
+def test_repair_cannot_silently_upgrade_an_existing_install(tmp_path, lifecycle, capsys):
+    root, _ = lifecycle
+    original = install(root, bundle(tmp_path, "1.0.0"))
+    code = manager.main(
+        ["repair", "--root", str(root), "--bundle", str(bundle(tmp_path, "1.1.0")), "--yes"]
+    )
+    assert code == 2
+    assert "choose update explicitly" in capsys.readouterr().out
+    assert manager.load_state(root)["active"] == original["active"]

@@ -36,3 +36,13 @@ acceptance build is identified as such; code signing requires a suitable certifi
 approved application terminology workbook. Technical child-process output remains original for
 diagnostics; normal wizard controls/stages have both languages. The original vector brand assets
 are embedded directly; no replacement artwork is generated.
+
+
+0.22.1 uses operation-specific pages and separate masked credential dialogs. `WizardTests.cs`
+exercises navigation/disk/host-language/model/credential gates with synthetic data and no worker
+or network invocation; `--preview-dir` renders native WPF screenshots, including the shell-extracted
+EXE icon. `EwP.ico` is derived from the accepted framed SVG at seven sizes. Optional regeneration
+uses `tools/build_installer_icon.py` with system librsvg/cairo; normal builds need neither because
+the derived ICO is committed. Public pinned-model file sizes/revisions are in `installer/models.json`;
+this is a fixed default set, not a model catalog expansion. Cancel uses a transient marker read by
+the common manager; child work stops while prior active installation and downloaded cache remain.

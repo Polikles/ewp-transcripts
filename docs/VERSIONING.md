@@ -13,7 +13,9 @@ Every identifiable build handed over for installation/manual testing has a disti
 Do not overwrite published artifacts or retag an existing version. The source SHA supplements the
 version. Disposable uncommitted prototypes are explicitly marked source_dirty and are never
 presented as a final installation/release. Local temporary version 0.22.1 used in lifecycle tests
-is not a published release and must not be invented as historical delivery.
+was only a simulated version and must not be invented as historical delivery. The later actual
+0.22.1 installer usability handoff has its own source/artifacts; that older simulation does not
+qualify it.
 
 For a new handoff:
 

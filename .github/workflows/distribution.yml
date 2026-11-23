@@ -55,7 +55,8 @@ jobs:
           Get-Content SHA256SUMS.txt
           $exe=(Get-ChildItem EwP-Setup-*.exe).FullName
           $report=Join-Path $PWD 'windows-self-test.json'
-          $p=Start-Process -FilePath $exe -ArgumentList @('--self-test','--self-test-report',"`"$report`"") -Wait -PassThru
+          $previews=Join-Path $PWD 'previews'
+          $p=Start-Process -FilePath $exe -ArgumentList @('--self-test','--self-test-report',"`"$report`"",'--preview-dir',"`"$previews`"") -Wait -PassThru
           if ($p.ExitCode -ne 0) { if(Test-Path $report){Get-Content $report}; throw 'Windows wizard startup failed' }
           $result=Get-Content $report -Raw|ConvertFrom-Json
           if($result.result -ne 'PASS'){throw 'No passing self-test report'}
@@ -71,5 +72,7 @@ jobs:
         if: always()
         with:
           name: native-windows-startup-evidence
-          path: installers/windows-self-test.json
+          path: |
+            installers/windows-self-test.json
+            installers/previews/
           if-no-files-found: warn

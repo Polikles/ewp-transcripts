@@ -153,3 +153,8 @@ Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
     and content-free evidence are in the execution checkpoint. Owner Windows11 native installer
     acceptance is still required; CI startup/compilation do not qualify local GPU/model install.
     Online bootstrap URLs require actual matching release publication; never claim them live early.
+
+25. Owner installer feedback2026-11-23 rejects0.22.0 preview before installation. Complete the
+    detailed0.22.1 usability checklist and inspect native rendered previews before a new handoff.
+    Preserve old artifacts and app acceptance; no full workflow/paid requalification. HF/OR masked
+    modal checks never imply audio consent, credentials stay transient until deliberate OS save.

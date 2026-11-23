@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import contextvars
 import getpass
 import hashlib
 import json
 import os
 import platform
+import queue
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import uuid
 import zipfile
@@ -20,10 +23,41 @@ from pathlib import Path
 from typing import Any
 
 MAGIC = "ewp-transcripts-managed-v1"
+CANCEL_FILE: contextvars.ContextVar[Path | None] = contextvars.ContextVar(
+    "installer_cancel_file", default=None
+)
 
 
 class InstallError(ValueError):
     pass
+
+
+def check_cancelled() -> None:
+    marker = CANCEL_FILE.get()
+    if marker is not None and marker.exists():
+        raise InstallError(
+            "INSTALL_CANCELLED: Operation cancelled; previous active app is preserved"
+        )
+
+
+def stop_child(process: subprocess.Popen[str]) -> None:
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill.exe", "/PID", str(process.pid), "/T", "/F"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    else:
+        import signal
+
+        with contextlib.suppress(ProcessLookupError):
+            os.killpg(process.pid, signal.SIGTERM)
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
 
 
 def emit(stage: str, message: str, **values: Any) -> None:
@@ -184,6 +218,7 @@ def run(
     command: list[str], *, cwd: Path, environment: dict[str, str], capture: bool = False
 ) -> str:
     # Never print command arguments/environment: credentials can be present only in child stdin/env.
+    check_cancelled()
     process = subprocess.Popen(
         command,
         cwd=cwd,
@@ -193,11 +228,30 @@ def run(
         errors="replace",
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        start_new_session=os.name != "nt",
     )
     collected: list[str] = []
     assert process.stdout is not None
+    lines: queue.Queue[str | None] = queue.Queue()
+
+    def read_lines() -> None:
+        try:
+            for line in process.stdout:
+                lines.put(line)
+        finally:
+            lines.put(None)
+
+    reader = threading.Thread(target=read_lines, daemon=True)
+    reader.start()
     try:
-        for line in process.stdout:
+        while True:
+            check_cancelled()
+            try:
+                line = lines.get(timeout=0.1)
+            except queue.Empty:
+                continue
+            if line is None:
+                break
             for name in ("HF_TOKEN", "OPENROUTER_API_KEY"):
                 if environment.get(name):
                     line = line.replace(environment[name], "[redacted]")
@@ -207,14 +261,10 @@ def run(
                 emit("log", line.rstrip())
         code = process.wait()
     except BaseException:
-        process.terminate()
-        try:
-            process.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait()
+        stop_child(process)
         raise
     finally:
+        reader.join(timeout=2)
         process.stdout.close()
     if code:
         raise InstallError(
@@ -311,68 +361,93 @@ def check_hf_access(token: str) -> None:
 
 def host_report(root: Path, local: bool) -> dict[str, Any]:
     system = platform.system()
-    checks: list[dict[str, str]] = []
+    checks: list[dict[str, Any]] = []
 
-    def check(code: str, status: str, message: str) -> None:
-        checks.append({"code": code, "status": status, "message": message})
+    def check(code: str, status: str, message: str, **context: Any) -> None:
+        checks.append({"code": code, "status": status, "message": message, "context": context})
 
     arch = platform.machine().lower() in {"amd64", "x86_64"}
-    check("architecture", "pass" if arch else "fail", platform.machine())
+    cpu = platform.processor() or platform.machine()
     if system == "Windows":
-        check(
-            "platform",
-            "pass" if platform.release() == "11" else "warning",
-            "Windows " + platform.release(),
-        )
+        import winreg
+
+        with (
+            contextlib.suppress(OSError, StopIteration),
+            winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"HARDWARE\DESCRIPTION\System\CentralProcessor\0",
+            ) as key,
+        ):
+            cpu = winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
+    elif system == "Linux":
+        with contextlib.suppress(OSError, StopIteration):
+            cpu = next(
+                line.split(":", 1)[1].strip()
+                for line in Path("/proc/cpuinfo").read_text().splitlines()
+                if line.startswith("model name")
+            )
+    check(
+        "architecture",
+        "pass" if arch else "fail",
+        cpu,
+        cpu_model=cpu,
+        architecture=platform.machine(),
+    )
+    if system == "Windows":
+        label = "Windows " + platform.release() + " (" + platform.version() + ")"
+        check("platform", "pass" if platform.release() == "11" else "warning", label, name=label)
     elif system == "Linux":
         release = platform.freedesktop_os_release()
         ok = release.get("ID") == "ubuntu" and release.get("VERSION_ID") in {"24.04", "26.04"}
-        check("platform", "pass" if ok else "fail", release.get("PRETTY_NAME", "Unknown Linux"))
+        label = release.get("PRETTY_NAME", "Unknown Linux")
+        check("platform", "pass" if ok else "fail", label, name=label)
     else:
-        check("platform", "fail", "Only Windows and Ubuntu x64 are supported")
+        check("platform", "fail", "Only Windows and Ubuntu x64 are supported", name=system)
     existing = next(parent for parent in (root, *root.parents) if parent.exists())
     free = shutil.disk_usage(existing).free
     owner = load_owner(root)
-    if owner:
-        missing_models = local and not all(
-            Path(p).expanduser().exists() for p in owner.get("models", [])
-        )
-        required = (18 if missing_models else 8) * 1024**3
-    else:
-        required = (30 if local else 20) * 1024**3
+    required = 8 * 1024**3 if owner else 25_000_000_000
     check(
         "disk",
         "pass" if free >= required else "fail",
-        f"{free // 1024**3} GiB free; {required // 1024**3} GiB recommended for this choice",
+        f"{free / 1e9:.1f} GB free; {required / 1e9:g} GB required",
+        free_bytes=free,
+        required_bytes=required,
+        installation_bytes=required if owner else 20_000_000_000,
+        reserve_bytes=0 if owner else 5_000_000_000,
     )
+    devices: list[dict[str, str]] = []
     gpu = shutil.which("nvidia-smi")
     if gpu:
         try:
             result = subprocess.run(
-                [gpu, "--query-gpu=name,memory.total", "--format=csv,noheader"],
+                [gpu, "--query-gpu=name,driver_version", "--format=csv,noheader"],
                 capture_output=True,
                 text=True,
                 timeout=10,
             )
-            if result.returncode:
-                gpu = None
+            if result.returncode == 0:
+                import csv
+
+                devices = [
+                    {"name": row[0].strip(), "driver": row[1].strip()}
+                    for row in csv.reader(result.stdout.splitlines())
+                    if len(row) >= 2
+                ]
         except (OSError, subprocess.TimeoutExpired):
-            gpu = None
+            pass
     check(
         "gpu",
-        "pass" if gpu else ("fail" if local else "warning"),
-        "NVIDIA driver visible"
-        if gpu
-        else "Install the NVIDIA host driver for local ASR; cloud/review mode does not require it",
+        "pass" if devices else ("fail" if local else "warning"),
+        "NVIDIA driver visible" if devices else "No usable NVIDIA driver detected",
+        devices=devices,
     )
     if system == "Linux":
         missing = [name for name in ("ffmpeg", "ffprobe") if not shutil.which(name)]
         check(
             "media",
             "fail" if missing else "pass",
-            "Missing " + ", ".join(missing) + "; install Ubuntu prerequisites"
-            if missing
-            else "FFmpeg/ffprobe available",
+            "Missing " + ", ".join(missing) if missing else "FFmpeg/ffprobe available",
         )
     if system == "Windows":
         import winreg
@@ -382,13 +457,17 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
                 winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64"
             ) as key:
                 installed = winreg.QueryValueEx(key, "Installed")[0] == 1
+                version = ""
+                with contextlib.suppress(OSError):
+                    version = str(winreg.QueryValueEx(key, "Version")[0])
         except OSError:
             installed = False
+            version = ""
         check(
             "vc_runtime",
             "pass" if installed else "fail",
-            "Microsoft Visual C++ x64 runtime"
-            + (" installed" if installed else " required: https://aka.ms/vc14/vc_redist.x64.exe"),
+            "Microsoft Visual C++ x64",
+            version=version,
         )
     return {"ready": all(c["status"] != "fail" for c in checks), "checks": checks}
 
@@ -498,6 +577,7 @@ def install(
     check_host: bool = True,
 ) -> dict[str, Any]:
     root = safe_root(root)
+    check_cancelled()
     meta = inspect_bundle(bundle)
     expected = "windows-x64" if os.name == "nt" else "ubuntu-x64"
     if meta["platform"] != expected:
@@ -741,6 +821,7 @@ def install(
                 shutil.copyfile(source, target)
                 state["wizard"] = str(target)
             write_launchers(root)
+            check_cancelled()
             register(root, state)
             atomic_json(root / "installation.json", state)
             published = True
@@ -1113,10 +1194,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--remove-models", action="store_true")
     parser.add_argument("--remove-key", action="store_true")
     parser.add_argument("--secrets-stdin", action="store_true")
+    parser.add_argument("--cancel-file", type=Path)
     parser.add_argument("--save-openrouter-key", action="store_true")
     args = parser.parse_args(argv)
     secrets: dict[str, Any] = {}
     try:
+        CANCEL_FILE.set(args.cancel_file)
+        check_cancelled()
         root = safe_root(args.root)
         secrets: dict[str, str] = json.loads(sys.stdin.readline()) if args.secrets_stdin else {}
         if not isinstance(secrets, dict) or any(
@@ -1154,6 +1238,12 @@ def main(argv: list[str] | None = None) -> int:
                 args.local = existing.get("local_models", False)
             if args.action in {"update", "repair"} and existing is None:
                 raise InstallError("No managed installation found")
+            if (
+                args.action == "repair"
+                and existing
+                and inspect_bundle(args.bundle)["version"] != existing["version"]
+            ):
+                raise InstallError("Repair requires a matching bundle; choose update explicitly")
             if not args.yes and input("Install this versioned bundle? [y/N] ").lower() != "y":
                 raise InstallError("Cancelled")
             if (

@@ -3,7 +3,7 @@
 param(
  [ValidateSet('check','install','update','repair','rollback','launch','uninstall')][string]$Action='install',
  [string]$Root='',
- [string]$Bundle='', [switch]$Local, [switch]$CloudOnly, [switch]$AcceptModelTerms, [switch]$Yes,
+ [string]$Bundle='', [string]$CancelFile='', [switch]$Local, [switch]$CloudOnly, [switch]$AcceptModelTerms, [switch]$Yes,
  [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin
 )
 $ErrorActionPreference='Stop'
@@ -17,6 +17,7 @@ if(!$Root){
 $manager=Join-Path $PSScriptRoot 'manager.py'
 $argsToManager=@($manager,$Action,'--root',$Root)
 if($Bundle){$argsToManager+=@('--bundle',(Resolve-Path -LiteralPath $Bundle).Path)}
+if($CancelFile){$argsToManager+=@('--cancel-file',$CancelFile)}
 foreach($pair in @(@($Local,'--local'),@($CloudOnly,'--cloud-only'),@($AcceptModelTerms,'--accept-model-terms'),@($Yes,'--yes'),@($RemoveModels,'--remove-models'),@($RemoveKey,'--remove-key'),@($SecretsStdin,'--secrets-stdin'),@($SaveOpenRouterKey,'--save-openrouter-key'))){if($pair[0]){$argsToManager+=$pair[1]}}
 $secretLine=if($SecretsStdin){[Console]::ReadLine()}else{$null}
 $statePath=Join-Path $Root 'installation.json'

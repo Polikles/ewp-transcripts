@@ -1,6 +1,6 @@
 # User manual
 
-This manual describes the accepted 0.22.0 interface. Choose English or Polish in the application; recording language is a separate setting. Every guide is bundled with the program and opens without internet. The same numbered steps appear at the top of each workflow stage. Keep the application tab open while reading help.
+This manual describes the accepted 0.22.1 interface. Choose English or Polish in the application; recording language is a separate setting. Every guide is bundled with the program and opens without internet. The same numbered steps appear at the top of each workflow stage. Keep the application tab open while reading help.
 
 ## Start here
 

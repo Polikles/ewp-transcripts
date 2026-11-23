@@ -2,35 +2,64 @@
 
 ## Wybierz sposób instalacji
 
-1. W Windows uruchom kreator `EwP-Setup-0.22.0.exe` i wykonaj opisane niżej kroki.
+1. W Windows uruchom kreator `EwP-Setup-0.22.1.exe` i wykonaj opisane niżej kroki.
 2. Do instalacji terminalowej pobierz ZIP Windows albo tar.gz/ZIP Ubuntu i użyj krótkich poleceń poniżej. Nie trzeba ręcznie klonować repozytorium ani wcześniej instalować Python i uv.
 3. Jeśli pracujesz z repozytorium jako programista lub dotychczasowy użytkownik, zachowaj ten sposób i korzystaj z sekcji aktualizacji checkoutu. To nie jest instalacja zarządzana.
 
-Instalator zarządzany jest nowy w 0.22.0. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
+Instalacja zarządzana pojawiła się w0.22.0;0.22.1 poprawia kreator graficzny. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
 
 Obecne cele to Windows 11 x64 oraz Ubuntu 24.04/26.04, w tym WSL2. Wcześniejsze testy programu w Windows/WSL pozostają zaakceptowane. Nowy cykl instalacji zarządzanej ma rzeczywiste testy na VM Ubuntu; pełny test instalacji i usuwania na Windows 11 jest osobny od kompilacji lub uruchomienia okien na runnerze CI. Testowe GPU to RTX 3090 24 GB. Oczekiwanie działania na innych NVIDIA z co najmniej 8 GB VRAM nadal nie jest gwarancją.
 
 ## Kreator Windows
 
-Uruchom EXE ze zwykłego konta użytkownika. Zawiera środowisko własnego GUI i sprawdzoną paczkę programu, a nie wielogigabajtowe modele mowy. Test hosta może przygotować małe tymczasowe środowisko Python instalatora i wymaga internetu. Sprawdź system i architekturę, dysk, sterownik NVIDIA przy lokalnym ASR oraz Visual C++ x64. Przycisk otwiera instalator wymaganego składnika Microsoft. Brakujący sterownik NVIDIA zainstaluj osobno po stronie hosta.
+Uruchom `EwP-Setup-0.22.1.exe` na zwykłym koncie użytkownika. Paczka zawiera program,
+środowisko graficzne i wyśrodkowane logo EwP w ramce; nie zawiera wielogigabajtowych modeli.
 
-Wybierz pusty katalog aplikacji, zwykle `%LOCALAPPDATA%\EwPTranscripts`, osobny od nagrań. Istniejąca zarejestrowana instalacja jest proponowana automatycznie. Do aktualizacji i naprawy zachowaj tę lokalizację. Niepusty katalog bez znaczników instalatora jest odrzucany, więc stary checkout Git nie zostanie nadpisany.
+1. **Działanie i język.** Wybierz English/Polski oraz jedno działanie: Zainstaluj, Aktualizuj,
+   Napraw, Doinstaluj modele lokalne, Przywróć poprzednią wersję albo Odinstaluj. Następny ekran
+   zależy od tego wyboru.
+2. **Folder i komputer.** Przy instalacji wybierz **Folder instalacji programu**, osobny od
+   nagrań i starego repozytorium. Ilość miejsca na tym dysku jest sprawdzana automatycznie;
+   Dalej nie działa poniżej **25 GB** (20 GB instalacji plus5 GB wolnego marginesu). Uruchom
+   **Sprawdź komputer**: zobaczysz model CPU, system, miejsce, GPU ze sterownikiem i Visual C++.
+   Wyniki pokazują OK i zmieniają język wraz z wyborem języka. Link bibliotek Visual C++ otwiera
+   instrukcję Microsoft zamiast od razu pobierać EXE. Brakujący sterownik NVIDIA zainstaluj
+   osobno. Test może przygotować małe prywatne środowisko Python.
+3. **Lokalne modele i klucze.** Zaznacz **Użyj lokalnych modeli na moim GPU…**, aby zobaczyć
+   stałą listę modeli i potrzebne miejsce (około8,4 GB przed użyciem cache, plus dane językowe).
+   Istniejące dokładne pliki są wykorzystywane ponownie; dysk cache jest sprawdzany osobno.
+   **Podaj token Hugging Face** otwiera maskowane okno: wklejenie uruchamia test, **Sprawdź token**
+   go powtarza, a **OK** przyjmuje poprawny wynik. Na ekranie głównym pojawia się Token prawidłowy
+   i dopiero wtedy można potwierdzić zaakceptowanie warunków pyannote. Okno (i) zawiera kroki
+   założenia konta, dostępu do modelu i tokenu Read oraz [pełną instrukcję HF](https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/HUGGINGFACE_ACCESS_PL.md).
+   Token pozostaje w pamięci tylko podczas instalacji. Opcjonalny klucz OpenRouter podaje się
+   analogicznie w osobnym maskowanym oknie. Można go też ustawić po instalacji. Zatwierdzony klucz
+   jest zapisywany w magazynie systemowym dopiero podczas instalowania; nie oznacza zgody na audio
+   ani płatne wywołania.
+4. **Instalacja i wynik.** Dalej rozpoczyna wybraną operację. Zębatka i opisy etapów pokazują
+   postęp. Nawigacja to Wstecz/Dalej/Anuluj. Anulowanie przygotowania zatrzymuje procesy i zachowuje
+   poprzednią aktywną wersję oraz pobrane cache. Krótkie końcowe zatwierdzanie/usuwanie musi się
+   zakończyć przed zamknięciem. Po sukcesie uruchom program z kreatora lub skrótu na pulpicie.
+   Licencje i autorstwo są linkiem w lewym dolnym rogu każdego ekranu. Zapisz raport znajduje się
+   pod Szczegółami technicznymi/dziennikiem, a Zamknij w prawym dolnym rogu.
 
-Zaznacz modele lokalnego GPU, aby przygotować przypięte ASR, wyrównanie PL/EN, diarization i dane podziału zdań. Zaakceptuj warunki pyannote na swoim koncie HF, potwierdź pobranie i podaj prywatnie token tylko do odczytu. Kompletne snapshoty są używane ponownie; token może pozostać pusty, jeśli wszystko już jest dostępne. Nieudany test HF wskazuje problem tokenu, warunków lub połączenia przed pobraniem modeli. Token jest używany tylko tymczasowo i instalator go nie zapisuje.
+Przy utrzymaniu wybierz istniejący folder zarządzanej instalacji. Aktualizacja używa wersji
+wbudowanej w instalator; Napraw i Doinstaluj modele wymagają zgodnej wersji, aby nie aktualizować
+starszego programu bez wyboru Aktualizuj. Doinstalowanie korzysta z tych samych modeli i kontroli
+dostępu. Rollback pomija formularze modeli i kluczy. Deinstalacja pokazuje plan usunięcia oraz
+opcje zachowania modeli/klucza przed jawnym potwierdzeniem. Dodaj/usuń programy otwiera ten kreator.
 
-Bez modeli lokalnych można sprawdzać i eksportować gotowe wyniki albo wybrać OpenRouter jako silnik ASR nagrania. Lokalne GPU pozostaje zwykłym domyślnym wyborem programu. Instalacja bez modeli nie wyraża zgody na wysłanie audio ani nie zmienia automatycznie silnika każdego nagrania.
-
-Pole OpenRouter jest opcjonalne. Sprawdzenie wysyła tylko żądanie uwierzytelnienia i połączenia, bez audio. Instalacja z wypełnionym polem jawnie zapisuje klucz w tym samym magazynie systemowym, którego używa program. Nie ma zapisu awaryjnego jawnym tekstem. W aplikacji wybierz użycie zapisanego klucza, gdy chcesz go aktywować; zgoda na wysłanie i płatne wywołania pozostaje osobna. Praca lokalna nie wymaga OR. Zobacz [Ustawienia](settings.md).
-
-Wybierz instalację, aktualizację, naprawę, przywrócenie poprzedniej wersji albo odinstalowanie. Kontynuuj pokazuje etapy i własną zębatkę, a diagnostykę w szczegółach technicznych. Testy hosta mają osobne podsumowanie. Zapisz raport zachowuje diagnostykę bez kluczy. Nie zamykaj kreatora w trakcie operacji. Po sukcesie uruchom program lub użyj skrótu na pulpicie. „Dodaj/usuń programy” udostępnia pasujący deinstalator.
+Bez modeli lokalnych można używać ASR OpenRouter lub weryfikować/eksportować istniejące wyniki;
+domyślnym silnikiem nagrań pozostaje lokalne GPU. OR jest opcjonalny i niepotrzebny do pracy lokalnej.
+Tokeny/klucze nie trafiają do profili, raportów ani tekstowego zapisu awaryjnego. Patrz [Ustawienia](settings.md).
 
 ## Instalacja terminalowa z pobranej paczki
 
 PowerShell w Windows, w katalogu pobranego ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.22.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.22.0-windows-x64.zip
+Expand-Archive .\EwP-0.22.1-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.22.1-windows-x64.zip
 ```
 
 Po zaakceptowaniu warunków modelu dodaj `-Local -AcceptModelTerms`, aby przygotować modele lokalne. Monit tokenu jest ukryty; pusta odpowiedź pozwala użyć kompletnych modeli. `-SaveOpenRouterKey` włącza osobny ukryty monit i jawny zapis OR w systemie. `-Root 'D:\Apps\EwP'` wybiera własny pusty katalog. Obejście polityki PowerShell dotyczy tylko tego uruchomienia. Ścieżki ze spacjami obejmuj cudzysłowami.
@@ -39,13 +68,13 @@ Ubuntu 24.04/26.04, w katalogu pobranego tar.gz:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.22.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.22.1-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Dodaj `--local --accept-model-terms` dla modeli, `--save-openrouter-key` dla ukrytego monitu OR lub `--root "$HOME/Apps/EwP"` dla innej lokalizacji. Brakujące pakiety Ubuntu można zainstalować po jawnym monicie sudo. Nie instaluj sterownika ekranu Linuksa wewnątrz WSL; CUDA udostępnia sterownik Windows. Zgodność z fizycznym Ubuntu trzeba potwierdzić wykonaniem, a nie wnioskować tylko z WSL.
 
-Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.22.0.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
+Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.22.1.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
 
 ## Aktualizacja zarządzana i poprzednia wersja
 

@@ -1,56 +1,50 @@
-# Focused managed-installer acceptance / Test instalatora zarządzanego
+# Installer0.22.1 review / Przegląd instalatora0.22.1
 
-This checks new distribution behavior, not the already accepted long ASR/correction/export workflow.
-Read [EN instructions](../docs/gui/installation.md) / [instrukcję PL](../docs/gui/pl/installation.md).
-Current package: 0.22.0. Native target: Windows 11 x64; owner keeps the existing checkout until done.
+The owner rejected0.22.0 before installation. That archive stays unchanged. Review this corrected
+wizard first; do not start installation until its layout/flow is acceptable. Existing application
+workflow PASS is retained. No paid API/audio request or long ASR rerun is needed.
 
-## Before testing / Przed testem
+## GUI first / Najpierw GUI
 
-1. Save a normal work checkpoint and back up outputs/hidden sources/custom workspace catalogs.
-   Zapisz stan pracy i kopię wyników, ukrytych źródeł i osobnych katalogów zapisów.
-2. Stop the old GUI server. Download/check the exact package with SHA256SUMS. Use a NEW empty
-   managed install location. Nie wskazuj starego repozytorium jako katalogu instalacji.
-3. Existing model snapshots can be reused. No paid audio/API request or model-quality benchmark is
-   required. Można użyć istniejących modeli; nie trzeba płatnych wywołań ani długiej transkrypcji.
+- [ ] EXE has the centered framed EwP icon in Explorer; the window/header use the same centered
+  mark. Subtitle appears below EwP Transcripts in EN and PL.
+- [ ] First page has language and radio actions. Choose Install/Update/Repair/Add local models/
+  Rollback/Uninstall and use Next/Back: later screens visibly match that action. Close/Cancel
+  before execution leaves the existing installation unchanged.
+- [ ] Install page says Program installation folder / Folder instalacji programu; choosing a folder
+  automatically shows that volume's space. Agent tests cover below/exact25GB; do not fill a disk
+  solely for a manual checkbox. No bundle/version ZIP picker appears.
+- [ ] Check this computer / Sprawdź komputer shows CPU model, OS, disk, GPU+driver and Visual C++
+  with OK states. Switch language after checking: descriptions/numbers/status remain coherent,
+  without English disk phrases in PL. VC link opens Microsoft instructions without an automatic
+  EXE download.
+- [ ] Local-model checkbox reveals four fixed checked/disabled models and space requirement.
+  Clearing it hides HF/model controls; OpenRouter/review use remains available.
+- [ ] (i) gives short account/terms/Read-token instructions and full repository link. Token modal
+  masks input, checks after paste and supports manual retry. OK requires valid access; after OK
+  main page only says Token valid and enables the separate terms acknowledgment.
+- [ ] Optional OR modal masks/validates the key analogously. Main page only says Key valid.
+  No key is required for local work. Nothing is saved in the OS store before actual installation.
+- [ ] Licenses/artwork is bottom-left on every screen. Save report is immediately below technical
+  details. Navigation/Close is bottom-right. Escape closes credential/help windows normally.
 
-## Windows wizard / Kreator Windows
+**Next / Dalej on the models page starts the selected operation.** Token/key checks only read
+access/authentication endpoints and do not send recordings. Do not paste secrets into reports.
 
-- [ ] EXE opens with version 0.22.0, readable EN/PL, framed icon, original logo and custom gear.
-  Okno otwiera się, pola/przyciski są czytelne; sprawdź także połowę ekranu i skalowanie Windows.
-- [ ] Host test reports disk/OS/architecture/VC++/GPU without sending audio. Select local models;
-  accepted cached models can use a blank HF field. Nie wpisuj tokenu do raportu ani rozmowy.
-- [ ] Optional OR key check reports readiness without audio. Installing with the field filled saves
-  it only in the OS store; otherwise local install works without OR. Sprawdź, że w aplikacji da się
-  użyć zapisanego klucza; samo zapisanie nie zaznacza zgody na wysłanie.
-- [ ] Install to the empty managed location. Version/app doctor/media tools are ready for the chosen
-  mode; source checkout and existing outputs remain intact. Zębatka/etapy działają, raport można zapisać.
-- [ ] Desktop shortcut opens the GUI. About/CLI show 0.22.0. Close the server before maintenance.
-  Skrót działa, „Dodaj/usuń programy” ma właściwy wpis i lokalizację.
-- [ ] Open one existing canonical result/workspace and confirm files remain available. No full ASR
-  rerun required solely to prove installer correctness. Wystarczy krótka kontrola istniejącej pracy.
+## Only after visual approval / Dopiero po akceptacji wyglądu
 
-## Maintenance / Utrzymanie
+1. Keep the old checkout and back up work. Stop the old GUI server. Install into a NEW empty
+   managed location; the old source checkout is never adopted or deleted.
+2. Check that stages/custom gear work and the chosen local/cloud mode becomes ready. Reuse cached
+   models; do not remove shared models simply for a test checkbox. The HF wizard requires a valid
+   access check before its terms acknowledgment even when complete model files can be reused.
+3. Open the desktop shortcut and check About/CLI0.22.1; open one existing result/workspace.
+4. Stop the managed server, try Repair and matching-version Add local models when relevant.
+   Those operations must not silently upgrade an older installation. Update must be chosen explicitly.
+5. Uninstall first shows its plan. Default removal preserves work/models/key and finishes locked
+   file removal after Close. Optional model/key deletion is only for assets you actually want gone.
 
-- [ ] Repair from the same bundle preserves work/models/key and retains a previous verified runtime.
-  Naprawa nie powinna pobierać całych kompletnych modeli ponownie.
-- [ ] While the managed GUI server runs, update/removal is blocked. After stopping, the operation
-  works. Blokada nie może wymagać zamknięcia wyłącznie karty przeglądarki.
-- [ ] Restore previous version works after repair/update; existing user work is unchanged.
-  Nową wersję do rzeczywistej aktualizacji będzie można sprawdzić przy kolejnym buildzie.
-- [ ] Uninstall first shows a plan. Default confirmation removes app/private runtime/shortcut/OS entry
-  after the wizard closes, while results/workspaces/models/key remain. Sprawdź foldery po zamknięciu.
-- [ ] Reinstall works. Optional model/key removal is a separate deliberate test only if you actually
-  want to remove those shared assets. Nie usuwaj modeli wyłącznie dla formalnego checkboxa, jeśli
-  nadal używa ich Twój stary checkout. Zamiast tego odnotuj „nie testowano — modele współdzielone”.
-
-## Terminal / Terminal
-
-- [ ] Downloaded Windows ZIP installs using README commands without cloning a repository or requiring
-  preinstalled Python/uv. Root paths with spaces/Polish letters work.
-- [ ] Ubuntu tar/terminal route is checked on the actual available host; report WSL/native Ubuntu
-  explicitly. Agent's real Ubuntu VM install/update/rollback/uninstall evidence is separate from Windows 11.
-
-Report only failing item, stage/version/platform and sanitized report. Do not paste HF/OR tokens,
-private recordings/transcript content or entire unreviewed logs. Existing full-workflow PASS remains.
-Public release/online download activation and code-signing are separate delivery decisions after
-native acceptance; a successful compile/CI startup is not claimed as complete owner installation.
+No repeated full transcription/correction/translation workflow, reinstall campaign or paid test
+is required for this UI correction. Native CI previews and model-free regressions are evidence
+of UI behavior, not a claim of owner Windows11/GPU installation success. The EXE is unsigned;
+public release/online bootstrap activation remain separate after native installer acceptance.

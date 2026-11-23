@@ -13,6 +13,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>EwP.ico</ApplicationIcon>
     <DebugType>none</DebugType>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -21,5 +22,7 @@
     <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/logo.svg" LogicalName="logo.svg" />
     <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/favicon.svg" LogicalName="favicon.svg" />
     <EmbeddedResource Include="../../src/ewp_transcripts/web_assets/brand/gear.svg" LogicalName="gear.svg" />
+    <EmbeddedResource Include="../models.json" LogicalName="models.json" />
+    <EmbeddedResource Include="EwP.ico" LogicalName="EwP.ico" />
   </ItemGroup>
 </Project>

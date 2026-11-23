@@ -2,6 +2,15 @@
 
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
 
+## Active installer feedback — 2026-11-23
+
+Owner rejected0.22.0 wizard appearance/flow before installation. Execute all opening TODO items
+and docs/checkpoints/2026-11-23-installer-wizard-feedback.md for0.22.1: real page navigation,
+operation-specific flow, framed EXE/header icon/subtitle, selected-volume25GB gate, structured
+localized host results, masked validated HF/OR dialogs and footer links. Native render previews
+must be inspected before handoff; compilation/startup alone does not prove visual quality.
+Preserve delivered0.22.0/artist archives, prior app passes and spend. No paid/model test campaign.
+
 ## Active distribution implementation — 2026-11-23
 
 Owner authorizes executing the entire distribution plan until completion or a concrete need for

@@ -1,0 +1,93 @@
+{
+  "format": 1,
+  "metadata_checked": "2026-11-23",
+  "models": [
+    {
+      "code": "asr",
+      "repository": "Systran/faster-whisper-large-v2",
+      "revision": "f0fe81560cb8b68660e564f55dd99207059c092e",
+      "bytes": 3089582354,
+      "files": {
+        ".gitattributes": 1477,
+        "README.md": 2019,
+        "config.json": 2796,
+        "model.bin": 3086912962,
+        "tokenizer.json": 2203239,
+        "vocabulary.txt": 459861
+      },
+      "path": "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v2/snapshots/f0fe81560cb8b68660e564f55dd99207059c092e"
+    },
+    {
+      "code": "alignment_pl",
+      "repository": "jonatasgrosman/wav2vec2-large-xlsr-53-polish",
+      "revision": "6b1cea36bd8bc5f65ec8081667cd9c0207d51970",
+      "bytes": 4170679797,
+      "files": {
+        ".gitattributes": 736,
+        "README.md": 5241,
+        "alphabet.json": 244,
+        "config.json": 1782,
+        "eval.py": 6198,
+        "flax_model.msgpack": 1261934272,
+        "full_eval.sh": 1368,
+        "language_model/attrs.json": 78,
+        "language_model/lm.binary": 1628858942,
+        "language_model/unigrams.txt": 16663622,
+        "log_mozilla-foundation_common_voice_6_0_pl_test_predictions.txt": 259970,
+        "log_mozilla-foundation_common_voice_6_0_pl_test_predictions_greedy.txt": 260454,
+        "log_mozilla-foundation_common_voice_6_0_pl_test_targets.txt": 260914,
+        "log_speech-recognition-community-v2_dev_data_pl_validation_predictions.txt": 111798,
+        "log_speech-recognition-community-v2_dev_data_pl_validation_predictions_greedy.txt": 112092,
+        "log_speech-recognition-community-v2_dev_data_pl_validation_targets.txt": 103356,
+        "mozilla-foundation_common_voice_6_0_pl_test_eval_results.txt": 50,
+        "mozilla-foundation_common_voice_6_0_pl_test_eval_results_greedy.txt": 49,
+        "preprocessor_config.json": 262,
+        "pytorch_model.bin": 1262097815,
+        "special_tokens_map.json": 85,
+        "speech-recognition-community-v2_dev_data_pl_validation_eval_results.txt": 48,
+        "speech-recognition-community-v2_dev_data_pl_validation_eval_results_greedy.txt": 49,
+        "vocab.json": 372
+      },
+      "path": "~/.cache/huggingface/hub/models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
+    },
+    {
+      "code": "alignment_en",
+      "repository": "facebook/wav2vec2-base-960h",
+      "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+      "bytes": 1133123712,
+      "files": {
+        ".gitattributes": 790,
+        "README.md": 4431,
+        "config.json": 1596,
+        "feature_extractor_config.json": 158,
+        "model.safetensors": 377607901,
+        "preprocessor_config.json": 159,
+        "pytorch_model.bin": 377667514,
+        "special_tokens_map.json": 85,
+        "tf_model.h5": 377840624,
+        "tokenizer_config.json": 163,
+        "vocab.json": 291
+      },
+      "path": "~/.cache/huggingface/hub/models--facebook--wav2vec2-base-960h/snapshots/22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+    },
+    {
+      "code": "diarization",
+      "repository": "pyannote/speaker-diarization-community-1",
+      "revision": "3533c8cf8e369892e6b79ff1bf80f7b0286a54ee",
+      "bytes": 33695573,
+      "files": {
+        ".gitattributes": 1571,
+        "README.md": 9978,
+        "config.yaml": 444,
+        "diarization.gif": 861445,
+        "embedding/README.md": 938,
+        "embedding/pytorch_model.bin": 26646242,
+        "plda/README.md": 220,
+        "plda/plda.npz": 133852,
+        "plda/xvec_transform.npz": 134376,
+        "segmentation/pytorch_model.bin": 5906507
+      },
+      "path": "~/.cache/huggingface/hub/models--pyannote--speaker-diarization-community-1/snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
+    }
+  ]
+}
