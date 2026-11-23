@@ -14,9 +14,9 @@ research metrics and optional presets do not block completion or release readine
 
 ### Installer usability correction — 2026-11-23
 
-Owner rejected the0.22.0 GUI before installation. Implement0.22.1 using the detailed opening TODO
-and [feedback checkpoint](checkpoints/2026-11-23-installer-wizard-feedback.md); inspect native
-screenshots and navigation/credential/disk gates before handing over.0.22.0 stays immutable;
+Owner rejected the0.22.0 GUI before installation. 0.22.1 is implemented/agent-verified using the opening TODO
+and [feedback checkpoint](checkpoints/2026-11-23-installer-wizard-feedback.md); native screenshots and navigation/credential/disk gates PASS. Owner GUI review comes before
+actual installation.0.22.0 stays immutable;
 actual owner native installation remains untested. Prior application workflow remains accepted.
 
 ### Managed distribution implementation — 2026-11-23

@@ -4,12 +4,18 @@ Last updated: **2026-11-23**.
 
 ## Active task and resume pointers
 
-Active: owner rejected0.22.0 installer UI before installation. Implement the complete
-[usability correction](docs/checkpoints/2026-11-23-installer-wizard-feedback.md), opening TODO,
-and new0.22.1 build. Prior app/manual passes retained;0.22.0 artifact frozen, native install not
-accepted. Split pages/operation routing, centered icon/header/subtitle, disk/host data and masked auto-checked
-modals are implemented.1111 tests/mypy116 and17 integrations PASS. Next: native UI self-tests
-and inspect PNG previews, then clean0.22.1 artifacts; do not hand over on compile alone. No artist/paid/model campaign.
+Current handoff: **0.22.1 corrected installer wizard**, sourcea2b7a59. The owner rejected0.22.0
+before installing; no native installation success is claimed. All detailed feedback items are
+implemented and recorded in [checkpoint](docs/checkpoints/2026-11-23-installer-wizard-feedback.md).
+Separate operation pages, centered EXE/header mark/subtitle, selected-volume25GB gate, structured
+host EN/PL, fixed model list, masked paste-checked HF/OR modals and footer links are verified.
+1111 Python tests/mypy116,17 integrations and30 installer cases PASS. Final native Windows
+run45202869710 PASS; six local artifact hashes match CI exactly.14 PNG previews were visually
+inspected; credential/license footers are complete. Real credentials/models/paid calls unused.
+Final files outside Git: ../deliveries/ewp-0.22.1-installers (EXE, scripts, preview.html/PNGs,
+checksums, focused GUI-first checklist). Next: owner GUI review, then installation only after
+appearance/flow approval. Preserve immutable0.22.0, this handoff and both artist ZIPs. Task temp
+cleanup is recorded in checkpoint; public release/online-bootstrap activation remains pending.
 
 Earlier delivery follows for reference.
 

@@ -56,3 +56,29 @@ Run45201946297 PASS for64cfac8; all six local bytes match CI and14 final opaque 
 Literal final requirement check extends the persistent licenses/artwork footer to credential and
 HF-help windows too, not only main wizard pages. Re-run native once for that final small control
 change; owner delivery remains0.22.1 and no candidate is handed over until the exact final build.
+
+Final: sourcea2b7a59, native run45202869710 PASS (13 named native checks,30 installer Python
+cases in CI). Local final six file hashes exactly match CI, including EXE. Final14 opaque
+native PNGs re-downloaded with the verified artifact digest and visually inspected, including
+license links in both credential dialogs.0.22.1 clean source bundles/manifests/privacy checks PASS;
+CLI/installed metadata0.22.1 consistent. Full Python gate1111/mypy116 and17 integrations retained;
+no Python code changed during subsequent C# visual corrections. User tokens/actual model install
+were not exercised; native checks inject synthetic auth responses and run no workers/network.
+
+Delivery outside Git: ../deliveries/ewp-0.22.1-installers. Includes EXE, terminal bundles/templates,
+SHA256SUMS, DELIVERY.json,14 previews plus preview.html, native report,111-row installer-only
+EN/PL reference, GUI-first acceptance checklist and START-HERE-PL. Documentation/HF instructions
+are EN/PL; existing app terminology workbook is unchanged. No public release/tag/online URL
+activation, signing or artist archive modification.0.22.0 EXE hash remains
+e2f36e26a2601857b7778fb262e1b6cee93be6f118fac271b4441736da57db3b;
+artist archive hashes remain the previously recorded1265a795... and634b3999....
+Cumulative cloud spend remains USD0.0291461230985028369; new paid/model/API-key calls zero.
+
+Next: owner reviews corrected GUI without installing; only after appearance/flow approval proceed
+to the focused actual native installer check. Do not overwrite delivered0.22.1 if later changes
+are needed: use next patch identity. Before handoff remove only /tmp/ewp-wizard-feedback.TEkrTX
+and its build servers; preserve final delivery and all original user data/caches/artist artifacts.
+
+Cleanup complete: both task build servers shut down; /tmp/ewp-wizard-feedback.TEkrTX removed.
+Final0.22.1 package/previews, frozen0.22.0 and artist archives preserved. No task server or child
+operation remains running. Persisted only reviewed content-free metadata/evidence.

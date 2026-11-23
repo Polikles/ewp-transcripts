@@ -16,7 +16,9 @@ no native installation PASS is claimed. New build0.22.1. Follow the dedicated ch
 - [x] HF masked modal: paste auto-check plus Check token and OK; status/code; validated token remains transient, main button disables and shows Token valid; enable separate pyannote terms acknowledgment only after access succeeds. (i) popup has concise account/terms/read-token steps and full repo instructions link.
 - [x] OR masked modal with auto/manual key check, OK and valid status; optional OS-store save only during install. No credentials displayed/persisted in plaintext or upload consent implied.
 - [x] Footer: licenses/artwork link bottom-left on every page; report link below technical log; navigation/Close bottom-right. Real operation progress/outcome screens.
-- [ ] New focused native UI/gating/localization/modal/icon tests and visual previews; normal gates, canonical clean artifacts, exact CI hash comparison, EN/PL copy/docs/checklist/checkpoints; commit/push0.22.1. No paid API/model campaign or artist archive changes.
+- [x] New focused native UI/gating/localization/modal/icon tests and visual previews; normal gates, canonical clean artifacts, exact CI hash comparison, EN/PL copy/docs/checklist/checkpoints; commit/push0.22.1. No paid API/model campaign or artist archive changes.
+
+Agent delivery complete:0.22.1 sourcea2b7a59; native run45202869710 PASS, all six local hashes match CI.14 native PNGs visually reviewed and supplied in ../deliveries/ewp-0.22.1-installers. Next is owner GUI review before actual installation; do not reopen old app workflow tests.
 
 ## Previous package: versioning, updates and distribution — 2026-11-23
 

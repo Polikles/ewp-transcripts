@@ -1,8 +1,8 @@
 {
   "application_version": "0.22.1",
-  "source_commit": "64cfac8176197d6135fa7a066b82a731de1b5309",
-  "run_id": 45201946297,
-  "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45201946297",
+  "source_commit": "a2b7a592d8d0722970ea9b71dc0baef4498031ee",
+  "run_id": 45202869710,
+  "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45202869710",
   "native_report": {
     "result": "PASS",
     "platform": "Microsoft Windows NT 10.0.26100.0",
@@ -24,24 +24,32 @@
     ]
   },
   "artifact_sha256": {
-    "EwP-0.22.1-windows-x64.zip": "b558c9576417c29855f447030f87610983ed331d66726359cf585adcbeb9adec",
-    "EwP-0.22.1-ubuntu-x64.zip": "e842ef6fe59ee852e8919c86d20f036005678a4f975a1038aaea46b9d11c2c33",
-    "EwP-Setup-0.22.1.exe": "e4118198167d45e4d9f4c151a72748271745566ecea92e2ed978a618eec75251",
-    "EwP-0.22.1-ubuntu-x64.tar.gz": "29e7b4eca72454082bf164332bd3079ccc0e1c794af900d1d9ab89b297c4aae0",
-    "Install-EwP-0.22.1.ps1": "0fae2ba14f9a23ff8b9bc19b8affae2605078e2b0eb0e662f2d5a5f5163840ab",
-    "Install-EwP-0.22.1.sh": "265ae5001ecf5eca1776a560cff1c119186027c2ff1a2c2480f06a9c0509959f"
+    "EwP-0.22.1-windows-x64.zip": "0c4d2b56ff111f7e3e8c2cdf0567def29764532480be18ddcc64d5f60dcc1541",
+    "EwP-0.22.1-ubuntu-x64.zip": "dc6e72f826d5b1059c73299c5cf8451925dd0eff94f543abd3795eabd9153bc3",
+    "EwP-Setup-0.22.1.exe": "bc0658cac39e00d4baa7adaec297dd0fcf653b9020f531196a8d1d6e13792d53",
+    "EwP-0.22.1-ubuntu-x64.tar.gz": "429e9844e3176631a5de9ec00c9844a1304eb4f139820d1518999afc2262fa4d",
+    "Install-EwP-0.22.1.ps1": "7372745a23b40a086371dbb194ee23afed9dead40eca24cd4e83b3e1d69f59cc",
+    "Install-EwP-0.22.1.sh": "1bc4f7121cd8872290b576bf3e4f163b76627f89bdc78b42f25d3083d516fc7c"
   },
   "native_preview_artifact": {
-    "id": 14832555631,
-    "digest": "sha256:20cda72c2e916d524ebfca3afcd438dd87aeedbc7319df1ecfc0ce2c40fd1acb"
+    "id": 14831288893,
+    "digest": "sha256:7a4d6df0db8a30e1c965b8e28cd0ea0ebafd207b3097717e484b2fdb0c311a51"
   },
   "python_tests": 1111,
   "installer_python_tests": 30,
   "media_integrations": 17,
   "mypy_source_files": 116,
+  "previous_native_runs": [
+    45199880102,
+    45201335163,
+    45201946297
+  ],
   "native_installation": "not performed; owner rejected 0.22.0 before installation; 0.22.1 GUI review first",
   "real_credentials_used": false,
   "models_downloaded": false,
   "new_paid_asr_calls": 0,
-  "old_artifacts_preserved": true
+  "old_artifacts_preserved": true,
+  "visual_previews_reviewed": true,
+  "preview_count": 14,
+  "preview_zip_sha256": "60ec3ea576905f7ab864a8760587b7eee4386a26b0db70f1009be152ad68cea2"
 }
