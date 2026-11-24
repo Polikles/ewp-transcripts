@@ -56,3 +56,9 @@ Native tests include authenticated bootstrap/transport, real D: host validation 
 stdlib-only Program Files launcher fixture. These do not qualify an interactive UAC prompt,
 full application installation, GPU/model preparation or provider workflow. Full installer EN/PL
 copy approval waits until the GUI is accepted.
+
+0.23.0 separates program-only maintenance from selective model recovery, adds pinned upstream
+file hashes to models.json, measured model/FFmpeg progress and timestamped reports, and fixes
+readonly-file Windows removal. Root uninstall.exe/registered maintenance restrict actions.
+Automatic workspace recovery starts with the app; writable installs use work-state, protected
+installs use per-user state. Synthetic lifecycle/queue tests do not require downloaded models.

@@ -4,7 +4,7 @@ Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
 
 1. Wybierz katalog wyników i zapisu: Pozostaw opcjonalny katalog pusty, aby zapisywać nowe pliki stanu pracy w katalogu wyników, lub wybierz osobny katalog zapisów i kopii zapasowych.
 2. Zapisz bieżący stan pracy: Nazwij obszar pracy i zapisz jego stan przed zatrzymaniem programu. Zmienione szkice są najpierw zapisywane.
-3. Wczytaj zapisaną pracę: Lista odświeża się przy otwarciu tej sekcji. Wybierz zapis i wczytaj stan po restarcie. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona.
+3. Wczytaj zapisaną pracę: Lista odświeża się przy otwarciu tej sekcji. Ostatni stan wczytuje się automatycznie; w razie potrzeby wybierz inny zapis i wczytaj go. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona.
 4. Sprawdź porządkowanie przed usunięciem: Odśwież spis zarządzanych źródeł i przeczytaj przyczyny zachowania plików przed jawnym porządkowaniem.
 
 ## 1. Wybierz katalog wyników i zapisu
@@ -17,7 +17,19 @@ Wprowadź czytelną, unikalną nazwę obszaru i zapisz bieżący stan. Zmienione
 
 Nazwa wczytanego obszaru wypełnia się automatycznie i jest chroniona przed przypadkową zmianą. Aktualizacja zapisuje ten sam obszar. Zapisz jako nowy obszar wymaga innej nazwy i zachowuje oryginał. Powtórzona nazwa w znanych katalogach jest odrzucana. Wielkość liter, spacje na brzegach i równoważne zapisy Unicode nie tworzą odrębnych nazw. Pusta lub zajęta nazwa podświetla pole.
 
-Autozapis jest domyślnie wyłączony. Po włączeniu okresowo aktualizuje aktywny punkt zapisu przy zmianach śledzonej pracy. Nie zastępuje świadomego zapisywania ważnych zmian w edytorze. Jawny zapis to zalecany punkt odzyskiwania przed zatrzymaniem serwera.
+Autozapis jest aktywny od uruchomienia i zapisuje zmiany oraz szkice edycji w ciągu kilku sekund.
+Ostatni aktywny stan pracy wczytuje się automatycznie, także w nowej sesji przeglądarki.
+Przed wyborem katalogu wyników instalacja zarządzana zapisuje stan w `work-state` obok programu.
+Przy instalacji w chronionym folderze, np. Program Files, używa prywatnego katalogu użytkownika.
+Wybór katalogu wyników wiąże z nim początkowy zapis odzyskiwania. Wiersz pliku zapisu pokazuje
+rzeczywistą ścieżkę. Nazwane zapisy nadal służą do świadomego tworzenia punktów powrotu.
+Przed zatrzymaniem serwera poczekaj na zakończenie zapisu. Brakujące ścieżki nie powodują
+zastąpienia ostatniego zapisu pustym stanem.
+
+Wyniki kolejki są zapisywane również po zamknięciu przeglądarki. Niedokończone zadania wracają
+do stanu oczekującego i wymagają jawnego uruchomienia. Zamknięcie karty nadal pozostawia serwer
+włączony; po zakończeniu pracy zatrzymaj go przez Ctrl+C. Natywny interfejs Windows jest
+zaplanowany po odbiorze instalatora.
 
 ## 3. Wczytaj zapisaną pracę
 

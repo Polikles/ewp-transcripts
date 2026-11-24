@@ -343,8 +343,8 @@
           "pl": "Wczytaj zapisaną pracę"
         },
         "text": {
-          "en": "The list refreshes when this stage opens. Select the workspace and Load selected work state after a restart. Re-enter or explicitly load provider credentials; upload consent stays unchecked.",
-          "pl": "Lista odświeża się przy otwarciu tej sekcji. Wybierz zapis i wczytaj stan po restarcie. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona."
+          "en": "The list refreshes when this stage opens. The last work state loads automatically; select and load a different workspace when needed. Re-enter or explicitly load provider credentials; upload consent stays unchecked.",
+          "pl": "Lista odświeża się przy otwarciu tej sekcji. Ostatni stan wczytuje się automatycznie; w razie potrzeby wybierz inny zapis i wczytaj go. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona."
         }
       },
       {

@@ -52,6 +52,7 @@ from ewp_transcripts.web_jobs import (
 from ewp_transcripts.web_media import GuiMediaController, media_byte_range
 from ewp_transcripts.web_profiles import PROFILE_LIMIT, GuiProfileController
 from ewp_transcripts.web_projects import GuiProjects
+from ewp_transcripts.web_recovery import GuiStartupRecovery
 from ewp_transcripts.web_restore import GuiRestoreProgress
 from ewp_transcripts.web_reviews import GuiReviewController
 from ewp_transcripts.web_source_cleanup import (
@@ -407,6 +408,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("media_choices.js").read_bytes()
         body += b"\n" + assets.joinpath("native_picker_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("cloud_asr_controls.js").read_bytes()
+        body += b"\n" + assets.joinpath("startup_recovery.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -507,10 +509,33 @@ class LocalGuiServer(ThreadingHTTPServer):
             ),
             history_path=default_workspace_directory().parent / "runtime-timings.json",
         )
+        self.gui_startup_recovery = GuiStartupRecovery(
+            default_workspace_directory().parent / "startup-recovery.json"
+        )
+        self._recovery_stop = threading.Event()
+        self._recovery_worker = threading.Thread(target=self._checkpoint_recovery_loop, daemon=True)
+        self._recovery_worker.start()
+
+    def checkpoint_recovery(self) -> None:
+        """Keep queue outcomes on disk even after the browser has been closed."""
+        try:
+            self.gui_startup_recovery.checkpoint(
+                self.gui_transcriptions.jobs(), self.workspace_controller
+            )
+        except (OSError, ValueError):
+            # Never replace an unreadable checkpoint with an empty workspace.
+            return
+
+    def _checkpoint_recovery_loop(self) -> None:
+        while not self._recovery_stop.wait(2):
+            self.checkpoint_recovery()
 
     def server_close(self) -> None:
         self.gui_openrouter_api_key = ""
         self.gui_transcriptions.close()
+        self._recovery_stop.set()
+        self._recovery_worker.join()
+        self.checkpoint_recovery()
         self.gui_media.close()
         self.gui_selections.close()
         super().server_close()
@@ -1228,7 +1253,17 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 if not isinstance(storage_directory, str):
                     raise ValueError("Workspace storage directory is invalid")
                 workspaces = self.server.workspace_controller(storage_directory)
-                if path == "/api/v1/workspaces/locations":
+                if path == "/api/v1/workspaces/recovery":
+                    recovery_api = self.server.gui_startup_recovery
+                    if document.get("clear") is True:
+                        recovery_api.forget()
+                    if "enabled" in document:
+                        recovery_api.armed = document["enabled"] is True
+                    payload: dict[str, object] = {
+                        "reference": recovery_api.reference(),
+                        "default_directory": str(self.server.gui_workspaces.state_directory),
+                    }
+                elif path == "/api/v1/workspaces/locations":
                     locations_registry = self.server.gui_workspace_locations
                     if document.get("remember") is True:
                         output = document.get("output_directory", "")
@@ -1238,9 +1273,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         locations_registry.remember(
                             output_directory=output, storage_directory=storage
                         )
-                    payload: dict[str, object] = {
-                        "locations": locations_registry.available().model_dump(mode="json")
-                    }
+                    payload = {"locations": locations_registry.available().model_dump(mode="json")}
                 elif path == "/api/v1/workspaces/list":
                     payload = {
                         "workspaces": [
@@ -1276,7 +1309,8 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     durable_staged = tuple(
                         job
                         for job in queue_jobs
-                        if job.status == "staged"
+                        if job.status in {"staged", "queued", "running", "cancel_requested"}
+                        and job.source_sha256
                         and not workspaces.is_temporary_selection(job.input_path)
                     )
                     durable_terminal = tuple(
@@ -1321,13 +1355,22 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         omit_unavailable=True,
                         catalogs=catalogs,
                     )
+                    recovery = getattr(self.server, "gui_startup_recovery", None)
+                    if isinstance(recovery, GuiStartupRecovery):
+                        recovery.remember(
+                            saved.workspace_id,
+                            storage_directory,
+                            enabled=document.get("autosave", True) is True,
+                        )
                     locations = getattr(self.server, "gui_workspace_locations", None)
                     if isinstance(locations, GuiWorkspaceLocations):
                         output = str(saved.fields.get("output-path", ""))
                         catalog = str(workspaces.state_directory)
                         locations.remember(
                             output_directory=output,
-                            storage_directory="" if catalog == output else catalog,
+                            storage_directory=""
+                            if not storage_directory or catalog == output
+                            else catalog,
                         )
                     unavailable_fields_omitted = sum(
                         isinstance(value, str)
@@ -1378,19 +1421,34 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                             "restored_staged_jobs": restored,
                             "restored_terminal_jobs": restored_terminal,
                         }
+                        recovery = getattr(self.server, "gui_startup_recovery", None)
+                        if isinstance(recovery, GuiStartupRecovery):
+                            recovery.remember(loaded.workspace_id, storage_directory)
                         locations = getattr(self.server, "gui_workspace_locations", None)
                         if isinstance(locations, GuiWorkspaceLocations):
                             output = str(loaded.fields.get("output-path", ""))
                             catalog = str(workspaces.state_directory)
                             locations.remember(
                                 output_directory=output,
-                                storage_directory="" if catalog == output else catalog,
+                                storage_directory=""
+                                if not storage_directory or catalog == output
+                                else catalog,
                             )
                         succeeded = True
                     finally:
                         self.server.gui_restore.finish(restore_id, succeeded=succeeded)
                 elif path == "/api/v1/workspaces/delete":
-                    workspaces.delete(str(document.get("workspace_id", "")))
+                    identifier = str(document.get("workspace_id", ""))
+                    workspaces.delete(identifier)
+                    recovery = getattr(self.server, "gui_startup_recovery", None)
+                    if isinstance(recovery, GuiStartupRecovery):
+                        reference = recovery.reference()
+                        if (
+                            reference
+                            and reference["workspace_id"] == identifier
+                            and reference["storage_directory"] == storage_directory
+                        ):
+                            recovery.forget()
                     payload = {"deleted": True}
                 else:
                     self._write_response(
@@ -2288,6 +2346,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     return
                 try:
                     cleared = self.server.gui_transcriptions.clear_current_state()
+                    recovery = getattr(self.server, "gui_startup_recovery", None)
+                    if isinstance(recovery, GuiStartupRecovery):
+                        recovery.forget()
                 except ValueError as error:
                     self._write_response(
                         _json_response(

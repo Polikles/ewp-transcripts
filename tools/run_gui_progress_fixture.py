@@ -19,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True, type=Path)
     parser.add_argument("--port", default=8876, type=int)
+    parser.add_argument("--empty-queue", action="store_true")
     args = parser.parse_args()
     args.root.mkdir(parents=True, exist_ok=True)
     os.environ["XDG_STATE_HOME"] = str(args.root / "state")
@@ -37,7 +38,7 @@ def main():
         handle.setparams((1, 2, 16000, 0, "NONE", ""))
         handle.writeframes(b"\0\0" * 64000)
     output = args.root / "output"
-    output.mkdir()
+    output.mkdir(exist_ok=True)
 
     def service(path, **kwargs):
         tracker, cancel = kwargs["progress"], kwargs["cancellation"]
@@ -67,11 +68,15 @@ def main():
         return SimpleNamespace(result_path=result)
 
     server.gui_transcriptions._service = service
-    for name, identity in [
-        ("episode", "fixture"),
-        ("cancel-waiting", "cancel-waiting"),
-        ("cancel-active", "cancel-active"),
-    ]:
+    for name, identity in (
+        []
+        if args.empty_queue
+        else [
+            ("episode", "fixture"),
+            ("cancel-waiting", "cancel-waiting"),
+            ("cancel-active", "cancel-active"),
+        ]
+    ):
         source = args.root / f"{name}.wav"
         if source != audio:
             source.write_bytes(audio.read_bytes())

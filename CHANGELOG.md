@@ -4,6 +4,24 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.23.0 — 2026-11-24 (installer lifecycle and automatic recovery)
+
+- Separate program updates/repairs from explicit selective model verification/downloads; reuse
+  unchanged pinned models without HF prompts and show OpenRouter setup only on first install.
+- Automatically run repair/add-model host checks; keep the full 20 GB local-install budget
+  distinct from incremental disk requirements. Open alternate installation folders immediately.
+- Compact location field, active HF information tooltip/focus, larger left-aligned operation
+  indicator, phase/activity/elapsed display and measured model-file download progress/rate/ETA.
+  Reports include timestamps in entries, headers and collision-resistant filenames.
+- Register desktop/program-list EwP icons and measured installed size including models. Add
+  uninstall.exe, restrict registered maintenance actions, and make Remove-EwP.ps1 directly usable.
+  Deferred removal clears read-only dependency attributes, retries locked files, preserves
+  unrelated work and keeps registration until deletion succeeds; elevated helpers stay protected.
+- Close idle console launch cleanly without a manager KeyboardInterrupt traceback or nested
+  batch-job prompt. Enable automatic workspace/draft saving and last-state recovery at startup,
+  with per-install local state, a protected-folder user-state fallback and output-root association.
+  Persist queue outcomes while the browser is closed; restored unfinished jobs remain staged.
+
 ## 0.22.2 — 2026-11-23 (installer location and operation fixes)
 
 - Accept dedicated Windows folders directly below a drive, including D:\Transcripts-test-01,

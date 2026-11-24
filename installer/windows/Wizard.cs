@@ -98,7 +98,8 @@ sealed partial class Wizard : Window
         language.SelectionChanged += (_, _) => Render();
         for (int i = 0; i < args.Length; i++)
         {
-            if (args[i] == "--uninstall") operation = "uninstall";
+            if (args[i] is "--maintenance" or "--uninstall") { maintenance = true; operation = "uninstall"; }
+            if (args[i] == "--local-maintenance") { localMaintenance = true; operation = "uninstall"; }
             if (args[i] == "--root" && i + 1 < args.Length) preferredMaintenanceRoot = args[++i];
             if (args[i] == "--operation" && i + 1 < args.Length && operations.Contains(args[i + 1])) operation = args[++i];
         }
@@ -127,7 +128,7 @@ sealed partial class Wizard : Window
     }
     internal static Image BusyGear()
     {
-        var gear = new Image { Source = Branding.Svg("gear.svg"), Width = 24, Height = 24, Margin = new Thickness(10, 2, 10, 2), Visibility = Visibility.Collapsed, RenderTransformOrigin = new Point(.5, .5), RenderTransform = new RotateTransform() };
+        var gear = new Image { Source = Branding.Svg("gear.svg"), Width = 24, Height = 24, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(10, 2, 10, 2), Visibility = Visibility.Collapsed, RenderTransformOrigin = new Point(.5, .5), RenderTransform = new RotateTransform() };
         if (SystemParameters.ClientAreaAnimation) ((RotateTransform)gear.RenderTransform).BeginAnimation(RotateTransform.AngleProperty, new DoubleAnimation(0, 360, TimeSpan.FromSeconds(3)) { RepeatBehavior = RepeatBehavior.Forever });
         return gear;
     }
@@ -169,6 +170,7 @@ sealed partial class Wizard : Window
 
     string NoticeText() => notice switch
     {
+        "model_check_failed" => T("Cannot verify model files. See technical details.", "Nie można sprawdzić plików modeli. Sprawdź szczegóły techniczne."),
         "check_failed" => T("Resolve the failed checks and retry.", "Usuń przyczyny błędów i ponów test."),
         "check_unavailable" => T("Cannot run the computer check. See technical details.", "Nie można uruchomić testu komputera. Sprawdź szczegóły techniczne."),
         _ => T("Cannot prepare removal preview.", "Nie można przygotować planu usunięcia.")
@@ -179,7 +181,7 @@ sealed partial class Wizard : Window
         body.Children.Add(Heading(T("What would you like to do?", "Co chcesz zrobić?")));
         body.Children.Add(Copy(T("Choose your language above and select one action.", "Wybierz język powyżej i jedno działanie poniżej."), muted: true));
         var choices = new StackPanel(); actionChoices.Clear();
-        foreach (string op in operations)
+        foreach (string op in VisibleOperations)
         {
             var radio = Symbols.ActionChoice(OperationName(op), op, operation == op, () => SelectOperation(op, focusChoice: true));
             actionChoices.Add(radio); choices.Children.Add(radio);
@@ -199,7 +201,7 @@ sealed partial class Wizard : Window
                 body.Children.Add(Copy(T("No managed installation was detected. Choose its folder if you have one.", "Nie wykryto instalacji zarządzanej. Wybierz jej folder, jeśli program był już zainstalowany."), muted: true));
             body.Children.Add(Copy(operation == "install" ? T("Program installation folder", "Folder instalacji programu") : T("Installed program folder", "Folder zainstalowanego programu")));
             body.Children.Add(root);
-            var chooseFolder = ActionButton(T("Choose folder…", "Wybierz folder…"), () => { var picker = new OpenFolderDialog(); if (picker.ShowDialog(this) == true) root.Text = operation == "install" ? InstallFolderFromPicker(picker.FolderName) : picker.FolderName; }, secondary: true);
+            var chooseFolder = ActionButton(T("Choose folder…", "Wybierz folder…"), ChooseFolder, secondary: true);
             chooseFolder.Margin = new Thickness(0, 8, 0, 0); body.Children.Add(chooseFolder);
         }
         body.Children.Add(diskStatus); RefreshLocation();
@@ -216,41 +218,6 @@ sealed partial class Wizard : Window
             if (busy) body.Children.Add(Copy(T("Preparing/checking the installer runtime…", "Przygotowywanie/sprawdzanie środowiska instalatora…"), muted: true));
             AddLog();
         }
-    }
-
-    void RenderModels()
-    {
-        body.Children.Add(Heading(T("3. Local models and keys", "3. Lokalne modele i klucze")));
-        LabelCheck(local, T("Use local models on my GPU (without them you can only work using OpenRouter API and verify earlier transcripts)", "Użyj lokalnych modeli na moim GPU (bez nich możliwa jest tylko praca przez API OpenRouter i weryfikacja wcześniejszych transkrypcji)"));
-        local.IsEnabled = operation != "models"; body.Children.Add(local);
-        if (LocalSelected)
-        {
-            var list = new StackPanel();
-            foreach (var model in catalog.Models)
-            {
-                var box = new CheckBox { IsChecked = true, IsEnabled = false, Content = new TextBlock { Text = model.Repository, TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 2, 0, 2) };
-                list.Children.Add(box);
-            }
-            var modelCard = Card(list); modelCard.Padding = new Thickness(10); modelCard.Margin = new Thickness(0, 0, 0, 8); body.Children.Add(modelCard);
-            var spaceRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
-            var space = Copy(T("Required space: ", "Potrzebne miejsce: ") + GB(catalog.Models.Sum(m => m.Bytes)) + " GB", muted: true); space.Margin = new Thickness(0, 6, 20, 6); spaceRow.Children.Add(space);
-            spaceRow.Children.Add(Link(T("Read the model terms", "Przeczytaj warunki modelu"), () => Open("https://huggingface.co/pyannote/speaker-diarization-community-1"))); body.Children.Add(spaceRow);
-            var hfRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 4) };
-            var enter = ActionButton(T("Enter Hugging Face token", "Podaj token Hugging Face"), () => EnterCredential(true), secondary: true); enter.IsEnabled = !hfValid; hfRow.Children.Add(enter);
-            hfRow.Children.Add(Symbols.InfoButton(T("Hugging Face token information", "Informacje o tokenie Hugging Face"), ShowHfHelp));
-            if (hfValid) hfRow.Children.Add(new TextBlock { Text = T("Token valid", "Token prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
-            body.Children.Add(hfRow);
-            LabelCheck(terms, T("I accepted pyannote terms on Hugging Face", "Zaakceptowałem warunki pyannote w Hugging Face")); terms.IsEnabled = hfValid; body.Children.Add(terms);
-            string? modelProblem = ModelSpaceProblem();
-            if (modelProblem != null) { var warning = Copy(modelProblem); warning.Foreground = Error; body.Children.Add(warning); }
-        }
-        var optional = new StackPanel();
-        optional.Children.Add(Copy(T("(optional) save OpenRouter API key. You can also do it after program installation", "(opcjonalnie) zapisz klucz API OpenRouter. Możesz to zrobić także po instalacji programu")));
-        var keyRow = new StackPanel { Orientation = Orientation.Horizontal };
-        var key = ActionButton(T("Enter OpenRouter key", "Podaj klucz OpenRouter"), () => EnterCredential(false), secondary: true); key.IsEnabled = !orValid; keyRow.Children.Add(key);
-        if (orValid) keyRow.Children.Add(new TextBlock { Text = T("Key valid", "Klucz prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) });
-        optional.Children.Add(keyRow); var optionalCard = Card(optional); optionalCard.Padding = new Thickness(10); optionalCard.Margin = new Thickness(0, 8, 0, 0); body.Children.Add(optionalCard);
-
     }
 
     void RenderConfirmation()
@@ -281,7 +248,8 @@ sealed partial class Wizard : Window
     void RenderProgress()
     {
         body.Children.Add(Heading(finished ? (successful ? T("Operation completed", "Operacja ukończona") : T("Operation stopped", "Operacja zatrzymana")) : "4. " + OperationName(operation)));
-        if (busy) { var gear = BusyGear(); gear.Visibility = Visibility.Visible; body.Children.Add(gear); }
+        if (busy) { var gear = BusyGear(); gear.Width = gear.Height = 48; gear.Margin = new Thickness(0, 0, 0, 14); gear.Visibility = Visibility.Visible; body.Children.Add(gear); }
+        RenderOperationProgress();
         body.Children.Add(Copy(ProgressMessage()));
         if (finished && successful && operation == "uninstall") body.Children.Add(Copy(T("Close this window to finish removing locked files.", "Zamknij to okno, aby zakończyć usuwanie zablokowanych plików.")));
         AddLog(expand: finished && !successful);
@@ -295,6 +263,8 @@ sealed partial class Wizard : Window
             "permission" => T("Windows will ask for administrator permission for this folder.", "Windows poprosi o uprawnienia administratora dla tego folderu."),
             "extract" => T("Verifying program files…", "Sprawdzanie plików programu…"),
             "dependencies" => T("Installing program dependencies…", "Instalowanie zależności programu…"),
+            "python" => T("Preparing the Python runtime…", "Przygotowywanie środowiska Python…"),
+            "media" => T("Downloading and installing FFmpeg…", "Pobieranie i instalowanie FFmpeg…"),
             "models" => T("Preparing local models…", "Przygotowywanie modeli lokalnych…"),
             "verify" => T("Checking installed program…", "Sprawdzanie zainstalowanego programu…"),
             "credentials" => T("Saving the optional key in the OS store…", "Zapisywanie opcjonalnego klucza w magazynie systemowym…"),
@@ -325,7 +295,7 @@ sealed partial class Wizard : Window
         {
             0 => true,
             1 => LocationProblem() == null && (!IsInstall || hostReady),
-            2 => IsInstall ? (!LocalSelected || (hfValid && terms.IsChecked == true && ModelSpaceProblem() == null)) : operation == "rollback" || previewReady,
+            2 => IsInstall ? ModelsCanContinue : operation == "rollback" || previewReady,
             _ => false
         });
     }
@@ -335,7 +305,7 @@ sealed partial class Wizard : Window
         if (!next.IsEnabled) return;
         notice = "";
         if (finished) { Launch(); return; }
-        if (page == 0) { page = 1; ReadInstalled(); Render(); return; }
+        if (page == 0) { page = 1; ReadInstalled(); Render(); if (operation is "repair" or "models" && LocationProblem() == null) await CheckHost(); return; }
         if (page == 1)
         {
             page = 2; if (operation == "models") local.IsChecked = true; Render();
@@ -361,7 +331,7 @@ sealed partial class Wizard : Window
     }
     async Task RefreshAfterDelay(CancellationToken token, int epoch)
     {
-        try { await Task.Delay(200, token); if (!token.IsCancellationRequested && stateEpoch == epoch) { RefreshLocation(); RenderHostRows(); RefreshNavigation(); } }
+        try { await Task.Delay(200, token); if (!token.IsCancellationRequested && stateEpoch == epoch) { RefreshLocation(); RenderHostRows(); RefreshNavigation(); if (!testing && page == 1 && operation is "repair" or "models" && !busy && !hostAttempted && LocationProblem() == null) await CheckHost(); } }
         catch (OperationCanceledException) { }
     }
     void ReadInstalled()
@@ -427,9 +397,9 @@ sealed partial class Wizard : Window
         try
         {
             string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache/huggingface/hub");
-            long missing = catalog.Models.Sum(m => m.MissingBytes());
+            long missing = DownloadModels.Sum(m => repairModels ? m.Bytes : m.MissingBytes());
             var modelDisk = DiskProbe(cache); var appDisk = DiskProbe(root.Text);
-            long required = 1_000_000_000 + missing + (string.Equals(modelDisk.Volume, appDisk.Volume, StringComparison.OrdinalIgnoreCase) && operation == "install" ? 25_000_000_000 : 0);
+            long required = 1_000_000_000 + missing + (string.Equals(modelDisk.Volume, appDisk.Volume, StringComparison.OrdinalIgnoreCase) && operation == "install" ? Math.Max(0, 25_000_000_000 - catalog.Models.Sum(m => m.Bytes)) : 0);
             if (modelDisk.Free < required) return T("Not enough space on the model-cache disk. Required free space: ", "Za mało miejsca na dysku cache modeli. Potrzebne wolne miejsce: ") + GB(required) + " GB";
         }
         catch { return T("Cannot check model-cache disk space.", "Nie można sprawdzić miejsca na dysku cache modeli."); }
@@ -467,10 +437,11 @@ sealed partial class Wizard : Window
     async Task CheckHost()
     {
         if (busy) return;
+        int epoch = stateEpoch;
         busy = true; hostAttempted = false; notice = ""; File.Delete(CancelFile); Render();
-        try { int code = await Worker("check", false); hostReady = code == 0; if (!hostReady) notice = "check_failed"; }
+        try { int code = await Worker("check", false); hostReady = epoch == stateEpoch && code == 0; if (!hostReady && epoch == stateEpoch) notice = "check_failed"; }
         catch { hostReady = false; notice = "check_unavailable"; }
-        finally { busy = false; hostAttempted = true; Render(); }
+        finally { busy = false; hostAttempted = epoch == stateEpoch; Render(); }
     }
     async Task PreviewRemoval()
     {
@@ -481,10 +452,10 @@ sealed partial class Wizard : Window
     }
     async Task RunOperation()
     {
-        page = 3; busy = true; finished = successful = false; progressStage = ""; File.Delete(CancelFile); Render();
-        try { successful = await Worker(operation == "models" ? "repair" : operation, true) == 0; }
+        page = 3; busy = true; finished = successful = false; progressStage = ""; ResetOperationProgress(); operationClock.Start(); File.Delete(CancelFile); Render();
+        try { successful = await Worker(repairModels ? "models" : operation, true) == 0; }
         catch { successful = false; log.AppendText("INSTALLER_OPERATION_FAILED\n"); }
-        finally { busy = false; finished = true; hfSecret = orSecret = ""; hfValid = orValid = false; terms.IsChecked = false; Render(); }
+        finally { operationClock.Stop(); busy = false; finished = true; hfSecret = orSecret = ""; hfValid = orValid = false; terms.IsChecked = false; Render(); }
     }
     void RenderHostRows()
     {
@@ -526,7 +497,7 @@ sealed partial class Wizard : Window
         {
             "architecture" => T("64-bit processor: ", "Procesor 64-bit: ") + Field("cpu_model"),
             "platform" => T("System: ", "System: ") + Field("name"),
-            "disk" => T("Disk space: ", "Miejsce na dysku: ") + "(" + GB(context.GetProperty("free_bytes").GetInt64()) + T(" GB free; ", " GB wolne; ") + GB(context.GetProperty("installation_bytes").GetInt64()) + T(" GB required)", " GB wymagane)"),
+            "disk" => T("Disk space: ", "Miejsce na dysku: ") + "(" + GB(context.GetProperty("free_bytes").GetInt64()) + T(" GB free; ", " GB wolne; ") + GB(context.GetProperty("installation_bytes").GetInt64()) + T(" GB required", " GB wymagane") + (context.TryGetProperty("additional_bytes", out var additional) && operation != "install" ? T(" for program and basic models; additional free space: ", " na program i podstawowe modele; dodatkowe wolne miejsce: ") + GB(additional.GetInt64()) + " GB" : "") + ")",
             "gpu" => T("GPU driver: ", "Sterownik GPU: ") + (context.TryGetProperty("devices", out var devices) && devices.GetArrayLength() > 0 ? string.Join("; ", devices.EnumerateArray().Select(d => d.GetProperty("name").GetString() + " · " + d.GetProperty("driver").GetString())) : T("not detected", "nie wykryto")),
             "vc_runtime" => T("Visual C++ libraries", "Biblioteki Visual C++"),
             _ => "FFmpeg / ffprobe"
@@ -535,12 +506,12 @@ sealed partial class Wizard : Window
     async Task<int> Worker(string op, bool confirm)
     {
         if (testing) throw new InvalidOperationException("A self-test must never invoke installation or network workers");
-        bool prepare = op is "install" or "update" or "repair";
+        bool prepare = op is "install" or "update" or "repair" or "models";
         int epoch = stateEpoch;
-        var request = new OperationRequest(op, root.Text, confirm, prepare && LocalSelected,
+        var request = new OperationRequest(op, root.Text, confirm, prepare && LocalSelected || op == "check" && operation == "models",
             prepare && terms.IsChecked == true, removeModels.IsChecked == true, removeKey.IsChecked == true,
-            prepare && LocalSelected && hfValid ? hfSecret : "", prepare && orValid ? orSecret : "",
-            Environment.ProcessPath!, Environment.ProcessId, CancelFile);
+            prepare && LocalSelected && hfValid ? hfSecret : "", op == "install" && orValid ? orSecret : "",
+            Environment.ProcessPath!, Environment.ProcessId, CancelFile, op == "models" ? selectedModels.ToArray() : null, repairModels);
         async Task Output(string line)
         {
             string text = line, stage = ""; JsonElement? item = null;
@@ -549,10 +520,12 @@ sealed partial class Wizard : Window
             await Dispatcher.InvokeAsync(() =>
             {
                 if (epoch != stateEpoch) return;
-                log.AppendText(text + Environment.NewLine); if (log.Text.Length > 100000) log.Text = log.Text[^80000..]; log.ScrollToEnd();
+                log.AppendText(DateTimeOffset.Now.ToString("HH:mm:ss.fff zzz") + " · " + text + Environment.NewLine); if (log.Text.Length > 100000) log.Text = log.Text[^80000..]; log.ScrollToEnd();
                 if (item is JsonElement data && data.TryGetProperty("checks", out _)) { host = data; RenderHostRows(); }
                 if (item is JsonElement plan && stage == "preview") removal = plan;
-                if (stage != "log" && stage.Length > 0 && page == 3 && progressStage != "cancel") { progressStage = stage; Render(); }
+                if (item is JsonElement verification && stage == "model-verification") modelVerification = verification.GetProperty("models").Clone();
+                UpdateOperationProgress(stage, text, item);
+                if (stage != "log" && stage != "download" && stage.Length > 0 && page == 3 && progressStage != "cancel") { progressStage = stage; Render(); }
             });
         }
         if (OperationRunner.NeedsElevation(request))
@@ -564,8 +537,8 @@ sealed partial class Wizard : Window
     }
     void SaveReport()
     {
-        var picker = new SaveFileDialog { Filter = "Text (*.txt)|*.txt", FileName = "EwP-setup-report.txt" };
-        if (picker.ShowDialog(this) == true) File.WriteAllText(picker.FileName, log.Text);
+        var picker = new SaveFileDialog { Filter = "Text (*.txt)|*.txt", FileName = "EwP-setup-report-" + DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss-fff-zzz").Replace(":", "") + ".txt" };
+        if (picker.ShowDialog(this) == true) File.WriteAllText(picker.FileName, "EwP Setup " + version + " · " + DateTimeOffset.Now.ToString("o") + Environment.NewLine + "Operation: " + operation + Environment.NewLine + log.Text);
     }
     void Launch()
     {
@@ -591,6 +564,9 @@ sealed partial class Wizard : Window
 sealed class Catalog { public List<ModelEntry> Models { get; set; } = []; }
 sealed class ModelEntry
 {
+    public string Code { get; set; } = "";
+    public string Revision { get; set; } = "";
+    public bool Gated { get; set; }
     public string Repository { get; set; } = "";
     public string Path { get; set; } = "";
     public long Bytes { get; set; }

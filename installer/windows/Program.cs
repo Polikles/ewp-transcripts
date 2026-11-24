@@ -1,4 +1,5 @@
 using System.IO;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using System.Windows;
@@ -10,6 +11,21 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        if (string.Equals(Path.GetFileName(Environment.ProcessPath), "uninstall.exe", StringComparison.OrdinalIgnoreCase))
+        {
+            // Run the version-matched wizard, releasing the root entry point before repair/removal.
+            string root = Path.GetDirectoryName(Environment.ProcessPath!)!;
+            try
+            {
+                using var state = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "installation.json")));
+                string wizard = state.RootElement.GetProperty("wizard").GetString()!;
+                if (!Path.GetFullPath(wizard).StartsWith(Path.GetFullPath(Path.Combine(root, "wizards")) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException();
+                var start = new ProcessStartInfo(wizard) { UseShellExecute = false };
+                foreach (string value in new[] { "--local-maintenance", "--root", root }) start.ArgumentList.Add(value);
+                Process.Start(start); return;
+            }
+            catch { args = ["--local-maintenance", "--root", root]; }
+        }
         if (args.Contains("--elevated-operation"))
         {
             string? pipe = Argument(args, "--pipe");

@@ -18,7 +18,7 @@ sealed partial class Wizard
 
     void SelectOperation(string value, bool focusChoice = false)
     {
-        if (busy || !operations.Contains(value)) return;
+        if (busy || !VisibleOperations.Contains(value)) return;
         resettingOperation = true;
         try
         {
@@ -28,7 +28,7 @@ sealed partial class Wizard
             hostReady = hostAttempted = previewReady = finished = successful = false;
             hfSecret = orSecret = ""; hfValid = orValid = false;
             terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = false;
-            log.Clear(); File.Delete(CancelFile);
+            log.Clear(); ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
             detected = value == "install" ? null : FindInstallation(preferredMaintenanceRoot, value == "uninstall");
             manualLocation = detected == null;
             root.Text = value == "install" ? InstallationDiscovery.DefaultRoot : detected?.Root ?? "";
@@ -44,7 +44,7 @@ sealed partial class Wizard
     {
         steps.Children.Clear();
         string[] names = [T("Action", "Działanie"), T("Location and checks", "Lokalizacja i test"),
-            IsInstall ? T("Models and keys", "Modele i klucze") : T("Confirm", "Potwierdzenie"),
+            operation == "install" ? T("Models and keys", "Modele i klucze") : operation is "repair" or "models" ? T("Models", "Modele") : T("Confirm", "Potwierdzenie"),
             IsInstall && !finished ? T("Installation", "Instalacja") : T("Result", "Wynik")];
         for (int i = 0; i < names.Length; i++)
         {
@@ -79,6 +79,6 @@ sealed partial class Wizard
         info.Children.Add(new TextBlock { Text = detected?.Version.Length > 0 ? "EwP Transcripts " + detected.Version : "EwP Transcripts", FontSize = 16, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
         info.Children.Add(new TextBlock { Text = root.Text, TextWrapping = TextWrapping.Wrap, Foreground = Muted, FontSize = 13 });
         body.Children.Add(Card(info));
-        body.Children.Add(Link(T("Choose another installation…", "Wybierz inną instalację…"), () => { manualLocation = true; Render(); }));
+        body.Children.Add(Link(T("Choose another installation…", "Wybierz inną instalację…"), ChooseFolder));
     }
 }

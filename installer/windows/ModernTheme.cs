@@ -10,7 +10,8 @@ static class ModernTheme
     {
         input.Background = Brushes.White; input.Foreground = Wizard.Ink;
         input.BorderBrush = (Brush)new BrushConverter().ConvertFromInvariantString("#AABCC9")!;
-        input.BorderThickness = new Thickness(1); input.Padding = new Thickness(12, 10, 12, 10);
+        input.BorderThickness = new Thickness(1); input.Padding = new Thickness(10, 6, 10, 6);
+        input.Height = 36;
         input.VerticalContentAlignment = VerticalAlignment.Center;
         var border = new FrameworkElementFactory(typeof(Border), "InputFrame");
         border.SetValue(Border.CornerRadiusProperty, new CornerRadius(7));

@@ -12,13 +12,16 @@ import os
 import platform
 import queue
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import threading
 import time
+import tomllib
 import uuid
 import zipfile
+from datetime import UTC, datetime
 from pathlib import Path, PurePath
 from typing import Any
 
@@ -62,7 +65,11 @@ def stop_child(process: subprocess.Popen[str]) -> None:
 
 def emit(stage: str, message: str, **values: Any) -> None:
     print(
-        json.dumps({"stage": stage, "message": message, **values}, ensure_ascii=False), flush=True
+        json.dumps(
+            {"time": datetime.now(UTC).isoformat(), "stage": stage, "message": message, **values},
+            ensure_ascii=False,
+        ),
+        flush=True,
     )
 
 
@@ -292,7 +299,24 @@ def run(
             if capture:
                 collected.append(line)
             else:
-                emit("log", line.rstrip())
+                try:
+                    event = json.loads(line)
+                except ValueError:
+                    event = None
+                if isinstance(event, dict) and event.get("stage") in {
+                    "download",
+                    "python",
+                    "dependencies",
+                    "media",
+                    "verify",
+                }:
+                    emit(
+                        event["stage"],
+                        event.pop("message", "Downloading model"),
+                        **{k: v for k, v in event.items() if k not in {"stage", "time"}},
+                    )
+                else:
+                    emit("log", line.rstrip())
         code = process.wait()
     except BaseException:
         stop_child(process)
@@ -501,7 +525,8 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
         f"{free / 1e9:.1f} GB free; {required / 1e9:g} GB required",
         free_bytes=free,
         required_bytes=required,
-        installation_bytes=required if owner else 20_000_000_000,
+        installation_bytes=20_000_000_000,
+        additional_bytes=required,
         reserve_bytes=0 if owner else 5_000_000_000,
     )
     devices: list[dict[str, str]] = []
@@ -579,6 +604,188 @@ def app_env(root: Path) -> dict[str, str]:
     }
 
 
+def installed_size(root: Path) -> int:
+    """Logical installed bytes, including reused models; never follow directory links."""
+    seen: set[str] = set()
+    total = 0
+    paths = [root, *(Path(p) for p in (load_owner(root) or {}).get("models", []))]
+    for base in paths:
+        for directory, dirs, files in os.walk(base, followlinks=False):
+            dirs[:] = [
+                d
+                for d in dirs
+                if not (Path(directory) / d).is_symlink()
+                and not (
+                    hasattr(Path(directory) / d, "is_junction")
+                    and (Path(directory) / d).is_junction()
+                )
+            ]
+            for name in files:
+                path = Path(directory) / name
+                with contextlib.suppress(OSError):
+                    identity = str(path.resolve())
+                    if identity not in seen:
+                        total += path.stat().st_size
+                        seen.add(identity)
+    return total
+
+
+def model_catalog(source: Path) -> list[dict[str, Any]]:
+    return json.loads(source.read_text(encoding="utf-8"))["models"]
+
+
+def model_targets(
+    root: Path, entries: list[dict[str, Any]], release: Path | None = None
+) -> list[dict[str, Any]]:
+    state = load_state(root)
+    # Read the installed configuration to respect custom paths; missing app falls back to pins.
+    targets: list[str] = []
+    if state or release:
+        release = release or active_path(root, state)
+        program = (
+            "import json;from ewp_transcripts.config import load_config;c=load_config();"
+            "print(json.dumps([str(c.models.asr_snapshot_path),str(c.models.alignment_snapshot_path),"
+            "str(c.models.english_alignment_snapshot_path),str(c.diarization.local_model_path)]))"
+        )
+        with contextlib.suppress(OSError, ValueError):
+            result = subprocess.run(
+                [str(app_python(release)), "-c", program],
+                cwd=release / "app",
+                env=app_env(root),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            value = json.loads(result.stdout)
+            if (
+                isinstance(value, list)
+                and len(value) == len(entries)
+                and all(isinstance(p, str) for p in value)
+            ):
+                targets = value
+    return [
+        dict(entry, path=targets[i] if targets else str(Path(entry["path"]).expanduser()))
+        for i, entry in enumerate(entries)
+    ]
+
+
+def verify_models(root: Path, catalog: Path) -> list[dict[str, Any]]:
+    """Offline verification against pinned upstream SHA256/git-blob hashes, no model load."""
+    results = []
+    for entry in model_targets(root, model_catalog(catalog)):
+        target = Path(entry["path"])
+        issues = []
+        for name, size in entry["files"].items():
+            check_cancelled()
+            path = target / name
+            try:
+                expected = entry["hashes"][name]
+                if path.stat().st_size != size:
+                    raise ValueError("size")
+                digest = hashlib.sha256() if expected["algorithm"] == "sha256" else hashlib.sha1()
+                if expected["algorithm"] == "git-sha1":
+                    digest.update(f"blob {size}\0".encode())
+                with path.open("rb") as stream:
+                    while block := stream.read(4 * 1024 * 1024):
+                        check_cancelled()
+                        digest.update(block)
+                if digest.hexdigest() != expected["digest"]:
+                    raise ValueError("hash")
+            except (OSError, ValueError, KeyError):
+                issues.append(name)
+        result = {
+            "code": entry["code"],
+            "repository": entry["repository"],
+            "path": str(target),
+            "revision": entry["revision"],
+            "status": "fail" if issues else "pass",
+            "issues": issues,
+        }
+        results.append(result)
+        emit("model-check", "Model integrity checked", **result)
+    emit("model-verification", "Offline model verification complete", models=results)
+    return results
+
+
+def prepare_models(
+    root: Path,
+    release: Path,
+    *,
+    selected: list[str] | None,
+    redownload: bool,
+    terms: bool,
+    secrets: dict[str, str],
+    hf_checked: bool = False,
+) -> None:
+    catalog = release / "control/models.json"
+    entries = model_targets(root, model_catalog(catalog), release)
+    if selected is not None and set(selected) - {m["code"] for m in entries}:
+        raise InstallError("Unknown model selection")
+    downloads = []
+    for entry in entries:
+        if selected is not None and entry["code"] not in selected:
+            continue
+        target = Path(entry["path"])
+        complete = all(
+            (target / n).is_file() and (target / n).stat().st_size == size
+            for n, size in entry["files"].items()
+        )
+        if redownload or not complete:
+            downloads.append(entry)
+    owner = load_owner(root)
+    assert owner is not None
+    owner["models"] = sorted(set(owner.get("models", []) + [m["path"] for m in entries]))
+    atomic_json(root / "owner.json", owner)
+    if not downloads:
+        emit("models", "Pinned local models preserved; no download or HF token required")
+        return
+    gated = any(m.get("gated", m["code"] == "diarization") for m in downloads)
+    if gated and (not terms or not secrets.get("hf_token")):
+        raise InstallError(
+            "Accept pyannote terms and provide HF token for the selected gated download"
+        )
+    if gated and not hf_checked:
+        check_hf_access(secrets["hf_token"])
+    if os.name == "nt":
+        import ctypes
+
+        if ctypes.windll.shell32.IsUserAnAdmin():
+            validate_elevated_model_targets([m["path"] for m in downloads])
+    command = [str(app_python(release)), "scripts/setup-models.py", "--yes", "--progress-json"]
+    for entry in downloads:
+        command += ["--model", entry["code"]]
+    if redownload:
+        command += ["--force-download"]
+    emit("models", "Downloading selected models", selected=[m["code"] for m in downloads])
+    run(
+        command,
+        cwd=release / "app",
+        environment={**app_env(root), "HF_TOKEN": secrets.get("hf_token", "")},
+    )
+
+
+def changed_model_codes(root: Path, bundle: Path) -> list[str]:
+    """An app update prepares only models whose pinned identity changed."""
+    state = load_state(root)
+    if state is None or not state.get("local_models"):
+        return []
+    config_path = "app/src/ewp_transcripts/resources/default-config.toml"
+    old = tomllib.loads((active_path(root, state) / config_path).read_text(encoding="utf-8"))
+    with zipfile.ZipFile(bundle) as archive:
+        new = tomllib.loads(archive.read(config_path).decode())
+    fields = {
+        "asr": ("models", "asr_revision"),
+        "alignment_pl": ("models", "alignment_revision"),
+        "alignment_en": ("models", "english_alignment_revision"),
+        "diarization": ("diarization", "model_revision"),
+    }
+    return [
+        code
+        for code, (section, name) in fields.items()
+        if old.get(section, {}).get(name) != new.get(section, {}).get(name)
+    ]
+
+
 def register(root: Path, state: dict[str, Any]) -> None:
     if os.name == "nt":
         import winreg
@@ -599,8 +806,10 @@ def register(root: Path, state: dict[str, Any]) -> None:
                 "DisplayVersion": state["version"],
                 "Publisher": "Damian Szczech",
                 "InstallLocation": str(root),
+                "DisplayIcon": str(root / "EwP.ico"),
+                "EstimatedSize": min(0xFFFFFFFF, max(1, installed_size(root) // 1024)),
                 "UninstallString": (
-                    f'"{state["wizard"]}" --uninstall --root "{root}"'
+                    f'"{state["wizard"]}" --maintenance --root "{root}"'
                     if state.get("wizard")
                     else (
                         "powershell.exe -NoProfile -ExecutionPolicy Bypass "
@@ -622,14 +831,18 @@ def register(root: Path, state: dict[str, Any]) -> None:
         script = (
             "$w=New-Object -ComObject WScript.Shell;$s=$w.CreateShortcut((Join"
             "-Path ([Environment]::GetFolderPath('Desktop')) 'EwP Transcripts."
-            "lnk'));$s.TargetPath=$env:EWP_LAUNCH;$s.WorkingDirectory=$env:EWP"
-            "_ROOT;$s.Save()"
+            "lnk'));$s.TargetPath=$env:EWP_LAUNCH;$s.Arguments=$env:EWP_ARGS;$s.WorkingDirectory=$env:EWP"
+            "_ROOT;$s.IconLocation=$env:EWP_ICON;$s.Save()"
         )
         environment = {
             **os.environ,
             "EWP_SHORTCUT": str(Path.home() / "Desktop/EwP Transcripts.lnk"),
-            "EWP_LAUNCH": str(root / "EwP.cmd"),
+            "EWP_LAUNCH": str(
+                Path(os.environ["SYSTEMROOT"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+            ),
+            "EWP_ARGS": f'-NoProfile -ExecutionPolicy Bypass -File "{root / "launch.ps1"}"',
             "EWP_ROOT": str(root),
+            "EWP_ICON": str(root / "EwP.ico"),
         }
         subprocess.run(
             ["powershell.exe", "-NoProfile", "-Command", script],
@@ -665,6 +878,8 @@ def install(
     terms: bool,
     secrets: dict[str, str],
     check_host: bool = True,
+    model_codes: list[str] | None = None,
+    redownload: bool = False,
 ) -> dict[str, Any]:
     root = safe_root(root)
     check_cancelled()
@@ -673,8 +888,30 @@ def install(
     if meta["platform"] != expected:
         raise InstallError("Choose the bundle for this operating system")
     old = load_state(root)
-    if local and not terms and not (old and old.get("local_models")):
-        raise InstallError("Confirm model download and upstream gated-model terms first")
+    hf_checked = False
+    if local and model_codes != []:
+        with zipfile.ZipFile(bundle) as archive:
+            entries = model_targets(root, json.loads(archive.read("control/models.json"))["models"])
+        gated_missing = any(
+            m.get("gated", m["code"] == "diarization")
+            and (model_codes is None or m["code"] in model_codes)
+            and (
+                redownload
+                or any(
+                    not (Path(m["path"]) / n).is_file()
+                    or (Path(m["path"]) / n).stat().st_size != size
+                    for n, size in m["files"].items()
+                )
+            )
+            for m in entries
+        )
+        if gated_missing:
+            if not terms:
+                raise InstallError("Confirm gated-model terms before downloading pyannote")
+            if not secrets.get("hf_token"):
+                raise InstallError("Provide an HF read token for the selected gated model")
+            check_hf_access(secrets["hf_token"])
+            hf_checked = True
     if old and tuple(map(int, meta["version"].split("."))) < tuple(
         map(int, old["version"].split("."))
     ):
@@ -688,9 +925,6 @@ def install(
     emit("host", "Host checks completed", **report)
     if check_host and not report["ready"]:
         raise InstallError("Resolve failed host checks before installation")
-    if local and secrets.get("hf_token"):
-        emit("models", "Checking HF read access; no model is downloaded yet")
-        check_hf_access(secrets["hf_token"])
     root.mkdir(parents=True, exist_ok=True)
     with exclusive(root):
         if owner is None:
@@ -738,6 +972,7 @@ def install(
                         "-File",
                         str(release / "app/scripts/setup-windows.ps1"),
                         "-Install",
+                        "-ProgressJson",
                         *([] if local else ["-CloudOnly"]),
                     ],
                     cwd=release / "app",
@@ -750,63 +985,15 @@ def install(
                     environment={**env, "PATH": str(uv.parent) + os.pathsep + env.get("PATH", "")},
                 )
             if local:
-                emit(
-                    "models",
-                    "Preparing exact model snapshots; existing complete snapshots are reused",
+                prepare_models(
+                    root,
+                    release,
+                    selected=model_codes,
+                    redownload=redownload,
+                    terms=terms,
+                    secrets=secrets,
+                    hf_checked=hf_checked,
                 )
-                program = (
-                    "import json;from ewp_transcripts.config import load_config;"
-                    "c=load_config();print(json.dumps([str(c.models.asr_snapshot_path),"
-                    "str(c.models.alignment_snapshot_path),str(c.models.english_alignment_snapshot_path),"
-                    "str(c.diarization.local_model_path)]))"
-                )
-                model_paths = json.loads(
-                    run(
-                        [str(python), "-c", program],
-                        cwd=release / "app",
-                        environment=env,
-                        capture=True,
-                    )
-                )
-                owner["models"] = sorted(set(owner.get("models", []) + model_paths))
-                atomic_json(root / "owner.json", owner)
-                probe = subprocess.run(
-                    [str(python), "-m", "ewp_transcripts", "doctor", "--json-output"],
-                    cwd=release / "app",
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                )
-                try:
-                    model_checks = [
-                        item
-                        for item in json.loads(probe.stdout)["checks"]
-                        if item["code"].endswith("_model")
-                    ]
-                    models_ready = len(model_checks) == 4 and all(
-                        item["status"] == "pass" for item in model_checks
-                    )
-                except (ValueError, KeyError):
-                    models_ready = False
-                if not models_ready:
-                    if not terms:
-                        raise InstallError(
-                            "Confirm download and upstream terms for the missing/new models"
-                        )
-                    if not secrets.get("hf_token"):
-                        raise InstallError(
-                            "Provide a Hugging Face read token after accepting the model terms"
-                        )
-                    if os.name == "nt":
-                        import ctypes
-
-                        if ctypes.windll.shell32.IsUserAnAdmin():
-                            validate_elevated_model_targets(model_paths)
-                    run(
-                        [str(python), "scripts/setup-models.py", "--yes"],
-                        cwd=release / "app",
-                        environment={**env, "HF_TOKEN": secrets["hf_token"]},
-                    )
             if local:
                 emit("models", "Checking local sentence-tokenizer data")
                 with tempfile.TemporaryDirectory(
@@ -858,7 +1045,7 @@ def install(
                     environment=env,
                     capture=True,
                 )
-                if local
+                if local and model_codes != []
                 else run(
                     [str(python), "-m", "ewp_transcripts", "--help"],
                     cwd=release / "app",
@@ -896,8 +1083,16 @@ def install(
                 "local_models": local,
                 "updated_at": time.time(),
             }
-            for name in ("manager.py", "Install-EwP.ps1", "Install-EwP.sh", "Remove-EwP.ps1"):
-                atomic_copy(release / "control" / name, root / name)
+            for name in (
+                "manager.py",
+                "Install-EwP.ps1",
+                "Install-EwP.sh",
+                "Remove-EwP.ps1",
+                "models.json",
+                "EwP.ico",
+            ):
+                if (release / "control" / name).exists():
+                    atomic_copy(release / "control" / name, root / name)
             exe = release / "control/EwP-Setup.exe"
             if exe.exists():
                 shutil.copyfile(exe, root / "EwP-Setup.exe")
@@ -915,6 +1110,7 @@ def install(
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
                 state["wizard"] = str(target)
+                atomic_copy(source, root / "uninstall.exe")
             write_launchers(root)
             check_cancelled()
             register(root, state)
@@ -978,19 +1174,65 @@ exit $LASTEXITCODE
         (root / "ewp").chmod(0o700)
 
 
+def gui_state_directory(root: Path) -> Path:
+    """Keep recovery beside writable installs, in per-user state for protected folders."""
+    directory = root / "work-state"
+    try:
+        if os.name == "nt" and any(
+            Path(os.environ[name]) in root.parents
+            for name in ("PROGRAMFILES", "PROGRAMFILES(X86)", "SYSTEMROOT")
+            if os.environ.get(name)
+        ):
+            raise PermissionError("Protected installation uses per-user state")
+        if directory.is_symlink() or (
+            hasattr(directory, "is_junction") and directory.is_junction()
+        ):
+            raise InstallError("Work-state directory must not be linked")
+        directory.mkdir(exist_ok=True)
+        with tempfile.TemporaryFile(dir=directory):
+            pass
+    except PermissionError:
+        base = Path(os.environ.get("LOCALAPPDATA", Path.home() / ".local/state"))
+        identity = hashlib.sha256(str(root).encode()).hexdigest()[:24]
+        directory = base / "ewp-transcripts/installations" / identity / "work-state"
+        directory.mkdir(parents=True, exist_ok=True)
+    # Keep directory recall from pre-managed-state versions, without copying secrets or media.
+    previous = (
+        Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state")))
+        / "ewp-transcripts"
+    )
+    for name in ("workspace-locations.json", "project-catalog.json"):
+        source, target = previous / name, directory / name
+        if source.is_file() and not source.is_symlink() and not target.exists():
+            atomic_copy(source, target)
+    return directory
+
+
 def launch(root: Path) -> None:
     state = load_state(root)
     if state is None:
         raise InstallError("No managed installation found")
     with exclusive(root):
         release = active_path(root, state)
-        result = subprocess.run(
+        environment = app_env(root)
+        environment["EWP_GUI_STATE_DIR"] = str(gui_state_directory(root))
+        process = subprocess.Popen(
             [str(app_python(release)), "-m", "ewp_transcripts", "gui"],
             cwd=release / "app",
-            env=app_env(root),
-            check=False,
+            env=environment,
         )
-        if result.returncode:
+        try:
+            code = process.wait()
+        except KeyboardInterrupt:
+            # The console signal is also delivered to the GUI process. Let it close workers.
+            previous = signal.signal(signal.SIGINT, signal.SIG_IGN)
+            try:
+                code = process.wait()
+            finally:
+                signal.signal(signal.SIGINT, previous)
+            emit("complete", "Application closed")
+            return
+        if code:
             raise InstallError("Application exited with an error")
 
 
@@ -1014,6 +1256,9 @@ def removal_preview(root: Path) -> dict[str, Any]:
         "EwP.cmd",
         "tools-launch.cmd",
         "launch.ps1",
+        "models.json",
+        "EwP.ico",
+        "uninstall.exe",
         "ewp",
     ]
     paths = [str(root / p) for p in allowed if (root / p).exists()]
@@ -1074,28 +1319,7 @@ def uninstall(
             run([str(python), "-c", code], cwd=release / "app", environment=app_env(root))
         if remove_models:
             remove_exact_models(root)
-        if os.name == "nt":
-            import winreg
-
-            keypath = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts"
-            with contextlib.suppress(FileNotFoundError):
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, keypath) as key:
-                    location = winreg.QueryValueEx(key, "InstallLocation")[0]
-                if location == str(root):
-                    winreg.DeleteKey(winreg.HKEY_CURRENT_USER, keypath)
-            script = (
-                "$w=New-Object -ComObject WScript.Shell;$p=Join-Path ([Environment"
-                "]::GetFolderPath('Desktop')) 'EwP Transcripts.lnk';if(Test-Path -"
-                "LiteralPath $p){$s=$w.CreateShortcut($p);if($s.TargetPath -eq $en"
-                "v:EWP_LAUNCH){Remove-Item -LiteralPath $p -Force}}"
-            )
-            subprocess.run(
-                ["powershell.exe", "-NoProfile", "-Command", script],
-                env={**os.environ, "EWP_LAUNCH": str(root / "EwP.cmd")},
-                check=False,
-                capture_output=True,
-            )
-        else:
+        if os.name != "nt":
             desktop = Path.home() / ".local/share/applications/ewp-transcripts.desktop"
             if (
                 desktop.is_file()
@@ -1215,8 +1439,47 @@ def remove_exact_models(root: Path) -> None:
         )
 
 
+def removal_worker_directory() -> Path:
+    """Elevated deferred code must never execute from user-writable temporary files."""
+    import ctypes
+    from ctypes import wintypes
+
+    if not ctypes.windll.shell32.IsUserAnAdmin():
+        return Path(tempfile.mkdtemp(prefix="ewp-uninstall-"))
+    target = Path(os.environ["COMMONPROGRAMFILES"]) / ("EwP-remove-" + uuid.uuid4().hex)
+    descriptor = wintypes.LPVOID()
+    security = ctypes.WinDLL("advapi32", use_last_error=True)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+
+    class Attributes(ctypes.Structure):
+        _fields_ = [
+            ("length", wintypes.DWORD),
+            ("descriptor", wintypes.LPVOID),
+            ("inherit", wintypes.BOOL),
+        ]
+
+    convert = security.ConvertStringSecurityDescriptorToSecurityDescriptorW
+    convert.argtypes = [
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        ctypes.POINTER(wintypes.LPVOID),
+        wintypes.LPVOID,
+    ]
+    if not convert("D:P(A;OICI;FA;;;BA)(A;OICI;FA;;;SY)", 1, ctypes.byref(descriptor), None):
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        attributes = Attributes(ctypes.sizeof(Attributes), descriptor, False)
+        kernel.CreateDirectoryW.argtypes = [wintypes.LPCWSTR, ctypes.POINTER(Attributes)]
+        if not kernel.CreateDirectoryW(str(target), ctypes.byref(attributes)):
+            raise ctypes.WinError(ctypes.get_last_error())
+    finally:
+        kernel.LocalFree.argtypes = [wintypes.LPVOID]
+        kernel.LocalFree(descriptor)
+    return target
+
+
 def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None:
-    temporary = Path(tempfile.mkdtemp(prefix="ewp-uninstall-"))
+    temporary = removal_worker_directory()
     plan = temporary / "plan.json"
     atomic_json(
         plan,
@@ -1224,6 +1487,7 @@ def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None
             "root": str(root),
             "paths": paths,
             "pids": [os.getpid(), os.getppid(), *([wizard_pid] if wizard_pid > 0 else [])],
+            "owner_id": (load_owner(root) or {}).get("id", ""),
         },
     )
     script = temporary / "remove.ps1"
@@ -1240,7 +1504,7 @@ def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None
             "-Plan",
             str(plan),
         ],
-        creationflags=0x08000000,
+        creationflags=0x08000200,
         close_fds=True,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
@@ -1278,7 +1542,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "action",
-        choices=("check", "install", "update", "repair", "rollback", "launch", "uninstall"),
+        choices=(
+            "check",
+            "verify-models",
+            "models",
+            "install",
+            "update",
+            "repair",
+            "rollback",
+            "launch",
+            "uninstall",
+        ),
     )
     parser.add_argument("--root", type=Path, default=default_root())
     parser.add_argument("--bundle", type=Path)
@@ -1291,6 +1565,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--secrets-stdin", action="store_true")
     parser.add_argument("--cancel-file", type=Path)
     parser.add_argument("--save-openrouter-key", action="store_true")
+    parser.add_argument("--model", action="append")
+    parser.add_argument("--redownload", action="store_true")
     args = parser.parse_args(argv)
     secrets: dict[str, Any] = {}
     try:
@@ -1307,7 +1583,27 @@ def main(argv: list[str] | None = None) -> int:
             report = host_report(root, args.local)
             emit("host", "Host checks completed", **report)
             return 0 if report["ready"] else 3
-        if args.action == "rollback":
+        if args.action == "verify-models":
+            verify_models(root, Path(__file__).with_name("models.json"))
+        elif args.action == "models":
+            state = load_state(root)
+            if state is None:
+                raise InstallError("No managed installation found")
+            with exclusive(root):
+                release = active_path(root, state)
+                prepare_models(
+                    root,
+                    release,
+                    selected=args.model,
+                    redownload=args.redownload,
+                    terms=args.accept_model_terms,
+                    secrets=secrets,
+                )
+                state["local_models"] = True
+                atomic_json(root / "installation.json", state)
+                register(root, state)
+                emit("complete", "Selected local models prepared; application files unchanged")
+        elif args.action == "rollback":
             rollback(root)
         elif args.action == "launch":
             launch(root)
@@ -1355,7 +1651,19 @@ def main(argv: list[str] | None = None) -> int:
                     "Optional OpenRouter key to save in the OS store: "
                 )
             install(
-                root, args.bundle, local=args.local, terms=args.accept_model_terms, secrets=secrets
+                root,
+                args.bundle,
+                local=args.local,
+                terms=args.accept_model_terms,
+                secrets=secrets,
+                model_codes=(
+                    []
+                    if args.action == "repair"
+                    else changed_model_codes(root, args.bundle)
+                    if args.action == "update"
+                    else args.model
+                ),
+                redownload=args.redownload,
             )
         return 0
     except (InstallError, OSError, ValueError) as error:
@@ -1369,6 +1677,9 @@ def main(argv: list[str] | None = None) -> int:
                 message = message.replace(secrets[name], "[redacted]")
         emit("error", message)
         return 2
+    except KeyboardInterrupt:
+        emit("complete", "Operation interrupted")
+        return 130
 
 
 if __name__ == "__main__":

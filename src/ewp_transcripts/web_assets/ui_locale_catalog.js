@@ -2486,3 +2486,31 @@ for (const [en, pl] of [
 // Owner startup feedback and requested product subtitle.
 guiPolish.set("Local-first transcript workflow", "Lokalne narzędzie do transkrypcji");
 guiPolishErrorDescriptions.set("GUI_INITIALIZATION_FAILED", "Nie udało się zainicjalizować interfejsu. Odśwież stronę i sprawdź szczegóły techniczne.");
+
+// Owner 2026-11-24: automatic startup recovery. Stable IDs retained in en-pl.csv.
+for (const [en, pl] of [
+  [
+    "Automatically save changes and restore the last work state at startup.",
+    "Automatycznie zapisuj zmiany i przywracaj ostatni stan pracy przy uruchomieniu."
+  ],
+  [
+    "Automatic recovery is preparing. Work is saved locally, including before choosing an output directory.",
+    "Przygotowywanie odzyskiwania pracy. Stan jest zapisywany lokalnie, także przed wyborem katalogu wyników."
+  ],
+  [
+    "Auto-save active. Changes are saved within a few seconds.",
+    "Autozapis aktywny. Zmiany są zapisywane w ciągu kilku sekund."
+  ],
+  [
+    "Changes pending for auto-save. They will be validated within a few seconds.",
+    "Zmiany oczekują na autozapis. Zostaną sprawdzone w ciągu kilku sekund."
+  ],
+  [
+    "Startup recovery paused because current work changed. Save or load a workspace to continue.",
+    "Wstrzymano odzyskiwanie, ponieważ bieżąca praca uległa zmianie. Zapisz lub wczytaj stan pracy, aby kontynuować."
+  ],
+  [
+    "The last work state is unavailable. Its recovery file was preserved; restore missing paths or load another workspace.",
+    "Ostatni stan pracy jest niedostępny. Zachowano jego zapis; przywróć brakujące ścieżki lub wczytaj inny stan pracy."
+  ]
+]) guiPolish.set(en, pl);

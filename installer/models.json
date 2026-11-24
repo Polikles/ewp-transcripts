@@ -15,7 +15,34 @@
         "tokenizer.json": 2203239,
         "vocabulary.txt": 459861
       },
-      "path": "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v2/snapshots/f0fe81560cb8b68660e564f55dd99207059c092e"
+      "path": "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v2/snapshots/f0fe81560cb8b68660e564f55dd99207059c092e",
+      "hashes": {
+        ".gitattributes": {
+          "algorithm": "git-sha1",
+          "digest": "c7d9f3332a950355d5a77d85000f05e6f45435ea"
+        },
+        "README.md": {
+          "algorithm": "git-sha1",
+          "digest": "7f318da4d83500b49baa7e26917e96294dc449e5"
+        },
+        "config.json": {
+          "algorithm": "git-sha1",
+          "digest": "346bb8684801a61c15ce82bcb80c29a63c2d1f94"
+        },
+        "model.bin": {
+          "algorithm": "sha256",
+          "digest": "bf2a9746382e1aa7ffff6b3a0d137ed9edbd9670c3b87e5d35f5e85e70d0333a"
+        },
+        "tokenizer.json": {
+          "algorithm": "git-sha1",
+          "digest": "7818adb6de9fa3064d3ff81226fdd675be1f6344"
+        },
+        "vocabulary.txt": {
+          "algorithm": "git-sha1",
+          "digest": "c9074644d9d1205686f16d411564729461324b75"
+        }
+      },
+      "gated": false
     },
     {
       "code": "alignment_pl",
@@ -48,7 +75,106 @@
         "speech-recognition-community-v2_dev_data_pl_validation_eval_results_greedy.txt": 49,
         "vocab.json": 372
       },
-      "path": "~/.cache/huggingface/hub/models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970"
+      "path": "~/.cache/huggingface/hub/models--jonatasgrosman--wav2vec2-large-xlsr-53-polish/snapshots/6b1cea36bd8bc5f65ec8081667cd9c0207d51970",
+      "hashes": {
+        ".gitattributes": {
+          "algorithm": "git-sha1",
+          "digest": "d699711d884c16db686245dffb53739ddf85119c"
+        },
+        "README.md": {
+          "algorithm": "git-sha1",
+          "digest": "610e37af4d663e2f65b4fcc28c04b40cfe67f278"
+        },
+        "alphabet.json": {
+          "algorithm": "git-sha1",
+          "digest": "38e3db652aca61248a0ebf20b1135a0b97b5db5a"
+        },
+        "config.json": {
+          "algorithm": "git-sha1",
+          "digest": "36716433860dc0bd3f23c7a1c308062228c9a72d"
+        },
+        "eval.py": {
+          "algorithm": "git-sha1",
+          "digest": "cac50014eeb12f18e47067f3d2af8d6804e7359e"
+        },
+        "flax_model.msgpack": {
+          "algorithm": "sha256",
+          "digest": "08be9595fb38cbe835b5ea7e923a632e03bd2d915749b6e92902d51eb48928d8"
+        },
+        "full_eval.sh": {
+          "algorithm": "git-sha1",
+          "digest": "01485dd373f300ba4216288286deba64e527efdf"
+        },
+        "language_model/attrs.json": {
+          "algorithm": "sha256",
+          "digest": "f5ffd02e1ceef6517476e72ebe7997ddef7e92d27cb5a23d6695d64c4317d6ad"
+        },
+        "language_model/lm.binary": {
+          "algorithm": "sha256",
+          "digest": "f1df471209afd17b6476d8ff10707e55444b77c99609ade5d75e65dd2bf464b5"
+        },
+        "language_model/unigrams.txt": {
+          "algorithm": "sha256",
+          "digest": "5618b3acd674a33040b05dc3f4b6d4e27971d7817b3a323a9365d38a7477b2e7"
+        },
+        "log_mozilla-foundation_common_voice_6_0_pl_test_predictions.txt": {
+          "algorithm": "git-sha1",
+          "digest": "d3aaa0d98a3f7a8dba0a1e8763927e5dfb3d2bcd"
+        },
+        "log_mozilla-foundation_common_voice_6_0_pl_test_predictions_greedy.txt": {
+          "algorithm": "git-sha1",
+          "digest": "3b71ee7876e9af1cd6493e6d35e56d281f9e0380"
+        },
+        "log_mozilla-foundation_common_voice_6_0_pl_test_targets.txt": {
+          "algorithm": "git-sha1",
+          "digest": "89e7764d8a90115223422635c70489c65b4c2cab"
+        },
+        "log_speech-recognition-community-v2_dev_data_pl_validation_predictions.txt": {
+          "algorithm": "git-sha1",
+          "digest": "a9afa17bf79140317f0331b77a83e66b4762155d"
+        },
+        "log_speech-recognition-community-v2_dev_data_pl_validation_predictions_greedy.txt": {
+          "algorithm": "git-sha1",
+          "digest": "eaf4aaad7227bdca389d2a418b55414afff5af7d"
+        },
+        "log_speech-recognition-community-v2_dev_data_pl_validation_targets.txt": {
+          "algorithm": "git-sha1",
+          "digest": "a5cd705d37c0396ff968b119cf8d70d5a12eaf2e"
+        },
+        "mozilla-foundation_common_voice_6_0_pl_test_eval_results.txt": {
+          "algorithm": "git-sha1",
+          "digest": "45fe3249a767c1ceb8b99e61bc237a09d2b13d47"
+        },
+        "mozilla-foundation_common_voice_6_0_pl_test_eval_results_greedy.txt": {
+          "algorithm": "git-sha1",
+          "digest": "5e2552868ba1d4ef0a4cf938c9b98582f54a1043"
+        },
+        "preprocessor_config.json": {
+          "algorithm": "git-sha1",
+          "digest": "bb3285bc209d674e3f88646bdfd327bfe43b60da"
+        },
+        "pytorch_model.bin": {
+          "algorithm": "sha256",
+          "digest": "1bd2a29f3b6093cc7a0f9ad39d56b5b11ae00f588878035e117e379dd3c204a6"
+        },
+        "special_tokens_map.json": {
+          "algorithm": "git-sha1",
+          "digest": "25bc39604f72700b3b8e10bd69bb2f227157edd1"
+        },
+        "speech-recognition-community-v2_dev_data_pl_validation_eval_results.txt": {
+          "algorithm": "git-sha1",
+          "digest": "67cba4543823071b7192c0c3d4103f9fb7510d57"
+        },
+        "speech-recognition-community-v2_dev_data_pl_validation_eval_results_greedy.txt": {
+          "algorithm": "git-sha1",
+          "digest": "016281b825a88b37992efc67fd63aa4566a0be96"
+        },
+        "vocab.json": {
+          "algorithm": "git-sha1",
+          "digest": "9bf566b0e25bee18de53e8afefa5cc2350381b65"
+        }
+      },
+      "gated": false
     },
     {
       "code": "alignment_en",
@@ -68,7 +194,54 @@
         "tokenizer_config.json": 163,
         "vocab.json": 291
       },
-      "path": "~/.cache/huggingface/hub/models--facebook--wav2vec2-base-960h/snapshots/22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+      "path": "~/.cache/huggingface/hub/models--facebook--wav2vec2-base-960h/snapshots/22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+      "hashes": {
+        ".gitattributes": {
+          "algorithm": "git-sha1",
+          "digest": "cf6d51fc9b1a671c35e92d6bd009880937aaa12d"
+        },
+        "README.md": {
+          "algorithm": "git-sha1",
+          "digest": "c7fe2047d7ac9b9816848c657b2a492ee95b264b"
+        },
+        "config.json": {
+          "algorithm": "git-sha1",
+          "digest": "8ca9cc7496e145e37d09cec17d0c3bf9b8523c8e"
+        },
+        "feature_extractor_config.json": {
+          "algorithm": "git-sha1",
+          "digest": "52fdd74dc06f40033506e402269fbde5e7adc21d"
+        },
+        "model.safetensors": {
+          "algorithm": "sha256",
+          "digest": "8aa76ab2243c81747a1f832954586bc566090c83a0ac167df6f31f0fa917d74a"
+        },
+        "preprocessor_config.json": {
+          "algorithm": "git-sha1",
+          "digest": "3f24dc078fcba55ee1d417a413847ead40c093a3"
+        },
+        "pytorch_model.bin": {
+          "algorithm": "sha256",
+          "digest": "c34f9827b034a1b9141dbf6f652f8a60eda61cdf5771c9e05bfa99033c92cd96"
+        },
+        "special_tokens_map.json": {
+          "algorithm": "git-sha1",
+          "digest": "25bc39604f72700b3b8e10bd69bb2f227157edd1"
+        },
+        "tf_model.h5": {
+          "algorithm": "sha256",
+          "digest": "412742825972a6e2e877255ccd8b3416e618df15a7f1e5e4f736aa3632ce33b5"
+        },
+        "tokenizer_config.json": {
+          "algorithm": "git-sha1",
+          "digest": "978a15a96dbb2d23e2afbc70137cae6c5ce38c8d"
+        },
+        "vocab.json": {
+          "algorithm": "git-sha1",
+          "digest": "88181b954aa14df68be9b444b3c36585f3078c0a"
+        }
+      },
+      "gated": false
     },
     {
       "code": "diarization",
@@ -87,7 +260,50 @@
         "plda/xvec_transform.npz": 134376,
         "segmentation/pytorch_model.bin": 5906507
       },
-      "path": "~/.cache/huggingface/hub/models--pyannote--speaker-diarization-community-1/snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee"
+      "path": "~/.cache/huggingface/hub/models--pyannote--speaker-diarization-community-1/snapshots/3533c8cf8e369892e6b79ff1bf80f7b0286a54ee",
+      "hashes": {
+        ".gitattributes": {
+          "algorithm": "git-sha1",
+          "digest": "7c39301dc01fe65e09b2432a27a18b4ee3e74a37"
+        },
+        "README.md": {
+          "algorithm": "git-sha1",
+          "digest": "8356d6634d7b1074581dd36e2225887ec809326e"
+        },
+        "config.yaml": {
+          "algorithm": "git-sha1",
+          "digest": "4022db43960736338378fdb6b5a85cfdae198910"
+        },
+        "diarization.gif": {
+          "algorithm": "sha256",
+          "digest": "0d925ad38995d89009260e493b0ae2e684c3e1397f495265ed841c45c4f73a35"
+        },
+        "embedding/README.md": {
+          "algorithm": "git-sha1",
+          "digest": "d71f943e00016652680bef1e6c49fbc842e0d4c4"
+        },
+        "embedding/pytorch_model.bin": {
+          "algorithm": "sha256",
+          "digest": "6f10ff60898a1d185fa22e1d11e0bfa8a92efec811f11bca48cb8cafebefd929"
+        },
+        "plda/README.md": {
+          "algorithm": "git-sha1",
+          "digest": "5c01ad2e673203fe32a82d7a140eb817db9930b7"
+        },
+        "plda/plda.npz": {
+          "algorithm": "sha256",
+          "digest": "9b77bcd840692710dd3496f62ecfeed8d8e5f002fd991b785079b244eab7d255"
+        },
+        "plda/xvec_transform.npz": {
+          "algorithm": "sha256",
+          "digest": "325f1ce8e48f7e55e9c8aa47e05d2766b7c48c4b25b8de8dd751e7a4cc5fbe8f"
+        },
+        "segmentation/pytorch_model.bin": {
+          "algorithm": "sha256",
+          "digest": "7ad24338d844fb95985486eb1a464e32d229f6d7a03c9abe60f978bacf3f816e"
+        }
+      },
+      "gated": true
     }
   ]
 }

@@ -1,10 +1,11 @@
 # Works from an extracted versioned bundle or a managed installation. No secrets in argv.
 [CmdletBinding()]
 param(
- [ValidateSet('check','install','update','repair','rollback','launch','uninstall')][string]$Action='install',
+ [ValidateSet('check','verify-models','models','install','update','repair','rollback','launch','uninstall')][string]$Action='install',
  [string]$Root='',
  [string]$Bundle='', [string]$CancelFile='', [switch]$Local, [switch]$CloudOnly, [switch]$AcceptModelTerms, [switch]$Yes,
- [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin
+ [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin,
+ [string]$Models='', [switch]$Redownload
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -18,10 +19,12 @@ $manager=Join-Path $PSScriptRoot 'manager.py'
 $argsToManager=@($manager,$Action,'--root',$Root)
 if($Bundle){$argsToManager+=@('--bundle',(Resolve-Path -LiteralPath $Bundle).Path)}
 if($CancelFile){$argsToManager+=@('--cancel-file',$CancelFile)}
+foreach($model in $Models.Split(',',[StringSplitOptions]::RemoveEmptyEntries)){$argsToManager+=@('--model',$model)}
+if($Redownload){$argsToManager+='--redownload'}
 foreach($pair in @(@($Local,'--local'),@($CloudOnly,'--cloud-only'),@($AcceptModelTerms,'--accept-model-terms'),@($Yes,'--yes'),@($RemoveModels,'--remove-models'),@($RemoveKey,'--remove-key'),@($SecretsStdin,'--secrets-stdin'),@($SaveOpenRouterKey,'--save-openrouter-key'))){if($pair[0]){$argsToManager+=$pair[1]}}
 $secretLine=if($SecretsStdin){[Console]::ReadLine()}else{$null}
 $statePath=Join-Path $Root 'installation.json'
-if((Test-Path -LiteralPath $statePath) -and $Action -in @('uninstall','rollback','launch')){
+if((Test-Path -LiteralPath $statePath) -and $Action -in @('uninstall','rollback','launch','verify-models','models')){
  $state=Get-Content -Encoding UTF8 -LiteralPath $statePath -Raw|ConvertFrom-Json
  if($state.kind -ne 'ewp-transcripts-managed-v1' -or $state.active -notmatch '^versions[\\/][a-zA-Z0-9.\-]+$'){throw 'Invalid installation inventory'}
  $python=Join-Path $Root ($state.active+'\app\.venv\Scripts\python.exe')

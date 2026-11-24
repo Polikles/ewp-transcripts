@@ -1,8 +1,12 @@
 # Run from a source checkout in Windows PowerShell 5.1 or PowerShell 7.
 [CmdletBinding()]
-param([switch]$Install, [switch]$Repair, [switch]$SetupModels, [switch]$PublicOnly, [switch]$CloudOnly)
+param([switch]$Install, [switch]$Repair, [switch]$SetupModels, [switch]$PublicOnly, [switch]$CloudOnly, [switch]$ProgressJson)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+function Write-SetupPhase([string]$Stage,[string]$Message){
+    if($ProgressJson){@{stage=$Stage;message=$Message}|ConvertTo-Json -Compress|Write-Output}
+    else{Write-Host $Message}
+}
 if (-not ($Install -or $Repair)) {
     Write-Host 'Usage: .\scripts\setup-windows.ps1 -Install [-SetupModels] [-PublicOnly]'
     Write-Host 'Repair: .\scripts\setup-windows.ps1 -Repair'
@@ -19,9 +23,11 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
 }
 Push-Location (Split-Path -Parent $PSScriptRoot)
 try {
+    Write-SetupPhase 'python' 'Preparing Python 3.12'
     & uv python install 3.12
     if ($LASTEXITCODE -ne 0) { throw 'Python setup failed.' }
     $syncArgs = @('sync', '--locked', '--python', '3.12', '--no-dev')
+    Write-SetupPhase 'dependencies' 'Installing locked Python dependencies'
     if ($Repair) { $syncArgs += @('--reinstall-package', 'torchcodec', '--reinstall-package', 'pyannote-audio') }
     & uv @syncArgs
     if ($LASTEXITCODE -ne 0) { throw 'Locked dependency installation failed.' }
@@ -31,10 +37,29 @@ try {
         $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ('ewp-windows-setup-' + [Guid]::NewGuid())
         New-Item -ItemType Directory -Path $tempRoot | Out-Null
         try {
+            Write-SetupPhase 'media' 'Downloading verified FFmpeg runtime'
             $archive = Join-Path $tempRoot 'ffmpeg.zip'
             $url = 'https://github.com/GyanD/codexffmpeg/releases/download/7.1.1/ffmpeg-7.1.1-full_build-shared.zip'
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $archive
+            $request=[Net.HttpWebRequest]::Create($url)
+            $request.Timeout=600000;$request.ReadWriteTimeout=600000
+            $response=$request.GetResponse()
+            try {
+                $source=$response.GetResponseStream();$target=[IO.File]::Create($archive)
+                try {
+                    $buffer=New-Object byte[] 1048576
+                    $bytes=0L;$clock=[Diagnostics.Stopwatch]::StartNew();$lastReport=0.0
+                    while(($count=$source.Read($buffer,0,$buffer.Length)) -gt 0){
+                        $target.Write($buffer,0,$count);$bytes+=$count
+                        if($ProgressJson -and ($clock.Elapsed.TotalSeconds-$lastReport -ge .5 -or $bytes -eq $response.ContentLength)){
+                            $lastReport=$clock.Elapsed.TotalSeconds
+                            $rate=$bytes/[Math]::Max(.001,$lastReport)
+                            $eta=if($response.ContentLength -gt 0){[Math]::Max(0,($response.ContentLength-$bytes)/$rate)}else{$null}
+                            @{stage='download';message='FFmpeg';bytes=$bytes;total=$response.ContentLength;unit='B';rate=$rate;eta_seconds=$eta}|ConvertTo-Json -Compress|Write-Output
+                        }
+                    }
+                } finally {$source.Dispose();$target.Dispose()}
+            } finally {$response.Dispose()}
             $expected = '9f28727e8b472a04c1d2e520aaa425dca82721b995139b35710091130ea6e699'
             if ((Get-FileHash -Algorithm SHA256 $archive).Hash.ToLowerInvariant() -ne $expected) {
                 throw 'FFmpeg archive SHA-256 mismatch. Nothing will be installed.'
@@ -48,6 +73,7 @@ try {
         }
     }
     $env:EWP_FFMPEG_PREFIX = $prefix
+    Write-SetupPhase 'verify' 'Checking installed native runtime'
     $env:PATH = (Join-Path $prefix 'bin') + ';' + $env:PATH
     if ($SetupModels) {
         $modelArgs = @('run', '--locked', '--no-sync', 'python', 'scripts/setup-models.py')

@@ -4,7 +4,7 @@ Use the numbered steps below with the matching GUI stage.
 
 1. Choose output root and catalog: Leave the optional catalog blank to store new saved-work JSON files in the output directory, or choose a separate catalog for saves and backups.
 2. Save current work state: Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.
-3. Load saved work: The list refreshes when this stage opens. Select the workspace and Load selected work state after a restart. Re-enter or explicitly load provider credentials; upload consent stays unchecked.
+3. Load saved work: The list refreshes when this stage opens. The last work state loads automatically; select and load a different workspace when needed. Re-enter or explicitly load provider credentials; upload consent stays unchecked.
 4. Inspect cleanup before deleting: Refresh the managed-source inventory and read retention reasons before any explicit cleanup.
 
 ## 1. Choose output root and catalog
@@ -17,7 +17,19 @@ Enter a recognizable unique workspace name and Save current work state. Dirty so
 
 The loaded name is filled automatically and locked against accidental renaming. Updating it saves the same workspace. Save as a new workspace requires another name and keeps the original. A duplicate name in known catalogs is rejected; case, surrounding whitespace and equivalent Unicode spellings do not create distinct names. An empty/duplicate name highlights the field.
 
-Auto-save is off by default. If enabled, it periodically updates the active checkpoint when tracked work changes; it is not a substitute for deliberately saving important editor work. Explicit save is the recommended recovery point before stopping the server.
+Auto-save starts enabled and saves tracked changes and dirty review drafts within a few seconds.
+The last active work state loads automatically after startup, including in a fresh browser.
+Before an output folder is selected, managed installations save under `work-state` beside the
+program; protected installations such as Program Files use a private per-user location instead.
+Selecting the output folder associates the initial recovery state with that folder. The Saved
+work file line shows its actual path. Named saves remain available for deliberate checkpoints.
+Wait until saving finishes before stopping the server. Missing paths do not cause the last
+recovery file to be overwritten by an empty state.
+
+Queue outcomes continue to be checkpointed while the browser is closed. Unfinished work restores
+as staged jobs and requires a new explicit start. Closing a browser tab still leaves the local
+server running; stop it with Ctrl+C after work finishes. A native Windows app interface is planned
+after installer acceptance.
 
 ## 3. Load saved work
 

@@ -1,5 +1,9 @@
 # Reviewed interface copy
 
+2026-11-24 maintenance: four existing IDs now describe automatic startup recovery rather than
+opt-in 60-second saving; two explicit startup diagnostics added. CSV/workbook/runtime agree;
+original hidden owner baselines and all other IDs remain unchanged. See integration.json.
+
 Status: owner corrections integrated and the resulting interface approved on 2026-11-22 (focused checklist 1–5 PASS).
 The source workbook returned on 2026-11-22 contains 2218 stable IDs and 106 changed rows
 (18 English changes and 105 Polish changes; some rows change both).

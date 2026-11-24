@@ -1,0 +1,120 @@
+using System.IO;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace EwP.Setup;
+
+sealed partial class Wizard
+{
+    bool maintenance, localMaintenance, repairModels;
+    JsonElement? modelVerification;
+    readonly HashSet<string> selectedModels = [];
+    IEnumerable<string> VisibleOperations => localMaintenance ? ["repair", "uninstall"] : maintenance ? ["repair", "rollback", "uninstall"] : operations;
+    bool PreparingModels => operation == "install" && LocalSelected || operation == "models" || repairModels || operation == "update" && UpdateChangesModels;
+    bool UpdateChangesModels => operation == "update" && LocalSelected && installed is JsonElement state &&
+        !catalog.Models.All(m => ReadInstalledModelPins(state).Contains(m.Revision, StringComparison.Ordinal));
+    string ReadInstalledModelPins(JsonElement state)
+    {
+        try { return File.ReadAllText(Path.Combine(root.Text, state.GetProperty("active").GetString()!, "app/src/ewp_transcripts/resources/default-config.toml")); }
+        catch { return ""; }
+    }
+    IEnumerable<ModelEntry> DownloadModels => catalog.Models.Where(m =>
+        (operation is "install" or "update" || selectedModels.Contains(m.Code)) && (repairModels || m.MissingBytes() > 0));
+    bool NeedsHf => PreparingModels && DownloadModels.Any(m => m.Gated);
+    bool ModelsCanContinue => !PreparingModels ||
+        ((!NeedsHf || hfValid && terms.IsChecked == true) && ModelSpaceProblem() == null &&
+         (!(operation == "models" || repairModels) || selectedModels.Count > 0));
+
+    void ResetModelState()
+    {
+        repairModels = false; modelVerification = null; selectedModels.Clear();
+        foreach (var model in catalog.Models.Where(m => m.MissingBytes() > 0)) selectedModels.Add(model.Code);
+    }
+
+    async void ChooseFolder()
+    {
+        var picker = new Microsoft.Win32.OpenFolderDialog();
+        if (picker.ShowDialog(this) != true) return;
+        manualLocation = true;
+        root.Text = operation == "install" ? InstallFolderFromPicker(picker.FolderName) : picker.FolderName;
+        locationChange?.Cancel(); ReadInstalled(); Render();
+        if (operation is "repair" or "models" && LocationProblem() == null) await CheckHost();
+    }
+
+    void RenderModels()
+    {
+        body.Children.Add(Heading("3. " + (operation == "install" ? T("Local models and keys", "Lokalne modele i klucze") : OperationName(operation))));
+        if (operation == "update" && !UpdateChangesModels)
+        {
+            body.Children.Add(Copy(T("Only the program will be updated. Model versions are unchanged; no model downloads or keys are needed.", "Zaktualizowany zostanie tylko program. Wersje modeli są takie same; pobieranie modeli i klucze nie są potrzebne.")));
+            return;
+        }
+        if (operation == "repair")
+        {
+            body.Children.Add(Copy(T("Default: repair program files and dependencies. Local models remain unchanged.", "Domyślnie: napraw pliki programu i zależności. Lokalne modele pozostaną bez zmian.")));
+            var check = ActionButton(T("Check models", "Sprawdź modele"), async () => await VerifyModels(), secondary: true); check.IsEnabled = !busy; body.Children.Add(check);
+            if (modelVerification is JsonElement models)
+            {
+                foreach (var result in models.EnumerateArray())
+                    body.Children.Add(Copy(result.GetProperty("repository").GetString() + " · " + (result.GetProperty("status").GetString() == "pass" ? "SHA OK" : T("missing or damaged files", "brakujące lub uszkodzone pliki")) + "\n" + result.GetProperty("path").GetString() + "\n" + result.GetProperty("revision").GetString(), muted: true));
+                body.Children.Add(ActionButton(T("Download models again…", "Pobierz ponownie modele…"), () => { repairModels = true; Render(); }, secondary: true));
+            }
+            if (busy) body.Children.Add(Copy(T("Checking model locations, pinned versions and file hashes…", "Sprawdzanie lokalizacji, wersji i sum kontrolnych modeli…")));
+            if (!repairModels) { AddLog(); return; }
+            body.Children.Add(Link(T("Return to program-only repair", "Wróć do naprawy samego programu"), () => { repairModels = false; Render(); }));
+        }
+        if (operation == "install")
+        {
+            LabelCheck(local, T("Use local models on my GPU (without them you can only work using OpenRouter API and verify earlier transcripts)", "Użyj lokalnych modeli na moim GPU (bez nich możliwa jest tylko praca przez API OpenRouter i weryfikacja wcześniejszych transkrypcji)"));
+            local.IsEnabled = true; body.Children.Add(local);
+        }
+        if (PreparingModels)
+        {
+            var list = new StackPanel();
+            foreach (var model in catalog.Models)
+            {
+                bool selectable = operation == "models" || repairModels;
+                var box = new CheckBox { IsChecked = selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable,
+                    Content = new TextBlock { Text = model.Repository + (model.MissingBytes() == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
+                box.Checked += (_, _) => { selectedModels.Add(model.Code); Render(); };
+                box.Unchecked += (_, _) => { selectedModels.Remove(model.Code); Render(); };
+                list.Children.Add(box);
+            }
+            body.Children.Add(Card(list));
+            body.Children.Add(Copy(T("Required space for selected downloads: ", "Potrzebne miejsce na wybrane modele: ") + GB(DownloadModels.Sum(m => repairModels ? m.Bytes : m.MissingBytes())) + " GB", muted: true));
+            if (NeedsHf)
+            {
+                var row = new StackPanel { Orientation = Orientation.Horizontal };
+                var enter = ActionButton(T("Enter Hugging Face token", "Podaj token Hugging Face"), () => EnterCredential(true), secondary: true); enter.IsEnabled = !hfValid; row.Children.Add(enter);
+                row.Children.Add(Symbols.InfoButton(T("Token for downloading pyannote. Click for help.", "Token do pobrania pyannote. Kliknij, aby uzyskać pomoc."), ShowHfHelp));
+                if (hfValid) row.Children.Add(new TextBlock { Text = T("Token valid", "Token prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center });
+                body.Children.Add(row);
+                LabelCheck(terms, T("I accepted pyannote terms on Hugging Face", "Zaakceptowałem warunki pyannote w Hugging Face")); terms.IsEnabled = hfValid; body.Children.Add(terms);
+            }
+            string? problem = ModelSpaceProblem();
+            if (problem != null) { var warning = Copy(problem); warning.Foreground = Error; body.Children.Add(warning); }
+        }
+        if (operation != "install") return;
+        var optional = new StackPanel();
+        optional.Children.Add(Copy(T("(optional) save OpenRouter API key. You can also do it after program installation", "(opcjonalnie) zapisz klucz API OpenRouter. Możesz to zrobić także po instalacji programu")));
+        var key = ActionButton(T("Enter OpenRouter key", "Podaj klucz OpenRouter"), () => EnterCredential(false), secondary: true); key.IsEnabled = !orValid; optional.Children.Add(key);
+        if (orValid) optional.Children.Add(Copy(T("Key valid", "Klucz prawidłowy")));
+        body.Children.Add(Card(optional));
+    }
+
+    async Task VerifyModels()
+    {
+        if (busy) return;
+        busy = true; modelVerification = null; File.Delete(CancelFile); Render();
+        try
+        {
+            if (await Worker("verify-models", false) != 0) throw new IOException();
+            selectedModels.Clear();
+            if (modelVerification is JsonElement models)
+                foreach (var model in models.EnumerateArray().Where(m => m.GetProperty("status").GetString() != "pass")) selectedModels.Add(model.GetProperty("code").GetString()!);
+        }
+        catch { notice = "model_check_failed"; }
+        finally { busy = false; Render(); }
+    }
+}

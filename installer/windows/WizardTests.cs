@@ -21,6 +21,8 @@ sealed partial class Wizard
         "responsive native page previews", "aligned radio glyph and text centers", "action reset and automatic maintenance discovery",
         "conditional Visual C++ help", "Windows release warning", "accessible vector information icon",
         "readable lossless credits", "authenticated same-user permission broker",
+        "app-only update and repair without credentials", "selective gated model recovery",
+        "restricted installed maintenance entry points", "measured download progress and report timestamps",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -85,8 +87,49 @@ sealed partial class Wizard
         await Capture(previewDirectory, "pl-install-progress");
         busy = false; finished = successful = true; Render(); await Capture(previewDirectory, "pl-complete");
         await TestActionResetAndPresentation(previewDirectory);
+        await TestModelMaintenance(previewDirectory);
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
+    }
+
+    async Task TestModelMaintenance(string? previews)
+    {
+        busy = finished = successful = false; language.SelectedIndex = 1;
+        string existing = Path.Combine(temporary, "test-model-maintenance"); Directory.CreateDirectory(existing);
+        File.WriteAllText(Path.Combine(existing, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing }));
+        File.WriteAllText(Path.Combine(existing, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing, version, active = "versions/test-1", local_models = true, previous = "versions/prior" }));
+        string config = Path.Combine(existing, "versions/test-1/app/src/ewp_transcripts/resources"); Directory.CreateDirectory(config);
+        File.WriteAllText(Path.Combine(config, "default-config.toml"), string.Join("\n", catalog.Models.Select(m => m.Revision)));
+        FindInstallation = (_, _) => InstallationDiscovery.Read(existing);
+        SelectOperation("update"); page = 2; Render(); UpdateLayout();
+        Assert(next.IsEnabled && !NeedsHf && !VisibleText((DependencyObject)Content).Contains("Podaj klucz OpenRouter"), "same-model update has no token/key gate");
+        await Capture(previews, "pl-update-program-only");
+        SelectOperation("repair"); page = 2; SetFixtureHost(); Render(); UpdateLayout();
+        Assert(next.IsEnabled && !repairModels && !NeedsHf, "repair defaults to app only");
+        await Capture(previews, "pl-repair-program-only");
+        repairModels = true; selectedModels.Clear(); selectedModels.Add("diarization"); Render();
+        Assert(NeedsHf && !next.IsEnabled, "explicit gated redownload requires token");
+        await Capture(previews, "pl-repair-gated-model");
+        selectedModels.Clear(); selectedModels.Add("asr"); Render();
+        Assert(!NeedsHf && next.IsEnabled, "public model redownload needs no HF");
+        await Capture(previews, "pl-repair-public-model");
+        SelectOperation("models"); page = 2; SetFixtureHost(); selectedModels.Clear(); selectedModels.Add("asr"); Render(); UpdateLayout();
+        Assert(!NeedsHf && !VisibleText((DependencyObject)Content).Contains("OpenRouter API"), "adding public models has no OR or gated prompt");
+        await Capture(previews, "pl-add-public-model");
+        maintenance = true; page = 0; operation = "uninstall"; Render();
+        Assert(actionChoices.Count == 3 && actionChoices.All(c => new[] { "repair", "rollback", "uninstall" }.Contains(c.Tag?.ToString())), "installed-program panel limits maintenance");
+        await Capture(previews, "pl-installed-program-maintenance");
+        maintenance = false; localMaintenance = true; Render();
+        Assert(actionChoices.Count == 2, "uninstall.exe offers repair/uninstall only");
+        await Capture(previews, "pl-local-uninstall-entry");
+        localMaintenance = false; operation = "install"; page = 1; Render(); UpdateLayout();
+        Assert(root.Height == 36 && root.ActualHeight < 45, "location field is compact");
+        page = 3; busy = true; progressStage = "models"; Render();
+        using (var download = JsonDocument.Parse("{\"bytes\":500000000,\"total\":1000000000,\"unit\":\"B\",\"rate\":2500000,\"eta_seconds\":200}"))
+            UpdateOperationProgress("download", "model.bin", download.RootElement);
+        Assert(!operationProgress.IsIndeterminate && operationProgress.Value == 50 && downloadProgress.Text.Contains("MB/s"), "measured per-file progress/rate/ETA");
+        await Capture(previews, "pl-model-download-progress");
+        busy = false; FindInstallation = InstallationDiscovery.Find;
     }
 
     async Task TestCredentialModals(string? previews)

@@ -1,4 +1,22 @@
-# Installer0.22.2 review / Przegląd instalatora0.22.2
+# Installer0.23.0 review / Przegląd instalatora0.23.0
+
+Owner confirms successful0.22.2 installation, desktop launch and one episode transcription.
+Retain that pass. Focus this review on the new lifecycle/operation/startup behavior below.
+
+- [ ] Location field is compact; alternate installation opens the folder picker immediately.
+  Repair/Add models run host checks automatically. The disk row distinguishes full local budget
+  and additional free space.
+- [ ] Unchanged-model update and program-only repair need no HF/OR. Repair offers offline model
+  hash checks and explicit selective download; only selected gated downloads show HF controls.
+- [ ] HF info highlights on hover/focus and has a short tooltip. Larger left gear, stages,
+  activity/elapsed and measured download progress are visible. Reports have dated names/entries.
+- [ ] Desktop and installed-program entries show EwP artwork; program-list size includes models.
+  Installed-program maintenance offers Repair/Rollback/Uninstall; uninstall.exe offers Repair/Uninstall.
+- [ ] Closing then Ctrl+C stops the idle app without a traceback or nested batch-job question.
+  Startup autosave restores output/pending work after restart, without automatic transcription
+  or restored cloud consent. Native Windows app interface remains a later task.
+- [ ] Removal cleans program/dependencies after wizard closure, preserving user work and shared
+  models by default. Remove-EwP.ps1 opens without a Plan prompt; a failed cleanup retains a report.
 
 The owner rejected0.22.0 before installation. That archive stays unchanged. Review this corrected
 wizard first; do not start installation until its layout/flow is acceptable. Existing application
@@ -41,9 +59,9 @@ access/authentication endpoints and do not send recordings. Do not paste secrets
 1. Keep the old checkout and back up work. Stop the old GUI server. Install into a NEW empty
    managed location; the old source checkout is never adopted or deleted.
 2. Check that stages/custom gear work and the chosen local/cloud mode becomes ready. Reuse cached
-   models; do not remove shared models simply for a test checkbox. The HF wizard requires a valid
-   access check before its terms acknowledgment even when complete model files can be reused.
-3. Open the desktop shortcut and check About/CLI0.22.2; open one existing result/workspace.
+   models; do not remove shared models simply for a test checkbox. Complete unchanged models are
+   reused without an HF prompt. HF access/terms are required only for a selected gated download.
+3. Open the desktop shortcut and check About/CLI0.23.0; open one existing result/workspace.
 4. Stop the managed server, try Repair and matching-version Add local models when relevant.
    Those operations must not silently upgrade an older installation. Update must be chosen explicitly.
 5. Uninstall first shows its plan. Default removal preserves work/models/key and finishes locked

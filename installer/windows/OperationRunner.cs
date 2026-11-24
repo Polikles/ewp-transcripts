@@ -13,11 +13,11 @@ namespace EwP.Setup;
 
 sealed record OperationRequest(string Operation, string Root, bool Confirm, bool Local, bool Terms,
     bool RemoveModels, bool RemoveKey, string HfToken, string OpenRouterKey, string WizardSource,
-    int WizardPid, string CancelFile);
+    int WizardPid, string CancelFile, string[]? Models = null, bool Redownload = false);
 
 static class OperationRunner
 {
-    internal static bool Mutates(OperationRequest request) => request.Operation is "install" or "update" or "repair" or "rollback" || request.Operation == "uninstall" && request.Confirm;
+    internal static bool Mutates(OperationRequest request) => request.Operation is "install" or "update" or "repair" or "models" or "rollback" || request.Operation == "uninstall" && request.Confirm;
 
     internal static bool NeedsElevation(OperationRequest request)
     {
@@ -80,6 +80,8 @@ static class OperationRunner
         if (request.Confirm || request.Operation == "check") info.ArgumentList.Add("-Yes");
         info.ArgumentList.Add(request.Local ? "-Local" : "-CloudOnly");
         if (request.Terms) info.ArgumentList.Add("-AcceptModelTerms");
+        if (request.Models is { Length: > 0 }) { info.ArgumentList.Add("-Models"); info.ArgumentList.Add(string.Join(",", request.Models)); }
+        if (request.Redownload) info.ArgumentList.Add("-Redownload");
         if (request.RemoveModels && request.Operation == "uninstall") info.ArgumentList.Add("-RemoveModels");
         if (request.RemoveKey && request.Operation == "uninstall") info.ArgumentList.Add("-RemoveKey");
         foreach (string name in new[] { "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "PYTHONUSERBASE", "VIRTUAL_ENV", "CONDA_PREFIX", "UV_CONFIG_FILE", "UV_INDEX_URL", "UV_EXTRA_INDEX_URL", "PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL" }) info.Environment.Remove(name);
@@ -239,7 +241,7 @@ static class OperationRunner
                 await writer.WriteLineAsync("{\"stage\":\"test\",\"message\":\"Authenticated same-user worker\"}");
                 await writer.WriteLineAsync("EWP_EXIT:0"); return 0;
             }
-            if (!new[] { "install", "update", "repair", "rollback", "uninstall" }.Contains(request.Operation) ||
+            if (!new[] { "install", "update", "repair", "models", "rollback", "uninstall" }.Contains(request.Operation) ||
                 request.WizardPid != parent || !string.Equals(request.WizardSource, Environment.ProcessPath, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException();
             // Elevated code and dependencies live below a protected OS folder, never a user-writable payload.
             string parentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles);

@@ -1,5 +1,9 @@
 # Development Handoff
 
+Current resume point (2026-11-24): [session handoff](checkpoints/2026-11-24-session-handoff.md).
+The owner is reviewing installer0.22.2 and will send new-session feedback. No product work now.
+Everything below is historical; do not reopen its obsolete acceptance gates.
+
 Active resume point (latest 2026-11-20 decision): [WORK_STATUS](../WORK_STATUS.md),
 [TODO](../TODO.md), [package checkpoint](checkpoints/2026-11-20-package-a.md) and the
 [roadmap package sequence](99-roadmap-v2.md#accepted-package-sequence--package-a-authorized).

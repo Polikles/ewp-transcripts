@@ -162,3 +162,9 @@ Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
 26. Owner0.22.1 feedback2026-11-23: implement location/permission/state/presentation fixes as0.22.2.
     Full installer EN/PL copy review is explicitly deferred until GUI is finished; keep that TODO.
     Do not reopen accepted app workflow, paid provider tests or artist packages. See active checkpoint.
+
+27. Owner requests a LOCAL new-session handoff2026-11-24 while reviewing installer0.22.2.
+    Follow docs/checkpoints/2026-11-24-session-handoff.md; wait for new-session feedback rather
+    than starting product changes, new builds, release, copy review or artist work now. Reconcile
+    stale completed TODO boxes without claiming installer acceptance. No commit/push requested
+    for this handoff; preserve its local docs edits at resume.

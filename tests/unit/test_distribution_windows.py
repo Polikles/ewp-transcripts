@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -30,6 +31,77 @@ def native_target():
         yield root
     finally:
         shutil.rmtree(root, ignore_errors=True)
+
+
+@pytest.mark.parametrize("preserve_work", [False, True])
+def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
+    tmp_path, preserve_work
+):
+    """Real PS adapter, managed Python, deferred worker and read-only uv-style dependencies."""
+    root = tmp_path / "Żółć installation"
+    app = root / "versions/test-1/app"
+    app.mkdir(parents=True)
+    subprocess.run(
+        [sys.executable, "-m", "venv", "--without-pip", str(app / ".venv")],
+        check=True,
+        capture_output=True,
+    )
+    for name in ("manager.py", "Install-EwP.ps1", "Remove-EwP.ps1"):
+        shutil.copyfile(ROOT / "installer" / name, root / name)
+    (app.parent / "bundle.json").write_text(json.dumps({"sha256": {}}))
+    for directory in ("cache", "runtime", "tools"):
+        folder = root / directory
+        folder.mkdir()
+        dll = folder / "readonly.dll"
+        dll.write_bytes(b"synthetic installed dependency")
+        dll.chmod(0o444)
+    owner = {
+        "kind": manager.MAGIC,
+        "root": str(root),
+        "id": "native-owned-test",
+        "releases": ["versions/test-1"],
+        "models": [],
+    }
+    manager.atomic_json(root / "owner.json", owner)
+    manager.atomic_json(
+        root / "installation.json",
+        {"kind": manager.MAGIC, "root": str(root), "active": "versions/test-1", "version": "1.0.0"},
+    )
+    if preserve_work:
+        (root / "recording.wav").write_bytes(b"private work must remain")
+    result = subprocess.run(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(root / "Remove-EwP.ps1"),
+            "-Yes",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
+    report = next(e["report_directory"] for e in events if e.get("stage") == "removal")
+    deadline = time.monotonic() + 45
+    while (root / "owner.json").exists() and time.monotonic() < deadline:
+        if (Path(report) / "removal-error.txt").exists():
+            pytest.fail((Path(report) / "removal-error.txt").read_text())
+        time.sleep(0.2)
+    assert not (root / "owner.json").exists(), report
+    assert not (root / "tools").exists()
+    assert not (root / "versions").exists()
+    if preserve_work:
+        assert (root / "recording.wav").read_bytes() == b"private work must remain"
+    else:
+        deadline = time.monotonic() + 5
+        while root.exists() and time.monotonic() < deadline:
+            time.sleep(0.1)
+        assert not root.exists()
 
 
 def test_real_empty_d_drive_child_passes_check_instead_of_depth_error(native_target):

@@ -1,8 +1,20 @@
 # EWP-transcripts work status
 
-Last updated: **2026-11-23**.
+Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
+
+**Active 2026-11-24 feedback / target0.23.0:** owner installed 0.22.2 and transcribed an episode successfully.
+Implement installer presentation/progress, operation-specific models/credentials, Windows
+registration/removal and idle shutdown fixes, then automatic startup autosave/recovery.
+See opening TODO and [active checkpoint](docs/checkpoints/2026-11-24-installer-lifecycle-startup.md).
+Native Windows app interface follows installer closure; previous handoff wait is superseded.
+
+**Current session boundary:** the owner is reviewing installer0.22.2 and will send comments in
+another session. Read the [complete local handoff](docs/checkpoints/2026-11-24-session-handoff.md).
+No product work is requested now. Last pushed HEADf696f30; this handoff leaves local documentation
+edits only. Full installer EN/PL review remains after GUI completion; actual native managed-install
+acceptance is still pending. Older pending app/manual/artist wording below is historical.
 
 Current delivery: **0.22.2 installer location/state/presentation fixes**, sourced51b106.
 [Checkpoint](docs/checkpoints/2026-11-23-installer-location-state.md) and its evidence record

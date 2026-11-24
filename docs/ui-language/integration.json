@@ -1,6 +1,6 @@
 {
   "status": "Owner interface approval complete 2026-11-22; EN/PL manuals prepared",
-  "rows": 2219,
+  "rows": 2221,
   "submitted_changes": 106,
   "submitted_EN_changes": 18,
   "submitted_PL_changes": 105,
@@ -1201,5 +1201,42 @@
       "pl": "Pełne instrukcje",
       "reason": "Complete Polish offline manuals are now available; the old English-only qualifier is obsolete. Stable ID retained."
     }
-  ]
+  ],
+  "startup_recovery_changes": {
+    "date": "2026-11-24",
+    "changed": [
+      {
+        "id": "ui.d02bfa91f76b44c0",
+        "previous_en": "Auto-save active. The next check runs within 60 seconds.",
+        "en": "Auto-save active. Changes are saved within a few seconds.",
+        "pl": "Autozapis aktywny. Zmiany są zapisywane w ciągu kilku sekund."
+      },
+      {
+        "id": "ui.8b0dbe91b82e6755",
+        "previous_en": "Auto-save is off by default and becomes available after an explicit workspace save or load. Enabling it updates the saved recovery point when queue items are added or removed.",
+        "en": "Automatic recovery is preparing. Work is saved locally, including before choosing an output directory.",
+        "pl": "Przygotowywanie odzyskiwania pracy. Stan jest zapisywany lokalnie, także przed wyborem katalogu wyników."
+      },
+      {
+        "id": "ui.34dc0ed1a7fbd978",
+        "previous_en": "Automatically replace the active saved workspace every 60 seconds when changes occur.",
+        "en": "Automatically save changes and restore the last work state at startup.",
+        "pl": "Automatycznie zapisuj zmiany i przywracaj ostatni stan pracy przy uruchomieniu."
+      },
+      {
+        "id": "ui.4515fa2eb0107d2a",
+        "previous_en": "Changes pending for auto-save. They will be validated at the next 60-second check.",
+        "en": "Changes pending for auto-save. They will be validated within a few seconds.",
+        "pl": "Zmiany oczekują na autozapis. Zostaną sprawdzone w ciągu kilku sekund."
+      }
+    ],
+    "added": [
+      "ui.startup-recovery.changed",
+      "ui.startup-recovery.unavailable"
+    ],
+    "note": "Preserved owner IDs and original hidden baselines; changed behavior per new owner feedback.",
+    "guide_changes": [
+      "guide.saved.steps.2.text"
+    ]
+  }
 }

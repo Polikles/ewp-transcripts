@@ -1,7 +1,43 @@
 # Immediate work queue
 
-Updated: 2026-11-23. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
+Updated: 2026-11-24. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+
+## Current handoff / owner review — 2026-11-24
+
+### Active owner feedback — installer lifecycle and startup, 2026-11-24
+
+Owner installed 0.22.2 and successfully transcribed an episode using the desktop shortcut.
+The new feedback supersedes the handoff wait. Preserve that application pass and previous deliveries.
+See `docs/checkpoints/2026-11-24-installer-lifecycle-startup.md`.
+
+- [x] Locate/read supplied setup report without persisting private contents in Git.
+- [x] Reduce Location textbox height; HF info short tooltip + visible hover/focus; larger left-aligned installation gear.
+- [x] Show current installation phase and useful progress, download bytes/rate/ETA where measurable; timestamp report contents and collision-resistant filename.
+- [x] EwP desktop and installed-program icons; dynamic initial program/model installed size.
+- [x] Choose another installation opens folder dialog immediately; consistent full local-install disk budget in checks, distinct incremental model size.
+- [x] Update preserves matching models without HF/OR prompts/downloads. Repair defaults to app-only; automatic host diagnostics, explicit model SHA/version/location verification and selective redownload; HF only for selected gated models.
+- [x] Add-models automatically checks host, omits OR, asks HF only for missing/selected gated downloads.
+- [x] Installed-program entry limits operations to repair/rollback/uninstall. Root uninstall.exe offers repair/uninstall.
+- [x] Diagnose incomplete Windows removal (15.5 GB left); reliable owned-file deletion and direct user-facing Remove-EwP.ps1 without mandatory internal Plan; retain unrelated work/shared caches by default.
+- [x] Clean idle Ctrl+C/launcher shutdown; preserve running-job safeguards.
+- [x] After installer fixes: automatic startup recovery/autosave from launch, before output selection; associate saved state with output root, respect protected install directories.
+- [ ] Focused regression/integration/native Windows previews/lifecycle checks; new versioned delivery and affected EN/PL docs.
+- [ ] Later, after installer closure: native Windows application interface with controlled lifetime and unsaved/active-work handling. Do not implement the native app shell in this installer pass.
+
+Historical handoff (superseded by active feedback above):
+Read [complete session handoff](docs/checkpoints/2026-11-24-session-handoff.md). Owner was reviewing
+installer0.22.2 and will send feedback in a NEW session. No product changes/builds requested now.
+
+- [ ] Receive and address the next owner installer review; prepare a new version only for a new changed build.
+- [ ] After installer GUI completion, consolidate full installer EN/PL copy for owner correction and integrate it.
+- [ ] Actual owner Win11 managed-install/UAC/local-model and focused lifecycle acceptance after GUI approval; preserve prior application workflow acceptance.
+- [ ] Maintain affected EN/PL installation/update/removal docs and packaged help after accepted installer changes.
+- [ ] After native acceptance: deliberate release/tag/assets/online bootstrap activation; signing decision if a certificate becomes available. Nothing public has been activated.
+- [ ] Parallel/non-blocking: integrate artist feedback/icons when supplied; documentation screenshots after final artwork. Preserve sent archives.
+
+Repeated historical boxes below are completion records, not separate open tasks. Full profile
+exchange is provisional; browser zoom200% and broad research remain optional, not new gates.
 
 ## Active installer location/state/presentation fixes — 2026-11-23
 
@@ -81,7 +117,7 @@ Delivered: [EN manual](docs/gui/README.md), [PL manual](docs/gui/pl/README.md), 
 help and `deliveries/ewp-gui-artist-review-2026-11-22.zip` outside Git. Source commitcca698b; final
 archive/manifest/source stamp and offline browser checks pass. Original sent ZIP preserved. Follow
 [checkpoint/evidence](docs/checkpoints/2026-11-22-user-documentation.md). Await documentation or
-artist feedback; later uninstall/graphical installer remains queued, not started.
+artist feedback. The later managed uninstall/graphical installer is implemented; owner installer acceptance remains open above.
 
 ## Delivered Windows startup / queue refresh correction — 2026-11-22
 
@@ -130,12 +166,12 @@ and mixed-queue missing-key blocking explicitly accepted. Transition to terminol
 - [x] Automated targeted/browser/ordinary/integration checks; no paid ASR, reinstall or owner retest.
 - [x] Generate complete local editable stable-ID / EN / PL review workbook, including messages, states, errors, hints/tooltips, quick guides and dynamic templates; document safe editing/round-trip mapping.
 - [x] Update plans/checkpoint/evidence and deliver product changes/tooling to main; initial review file stays local for owner editing.
-- [ ] After owner corrections: apply EN and PL edits, commit approved reference table, obtain interface approval.
-- [ ] Then review/update English documentation, then prepare full Polish user documentation.
-- [ ] Finally update a NEW artist review package with approved GUI/language changes. Latest owner instruction supersedes the earlier freeze at that later stage; keep already sent ZIP unchanged now.
+- [x] After owner corrections: apply EN and PL edits, commit approved reference table, obtain interface approval.
+- [x] Then review/update English documentation, then prepare full Polish user documentation.
+- [x] Finally update a NEW artist review package with approved GUI/language changes. Latest owner instruction supersedes the earlier freeze at that later stage; keep already sent ZIP unchanged now.
 
 Local review: [instructions](Instructions/UI_LANGUAGE_REVIEW.md). Workbook2218 rows; no owner
-manual retest required. Await edited workbook; do not regenerate/overwrite it or start full manuals.
+manual retest required. Historical wait is resolved: corrections, interface approval, manuals and the new artist package were delivered2026-11-22. Preserve the original workbooks.
 
 ## Delivered B recent locations, save filenames and cloud preflight — 2026-11-22
 
@@ -216,7 +252,7 @@ ASR work; shared-key OS save/load actions also work. Full B acceptance is still 
 - [x] Keep translation dictionary file picker inside its optional disclosure; audit sibling native pickers after DOM reparenting.
 - [x] Review Windows audio disconnect exceptions (WinError10053) and handle expected browser disconnects without stack spam; retain genuine media/file failures.
 - [x] Meaningful regressions/browser/normal gate and integration; changed-step docs/ENPL copy/checkpoint/evidence/changelog; cleanup, commit/push and focused owner checklist. 1031 tests, 17 integrations, full/focused Chromium and actual restart/recovery pass.
-- [ ] Owner: focused native retest from the final section of Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md; then remaining full native/WSL B acceptance.
+- [x] Historical app retest gate superseded by owner focused acceptance/task10 authorization and final Windows startup checks on2026-11-22. Managed-installer acceptance is separate and remains open above.
 
 ## Delivered B owner Windows/GUI fixes — native retest next
 
@@ -237,9 +273,9 @@ The reproduced Windows publication defect and requested UI changes are fixed; se
 
 ## Earlier installation/distribution request — consolidated into the next package
 
-- [ ] Tracked in the new Windows/Ubuntu lifecycle package above: Windows uninstall script with documented removal of application environment/private FFmpeg and optional downloaded models. Inventory exact owned paths and shared caches; preserve recordings/publications and unrelated/shared model editions unless explicitly selected.
-- [ ] Standalone graphical Windows EXE installer without a repository checkout; desktop launch icon and Add/Remove Programs registration.
-- [ ] Matching graphical uninstaller, including explicit optional model removal. See the consolidated distribution plan above; this is no longer an unspecified later backlog item.
+- [x] Tracked in the new Windows/Ubuntu lifecycle package above: Windows uninstall script with documented removal of application environment/private FFmpeg and optional downloaded models. Inventory exact owned paths and shared caches; preserve recordings/publications and unrelated/shared model editions unless explicitly selected.
+- [x] Standalone graphical Windows EXE installer without a repository checkout; desktop launch icon and Add/Remove Programs registration.
+- [x] Matching graphical uninstaller, including explicit optional model removal. See the consolidated distribution plan above; this is no longer an unspecified later backlog item.
 
 ## Completed Windows model-setup fix
 
@@ -341,7 +377,7 @@ remains present. The feedback fixes and the complete focused retest are now acce
 - [x] A4: Download verified existing exports through the GUI, preserving exact artifact/version identity and avoiding ASR reruns.
 - [x] Run relevant regression/packaging checks, then deliver one concrete manual checklist for the implemented A package.
 - [x] Owner tested A; reported defects were fixed and the complete focused retest passed on 2026-11-21.
-- [x] A acceptance gate passed and final no-retest layout adjustment verified. A is closed; B implementation is not started.
+- [x] A acceptance gate passed and final no-retest layout adjustment verified. A is closed; later B implementation/acceptance is recorded below.
 
 ## Package B — original tasks 5–9, with cloud ASR inserted as 8a
 

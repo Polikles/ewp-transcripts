@@ -44,6 +44,8 @@ else:print('synthetic help')
         "app/ewp_transcripts/__main__.py": app.encode(),
         "app/scripts/repair-dependencies.sh": b"#!/bin/sh\nexit 0\n",
         "app/src/ewp_transcripts/resources/default-config.toml": b"[models]\n",
+        "control/models.json": (ROOT / "installer/models.json").read_bytes(),
+        "control/EwP.ico": (ROOT / "installer/windows/EwP.ico").read_bytes(),
         **{
             f"control/{name}": (ROOT / "installer" / name).read_bytes()
             for name in ("manager.py", "Install-EwP.ps1", "Install-EwP.sh", "Remove-EwP.ps1")
@@ -192,6 +194,106 @@ def test_models_and_terms_are_explicit_before_root_changes(tmp_path, lifecycle):
     with pytest.raises(manager.InstallError, match="terms"):
         manager.install(root, bundle(tmp_path, "1.0.0"), local=True, terms=False, secrets={})
     assert not root.exists()
+
+
+def test_offline_model_verification_detects_same_size_corruption_and_missing_file(tmp_path):
+    target = tmp_path / "snapshot" / ("a" * 40)
+    target.mkdir(parents=True)
+    (target / "model.bin").write_bytes(b"BAD!")
+    catalog = tmp_path / "catalog.json"
+    manager.atomic_json(
+        catalog,
+        {
+            "models": [
+                {
+                    "code": "asr",
+                    "repository": "test/model",
+                    "revision": "a" * 40,
+                    "path": str(target),
+                    "files": {"model.bin": 4, "config.json": 2},
+                    "hashes": {
+                        "model.bin": {
+                            "algorithm": "sha256",
+                            "digest": hashlib.sha256(b"GOOD").hexdigest(),
+                        },
+                        "config.json": {
+                            "algorithm": "git-sha1",
+                            "digest": hashlib.sha1(b"blob 2\0{}").hexdigest(),
+                        },
+                    },
+                }
+            ]
+        },
+    )
+    result = manager.verify_models(tmp_path / "uninstalled", catalog)[0]
+    assert result["status"] == "fail" and set(result["issues"]) == {"model.bin", "config.json"}
+    (target / "model.bin").write_bytes(b"GOOD")
+    (target / "config.json").write_bytes(b"{}")
+    assert manager.verify_models(tmp_path / "uninstalled", catalog)[0]["status"] == "pass"
+
+
+def test_selected_public_model_download_needs_no_hf_and_preserved_gated_model_is_not_requested(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "installation"
+    release = root / "versions/test-1"
+    catalog = release / "control/models.json"
+    catalog.parent.mkdir(parents=True)
+    entries = [
+        {
+            "code": code,
+            "repository": "test/" + code,
+            "revision": "a" * 40,
+            "path": str(tmp_path / code),
+            "files": {"model.bin": 4},
+            "gated": gated,
+        }
+        for code, gated in [("asr", False), ("diarization", True)]
+    ]
+    manager.atomic_json(catalog, {"models": entries})
+    manager.atomic_json(
+        root / "owner.json", {"kind": manager.MAGIC, "root": str(root), "models": []}
+    )
+    monkeypatch.setattr(manager, "model_targets", lambda root, entries, *args: entries)
+    commands = []
+    monkeypatch.setattr(manager, "run", lambda command, **kw: commands.append(command))
+    manager.prepare_models(
+        root, release, selected=["asr"], redownload=False, terms=False, secrets={}
+    )
+    assert commands[0][-2:] == ["--model", "asr"]
+    commands.clear()
+    for entry in entries:
+        path = Path(entry["path"])
+        path.mkdir()
+        (path / "model.bin").write_bytes(b"GOOD")
+    manager.prepare_models(root, release, selected=None, redownload=False, terms=False, secrets={})
+    assert commands == []
+    with pytest.raises(manager.InstallError, match="gated"):
+        manager.prepare_models(
+            root, release, selected=["diarization"], redownload=True, terms=False, secrets={}
+        )
+
+
+def test_update_with_same_model_pins_prepares_no_models(tmp_path, lifecycle):
+    root, _ = lifecycle
+    state = install(root, bundle(tmp_path, "1.0.0"))
+    state["local_models"] = True
+    manager.atomic_json(root / "installation.json", state)
+    assert manager.changed_model_codes(root, bundle(tmp_path, "1.1.0")) == []
+
+
+def test_installed_size_counts_models_and_program_once(tmp_path):
+    root = tmp_path / "installation"
+    root.mkdir()
+    model = tmp_path / "models"
+    model.mkdir()
+    (model / "weights.bin").write_bytes(b"12345")
+    (root / "program.bin").write_bytes(b"123")
+    manager.atomic_json(
+        root / "owner.json",
+        {"kind": manager.MAGIC, "root": str(root), "models": [str(model), str(model)]},
+    )
+    assert manager.installed_size(root) == 8 + (root / "owner.json").stat().st_size
 
 
 def test_secret_input_and_child_logs_never_expose_keys(tmp_path, monkeypatch, capsys):
@@ -385,6 +487,8 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
         "src/ewp_transcripts/_version.py": '__version__ = "0.22.0"\n',
         "src/ewp_transcripts/__init__.py": "# app\n",
         "scripts/host.ps1": "# committed LF script\n",
+        "installer/models.json": '{"models":[]}',
+        "installer/windows/EwP.ico": "synthetic public icon",
         "src/private-key.txt": "UNTRACKED-SECRET-MUST-NOT-SHIP",
         "private benchmark/sample.txt": "PRIVATE-CORPUS-MUST-NOT-SHIP",
         **{
@@ -457,7 +561,7 @@ def test_deferred_windows_removal_releases_worker_pipes_and_keeps_unicode_plan(
 ):
     temporary = tmp_path / "deferred"
     temporary.mkdir()
-    monkeypatch.setattr(manager.tempfile, "mkdtemp", lambda **kw: str(temporary))
+    monkeypatch.setattr(manager, "removal_worker_directory", lambda: temporary)
     captured = {}
 
     def popen(command, **kwargs):
@@ -551,6 +655,7 @@ def test_host_checks_are_structured_and_use_selected_volume_and_25gb_margin(tmp_
     assert rows["platform"]["context"]["name"] == "Windows 11 26H2"
     assert rows["gpu"]["context"]["devices"] == [{"name": "NVIDIA Test GPU", "driver": "580.00"}]
     assert rows["disk"]["context"] == {
+        "additional_bytes": free,
         "free_bytes": free,
         "required_bytes": free,
         "installation_bytes": 20_000_000_000,

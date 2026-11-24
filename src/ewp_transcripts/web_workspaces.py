@@ -228,6 +228,8 @@ def resolve_optional_workspace_file(raw: str, resolve_path: ResolvePath) -> Path
 
 
 def default_workspace_directory() -> Path:
+    if managed := os.environ.get("EWP_GUI_STATE_DIR", "").strip():
+        return Path(managed).expanduser() / "gui-workspaces"
     state_home = os.environ.get("XDG_STATE_HOME", "").strip()
     base = Path(state_home).expanduser() if state_home else Path.home() / ".local" / "state"
     return base / "ewp-transcripts" / "gui-workspaces"
@@ -344,10 +346,7 @@ class GuiWorkspaceController:
                     return
             for catalog in (self, *catalogs):
                 for saved in catalog.documents():
-                    same_record = (
-                        catalog.state_directory == self.state_directory
-                        and saved.workspace_id == workspace_id
-                    )
+                    same_record = saved.workspace_id == workspace_id
                     if (
                         not same_record
                         and unicodedata.normalize("NFC", saved.name.strip()).casefold() == key

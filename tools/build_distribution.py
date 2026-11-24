@@ -56,6 +56,8 @@ def build(output: Path, downloads: Path, *, allow_dirty: bool = False) -> list[P
         sources["app/" + name] = source_bytes(name)
     for name in ("manager.py", "Install-EwP.ps1", "Install-EwP.sh", "Remove-EwP.ps1"):
         sources["control/" + name] = source_bytes("installer/" + name)
+    sources["control/models.json"] = source_bytes("installer/models.json")
+    sources["control/EwP.ico"] = source_bytes("installer/windows/EwP.ico")
     artifacts = []
     for target, (archive_name, digest) in UV_HASHES.items():
         archive = downloads / archive_name

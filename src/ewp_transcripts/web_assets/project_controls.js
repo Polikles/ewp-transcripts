@@ -166,6 +166,7 @@ async function restoreWorkspaceLocations() {
       workspaceDirectory.dispatchEvent(new Event("change",{bubbles:true}));
     }
     await refreshWorkspaces(workspaceList.value,{feedback:false});
+    await initializeAutomaticRecovery();
   }catch(error){workspaceStatus.textContent=error.message;}
   finally{restoringWorkspaceLocations=false;}
 }

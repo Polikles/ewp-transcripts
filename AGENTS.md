@@ -1,6 +1,24 @@
 # AGENTS.md
 
+## Active owner feedback — 2026-11-24
+
+Owner installed0.22.2, launched from desktop and successfully transcribed one episode. The prior
+handoff wait is superseded. Follow opening TODO and the installer-lifecycle-startup checkpoint:
+operation-specific models/keys, progress/report/icon/size, reliable removal and idle shutdown,
+then automatic startup autosave/recovery. A native Windows interface follows installer closure.
+Preserve earlier application acceptance/deliveries, no paid/model campaign or full copy workbook
+review before installer GUI completion. Current target0.23.0 includes the new recovery behavior.
+
 This file defines implementation rules for coding agents working on **ewp-transcripts**.
+
+## Latest session boundary — 2026-11-24
+
+Owner is reviewing installer0.22.2 and will send feedback in a NEW session. This turn is a local
+handoff only: read [current handoff](docs/checkpoints/2026-11-24-session-handoff.md) before older
+plans. Do not start product changes, rebuild, copy review, publication or artist work while waiting.
+Last pushed HEADf696f30; actual installer sourced51b106. This handoff leaves local docs-only edits,
+not a new release or owner acceptance. Retain prior app/docs/artist acceptance and pending native
+installer/UAC/model qualification. No handoff commit/push requested.
 
 ## Current installer0.22.2 correction — 2026-11-23
 

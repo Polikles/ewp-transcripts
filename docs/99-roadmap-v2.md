@@ -12,6 +12,24 @@ transcription research platform, universal dictionaries and broad model/hardware
 required deliverables. Existing regression, security, lineage and packaging checks remain required;
 research metrics and optional presets do not block completion or release readiness.
 
+### Active installer/startup follow-up — 2026-11-24
+
+Owner confirms0.22.2 installation, desktop startup and one successful transcription. New feedback
+supersedes the handoff wait.0.23.0 addresses installer operation/model/progress/report/registration/
+removal behavior and automatic startup autosave/recovery. Native Windows app interface follows
+installer closure, with explicit lifetime/active-work handling; do not implement that shell now.
+See opening TODO and the installer-lifecycle-startup checkpoint. Prior app passes remain closed.
+
+### Current session boundary — 2026-11-24
+
+Owner is reviewing installer **0.22.2**, not yet approved, and will send feedback in a new session.
+[Current local handoff](checkpoints/2026-11-24-session-handoff.md) is the resume point.0.22.2 source
+d51b106/native run45238109373 passes agent gates and19 visual previews; actual owner managed
+Windows installation/UAC/models remain separate. Next: feedback fixes → completed installer GUI →
+installer EN/PL review and native lifecycle acceptance → affected docs/release preparation.
+No product work is requested during this handoff. Earlier app terminology/manual/artist work is
+complete; no new full workflow/paid benchmark gate. Public bootstrap/signing remain pending.
+
 ### Installer usability correction — 2026-11-23
 
 Owner rejected the0.22.0 GUI before installation. 0.22.1 is implemented/agent-verified using the opening TODO
