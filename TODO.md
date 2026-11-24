@@ -7,6 +7,10 @@ Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-curren
 
 ### Active owner feedback — installer lifecycle and startup, 2026-11-24
 
+Delivered0.23.0 from5edfc1d; native run45372295246 PASS. Local1135/17 integration cases,
+5 real Windows cases,25 WPF groups and27 inspected previews. New next step: owner focused
+GUI/update/removal/startup review. Full installer EN/PL review follows GUI completion.
+
 Owner installed 0.22.2 and successfully transcribed an episode using the desktop shortcut.
 The new feedback supersedes the handoff wait. Preserve that application pass and previous deliveries.
 See `docs/checkpoints/2026-11-24-installer-lifecycle-startup.md`.
@@ -22,7 +26,7 @@ See `docs/checkpoints/2026-11-24-installer-lifecycle-startup.md`.
 - [x] Diagnose incomplete Windows removal (15.5 GB left); reliable owned-file deletion and direct user-facing Remove-EwP.ps1 without mandatory internal Plan; retain unrelated work/shared caches by default.
 - [x] Clean idle Ctrl+C/launcher shutdown; preserve running-job safeguards.
 - [x] After installer fixes: automatic startup recovery/autosave from launch, before output selection; associate saved state with output root, respect protected install directories.
-- [ ] Focused regression/integration/native Windows previews/lifecycle checks; new versioned delivery and affected EN/PL docs.
+- [x] Focused regression/integration/native Windows previews/lifecycle checks; new versioned delivery and affected EN/PL docs. See checkpoint/evidence; actual owner0.23.0 review remains pending.
 - [ ] Later, after installer closure: native Windows application interface with controlled lifetime and unsaved/active-work handling. Do not implement the native app shell in this installer pass.
 
 Historical handoff (superseded by active feedback above):

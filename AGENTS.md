@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Current delivered boundary — 2026-11-24
+
+0.23.0 is delivered from5edfc1d; native run45372295246 passes25 WPF groups and5 real Windows
+filesystem/removal cases. Local1135 tests/17 integrations pass;27 previews inspected; six local
+hashes match CI. Follow opening WORK_STATUS/TODO and the installer-lifecycle-startup checkpoint.
+Await owner focused installer/update/removal/startup feedback. Keep0.22.2 successful install/
+desktop/transcription acceptance. Installer copy approval remains after GUI closure; native app
+interface is later. Do not start another build, paid/model campaign, release or artist package.
+
 ## Active owner feedback — 2026-11-24
 
 Owner installed0.22.2, launched from desktop and successfully transcribed one episode. The prior

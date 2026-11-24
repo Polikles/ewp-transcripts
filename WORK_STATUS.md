@@ -4,6 +4,17 @@ Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
 
+**Delivered0.23.0 — 2026-11-24:** installer lifecycle/startup feedback implemented and verified.
+Actual artifact source `5edfc1d`; final Windows run45372295246 PASS (25 WPF groups/5 real native
+cases). Local1135 passed/5 native-only skips; integration17. All27 native previews inspected and
+six local artifact hashes match CI. Delivery: ../deliveries/ewp-0.23.0-installers, with EXE,
+preview.html/ZIP, START-HERE-PL and evidence/checklist. See the
+[final checkpoint](docs/checkpoints/2026-11-24-installer-lifecycle-startup.md) and
+[hash evidence](docs/checkpoints/2026-11-24-installer-lifecycle-evidence.json).
+Next is owner focused0.23.0 GUI/update/removal/startup review. Keep the successful0.22.2 native
+installation/desktop/transcription pass. Installer EN/PL review follows GUI completion; native
+Windows app interface follows installer closure. No new paid/model campaign or release activation.
+
 **Active 2026-11-24 feedback / target0.23.0:** owner installed 0.22.2 and transcribed an episode successfully.
 Implement installer presentation/progress, operation-specific models/credentials, Windows
 registration/removal and idle shutdown fixes, then automatic startup autosave/recovery.

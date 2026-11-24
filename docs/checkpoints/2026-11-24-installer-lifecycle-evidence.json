@@ -1,0 +1,88 @@
+{
+  "version": "0.23.0",
+  "source_commit": "5edfc1d2b3b9f49eaea85f036942ba6dd143bff4",
+  "ci_run": 45372295246,
+  "ci_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45372295246",
+  "ci_conclusion": "success",
+  "artifacts": [
+    {
+      "name": "EwP-0.23.0-windows-x64.zip",
+      "sha256": "182e882d68fc9f2f3212e8f5ed87d3892dbb022f724f1d95065691666a7961fe"
+    },
+    {
+      "name": "EwP-0.23.0-ubuntu-x64.zip",
+      "sha256": "21f2b6a20f42f696fee4f17d075456bd7eb442a8db74242c61c444845b85d9cd"
+    },
+    {
+      "name": "EwP-Setup-0.23.0.exe",
+      "sha256": "36a7e064d060ba556b4b2bc228fdab5fe976fd641148b02788b7d2b9cd1f5520"
+    },
+    {
+      "name": "EwP-0.23.0-ubuntu-x64.tar.gz",
+      "sha256": "c49a50daa4e7b8fac66debf3bf065815e921ae24601cfd592e6cc94c1b5cd6cb"
+    },
+    {
+      "name": "Install-EwP-0.23.0.ps1",
+      "sha256": "fe64f9b0577d4c734266eb829113b3425bb1083135f275344358d2de423580dc"
+    },
+    {
+      "name": "Install-EwP-0.23.0.sh",
+      "sha256": "97d18f94344a478d3c4e648f32bb6d6cc7f3c8d3f7b4d2f36a1c9646b5553800"
+    }
+  ],
+  "checks": {
+    "python_passed": 1135,
+    "python_native_skips_on_linux": 5,
+    "integration_passed": 17,
+    "native_windows_cases_passed": 5,
+    "wpf_coverage_groups": 25,
+    "native_previews_visually_inspected": 27,
+    "application_reference_rows": 2221,
+    "browser_locale_layout_cases": 36,
+    "provider_calls": 0,
+    "models_downloaded": 0,
+    "measured_model_byte_progress": "Real pinned HF http_get path, synthetic 8-byte response; no model/network request"
+  },
+  "owner_native_acceptance": "0.22.2 install/desktop/transcription passed; focused 0.23.0 update/removal/startup review pending",
+  "delivery_directory": "/home/linuch/project-ewp/deliveries/ewp-0.23.0-installers",
+  "installer_copy_pairs": 131,
+  "preview_zip_sha256": "5488aeb6452177092c3920ebdd70d7543a980aff38fe4342f8b0bd2ecbb3bea5",
+  "browser_startup": {
+    "result": "PASS",
+    "cases": [
+      "initial private autosave",
+      "output-root association",
+      "pending-media durable autosave",
+      "fresh-context automatic recovery",
+      "no restored upload consent",
+      "no automatic transcription",
+      "unavailable checkpoint preservation and manual recovery autosave"
+    ],
+    "page_errors": [],
+    "external_requests": []
+  },
+  "browser_server_restart": {
+    "result": "PASS",
+    "cases": [
+      "actual server restart",
+      "automatic pending-media recovery",
+      "fresh cloud consent required"
+    ],
+    "page_errors": [],
+    "external_requests": []
+  },
+  "browser_copy": {
+    "reference_rows": 2221,
+    "owner_changed_rows": 106,
+    "exact_copy_checked": 102,
+    "dynamic_templates_checked": 2,
+    "quick_guides_checked": 2,
+    "derived_quick_guides_checked": 1,
+    "help_chrome_checked": 4,
+    "locale_roundtrips": 4,
+    "layout_cases": 36,
+    "page_errors": [],
+    "external_requests": [],
+    "real_provider_calls": 0
+  }
+}

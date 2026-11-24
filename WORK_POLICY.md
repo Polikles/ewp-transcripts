@@ -1,5 +1,10 @@
 # Work policy and context recovery
 
+Current boundary2026-11-24: owner0.22.2 install/desktop/transcription PASS is retained. New installer
+lifecycle/startup feedback is delivered as0.23.0 (source5edfc1d/native run45372295246). Follow its
+checkpoint and await focused owner review. Native Windows interface follows installer closure;
+full installer copy review is still after GUI completion. No new model/paid campaign is implied.
+
 Updated: 2026-11-23. Read `AGENTS.md` first; this file supplements its rules.
 
 1. On resume, read `WORK_STATUS.md`, `TODO.md`, the active task checkpoint linked there,
