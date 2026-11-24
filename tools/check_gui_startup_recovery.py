@@ -143,7 +143,7 @@ with sync_playwright() as p:
     page.locator("#load-workspace").click()
     page.wait_for_function("()=>automaticRecoveryReady && !workspaceRestoreBusy")
     page.locator('[data-gui-stage="workspace"]').click()
-    page.locator("#workflow-language").select_option("en")
+    page.locator("#workflow-language").select_option("en", force=True)
     page.wait_for_function(
         "()=>!workspaceAutosaveBusy && workspaceFingerprint()===lastWorkspaceFingerprint"
     )

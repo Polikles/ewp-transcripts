@@ -132,6 +132,8 @@ sealed partial class Wizard
         await Capture(previews, "pl-local-uninstall-entry");
         localMaintenance = false; operation = "install"; page = 1; Render(); UpdateLayout();
         Assert(root.Height == 36 && root.ActualHeight < 45, "location field is compact");
+        var textViewport = (ScrollViewer)root.Template.FindName("PART_ContentHost", root);
+        Assert(textViewport.ActualHeight >= root.ActualHeight - 4, "compact input does not apply padding twice or clip path text");
         page = 3; busy = true; progressStage = "models"; Render();
         using (var download = JsonDocument.Parse("{\"bytes\":500000000,\"total\":1000000000,\"unit\":\"B\",\"rate\":2500000,\"eta_seconds\":200}"))
             UpdateOperationProgress("download", "model.bin", download.RootElement);

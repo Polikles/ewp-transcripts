@@ -23,6 +23,7 @@ sealed partial class Wizard
     void RenderOperationProgress()
     {
         if (!busy && !finished) return;
+        foreach (var text in new[] { elapsedProgress, activityProgress, downloadProgress }) text.Visibility = text.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         foreach (FrameworkElement control in new FrameworkElement[] { operationProgress, elapsedProgress, activityProgress, downloadProgress })
         {
             if (control.Parent is Panel parent) parent.Children.Remove(control);
@@ -32,7 +33,7 @@ sealed partial class Wizard
         if (progressTimer == null)
         {
             progressTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            progressTimer.Tick += (_, _) => elapsedProgress.Text = T("Elapsed: ", "Czas: ") + operationClock.Elapsed.ToString(@"hh\:mm\:ss");
+            progressTimer.Tick += (_, _) => { elapsedProgress.Text = T("Elapsed: ", "Czas: ") + operationClock.Elapsed.ToString(@"hh\:mm\:ss"); foreach (var text in new[] { elapsedProgress, activityProgress, downloadProgress }) text.Visibility = text.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed; };
             progressTimer.Start(); Closed += (_, _) => progressTimer.Stop();
         }
     }
@@ -49,7 +50,7 @@ sealed partial class Wizard
             string eta = data.TryGetProperty("eta_seconds", out var remaining) && remaining.ValueKind == JsonValueKind.Number
                 ? " · ~" + TimeSpan.FromSeconds(Math.Clamp(remaining.GetDouble(), 0, 864000)).ToString(@"hh\:mm\:ss") : "";
             string rate = bytes && data.TryGetProperty("rate", out var speed) && speed.ValueKind == JsonValueKind.Number ? " · " + (speed.GetDouble() / 1e6).ToString("0.0") + " MB/s" : "";
-            downloadProgress.Text = text + " · " + amount + rate + eta; return;
+            downloadProgress.Text = text + " · " + amount + rate + eta; downloadProgress.Visibility = Visibility.Visible; return;
         }
         if (stage != "log" && stage.Length > 0)
         {

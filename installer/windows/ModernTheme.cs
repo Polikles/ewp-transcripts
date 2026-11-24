@@ -18,7 +18,7 @@ static class ModernTheme
         border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
         border.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
         border.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
+        // TextBoxView already applies TextBox.Padding. A second border padding clips the line.
         var host = new FrameworkElementFactory(typeof(ScrollViewer), "PART_ContentHost"); border.AppendChild(host);
         var template = new ControlTemplate(typeof(TextBox)) { VisualTree = border };
         var focus = new Trigger { Property = UIElement.IsKeyboardFocusWithinProperty, Value = true };
