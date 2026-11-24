@@ -24,10 +24,21 @@ if($Redownload){$argsToManager+='--redownload'}
 foreach($pair in @(@($Local,'--local'),@($CloudOnly,'--cloud-only'),@($AcceptModelTerms,'--accept-model-terms'),@($Yes,'--yes'),@($RemoveModels,'--remove-models'),@($RemoveKey,'--remove-key'),@($SecretsStdin,'--secrets-stdin'),@($SaveOpenRouterKey,'--save-openrouter-key'))){if($pair[0]){$argsToManager+=$pair[1]}}
 $secretLine=if($SecretsStdin){[Console]::ReadLine()}else{$null}
 $statePath=Join-Path $Root 'installation.json'
+$useInstalled=$false
 if((Test-Path -LiteralPath $statePath) -and $Action -in @('uninstall','rollback','launch','verify-models','models')){
  $state=Get-Content -Encoding UTF8 -LiteralPath $statePath -Raw|ConvertFrom-Json
  if($state.kind -ne 'ewp-transcripts-managed-v1' -or $state.active -notmatch '^versions[\\/][a-zA-Z0-9.\-]+$'){throw 'Invalid installation inventory'}
  $python=Join-Path $Root ($state.active+'\app\.venv\Scripts\python.exe')
+ $useInstalled=$true
+ if($Action -eq 'uninstall'){
+  # A prior partial removal may have deleted the app interpreter or its managed base runtime.
+  $useInstalled=$false
+  if(Test-Path -LiteralPath $python){
+   try{& $python -I -c 'import sys' 2>$null;$useInstalled=$LASTEXITCODE -eq 0}catch{}
+  }
+ }
+}
+if($useInstalled){
  if($SecretsStdin){$secretLine | & $python @argsToManager}else{& $python @argsToManager}
 }else{
  if(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'owner.json')){$uv=Join-Path $PSScriptRoot 'tools\uv.exe'}else{$uv=Join-Path (Split-Path -Parent $PSScriptRoot) 'tools\uv.exe'}

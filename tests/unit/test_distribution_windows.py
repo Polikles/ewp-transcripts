@@ -33,9 +33,11 @@ def native_target():
         shutil.rmtree(root, ignore_errors=True)
 
 
-@pytest.mark.parametrize("preserve_work", [False, True])
+@pytest.mark.parametrize(
+    ("preserve_work", "broken_python"), [(False, False), (True, False), (False, True)]
+)
 def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
-    tmp_path, preserve_work
+    tmp_path, preserve_work, broken_python
 ):
     """Real PS adapter, managed Python, deferred worker and read-only uv-style dependencies."""
     root = tmp_path / "Żółć installation"
@@ -55,6 +57,9 @@ def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
         dll = folder / "readonly.dll"
         dll.write_bytes(b"synthetic installed dependency")
         dll.chmod(0o444)
+    if broken_python:
+        shutil.rmtree(app / ".venv")
+        shutil.copyfile(ROOT / "installers/extracted/tools/uv.exe", root / "tools/uv.exe")
     owner = {
         "kind": manager.MAGIC,
         "root": str(root),

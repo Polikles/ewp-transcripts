@@ -142,12 +142,13 @@ with sync_playwright() as p:
     page.locator("#workspace-list").select_option(key)
     page.locator("#load-workspace").click()
     page.wait_for_function("()=>automaticRecoveryReady && !workspaceRestoreBusy")
-    page.locator('[data-gui-stage="workspace"]').click()
-    page.locator("#workflow-language").select_option("en", force=True)
+    page.locator('[data-gui-stage="saved"]').click()
+    page.locator("#workspace-name").fill("Recovery manual resume")
     page.wait_for_function(
         "()=>!workspaceAutosaveBusy && workspaceFingerprint()===lastWorkspaceFingerprint"
     )
-    assert json.loads(checkpoint.read_text())["fields"]["workflow-language"] == "en"
+    checkpoint = next(output.glob(f"*--{initial}.workspace.json"))
+    assert json.loads(checkpoint.read_text())["name"] == "Recovery manual resume"
     assert not errors and not external, (errors, external)
     (base / "browser-report.json").write_text(
         json.dumps(
