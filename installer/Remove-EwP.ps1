@@ -1,8 +1,9 @@
 # User entry point and deferred worker. Internal plans are created only by manager.py.
 [CmdletBinding()]
-param([string]$Plan='', [string]$Root=$PSScriptRoot, [switch]$Yes,
+param([string]$Plan='', [string]$Root='', [switch]$Yes,
       [switch]$RemoveModels, [switch]$RemoveKey)
 $ErrorActionPreference='Stop'
+if(!$Root){$Root=$PSScriptRoot}
 if(!$Plan){
  try {
   $wizard=Join-Path $Root 'uninstall.exe'
@@ -23,6 +24,7 @@ if(!$Plan){
   exit $LASTEXITCODE
  } catch {
   Write-Host $_.Exception.Message -ForegroundColor Red
+  Write-Host $_.InvocationInfo.PositionMessage
   Read-Host 'Press Enter to close / Nacisnij Enter, aby zamknac'
   exit 2
  }
