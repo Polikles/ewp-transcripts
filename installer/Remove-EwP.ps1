@@ -100,7 +100,8 @@ try {
  Remove-OwnedTree $ownerPath
  Remove-EmptyOwnedDirectories (Join-Path $p.root 'versions')
  $reg='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts'
- if((Test-Path $reg) -and (Get-ItemProperty $reg).InstallLocation -eq $p.root){Remove-Item $reg}
+ $ownsRegistration=(Test-Path $reg) -and (Get-ItemProperty $reg).InstallLocation -eq $p.root
+ if($ownsRegistration){Remove-Item $reg}
  $w=New-Object -ComObject WScript.Shell
  $shortcut=Join-Path ([Environment]::GetFolderPath('Desktop')) 'EwP Transcripts.lnk'
  if(Test-Path -LiteralPath $shortcut){
@@ -108,7 +109,7 @@ try {
   $powershell=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
   $owned=$s.TargetPath -eq (Join-Path $p.root 'EwP.cmd') -or
    $s.Arguments -eq ('-NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $p.root 'launch.ps1')+'"') -or
-   ($s.WorkingDirectory -eq $p.root -and $s.TargetPath -eq $powershell)
+   (($s.WorkingDirectory -eq $p.root -or $ownsRegistration) -and $s.TargetPath -eq $powershell)
   if($owned){Remove-Item -LiteralPath $shortcut -Force}
   else{Publish-Event 'removal' 'An unrelated desktop shortcut was preserved'}
  }
