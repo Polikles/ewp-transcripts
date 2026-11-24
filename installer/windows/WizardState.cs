@@ -28,7 +28,7 @@ sealed partial class Wizard
             hostReady = hostAttempted = previewReady = finished = successful = false;
             hfSecret = orSecret = ""; hfValid = orValid = false;
             terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = false;
-            log.Clear(); logExpanded = false; ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
+            log.Clear(); logExpanded = false; missingRequirements.Clear(); ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
             detected = value == "install" ? null : FindInstallation(preferredMaintenanceRoot, value == "uninstall");
             manualLocation = detected == null;
             root.Text = value == "install" ? InstallationDiscovery.DefaultRoot : detected?.Root ?? "";
@@ -43,9 +43,9 @@ sealed partial class Wizard
     void RenderSteps()
     {
         steps.Children.Clear();
-        string[] names = [T("Action", "Działanie"), T("Location and checks", "Lokalizacja i test"),
-            operation == "install" ? T("Models and keys", "Modele i klucze") : operation is "repair" or "models" ? T("Models", "Modele") : T("Confirm", "Potwierdzenie"),
-            IsInstall && !finished ? T("Installation", "Instalacja") : T("Result", "Wynik")];
+        string[] names = operation == "install"
+            ? [T("Action", "Działanie"), T("Location and checks", "Lokalizacja i test"), T("Models and HF token", "Modele i token HF"), T("OpenRouter key", "Klucz OpenRouter"), finished ? T("Result", "Wynik") : T("Installation", "Instalacja")]
+            : [T("Action", "Działanie"), T("Location and checks", "Lokalizacja i test"), operation is "repair" or "models" ? T("Models", "Modele") : T("Confirm", "Potwierdzenie"), IsInstall && !finished ? T("Installation", "Instalacja") : T("Result", "Wynik")];
         for (int i = 0; i < names.Length; i++)
         {
             bool current = page == i;

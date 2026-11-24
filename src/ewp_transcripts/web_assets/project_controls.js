@@ -140,6 +140,10 @@ else document.addEventListener("ewp-session-ready",()=>{void refreshProjectCatal
 
 // Last directories are local server preferences, not workspace approval or provider credentials.
 let restoringWorkspaceLocations=false,workspaceLocationWrites=Promise.resolve();
+let defaultWorkflowOutput = "";
+workflowOutput.addEventListener("change", () => {
+  if (!workflowOutput.value.trim() && defaultWorkflowOutput) workflowOutput.value = defaultWorkflowOutput;
+});
 function rememberWorkspaceLocations() {
   if(!csrfToken || restoringWorkspaceLocations || workspaceRestoreBusy)return;
   const fields={remember:true,output_directory:workflowOutput.value.trim(),workspace_directory:workspaceDirectory.value.trim()};
@@ -155,6 +159,7 @@ async function restoreWorkspaceLocations() {
   const initialOutput=workflowOutput.value,initialStorage=workspaceDirectory.value;
   try {
     const payload=await queuePost("/api/v1/workspaces/locations",{},{feedback:false});
+    defaultWorkflowOutput = payload.locations.output_directory || "";
     const untouched=!initialOutput && !initialStorage && workflowOutput.value===initialOutput && workspaceDirectory.value===initialStorage;
     restoringWorkspaceLocations=true;
     if(untouched && !initialOutput && workflowOutput.value===initialOutput && payload.locations.output_directory) {

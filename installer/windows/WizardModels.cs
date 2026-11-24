@@ -45,7 +45,7 @@ sealed partial class Wizard
 
     void RenderModels()
     {
-        body.Children.Add(Heading("3. " + (operation == "install" ? T("Local models and keys", "Lokalne modele i klucze") : OperationName(operation))));
+        body.Children.Add(Heading("3. " + (operation == "install" ? T("Local models and HF token", "Lokalne modele i token HF") : OperationName(operation))));
         if (operation == "update" && !UpdateChangesModels)
         {
             body.Children.Add(Copy(T("Only the program will be updated. Model versions are unchanged; no model downloads or keys are needed.", "Zaktualizowany zostanie tylko program. Wersje modeli są takie same; pobieranie modeli i klucze nie są potrzebne.")));
@@ -89,26 +89,21 @@ sealed partial class Wizard
                 box.Unchecked += (_, _) => { selectedModels.Remove(model.Code); Render(); };
                 list.Children.Add(box);
             }
-            body.Children.Add(Card(list));
+            var modelCard = Card(list); if (missingRequirements.Contains("models")) { modelCard.BorderBrush = Error; modelCard.BorderThickness = new Thickness(2); } body.Children.Add(modelCard);
             body.Children.Add(Copy(T("Required space for selected downloads: ", "Potrzebne miejsce na wybrane modele: ") + GB(DownloadModels.Sum(m => repairModels || reinstallModels ? m.Bytes : ModelMissingBytes(m))) + " GB", muted: true));
             if (NeedsHf)
             {
                 var row = new StackPanel { Orientation = Orientation.Horizontal };
-                var enter = ActionButton(T("Enter Hugging Face token", "Podaj token Hugging Face"), () => EnterCredential(true), secondary: true); enter.IsEnabled = !hfValid; row.Children.Add(enter);
+                var enter = ActionButton(T("Enter Hugging Face token", "Podaj token Hugging Face"), () => EnterCredential(true), secondary: true); enter.IsEnabled = !hfValid; if (missingRequirements.Contains("hf")) { enter.BorderBrush = Error; enter.BorderThickness = new Thickness(2); } row.Children.Add(enter);
                 row.Children.Add(Symbols.InfoButton(T("Token for downloading pyannote. Click for help.", "Token do pobrania pyannote. Kliknij, aby uzyskać pomoc."), ShowHfHelp));
                 if (hfValid) row.Children.Add(new TextBlock { Text = T("Token valid", "Token prawidłowy"), Foreground = Success, VerticalAlignment = VerticalAlignment.Center });
                 body.Children.Add(row);
-                LabelCheck(terms, T("I accepted pyannote terms on Hugging Face", "Zaakceptowałem warunki pyannote w Hugging Face")); terms.IsEnabled = hfValid; body.Children.Add(terms);
+                LabelCheck(terms, T("I accepted pyannote terms on Hugging Face", "Zaakceptowałem warunki pyannote w Hugging Face")); terms.IsEnabled = hfValid; body.Children.Add(RequiredCheck(terms, "terms"));
             }
             string? problem = ModelSpaceProblem();
             if (problem != null) { var warning = Copy(problem); warning.Foreground = Error; body.Children.Add(warning); }
         }
-        if (operation != "install") return;
-        var optional = new StackPanel();
-        optional.Children.Add(Copy(T("(optional) save OpenRouter API key. You can also do it after program installation", "(opcjonalnie) zapisz klucz API OpenRouter. Możesz to zrobić także po instalacji programu")));
-        var key = ActionButton(T("Enter OpenRouter key", "Podaj klucz OpenRouter"), () => EnterCredential(false), secondary: true); key.IsEnabled = !orValid; optional.Children.Add(key);
-        if (orValid) optional.Children.Add(Copy(T("Key valid", "Klucz prawidłowy")));
-        body.Children.Add(Card(optional));
+
     }
 
     async Task VerifyModels()

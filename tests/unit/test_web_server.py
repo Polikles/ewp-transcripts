@@ -1740,3 +1740,23 @@ def test_pending_group_is_preserved_before_output_directory_selection(tmp_path):
     assert len(loaded.pending_media) == 2
     assert all(Path(item.path).is_file() for item in loaded.pending_media)
     assert not loaded.staged_jobs and not fields
+
+
+def test_runtime_control_requires_private_token_and_matching_host(monkeypatch):
+    from ewp_transcripts.web_runtime import runtime_authorized
+
+    assert not runtime_authorized("", "")
+    assert not runtime_authorized("foreign-token", "x" * 64)
+    assert runtime_authorized("x" * 64, "x" * 64)
+    monkeypatch.setenv("EWP_RUNTIME_TOKEN", "x" * 64)
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(server_port=8765)
+    responses = []
+    handler._write_response = responses.append
+    for headers in (
+        {"Host": "evil.example", "X-EWP-Runtime-Token": "x" * 64},
+        {"Host": "127.0.0.1:8765"},
+    ):
+        handler.headers = headers
+        handler._runtime_control(stop=False)
+        assert responses[-1].status == 403

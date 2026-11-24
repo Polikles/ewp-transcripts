@@ -41,6 +41,9 @@ sealed partial class Wizard : Window
     string operation = "install", hfSecret = "", orSecret = "", notice = "";
     bool busy, finished, successful, hostReady, hfValid, orValid, previewReady, testing, logExpanded;
     int page;
+    int ProgressPage => operation == "install" ? 4 : 3;
+    bool IsProgressPage => page == ProgressPage;
+    readonly HashSet<string> missingRequirements = [];
     CancellationTokenSource? locationChange;
     internal Func<string, (long Free, string Volume)> DiskProbe = ProbeDisk;
     string CancelFile => Path.Combine(temporary, "cancel.requested");
@@ -94,7 +97,7 @@ sealed partial class Wizard : Window
         Grid.SetColumn(navigation, 1); footer.Children.Add(navigation); Grid.SetRow(footer, 3); shell.Children.Add(footer);
         root.TextChanged += (_, _) => { if (!resettingOperation) ScheduleLocation(); };
         local.Checked += (_, _) => { if (page == 2) Render(); }; local.Unchecked += (_, _) => { if (page == 2) Render(); };
-        terms.Checked += (_, _) => RefreshNavigation(); terms.Unchecked += (_, _) => RefreshNavigation();
+        terms.Checked += (_, _) => { missingRequirements.Remove("terms"); if (notice == "requirements") notice = ""; if (terms.Parent is Border frame) { frame.Background = Brushes.Transparent; frame.BorderBrush = Brushes.Transparent; } RefreshNavigation(); }; terms.Unchecked += (_, _) => RefreshNavigation();
         language.SelectionChanged += (_, _) => Render();
         for (int i = 0; i < args.Length; i++)
         {
@@ -163,6 +166,7 @@ sealed partial class Wizard : Window
         else if (page == 1) RenderLocation();
         else if (page == 2 && IsInstall) RenderModels();
         else if (page == 2) RenderConfirmation();
+        else if (operation == "install" && page == 3) RenderOpenRouter();
         else RenderProgress();
         if (notice.Length > 0) { var text = Copy(NoticeText()); text.Foreground = Error; body.Children.Add(text); }
         RefreshNavigation();
@@ -171,6 +175,7 @@ sealed partial class Wizard : Window
     string NoticeText() => notice switch
     {
         "model_check_failed" => T("Cannot verify model files. See technical details.", "Nie można sprawdzić plików modeli. Sprawdź szczegóły techniczne."),
+        "requirements" => T("Complete the highlighted requirements before continuing.", "Uzupełnij zaznaczone wymagania przed przejściem dalej."),
         "check_failed" => T("Resolve the failed checks and retry.", "Usuń przyczyny błędów i ponów test."),
         "check_unavailable" => T("Cannot run the computer check. See technical details.", "Nie można uruchomić testu komputera. Sprawdź szczegóły techniczne."),
         _ => T("Cannot prepare removal preview.", "Nie można przygotować planu usunięcia.")
@@ -211,6 +216,7 @@ sealed partial class Wizard : Window
             body.Children.Add(Copy(T("Test utilizes small Python runtime. No data is sent", "Test korzysta z małego środowiska Python. Nie wysyła żadnych danych"), muted: true));
             var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 14) };
             var test = ActionButton(T("Check this computer", "Sprawdź komputer"), async () => await CheckHost(), secondary: true); test.IsEnabled = !busy;
+            if (missingRequirements.Contains("host")) { test.BorderBrush = Error; test.BorderThickness = new Thickness(2); }
             row.Children.Add(test); var gear = BusyGear(); gear.Visibility = busy ? Visibility.Visible : Visibility.Collapsed; row.Children.Add(gear); body.Children.Add(row);
             body.Children.Add(hostRows); RenderHostRows();
             if (ShowVcHelp) body.Children.Add(Link(T("Download Microsoft Visual C++ libraries", "Pobierz biblioteki Microsoft Visual C++"), () => Open(Pl
@@ -248,7 +254,7 @@ sealed partial class Wizard : Window
 
     void RenderProgress()
     {
-        body.Children.Add(Heading(finished ? (successful ? T("Operation completed", "Operacja ukończona") : T("Operation stopped", "Operacja zatrzymana")) : "4. " + OperationName(operation)));
+        body.Children.Add(Heading(finished ? (successful ? T("Operation completed", "Operacja ukończona") : T("Operation stopped", "Operacja zatrzymana")) : (ProgressPage + 1) + ". " + OperationName(operation)));
         if (busy) { var gear = BusyGear(); gear.Width = gear.Height = 48; gear.Margin = new Thickness(0, 0, 0, 14); gear.Visibility = Visibility.Visible; body.Children.Add(gear); }
         RenderOperationProgress();
         body.Children.Add(Copy(ProgressMessage()));
@@ -261,6 +267,8 @@ sealed partial class Wizard : Window
         ? T("Read the report below. User work has been preserved.", "Przeczytaj raport poniżej. Pliki pracy zostały zachowane.")
         : T("Read the details below. You can go back and retry; the previous active program remains.", "Przeczytaj szczegóły poniżej. Możesz wrócić i ponowić próbę; poprzednia aktywna wersja pozostała.")) : progressStage switch
         {
+            "shutdown" => T("Closing the running application…", "Zamykanie działającej aplikacji…"),
+            "register" => T("Saving installation settings…", "Zapisywanie ustawień instalacji…"),
             "permission" => T("Windows will ask for administrator permission for this folder.", "Windows poprosi o uprawnienia administratora dla tego folderu."),
             "extract" => T("Verifying program files…", "Sprawdzanie plików programu…"),
             "dependencies" => T("Installing program dependencies…", "Instalowanie zależności programu…"),
@@ -286,26 +294,56 @@ sealed partial class Wizard : Window
         box.Children.Add(Link(T("Save report…", "Zapisz raport…"), SaveReport)); body.Children.Add(box);
     }
 
+    bool CanAdvance => !busy && (finished ? successful : page switch
+    {
+        0 => true,
+        1 => LocationProblem() == null && (!IsInstall || hostReady),
+        2 => IsInstall ? ModelsCanContinue : operation == "rollback" || previewReady,
+        3 when operation == "install" => true,
+        _ => false
+    });
+
+    void HighlightMissingRequirements()
+    {
+        if (page == 2 && NeedsHf)
+        {
+            if (!hfValid) missingRequirements.Add("hf");
+            else if (terms.IsChecked != true) missingRequirements.Add("terms");
+        }
+        if (page == 1 && IsInstall && !hostReady) missingRequirements.Add("host");
+        if (page == 2 && PreparingModels && !DownloadModels.Any()) missingRequirements.Add("models");
+        notice = "requirements"; Render();
+        if (missingRequirements.Contains("terms")) { terms.BringIntoView(); terms.Focus(); }
+        else if (page == 1) diskStatus.BringIntoView();
+    }
+
+    Border RequiredCheck(CheckBox box, string requirement)
+    {
+        if (box.Parent is Decorator old) old.Child = null;
+        bool missing = missingRequirements.Contains(requirement);
+        return new Border { Child = box, BorderBrush = missing ? Error : Brushes.Transparent,
+            BorderThickness = new Thickness(2), Background = missing ? ColorBrush("#FFF0E8") : Brushes.Transparent,
+            CornerRadius = new CornerRadius(6), Padding = new Thickness(8, 0, 8, 0), Margin = new Thickness(-10, 0, 0, 0) };
+    }
+
     void RefreshNavigation()
     {
         back.Content = T("Back", "Wstecz"); cancel.Content = finished ? T("Close", "Zamknij") : T("Cancel", "Anuluj");
         back.Visibility = page == 0 || (finished && successful) ? Visibility.Collapsed : Visibility.Visible;
         back.IsEnabled = !busy; language.IsEnabled = !busy;
-        cancel.IsEnabled = !busy || (!(operation is "uninstall" or "rollback" && page == 3) && !File.Exists(CancelFile));
+        cancel.IsEnabled = !busy || (!(operation is "uninstall" or "rollback" && IsProgressPage) && !File.Exists(CancelFile));
         next.Visibility = finished && (!successful || operation is "uninstall" or "rollback") ? Visibility.Collapsed : Visibility.Visible;
-        next.Content = finished ? T("Launch program", "Uruchom program") : page == 2 ? (IsInstall ? T("Next — ", "Dalej — ") + OperationName(operation) : OperationName(operation)) : T("Next", "Dalej");
-        next.IsEnabled = !busy && (finished ? successful : page switch
-        {
-            0 => true,
-            1 => LocationProblem() == null && (!IsInstall || hostReady),
-            2 => IsInstall ? ModelsCanContinue : operation == "rollback" || previewReady,
-            _ => false
-        });
+        next.Content = finished ? T("Launch program", "Uruchom program") : page == ProgressPage - 1 ? (IsInstall ? T("Next — ", "Dalej — ") + OperationName(operation) : OperationName(operation)) : T("Next", "Dalej");
+        // Keep blocked navigation clickable so it can explain and highlight requirements.
+        next.IsEnabled = !busy && (!finished || successful);
+        next.Opacity = CanAdvance ? 1 : .45;
+        next.ToolTip = CanAdvance ? null : T("Complete the required fields to continue.", "Uzupełnij wymagane pola, aby przejść dalej.");
     }
 
     async Task Next()
     {
-        if (!next.IsEnabled) return;
+        if (busy) return;
+        if (!CanAdvance) { HighlightMissingRequirements(); return; }
         notice = "";
         if (finished) { Launch(); return; }
         if (page == 0) { page = 1; ReadInstalled(); Render(); if (operation is "repair" or "models" && installed != null) await CheckHost(); return; }
@@ -315,15 +353,16 @@ sealed partial class Wizard : Window
             if (operation == "uninstall") await PreviewRemoval();
             return;
         }
-        if (page == 2) await RunOperation();
+        if (page == 2 && operation == "install") { page = 3; Render(); return; }
+        if (page == ProgressPage - 1) await RunOperation();
     }
     void Back() { if (busy) return; notice = ""; if (finished) { finished = false; page = 1; } else page = Math.Max(0, page - 1); Render(); }
     void Cancel()
     {
         if (!busy) { Close(); return; }
-        if (page == 3 && operation is "uninstall" or "rollback") return;
+        if (IsProgressPage && operation is "uninstall" or "rollback") return;
         File.WriteAllText(CancelFile, "cancel"); progressStage = "cancel"; cancel.IsEnabled = false;
-        if (page == 3) Render();
+        if (IsProgressPage) Render();
     }
     void ScheduleLocation()
     {
@@ -366,6 +405,7 @@ sealed partial class Wizard : Window
                     if (operation is "repair" or "models" && current != version) return Version.Parse(current) > Version.Parse(version)
                         ? T("Download a newer installer matching the installed program version.", "Pobierz nowszą wersję instalatora zgodną z wersją programu.")
                         : T("Update the program first.", "Najpierw zaktualizuj program.");
+                    if (operation == "update" && current == version) return T("This version is already installed. Choose Repair if needed.", "Ta wersja jest już zainstalowana. W razie potrzeby wybierz Napraw.");
                     if (operation == "update" && Version.Parse(current) > Version.Parse(version)) return T("This installer is older; use Restore previous version instead.", "Ten instalator jest starszy; wybierz Przywróć poprzednią wersję.");
                     if (operation == "rollback" && RollbackChoices().Count == 0) return T("No files from an older version were found.", "Nie znaleziono plików starszej wersji.");
                 }
@@ -419,7 +459,7 @@ sealed partial class Wizard : Window
     }
     void StoreCheckedCredential(bool hf, string value)
     {
-        if (hf) { hfSecret = value; hfValid = true; } else { orSecret = value; orValid = true; }
+        if (hf) { hfSecret = value; hfValid = true; missingRequirements.Remove("hf"); } else { orSecret = value; orValid = true; }
         Render();
     }
     void ShowHfHelp() => CreateHfHelp().ShowDialog();
@@ -428,6 +468,7 @@ sealed partial class Wizard : Window
         var help = new Window { Owner = this, Icon = Icon, ShowInTaskbar = false, Title = T("Hugging Face token", "Token Hugging Face"), Width = 540, SizeToContent = SizeToContent.Height, ResizeMode = ResizeMode.NoResize, WindowStartupLocation = WindowStartupLocation.CenterOwner, Background = Paper, FontFamily = FontFamily, FontSize = 14 };
         var panel = new StackPanel(); help.Content = new Border { Background = Paper, Padding = new Thickness(24), Child = panel };
         panel.Children.Add(Heading(T("Before entering your token", "Przed podaniem tokenu")));
+        panel.Children.Add(TokenWarning());
         panel.Children.Add(Copy(T("The token is used only during installation to download pyannote. It is not saved.", "Token jest używany tylko podczas instalacji do pobrania pyannote. Nie jest zapisywany.")));
         void Step(string before, string label, string url, string after)
         {
@@ -464,7 +505,7 @@ sealed partial class Wizard : Window
     }
     async Task RunOperation()
     {
-        page = 3; busy = true; finished = successful = false; progressStage = ""; ResetOperationProgress(); operationClock.Start(); File.Delete(CancelFile); Render();
+        page = ProgressPage; busy = true; finished = successful = false; progressStage = ""; ResetOperationProgress(); operationClock.Start(); File.Delete(CancelFile); Render();
         try { successful = await Worker(repairModels ? "models" : operation, true) == 0; }
         catch { successful = false; log.AppendText("INSTALLER_OPERATION_FAILED\n"); }
         finally { operationClock.Stop(); busy = false; finished = true; hfSecret = orSecret = ""; hfValid = orValid = false; terms.IsChecked = false; Render(); }
@@ -543,7 +584,7 @@ sealed partial class Wizard : Window
                 if (item is JsonElement plan && stage == "preview") removal = plan;
                 if (item is JsonElement verification && stage == "model-verification") modelVerification = verification.GetProperty("models").Clone();
                 UpdateOperationProgress(stage, text, item);
-                if (stage != "log" && stage != "download" && stage.Length > 0 && page == 3 && progressStage != "cancel") { progressStage = stage; Render(); }
+                if (stage != "log" && stage != "download" && stage.Length > 0 && IsProgressPage && progressStage != "cancel") { progressStage = stage; Render(); }
             });
         }
         if (OperationRunner.NeedsElevation(request))

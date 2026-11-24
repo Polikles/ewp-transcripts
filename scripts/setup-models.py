@@ -57,6 +57,8 @@ def main() -> None:
     from huggingface_hub import snapshot_download
     from tqdm.auto import tqdm
 
+    active_repository = ""
+
     class DownloadProgress(tqdm):
         """Report only measured per-file bytes/rate; no fabricated total-install ETA."""
 
@@ -84,6 +86,7 @@ def main() -> None:
                         {
                             "stage": "download",
                             "message": str(self.desc),
+                            "download_id": active_repository + ":" + str(self.desc),
                             "bytes": self.n,
                             "total": self.total,
                             "unit": self.unit,
@@ -134,6 +137,7 @@ def main() -> None:
     for code, repository, revision, target in entries:
         if args.model is not None and code not in args.model:
             continue
+        active_repository = repository
         token = os.environ.get("HF_TOKEN")
         if repository == config.diarization.model and not token:
             token = getpass.getpass("Hugging Face read token (accept model terms first): ")

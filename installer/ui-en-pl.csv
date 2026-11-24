@@ -1,5 +1,6 @@
 ﻿ID,EN,PL,Context,Notes
 installer.ui.006cb2b4fbea63f4,Reinstall selected models,Zainstaluj ponownie wybrane modele,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.009a700f25ab9693,Open workspaces,Otwórz obszary robocze,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.013a130627d5b339,Save report…,Zapisz raport…,Wizard.cs,
 installer.ui.045b64c49a3064c1,Next — ,Dalej — ,Wizard.cs,
 installer.ui.05418011a994f277,Cancelling safely… Downloaded cache files will remain.,Bezpieczne anulowanie… Pobrane pliki cache pozostaną.,Wizard.cs,
@@ -26,13 +27,17 @@ installer.ui.335b90fdf94e1fc2,Cannot verify model files. See technical details.,
 installer.ui.3547014d3efee61d,Licenses and artwork,Licencje i autorstwo,"Credentials.cs, Wizard.cs",
 installer.ui.3813dc1d447d7bbc,Restore program files and dependencies for the same installed version. User work remains.,Przywróć pliki programu i zależności dla tej samej zainstalowanej wersji. Praca pozostanie.,Wizard.cs,
 installer.ui.388180d1086bd614,Preparing local models…,Przygotowywanie modeli lokalnych…,Wizard.cs,
+installer.ui.388bd5670b33d2f0,Treat tokens like passwords,Traktuj tokeny jak hasła,Credentials.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.39438e7752924125,"Use an installer matching the installed version, or choose Update first.",Użyj instalatora zgodnego z zainstalowaną wersją albo najpierw wybierz Aktualizuj.,Wizard.cs,
+installer.ui.3a9d1d1075bbe5d0,Downloads completed: ,Ukończone pobrania: ,WizardProgress.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.3af23d3e49a76317,Choose the program installation folder.,Wybierz folder instalacji programu.,Wizard.cs,
 installer.ui.3c7121ad69a378cd,Windows will ask for administrator permission for this folder.,Windows poprosi o uprawnienia administratora dla tego folderu.,Wizard.cs,
+installer.ui.3c8855f93d3ed304, and choose Default for this program., i wybierz Default dla tego programu.,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.3d13588f29ffc7aa,Installed program folder,Folder zainstalowanego programu,Wizard.cs,
 installer.ui.3d3ce74a3f3578b6,Installing program dependencies…,Instalowanie zależności programu…,Wizard.cs,
 installer.ui.3e040b30e6106410,Check key,Sprawdź klucz,Credentials.cs,
 installer.ui.3fd2d65bf26968e6,action required,wymaga działania,Wizard.cs,
+installer.ui.40352a6bf245ef0a,Saving installation settings…,Zapisywanie ustawień instalacji…,Wizard.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.416304f0fe669487,Also remove the recorded model snapshots (may be shared with other programs),Usuń także zapisane wersje modeli (mogą być współdzielone z innymi programami),Wizard.cs,
 installer.ui.44fc3fd84bfad485,This installation is incomplete; use Uninstall before installing again.,Ta instalacja jest niekompletna; przed ponowną instalacją wybierz Odinstaluj.,Wizard.cs,
 installer.ui.4603489d51a278a6,Not enough space on the model-cache disk. Required free space: ,Za mało miejsca na dysku cache modeli. Potrzebne wolne miejsce: ,Wizard.cs,
@@ -44,6 +49,7 @@ installer.ui.4e3f87d4d57b623b, on Hugging Face and sign in., Hugging Face i zalo
 installer.ui.51670340f43a1f57,Cannot check model-cache disk space.,Nie można sprawdzić miejsca na dysku cache modeli.,Wizard.cs,
 installer.ui.52a84fa25cdacfbf,Operation stopped,Operacja zatrzymana,Wizard.cs,
 installer.ui.52d0b6aa356f0842,No files from an older version were found.,Nie znaleziono plików starszej wersji.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.542a69376d906224,Current item,Bieżący element,WizardProgress.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.5589113ce6406859,"A working NVIDIA driver is required for local models. Go back to the computer check, or clear the local-model option.",Modele lokalne wymagają działającego sterownika NVIDIA. Wróć do testu komputera albo odznacz modele lokalne.,Wizard.cs,
 installer.ui.568e28614ac53592,Read model terms,Przeczytaj warunki modelu,Wizard.cs,
 installer.ui.569ca49f4aaf7846,Install,Zainstaluj,Wizard.cs,
@@ -55,6 +61,7 @@ installer.ui.60eb65ed2f435003,This installer is older; use Restore previous vers
 installer.ui.633eef0895b1e4c2,Older Windows version — compatibility not guaranteed,Starsza wersja Windows — działanie niegwarantowane,Wizard.cs,
 installer.ui.64cff1319d2fd2cb,Action,Działanie,WizardState.cs,
 installer.ui.6569d87855d874e5,Open the model page,Otwórz stronę modelu,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.65d227586e061663,OpenRouter key,Klucz OpenRouter,WizardState.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.6726edba88f81893,3. Local models and keys,3. Lokalne modele i klucze,Wizard.cs,
 installer.ui.691f58ba1300192d,Saving the optional key in the OS store…,Zapisywanie opcjonalnego klucza w magazynie systemowym…,Wizard.cs,
 installer.ui.6b17a11e1a45da9f,Program version: ,Wersja programu: ,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
@@ -69,6 +76,8 @@ installer.ui.7a47b68dc9df237f,Used only during installation to download pyannote
 installer.ui.7b812097cf49c555,Add local models,Doinstaluj modele lokalne,Wizard.cs,
 installer.ui.7d8fdebdcf7e741b,Compatibility on older or unrecognized Windows versions is not guaranteed.,Nie gwarantujemy działania na starszych lub nierozpoznanych wersjach Windows.,Wizard.cs,
 installer.ui.7d9eb7acb13e2462,Close,Zamknij,Wizard.cs,
+installer.ui.7fba2056c61e18a7,Models and HF token,Modele i token HF,WizardState.cs,0.23.2 owner feedback; full installer copy review pending
+installer.ui.81ba99d232a725f2,Complete the required fields to continue.,"Uzupełnij wymagane pola, aby przejść dalej.",Wizard.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.8476c299eb77d0bc,Download a newer installer matching the installed program version.,Pobierz nowszą wersję instalatora zgodną z wersją programu.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.85289ecc28a84cfb,Preparing the Python runtime…,Przygotowywanie środowiska Python…,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.86033f75a4c0876a,Create an account,Załóż konto,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
@@ -86,7 +95,9 @@ installer.ui.89616b71606749cb,OpenRouter API key,Klucz API OpenRouter,Credential
 installer.ui.89771bb818d4966a,Check could not confirm readiness,Test nie potwierdził gotowości,Wizard.cs,
 installer.ui.90e4ec974b2992c7,Restore previous version,Przywróć poprzednią wersję,Wizard.cs,
 installer.ui.91b9fbf9d6a1e8a4,Installed version: ,Zainstalowana wersja: ,Wizard.cs,
+installer.ui.923864ebb5fa15a7, · in progress: , · w toku: ,WizardProgress.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.981e340545b1ab99,Restore the retained previous installation. User work is not changed.,Przywróć zachowaną poprzednią instalację. Pliki pracy nie będą zmieniane.,Wizard.cs,
+installer.ui.9ad0437507ba6031, in that workspace. Set a low credit limit and paste the key into the installer., w wybranym obszarze. Ustaw niski limit wydatków klucza i wklej go do instalatora.,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.9cb95d17311a1b6c, GB required), GB wymagane),Wizard.cs,
 installer.ui.9cd323bca54fd187,Installer version: ,Wersja instalatora: ,Wizard.cs,
 installer.ui.9d358f8f12329b9c,Restore program version:,Przywróć wersję programu:,WizardRollback.cs,0.23.1 owner feedback; full EN/PL review pending
@@ -100,10 +111,12 @@ installer.ui.a81cd999e1c278ac, GB required, GB wymagane,Wizard.cs,0.23.1 owner f
 installer.ui.a8b25e2668e29d7b,No previous verified version is available.,Brak poprzedniej zweryfikowanej wersji.,Wizard.cs,
 installer.ui.a8f5fe23d4f13a07,Activate the retained previous program version. No models or user files are removed.,Przywróć zachowaną poprzednią wersję programu. Modele i pliki użytkownika nie będą usuwane.,Wizard.cs,
 installer.ui.ab2000440ae81510,Downloading and installing FFmpeg…,Pobieranie i instalowanie FFmpeg…,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.ac066e1b0272bb08,Overall progress · stages completed: ,Postęp całej operacji · ukończone etapy: ,WizardProgress.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.ae47cdedaa081687,Models and keys,Modele i klucze,WizardState.cs,
 installer.ui.ae659939b7c5f5a6,Windows may ask for administrator permission when the operation starts.,Windows może poprosić o uprawnienia administratora przy rozpoczęciu operacji.,Wizard.cs,
 installer.ui.aff916221dda0269,Checking installed program…,Sprawdzanie zainstalowanego programu…,Wizard.cs,
 installer.ui.b09b5a64fda9dbc6,Required space for selected downloads: ,Potrzebne miejsce na wybrane modele: ,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.b11ceaee2b26b931, on OpenRouter and sign in., OpenRouter i zaloguj się.,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.b1921182eff52310,Program files and shortcuts have been removed. Closing this window removes the installer itself.,Pliki programu i skróty zostały usunięte. Zamknięcie tego okna usunie sam deinstalator.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.b1ba775ef610000a,Full instructions in the repository,Pełna instrukcja w repozytorium,Wizard.cs,
 installer.ui.badf59a11538cb64, GB free, GB wolne,Wizard.cs,
@@ -112,6 +125,7 @@ installer.ui.bccd5034bbe0dab1,64-bit processor: ,Procesor 64-bit: ,Wizard.cs,
 installer.ui.c1c1009d3f37ec05,Update,Aktualizuj,Wizard.cs,
 installer.ui.c2d5fc1d0db728ae,Only the program will be updated. Model versions are unchanged; no model downloads or keys are needed.,Zaktualizowany zostanie tylko program. Wersje modeli są takie same; pobieranie modeli i klucze nie są potrzebne.,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.c3fc54aa5390dc2c,Installation,Instalacja,WizardState.cs,
+installer.ui.c426f204fad738b0,Closing the running application…,Zamykanie działającej aplikacji…,Wizard.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.c44ccde14cb080b8,I accepted pyannote terms on Hugging Face,Zaakceptowałem warunki pyannote w Hugging Face,Wizard.cs,
 installer.ui.c4c932455cca1832,Resolve the failed checks and retry.,Usuń przyczyny błędów i ponów test.,Wizard.cs,
 installer.ui.c58b85f13977b0ce,Read the report below. User work has been preserved.,Przeczytaj raport poniżej. Pliki pracy zostały zachowane.,Wizard.cs,
@@ -119,13 +133,16 @@ installer.ui.c7395bbc8288a4e6,Also remove the saved OpenRouter key,Usuń także 
 installer.ui.c893f0a2778c1e9f,4. Copy it into the installer and check access.,4. Wklej go do instalatora i sprawdź dostęp.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.c9f8b185e07f3208,Download Microsoft Visual C++ libraries,Pobierz biblioteki Microsoft Visual C++,Wizard.cs,
 installer.ui.ca2c7522bf4bc4a0,Location and checks,Lokalizacja i test,WizardState.cs,
+installer.ui.ca88223fe411f9dc,Local models and HF token,Lokalne modele i token HF,WizardModels.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.cb067682f9f482d2,Default: repair program files and dependencies. Local models remain unchanged.,Domyślnie: napraw pliki programu i zależności. Lokalne modele pozostaną bez zmian.,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.cc42af5664d647dc,Hugging Face read token,Token odczytu Hugging Face,Credentials.cs,
 installer.ui.cd1d2bbbebc2d99d,Checked without sending audio. Saved in the OS store only during installation.,Sprawdzany bez wysyłania audio. Zapis w magazynie systemowym nastąpi dopiero podczas instalacji.,Credentials.cs,
 installer.ui.cd24a96acf78e7d2,Use local models on my GPU (without them you can only work using OpenRouter API and verify earlier transcripts),Użyj lokalnych modeli na moim GPU (bez nich możliwa jest tylko praca przez API OpenRouter i weryfikacja wcześniejszych transkrypcji),Wizard.cs,
 installer.ui.ce924b3415d5f92c,Check this computer,Sprawdź komputer,Wizard.cs,
+installer.ui.d0551a112d296041,Complete the highlighted requirements before continuing.,Uzupełnij zaznaczone wymagania przed przejściem dalej.,Wizard.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.d17d2d78d76e6a6c,Models,Modele,WizardState.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.d20220b553f8d2b9,Update the program first.,Najpierw zaktualizuj program.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.d22feb61298be94d,Add credits,Doładuj konto,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.d38682cae56d600a,Return to program-only repair,Wróć do naprawy samego programu,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.d4524c0a3df72449, · at least 25 GB (20 + 5 GB margin), · co najmniej 25 GB (20 + 5 GB marginesu),Wizard.cs,
 installer.ui.d514c7993d455ff4,"Checking model locations, pinned versions and file hashes…","Sprawdzanie lokalizacji, wersji i sum kontrolnych modeli…",WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
@@ -140,9 +157,12 @@ installer.ui.e5d191b4ff42a9e3,2. Location and checks,2. Lokalizacja i test,Wizar
 installer.ui.e63c44f90f39d67f,Preparing removal preview…,Przygotowywanie planu usunięcia…,Wizard.cs,
 installer.ui.e63e558d6ff99dbf,Add the pinned local models to an installed program. Use an installer matching its version.,Doinstaluj przypięte modele lokalne do istniejącego programu. Użyj instalatora zgodnego z jego wersją.,Wizard.cs,
 installer.ui.e82ab623705a4a51,not detected,nie wykryto,Wizard.cs,
+installer.ui.e8f49fc73533b8e7, for the models you want to use., na korzystanie z wybranych modeli.,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
+installer.ui.e976f2a5db33fd74,This version is already installed. Choose Repair if needed.,Ta wersja jest już zainstalowana. W razie potrzeby wybierz Napraw.,Wizard.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.e9c4e3d511365fe9,Choose an empty folder; for an existing installation choose Update or Repair.,Wybierz pusty folder; dla istniejącej instalacji wybierz Aktualizuj lub Napraw.,Wizard.cs,
 installer.ui.ea1a413b03d32c92,Cannot run the computer check. See technical details.,Nie można uruchomić testu komputera. Sprawdź szczegóły techniczne.,Wizard.cs,
 installer.ui.ea5fabe55aa211f6,"Update an existing managed installation to the version in this installer. Work, models and saved keys remain.","Zaktualizuj istniejącą instalację zarządzaną do wersji z tego instalatora. Praca, modele i zapisane klucze pozostaną.",Wizard.cs,
+installer.ui.eb136082215ae6f1,Create an API key,Utwórz klucz API,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.eb68c36c8d05a286,", complete the access form and accept the terms.",", wypełnij formularz dostępu i zaakceptuj warunki.",Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.ebf5f8468ba61f7f,Verifying program files…,Sprawdzanie plików programu…,Wizard.cs,
 installer.ui.ec09a231e72c1713,Choose your language above and select one action.,Wybierz język powyżej i jedno działanie poniżej.,Wizard.cs,
@@ -151,11 +171,14 @@ installer.ui.ece40133d34c794b,Choose a separate program folder.,Wybierz osobny f
 installer.ui.eebdd24a77d9ad32,Confirm,Potwierdzenie,WizardState.cs,
 installer.ui.eec3bfcb8816f1c7,Operation completed,Operacja ukończona,Wizard.cs,
 installer.ui.ef3e15e40efe5910,Cannot save the report here. Choose a writable folder.,Nie można zapisać tu raportu. Wybierz folder z prawem zapisu.,Wizard.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.f0526c229e5c21bb,The key is checked without sending recordings and saved in the OS credential store during installation. This does not grant consent to upload audio.,Klucz jest sprawdzany bez wysyłania nagrań i zapisywany w magazynie systemowym podczas instalacji. Nie oznacza to zgody na wysyłanie audio.,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.f266c1a59456c1cf,System: ,System: ,Wizard.cs,
+installer.ui.f2689943472bc2b2,"Optional. OpenRouter enables cloud transcription, correction and translation. You can add a key later in the program.","Opcjonalnie. OpenRouter umożliwia transkrypcję, korektę i tłumaczenie w chmurze. Klucz możesz dodać także później w programie.",WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.f26cbae92fbb4eb1,The following application files will be removed:,Zostaną usunięte następujące pliki programu:,Wizard.cs,
 installer.ui.f4e45f38cb24574d,Enter Hugging Face token,Podaj token Hugging Face,Wizard.cs,
 installer.ui.fa6c280f93c9068f,Read the details below. You can go back and retry; the previous active program remains.,Przeczytaj szczegóły poniżej. Możesz wrócić i ponowić próbę; poprzednia aktywna wersja pozostała.,Wizard.cs,
 installer.ui.fb0d95c2d7d534e6,What would you like to do?,Co chcesz zrobić?,Wizard.cs,
 installer.ui.fbb0a7cad776279a,Check models,Sprawdź modele,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
+installer.ui.fc962c92a8740a24,4. OpenRouter key,4. Klucz OpenRouter,WizardKeys.cs,0.23.2 owner feedback; full installer copy review pending
 installer.ui.fe199528850a4e24,Uninstall,Odinstaluj,Wizard.cs,
 installer.ui.ff1cbe301a613f76,Cannot access this folder or its disk.,Nie można odczytać folderu lub jego dysku.,Wizard.cs,

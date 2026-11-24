@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/distribution.yml'
       - 'installer/**'
+      - 'tests/unit/test_distribution*.py'
       - 'tools/build_distribution.py'
       - 'tools/build_setup.py'
       - 'tools/prepare_distribution_tools.py'
@@ -14,6 +15,7 @@ on:
       - 'src/ewp_transcripts/web_server.py'
       - 'src/ewp_transcripts/web_workspaces.py'
       - 'src/ewp_transcripts/web_recovery.py'
+      - 'src/ewp_transcripts/web_runtime.py'
       - 'scripts/setup-models.py'
       - 'scripts/setup-windows.ps1'
 permissions:

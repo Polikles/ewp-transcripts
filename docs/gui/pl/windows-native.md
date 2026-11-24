@@ -1,5 +1,10 @@
 # Natywny Windows: instalacja i naprawa
 
+## Uruchamianie instalacji zarządzanej
+
+Okno terminala ma tytuł EwP Transcripts. Ponowne kliknięcie skrótu otwiera działającą aplikację w przeglądarce. Zamknięcie samej przeglądarki pozostawia serwer włączony. Po zakończeniu zatrzymaj go przez Ctrl+C; blokada po przerwanym uruchomieniu jest odzyskiwana automatycznie. Deinstalacja zamyka zweryfikowaną instancję przed usunięciem plików programu.
+
+
 Ta strona opisuje instalację i naprawę z repozytorium. Nowy kreator i paczki zarządzane opisuje [Instalacja i aktualizacja](installation.md). Ich prywatny FFmpeg jest pod katalogiem instalacji, a nie w osobnej domyślnej lokalizacji checkoutu. Program był sprawdzony przez właściciela na Windows 11; nowa instalacja zarządzana ma osobne zatwierdzenie.
 
 1. Wykonaj [Instalację i aktualizację](installation.md): Git, uv, sterownik NVIDIA Windows i Microsoft Visual C++ x64.

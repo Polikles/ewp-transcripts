@@ -886,7 +886,11 @@ nativeMediaInput.addEventListener("change", async () => {
     if(errors.length)status.textContent=errors.join("; ");
     else if(!mediaAdded && !files.some(file=>file.name.toLowerCase().endsWith(".json")))status.textContent="These files are already in the list.";
   }catch(error){status.textContent=error.message;}
-  finally{nativeMediaButton.disabled=false;}
+  finally{
+    nativeMediaButton.disabled=false;
+    // Persist selected files as soon as their upload/settings are complete, without planning.
+    document.dispatchEvent(new Event("ewp-workspace-changed"));
+  }
 });
 workflowInput.addEventListener("input", () => {
   if (activeGuiAudio && workflowInput.value !== activeGuiAudio.paths[0]) activeGuiAudio = null;

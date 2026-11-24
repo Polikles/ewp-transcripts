@@ -934,3 +934,86 @@ def test_powershell_secret_channel_accepts_transport_bom_without_exposing_keys(
     monkeypatch.setattr(manager, "host_report", lambda *a: {"ready": True, "checks": []})
     assert manager.main(["check", "--root", str(tmp_path / "installation"), "--secrets-stdin"]) == 0
     assert "private-test-key" not in capsys.readouterr().out
+
+
+def test_process_identity_tracks_birth_and_detects_a_terminated_child():
+    import subprocess
+
+    identity = manager.process_identity(os.getpid())
+    assert identity and identity[0] and identity[1] > 0 and identity[2]
+    child = subprocess.Popen([sys.executable, "-c", "pass"])
+    child.wait(timeout=10)
+    assert manager.process_identity(child.pid) is None
+    assert not manager.process_alive(child.pid)
+
+
+def test_legacy_lock_rejects_pid_reuse_and_recovers_empty_old_file(tmp_path, monkeypatch):
+    import time
+
+    lock = tmp_path / "old.lock"
+    lock.write_text("12345")
+    recorded = lock.stat().st_mtime
+    monkeypatch.setattr(
+        manager, "process_identity", lambda _: ("new-process", recorded + 10, "python")
+    )
+    assert not manager.legacy_lock_active(lock)
+    monkeypatch.setattr(manager, "process_identity", lambda _: ("owner", recorded - 10, "python"))
+    assert manager.legacy_lock_active(lock)
+    lock.write_text("")
+    os.utime(lock, (time.time() - 10, time.time() - 10))
+    assert not manager.legacy_lock_active(lock)
+
+
+def test_runtime_record_never_authorizes_a_reused_pid(tmp_path, monkeypatch):
+    root = tmp_path / "managed"
+    root.mkdir()
+    record_path = manager.runtime_session_path(root)
+    manager.atomic_json(
+        record_path,
+        {"root": str(root), "pid": 12345, "identity": "old", "token": "x" * 64, "port": 8765},
+    )
+    monkeypatch.setattr(manager, "process_identity", lambda _: ("replacement", 1, "python"))
+    assert manager.runtime_record(root) is None
+    assert not record_path.exists()
+
+
+def test_managed_default_outputs_survive_removal(tmp_path, lifecycle):
+    root, _ = lifecycle
+    install(root, bundle(tmp_path, "1.0.0"))
+    outputs = manager.default_output_directory(root)
+    assert outputs == root / "outputs"
+    (outputs / "publication.txt").write_text("user work")
+    manager.uninstall(root, confirmed=True)
+    assert (outputs / "publication.txt").read_text() == "user work"
+
+
+def test_explicit_update_rejects_same_version_and_repair_still_works(tmp_path, lifecycle):
+    root, _ = lifecycle
+    archive = bundle(tmp_path, "1.0.0")
+    install(root, archive)
+    assert manager.main(["update", "--root", str(root), "--bundle", str(archive)]) == 2
+    assert (
+        manager.main(
+            ["repair", "--root", str(root), "--bundle", str(archive), "--cloud-only", "--yes"]
+        )
+        == 0
+    )
+
+
+def test_runtime_record_publication_matches_live_identity_and_is_private(tmp_path, monkeypatch):
+    import runpy
+
+    publish_runtime = runpy.run_path(str(ROOT / "src/ewp_transcripts/web_runtime.py"))[
+        "publish_runtime"
+    ]
+    path = tmp_path / "runtime.session.json"
+    monkeypatch.setenv("EWP_RUNTIME_RECORD", str(path))
+    monkeypatch.setenv("EWP_RUNTIME_ROOT", str(tmp_path))
+    monkeypatch.setenv("EWP_RUNTIME_TOKEN", "synthetic-management-token-0123456789")
+    publish_runtime(port=8765)
+    record = json.loads(path.read_text())
+    assert record["pid"] == os.getpid()
+    assert record["identity"] == manager.process_identity(os.getpid())[0]
+    if os.name != "nt":
+        assert path.stat().st_mode & 0o777 == 0o600
+    assert not list(tmp_path.glob(".ewp-runtime-*"))

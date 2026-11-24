@@ -4,6 +4,14 @@ Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
 
+**Active2026-11-24 / target0.23.2:** next owner feedback authorizes runtime stale-lock/reopen/stop,
+default outputs and reliable change-aware saves, operation-specific five-step first install,
+required-check feedback, token help, stable/overall progress and same-version update blocking.
+Read opening TODO and [checkpoint](docs/checkpoints/2026-11-24-runtime-wizard-autosave.md).
+Owner confirms0.23.1 program removal/work-state preservation. Later local/OpenRouter model parity
+is TODO only. Internal old installers may now be cleaned; artist archives remain preserved.
+
+
 **Delivered0.23.1 — 2026-11-24:** multi-file pre-plan autosave/manual recovery without startup
 planning; dated task defaults and planning gear; installer model/version/rollback/help/log/report
 corrections and synchronous visible removal. Source5442167, native run45400731344 PASS:28 WPF

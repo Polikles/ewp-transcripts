@@ -42,6 +42,10 @@ async function loadSelectedWorkspace() {
     resetActiveReviewState(); clearActiveTranslationReview();
     selectedGuiAudio.length=0;activeGuiAudio=null;guiBatchPlan=null;renderGuiAudioChoices();
     await applyWorkspaceFields(payload.workspace.fields);
+    if (!workflowOutput.value.trim() && typeof defaultWorkflowOutput !== "undefined" && defaultWorkflowOutput) {
+      workflowOutput.value = defaultWorkflowOutput;
+      workflowOutput.dispatchEvent(new Event("input", {bubbles:true}));
+    }
     await refreshJobs();
     await restorePendingGuiMedia(payload.workspace.pending_media);
     displayWorkspaceName(payload.workspace.name);clearWorkspaceNameError();showWorkspaceFile(payload.workspace_file);

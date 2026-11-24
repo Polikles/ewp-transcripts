@@ -20,10 +20,15 @@ def main():
     parser.add_argument("--root", required=True, type=Path)
     parser.add_argument("--port", default=8876, type=int)
     parser.add_argument("--empty-queue", action="store_true")
+    parser.add_argument("--default-output", action="store_true")
     args = parser.parse_args()
     args.root.mkdir(parents=True, exist_ok=True)
     os.environ["XDG_STATE_HOME"] = str(args.root / "state")
     os.environ.pop("OPENROUTER_API_KEY", None)
+    if args.default_output:
+        default_output = args.root / "outputs"
+        default_output.mkdir(exist_ok=True)
+        os.environ["EWP_GUI_DEFAULT_OUTPUT_DIR"] = str(default_output)
     from ewp_transcripts import web_jobs, web_server, web_workflows
     from ewp_transcripts.config import ApplicationConfig
     from ewp_transcripts.progress import ProgressEvent
@@ -89,6 +94,8 @@ def main():
     print(f"Synthetic progress fixture: http://127.0.0.1:{args.port}/", flush=True)
     try:
         server.serve_forever()
+    except KeyboardInterrupt:
+        pass
     finally:
         server.server_close()
 

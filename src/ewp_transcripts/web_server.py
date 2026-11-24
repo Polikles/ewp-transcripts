@@ -515,6 +515,9 @@ class LocalGuiServer(ThreadingHTTPServer):
         self._recovery_stop = threading.Event()
         self._recovery_worker = threading.Thread(target=self._checkpoint_recovery_loop, daemon=True)
         self._recovery_worker.start()
+        from ewp_transcripts.web_runtime import publish_runtime
+
+        publish_runtime(port=self.server_port)
 
     def checkpoint_recovery(self) -> None:
         """Keep queue outcomes on disk even after the browser has been closed."""
@@ -532,6 +535,9 @@ class LocalGuiServer(ThreadingHTTPServer):
 
     def server_close(self) -> None:
         self.gui_openrouter_api_key = ""
+        for job in self.gui_transcriptions.jobs():
+            if job.status in {"queued", "running"}:
+                self.gui_transcriptions.cancel(job.job_id)
         self.gui_transcriptions.close()
         self._recovery_stop.set()
         self._recovery_worker.join()
@@ -578,7 +584,34 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
     sys_version = ""
     _security_headers: ClassVar[dict[str, str]] = SECURITY_HEADERS
 
+    def _runtime_control(self, *, stop: bool) -> None:
+        from ewp_transcripts.web_runtime import runtime_authorized, runtime_status
+
+        allowed = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+        if self.headers.get("Host") not in allowed or not runtime_authorized(
+            self.headers.get("X-EWP-Runtime-Token", ""), os.environ.get("EWP_RUNTIME_TOKEN", "")
+        ):
+            self._write_response(
+                _json_response(
+                    HTTPStatus.FORBIDDEN,
+                    {
+                        "error": {
+                            "code": "GUI_RUNTIME_REJECTED",
+                            "message": "Application control is not authorized",
+                        }
+                    },
+                )
+            )
+            return
+        self._write_response(_json_response(HTTPStatus.OK, runtime_status()))
+        if stop:
+            self.server.checkpoint_recovery()
+            threading.Thread(target=self.server.shutdown, daemon=True).start()
+
     def do_GET(self) -> None:  # noqa: N802
+        if urlsplit(self.path).path == "/api/v1/runtime-control":
+            self._runtime_control(stop=False)
+            return
         if urlsplit(self.path).path.startswith("/api/v1/export-downloads/"):
             self._download_export()
             return
@@ -814,6 +847,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             )
             return
         path = urlsplit(self.path).path
+        if path == "/api/v1/runtime-control":
+            self._runtime_control(stop=True)
+            return
         if path in {
             "/api/v1/selected-media/upload",
             "/api/v1/import-canonical-file",
@@ -1273,7 +1309,15 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         locations_registry.remember(
                             output_directory=output, storage_directory=storage
                         )
-                    payload = {"locations": locations_registry.available().model_dump(mode="json")}
+                    available_locations = locations_registry.available().model_dump(mode="json")
+                    default_output = os.environ.get("EWP_GUI_DEFAULT_OUTPUT_DIR", "").strip()
+                    if not available_locations["output_directory"] and default_output:
+                        available_locations["output_directory"] = str(
+                            self.server.gui_workflows.resolve_allowed_path(
+                                default_output, directory=True
+                            )
+                        )
+                    payload = {"locations": available_locations}
                 elif path == "/api/v1/workspaces/list":
                     payload = {
                         "workspaces": [

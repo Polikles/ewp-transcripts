@@ -1,4 +1,4 @@
-# Installer0.23.1 review / Przegląd instalatora0.23.1
+# Installer0.23.2 review / Przegląd instalatora0.23.2
 
 Owner confirms successful0.22.2 installation, desktop launch/transcription and0.23.0 update/version.
 Retain that pass. Focus this review on the new lifecycle/operation/startup behavior below.
@@ -22,6 +22,21 @@ The owner rejected0.22.0 before installation. That archive stays unchanged. Revi
 wizard first; do not start installation until its layout/flow is acceptable. Existing application
 workflow PASS is retained. No paid API/audio request or long ASR rerun is needed.
 
+
+## Focused0.23.2 follow-up / Sprawdzenie poprawek0.23.2
+
+- [ ] Pierwsza instalacja ma osobny krok4 Klucz OpenRouter i krok5 Instalacja; pozostałe operacje
+  są krótsze. Brak wymaganej akceptacji HF podświetla checkbox przy kliknięciu wyszarzonego Dalej.
+  Instrukcje HF/OR pokazują czerwone Traktuj tokeny jak hasła; OR ma linki do konta/środków/kluczy.
+- [ ] Ogólny postęp etapów i licznik ukończonych pobrań są niezależne od bieżącego pliku.
+  Pola nazwy, rozmiaru, szybkości i ETA oraz tekst pod Czas zachowują miejsce.
+- [ ] Aktualizacja do tej samej wersji jest zablokowana; dostępna jest Naprawa.
+- [ ] Bez wybierania katalogu wyników dodaj dwa pliki: outputs jest domyślny, zapis reaguje na
+  dodanie/zmiany. Po pełnym restarcie wybór wraca bez planowania. Własna ścieżka jest pamiętana.
+- [ ] Zamknij przeglądarkę i kliknij skrót: otwiera się działająca aplikacja. Terminal ma nazwę EwP
+  Transcripts. Zamknięcie terminala nie pozostawia blokady uniemożliwiającej kolejne uruchomienie.
+- [ ] Deinstalator zamyka działającą instancję i usuwa program, zachowując outputs oraz work-state.
+  Nie trzeba powtarzać transkrypcji ani pobierać modeli tylko dla testu.
 
 ## Focused0.23.1 follow-up / Sprawdzenie poprawek0.23.1
 
@@ -78,7 +93,7 @@ access/authentication endpoints and do not send recordings. Do not paste secrets
 2. Check that stages/custom gear work and the chosen local/cloud mode becomes ready. Reuse cached
    models; do not remove shared models simply for a test checkbox. Complete unchanged models are
    reused without an HF prompt. HF access/terms are required only for a selected gated download.
-3. Open the desktop shortcut and check About/CLI0.23.1; open one existing result/workspace.
+3. Open the desktop shortcut and check About/CLI0.23.2; open one existing result/workspace.
 4. Stop the managed server, try Repair and matching-version Add local models when relevant.
    Those operations must not silently upgrade an older installation. Update must be chosen explicitly.
 5. Uninstall first shows its plan. Default removal preserves work/models/key and removes program files and shortcuts before success. Only the running maintenance EXE

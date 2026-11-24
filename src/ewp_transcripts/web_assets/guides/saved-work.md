@@ -11,6 +11,8 @@ Use the numbered steps below with the matching GUI stage.
 
 Choose the output root before working. An empty optional work-storage directory saves NEW workspace JSON files in that output folder; choose another catalog for a separate save/backup location. Updating a selected older save keeps its actual owning catalog. Read Saved work file to see the manifest's real path. The server remembers accessible recent output/catalog locations locally; the list refreshes when this section opens. This recall does not start work or supply consent.
 
+Managed installations prefill the output folder with `outputs` beside the program. Protected installations use a writable per-user folder. You can keep the default or select another folder; an existing custom choice takes precedence. File additions trigger a save immediately after selection; other edits save after a short pause. A fallback check runs every15 seconds.
+
 ## 2. Save current work state
 
 Leave the suggested `task + date/time` name or enter your own unique name, then Save current work state. Dirty source/translation drafts are checkpointed first. New filenames begin with the name and end with `--<UUID>.workspace.json`. Windows-forbidden filename characters are replaced; Polish letters can remain. Do not identify a workspace only by its UUID.

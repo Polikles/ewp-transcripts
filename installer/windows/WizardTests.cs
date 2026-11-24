@@ -24,7 +24,9 @@ sealed partial class Wizard
         "app-only update and repair without credentials", "selective gated model recovery",
         "restricted installed maintenance entry points", "measured download progress and report timestamps",
         "visible information hover/focus feedback", "persistent technical log expansion",
-        "disabled installed models and explicit reinstall", "real older-version rollback selection",
+        "disabled installed models and explicit reinstall", "real older-version rollback selection", "required-check click feedback",
+        "five-step first install and optional OpenRouter page", "overall progress and stable metrics",
+        "same-version update refusal",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -48,23 +50,31 @@ sealed partial class Wizard
             double ty = text.TransformToAncestor(choice).Transform(new Point(0, text.ActualHeight / 2)).Y;
             Assert(Math.Abs(gy - ty) < .75, "radio glyph and label share one center line");
         }
-        Assert(next.IsEnabled && subtitle.Text == "Local-first transcript workflow", "welcome EN");
-        await Next(); Assert(page == 1 && !next.IsEnabled, "host test required");
+        Assert(CanAdvance && subtitle.Text == "Local-first transcript workflow", "welcome EN");
+        await Next(); Assert(page == 1 && !CanAdvance, "host test required");
         hostReady = true; SetFixtureHost(); Render();
-        Assert(next.IsEnabled, "host result permits next");
-        DiskProbe = _ => (24_999_999_999L, "TEST-VOLUME"); Render(); Assert(!next.IsEnabled, "25GB margin gate");
-        DiskProbe = _ => (25_000_000_000L, "TEST-VOLUME"); Render(); Assert(next.IsEnabled, "25GB boundary");
+        Assert(CanAdvance, "host result permits next");
+        DiskProbe = _ => (24_999_999_999L, "TEST-VOLUME"); Render(); Assert(!CanAdvance, "25GB margin gate");
+        DiskProbe = _ => (25_000_000_000L, "TEST-VOLUME"); Render(); Assert(CanAdvance, "25GB boundary");
         DiskProbe = _ => (100_000_000_000L, "TEST-VOLUME");
         var cpu = HostStrings(); Assert(cpu.Contains("64-bit processor: Test CPU"), "host structured model");
         language.SelectedIndex = 1; Assert(HostStrings().Contains("Procesor 64-bit") && !HostStrings().Contains("GB free"), "cached host PL");
         language.SelectedIndex = 0; Assert(HostStrings().Contains("GB free") && HostStrings().Contains("20 GB required") && !HostStrings().Contains("wolne"), "cached host EN");
-        await Next(); Assert(page == 2 && !next.IsEnabled && !terms.IsEnabled, "HF gate initially closed");
+        await Next(); Assert(page == 2 && !CanAdvance && !terms.IsEnabled, "HF gate initially closed");
         language.SelectedIndex = 1; await Capture(previewDirectory, "pl-models-before-token"); language.SelectedIndex = 0;
-        local.IsChecked = false; Assert(next.IsEnabled, "cloud/review install needs no credential");
+        local.IsChecked = false; Assert(CanAdvance, "cloud/review install needs no credential");
         local.IsChecked = true; hfSecret = "synthetic-hf-never-sent"; hfValid = true; Render();
-        Assert(terms.IsEnabled && !next.IsEnabled, "terms only enabled after verified token");
-        terms.IsChecked = true; Assert(next.IsEnabled, "verified token and acknowledgment permit next");
+        Assert(terms.IsEnabled && !CanAdvance, "terms only enabled after verified token");
+        await Next();
+        Assert(page == 2 && next.IsEnabled && !CanAdvance && missingRequirements.Contains("terms") && terms.Parent is Border frame && frame.BorderBrush == Error, "blocked Next highlights missing HF acknowledgment");
+        await Capture(previewDirectory, "en-required-hf-terms");
+        terms.IsChecked = true; Assert(CanAdvance, "verified token and acknowledgment permit next");
         Assert(!VisibleText((DependencyObject)Content).Contains(hfSecret), "main page never exposes token");
+        await Next(); Assert(page == 3 && ProgressPage == 4 && steps.Children.Count == 5 && CanAdvance, "first install has a separate optional OpenRouter step");
+        Assert(VisibleText(body).Contains("OpenRouter") && !VisibleText(body).Contains("Hugging Face"), "OpenRouter is separate from models/HF");
+        await Capture(previewDirectory, "en-openrouter-step");
+        language.SelectedIndex = 1; await Capture(previewDirectory, "pl-openrouter-step"); language.SelectedIndex = 0;
+        Back(); Assert(page == 2 && !VisibleText(body).Contains("OpenRouter API"), "models step does not request OpenRouter key");
         await TestCredentialModals(previewDirectory);
         orSecret = "synthetic-or-never-sent"; orValid = true; Render();
         Assert(!VisibleText((DependencyObject)Content).Contains(orSecret) && !log.Text.Contains(orSecret), "main page and logs never expose key");
@@ -79,13 +89,13 @@ sealed partial class Wizard
         File.WriteAllText(Path.Combine(existing, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing }));
         File.WriteAllText(Path.Combine(existing, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing, version = "0.0.1", active = "versions/test-1", local_models = false, previous = "versions/prior" }));
         root.Text = existing; await Task.Delay(250); operation = "models"; page = 1; Render();
-        Assert(!next.IsEnabled && LocationProblem() != null, "adding models cannot silently upgrade older version");
-        operation = "update"; hostReady = true; SetFixtureHost(); Render(); Assert(next.IsEnabled, "explicit update handles older version");
-        operation = "uninstall"; page = 2; previewReady = false; Render(); Assert(!next.IsEnabled, "uninstall requires preview");
+        Assert(!CanAdvance && LocationProblem() != null, "adding models cannot silently upgrade older version");
+        operation = "update"; hostReady = true; SetFixtureHost(); Render(); Assert(CanAdvance, "explicit update handles older version");
+        operation = "uninstall"; page = 2; previewReady = false; Render(); Assert(!CanAdvance, "uninstall requires preview");
         using (var plan = JsonDocument.Parse("{\"paths\":[\"C:\\\\Users\\\\Example\\\\EwP\\\\runtime\"],\"models\":[]}")) removal = plan.RootElement.Clone();
-        previewReady = true; Render(); Assert(next.IsEnabled && !removeModels.IsChecked!.Value && !removeKey.IsChecked!.Value, "removal preserves shared assets by default");
+        previewReady = true; Render(); Assert(CanAdvance && !removeModels.IsChecked!.Value && !removeKey.IsChecked!.Value, "removal preserves shared assets by default");
         await Capture(previewDirectory, "pl-uninstall-preview");
-        operation = "install"; page = 3; busy = true; progressStage = "models"; Render();
+        operation = "install"; page = ProgressPage; busy = true; progressStage = "models"; Render();
         await Capture(previewDirectory, "pl-install-progress");
         busy = false; finished = successful = true; Render(); await Capture(previewDirectory, "pl-complete");
         await TestActionResetAndPresentation(previewDirectory);
@@ -111,29 +121,30 @@ sealed partial class Wizard
         File.WriteAllText(Path.Combine(config, "default-config.toml"), string.Join("\n", catalog.Models.Select(m => m.Revision)));
         FindInstallation = (_, _) => InstallationDiscovery.Read(existing);
         SelectOperation("update"); page = 2; Render(); UpdateLayout();
-        Assert(next.IsEnabled && !NeedsHf && !VisibleText((DependencyObject)Content).Contains("Podaj klucz OpenRouter"), "same-model update has no token/key gate");
+        Assert(CanAdvance && !NeedsHf && !VisibleText((DependencyObject)Content).Contains("Podaj klucz OpenRouter"), "same-model update has no token/key gate");
         await Capture(previews, "pl-update-program-only");
+        page = 1; Render(); Assert(!CanAdvance && LocationProblem() != null, "same-version update is blocked");
         SelectOperation("repair"); page = 2; SetFixtureHost(); Render(); UpdateLayout();
-        Assert(next.IsEnabled && !repairModels && !NeedsHf, "repair defaults to app only");
+        Assert(CanAdvance && !repairModels && !NeedsHf, "repair defaults to app only");
         await Capture(previews, "pl-repair-program-only");
         repairModels = true; selectedModels.Clear(); selectedModels.Add("diarization"); Render();
-        Assert(NeedsHf && !next.IsEnabled, "explicit gated redownload requires token");
+        Assert(NeedsHf && !CanAdvance, "explicit gated redownload requires token");
         await Capture(previews, "pl-repair-gated-model");
         selectedModels.Clear(); selectedModels.Add("asr"); Render();
-        Assert(!NeedsHf && next.IsEnabled, "public model redownload needs no HF");
+        Assert(!NeedsHf && CanAdvance, "public model redownload needs no HF");
         await Capture(previews, "pl-repair-public-model");
         SelectOperation("models"); page = 2; SetFixtureHost(); selectedModels.Clear(); selectedModels.Add("asr"); Render(); UpdateLayout();
         Assert(!NeedsHf && !VisibleText((DependencyObject)Content).Contains("OpenRouter API"), "adding public models has no OR or gated prompt");
         await Capture(previews, "pl-add-public-model");
         ModelMissingBytes = _ => 0; ResetModelState(); Render(); UpdateLayout();
-        Assert(!NeedsHf && !next.IsEnabled && selectedModels.Count == 0 && !DownloadModels.Any(), "installed models have no implicit selection/download/token");
+        Assert(!NeedsHf && !CanAdvance && selectedModels.Count == 0 && !DownloadModels.Any(), "installed models have no implicit selection/download/token");
         Assert(FindVisual<CheckBox>(body).Count(c => !c.IsEnabled) == catalog.Models.Count, "installed model boxes are disabled");
         await Capture(previews, "pl-models-already-installed");
         reinstallModels = true; selectedModels.Add("diarization"); Render(); UpdateLayout();
         Assert(NeedsHf && DownloadModels.Single().Code == "diarization", "explicit reinstall unlocks selected gated download");
         await Capture(previews, "pl-models-explicit-reinstall");
         ModelMissingBytes = model => model.MissingBytes();
-        SelectOperation("repair"); page = 3; busy = true; Render(); UpdateLayout();
+        SelectOperation("repair"); page = ProgressPage; busy = true; Render(); UpdateLayout();
         var details = FindVisual<Expander>(body).Single(); details.IsExpanded = true;
         progressStage = "dependencies"; Render(); UpdateLayout();
         Assert(FindVisual<Expander>(body).Single().IsExpanded, "log stays open across progress rerender");
@@ -153,10 +164,19 @@ sealed partial class Wizard
         Assert(root.Height == 36 && root.ActualHeight < 45, "location field is compact");
         var textViewport = (ScrollViewer)root.Template.FindName("PART_ContentHost", root);
         Assert(textViewport.ActualHeight >= root.ActualHeight - 4, "compact input does not apply padding twice or clip path text");
-        page = 3; busy = true; progressStage = "models"; Render();
+        page = ProgressPage; busy = true; progressStage = "models"; ResetOperationProgress(); Render();
         using (var download = JsonDocument.Parse("{\"bytes\":500000000,\"total\":1000000000,\"unit\":\"B\",\"rate\":2500000,\"eta_seconds\":200}"))
             UpdateOperationProgress("download", "model.bin", download.RootElement);
-        Assert(!operationProgress.IsIndeterminate && operationProgress.Value == 50 && downloadProgress.Text.Contains("MB/s"), "measured per-file progress/rate/ETA");
+        Assert(!operationProgress.IsIndeterminate && operationProgress.Value == 50 && downloadRate.Text.Contains("MB/s"), "measured per-file progress/rate/ETA");
+        UpdateOperationProgress("verify", "Checking installed program", null);
+        double completed = overallProgress.Value;
+        UpdateOperationProgress("python", "Repeated child runtime check", null);
+        Assert(completed > 0 && overallProgress.Value == completed && activityProgress.Height == 32, "overall phase progress does not regress and activity reserves height");
+        UpdateOperationProgress("log", "Downloading test-wheel (1MiB)", null);
+        UpdateOperationProgress("log", "Downloaded test-wheel", null);
+        Assert(downloadsFinished.Contains("package:test-wheel"), "download counter includes completed dependencies");
+        using (var finalDownload = JsonDocument.Parse("{\"bytes\":1000000000,\"total\":1000000000,\"unit\":\"B\",\"download_id\":\"fixture:model.bin\"}")) UpdateOperationProgress("download", "model.bin", finalDownload.RootElement);
+        Assert(downloadsFinished.Contains("fixture:model.bin"), "download counter includes model byte transfers");
         await Capture(previews, "pl-model-download-progress");
         busy = false; FindInstallation = InstallationDiscovery.Find;
     }
@@ -215,7 +235,7 @@ sealed partial class Wizard
         foreach (string action in operations.Where(o => o != "install"))
         {
             SelectOperation(action); page = 1; Render();
-            Assert(root.Text.Length == 0 && manualLocation && !next.IsEnabled, "missing installation asks for location without reusing prior input");
+            Assert(root.Text.Length == 0 && manualLocation && !CanAdvance, "missing installation asks for location without reusing prior input");
         }
         await Capture(previews, "pl-maintenance-not-found");
         SelectOperation("install"); Assert(root.Text == InstallationDiscovery.DefaultRoot, "install action restores default location");
@@ -277,11 +297,11 @@ sealed partial class Wizard
             File.WriteAllText(Path.Combine(path, "bundle.json"), JsonSerializer.Serialize(new { version = oldVersion }));
         }
         SelectOperation("rollback"); page = 1; Render(); UpdateLayout();
-        Assert(RollbackChoices().Count == 2 && rollbackTarget == releases[1] && next.IsEnabled, "rollback lists only existing older runtimes and defaults newest");
+        Assert(RollbackChoices().Count == 2 && rollbackTarget == releases[1] && CanAdvance, "rollback lists only existing older runtimes and defaults newest");
         var choice = FindVisual<ComboBox>(body).Single(); choice.SelectedIndex = 1;
         Assert(rollbackTarget == releases[0], "rollback user selects exact version");
         Directory.Delete(Path.Combine(existing, releases[0]), true); Directory.Delete(Path.Combine(existing, releases[1]), true);
-        Render(); Assert(!next.IsEnabled && LocationProblem() != null, "rollback blocked without older files");
+        Render(); Assert(!CanAdvance && LocationProblem() != null, "rollback blocked without older files");
     }
     string HostStrings() => host is JsonElement value ? string.Join("\n", value.GetProperty("checks").EnumerateArray().Select(HostText)) : "";
     static void Assert(bool condition, string name) { if (!condition) throw new InvalidDataException("Self-test failed: " + name); }

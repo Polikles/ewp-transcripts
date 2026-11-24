@@ -1,5 +1,34 @@
 # Immediate work queue
 
+## Active0.23.1 feedback — target0.23.2,2026-11-24
+
+Owner confirms uninstall removes program files and preserves work-state. Keep that pass.
+See `docs/checkpoints/2026-11-24-runtime-wizard-autosave.md`. No paid/model campaign.
+
+- [ ] Read new installation report privately; preserve previous accepted application behavior.
+- [ ] Recover stale Windows locks after terminal closure/reboot/PID reuse, with kernel lifetime
+      locking and reliable process identity; never terminate unrelated processes.
+- [ ] Reopen the existing verified GUI in the browser on repeated desktop launch. Give the
+      console the title EwP Transcripts. Uninstaller stops its verified running app before removal.
+- [ ] Default managed output folder is installation-root/outputs (private fallback for protected
+      installations); remember explicit custom paths and preserve outputs on removal.
+- [ ] Change-aware nonblocking workspace saving, picker-before-output persistence and shorter
+      fallback/editor intervals. Verify immediate file additions, full restart and no auto-plan.
+- [ ] Installer missing required checks highlight when Next is attempted. Keep blocked navigation
+      visually clear while allowing click feedback; cover HF terms and other operation gates.
+- [ ] First install has separate step4 OpenRouter key and step5 Installation. Other operations
+      use their own number of steps. OR help links inline like HF, with account/credits/workspace/
+      restricted-key instructions; BOTH token help windows say in red Treat tokens like passwords.
+- [ ] Fixed progress text layout and overall phase/item counter/bar alongside current download
+      progress; no invented byte totals or ETA. Update cannot run on identical installed version.
+- [ ] Native WPF/filesystem checks, focused synthetic browser restart/persistence verification,
+      updated affected EN/PL help/reference and distinct immutable delivery.
+- [ ] Clean unneeded internal installers/build caches under current owner authorization. Retain
+      useful accepted baselines, manifests and artist archives; full installer/notices review later.
+- [ ] LATER: local options matching ASR models available via OpenRouter, for local/cloud function
+      parity. Research hardware/licensing/runtime feasibility then; no model addition/download now.
+
+
 ## Delivered 0.23.1 owner follow-up — 2026-11-24
 
 Owner confirms update succeeded and About shows0.23.0. Preserve that pass; registration had

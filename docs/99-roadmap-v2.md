@@ -1,5 +1,9 @@
 # Post-0.1 Roadmap
 
+Owner follow-up2026-11-24: later investigate local implementations of ASR models offered through
+OpenRouter, aiming for equivalent local/cloud features subject to runtime/hardware/licensing
+feasibility. This is a deferred TODO, not permission for new models, downloads or paid tests now.
+
 The filename is retained for compatibility with existing links. The roadmap now tracks
 planned work after the `0.1.x` internal release candidates rather than implying that all
 items belong to one monolithic "Version 2" release.

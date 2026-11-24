@@ -1,5 +1,10 @@
 # Native Windows setup and repair
 
+## Managed launch and shutdown
+
+The console is titled EwP Transcripts. Clicking the shortcut again reopens the running application in your browser. Closing the browser alone keeps the server running. Stop it with Ctrl+C when finished; interrupted Windows activity locks are recovered automatically. Uninstall closes the verified application instance before removing its program files.
+
+
 This page covers source-checkout setup/repair. For the new managed wizard and terminal bundles, use [Installation and updates](installation.md). Managed private FFmpeg is below its installation root, not the separate source-checkout default. The application workflow was owner-tested on Windows 11; new managed installation acceptance is recorded separately.
 
 1. Follow [Installation and updates](installation.md) for Git, uv, the NVIDIA Windows driver and Microsoft Visual C++ x64 runtime.

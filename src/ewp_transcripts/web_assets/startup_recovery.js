@@ -58,6 +58,7 @@ async function saveAutomaticWorkspace(force = false) {
   const fingerprint = workspaceFingerprint();
   if (!force && fingerprint === lastWorkspaceFingerprint && !reviewDirty && !translationReviewDirty) return;
   workspaceAutosaveBusy = true;
+  let saveSucceeded = false;
   try {
     if (reviewDocument && reviewDirty) await saveReviewDraft();
     if (translationReview && translationReviewDirty && !(await saveEnhancedTranslationReview()))
@@ -78,18 +79,24 @@ async function saveAutomaticWorkspace(force = false) {
     showWorkspaceFile(payload.workspace_file);
     await refreshWorkspaces(activeWorkspaceKey, {feedback:false});
     workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored.";
+    saveSucceeded = true;
   } catch (error) {
     workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`;
-  } finally { workspaceAutosaveBusy = false; }
+  } finally {
+    workspaceAutosaveBusy = false;
+    if (saveSucceeded && automaticRecoveryReady && workspaceAutosave.checked && workspaceFingerprint() !== lastWorkspaceFingerprint)
+      scheduleAutomaticWorkspaceSave();
+  }
 }
 
 function scheduleAutomaticWorkspaceSave() {
   if (automaticRecoveryTimer !== null) clearTimeout(automaticRecoveryTimer);
-  automaticRecoveryTimer = setTimeout(() => { void saveAutomaticWorkspace(); }, 750);
+  automaticRecoveryTimer = setTimeout(() => { void saveAutomaticWorkspace(); }, 500);
 }
 for (const event of ["input", "change", "ewp-stage"]) document.addEventListener(event, scheduleAutomaticWorkspaceSave);
+document.addEventListener("ewp-workspace-changed", () => { void saveAutomaticWorkspace(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) void saveAutomaticWorkspace(); });
-setInterval(() => { void saveAutomaticWorkspace(); }, 2000);
+setInterval(() => { void saveAutomaticWorkspace(); }, 15000);
 workspaceAutosave.addEventListener("change", () => {
   void workspacePost("/api/v1/workspaces/recovery", {enabled:workspaceAutosave.checked}, {feedback:false, storageDirectory:""});
 });

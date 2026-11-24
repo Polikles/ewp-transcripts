@@ -172,28 +172,352 @@ def active_path(root: Path, state: dict[str, Any]) -> Path:
     return path
 
 
-def process_alive(pid: int) -> bool:
+def process_identity(pid: int) -> tuple[str, float, str] | None:
+    """Identify a live process, including its creation time (PID alone is not identity)."""
     if pid <= 0:
-        return True
+        return None
     if os.name == "nt":
         import ctypes
         from ctypes import wintypes
 
         kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
         kernel.OpenProcess.restype = wintypes.HANDLE
-        handle = kernel.OpenProcess(0x1000, False, pid)
-        if not handle:
-            return ctypes.get_last_error() != 87
         kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-        kernel.CloseHandle(handle)
+        handle = kernel.OpenProcess(0x101000, False, pid)
+        if not handle:
+            if ctypes.get_last_error() == 87:
+                return None
+            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+            state = kernel.WaitForSingleObject(handle, 0)
+            if state == 0:
+                return None
+            if state != 0x102:
+                raise ctypes.WinError(ctypes.get_last_error())
+            code = wintypes.DWORD()
+            kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+            if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            if code.value != 259:  # STILL_ACTIVE; an open handle can outlive a terminated process.
+                return None
+            times = [wintypes.FILETIME() for _ in range(4)]
+            kernel.GetProcessTimes.argtypes = [
+                wintypes.HANDLE,
+                *([ctypes.POINTER(wintypes.FILETIME)] * 4),
+            ]
+            if not kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            creation = times[0].dwLowDateTime | times[0].dwHighDateTime << 32
+            buffer, size = ctypes.create_unicode_buffer(32768), wintypes.DWORD(32768)
+            kernel.QueryFullProcessImageNameW.argtypes = [
+                wintypes.HANDLE,
+                wintypes.DWORD,
+                wintypes.LPWSTR,
+                ctypes.POINTER(wintypes.DWORD),
+            ]
+            if not kernel.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            return str(creation), creation / 10_000_000 - 11644473600, buffer.value
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        values = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
+        if values[0] == "Z":
+            return None
+        ticks = int(values[19])
+        boot = next(
+            line.split()[1]
+            for line in Path("/proc/stat").read_text().splitlines()
+            if line.startswith("btime ")
+        )
+        boot_id = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+        return (
+            f"{boot_id}:{ticks}",
+            int(boot) + ticks / os.sysconf("SC_CLK_TCK"),
+            os.readlink(f"/proc/{pid}/exe"),
+        )
+    except FileNotFoundError:
+        return None
+
+
+def process_alive(pid: int) -> bool:
+    if pid <= 0:
         return True
     try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
+        return process_identity(pid) is not None
+    except OSError:
+        return True  # Unknown ownership is never permission to terminate a process.
+
+
+def legacy_lock_active(path: Path) -> bool:
+    """Read earlier PID files conservatively, but reject terminated/reused PID ownership."""
+    if path.is_symlink():
+        raise InstallError("Linked installation lock is not allowed")
+    if os.name == "nt":
+        import ctypes
+
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.GetTickCount64.restype = ctypes.c_ulonglong
+        boot_time = time.time() - kernel.GetTickCount64() / 1000
+        if path.stat().st_mtime < boot_time - 1:
+            return False
+    try:
+        pid = int(path.read_text())
+    except ValueError:
+        return time.time() - path.stat().st_mtime < 2
+    if pid <= 0:
         return False
+    try:
+        identity = process_identity(pid)
     except OSError:
         return True
+    return bool(identity and identity[1] <= path.stat().st_mtime + 0.01)
+
+
+@contextlib.contextmanager
+def windows_exclusive(root: Path):
+    """The OS releases this mutex on crash, terminal close and reboot; files are diagnostics."""
+    import ctypes
+    from ctypes import wintypes
+
+    lock = lifecycle_lock_path(root)
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+    kernel.CreateMutexW.restype = wintypes.HANDLE
+    kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel.ReleaseMutex.argtypes = [wintypes.HANDLE]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.CreateMutexW(
+        None,
+        False,
+        "Local\\EwP.Transcripts." + hashlib.sha256(str(lock).casefold().encode()).hexdigest(),
+    )
+    if not handle:
+        raise InstallError("Cannot access the installation activity lock")
+    acquired = False
+    try:
+        acquired = kernel.WaitForSingleObject(handle, 3000) in (0, 0x80)
+        if not acquired:
+            raise InstallError("Another installer/application is active; close it and retry")
+        for previous in (lock, root / ".lifecycle.lock"):
+            if previous.exists() or previous.is_symlink():
+                if legacy_lock_active(previous):
+                    raise InstallError(
+                        "Another installer/application is active; close it and retry"
+                    )
+                try:
+                    previous.unlink()
+                except PermissionError:
+                    if previous == lock:
+                        raise
+                emit("recovery", "Recovered an interrupted application lock; no job is resumed")
+        # Keep a readable PID for diagnostics and compatibility with earlier launchers.
+        descriptor = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, "w") as stream:
+            stream.write(str(os.getpid()))
+        try:
+            yield
+        finally:
+            if lock.exists() and not lock.is_symlink() and lock.read_text() == str(os.getpid()):
+                lock.unlink()
+    finally:
+        if acquired:
+            kernel.ReleaseMutex(handle)
+        kernel.CloseHandle(handle)
+
+
+def runtime_session_path(root: Path) -> Path:
+    return lifecycle_lock_path(root).with_suffix(".session.json")
+
+
+def runtime_record(root: Path) -> dict[str, Any] | None:
+    path = runtime_session_path(root)
+    if not path.exists():
+        return None
+    if path.is_symlink() or path.stat().st_size > 8192:
+        raise InstallError("Invalid application runtime record")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        record.get("root") != str(root)
+        or not isinstance(record.get("token"), str)
+        or len(record["token"]) < 32
+        or not isinstance(record.get("pid"), int)
+        or record.get("port") != 8765
+    ):
+        raise InstallError("Invalid application runtime record")
+    identity = process_identity(record["pid"])
+    if not identity or identity[0] != record.get("identity"):
+        path.unlink(missing_ok=True)
+        return None
+    return record
+
+
+def runtime_request(record: dict[str, Any], action: str) -> dict[str, Any] | None:
+    import urllib.error
+    import urllib.request
+
+    base = f"http://127.0.0.1:{record['port']}"
+    request = urllib.request.Request(
+        base + "/api/v1/runtime-control",
+        data=b"" if action == "stop" else None,
+        headers={"Origin": base, "X-EWP-Runtime-Token": record["token"]},
+    )
+
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    try:
+        with opener.open(request, timeout=2) as response:
+            result = json.load(response)
+        return result if result.get("pid") == record["pid"] else None
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return None
+
+
+def reopen_running_application(root: Path) -> bool:
+    record = runtime_record(root)
+    if record is None:
+        return False
+    if not runtime_request(record, "ping"):
+        raise InstallError(
+            "The running EwP application is not responding; close it or use Uninstall"
+        )
+    import webbrowser
+
+    webbrowser.open(f"http://127.0.0.1:{record['port']}/")
+    emit("complete", "Opened the running EwP Transcripts application")
     return True
+
+
+def terminate_installed_process(root: Path, pid: int, expected: str) -> None:
+    """Terminate the retained, creation-verified process object, never a recycled PID."""
+    current = process_identity(pid)
+    if current is None or current[0] != expected:
+        return
+    if not Path(current[2]).is_relative_to(root):
+        raise InstallError("Cannot safely stop a process outside this installation")
+    if os.name != "nt":
+        os.kill(pid, signal.SIGTERM)
+        return
+    import ctypes
+    from ctypes import wintypes
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.OpenProcess(0x100001, False, pid)
+    if not handle:
+        raise InstallError("Cannot stop the running application")
+    try:
+        current = process_identity(pid)
+        if current is None:
+            return
+        if current[0] != expected:
+            raise InstallError("Application process identity changed")
+        if not kernel.TerminateProcess(handle, 1):
+            raise InstallError("Cannot stop the running application")
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def stop_legacy_application(root: Path) -> None:
+    """Support earlier managed launchers only after verifying their root, role and process tree."""
+    if os.name != "nt":
+        return
+    lock = lifecycle_lock_path(root)
+    if not lock.exists():
+        lock = root / ".lifecycle.lock"
+    if not lock.exists() or not legacy_lock_active(lock):
+        return
+    owner_pid = int(lock.read_text())
+    owner_identity = process_identity(owner_pid)
+    if not owner_identity or not Path(owner_identity[2]).is_relative_to(root):
+        return  # An installer/foreign owner remains protected; the activity gate will explain it.
+    script = r"""[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+$pending=@([int]$env:EWP_TARGET_PID);$items=@();$seen=@{}
+while($pending.Count){
+ $current=$pending[0];$pending=@($pending|Select-Object -Skip 1)
+ if($seen.ContainsKey($current)){continue};$seen[$current]=$true
+ $entry=Get-CimInstance Win32_Process -Filter "ProcessId = $current"
+ if($entry){$items+=@{pid=$entry.ProcessId;command=$entry.CommandLine}}
+ $children=Get-CimInstance Win32_Process -Filter "ParentProcessId = $current"
+ $pending+=@($children|ForEach-Object{$_.ProcessId})
+}
+ConvertTo-Json -InputObject @($items) -Compress
+"""
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-Command", script],
+        env={**os.environ, "EWP_TARGET_PID": str(owner_pid)},
+        text=True,
+        encoding="utf-8-sig",
+        capture_output=True,
+        timeout=15,
+    )
+    if result.returncode:
+        raise InstallError("Cannot verify the running legacy application; close its console first")
+    import re
+
+    entries = json.loads(result.stdout)
+    owner = next((entry for entry in entries if entry["pid"] == owner_pid), None)
+    command = str((owner or {}).get("command") or "")
+    if str(root / "manager.py").casefold() not in command.casefold() or not re.search(
+        r'manager\.py["\s]+launch(?:\s|$)', command, re.IGNORECASE
+    ):
+        return  # Never stop update/repair/uninstall workers or unrelated programs.
+    if process_identity(owner_pid) != owner_identity:
+        return
+    targets = []
+    for entry in entries:
+        pid = entry["pid"]
+        if pid in (owner_pid, os.getpid()):
+            continue
+        identity = process_identity(pid)
+        if identity and Path(identity[2]).is_relative_to(root):
+            # The known GUI's private Python/FFmpeg descendants belong to this app.
+            name = Path(identity[2]).name.casefold()
+            args = str(entry.get("command") or "")
+            if (
+                name in {"python.exe", "pythonw.exe", "ffmpeg.exe", "ffprobe.exe"}
+                and "manager.py" not in args.casefold()
+            ):
+                targets.append((pid, identity[0]))
+    emit("shutdown", "Closing the verified older EwP Transcripts application")
+    for pid, identity in reversed(targets):
+        terminate_installed_process(root, pid, identity)
+    terminate_installed_process(root, owner_pid, owner_identity[0])
+    deadline = time.monotonic() + 5
+    while process_identity(owner_pid) and time.monotonic() < deadline:
+        time.sleep(0.1)
+
+
+def stop_running_application(root: Path) -> None:
+    record = runtime_record(root)
+    if record is None:
+        stop_legacy_application(root)
+        return
+    emit("shutdown", "Closing the running EwP Transcripts application and saving queue state")
+    runtime_request(record, "stop")
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        identity = process_identity(record["pid"])
+        if identity is None or identity[0] != record["identity"]:
+            runtime_session_path(root).unlink(missing_ok=True)
+            return
+        time.sleep(0.1)
+    terminate_installed_process(root, record["pid"], record["identity"])
+    deadline = time.monotonic() + 5
+    while process_alive(record["pid"]) and time.monotonic() < deadline:
+        time.sleep(0.1)
+    if process_alive(record["pid"]):
+        raise InstallError("The application has not stopped yet")
+    runtime_session_path(root).unlink(missing_ok=True)
 
 
 def lifecycle_lock_path(
@@ -214,6 +538,10 @@ def lifecycle_lock_path(
 
 @contextlib.contextmanager
 def exclusive(root: Path):
+    if os.name == "nt":
+        with windows_exclusive(root):
+            yield
+        return
     lock = lifecycle_lock_path(root)
     legacy = root / ".lifecycle.lock"
     if lock != legacy:
@@ -982,7 +1310,9 @@ def install(
                 "dependencies",
                 "Installing locked application dependencies; this can take several minutes",
             )
+            emit("python", "Preparing the managed Python runtime")
             run([str(uv), "python", "install", "3.12"], cwd=release, environment=env)
+            emit("dependencies", "Installing locked application dependencies")
             run(
                 [str(uv), "sync", "--locked", "--no-dev", "--python", "3.12"],
                 cwd=release / "app",
@@ -1079,6 +1409,7 @@ def install(
                         "OS credential storage is unavailable. No plaintext fallback was u"
                         "sed; retry without saving a key or enable the OS store."
                     )
+            emit("register", "Registering the installed application")
             state = {
                 "kind": MAGIC,
                 "root": str(root),
@@ -1150,6 +1481,7 @@ def write_launchers(root: Path) -> None:
         (root / "EwP.cmd").write_text('@echo off\n"%~dp0tools-launch.cmd"\n')
         # PowerShell reads the atomic pointer, never executes it as code.
         script = r"""$ErrorActionPreference='Stop'
+try{$Host.UI.RawUI.WindowTitle='EwP Transcripts'}catch{}
 $r=$PSScriptRoot
 $s=Get-Content -Encoding UTF8 -LiteralPath (Join-Path $r 'installation.json') -Raw|ConvertFrom-Json
 if($s.kind -ne 'ewp-transcripts-managed-v1' -or
@@ -1219,14 +1551,50 @@ def gui_state_directory(root: Path) -> Path:
     return directory
 
 
+def default_output_directory(root: Path) -> Path:
+    directory = root / "outputs"
+    try:
+        if os.name == "nt" and any(
+            Path(os.environ[name]) in root.parents
+            for name in ("PROGRAMFILES", "PROGRAMFILES(X86)", "SYSTEMROOT")
+            if os.environ.get(name)
+        ):
+            raise PermissionError("Protected installation uses per-user outputs")
+        if directory.is_symlink() or (
+            hasattr(directory, "is_junction") and directory.is_junction()
+        ):
+            raise InstallError("Output directory must not be linked")
+        directory.mkdir(exist_ok=True)
+        with tempfile.TemporaryFile(dir=directory):
+            pass
+    except PermissionError:
+        directory = gui_state_directory(root).parent / "outputs"
+        directory.mkdir(exist_ok=True)
+    return directory
+
+
 def launch(root: Path) -> None:
+    if os.name == "nt":
+        import ctypes
+
+        kernel = ctypes.WinDLL("kernel32")
+        kernel.SetConsoleTitleW.argtypes = [ctypes.c_wchar_p]
+        kernel.SetConsoleTitleW("EwP Transcripts")
     state = load_state(root)
     if state is None:
         raise InstallError("No managed installation found")
+    if reopen_running_application(root):
+        return
     with exclusive(root):
         release = active_path(root, state)
         environment = app_env(root)
         environment["EWP_GUI_STATE_DIR"] = str(gui_state_directory(root))
+        environment["EWP_GUI_DEFAULT_OUTPUT_DIR"] = str(default_output_directory(root))
+        token = uuid.uuid4().hex + uuid.uuid4().hex
+        environment["EWP_RUNTIME_TOKEN"] = token
+        record_path = runtime_session_path(root)
+        environment["EWP_RUNTIME_RECORD"] = str(record_path)
+        environment["EWP_RUNTIME_ROOT"] = str(root)
         process = subprocess.Popen(
             [str(app_python(release)), "-m", "ewp_transcripts", "gui"],
             cwd=release / "app",
@@ -1243,6 +1611,10 @@ def launch(root: Path) -> None:
                 signal.signal(signal.SIGINT, previous)
             emit("complete", "Application closed")
             return
+        finally:
+            with contextlib.suppress(FileNotFoundError):
+                if json.loads(record_path.read_text()).get("token") == token:
+                    record_path.unlink()
         if code:
             raise InstallError("Application exited with an error")
 
@@ -1317,6 +1689,7 @@ def uninstall(
         return preview
     state = load_state(root)
     release = active_path(root, state) if state else None
+    stop_running_application(root)
     with exclusive(root):
         if remove_key and release is None:
             raise InstallError(
@@ -1667,6 +2040,7 @@ def main(argv: list[str] | None = None) -> int:
                 diagnose_runtime(root, release, local=True)
                 state["local_models"] = True
                 atomic_json(root / "installation.json", state)
+                emit("register", "Updating the installed model inventory")
                 register(root, state)
                 emit("complete", "Selected local models prepared; application files unchanged")
         elif args.action == "rollback":
@@ -1687,6 +2061,11 @@ def main(argv: list[str] | None = None) -> int:
                 raise InstallError("Select a versioned bundle with --bundle")
             local_requested = args.local
             existing = load_state(root)
+            if args.action == "update" and existing:
+                with zipfile.ZipFile(args.bundle) as selected_bundle:
+                    requested_version = json.loads(selected_bundle.read("bundle.json"))["version"]
+                if requested_version == existing["version"]:
+                    raise InstallError("This version is already installed; choose Repair if needed")
             if (
                 args.action in {"update", "repair"}
                 and existing

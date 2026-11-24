@@ -80,6 +80,7 @@ sealed class CredentialDialog : Window
         body.Children.Add(Wizard.Copy(hf
             ? T("Used only during installation to download pyannote. It is not saved.", "Używany tylko podczas instalacji do pobrania pyannote. Nie jest zapisywany.")
             : T("Checked without sending audio. Saved in the OS store only during installation.", "Sprawdzany bez wysyłania audio. Zapis w magazynie systemowym nastąpi dopiero podczas instalacji."), muted: true));
+        var warning = Wizard.Copy(T("Treat tokens like passwords", "Traktuj tokeny jak hasła")); warning.Foreground = Wizard.Error; warning.FontWeight = FontWeights.SemiBold; body.Children.Add(warning);
         body.Children.Add(input);
         var row = new Grid { Margin = new Thickness(0, 14, 0, 8) };
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });

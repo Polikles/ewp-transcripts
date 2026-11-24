@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Active runtime/wizard follow-up —2026-11-24
+
+Latest owner feedback supersedes the wait: execute opening TODO and runtime-wizard-autosave
+checkpoint as0.23.2. Keep confirmed0.23.1 removal/work-state pass. Runtime identity/locks/reopen/
+uninstall stop, default outputs/change-aware saves and installer steps/check/progress are active.
+Owner allows removal of obsolete installers; retain useful baselines/artist archives. Local/API
+model parity is LATER TODO only. No paid/model campaign, full notices/copy audit or native app shell.
+
+
 ## Delivered owner follow-up — 2026-11-24
 
 0.23.1 delivered from5442167; native run45400731344 PASS28 WPF groups/6 real Windows cases.

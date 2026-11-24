@@ -4,6 +4,21 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.23.2 — 2026-11-24 (managed runtime recovery and guided installer steps)
+
+- Recover interrupted Windows activity locks using an OS mutex and live process creation
+  identity. Repeated launch reopens the authenticated running GUI; uninstall closes that
+  instance before removal. Label the launcher console EwP Transcripts.
+- Default managed output to the installation's outputs folder, with a private user fallback
+  for protected locations. Save after file additions/changes, debounce edits and retry at
+  most15 seconds later; preserve custom output folders and all outputs on removal.
+- Separate first installation into models/HF, optional OpenRouter key and installation steps.
+  Highlight missing required acknowledgments on attempted navigation; keep other flows shorter.
+- Add linked OpenRouter account/credits/workspace/key-limit guidance and a red token/password
+  reminder. Refuse updating to the identical installed version; Repair remains available.
+- Reserve progress text/metric space, show an overall stage bar and count completed downloads
+  across dependencies and models. Keep per-file byte/rate/ETA progress without invented totals.
+
 ## 0.23.1 — 2026-11-24 (workspace recovery and visible maintenance completion)
 
 - Preserve unplanned multi-track selections through automatic/manual saves and restart. Restore

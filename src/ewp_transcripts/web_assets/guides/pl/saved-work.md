@@ -11,6 +11,8 @@ Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
 
 Wybierz katalog wyników przed pracą. Puste pole opcjonalnego katalogu zapisów umieszcza NOWE pliki stanu pracy w katalogu wyników. Możesz wybrać inny katalog zapisów i kopii zapasowych. Aktualizacja wybranego starszego zapisu zachowuje jego faktyczny katalog. Wiersz pliku zapisu pokazuje rzeczywistą ścieżkę manifestu. Serwer lokalnie pamięta dostępne ostatnie lokalizacje wyników i zapisów. Lista odświeża się przy otwarciu sekcji. Zapamiętanie katalogów nie uruchamia pracy i nie przywraca zgód.
 
+Instalacja zarządzana domyślnie wypełnia katalog wyników folderem `outputs` obok programu. Przy chronionej instalacji używa zapisywalnego folderu użytkownika. Możesz pozostawić tę ścieżkę albo wskazać inną; poprzedni własny wybór ma pierwszeństwo. Dodanie plików uruchamia zapis od razu po wyborze, a inne zmiany zapisują się po krótkiej pauzie. Dodatkowa kontrola działa co15 sekund.
+
 ## 2. Zapisz bieżący stan pracy
 
 Pozostaw proponowaną nazwę `zadanie + data i czas` albo wprowadź własną, unikalną nazwę i zapisz bieżący stan. Zmienione szkice źródła i tłumaczenia są najpierw zapisywane. Nowe nazwy plików zaczynają się nazwą i kończą `--<UUID>.workspace.json`. Znaki niedozwolone w nazwach Windows są zastępowane; polskie litery mogą pozostać. Nie trzeba rozpoznawać zapisu po samym UUID.
