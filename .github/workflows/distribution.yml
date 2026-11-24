@@ -10,6 +10,10 @@ on:
       - 'tools/build_setup.py'
       - 'tools/prepare_distribution_tools.py'
       - 'src/ewp_transcripts/_version.py'
+      - 'src/ewp_transcripts/web_assets/**'
+      - 'src/ewp_transcripts/web_server.py'
+      - 'src/ewp_transcripts/web_workspaces.py'
+      - 'src/ewp_transcripts/web_recovery.py'
 permissions:
   contents: read
 jobs:
