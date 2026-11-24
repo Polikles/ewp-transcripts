@@ -54,7 +54,8 @@ with sync_playwright() as playwright:
         page.locator("#workflow input[type=file]").set_input_files(sources)
         page.wait_for_function(
             "()=>selectedGuiAudio.length===2 && !workspaceAutosaveBusy"
-            " && workspaceFingerprint()===lastWorkspaceFingerprint"
+            " && workspaceFingerprint()===lastWorkspaceFingerprint",
+            timeout=5000,
         )
         manifest = next(outputs.glob("*.workspace.json"))
         saved = json.loads(manifest.read_text())

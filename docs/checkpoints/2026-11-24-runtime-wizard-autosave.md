@@ -66,3 +66,31 @@ including healthy/orphan reopen and old PID-only launcher stop through the real 
 Before final packaging, align uninstall phase order with its preview→shutdown→removal events,
 clear completed requirement feedback immediately and remove remaining obsolete EN removal prose.
 No candidate has been delivered; final source-native artifact verification follows.
+
+## Final verified delivery
+
+Product source05cebd12fcf42d3eae42aa4fc4736bd14241bce3; final native run45436776960 SUCCESS.
+32 WPF coverage groups and12 actual Windows cases PASS. All32 final native previews inspected,
+including missing-HF acknowledgment highlighting and separate EN/PL OpenRouter screens.
+Six delivery hashes exactly match native-tested CI. Canonical directory:
+`/home/linuch/project-ewp/deliveries/ewp-0.23.2-installers/` (EXE, six packages/scripts, SHA256SUMS,
+preview.html/ZIP, focused checklist, Polish START-HERE and content-free browser/CI evidence).
+EXE SHA256 `fca0830d6ed218949a0818e268561e6cda44a9e6b72e0bfa64d1a131a5be3976`.
+Evidence is `2026-11-24-runtime-wizard-autosave-evidence.json`.
+
+Local1146 PASS/12 native skips (17 integrations included), Ruff/format/mypy PASS, WPF compiles
+without warnings/errors. Browser verifies untouched outputs, two synchronized unplanned sources,
+change-aware save BEFORE a5-second deadline (independent of the15-second fallback), fresh-browser
+and actual server restart without planning/processing/consent. Actual production RPC rejects
+wrong Host/token and supports authenticated ping/clean close. Reviewed-copy browser check passes
+2221 reference rows/102 changed-copy checks and36 layouts without page errors/external requests.
+Installer copy reference has177 pairs; application owner baseline/workbook stays unchanged.
+Affected EN/PL guides match their packaged offline counterparts.
+
+Owner0.23.1 installation-report completion and removal/work-state pass are retained alongside
+previous install/transcription/update passes. No owner0.23.2 acceptance is claimed yet. Next is
+only focused retest in START-HERE/checklist, not a repeated full ASR/reinstall/paid/model campaign.
+Later parity across local/API model choices is recorded, not implemented. Full installer EN/PL/
+notices review and native Windows interface retain the owner's sequencing. Unsigned/internal;
+public release/online bootstrap activation remain separate pending actions. All sent baselines
+and artist archives remain intact. Disposable local test/build directories are cleaned at handoff.

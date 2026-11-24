@@ -4,13 +4,18 @@ Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
 
-**Active2026-11-24 / target0.23.2:** next owner feedback authorizes runtime stale-lock/reopen/stop,
-default outputs and reliable change-aware saves, operation-specific five-step first install,
-required-check feedback, token help, stable/overall progress and same-version update blocking.
-Read opening TODO and [checkpoint](docs/checkpoints/2026-11-24-runtime-wizard-autosave.md).
-Owner confirms0.23.1 program removal/work-state preservation. Later local/OpenRouter model parity
-is TODO only. Internal old installers may now be cleaned; artist archives remain preserved.
-
+**Delivered0.23.2 —2026-11-24:** OS-lifetime Windows locking/creation identity, same-instance
+browser reopening and authenticated/verified legacy shutdown before uninstall; default outputs
+and change-aware saving; first-install models/HF→OpenRouter→installation pages; required-check
+feedback, stable metrics/overall progress and equal-version update refusal. Product source05cebd1,
+final native run45436776960 PASS:32 WPF groups/12 actual Windows cases;1146 local tests/17
+integrations, source-copy/layout browser checks and32 inspected previews. Six local hashes match
+native-tested CI. Files: `/home/linuch/project-ewp/deliveries/ewp-0.23.2-installers/`.
+Follow [checkpoint](docs/checkpoints/2026-11-24-runtime-wizard-autosave.md) and its evidence.
+Await focused owner0.23.2 feedback. No new build/model/paid/artist campaign merely after resume.
+Later: local/OpenRouter model parity (feasibility first), complete installer EN/PL/notices review,
+then native Windows app interface after installer closure. Internal old candidates cleaned1.4GiB;
+sent baselines/artist archives retained. EXE unsigned; public release/bootstrap activation pending.
 
 **Delivered0.23.1 — 2026-11-24:** multi-file pre-plan autosave/manual recovery without startup
 planning; dated task defaults and planning gear; installer model/version/rollback/help/log/report

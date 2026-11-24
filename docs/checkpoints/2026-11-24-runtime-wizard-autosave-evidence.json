@@ -1,0 +1,134 @@
+{
+  "version": "0.23.2",
+  "source_commit": "05cebd12fcf42d3eae42aa4fc4736bd14241bce3",
+  "ci_run": 45436776960,
+  "ci_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45436776960",
+  "ci_conclusion": "success",
+  "ci_artifacts": [
+    {
+      "id": 14942330690,
+      "name": "installer-test-package",
+      "digest": "sha256:db02c7d3dc3deed95903e8a4d4883213d3f5dff0f6b1863beea6da8a69f007fb"
+    },
+    {
+      "id": 14940044990,
+      "name": "native-windows-startup-evidence",
+      "digest": "sha256:2e1adeea1529eaaeb970ff32939ed948efcf71c4461b4269f8e23a3093fe64be"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "EwP-0.23.2-windows-x64.zip",
+      "sha256": "0c93c01a972af4f329bfcd175d94d92395bcaf0fe64e55058134cd56a7c0d4f7"
+    },
+    {
+      "name": "EwP-0.23.2-ubuntu-x64.zip",
+      "sha256": "41b62c688dda5b2a2d766fc39f872ca12a58e8ecfc6b99fcc35f6008daeeabab"
+    },
+    {
+      "name": "EwP-Setup-0.23.2.exe",
+      "sha256": "fca0830d6ed218949a0818e268561e6cda44a9e6b72e0bfa64d1a131a5be3976"
+    },
+    {
+      "name": "EwP-0.23.2-ubuntu-x64.tar.gz",
+      "sha256": "825d346a74404577492fe70d1df957984ed137fa41a545b2d24acae82b3145df"
+    },
+    {
+      "name": "Install-EwP-0.23.2.ps1",
+      "sha256": "ff09b59615bd3cb5ffda05bde24f3bfa1d2e67efb44f6fbecade5f9568da9a07"
+    },
+    {
+      "name": "Install-EwP-0.23.2.sh",
+      "sha256": "f7426d8147207c8efa3fa1c3567d10e6b5512a487d48de5b2e5d394e97ee2a4e"
+    }
+  ],
+  "checks": {
+    "python_passed": 1146,
+    "python_native_skips_on_linux": 12,
+    "integration_passed": 17,
+    "native_windows_cases_passed": 12,
+    "wpf_coverage_groups": 32,
+    "native_previews_visually_inspected": 32,
+    "application_reference_rows": 2221,
+    "browser_locale_layout_cases": 36,
+    "picker_save_test_deadline_ms": 5000,
+    "provider_calls": 0,
+    "models_downloaded": 0
+  },
+  "owner_native_acceptance": "0.22.2 installation/desktop/transcription,0.23.0 update/version and0.23.1 installation report/removal/work-state acceptance retained; focused0.23.2 review pending",
+  "delivery_directory": "/home/linuch/project-ewp/deliveries/ewp-0.23.2-installers",
+  "installer_copy_pairs": 177,
+  "preview_zip_sha256": "98e186b1887617192c6f733ea52b4ef6ffc76500d17ff00c28def6ff095c4c7a",
+  "browser_default_outputs": {
+    "result": "PASS",
+    "cases": [
+      "managed default outputs with no folder selection",
+      "two tracks saved immediately after upload",
+      "change-aware save without timer wait",
+      "fresh browser recovery",
+      "no planning or processing or upload consent"
+    ],
+    "page_errors": [],
+    "external_requests": [],
+    "unexpected_planning_or_staging": [],
+    "provider_calls": 0
+  },
+  "browser_server_restart": {
+    "result": "PASS",
+    "cases": [
+      "managed default outputs with no folder selection",
+      "two tracks saved immediately after upload",
+      "change-aware save without timer wait",
+      "fresh browser recovery",
+      "no planning or processing or upload consent",
+      "actual server restart"
+    ],
+    "page_errors": [],
+    "external_requests": [],
+    "unexpected_planning_or_staging": [],
+    "provider_calls": 0
+  },
+  "browser_change_aware_before_fallback": {
+    "result": "PASS",
+    "cases": [
+      "managed default outputs with no folder selection",
+      "two tracks saved immediately after upload",
+      "change-aware save without timer wait",
+      "fresh browser recovery",
+      "no planning or processing or upload consent"
+    ],
+    "page_errors": [],
+    "external_requests": [],
+    "unexpected_planning_or_staging": [],
+    "provider_calls": 0
+  },
+  "runtime_control": {
+    "result": "PASS",
+    "cases": [
+      "wrong token rejected",
+      "wrong Host rejected",
+      "authenticated ping",
+      "authenticated graceful shutdown"
+    ],
+    "provider_calls": 0
+  },
+  "browser_copy": {
+    "reference_rows": 2221,
+    "owner_changed_rows": 106,
+    "exact_copy_checked": 102,
+    "dynamic_templates_checked": 2,
+    "quick_guides_checked": 2,
+    "derived_quick_guides_checked": 1,
+    "help_chrome_checked": 4,
+    "locale_roundtrips": 4,
+    "layout_cases": 36,
+    "page_errors": [],
+    "external_requests": [],
+    "real_provider_calls": 0
+  },
+  "cleanup": {
+    "obsolete_internal_candidates_removed_approx_gib": 1.4,
+    "sent_baselines_retained": true,
+    "artist_archives_retained": true
+  }
+}

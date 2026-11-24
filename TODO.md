@@ -1,33 +1,37 @@
 # Immediate work queue
 
-## Active0.23.1 feedback — target0.23.2,2026-11-24
+## Delivered0.23.2 follow-up —2026-11-24
 
 Owner confirms uninstall removes program files and preserves work-state. Keep that pass.
 See `docs/checkpoints/2026-11-24-runtime-wizard-autosave.md`. No paid/model campaign.
 
-- [ ] Read new installation report privately; preserve previous accepted application behavior.
-- [ ] Recover stale Windows locks after terminal closure/reboot/PID reuse, with kernel lifetime
+- [x] Read new installation report privately; preserve previous accepted application behavior.
+- [x] Recover stale Windows locks after terminal closure/reboot/PID reuse, with kernel lifetime
       locking and reliable process identity; never terminate unrelated processes.
-- [ ] Reopen the existing verified GUI in the browser on repeated desktop launch. Give the
+- [x] Reopen the existing verified GUI in the browser on repeated desktop launch. Give the
       console the title EwP Transcripts. Uninstaller stops its verified running app before removal.
-- [ ] Default managed output folder is installation-root/outputs (private fallback for protected
+- [x] Default managed output folder is installation-root/outputs (private fallback for protected
       installations); remember explicit custom paths and preserve outputs on removal.
-- [ ] Change-aware nonblocking workspace saving, picker-before-output persistence and shorter
+- [x] Change-aware nonblocking workspace saving, picker-before-output persistence and shorter
       fallback/editor intervals. Verify immediate file additions, full restart and no auto-plan.
-- [ ] Installer missing required checks highlight when Next is attempted. Keep blocked navigation
+- [x] Installer missing required checks highlight when Next is attempted. Keep blocked navigation
       visually clear while allowing click feedback; cover HF terms and other operation gates.
-- [ ] First install has separate step4 OpenRouter key and step5 Installation. Other operations
+- [x] First install has separate step4 OpenRouter key and step5 Installation. Other operations
       use their own number of steps. OR help links inline like HF, with account/credits/workspace/
       restricted-key instructions; BOTH token help windows say in red Treat tokens like passwords.
-- [ ] Fixed progress text layout and overall phase/item counter/bar alongside current download
+- [x] Fixed progress text layout and overall phase/item counter/bar alongside current download
       progress; no invented byte totals or ETA. Update cannot run on identical installed version.
-- [ ] Native WPF/filesystem checks, focused synthetic browser restart/persistence verification,
+- [x] Native WPF/filesystem checks, focused synthetic browser restart/persistence verification,
       updated affected EN/PL help/reference and distinct immutable delivery.
-- [ ] Clean unneeded internal installers/build caches under current owner authorization. Retain
+- [x] Clean unneeded internal installers/build caches under current owner authorization. Retain
       useful accepted baselines, manifests and artist archives; full installer/notices review later.
 - [ ] LATER: local options matching ASR models available via OpenRouter, for local/cloud function
       parity. Research hardware/licensing/runtime feasibility then; no model addition/download now.
 
+
+- [ ] Owner focused0.23.2 retest: reopen after browser/terminal closure, default-output
+      two-track persistence, missing-check feedback, five-step first install and removal.
+      Automated checks PASS; no repeated paid/model/transcription campaign is needed.
 
 ## Delivered 0.23.1 owner follow-up — 2026-11-24
 
@@ -56,8 +60,8 @@ See `docs/checkpoints/2026-11-24-workspace-uninstall-followup.md`.
       only the running uninstaller/helper may delete itself after window closure. Preserve work-state.
 - [x] Focused synthetic browser restart, filesystem/integration and native Windows lifecycle/UI
       checks; distinct test version and immutable verified delivery; maintain affected EN/PL docs.
-- [ ] Owner focused0.23.1 workspace/startup/model/rollback/uninstall retest; automated checks
-      pass, no repeated full transcription or paid/model campaign needed.
+- [x] Owner0.23.1 feedback received; confirmed removal/work-state pass retained. Remaining
+      corrections and focused acceptance are promoted to0.23.2 above.
 - [ ] Deferred until copy review: shorten disk-space prose. Native Windows app interface remains
       after installer closure; no new paid/model campaign or artist-archive changes.
 

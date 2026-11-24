@@ -1,13 +1,14 @@
 # AGENTS.md
 
-## Active runtime/wizard follow-up —2026-11-24
+## Delivered runtime/wizard follow-up —2026-11-24
 
-Latest owner feedback supersedes the wait: execute opening TODO and runtime-wizard-autosave
-checkpoint as0.23.2. Keep confirmed0.23.1 removal/work-state pass. Runtime identity/locks/reopen/
-uninstall stop, default outputs/change-aware saves and installer steps/check/progress are active.
-Owner allows removal of obsolete installers; retain useful baselines/artist archives. Local/API
-model parity is LATER TODO only. No paid/model campaign, full notices/copy audit or native app shell.
-
+0.23.2 delivered from05cebd1, native run45436776960 PASS32 WPF groups/12 real Windows cases.
+1146 local tests/17 integrations, default-output/change-aware browser/full restart/RPC checks,
+36 layout checks and32 inspected previews; six local hashes match CI. Follow opening TODO/status
+and runtime-wizard-autosave checkpoint/evidence. Await focused owner0.23.2 feedback; no new build,
+paid/model campaign or artist work merely after resume. Local/OpenRouter model parity is LATER
+TODO only. Full installer/notices copy review and native app shell remain after functional closure.
+Owner permitted old installer cleanup:1.4GiB internal candidates removed; sent baselines/artists kept.
 
 ## Delivered owner follow-up — 2026-11-24
 
