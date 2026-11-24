@@ -1,5 +1,35 @@
 # Immediate work queue
 
+## Active 0.23.0 owner feedback — 2026-11-24, follow-up
+
+Owner confirms update succeeded and About shows0.23.0. Preserve that pass; registration had
+already been removed, so selecting the remaining managed root manually was expected.
+See `docs/checkpoints/2026-11-24-workspace-uninstall-followup.md`.
+
+- [x] Read three new home-directory setup reports; retain private reports outside Git.
+- [x] Save browser-selected media before any planning, both explicit save and automatic recovery.
+- [x] Restore selections/settings only; never automatically run planning on load/restart.
+- [x] Automatic saves must work from startup with empty display-name input; localized gray
+      task/datecode default (zadanie/task), unique usable fallback name and reliable recovery.
+- [x] Show moving gear beside batch Planning x/y; keep existing progress/consent safeguards.
+- [x] Remove the two reported project-comment paragraphs from readable notices; preserve rights
+      and legitimate attribution. Later: review all notices/user-facing technical commentary.
+- [x] HF help links inline in numbered steps; only detailed-procedure and credits links below.
+- [x] Keep technical-log expansion across update/repair progress rerenders; report save defaults
+      to current user's Desktop and handles write errors without crashing.
+- [x] Eliminate intermittent nested batch-job prompt from desktop launch; inspect launcher chain.
+- [x] Add-model help/version diagnostics distinguish older/newer installer and block mismatch.
+- [x] Installed model checkboxes disabled by default; explicit reinstall-selected switch enables
+      selective repeat downloads and gated-token UI. Run diagnostics automatically after models/repair.
+- [x] Rollback displays verified target version(s), excludes same-version repairs, allows choice
+      when multiple older releases exist, and blocks when older files are unavailable.
+- [x] Remove program/dependencies and desktop/registry entries BEFORE reporting uninstall complete;
+      only the running uninstaller/helper may delete itself after window closure. Preserve work-state.
+- [ ] Focused synthetic browser restart, filesystem/integration and native Windows lifecycle/UI
+      checks; distinct test version and immutable verified delivery; maintain affected EN/PL docs.
+- [ ] Deferred until copy review: shorten disk-space prose. Native Windows app interface remains
+      after installer closure; no new paid/model campaign or artist-archive changes.
+
 Updated: 2026-11-24. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
 

@@ -23,12 +23,12 @@ sealed partial class Wizard
         try
         {
             locationChange?.Cancel(); stateEpoch++;
-            operation = value; page = 0; notice = progressStage = "";
+            operation = value; rollbackTarget = null; page = 0; notice = progressStage = "";
             host = installed = removal = null;
             hostReady = hostAttempted = previewReady = finished = successful = false;
             hfSecret = orSecret = ""; hfValid = orValid = false;
             terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = false;
-            log.Clear(); ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
+            log.Clear(); logExpanded = false; ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
             detected = value == "install" ? null : FindInstallation(preferredMaintenanceRoot, value == "uninstall");
             manualLocation = detected == null;
             root.Text = value == "install" ? InstallationDiscovery.DefaultRoot : detected?.Root ?? "";

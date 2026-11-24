@@ -7,9 +7,10 @@ namespace EwP.Setup;
 
 sealed partial class Wizard
 {
-    bool maintenance, localMaintenance, repairModels;
+    bool maintenance, localMaintenance, repairModels, reinstallModels;
     JsonElement? modelVerification;
     readonly HashSet<string> selectedModels = [];
+    internal Func<ModelEntry, long> ModelMissingBytes = model => model.MissingBytes();
     IEnumerable<string> VisibleOperations => localMaintenance ? ["repair", "uninstall"] : maintenance ? ["repair", "rollback", "uninstall"] : operations;
     bool PreparingModels => operation == "install" && LocalSelected || operation == "models" || repairModels || operation == "update" && UpdateChangesModels;
     bool UpdateChangesModels => operation == "update" && LocalSelected && installed is JsonElement state &&
@@ -20,7 +21,7 @@ sealed partial class Wizard
         catch { return ""; }
     }
     IEnumerable<ModelEntry> DownloadModels => catalog.Models.Where(m =>
-        (operation is "install" or "update" || selectedModels.Contains(m.Code)) && (repairModels || m.MissingBytes() > 0));
+        (operation is "install" or "update" || selectedModels.Contains(m.Code)) && (repairModels || reinstallModels || ModelMissingBytes(m) > 0));
     bool NeedsHf => PreparingModels && DownloadModels.Any(m => m.Gated);
     bool ModelsCanContinue => !PreparingModels ||
         ((!NeedsHf || hfValid && terms.IsChecked == true) && ModelSpaceProblem() == null &&
@@ -28,8 +29,8 @@ sealed partial class Wizard
 
     void ResetModelState()
     {
-        repairModels = false; modelVerification = null; selectedModels.Clear();
-        foreach (var model in catalog.Models.Where(m => m.MissingBytes() > 0)) selectedModels.Add(model.Code);
+        repairModels = reinstallModels = false; modelVerification = null; selectedModels.Clear();
+        foreach (var model in catalog.Models.Where(m => ModelMissingBytes(m) > 0)) selectedModels.Add(model.Code);
     }
 
     async void ChooseFolder()
@@ -39,7 +40,7 @@ sealed partial class Wizard
         manualLocation = true;
         root.Text = operation == "install" ? InstallFolderFromPicker(picker.FolderName) : picker.FolderName;
         locationChange?.Cancel(); ReadInstalled(); Render();
-        if (operation is "repair" or "models" && LocationProblem() == null) await CheckHost();
+        if (operation is "repair" or "models" && installed != null) await CheckHost();
     }
 
     void RenderModels()
@@ -71,18 +72,25 @@ sealed partial class Wizard
         }
         if (PreparingModels)
         {
+            if (operation == "models")
+            {
+                var reinstall = new CheckBox { Content = T("Reinstall selected models", "Zainstaluj ponownie wybrane modele"), IsChecked = reinstallModels, Margin = new Thickness(0, 6, 0, 10) };
+                reinstall.Checked += (_, _) => { reinstallModels = true; Render(); };
+                reinstall.Unchecked += (_, _) => { reinstallModels = false; foreach (var model in catalog.Models.Where(m => ModelMissingBytes(m) == 0)) selectedModels.Remove(model.Code); Render(); };
+                body.Children.Add(reinstall);
+            }
             var list = new StackPanel();
             foreach (var model in catalog.Models)
             {
                 bool selectable = operation == "models" || repairModels;
-                var box = new CheckBox { IsChecked = selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable,
-                    Content = new TextBlock { Text = model.Repository + (model.MissingBytes() == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
+                var box = new CheckBox { IsChecked = selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable && (operation != "models" || reinstallModels || ModelMissingBytes(model) > 0),
+                    Content = new TextBlock { Text = model.Repository + (ModelMissingBytes(model) == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
                 box.Checked += (_, _) => { selectedModels.Add(model.Code); Render(); };
                 box.Unchecked += (_, _) => { selectedModels.Remove(model.Code); Render(); };
                 list.Children.Add(box);
             }
             body.Children.Add(Card(list));
-            body.Children.Add(Copy(T("Required space for selected downloads: ", "Potrzebne miejsce na wybrane modele: ") + GB(DownloadModels.Sum(m => repairModels ? m.Bytes : m.MissingBytes())) + " GB", muted: true));
+            body.Children.Add(Copy(T("Required space for selected downloads: ", "Potrzebne miejsce na wybrane modele: ") + GB(DownloadModels.Sum(m => repairModels || reinstallModels ? m.Bytes : ModelMissingBytes(m))) + " GB", muted: true));
             if (NeedsHf)
             {
                 var row = new StackPanel { Orientation = Orientation.Horizontal };

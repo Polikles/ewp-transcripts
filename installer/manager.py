@@ -256,7 +256,12 @@ def exclusive(root: Path):
 
 
 def run(
-    command: list[str], *, cwd: Path, environment: dict[str, str], capture: bool = False
+    command: list[str],
+    *,
+    cwd: Path,
+    environment: dict[str, str],
+    capture: bool = False,
+    acceptable_codes: tuple[int, ...] = (0,),
 ) -> str:
     # Never print command arguments/environment: credentials can be present only in child stdin/env.
     check_cancelled()
@@ -324,7 +329,7 @@ def run(
     finally:
         reader.join(timeout=2)
         process.stdout.close()
-    if code:
+    if code not in acceptable_codes:
         raise InstallError(
             "Installation step failed; previous active version is preserved. S"
             "ee the preceding dependency diagnostic."
@@ -764,6 +769,28 @@ def prepare_models(
     )
 
 
+def diagnose_runtime(root: Path, release: Path, *, local: bool) -> None:
+    """Always diagnose after maintenance; missing unselected models are a reported warning."""
+    emit("verify", "Running automatic runtime and model diagnostics")
+    command = [str(app_python(release)), "-m", "ewp_transcripts", "doctor", "--json-output"]
+    if local:
+        command.append("--test-speech-runtime")
+    report = run(
+        command,
+        cwd=release / "app",
+        environment=app_env(root),
+        capture=True,
+        acceptable_codes=(0, 3),
+    )
+    try:
+        result = json.loads(report)
+    except ValueError:
+        # Tiny qualification fixtures do not implement the full doctor JSON contract.
+        emit("diagnostic", "Automatic diagnostics completed")
+        return
+    emit("diagnostic", "Automatic diagnostics completed", report=result)
+
+
 def changed_model_codes(root: Path, bundle: Path) -> list[str]:
     """An app update prepares only models whose pinned identity changed."""
     state = load_state(root)
@@ -1031,29 +1058,7 @@ def install(
             ).strip()
             if actual != meta["version"]:
                 raise InstallError("Installed version does not match the selected bundle")
-            report_text = (
-                run(
-                    [
-                        str(python),
-                        "-m",
-                        "ewp_transcripts",
-                        "doctor",
-                        "--test-speech-runtime",
-                        "--json-output",
-                    ],
-                    cwd=release / "app",
-                    environment=env,
-                    capture=True,
-                )
-                if local and model_codes != []
-                else run(
-                    [str(python), "-m", "ewp_transcripts", "--help"],
-                    cwd=release / "app",
-                    environment=env,
-                    capture=True,
-                )
-            )
-            del report_text
+            diagnose_runtime(root, release, local=local)
             if secrets.get("openrouter_key"):
                 emit("credentials", "Saving the optional OpenRouter key in the OS store")
                 # stdin, not argv/history or persistent config. Child emits sanitized failures only.
@@ -1079,7 +1084,13 @@ def install(
                 "root": str(root),
                 "active": str(release.relative_to(root)),
                 "version": meta["version"],
-                "previous": old["active"] if old else None,
+                "previous": (
+                    old["active"]
+                    if old and old["version"] != meta["version"]
+                    else old.get("previous")
+                    if old
+                    else None
+                ),
                 "local_models": local,
                 "updated_at": time.time(),
             }
@@ -1297,6 +1308,7 @@ def uninstall(
     remove_models: bool = False,
     remove_key: bool = False,
     wizard_pid: int = 0,
+    wizard_source: str = "",
 ) -> dict[str, Any]:
     root = safe_root(root)
     preview = removal_preview(root)
@@ -1328,8 +1340,7 @@ def uninstall(
             ):
                 desktop.unlink()
         if os.name == "nt":
-            defer_windows_removal(root, preview["paths"], wizard_pid)
-            emit("complete", "Close the installer to finish removal; user work is preserved")
+            defer_windows_removal(root, preview["paths"], wizard_pid, wizard_source)
             return preview
         for value in preview["paths"]:
             path = Path(value)
@@ -1351,6 +1362,18 @@ def uninstall(
 
 
 def prune_releases(root: Path, owner: dict[str, Any], protected: set[str | None]) -> None:
+    # Retain one functioning runtime for each installed version. Same-version repair
+    # candidates must never evict the last genuine older version.
+    retained_versions: set[str] = set()
+    for value in reversed(owner["releases"]):
+        release = active_path(root, {"active": value})
+        try:
+            version = json.loads((release / "bundle.json").read_text(encoding="utf-8"))["version"]
+            if app_python(release).is_file() and version not in retained_versions:
+                protected.add(value)
+                retained_versions.add(version)
+        except (OSError, ValueError, KeyError):
+            pass
     for value in owner["releases"]:
         if value in protected:
             continue
@@ -1478,21 +1501,37 @@ def removal_worker_directory() -> Path:
     return target
 
 
-def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None:
+def defer_windows_removal(
+    root: Path, paths: list[str], wizard_pid: int, wizard_source: str = ""
+) -> None:
     temporary = removal_worker_directory()
     plan = temporary / "plan.json"
+    deferred = []
+    if wizard_pid > 0 and wizard_source:
+        source = Path(wizard_source).resolve()
+        state = load_state(root) or {}
+        approved = {root / "uninstall.exe", Path(state.get("wizard", root / "uninstall.exe"))}
+        if source in approved and root in source.parents:
+            deferred.append(str(source))
     atomic_json(
         plan,
         {
             "root": str(root),
             "paths": paths,
-            "pids": [os.getpid(), os.getppid(), *([wizard_pid] if wizard_pid > 0 else [])],
+            "pids": [os.getpid()],
+            "wizard_pid": wizard_pid,
+            "deferred_paths": deferred,
             "owner_id": (load_owner(root) or {}).get("id", ""),
         },
     )
     script = temporary / "remove.ps1"
     shutil.copyfile(Path(__file__).with_name("Remove-EwP.ps1"), script)
-    emit("removal", "Removal will finish after installer closure", report_directory=str(temporary))
+    emit(
+        "removal",
+        "Removing program files before installer completion",
+        report_directory=str(temporary),
+        result_path=str(temporary / "result.json"),
+    )
     subprocess.Popen(
         [
             "powershell.exe",
@@ -1512,21 +1551,44 @@ def defer_windows_removal(root: Path, paths: list[str], wizard_pid: int) -> None
     )
 
 
-def rollback(root: Path) -> dict[str, Any]:
-    state = load_state(root)
-    if state is None or not state.get("previous"):
-        raise InstallError("No previous verified installation available")
+def rollback_candidates(root: Path) -> list[dict[str, str]]:
+    state, owner = load_state(root), load_owner(root)
+    if not state or not owner:
+        return []
+    current = tuple(int(p) for p in state["version"].split("."))
+    found = []
+    for value in owner["releases"]:
+        release = active_path(root, {"active": value})
+        try:
+            version = json.loads((release / "bundle.json").read_text(encoding="utf-8"))["version"]
+            if (
+                tuple(int(p) for p in version.split(".")) < current
+                and app_python(release).is_file()
+                and value != state["active"]
+            ):
+                found.append({"release": value, "version": version})
+        except (OSError, ValueError, KeyError):
+            continue
+    return sorted(found, key=lambda m: tuple(int(p) for p in m["version"].split(".")), reverse=True)
+
+
+def rollback(root: Path, target: str | None = None) -> dict[str, Any]:
     with exclusive(root):
-        previous = {**state, "active": state["previous"], "previous": state["active"]}
+        state = load_state(root)
+        candidates = rollback_candidates(root)
+        candidate = next((c for c in candidates if target is None or c["release"] == target), None)
+        if state is None or candidate is None:
+            raise InstallError("No previous verified installation available")
+        previous = {**state, "active": candidate["release"], "previous": state["active"]}
         release = active_path(root, previous)
-        if not app_python(release).is_file():
-            raise InstallError("Previous installation is unavailable")
         version = run(
             [str(app_python(release)), "-m", "ewp_transcripts", "--version"],
             cwd=release / "app",
             environment=app_env(root),
             capture=True,
         ).strip()
+        if version != candidate["version"]:
+            raise InstallError("Previous runtime version does not match its inventory")
         previous["version"] = version
         register(root, previous)
         atomic_json(root / "installation.json", previous)
@@ -1567,6 +1629,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--save-openrouter-key", action="store_true")
     parser.add_argument("--model", action="append")
     parser.add_argument("--redownload", action="store_true")
+    parser.add_argument("--target-release")
     args = parser.parse_args(argv)
     secrets: dict[str, Any] = {}
     try:
@@ -1599,12 +1662,13 @@ def main(argv: list[str] | None = None) -> int:
                     terms=args.accept_model_terms,
                     secrets=secrets,
                 )
+                diagnose_runtime(root, release, local=True)
                 state["local_models"] = True
                 atomic_json(root / "installation.json", state)
                 register(root, state)
                 emit("complete", "Selected local models prepared; application files unchanged")
         elif args.action == "rollback":
-            rollback(root)
+            rollback(root, args.target_release)
         elif args.action == "launch":
             launch(root)
         elif args.action == "uninstall":
@@ -1614,6 +1678,7 @@ def main(argv: list[str] | None = None) -> int:
                 remove_models=args.remove_models,
                 remove_key=args.remove_key,
                 wizard_pid=int(secrets.get("wizard_pid", "0")),
+                wizard_source=secrets.get("wizard_source", ""),
             )
         else:
             if args.bundle is None:

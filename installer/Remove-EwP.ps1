@@ -32,11 +32,25 @@ if(!$Plan){
 }
 $p=Get-Content -Encoding UTF8 -LiteralPath $Plan -Raw|ConvertFrom-Json
 $errorsFound=[Collections.Generic.List[string]]::new()
+$deferred=@($p.deferred_paths)
+$resultPath=Join-Path $PSScriptRoot 'result.json'
+$progressPath=Join-Path $PSScriptRoot 'progress.jsonl'
+$utf8=[Text.UTF8Encoding]::new($false)
+function Publish-Event([string]$Stage,[string]$Message){
+ $event=@{time=[DateTimeOffset]::UtcNow.ToString('o');stage=$Stage;message=$Message}|ConvertTo-Json -Compress
+ [IO.File]::AppendAllText($progressPath,$event+[Environment]::NewLine,$utf8)
+}
+function Publish-Result([int]$Code,[string]$Message){
+ $result=@{exit_code=$Code;message=$Message;deferred_paths=$deferred}|ConvertTo-Json -Compress
+ [IO.File]::WriteAllText($resultPath+'.tmp',$result,$utf8)
+ Move-Item -LiteralPath ($resultPath+'.tmp') -Destination $resultPath -Force
+}
 function Assert-NotLinked([string]$Path){
  if((Get-Item -LiteralPath $Path -Force).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Linked removal target preserved'}
 }
 function Remove-OwnedTree([string]$Path){
  if(!(Test-Path -LiteralPath $Path)){return}
+ if($deferred -contains [IO.Path]::GetFullPath($Path)){return}
  $item=Get-Item -LiteralPath $Path -Force
  if($item.Attributes -band [IO.FileAttributes]::ReparsePoint){
   if($item.PSIsContainer){[IO.Directory]::Delete($Path,$false)}else{[IO.File]::Delete($Path)}
@@ -44,8 +58,10 @@ function Remove-OwnedTree([string]$Path){
  }
  if($item.PSIsContainer){
   foreach($child in [IO.Directory]::EnumerateFileSystemEntries($Path)){Remove-OwnedTree $child}
-  [IO.File]::SetAttributes($Path,[IO.FileAttributes]::Directory)
-  [IO.Directory]::Delete($Path)
+  if(!@([IO.Directory]::EnumerateFileSystemEntries($Path)).Count){
+   [IO.File]::SetAttributes($Path,[IO.FileAttributes]::Directory)
+   [IO.Directory]::Delete($Path)
+  }
  }else{
   # uv dependency caches/venvs contain read-only hardlinks. Clear attributes before deletion.
   [IO.File]::SetAttributes($Path,[IO.FileAttributes]::Normal)
@@ -72,6 +88,7 @@ try {
   while($ancestor -and $ancestor.Length -ge $prefix.TrimEnd('\').Length){Assert-NotLinked $ancestor;$ancestor=[IO.Path]::GetDirectoryName($ancestor)}
  }
  foreach($target in $p.paths){
+  Publish-Event 'removal' ('Removing: '+[IO.Path]::GetFileName($target))
   if([IO.Path]::GetFileName($target) -eq 'owner.json'){continue}
   $removed=$false
   for($attempt=0;$attempt -lt 4 -and !$removed;$attempt++){
@@ -91,9 +108,23 @@ try {
   if($s.TargetPath -eq (Join-Path $p.root 'EwP.cmd') -or $s.Arguments -eq ('-NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $p.root 'launch.ps1')+'"')){Remove-Item -LiteralPath $shortcut -Force}
  }
  if((Test-Path -LiteralPath $p.root) -and !@([IO.Directory]::EnumerateFileSystemEntries($p.root)).Count){[IO.Directory]::Delete($p.root)}
+ Publish-Event 'complete' 'Application removed; original recordings, outputs and user state preserved'
+ Publish-Result 0 'Application removed'
+ # The adapter acknowledges receipt before temporary reports are cleaned up.
+ $deadline=[DateTime]::UtcNow.AddMinutes(2)
+ while(!(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'ack')) -and [DateTime]::UtcNow -lt $deadline){Start-Sleep -Milliseconds 100}
+ if($p.wizard_pid -gt 0){Wait-Process -Id $p.wizard_pid -ErrorAction SilentlyContinue}
+ # Only the running maintenance EXE and empty containing directories remain at this point.
+ $cleanup=$deferred
+ $deferred=@()
+ foreach($target in $cleanup){Remove-OwnedTree $target}
+ Remove-EmptyOwnedDirectories (Join-Path $p.root 'wizards')
+ if((Test-Path -LiteralPath $p.root) -and !@([IO.Directory]::EnumerateFileSystemEntries($p.root)).Count){[IO.Directory]::Delete($p.root)}
  Remove-Item -LiteralPath $PSScriptRoot -Recurse -Force
 } catch {
  $stamp=[DateTimeOffset]::UtcNow.ToString('o')
  @($stamp,$_.Exception.GetType().FullName,$errorsFound) | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'removal-error.txt')
+ Publish-Event 'error' 'Some program files could not be removed. The removal report was preserved.'
+ Publish-Result 2 'Program removal incomplete'
  exit 2
 }

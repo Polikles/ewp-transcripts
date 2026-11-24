@@ -3,7 +3,7 @@
 Use the numbered steps below with the matching GUI stage.
 
 1. Choose output root and catalog: Leave the optional catalog blank to store new saved-work JSON files in the output directory, or choose a separate catalog for saves and backups.
-2. Save current work state: Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.
+2. Save current work state: Save current work state before stopping. A task name with a date and time is suggested; a custom name is optional. Dirty review drafts are checkpointed first.
 3. Load saved work: The list refreshes when this stage opens. The last work state loads automatically; select and load a different workspace when needed. Re-enter or explicitly load provider credentials; upload consent stays unchecked.
 4. Inspect cleanup before deleting: Refresh the managed-source inventory and read retention reasons before any explicit cleanup.
 
@@ -13,9 +13,9 @@ Choose the output root before working. An empty optional work-storage directory 
 
 ## 2. Save current work state
 
-Enter a recognizable unique workspace name and Save current work state. Dirty source/translation drafts are checkpointed first. New filenames begin with the name and end with `--<UUID>.workspace.json`. Windows-forbidden filename characters are replaced; Polish letters can remain. Do not identify a workspace only by its UUID.
+Leave the suggested `task + date/time` name or enter your own unique name, then Save current work state. Dirty source/translation drafts are checkpointed first. New filenames begin with the name and end with `--<UUID>.workspace.json`. Windows-forbidden filename characters are replaced; Polish letters can remain. Do not identify a workspace only by its UUID.
 
-The loaded name is filled automatically and locked against accidental renaming. Updating it saves the same workspace. Save as a new workspace requires another name and keeps the original. A duplicate name in known catalogs is rejected; case, surrounding whitespace and equivalent Unicode spellings do not create distinct names. An empty/duplicate name highlights the field.
+A custom loaded name is filled automatically and locked against accidental renaming. The suggested default appears in gray and can be replaced. Updating it saves the same workspace. Save as a new workspace requires another name and keeps the original. A duplicate name in known catalogs is rejected; case, surrounding whitespace and equivalent Unicode spellings do not create distinct names. An empty field uses the suggested name; a duplicate custom name highlights the field.
 
 Auto-save starts enabled and saves tracked changes and dirty review drafts within a few seconds.
 The last active work state loads automatically after startup, including in a fresh browser.
@@ -35,7 +35,7 @@ after installer acceptance.
 
 Select a listed workspace and Load selected work state, or open its manifest file. The progress overlay reports loaded/total jobs while checking paths, sources and editors. Wait for completion. Completed, failed and cancelled jobs are restored, along with staged jobs and their per-file options. Interrupted work is never silently resumed. Retry is explicit and starts from the beginning.
 
-Pending files that were planned but not queued are retained in new saves and replanned on load. Review and confirm the refreshed plan before Add to queue. Selecting the same named file with the same content again does not duplicate it. Distinct content may need a distinct recording ID. Older saves without durable pending-selection metadata may require selecting the original files again.
+Selected files are retained even before planning, including multiple speaker tracks for one episode. Loading restores files and settings without planning. Click Plan processing explicitly, then review and confirm the plan before Add to queue. Selecting the same named file with the same content again does not duplicate it. Distinct content may need a distinct recording ID. Older saves without durable pending-selection metadata may require selecting the original files again.
 
 Credentials and upload/manual-verification checkboxes are excluded. Re-enter or explicitly load the OpenRouter key if the server no longer has one, then give fresh cloud consent. A key still present in the same server process is independent of loading work. Missing paths remain a recovery issue; a saved manifest is not an embedded copy of every file.
 

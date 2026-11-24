@@ -4,6 +4,21 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.23.1 — 2026-11-24 (workspace recovery and visible maintenance completion)
+
+- Preserve unplanned multi-track selections through automatic/manual saves and restart. Restore
+  inputs without planning or starting work; use a localized date-coded default workspace name.
+- Show the animated gear beside planning progress. Keep installer technical details open,
+  simplify HF help links, and default setup reports to the current user's Desktop.
+- Require matching program/installer versions for model addition; protect installed model
+  checkboxes until explicit reinstall. Run diagnostics automatically after repair/downloads.
+- Retain distinct older runtimes through same-version repairs and select the actual rollback
+  version; block rollback when older files are unavailable.
+- Complete Windows program/shortcut removal before displaying success, deferring only the
+  running maintenance EXE's own deletion. Launch from the wizard without a batch wrapper.
+- Remove internal asset-provenance commentary from user-facing notices. Broader notices and
+  installer EN/PL copy reviews remain scheduled after functional installer closure.
+
 ## 0.23.0 — 2026-11-24 (installer lifecycle and automatic recovery)
 
 - Separate program updates/repairs from explicit selective model verification/downloads; reuse

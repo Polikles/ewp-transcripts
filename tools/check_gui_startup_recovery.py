@@ -21,12 +21,22 @@ assert urlsplit(args.url).hostname in ("localhost", "127.0.0.1")
 base = args.output
 base.mkdir(parents=True, exist_ok=True)
 errors = []
+allow_planning = False
+planning_gears = []
 external = []
 with sync_playwright() as p:
     browser = p.chromium.launch()
     context = browser.new_context()
     page = context.new_page()
     page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on(
+        "request",
+        lambda r: (
+            errors.append("Unexpected automatic planning")
+            if r.url.endswith("/api/v1/dry-run") and not allow_planning
+            else None
+        ),
+    )
     page.route(
         "**/*",
         lambda r: (
@@ -42,7 +52,7 @@ with sync_playwright() as p:
     )
     if args.recover:
         expect(page.locator("#output-path")).to_have_value(str(args.fixture_root / "output"))
-        assert page.evaluate("selectedGuiAudio.length") == 1
+        assert page.evaluate("selectedGuiAudio.length") == 2
         assert not page.locator("#cloud-asr-confirmed").is_checked()
         (base / "server-restart-report.json").write_text(
             json.dumps(
@@ -82,21 +92,38 @@ with sync_playwright() as p:
         timeout=15000,
     )
     initial = page.evaluate("activeWorkspaceId")
-    page.locator("#workflow input[type=file]").set_input_files(args.fixture_root / "episode.wav")
-    page.wait_for_function("()=>selectedGuiAudio.length===1")
+    sources = [args.fixture_root / "episode-left.wav", args.fixture_root / "episode-right.wav"]
+    for source in sources:
+        source.write_bytes((args.fixture_root / "episode.wav").read_bytes())
+    page.locator("#workflow input[type=file]").set_input_files(sources)
+    page.wait_for_function("()=>selectedGuiAudio.length===2")
     page.wait_for_function(
         "()=>!workspaceAutosaveBusy && workspaceFingerprint()===lastWorkspaceFingerprint",
         timeout=15000,
     )
     checkpoint = next(output.glob("*.workspace.json"))
     data = json.loads(checkpoint.read_text())
-    assert data["pending_media"], data
+    assert len(data["pending_media"]) == 2, data
+    assert page.evaluate("guiAudioEpisodes().length") == 1
+    assert page.evaluate("guiBatchPlan === null")
+    # Explicit Save with the empty/default name must preserve both unplanned sources too.
+    page.evaluate("workspaceName.value = ''")
+    page.evaluate("document.querySelector('#save-workspace').click()")
+    expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
     assert not any(k in str(data) for k in ("api_key", "hf_token", "cloud-asr-confirmed"))
     # Fresh browser context: no browser local/session storage can supply this recovery.
     context.close()
     context = browser.new_context()
     page = context.new_page()
     page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on(
+        "request",
+        lambda r: (
+            errors.append("Unexpected automatic planning")
+            if r.url.endswith("/api/v1/dry-run") and not allow_planning
+            else None
+        ),
+    )
     page.route(
         "**/*",
         lambda r: (
@@ -112,11 +139,45 @@ with sync_playwright() as p:
         timeout=20000,
     )
     assert page.locator("#output-path").input_value() == str(output)
-    assert page.evaluate("selectedGuiAudio.length") == 1
+    assert page.evaluate("selectedGuiAudio.length") == 2
     assert page.evaluate('guiQueueJobs.every(job=>job.status!=="running")')
     assert not page.locator("#cloud-asr-confirmed").is_checked()
     page.screenshot(path=str(base / "startup-recovered.png"), full_page=True)
     print("Fresh-context pending media/output recovery PASS")
+    assert page.evaluate("guiBatchPlan === null")
+    assert page.locator("#workspace-name").input_value() == ""
+    assert page.locator("#workspace-name").get_attribute("placeholder").startswith("task ")
+    page.locator("#gui-locale").select_option("pl")
+    expect(page.locator("#workspace-name")).to_have_attribute(
+        "placeholder", __import__("re").compile(r"zadanie \d{4}-")
+    )
+    page.locator("#gui-locale").select_option("en")
+
+    def planning_route(route):
+        planning_gears.append(
+            page.evaluate(
+                "document.querySelector('#operation-status').classList.contains('gui-status-working')"
+                " && getComputedStyle(document.querySelector('#operation-status'),'::before')"
+                ".backgroundImage.includes('gear.svg')"
+            )
+        )
+        route.continue_()
+
+    page.route("**/api/v1/dry-run", planning_route)
+    allow_planning = True
+    page.evaluate(
+        "void runGuiBatch('dry-run',document.querySelector('#workflow button[value=dry-run]'))"
+    )
+    page.wait_for_function("()=>!guiBatchBusy && guiBatchPlan !== null")
+    assert planning_gears == [True], planning_gears
+    page.evaluate("document.querySelector('#save-workspace').click()")
+    expect(page.locator("#workspace-status")).to_contain_text("Workspace saved:")
+    allow_planning = False
+    page.reload()
+    page.wait_for_function("()=>automaticRecoveryReady && !workspaceRestoreBusy")
+    assert page.evaluate("selectedGuiAudio.length === 2 && guiBatchPlan === null")
+    assert not errors, errors
+
     # An unavailable last checkpoint must survive; manually choosing a good one re-enables saving.
     missing = args.fixture_root / "missing-reference.txt"
     missing.write_text("synthetic reference")
@@ -131,6 +192,14 @@ with sync_playwright() as p:
     context = browser.new_context()
     page = context.new_page()
     page.on("pageerror", lambda e: errors.append(str(e)))
+    page.on(
+        "request",
+        lambda r: (
+            errors.append("Unexpected automatic planning")
+            if r.url.endswith("/api/v1/dry-run") and not allow_planning
+            else None
+        ),
+    )
     page.goto(args.url)
     expect(page.locator("#workspace-autosave-status")).to_contain_text(
         "The last work state is unavailable"

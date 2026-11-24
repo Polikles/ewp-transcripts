@@ -400,7 +400,7 @@ def test_dead_lock_is_recovered_and_unknown_or_live_owner_is_protected(tmp_path,
     assert lock.exists()
 
 
-def test_obsolete_releases_are_pruned_but_added_project_files_remain(tmp_path, lifecycle):
+def test_distinct_rollback_versions_and_added_project_files_remain(tmp_path, lifecycle):
     root, _ = lifecycle
     first = install(root, bundle(tmp_path, "1.0.0"))
     work = root / first["active"] / "app/my_publication.txt"
@@ -408,7 +408,7 @@ def test_obsolete_releases_are_pruned_but_added_project_files_remain(tmp_path, l
     install(root, bundle(tmp_path, "1.1.0"))
     install(root, bundle(tmp_path, "1.2.0"))
     assert work.read_text() == "keep"
-    assert not manager.app_python(root / first["active"]).exists()
+    assert manager.app_python(root / first["active"]).exists()
     preview = manager.removal_preview(root)
     assert any(work.is_relative_to(root / p) for p in preview["preserved_unknown"])
     manager.uninstall(root, confirmed=True)
@@ -573,7 +573,8 @@ def test_deferred_windows_removal_releases_worker_pipes_and_keeps_unicode_plan(
     manager.defer_windows_removal(root, [str(root / "runtime")], 4321)
     plan = json.loads((temporary / "plan.json").read_text(encoding="utf-8"))
     assert plan["root"] == str(root)
-    assert 4321 in plan["pids"]
+    assert 4321 not in plan["pids"]
+    assert plan["wizard_pid"] == 4321
     for stream in ("stdin", "stdout", "stderr"):
         assert captured[stream] == manager.subprocess.DEVNULL
     assert "-Encoding UTF8" in (temporary / "remove.ps1").read_text(encoding="utf-8")
@@ -894,3 +895,31 @@ def test_windows_lock_state_cannot_redirect_elevated_writes_via_directory_link(t
     with pytest.raises(manager.InstallError, match="links or junctions"):
         manager.lifecycle_lock_path(tmp_path / "program", windows=True, local_app_data=profile)
     assert not list(other.iterdir())
+
+
+def test_same_version_repair_retains_real_older_versions_and_selected_rollback(tmp_path, lifecycle):
+    root, _ = lifecycle
+    first = install(root, bundle(tmp_path, "1.0.0"))
+    install(root, bundle(tmp_path, "1.1.0"))
+    updated = install(root, bundle(tmp_path, "1.2.0"))
+    repaired = install(root, bundle(tmp_path, "1.2.0"))
+    assert repaired["previous"] == updated["previous"]
+    assert {c["version"] for c in manager.rollback_candidates(root)} == {"1.0.0", "1.1.0"}
+    with pytest.raises(manager.InstallError, match="No previous"):
+        manager.rollback(root, repaired["active"])
+    assert manager.rollback(root, first["active"])["version"] == "1.0.0"
+    assert not manager.rollback_candidates(root)
+    with pytest.raises(manager.InstallError, match="No previous"):
+        manager.rollback(root)
+
+
+def test_model_maintenance_runs_doctor_automatically_after_preparation(
+    tmp_path, lifecycle, monkeypatch
+):
+    root, _ = lifecycle
+    install(root, bundle(tmp_path, "1.0.0"))
+    events = []
+    monkeypatch.setattr(manager, "prepare_models", lambda *a, **kw: events.append("models"))
+    monkeypatch.setattr(manager, "diagnose_runtime", lambda *a, **kw: events.append("doctor"))
+    assert manager.main(["models", "--root", str(root), "--model", "alignment_en"]) == 0
+    assert events == ["models", "doctor"]

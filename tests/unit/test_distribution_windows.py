@@ -34,10 +34,11 @@ def native_target():
 
 
 @pytest.mark.parametrize(
-    ("preserve_work", "broken_python"), [(False, False), (True, False), (False, True)]
+    ("preserve_work", "broken_python", "live_wizard"),
+    [(False, False, False), (True, False, False), (False, True, False), (True, False, True)],
 )
 def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
-    tmp_path, preserve_work, broken_python
+    tmp_path, preserve_work, broken_python, live_wizard
 ):
     """Real PS adapter, managed Python, deferred worker and read-only uv-style dependencies."""
     root = tmp_path / "Żółć installation"
@@ -74,22 +75,88 @@ def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
     )
     if preserve_work:
         (root / "recording.wav").write_bytes(b"private work must remain")
-    result = subprocess.run(
-        [
-            "powershell.exe",
-            "-NoProfile",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-File",
-            str(root / "Remove-EwP.ps1"),
-            "-Yes",
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=60,
-    )
-    assert result.returncode == 0, result.stdout + result.stderr
+    blocker = None
+    wizard = root / "wizards/test/EwP-Setup.exe"
+    if live_wizard:
+        wizard.parent.mkdir(parents=True)
+        wizard.write_bytes(b"synthetic maintenance image")
+        state = manager.load_state(root)
+        state["wizard"] = str(wizard)
+        manager.atomic_json(root / "installation.json", state)
+        shutil.copyfile(ROOT / "installer/windows/EwP.ico", root / "EwP.ico")
+        manager.register(root, state)
+        (root / "work-state").mkdir()
+        (root / "work-state/session.json").write_text("private recovery preserved")
+        ready = tmp_path / "lock-ready"
+        blocker = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                "import sys,time;from pathlib import Path;f=open(sys.argv[1],'rb');"
+                "Path(sys.argv[2]).touch();time.sleep(90)",
+                str(wizard),
+                str(ready),
+            ]
+        )
+        deadline = time.monotonic() + 10
+        while not ready.exists() and time.monotonic() < deadline:
+            time.sleep(0.05)
+        assert ready.exists()
+    arguments = [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        str(root / ("Install-EwP.ps1" if live_wizard else "Remove-EwP.ps1")),
+        "-Yes",
+    ]
+    if live_wizard:
+        arguments += ["-Action", "uninstall", "-SecretsStdin"]
+    try:
+        result = subprocess.run(
+            arguments,
+            input=json.dumps({"wizard_pid": blocker.pid, "wizard_source": str(wizard)}) + "\n"
+            if blocker
+            else None,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        # The adapter reports success while the simulated wizard still owns its EXE.
+        assert not (root / "tools").exists()
+        assert not (root / "versions").exists()
+        assert not (root / "installation.json").exists()
+        if blocker:
+            assert blocker.poll() is None and wizard.exists()
+            import winreg
+
+            with pytest.raises(FileNotFoundError):
+                winreg.OpenKey(
+                    winreg.HKEY_CURRENT_USER,
+                    r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts",
+                )
+            desktop = subprocess.check_output(
+                [
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-Command",
+                    "[Environment]::GetFolderPath('Desktop')",
+                ],
+                text=True,
+            ).strip()
+            assert not (Path(desktop) / "EwP Transcripts.lnk").exists()
+            assert set(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()) == {
+                "wizards/test/EwP-Setup.exe",
+                "recording.wav",
+                "work-state/session.json",
+            }
+    finally:
+        if blocker:
+            blocker.terminate()
+            blocker.wait(timeout=10)
     events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
     report = next(e["report_directory"] for e in events if e.get("stage") == "removal")
     deadline = time.monotonic() + 45

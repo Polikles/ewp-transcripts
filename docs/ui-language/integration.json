@@ -1238,5 +1238,15 @@
     "guide_changes": [
       "guide.saved.steps.2.text"
     ]
-  }
+  },
+  "followups": [
+    {
+      "date": "2026-11-24",
+      "version": "0.23.1",
+      "id": "guide.saved.steps.1.text",
+      "reason": "Owner requests default task/date name; no name required to save.",
+      "en": "Save current work state before stopping. A task name with a date and time is suggested; a custom name is optional. Dirty review drafts are checkpointed first.",
+      "pl": "Zapisz bieżący stan pracy przed zatrzymaniem programu. Domyślna nazwa zadania zawiera datę i czas; własna nazwa jest opcjonalna. Zmienione szkice są najpierw zapisywane."
+    }
+  ]
 }

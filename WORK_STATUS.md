@@ -4,6 +4,12 @@ Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
 
+**Active follow-up2026-11-24:** owner passes0.23.0 update/version. Fix pre-plan multi-file
+save/recovery and unwanted startup planning, default task names, visible planning activity,
+installer model/rollback/help/log/report behavior, launch chain and pre-close uninstall cleanup.
+Follow opening TODO and [checkpoint](docs/checkpoints/2026-11-24-workspace-uninstall-followup.md).
+Disk prose/full notices review and native app shell retain the owner's later sequencing.
+
 **Delivered0.23.0 — 2026-11-24:** installer lifecycle/startup feedback implemented and verified.
 Actual artifact source `5edfc1d`; final Windows run45372295246 PASS (25 WPF groups/5 real native
 cases). Local1135 passed/5 native-only skips; integration17. All27 native previews inspected and

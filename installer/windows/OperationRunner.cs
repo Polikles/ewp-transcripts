@@ -13,7 +13,7 @@ namespace EwP.Setup;
 
 sealed record OperationRequest(string Operation, string Root, bool Confirm, bool Local, bool Terms,
     bool RemoveModels, bool RemoveKey, string HfToken, string OpenRouterKey, string WizardSource,
-    int WizardPid, string CancelFile, string[]? Models = null, bool Redownload = false);
+    int WizardPid, string CancelFile, string[]? Models = null, bool Redownload = false, string? RollbackTarget = null);
 
 static class OperationRunner
 {
@@ -82,6 +82,7 @@ static class OperationRunner
         if (request.Terms) info.ArgumentList.Add("-AcceptModelTerms");
         if (request.Models is { Length: > 0 }) { info.ArgumentList.Add("-Models"); info.ArgumentList.Add(string.Join(",", request.Models)); }
         if (request.Redownload) info.ArgumentList.Add("-Redownload");
+        if (request.RollbackTarget != null) { info.ArgumentList.Add("-TargetRelease"); info.ArgumentList.Add(request.RollbackTarget); }
         if (request.RemoveModels && request.Operation == "uninstall") info.ArgumentList.Add("-RemoveModels");
         if (request.RemoveKey && request.Operation == "uninstall") info.ArgumentList.Add("-RemoveKey");
         foreach (string name in new[] { "PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP", "PYTHONUSERBASE", "VIRTUAL_ENV", "CONDA_PREFIX", "UV_CONFIG_FILE", "UV_INDEX_URL", "UV_EXTRA_INDEX_URL", "PIP_INDEX_URL", "PIP_EXTRA_INDEX_URL" }) info.Environment.Remove(name);

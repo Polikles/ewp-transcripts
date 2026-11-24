@@ -23,7 +23,8 @@ sealed partial class Wizard
         "readable lossless credits", "authenticated same-user permission broker",
         "app-only update and repair without credentials", "selective gated model recovery",
         "restricted installed maintenance entry points", "measured download progress and report timestamps",
-        "visible information hover/focus feedback",
+        "visible information hover/focus feedback", "persistent technical log expansion",
+        "disabled installed models and explicit reinstall", "real older-version rollback selection",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -124,6 +125,24 @@ sealed partial class Wizard
         SelectOperation("models"); page = 2; SetFixtureHost(); selectedModels.Clear(); selectedModels.Add("asr"); Render(); UpdateLayout();
         Assert(!NeedsHf && !VisibleText((DependencyObject)Content).Contains("OpenRouter API"), "adding public models has no OR or gated prompt");
         await Capture(previews, "pl-add-public-model");
+        ModelMissingBytes = _ => 0; ResetModelState(); Render(); UpdateLayout();
+        Assert(!NeedsHf && !next.IsEnabled && selectedModels.Count == 0 && !DownloadModels.Any(), "installed models have no implicit selection/download/token");
+        Assert(FindVisual<CheckBox>(body).Count(c => !c.IsEnabled) == catalog.Models.Count, "installed model boxes are disabled");
+        await Capture(previews, "pl-models-already-installed");
+        reinstallModels = true; selectedModels.Add("diarization"); Render(); UpdateLayout();
+        Assert(NeedsHf && DownloadModels.Single().Code == "diarization", "explicit reinstall unlocks selected gated download");
+        await Capture(previews, "pl-models-explicit-reinstall");
+        ModelMissingBytes = model => model.MissingBytes();
+        SelectOperation("repair"); page = 3; busy = true; Render(); UpdateLayout();
+        var details = FindVisual<Expander>(body).Single(); details.IsExpanded = true;
+        progressStage = "dependencies"; Render(); UpdateLayout();
+        Assert(FindVisual<Expander>(body).Single().IsExpanded, "log stays open across progress rerender");
+        FindVisual<Expander>(body).Single().IsExpanded = false;
+        progressStage = "verify"; Render(); UpdateLayout();
+        Assert(!FindVisual<Expander>(body).Single().IsExpanded, "user can collapse log and keep it collapsed");
+        busy = false;
+        TestRollbackChoices(existing);
+
         maintenance = true; page = 0; operation = "uninstall"; Render();
         Assert(actionChoices.Count == 3 && actionChoices.All(c => new[] { "repair", "rollback", "uninstall" }.Contains(c.Tag?.ToString())), "installed-program panel limits maintenance");
         await Capture(previews, "pl-installed-program-maintenance");
@@ -237,6 +256,32 @@ sealed partial class Wizard
           {"code":"vc_runtime","status":"pass","context":{}}
         ]}
         """); host = fixture.RootElement.Clone();
+    }
+    static IEnumerable<T> FindVisual<T>(DependencyObject parent) where T : DependencyObject
+    {
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match) yield return match;
+            foreach (var nested in FindVisual<T>(child)) yield return nested;
+        }
+    }
+    void TestRollbackChoices(string existing)
+    {
+        string[] releases = ["versions/old-1", "versions/old-2", "versions/same", "versions/missing"];
+        File.WriteAllText(Path.Combine(existing, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = existing, releases }));
+        foreach (var (release, oldVersion) in new[] { (releases[0], "0.1.0"), (releases[1], "0.2.0"), (releases[2], version) })
+        {
+            string path = Path.Combine(existing, release); Directory.CreateDirectory(Path.Combine(path, "app/.venv/Scripts"));
+            File.WriteAllText(Path.Combine(path, "app/.venv/Scripts/python.exe"), "fixture only");
+            File.WriteAllText(Path.Combine(path, "bundle.json"), JsonSerializer.Serialize(new { version = oldVersion }));
+        }
+        SelectOperation("rollback"); page = 1; Render(); UpdateLayout();
+        Assert(RollbackChoices().Count == 2 && rollbackTarget == releases[1] && next.IsEnabled, "rollback lists only existing older runtimes and defaults newest");
+        var choice = FindVisual<ComboBox>(body).Single(); choice.SelectedIndex = 1;
+        Assert(rollbackTarget == releases[0], "rollback user selects exact version");
+        Directory.Delete(Path.Combine(existing, releases[0]), true); Directory.Delete(Path.Combine(existing, releases[1]), true);
+        Render(); Assert(!next.IsEnabled && LocationProblem() != null, "rollback blocked without older files");
     }
     string HostStrings() => host is JsonElement value ? string.Join("\n", value.GetProperty("checks").EnumerateArray().Select(HostText)) : "";
     static void Assert(bool condition, string name) { if (!condition) throw new InvalidDataException("Self-test failed: " + name); }

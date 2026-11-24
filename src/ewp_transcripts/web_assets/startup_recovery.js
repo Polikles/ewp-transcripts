@@ -2,7 +2,18 @@
 
 let automaticRecoveryReady = false;
 let automaticRecoveryTimer = null;
-const automaticRecoveryName = `Recovery ${new Date().toISOString().slice(0, 19).replaceAll(":", "-")} ${crypto.randomUUID().slice(0, 6)}`;
+let automaticRecoveryDatecode = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
+function defaultWorkspaceName() {
+  return `${document.documentElement.lang === "pl" ? "zadanie" : "task"} ${automaticRecoveryDatecode}`;
+}
+function displayWorkspaceName(name) {
+  const automatic = /^(task|zadanie) (\d{4}-.*)$/.exec(name);
+  if (automatic) { automaticRecoveryDatecode = automatic[2]; workspaceName.value = ""; updateDefaultWorkspaceName(); }
+  else workspaceName.value = name;
+}
+function updateDefaultWorkspaceName() { const name = defaultWorkspaceName(); if (workspaceName.placeholder !== name) workspaceName.placeholder = name; }
+updateDefaultWorkspaceName();
+new MutationObserver(updateDefaultWorkspaceName).observe(document.documentElement, {attributes:true, attributeFilter:["lang"]});
 
 async function initializeAutomaticRecovery() {
   if (automaticRecoveryReady || workspaceRestoreBusy) return;
@@ -15,7 +26,11 @@ async function initializeAutomaticRecovery() {
     if (latest) reference = {workspace_id:latest.dataset.workspaceId, storage_directory:latest.dataset.storageDirectory || ""};
   }
   if (workspaceFingerprint() !== initial || reviewDirty || translationReviewDirty || selectedGuiAudio.length) {
-    workspaceAutosaveStatus.textContent = "Startup recovery paused because current work changed. Save or load a workspace to continue.";
+    // New input takes precedence over recovery, but must still be auto-saved.
+    automaticRecoveryReady = true;
+    workspaceAutosave.checked = true;
+    workspaceAutosave.disabled = false;
+    await saveAutomaticWorkspace(true);
     return;
   }
   if (reference) {
@@ -48,18 +63,18 @@ async function saveAutomaticWorkspace(force = false) {
     if (translationReview && translationReviewDirty && !(await saveEnhancedTranslationReview()))
       throw new Error("GUI_WORKSPACE_REVIEW_SAVE_FAILED: The open translation draft could not be saved.");
     const storage = activeWorkspaceStorageDirectory || workspaceStorageDirectory();
-    const name = activeWorkspaceId ? workspaceName.value || automaticRecoveryName : automaticRecoveryName;
-    const media = JSON.stringify(collectPendingGuiMedia());
+    const name = workspaceName.value.trim() || defaultWorkspaceName();
+    const media = collectPendingGuiMedia();
     const payload = await workspacePost("/api/v1/workspaces/save", {
       workspace_id:activeWorkspaceId, name, current_step:lastWorkspaceStep,
-      fields:collectWorkspaceFields(), pending_media:collectPendingGuiMedia(), autosave:true,
+      fields:collectWorkspaceFields(), pending_media:media, autosave:true,
     }, {feedback:false, storageDirectory:storage});
     const saved = payload.workspace;
-    if (media === JSON.stringify(collectPendingGuiMedia()) && saved.pending_media?.length)
-      await restorePendingGuiMedia(saved.pending_media, {keepStaged:true});
-    workspaceName.value = saved.name;
+    const unchanged = fingerprint === workspaceFingerprint();
+    adoptSavedGuiMedia(saved.pending_media || [], media);
+    displayWorkspaceName(saved.name);
     activateWorkspace(saved, storage);
-    lastWorkspaceFingerprint = fingerprint;
+    lastWorkspaceFingerprint = unchanged ? workspaceFingerprint() : fingerprint;
     showWorkspaceFile(payload.workspace_file);
     await refreshWorkspaces(activeWorkspaceKey, {feedback:false});
     workspaceAutosaveStatus.textContent = "Auto-save completed. No credential, confirmation, or editor text was stored.";

@@ -333,8 +333,8 @@
           "pl": "Zapisz bieżący stan pracy"
         },
         "text": {
-          "en": "Name the workspace and Save current work state before stopping. Dirty review drafts are checkpointed first.",
-          "pl": "Nazwij obszar pracy i zapisz jego stan przed zatrzymaniem programu. Zmienione szkice są najpierw zapisywane."
+          "en": "Save current work state before stopping. A task name with a date and time is suggested; a custom name is optional. Dirty review drafts are checkpointed first.",
+          "pl": "Zapisz bieżący stan pracy przed zatrzymaniem programu. Domyślna nazwa zadania zawiera datę i czas; własna nazwa jest opcjonalna. Zmienione szkice są najpierw zapisywane."
         }
       },
       {

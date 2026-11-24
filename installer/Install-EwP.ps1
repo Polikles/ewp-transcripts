@@ -5,7 +5,7 @@ param(
  [string]$Root='',
  [string]$Bundle='', [string]$CancelFile='', [switch]$Local, [switch]$CloudOnly, [switch]$AcceptModelTerms, [switch]$Yes,
  [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin,
- [string]$Models='', [switch]$Redownload
+ [string]$Models='', [switch]$Redownload, [string]$TargetRelease=''
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -21,6 +21,7 @@ if($Bundle){$argsToManager+=@('--bundle',(Resolve-Path -LiteralPath $Bundle).Pat
 if($CancelFile){$argsToManager+=@('--cancel-file',$CancelFile)}
 foreach($model in $Models.Split(',',[StringSplitOptions]::RemoveEmptyEntries)){$argsToManager+=@('--model',$model)}
 if($Redownload){$argsToManager+='--redownload'}
+if($TargetRelease){$argsToManager+=@('--target-release',$TargetRelease)}
 foreach($pair in @(@($Local,'--local'),@($CloudOnly,'--cloud-only'),@($AcceptModelTerms,'--accept-model-terms'),@($Yes,'--yes'),@($RemoveModels,'--remove-models'),@($RemoveKey,'--remove-key'),@($SecretsStdin,'--secrets-stdin'),@($SaveOpenRouterKey,'--save-openrouter-key'))){if($pair[0]){$argsToManager+=$pair[1]}}
 $secretLine=if($SecretsStdin){[Console]::ReadLine()}else{$null}
 $statePath=Join-Path $Root 'installation.json'
@@ -38,21 +39,61 @@ if((Test-Path -LiteralPath $statePath) -and $Action -in @('uninstall','rollback'
   }
  }
 }
+# Native Python must exit before its managed runtime can be removed. The external
+# worker publishes completion while this adapter and the visible wizard stay alive.
+$script:removalDirectory=''
+function Invoke-ManagerProcess([string]$Executable,[string[]]$Arguments){
+ $lines={
+  process {
+   $line=[string]$_
+   try {
+    $event=$line|ConvertFrom-Json
+    if($event.stage -eq 'removal' -and $event.PSObject.Properties['result_path']){$script:removalDirectory=[IO.Path]::GetDirectoryName([string]$event.result_path)}
+   }catch{}
+   Write-Output $line
+  }
+ }
+ if($SecretsStdin){$secretLine | & $Executable @Arguments | & $lines}else{& $Executable @Arguments | & $lines}
+ $script:managerExitCode=$LASTEXITCODE
+}
+function Wait-RemovalResult {
+ if(!$script:removalDirectory -or $script:managerExitCode -ne 0){return}
+ $result=Join-Path $script:removalDirectory 'result.json'
+ $progress=Join-Path $script:removalDirectory 'progress.jsonl'
+ $seen=0
+ $deadline=[DateTime]::UtcNow.AddMinutes(30)
+ while($true){
+  if(Test-Path -LiteralPath $progress){
+   $events=@(Get-Content -Encoding UTF8 -LiteralPath $progress)
+   while($seen -lt $events.Count){Write-Output $events[$seen];$seen++}
+  }
+  if(Test-Path -LiteralPath $result){
+   $outcome=Get-Content -Encoding UTF8 -LiteralPath $result -Raw|ConvertFrom-Json
+   # Read the final events once more: completion may have arrived after the last poll.
+   $events=@(Get-Content -Encoding UTF8 -LiteralPath $progress)
+   while($seen -lt $events.Count){Write-Output $events[$seen];$seen++}
+   $script:managerExitCode=[int]$outcome.exit_code
+   Set-Content -LiteralPath (Join-Path $script:removalDirectory 'ack') -Value 'received'
+   return
+  }
+  if([DateTime]::UtcNow -gt $deadline){throw 'Program removal did not complete; see the external removal report.'}
+  Start-Sleep -Milliseconds 200
+ }
+}
 if($useInstalled){
- if($SecretsStdin){$secretLine | & $python @argsToManager}else{& $python @argsToManager}
+ Invoke-ManagerProcess -Executable $python -Arguments $argsToManager
+ Wait-RemovalResult
 }else{
  if(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'owner.json')){$uv=Join-Path $PSScriptRoot 'tools\uv.exe'}else{$uv=Join-Path (Split-Path -Parent $PSScriptRoot) 'tools\uv.exe'}
  if(!(Test-Path -LiteralPath $uv)){throw 'Extract the complete installer bundle; bundled uv.exe is missing.'}
- # Installer runtime is private, outside the destination so an empty-root guard is meaningful.
  $ownedRuntime=!$env:EWP_BOOTSTRAP_RUNTIME
  $runtime=if($ownedRuntime){Join-Path ([IO.Path]::GetTempPath()) ('ewp-bootstrap-'+[Guid]::NewGuid())}else{$env:EWP_BOOTSTRAP_RUNTIME}
  $env:UV_PYTHON_INSTALL_DIR=Join-Path $runtime 'python'
  $env:UV_CACHE_DIR=Join-Path $runtime 'cache'
  $env:UV_NO_CONFIG='1'
  $uvArgs=@('run','--no-project','--python','3.12','python')+$argsToManager
- try{if($SecretsStdin){$secretLine | & $uv @uvArgs}else{& $uv @uvArgs};$resultCode=$LASTEXITCODE}
+ try{Invoke-ManagerProcess -Executable $uv -Arguments $uvArgs; Wait-RemovalResult}
  finally{if($ownedRuntime -and (Test-Path -LiteralPath $runtime)){Remove-Item -LiteralPath $runtime -Recurse -Force}}
- exit $resultCode
 }
 $secretLine=$null
-exit $LASTEXITCODE
+exit $script:managerExitCode

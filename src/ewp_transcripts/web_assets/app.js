@@ -936,8 +936,28 @@ async function restorePendingGuiMedia(media,{keepStaged=false}={}) {
   activeGuiAudio=null;guiBatchPlan=null;
   document.querySelector("#operation-summary").replaceChildren();document.querySelector("#operation-result").textContent="";
   document.querySelector('#workflow input[name="confirmed"]').checked=false;
-  if(media?.length){selectGuiAudio(guiAudioEpisodes().find(episode=>!episode.files.some(file=>file.staged)),false);await runGuiBatch("dry-run",document.querySelector('#workflow button[value="dry-run"]'));}
+  if(media?.length)selectGuiAudio(guiAudioEpisodes().find(episode=>!episode.files.some(file=>file.staged)),false);
   else renderGuiAudioChoices();
+}
+
+function adoptSavedGuiMedia(saved, original) {
+  if (JSON.stringify(collectPendingGuiMedia()) !== JSON.stringify(original)) return;
+  const pending = selectedGuiAudio.filter(file => !file.staged);
+  if (saved.length !== pending.length) return;
+  const changedPaths = saved.some((media, index) => media.path !== pending[index].path);
+  saved.forEach((media, index) => {
+    const oldPath = pending[index].path;
+    Object.assign(pending[index], media);
+    if (pending[index].stream_index === null) delete pending[index].stream_index;
+    if (workflowInput.value === oldPath) workflowInput.value = media.path;
+  });
+  if (activeGuiAudio) activeGuiAudio.paths = activeGuiAudio.files.map(file => file.path);
+  // A saved source path can change; approval applies only to the exact planned paths.
+  if (changedPaths) {
+    guiBatchPlan = null;
+    document.querySelector('#workflow input[name="confirmed"]').checked = false;
+  }
+  renderGuiAudioChoices();
 }
 
 const workspaceAutosave = document.querySelector("#workspace-autosave");
@@ -1084,15 +1104,16 @@ cleanupManagedSourcesButton.addEventListener("click", async () => {
     managedSourcesStatus.textContent = `${payload.removed.length} unreferenced managed source cop${payload.removed.length === 1 ? "y" : "ies"} permanently deleted. Publication artifacts were not changed.`;
   } catch (error) { managedSourcesStatus.textContent = error.message; }
 });
-function updateWorkspaceSelectionControls(resetName = false) { const selectedWorkspace = selectedWorkspaceReference(); workspaceName.readOnly=Boolean(selectedWorkspace) && !/^Recovery \d{4}-/.test(workspaceList.selectedOptions[0]?.dataset.name || "");if(selectedWorkspace){if(resetName || workspaceName.readOnly || selectedWorkspace.key !== activeWorkspaceKey || !workspaceName.value.trim())workspaceName.value=workspaceList.selectedOptions[0].dataset.name || workspaceName.value;clearWorkspaceNameError();showWorkspaceFile(workspaceList.selectedOptions[0].dataset.workspaceFile);}else showWorkspaceFile(""); const available = selectedWorkspace && workspaceList.selectedOptions[0]?.dataset.available === "true"; loadWorkspaceButton.disabled = !available; loadWorkspaceButton.title = selectedWorkspace && !available ? "This saved workspace references unavailable paths. It can be removed or overwritten." : ""; deleteWorkspaceButton.disabled = !selectedWorkspace; workspaceAutosave.disabled = !available || workspaceList.value !== activeWorkspaceKey; if (workspaceAutosave.disabled) workspaceAutosaveStatus.textContent = "Auto-save inactive: load an available workspace first."; }
+function updateWorkspaceSelectionControls(resetName = false) { const selectedWorkspace = selectedWorkspaceReference(); workspaceName.readOnly=Boolean(selectedWorkspace) && !/^(Recovery|task|zadanie) \d{4}-/.test(workspaceList.selectedOptions[0]?.dataset.name || "");if(selectedWorkspace){if(resetName || workspaceName.readOnly || selectedWorkspace.key !== activeWorkspaceKey || !workspaceName.value.trim())displayWorkspaceName(workspaceList.selectedOptions[0].dataset.name || workspaceName.value);clearWorkspaceNameError();showWorkspaceFile(workspaceList.selectedOptions[0].dataset.workspaceFile);}else showWorkspaceFile(""); const available = selectedWorkspace && workspaceList.selectedOptions[0]?.dataset.available === "true"; loadWorkspaceButton.disabled = !available; loadWorkspaceButton.title = selectedWorkspace && !available ? "This saved workspace references unavailable paths. It can be removed or overwritten." : ""; deleteWorkspaceButton.disabled = !selectedWorkspace; workspaceAutosave.disabled = !available || workspaceList.value !== activeWorkspaceKey; if (workspaceAutosave.disabled) workspaceAutosaveStatus.textContent = "Auto-save inactive: load an available workspace first."; }
 async function refreshWorkspaces(selectedKey = "", options = {}) { const request=++workspaceListRequest,revision=workspaceSelectionRevision;const payload = await workspacePost("/api/v1/workspaces/list", {}, options);if(request!==workspaceListRequest)return;if(revision!==workspaceSelectionRevision)selectedKey=workspaceList.value;workspaceList.innerHTML = '<option value="">Save as a new workspace</option>'; for (const item of payload.workspaces) { const option = document.createElement("option"); option.value = workspaceKey(item.workspace_id, item.storage_directory); option.dataset.workspaceId = item.workspace_id; option.dataset.name=item.name;option.dataset.savedAt=item.saved_at;option.dataset.workspaceFile=item.workspace_file || ""; option.dataset.storageDirectory = item.storage_directory || ""; option.dataset.available = String(item.available); option.dataset.queueCount = String(item.queue_count || 0); option.textContent = `${item.name} · ${item.catalog} catalog · ${item.available ? "available" : "paths unavailable"} · ${new Date(item.saved_at).toLocaleString()}`; option.title = item.storage_directory || "Private default workspace catalog"; option.selected = option.value === selectedKey; workspaceList.append(option); } updateWorkspaceSelectionControls(); }
 document.querySelector("#refresh-workspaces").addEventListener("click", async () => { try { await refreshWorkspaces(workspaceList.value); workspaceStatus.textContent = "Saved workspace list refreshed."; } catch (error) { workspaceStatus.textContent = error.message; } });
 document.querySelector("#save-workspace").addEventListener("click", async () => {
-  if(!workspaceName.value.trim() || workspaceName.value.trim().length>100) {
+  if(workspaceName.value.trim().length>100) {
     workspaceName.classList.add("field-error");workspaceName.setAttribute("aria-invalid","true");workspaceName.setAttribute("aria-describedby","workspace-status");
     workspaceStatus.textContent="GUI_WORKSPACE_REQUEST_INVALID: Workspace name must contain 1 to 100 characters";workspaceName.focus({preventScroll:true});return;
   }
-  const requestedWorkspace=selectedWorkspaceReference(),requestedName=workspaceName.value.trim();
+  const requestedWorkspace=selectedWorkspaceReference(),requestedName=workspaceName.value.trim() || defaultWorkspaceName();
+  const pendingMedia = collectPendingGuiMedia();
   workspaceStatus.textContent = "Saving current work…";
   try {
     if (reviewDocument && reviewDirty) await saveReviewDraft();
@@ -1101,24 +1122,20 @@ document.querySelector("#save-workspace").addEventListener("click", async () => 
     }
     const selectedWorkspace = requestedWorkspace;
     const targetStorageDirectory = selectedWorkspace?.storageDirectory ?? workspaceStorageDirectory();
-    if(!selectedWorkspace && !targetStorageDirectory) {
-      workspaceDirectory.classList.add("field-error");workspaceDirectory.setAttribute("aria-invalid","true");workspaceDirectory.focus({preventScroll:true});
-      workspaceStatus.textContent="GUI_WORKSPACE_REQUEST_INVALID: Choose an output directory or a saved-work directory before saving.";return;
-    }
     const payload = await workspacePost("/api/v1/workspaces/save", {
       workspace_id: selectedWorkspace?.workspaceId || "", name: requestedName,
-      current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), pending_media:collectPendingGuiMedia(),
+      current_step: lastWorkspaceStep, fields: collectWorkspaceFields(), pending_media:pendingMedia,
     }, {storageDirectory: targetStorageDirectory});
     const saved = payload.workspace;
     showWorkspaceFile(payload.workspace_file);
-    if(saved.pending_media?.length)await restorePendingGuiMedia(saved.pending_media,{keepStaged:true});
+    adoptSavedGuiMedia(saved.pending_media || [], pendingMedia);
     for (const [id, value] of Object.entries(saved.fields)) {
       const element = document.getElementById(id);
       if (value === "" && element && element.type !== "checkbox") element.value = "";
     }
     const savedKey = workspaceKey(saved.workspace_id, targetStorageDirectory);
     await refreshWorkspaces(savedKey, {feedback: false});
-    workspaceName.value = saved.name;
+    displayWorkspaceName(saved.name);
     activateWorkspace(saved, targetStorageDirectory);
     const temporaryOmitted = payload.temporary_jobs_omitted || 0;
     const unavailableJobsOmitted = payload.unavailable_jobs_omitted || 0;

@@ -44,7 +44,7 @@ async function loadSelectedWorkspace() {
     await applyWorkspaceFields(payload.workspace.fields);
     await refreshJobs();
     await restorePendingGuiMedia(payload.workspace.pending_media);
-    workspaceName.value = payload.workspace.name;clearWorkspaceNameError();showWorkspaceFile(payload.workspace_file);
+    displayWorkspaceName(payload.workspace.name);clearWorkspaceNameError();showWorkspaceFile(payload.workspace_file);
     lastWorkspaceStep = payload.workspace.current_step || lastWorkspaceStep;
     activateWorkspace(payload.workspace, selected.storageDirectory);
     workspaceStatus.textContent = `Workspace loaded: ${payload.workspace.name}. Provider credentials and confirmations were not restored.`;

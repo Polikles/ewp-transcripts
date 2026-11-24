@@ -19,6 +19,7 @@ async function runGuiBatch(kind, trigger) {
   const form = document.querySelector("#workflow");
   if (!entries.length) return;
   guiBatchBusy = true;
+  status.classList.add("gui-status-working");
   const locked = [...form.querySelectorAll('input, select, button[type="reset"], .path-browser-button')].map(element=>[element, element.disabled]);
   locked.forEach(([element])=>{ element.disabled = true; });
   renderGuiAudioChoices(); setGuiWorking(true, trigger);
@@ -78,6 +79,6 @@ async function runGuiBatch(kind, trigger) {
   } finally {
     form.elements.confirmed.checked = false;
     locked.forEach(([element, disabled])=>{ element.disabled = disabled; });
-    guiBatchBusy = false; renderGuiAudioChoices(); setGuiWorking(false, trigger, succeeded);
+    guiBatchBusy = false; status.classList.remove("gui-status-working"); renderGuiAudioChoices(); setGuiWorking(false, trigger, succeeded);
   }
 }

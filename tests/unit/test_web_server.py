@@ -1706,3 +1706,37 @@ def test_save_preserves_pending_media_before_clearing_temporary_picker(tmp_path)
     Path(loaded.pending_media[0].path).write_bytes(b"changed")
     with pytest.raises(ValueError, match="pending source changed"):
         controller.load(saved.workspace_id)
+
+
+def test_pending_group_is_preserved_before_output_directory_selection(tmp_path):
+    from ewp_transcripts.web_workspaces import GuiWorkspaceController
+
+    selection = tmp_path / "picker"
+    selection.mkdir()
+    fields = {}
+    pending = []
+    for speaker in ("left", "right"):
+        source = selection / f"episode-{speaker}.wav"
+        source.write_bytes(f"selected {speaker}".encode())
+        pending.append({"path": str(source), "name": source.name})
+    controller = GuiWorkspaceController(
+        state_directory=tmp_path / "program/work-state/gui-workspaces",
+        resolve_path=GuiWorkflowController().resolve_allowed_path,
+        temporary_selection_root=selection,
+    )
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    handler.server = SimpleNamespace(
+        gui_workflows=GuiWorkflowController(),
+        gui_selections=SimpleNamespace(root=selection),
+        gui_workspaces=controller,
+    )
+    media = handler._preserve_workspace_media(pending, fields)
+    for source in selection.iterdir():
+        source.unlink()
+    saved = controller.save(
+        name="task", current_step="workspace-heading", fields=fields, pending_media=media
+    )
+    loaded = controller.load(saved.workspace_id)
+    assert len(loaded.pending_media) == 2
+    assert all(Path(item.path).is_file() for item in loaded.pending_media)
+    assert not loaded.staged_jobs and not fields

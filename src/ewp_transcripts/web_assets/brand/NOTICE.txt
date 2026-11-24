@@ -1,13 +1,1 @@
 EwP identity artwork: Cyryl. Rights holder: Damian Szczęch / Etyka w Pętli, https://etykawpetli.pl/. English: Damian Szczech / Ethics in the Loop, https://ethicsintheloop.eu/. Creator URL: unverified placeholder blogcyryla.pl; TODO replace when supplied. See LICENSE-ASSETS.txt. Fonts: Montserrat and Noto Sans Mono, included OFL notices. Icons: Lucide 1.71.0, included ISC notice. Assets copied unmodified from approved handoff 0.1.0 / brandbook 0.4.0.
-
-Additional owner-supplied asset — 2026-11-19
-gear.svg: supplied by the project owner as the EwP animated in-progress mark. Original bytes
-are packaged unchanged, including the asset's reduced-motion treatment. No additional artist
-credit or open asset license was supplied; do not invent one. The identity asset restrictions
-in LICENSE-ASSETS.txt continue to apply. EwP Brand® is the owner's visual-identity profile;
-Example default is a separate generic demonstration palette.
-
-Owner-requested favicon presentation — 2026-11-20
-favicon.svg places the original Cyryl logo geometry/colors on a light framed tile for readable
-browser chrome. The original logo.svg remains unchanged. This derived presentation was explicitly
-requested by the rights holder; it grants no general permission to modify identity artwork.

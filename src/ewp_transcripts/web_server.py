@@ -3043,11 +3043,11 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
             raise ValueError("Workspace pending media selection is invalid")
         if not items:
             return []
-        if not str(fields.get("output-path", "")).strip():
-            raise ValueError("Choose an output directory before saving pending media")
-        output = self.server.gui_workflows.resolve_allowed_path(
-            str(fields.get("output-path", "")), directory=True
+        # Recovery also covers files selected before choosing an output folder.
+        destination = str(fields.get("output-path", "")).strip() or str(
+            self.server.gui_workspaces.state_directory.parent / "pending-sources"
         )
+        output = self.server.gui_workflows.resolve_allowed_path(destination, directory=True)
         clean = []
         for raw in items:
             if not isinstance(raw, dict):

@@ -3,7 +3,7 @@
 Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
 
 1. Wybierz katalog wyników i zapisu: Pozostaw opcjonalny katalog pusty, aby zapisywać nowe pliki stanu pracy w katalogu wyników, lub wybierz osobny katalog zapisów i kopii zapasowych.
-2. Zapisz bieżący stan pracy: Nazwij obszar pracy i zapisz jego stan przed zatrzymaniem programu. Zmienione szkice są najpierw zapisywane.
+2. Zapisz bieżący stan pracy: Zapisz bieżący stan pracy przed zatrzymaniem programu. Domyślna nazwa zadania zawiera datę i czas; własna nazwa jest opcjonalna. Zmienione szkice są najpierw zapisywane.
 3. Wczytaj zapisaną pracę: Lista odświeża się przy otwarciu tej sekcji. Ostatni stan wczytuje się automatycznie; w razie potrzeby wybierz inny zapis i wczytaj go. Wprowadź lub jawnie wczytaj klucz dostawcy; zgoda na wysłanie pozostaje niezaznaczona.
 4. Sprawdź porządkowanie przed usunięciem: Odśwież spis zarządzanych źródeł i przeczytaj przyczyny zachowania plików przed jawnym porządkowaniem.
 
@@ -13,9 +13,9 @@ Wybierz katalog wyników przed pracą. Puste pole opcjonalnego katalogu zapisów
 
 ## 2. Zapisz bieżący stan pracy
 
-Wprowadź czytelną, unikalną nazwę obszaru i zapisz bieżący stan. Zmienione szkice źródła i tłumaczenia są najpierw zapisywane. Nowe nazwy plików zaczynają się nazwą i kończą `--<UUID>.workspace.json`. Znaki niedozwolone w nazwach Windows są zastępowane; polskie litery mogą pozostać. Nie trzeba rozpoznawać zapisu po samym UUID.
+Pozostaw proponowaną nazwę `zadanie + data i czas` albo wprowadź własną, unikalną nazwę i zapisz bieżący stan. Zmienione szkice źródła i tłumaczenia są najpierw zapisywane. Nowe nazwy plików zaczynają się nazwą i kończą `--<UUID>.workspace.json`. Znaki niedozwolone w nazwach Windows są zastępowane; polskie litery mogą pozostać. Nie trzeba rozpoznawać zapisu po samym UUID.
 
-Nazwa wczytanego obszaru wypełnia się automatycznie i jest chroniona przed przypadkową zmianą. Aktualizacja zapisuje ten sam obszar. Zapisz jako nowy obszar wymaga innej nazwy i zachowuje oryginał. Powtórzona nazwa w znanych katalogach jest odrzucana. Wielkość liter, spacje na brzegach i równoważne zapisy Unicode nie tworzą odrębnych nazw. Pusta lub zajęta nazwa podświetla pole.
+Własna nazwa wczytanego obszaru wypełnia się automatycznie i jest chroniona przed przypadkową zmianą. Nazwa domyślna jest wyszarzona i można ją zastąpić. Aktualizacja zapisuje ten sam obszar. Zapisz jako nowy obszar wymaga innej nazwy i zachowuje oryginał. Powtórzona nazwa w znanych katalogach jest odrzucana. Wielkość liter, spacje na brzegach i równoważne zapisy Unicode nie tworzą odrębnych nazw. Puste pole używa nazwy domyślnej; zajęta własna nazwa podświetla pole.
 
 Autozapis jest aktywny od uruchomienia i zapisuje zmiany oraz szkice edycji w ciągu kilku sekund.
 Ostatni aktywny stan pracy wczytuje się automatycznie, także w nowej sesji przeglądarki.
@@ -35,7 +35,7 @@ zaplanowany po odbiorze instalatora.
 
 Wybierz obszar z listy i wczytaj stan albo otwórz jego plik manifestu. Okno postępu pokazuje liczbę wczytanych i wszystkich zadań podczas sprawdzania ścieżek, źródeł i edytorów. Poczekaj do końca. Przywracane są zadania ukończone, nieudane i anulowane oraz oczekujące z indywidualnymi opcjami. Przerwane przetwarzanie nigdy nie wznawia się samo. Ponowienie jest jawne i rozpoczyna pracę od początku.
 
-Nowe zapisy przechowują również pliki zaplanowane, ale jeszcze niedodane do kolejki. Po wczytaniu program planuje je ponownie. Sprawdź i potwierdź odświeżony plan przed dodaniem. Ponowny wybór pliku o tej samej nazwie i treści nie tworzy duplikatu. Inna treść może wymagać odrębnego ID. Starsze zapisy bez trwałych danych wyboru mogą wymagać ponownego wskazania oryginałów.
+Nowe zapisy przechowują również pliki wybrane przed planowaniem, w tym wiele ścieżek mówców jednego odcinka. Wczytanie przywraca pliki i ustawienia bez planowania. Kliknij jawnie Zaplanuj przetwarzanie, a potem sprawdź i potwierdź plan przed dodaniem. Ponowny wybór pliku o tej samej nazwie i treści nie tworzy duplikatu. Inna treść może wymagać odrębnego ID. Starsze zapisy bez trwałych danych wyboru mogą wymagać ponownego wskazania oryginałów.
 
 Klucze i zgody na wysłanie lub ręczną weryfikację nie są zapisywane. Wprowadź albo jawnie wczytaj klucz OpenRouter, jeśli serwer już go nie ma, i zaznacz nową zgodę dla chmury. Klucz nadal obecny w tej samej sesji serwera jest niezależny od wczytania pracy. Brakujące ścieżki trzeba odtworzyć; sam manifest nie zawiera wszystkich plików.
 

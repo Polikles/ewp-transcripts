@@ -147,7 +147,7 @@ def main() -> None:
             force_download=args.force_download,
             tqdm_class=DownloadProgress,
         )
-    print("Pinned model preparation complete. Run transcriber doctor.")
+    print("Pinned model preparation complete.")
 
 
 if __name__ == "__main__":

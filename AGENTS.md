@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Active owner follow-up — 2026-11-24
+
+Owner0.23.0 update/version PASS; new feedback authorizes corrections in the opening TODO and
+workspace-uninstall-followup checkpoint. Preserve raw reports outside Git. Reproduce multi-file
+PRE-PLAN persistence and prohibit planning on restoration. Finish visible uninstall before window
+closure; defer only installer self-cleanup. Target0.23.1; no paid/model campaign or artist work.
+Full disk-text/notices review is later; native Windows interface follows installer closure.
+
 ## Current delivered boundary — 2026-11-24
 
 0.23.0 is delivered from5edfc1d; native run45372295246 passes25 WPF groups and5 real Windows
