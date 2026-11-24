@@ -105,7 +105,12 @@ try {
  $shortcut=Join-Path ([Environment]::GetFolderPath('Desktop')) 'EwP Transcripts.lnk'
  if(Test-Path -LiteralPath $shortcut){
   $s=$w.CreateShortcut($shortcut)
-  if($s.TargetPath -eq (Join-Path $p.root 'EwP.cmd') -or $s.Arguments -eq ('-NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $p.root 'launch.ps1')+'"')){Remove-Item -LiteralPath $shortcut -Force}
+  $powershell=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+  $owned=$s.TargetPath -eq (Join-Path $p.root 'EwP.cmd') -or
+   $s.Arguments -eq ('-NoProfile -ExecutionPolicy Bypass -File "'+(Join-Path $p.root 'launch.ps1')+'"') -or
+   ($s.WorkingDirectory -eq $p.root -and $s.TargetPath -eq $powershell)
+  if($owned){Remove-Item -LiteralPath $shortcut -Force}
+  else{Publish-Event 'removal' 'An unrelated desktop shortcut was preserved'}
  }
  if((Test-Path -LiteralPath $p.root) -and !@([IO.Directory]::EnumerateFileSystemEntries($p.root)).Count){[IO.Directory]::Delete($p.root)}
  Publish-Event 'complete' 'Application removed; original recordings, outputs and user state preserved'

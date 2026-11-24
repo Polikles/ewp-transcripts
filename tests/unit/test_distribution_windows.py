@@ -147,7 +147,22 @@ def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
                 ],
                 text=True,
             ).strip()
-            assert not (Path(desktop) / "EwP Transcripts.lnk").exists()
+            shortcut = Path(desktop) / "EwP Transcripts.lnk"
+            if shortcut.exists():
+                details = subprocess.check_output(
+                    [
+                        "powershell.exe",
+                        "-NoProfile",
+                        "-Command",
+                        "$w=New-Object -ComObject WScript.Shell;"
+                        "$s=$w.CreateShortcut($env:EWP_TEST_LINK);"
+                        "@{target=$s.TargetPath;arguments=$s.Arguments;working=$s.WorkingDirectory}"
+                        "|ConvertTo-Json -Compress",
+                    ],
+                    env={**os.environ, "EWP_TEST_LINK": str(shortcut)},
+                    text=True,
+                )
+                pytest.fail("Owned desktop shortcut remains: " + details + result.stdout)
             assert set(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file()) == {
                 "wizards/test/EwP-Setup.exe",
                 "recording.wav",
@@ -157,6 +172,10 @@ def test_direct_remove_script_cleans_readonly_runtime_and_preserves_user_work(
         if blocker:
             blocker.terminate()
             blocker.wait(timeout=10)
+            deadline = time.monotonic() + 10
+            while wizard.exists() and time.monotonic() < deadline:
+                time.sleep(0.1)
+            assert not wizard.exists(), "Deferred maintenance EXE did not delete after closure"
     events = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
     report = next(e["report_directory"] for e in events if e.get("stage") == "removal")
     deadline = time.monotonic() + 45

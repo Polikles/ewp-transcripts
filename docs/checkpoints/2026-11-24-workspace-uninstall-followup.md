@@ -44,3 +44,8 @@ First native run45399559184: all28 WPF groups PASS;5/6 filesystem cases PASS. Th
 case exposed a UTF-8 BOM on the PowerShell credential channel, before removal began. Set both
 PowerShell input/output/pipeline encodings explicitly and accept a leading transport BOM in the
 JSON reader. Preserve the failing run as diagnosis, not delivery evidence.
+
+Second native run45400054611:28 WPF groups PASS, bulk removal while the simulated wizard remains
+open PASS, but shortcut cleanup FAIL. WSH argument matching alone did not recognize the created
+link; also match its owned working directory and the exact system PowerShell target. Extend the
+native case to assert final self-deletion after simulated closure. No failed candidate delivered.

@@ -1,6 +1,6 @@
-# Installer0.23.0 review / Przegląd instalatora0.23.0
+# Installer0.23.1 review / Przegląd instalatora0.23.1
 
-Owner confirms successful0.22.2 installation, desktop launch and one episode transcription.
+Owner confirms successful0.22.2 installation, desktop launch/transcription and0.23.0 update/version.
 Retain that pass. Focus this review on the new lifecycle/operation/startup behavior below.
 
 - [ ] Location field is compact; alternate installation opens the folder picker immediately.
@@ -15,12 +15,29 @@ Retain that pass. Focus this review on the new lifecycle/operation/startup behav
 - [ ] Closing then Ctrl+C stops the idle app without a traceback or nested batch-job question.
   Startup autosave restores output/pending work after restart, without automatic transcription
   or restored cloud consent. Native Windows app interface remains a later task.
-- [ ] Removal cleans program/dependencies after wizard closure, preserving user work and shared
+- [ ] Removal cleans program/dependencies and shortcut/registry BEFORE showing success, preserving user work and shared
   models by default. Remove-EwP.ps1 opens without a Plan prompt; a failed cleanup retains a report.
 
 The owner rejected0.22.0 before installation. That archive stays unchanged. Review this corrected
 wizard first; do not start installation until its layout/flow is acceptable. Existing application
 workflow PASS is retained. No paid API/audio request or long ASR rerun is needed.
+
+
+## Focused0.23.1 follow-up / Sprawdzenie poprawek0.23.1
+
+- [ ] Dodaj dwa pliki jednego odcinka, bez planowania. Poczekaj na autozapis, zamknij przeglądarkę
+  i zatrzymaj serwer. Po restarcie oba pliki i ustawienia wracają bez planowania ani uruchamiania.
+  Sprawdź również jawny zapis i restart po ręcznym planowaniu; zębatka jest widoczna przy planowaniu.
+- [ ] Pusta nazwa nie blokuje zapisu: wyszarzone zadanie/task + data i czas stanowi nazwę domyślną.
+- [ ] Pomoc HF ma linki w treści trzech kroków. Dziennik pozostaje otwarty po zmianach etapów.
+  Zapis raportu domyślnie proponuje Pulpit użytkownika, również po otwarciu z listy programów Windows.
+- [ ] Doinstalowanie modeli blokuje różne wersje programu/instalatora i wyjaśnia właściwy następny
+  krok. Zainstalowane modele są nieaktywne, dopóki nie włączysz ich jawnej ponownej instalacji.
+  Nie pobieraj modeli ponownie tylko dla testu. Diagnostyka po naprawie/pobraniu uruchamia się sama.
+- [ ] Przywracanie pokazuje zachowane starsze wersje; brak plików blokuje operację. Wcześniej usuniętych
+  plików0.22.2 nie da się odzyskać z samego wpisu wersji.
+- [ ] Deinstalacja usuwa pliki programu i skrót przed pokazaniem sukcesu i przed zamknięciem okna.
+  `work-state` i inne dane użytkownika pozostają. Po zamknięciu usuwa się tylko sam deinstalator.
 
 ## GUI first / Najpierw GUI
 
@@ -61,11 +78,11 @@ access/authentication endpoints and do not send recordings. Do not paste secrets
 2. Check that stages/custom gear work and the chosen local/cloud mode becomes ready. Reuse cached
    models; do not remove shared models simply for a test checkbox. Complete unchanged models are
    reused without an HF prompt. HF access/terms are required only for a selected gated download.
-3. Open the desktop shortcut and check About/CLI0.23.0; open one existing result/workspace.
+3. Open the desktop shortcut and check About/CLI0.23.1; open one existing result/workspace.
 4. Stop the managed server, try Repair and matching-version Add local models when relevant.
    Those operations must not silently upgrade an older installation. Update must be chosen explicitly.
-5. Uninstall first shows its plan. Default removal preserves work/models/key and finishes locked
-   file removal after Close. Optional model/key deletion is only for assets you actually want gone.
+5. Uninstall first shows its plan. Default removal preserves work/models/key and removes program files and shortcuts before success. Only the running maintenance EXE
+   deletes itself after Close. Optional model/key deletion is only for assets you actually want gone.
 
 No repeated full transcription/correction/translation workflow, reinstall campaign or paid test
 is required for this UI correction. Native CI previews and model-free regressions are evidence
