@@ -23,6 +23,7 @@ sealed partial class Wizard
         "readable lossless credits", "authenticated same-user permission broker",
         "app-only update and repair without credentials", "selective gated model recovery",
         "restricted installed maintenance entry points", "measured download progress and report timestamps",
+        "visible information hover/focus feedback",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -88,6 +89,13 @@ sealed partial class Wizard
         busy = false; finished = successful = true; Render(); await Capture(previewDirectory, "pl-complete");
         await TestActionResetAndPresentation(previewDirectory);
         await TestModelMaintenance(previewDirectory);
+        var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
+        var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
+        infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();
+        await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+        var infoFrame = (Border)infoButton.Template.FindName("InfoFrame", infoButton);
+        Assert(infoButton.IsKeyboardFocused && ((SolidColorBrush)infoFrame.Background).Color == ((SolidColorBrush)ColorBrush("#C5DDF0")).Color, "info focus visibly changes the rendered frame despite local control background");
+        infoWindow.Close();
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
     }

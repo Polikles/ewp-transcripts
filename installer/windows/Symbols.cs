@@ -48,11 +48,11 @@ static class Symbols
         button.Cursor = Cursors.Hand;
         ToolTipService.SetInitialShowDelay(button, 200);
         ToolTipService.SetShowDuration(button, 6000);
-        var border = new FrameworkElementFactory(typeof(Border)); border.SetValue(Border.CornerRadiusProperty, new CornerRadius(17)); border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+        var border = new FrameworkElementFactory(typeof(Border), "InfoFrame"); border.SetValue(Border.CornerRadiusProperty, new CornerRadius(17)); border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
         var content = new FrameworkElementFactory(typeof(ContentPresenter)); content.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center); content.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center); border.AppendChild(content);
         var template = new ControlTemplate(typeof(Button)) { VisualTree = border };
-        var hover = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true }; hover.Setters.Add(new Setter(Control.BackgroundProperty, (Brush)new BrushConverter().ConvertFromInvariantString("#DDEAF5")!)); template.Triggers.Add(hover);
-        var focus = new Trigger { Property = UIElement.IsKeyboardFocusedProperty, Value = true }; focus.Setters.Add(new Setter(Control.BackgroundProperty, (Brush)new BrushConverter().ConvertFromInvariantString("#C5DDF0")!)); template.Triggers.Add(focus);
+        var hover = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true }; hover.Setters.Add(new Setter(Border.BackgroundProperty, (Brush)new BrushConverter().ConvertFromInvariantString("#DDEAF5")!, "InfoFrame")); template.Triggers.Add(hover);
+        var focus = new Trigger { Property = UIElement.IsKeyboardFocusedProperty, Value = true }; focus.Setters.Add(new Setter(Border.BackgroundProperty, (Brush)new BrushConverter().ConvertFromInvariantString("#C5DDF0")!, "InfoFrame")); template.Triggers.Add(focus);
         button.Template = template;
         AutomationProperties.SetName(button, name); button.Click += (_, _) => callback();
         return button;

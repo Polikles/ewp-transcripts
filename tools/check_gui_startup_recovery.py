@@ -117,6 +117,37 @@ with sync_playwright() as p:
     assert not page.locator("#cloud-asr-confirmed").is_checked()
     page.screenshot(path=str(base / "startup-recovered.png"), full_page=True)
     print("Fresh-context pending media/output recovery PASS")
+    # An unavailable last checkpoint must survive; manually choosing a good one re-enables saving.
+    missing = args.fixture_root / "missing-reference.txt"
+    missing.write_text("synthetic reference")
+    page.evaluate(
+        """async ({path,storage})=>workspacePost('/api/v1/workspaces/save',{
+          name:'Unavailable recovery test',current_step:'workspace-heading',
+          fields:{'input-path':path},pending_media:[]},{storageDirectory:storage,feedback:false})""",
+        {"path": str(missing), "storage": str(output)},
+    )
+    missing.unlink()
+    context.close()
+    context = browser.new_context()
+    page = context.new_page()
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(args.url)
+    expect(page.locator("#workspace-autosave-status")).to_contain_text(
+        "The last work state is unavailable"
+    )
+    page.locator('[data-gui-stage="saved"]').click()
+    key = page.evaluate(
+        "({id,storage})=>workspaceKey(id,storage)", {"id": initial, "storage": str(output)}
+    )
+    page.locator("#workspace-list").select_option(key)
+    page.locator("#load-workspace").click()
+    page.wait_for_function("()=>automaticRecoveryReady && !workspaceRestoreBusy")
+    page.locator('[data-gui-stage="workspace"]').click()
+    page.locator("#workflow-language").select_option("en")
+    page.wait_for_function(
+        "()=>!workspaceAutosaveBusy && workspaceFingerprint()===lastWorkspaceFingerprint"
+    )
+    assert json.loads(checkpoint.read_text())["fields"]["workflow-language"] == "en"
     assert not errors and not external, (errors, external)
     (base / "browser-report.json").write_text(
         json.dumps(
@@ -129,6 +160,7 @@ with sync_playwright() as p:
                     "fresh-context automatic recovery",
                     "no restored upload consent",
                     "no automatic transcription",
+                    "unavailable checkpoint preservation and manual recovery autosave",
                 ],
                 "page_errors": errors,
                 "external_requests": external,

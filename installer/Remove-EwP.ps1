@@ -3,6 +3,7 @@
 param([string]$Plan='', [string]$Root='', [switch]$Yes,
       [switch]$RemoveModels, [switch]$RemoveKey)
 $ErrorActionPreference='Stop'
+[Console]::OutputEncoding=New-Object Text.UTF8Encoding $false
 if(!$Root){$Root=$PSScriptRoot}
 if(!$Plan){
  try {
