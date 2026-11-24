@@ -923,3 +923,14 @@ def test_model_maintenance_runs_doctor_automatically_after_preparation(
     monkeypatch.setattr(manager, "diagnose_runtime", lambda *a, **kw: events.append("doctor"))
     assert manager.main(["models", "--root", str(root), "--model", "alignment_en"]) == 0
     assert events == ["models", "doctor"]
+
+
+def test_powershell_secret_channel_accepts_transport_bom_without_exposing_keys(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        manager.sys, "stdin", io.StringIO('\ufeff{"hf_token":"private-test-key"}\n')
+    )
+    monkeypatch.setattr(manager, "host_report", lambda *a: {"ready": True, "checks": []})
+    assert manager.main(["check", "--root", str(tmp_path / "installation"), "--secrets-stdin"]) == 0
+    assert "private-test-key" not in capsys.readouterr().out

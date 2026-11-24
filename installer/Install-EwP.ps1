@@ -9,7 +9,9 @@ param(
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
-[Console]::OutputEncoding=New-Object Text.UTF8Encoding $false
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
+[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)
+$OutputEncoding=[Text.UTF8Encoding]::new($false)
 $env:PYTHONIOENCODING='utf-8'
 if(!$Root){
  if(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'owner.json')){$Root=$PSScriptRoot}

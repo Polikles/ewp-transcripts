@@ -72,7 +72,7 @@ async function saveAutomaticWorkspace(force = false) {
     const saved = payload.workspace;
     const unchanged = fingerprint === workspaceFingerprint();
     adoptSavedGuiMedia(saved.pending_media || [], media);
-    displayWorkspaceName(saved.name);
+    if (unchanged) displayWorkspaceName(saved.name);
     activateWorkspace(saved, storage);
     lastWorkspaceFingerprint = unchanged ? workspaceFingerprint() : fingerprint;
     showWorkspaceFile(payload.workspace_file);

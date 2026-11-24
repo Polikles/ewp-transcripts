@@ -39,3 +39,8 @@ Affected EN/PL manual and stable-ID workbook cells were updated without modifyin
 
 No new paid/model campaign. All previous delivered binaries and artist archives remain unchanged.
 Final immutable artifacts require committed sources and native WPF/filesystem evidence.
+
+First native run45399559184: all28 WPF groups PASS;5/6 filesystem cases PASS. The new live-wizard
+case exposed a UTF-8 BOM on the PowerShell credential channel, before removal began. Set both
+PowerShell input/output/pipeline encodings explicitly and accept a leading transport BOM in the
+JSON reader. Preserve the failing run as diagnosis, not delivery evidence.

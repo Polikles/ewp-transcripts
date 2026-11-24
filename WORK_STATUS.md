@@ -8,6 +8,8 @@ Last updated: **2026-11-24**.
 save/recovery and unwanted startup planning, default task names, visible planning activity,
 installer model/rollback/help/log/report behavior, launch chain and pre-close uninstall cleanup.
 Follow opening TODO and [checkpoint](docs/checkpoints/2026-11-24-workspace-uninstall-followup.md).
+Local1138 PASS and actual two-track server-restart recovery PASS. First native run passes28 WPF
+groups; a new filesystem case exposed a transport BOM, corrected before the next build.
 Disk prose/full notices review and native app shell retain the owner's later sequencing.
 
 **Delivered0.23.0 — 2026-11-24:** installer lifecycle/startup feedback implemented and verified.

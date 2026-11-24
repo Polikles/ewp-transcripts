@@ -1636,7 +1636,9 @@ def main(argv: list[str] | None = None) -> int:
         CANCEL_FILE.set(args.cancel_file)
         check_cancelled()
         root = safe_root(args.root)
-        secrets: dict[str, str] = json.loads(sys.stdin.readline()) if args.secrets_stdin else {}
+        secrets: dict[str, str] = (
+            json.loads(sys.stdin.readline().lstrip("\ufeff")) if args.secrets_stdin else {}
+        )
         if not isinstance(secrets, dict) or any(
             not isinstance(secrets.get(k, ""), str) or len(secrets.get(k, "")) > 4096
             for k in ("hf_token", "openrouter_key", "wizard_source")
