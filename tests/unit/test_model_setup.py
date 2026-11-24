@@ -142,3 +142,48 @@ def test_help_and_cancel_do_not_prepare_or_download(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda *args: "n")
     with pytest.raises(SystemExit, match="Cancelled"):
         module.main()
+
+
+def test_installer_progress_reports_real_http_bytes_instead_of_snapshot_file_counts(
+    monkeypatch, capsys
+):
+    import io
+    import json
+
+    import huggingface_hub
+    from huggingface_hub import file_download
+
+    progress = __import__("importlib").import_module("huggingface_hub.utils.tqdm")
+    monkeypatch.setattr(progress, "tqdm", progress.tqdm)  # Restore the child-only hook after test.
+    module = script()
+    monkeypatch.setattr(module, "prepare_language_data", lambda: None)
+    monkeypatch.setattr(
+        sys, "argv", ["setup-models.py", "--yes", "--model", "asr", "--progress-json"]
+    )
+    monkeypatch.setattr(
+        file_download,
+        "_request_wrapper",
+        lambda **kwargs: SimpleNamespace(
+            headers={"Content-Length": "8"},
+            iter_content=lambda **kw: [b"1234", b"5678"],
+            raise_for_status=lambda: None,
+        ),
+    )
+
+    def transfer(**kwargs):
+        target = io.BytesIO()
+        file_download.http_get(
+            "https://synthetic.invalid/model",
+            target,
+            displayed_filename="model.bin",
+            expected_size=8,
+        )
+        assert target.getvalue() == b"12345678"
+
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", transfer)
+    module.main()
+    events = [
+        json.loads(line) for line in capsys.readouterr().out.splitlines() if line.startswith("{")
+    ]
+    assert events and events[-1]["bytes"] == events[-1]["total"] == 8
+    assert events[-1]["unit"] == "B" and events[-1]["message"] == "model.bin"

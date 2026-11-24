@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import importlib
 import io
 import json
 import os
@@ -61,6 +62,7 @@ def main() -> None:
 
         def __init__(self, *values, **options):
             self.last_report = 0.0
+            options.pop("name", None)  # HF groups byte streams using a named progress bar.
             if args.progress_json:
                 options["disable"] = False
                 options["file"] = io.StringIO()
@@ -69,12 +71,14 @@ def main() -> None:
         def update(self, amount=1):
             result = super().update(amount)
             now = time.monotonic()
-            if args.progress_json and (
-                now - self.last_report >= 0.5 or self.total and self.n >= self.total
+            if (
+                args.progress_json
+                and self.unit == "B"
+                and (now - self.last_report >= 0.5 or self.total and self.n >= self.total)
             ):
                 self.last_report = now
                 elapsed = max(0.001, time.time() - self.start_t)
-                rate = self.n / elapsed
+                rate = max(0, self.n - self.initial) / elapsed
                 print(
                     json.dumps(
                         {
@@ -92,6 +96,12 @@ def main() -> None:
                     flush=True,
                 )
             return result
+
+    if args.progress_json:
+        # snapshot_download's tqdm_class covers file counts only. The pinned hub downloader's
+        # byte-stream context resolves this module global for both HTTP and Xet transfers.
+        hub_progress = importlib.import_module("huggingface_hub.utils.tqdm")
+        hub_progress.tqdm = DownloadProgress
 
     prepare_language_data()
 
