@@ -97,7 +97,7 @@ sealed partial class Wizard : Window
         Grid.SetColumn(navigation, 1); footer.Children.Add(navigation); Grid.SetRow(footer, 3); shell.Children.Add(footer);
         root.TextChanged += (_, _) => { if (!resettingOperation) ScheduleLocation(); };
         local.Checked += (_, _) => { if (page == 2) Render(); }; local.Unchecked += (_, _) => { if (page == 2) Render(); };
-        terms.Checked += (_, _) => { missingRequirements.Remove("terms"); if (notice == "requirements") notice = ""; if (terms.Parent is Border frame) { frame.Background = Brushes.Transparent; frame.BorderBrush = Brushes.Transparent; } RefreshNavigation(); }; terms.Unchecked += (_, _) => RefreshNavigation();
+        terms.Checked += (_, _) => { missingRequirements.Remove("terms"); ClearRequirementNotice(); if (terms.Parent is Border frame) { frame.Background = Brushes.Transparent; frame.BorderBrush = Brushes.Transparent; } RefreshNavigation(); }; terms.Unchecked += (_, _) => RefreshNavigation();
         language.SelectionChanged += (_, _) => Render();
         for (int i = 0; i < args.Length; i++)
         {
@@ -302,6 +302,14 @@ sealed partial class Wizard : Window
         3 when operation == "install" => true,
         _ => false
     });
+
+    void ClearRequirementNotice()
+    {
+        if (notice != "requirements") return;
+        string text = NoticeText(); notice = "";
+        var displayed = body.Children.OfType<TextBlock>().FirstOrDefault(item => item.Text == text);
+        if (displayed != null) body.Children.Remove(displayed);
+    }
 
     void HighlightMissingRequirements()
     {

@@ -85,7 +85,7 @@ sealed partial class Wizard
                 bool selectable = operation == "models" || repairModels;
                 var box = new CheckBox { IsChecked = selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable && (operation != "models" || reinstallModels || ModelMissingBytes(model) > 0),
                     Content = new TextBlock { Text = model.Repository + (ModelMissingBytes(model) == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
-                box.Checked += (_, _) => { selectedModels.Add(model.Code); Render(); };
+                box.Checked += (_, _) => { selectedModels.Add(model.Code); missingRequirements.Remove("models"); ClearRequirementNotice(); Render(); };
                 box.Unchecked += (_, _) => { selectedModels.Remove(model.Code); Render(); };
                 list.Children.Add(box);
             }

@@ -60,3 +60,9 @@ uninstall stop and older PID-only launchers. The server publishes its own identi
 confusing Windows venv redirector/launcher PIDs with the actual listener. A legacy launcher may
 be stopped only after verifying its exact managed manager.py launch role, root and descendants;
 installer workers and unrelated images remain protected. No native PASS is claimed yet.
+
+First native run45436119635/sourcee815221:32 WPF groups and12 real Windows cases PASS,
+including healthy/orphan reopen and old PID-only launcher stop through the real removal adapter.
+Before final packaging, align uninstall phase order with its preview→shutdown→removal events,
+clear completed requirement feedback immediately and remove remaining obsolete EN removal prose.
+No candidate has been delivered; final source-native artifact verification follows.

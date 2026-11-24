@@ -30,7 +30,7 @@ sealed partial class Wizard
         operationPhases = operation is "install" or "update" or "repair" && !repairModels
             ? ["extract", "python", "dependencies", "media", ..(LocalSelected ? new[] { "models" } : Array.Empty<string>()), "verify", ..(orValid && operation == "install" ? new[] { "credentials" } : Array.Empty<string>()), "register"]
             : operation == "models" || repairModels ? ["models", "verify", "register"]
-            : operation == "uninstall" ? ["shutdown", "preview", "removal"] : ["verify", "register"];
+            : operation == "uninstall" ? ["preview", "shutdown", "removal"] : ["verify", "register"];
         operationProgress.IsIndeterminate = true; operationProgress.Value = overallProgress.Value = 0;
         RefreshOverallProgress();
     }
