@@ -1,0 +1,104 @@
+{
+  "version": "0.23.1",
+  "source_commit": "54421676ab83d2965fe2c5ec441384a8eb21084f",
+  "ci_run": 45400731344,
+  "ci_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45400731344",
+  "ci_conclusion": "success",
+  "artifacts": [
+    {
+      "name": "EwP-0.23.1-windows-x64.zip",
+      "sha256": "0976cbb85a69e50ffc4dd81a41fed33f3d592a2d283ada9000eb0284b7fcbd58"
+    },
+    {
+      "name": "EwP-0.23.1-ubuntu-x64.zip",
+      "sha256": "b385586123b9b20e3496b0fe92b54a78abba4796a40a64c4e0fa0bbd3c8afd70"
+    },
+    {
+      "name": "EwP-Setup-0.23.1.exe",
+      "sha256": "1972f77c9d63fefbda3a2fcc2d6e7cac21d59286d808dfb823e373ccdda2ed64"
+    },
+    {
+      "name": "EwP-0.23.1-ubuntu-x64.tar.gz",
+      "sha256": "9e9d6fa73422c070256e58d521ee4136915e224db1dbd8c5f184e1c2026871d8"
+    },
+    {
+      "name": "Install-EwP-0.23.1.ps1",
+      "sha256": "528f5cd66957bc5389047e81f6ee7fdf03a672885309d7c3f526ce51692a902f"
+    },
+    {
+      "name": "Install-EwP-0.23.1.sh",
+      "sha256": "769360db3fc0e9124ef190acd04f65e57eaf83ee3ecd782863dab8e6c28e8368"
+    }
+  ],
+  "checks": {
+    "python_passed": 1139,
+    "python_native_skips_on_linux": 6,
+    "integration_passed": 17,
+    "native_windows_cases_passed": 6,
+    "wpf_coverage_groups": 28,
+    "native_previews_visually_inspected": 29,
+    "application_reference_rows": 2221,
+    "browser_locale_layout_cases": 36,
+    "provider_calls": 0,
+    "models_downloaded": 0
+  },
+  "owner_native_acceptance": "0.22.2 installation/desktop/transcription and0.23.0 update/version passed; focused0.23.1 workspace/removal review pending",
+  "delivery_directory": "/home/linuch/project-ewp/deliveries/ewp-0.23.1-installers",
+  "installer_copy_pairs": 154,
+  "preview_zip_sha256": "dcb76bbc1cdc11eb04b92b197a0e2bf9c55fbe280229886bc591904a86856eeb",
+  "browser_startup": {
+    "result": "PASS",
+    "cases": [
+      "initial private autosave",
+      "output-root association",
+      "pending-media durable autosave",
+      "fresh-context automatic recovery",
+      "no restored upload consent",
+      "no automatic transcription",
+      "unavailable checkpoint preservation and manual recovery autosave",
+      "two synchronized tracks before planning",
+      "manual save with empty name",
+      "gray default name in EN and PL",
+      "gear beside explicit planning",
+      "planned selection restored without replanning"
+    ],
+    "page_errors": [],
+    "external_requests": []
+  },
+  "browser_server_restart": {
+    "result": "PASS",
+    "cases": [
+      "actual server restart",
+      "automatic pending-media recovery",
+      "fresh cloud consent required"
+    ],
+    "page_errors": [],
+    "external_requests": []
+  },
+  "browser_copy": {
+    "reference_rows": 2221,
+    "owner_changed_rows": 106,
+    "exact_copy_checked": 102,
+    "dynamic_templates_checked": 2,
+    "quick_guides_checked": 2,
+    "derived_quick_guides_checked": 1,
+    "help_chrome_checked": 4,
+    "locale_roundtrips": 4,
+    "layout_cases": 36,
+    "page_errors": [],
+    "external_requests": [],
+    "real_provider_calls": 0
+  },
+  "ci_artifacts": [
+    {
+      "id": 14924230097,
+      "name": "installer-test-package",
+      "digest": "sha256:9cab9e2b6597f830649b441329e485b9175b1a3c9ea1955399c500a69b975dda"
+    },
+    {
+      "id": 14923905601,
+      "name": "native-windows-startup-evidence",
+      "digest": "sha256:7ef442bf3c4690bb56de7c709a06836421edc741aa653016e8fc08cd01f0f582"
+    }
+  ]
+}

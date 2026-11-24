@@ -29,7 +29,7 @@ shortcut/registry entries while the visible adapter awaits a result. Only the ex
 maintenance EXE is deferred until closure. Ownership/link guards and user-state preservation remain.
 The older0.22.2 files cannot be reconstructed if0.23.0 already pruned them: rollback correctly blocks.
 
-Local verification:1138 passed,6 native Windows cases skipped; Ruff/mypy/format pass. Native WPF
+Local verification:1139 passed,6 native Windows cases skipped; Ruff/mypy/format pass. Native WPF
 compiles with no warnings/errors. Synthetic two-track pre-plan auto/manual save, empty name,
 EN/PL gray placeholder, fresh browser recovery, explicit-plan gear and no planning on reload pass.
 Reviewed-copy browser check passes2221 reference rows/102 changed-copy checks/36 layouts with no
@@ -49,3 +49,28 @@ Second native run45400054611:28 WPF groups PASS, bulk removal while the simulate
 open PASS, but shortcut cleanup FAIL. WSH argument matching alone did not recognize the created
 link; also match its owned working directory and the exact system PowerShell target. Extend the
 native case to assert final self-deletion after simulated closure. No failed candidate delivered.
+
+## Final delivery
+
+Delivered0.23.1 from54421676ab83d2965fe2c5ec441384a8eb21084f. Final native run45400731344
+PASS:28 WPF groups and6 actual Windows filesystem/launcher cases. The live-wizard case verifies
+that program/runtime/cache, registry and desktop shortcut are gone while its EXE remains open,
+work-state survives, and the EXE deletes after closure. All29 final native previews inspected.
+
+Six local artifact hashes exactly match native-tested CI. Canonical delivery:
+`/home/linuch/project-ewp/deliveries/ewp-0.23.1-installers/` with EXE, packages, SHA256SUMS,
+preview gallery/ZIP, focused acceptance checklist and Polish START-HERE. EXE SHA256:
+`1972f77c9d63fefbda3a2fcc2d6e7cac21d59286d808dfb823e373ccdda2ed64`.
+Content-free evidence is in `2026-11-24-workspace-uninstall-followup-evidence.json`.
+
+Actual server restart restores both unplanned sources without planning, processing or consent.
+Browser checks also cover empty-name manual save, gray task/datecode EN/PL, explicit planning
+gear, no replanning after planned-state reload, unavailable-state preservation and manual recovery.
+Local checks:1139 passed/6 native skips, including17 integrations; Ruff/format/mypy pass.
+Prior0.22.2 install/transcription and0.23.0 update/version owner passes remain accepted.
+
+Await only focused owner0.23.1 startup/workspace/installer/removal feedback. No additional build,
+full workflow/reinstallation, paid/model qualification or artist work is authorized merely by
+resuming. Later: complete installer EN/PL/disk-copy review and notices audit, then native Windows
+application interface after installer closure. EXE remains unsigned; public release/online
+bootstrap activation are separate pending actions. Preserve all previous deliveries/artist ZIPs.

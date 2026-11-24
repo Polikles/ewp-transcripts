@@ -4,13 +4,16 @@ Last updated: **2026-11-24**.
 
 ## Active task and resume pointers
 
-**Active follow-up2026-11-24:** owner passes0.23.0 update/version. Fix pre-plan multi-file
-save/recovery and unwanted startup planning, default task names, visible planning activity,
-installer model/rollback/help/log/report behavior, launch chain and pre-close uninstall cleanup.
-Follow opening TODO and [checkpoint](docs/checkpoints/2026-11-24-workspace-uninstall-followup.md).
-Local1138 PASS and actual two-track server-restart recovery PASS. First native run passes28 WPF
-groups; a new filesystem case exposed a transport BOM, corrected before the next build.
-Disk prose/full notices review and native app shell retain the owner's later sequencing.
+**Delivered0.23.1 — 2026-11-24:** multi-file pre-plan autosave/manual recovery without startup
+planning; dated task defaults and planning gear; installer model/version/rollback/help/log/report
+corrections and synchronous visible removal. Source5442167, native run45400731344 PASS:28 WPF
+groups/6 real Windows cases;1139 local tests/17 integrations;29 inspected previews; six hashes
+match CI. Files: `/home/linuch/project-ewp/deliveries/ewp-0.23.1-installers/`.
+Follow [checkpoint](docs/checkpoints/2026-11-24-workspace-uninstall-followup.md) and its evidence.
+Await focused owner0.23.1 feedback; preserve0.22.2 installation/transcription and0.23.0 update passes.
+Later: installer EN/PL/disk copy and notices audit, then native Windows app interface. No new build,
+paid/model campaign or artist work while awaiting this feedback. Unsigned/internal; public release
+and online bootstrap activation remain pending.
 
 **Delivered0.23.0 — 2026-11-24:** installer lifecycle/startup feedback implemented and verified.
 Actual artifact source `5edfc1d`; final Windows run45372295246 PASS (25 WPF groups/5 real native

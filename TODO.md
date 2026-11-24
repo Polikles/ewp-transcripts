@@ -1,6 +1,6 @@
 # Immediate work queue
 
-## Active 0.23.0 owner feedback — 2026-11-24, follow-up
+## Delivered 0.23.1 owner follow-up — 2026-11-24
 
 Owner confirms update succeeded and About shows0.23.0. Preserve that pass; registration had
 already been removed, so selecting the remaining managed root manually was expected.
@@ -25,8 +25,10 @@ See `docs/checkpoints/2026-11-24-workspace-uninstall-followup.md`.
       when multiple older releases exist, and blocks when older files are unavailable.
 - [x] Remove program/dependencies and desktop/registry entries BEFORE reporting uninstall complete;
       only the running uninstaller/helper may delete itself after window closure. Preserve work-state.
-- [ ] Focused synthetic browser restart, filesystem/integration and native Windows lifecycle/UI
+- [x] Focused synthetic browser restart, filesystem/integration and native Windows lifecycle/UI
       checks; distinct test version and immutable verified delivery; maintain affected EN/PL docs.
+- [ ] Owner focused0.23.1 workspace/startup/model/rollback/uninstall retest; automated checks
+      pass, no repeated full transcription or paid/model campaign needed.
 - [ ] Deferred until copy review: shorten disk-space prose. Native Windows app interface remains
       after installer closure; no new paid/model campaign or artist-archive changes.
 
