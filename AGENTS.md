@@ -1,3 +1,16 @@
+# Current boundary — 2026-11-25 / installer copy table delivered
+
+Owner authorized the full installer correction table. XLSX/CSV and complete review ZIP are in
+/home/linuch/project-ewp/deliveries/ewp-installer-text-review-2026-11-25 (ZIP alongside).
+1148 entries; start with 179 UI rows and 57 full templates. See docs/installer-copy-review/README.md
+and docs/checkpoints/2026-11-25-installer-copy-table.md. Tables/checks committed as review baseline;
+product remains 0.24.2 from7178bc7. Existing app workbook and legacy installer CSV unchanged.
+NEXT: owner returns wording corrections → reconcile stable IDs → integrate approved EN/PL/help.
+Do not silently apply suggestions, rebuild, start manual/model/paid tests or native app work on resume.
+Native app interface/lifetime follows installer copy closure; signing/public release remain later.
+
+Earlier boundaries follow.
+
 # Current boundary — 2026-11-25 / automatic-check correction closed
 
 0.24.2 delivered from7178bc7478897016e9663905739adb48afe73c00. Native run45683385827 SUCCESS:

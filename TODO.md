@@ -1,3 +1,17 @@
+# Active stage — 2026-11-25 / complete installer copy review table
+
+- [x] Inventory complete installer WPF screens/actions/modals/tooltips/errors/progress/report/startup,
+      dynamic composed templates and shared install/remove CLI/log messages; reconcile existing IDs.
+- [x] Include user-facing notices/credits/asset terms for review, preserving original legal text and
+      separating project copy from third-party immutable notices. Flag project-only/misleading prose.
+- [x] Produce editable XLSX and UTF-8 CSV EN/PL with stable IDs, context/locations, placeholders,
+      current/original copy and correction/status/notes fields; retain existing app workbook unchanged.
+- [x] Automated coverage/duplicate/round-trip/placeholder and workbook layout metadata checks
+      (no native Excel/LibreOffice rendering available); deliver review files/instructions/checkpoint. No product changes/build/manual retest.
+- [ ] Await returned wording corrections before applying product text/help; native app shell stays later.
+
+Earlier stages follow.
+
 # Active follow-up — 2026-11-25 / target 0.24.2
 
 Owner waives further manual testing after this correction. Preserve mixed-model inference,
@@ -12,9 +26,9 @@ uninstall and prior focused acceptance; use automated checks only for this chang
 - [x] Explain next planned stage: full installer EN/PL copy review and user-facing notices audit;
       after installer closure, native Windows interface/lifetime. No broad next-stage work inferred.
 
-Next planned stage (not started in this correction):
-- [ ] Full installer EN/PL text inventory with stable editable IDs, shorter/consistent disk copy,
-      and audit of user-facing notices/licensing/credits for project-only or misleading wording.
+Copy stage requested after this correction:
+- [x] Full installer EN/PL text inventory with stable editable IDs and disk copy flagged for review,
+      and inventory/audit flags in notices/licensing/credits for project-only or misleading wording.
 - [ ] Integrate accepted wording and synchronize affected offline help.
 - [ ] Native Windows app shell/lifetime after installer closure; release/signing separately.
 

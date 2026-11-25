@@ -1,0 +1,413 @@
+[
+  {
+    "key": "window-title",
+    "en": "EwP Transcripts · {version}",
+    "pl": "EwP Transcripts · {version}",
+    "context": "Tytuł głównego okna",
+    "source": "installer/windows/Wizard.cs:57"
+  },
+  {
+    "key": "installer-version",
+    "en": "Installer version: {version}",
+    "pl": "Wersja instalatora: {version}",
+    "context": "1. Działanie — wersja instalatora",
+    "source": "installer/windows/Wizard.cs:195"
+  },
+  {
+    "key": "detected-version",
+    "en": "EwP Transcripts {installed_version}",
+    "pl": "EwP Transcripts {installed_version}",
+    "context": "2. Wykryta instalacja / lista przywracanych wersji",
+    "source": "installer/windows/WizardState.cs:79; installer/windows/WizardRollback.cs:13"
+  },
+  {
+    "key": "step-badge",
+    "en": "{step_number}. {step_name}",
+    "pl": "{step_number}. {step_name}",
+    "context": "Nawigacja — numer i nazwa etapu",
+    "source": "installer/windows/WizardState.cs:58"
+  },
+  {
+    "key": "next-install",
+    "en": "Next — Install",
+    "pl": "Dalej — Zainstaluj",
+    "context": "Przycisk potwierdzenia operacji / install",
+    "source": "installer/windows/Wizard.cs:344"
+  },
+  {
+    "key": "next-update",
+    "en": "Next — Update",
+    "pl": "Dalej — Aktualizuj",
+    "context": "Przycisk potwierdzenia operacji / update",
+    "source": "installer/windows/Wizard.cs:344"
+  },
+  {
+    "key": "next-repair",
+    "en": "Next — Repair",
+    "pl": "Dalej — Napraw",
+    "context": "Przycisk potwierdzenia operacji / repair",
+    "source": "installer/windows/Wizard.cs:344"
+  },
+  {
+    "key": "next-models",
+    "en": "Next — Add local models",
+    "pl": "Dalej — Doinstaluj modele lokalne",
+    "context": "Przycisk potwierdzenia operacji / models",
+    "source": "installer/windows/Wizard.cs:344"
+  },
+  {
+    "key": "models-heading-install",
+    "en": "3. Local models and HF token",
+    "pl": "3. Lokalne modele i token HF",
+    "context": "Nagłówek kroku modeli / install",
+    "source": "installer/windows/WizardModels.cs:48"
+  },
+  {
+    "key": "models-heading-update",
+    "en": "3. Update",
+    "pl": "3. Aktualizuj",
+    "context": "Nagłówek kroku modeli / update",
+    "source": "installer/windows/WizardModels.cs:48"
+  },
+  {
+    "key": "models-heading-repair",
+    "en": "3. Repair",
+    "pl": "3. Napraw",
+    "context": "Nagłówek kroku modeli / repair",
+    "source": "installer/windows/WizardModels.cs:48"
+  },
+  {
+    "key": "models-heading-models",
+    "en": "3. Add local models",
+    "pl": "3. Doinstaluj modele lokalne",
+    "context": "Nagłówek kroku modeli / models",
+    "source": "installer/windows/WizardModels.cs:48"
+  },
+  {
+    "key": "progress-heading-install",
+    "en": "5. Install",
+    "pl": "5. Zainstaluj",
+    "context": "Nagłówek wykonywania operacji / install",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "progress-heading-update",
+    "en": "4. Update",
+    "pl": "4. Aktualizuj",
+    "context": "Nagłówek wykonywania operacji / update",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "progress-heading-repair",
+    "en": "4. Repair",
+    "pl": "4. Napraw",
+    "context": "Nagłówek wykonywania operacji / repair",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "progress-heading-models",
+    "en": "4. Add local models",
+    "pl": "4. Doinstaluj modele lokalne",
+    "context": "Nagłówek wykonywania operacji / models",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "progress-heading-rollback",
+    "en": "4. Restore previous version",
+    "pl": "4. Przywróć poprzednią wersję",
+    "context": "Nagłówek wykonywania operacji / rollback",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "progress-heading-uninstall",
+    "en": "4. Uninstall",
+    "pl": "4. Odinstaluj",
+    "context": "Nagłówek wykonywania operacji / uninstall",
+    "source": "installer/windows/Wizard.cs:256"
+  },
+  {
+    "key": "disk-folder-new",
+    "en": "Disk space: {free_gb} GB free · at least 25 GB (20 + 5 GB margin)",
+    "pl": "Miejsce na dysku: {free_gb} GB wolne · co najmniej 25 GB (20 + 5 GB marginesu)",
+    "context": "2. Instalacja — opis przy folderze",
+    "source": "installer/windows/Wizard.cs:432-433",
+    "notes": "Do skrócenia i ujednolicenia. Próg25 GB obejmuje20 GB budżetu i5 GB marginesu. Zachowaj {free_gb}."
+  },
+  {
+    "key": "disk-folder-maintenance",
+    "en": "Disk space: {free_gb} GB free\nInstalled version: {installed_version}",
+    "pl": "Miejsce na dysku: {free_gb} GB wolne\nZainstalowana wersja: {installed_version}",
+    "context": "2. Aktualizacja / naprawa — opis przy folderze",
+    "source": "installer/windows/Wizard.cs:432-435"
+  },
+  {
+    "key": "disk-protected",
+    "en": "{folder_disk_description}\nWindows may ask for administrator permission when the operation starts.",
+    "pl": "{folder_disk_description}\nWindows może poprosić o uprawnienia administratora przy rozpoczęciu operacji.",
+    "context": "2. Folder chroniony — dodatkowa informacja",
+    "source": "installer/windows/Wizard.cs:434"
+  },
+  {
+    "key": "disk-host-install",
+    "en": "Disk space: ({free_gb} GB free; {installation_gb} GB required)",
+    "pl": "Miejsce na dysku: ({free_gb} GB wolne; {installation_gb} GB wymagane)",
+    "context": "2. Wiersz testu dysku przy instalacji",
+    "source": "installer/windows/Wizard.cs:575",
+    "notes": "DO KOREKTY: opis pokazuje20 GB, lecz blokada uwzględnia25 GB. Trzeba jawnie rozróżnić budżet i wymagany margines; nie zmieniać liczb w kodzie przez samą korektę tekstu."
+  },
+  {
+    "key": "disk-host-maintenance",
+    "en": "Disk space: ({free_gb} GB free; {installation_gb} GB required for program and basic models; additional free space: {additional_gb} GB)",
+    "pl": "Miejsce na dysku: ({free_gb} GB wolne; {installation_gb} GB wymagane na program i podstawowe modele; dodatkowe wolne miejsce: {additional_gb} GB)",
+    "context": "2. Wiersz testu dysku przy aktualizacji / naprawie / modelach",
+    "source": "installer/windows/Wizard.cs:575",
+    "notes": "Do skrócenia. {installation_gb} to pełny budżet, a {additional_gb} to próg wolnego miejsca operacji — obecnie8 GiB / około8,6 GB. Zachowaj wszystkie parametry lub opisz świadome usunięcie w uwagach."
+  },
+  {
+    "key": "cpu-row",
+    "en": "64-bit processor: {cpu_model}",
+    "pl": "Procesor 64-bit: {cpu_model}",
+    "context": "2. Test CPU",
+    "source": "installer/windows/Wizard.cs:573"
+  },
+  {
+    "key": "os-row",
+    "en": "System: {system_name}",
+    "pl": "System: {system_name}",
+    "context": "2. Test systemu",
+    "source": "installer/windows/Wizard.cs:574"
+  },
+  {
+    "key": "gpu-row",
+    "en": "GPU driver: {gpu_name} · {driver_version}",
+    "pl": "Sterownik GPU: {gpu_name} · {driver_version}",
+    "context": "2. Wykryte GPU i sterownik; wiele GPU rozdzielone średnikiem",
+    "source": "installer/windows/Wizard.cs:576"
+  },
+  {
+    "key": "gpu-absent",
+    "en": "GPU driver: not detected",
+    "pl": "Sterownik GPU: nie wykryto",
+    "context": "2. Brak wykrytego GPU",
+    "source": "installer/windows/Wizard.cs:576"
+  },
+  {
+    "key": "required-cache",
+    "en": "Not enough space on the model-cache disk. Required free space: {required_gb} GB",
+    "pl": "Za mało miejsca na dysku cache modeli. Potrzebne wolne miejsce: {required_gb} GB",
+    "context": "3. Brak miejsca na cache modeli",
+    "source": "installer/windows/Wizard.cs:458"
+  },
+  {
+    "key": "model-download-space",
+    "en": "Required space for selected downloads: {download_gb} GB",
+    "pl": "Potrzebne miejsce na wybrane modele: {download_gb} GB",
+    "context": "3. Suma wybranych pobrań",
+    "source": "installer/windows/WizardModels.cs:102"
+  },
+  {
+    "key": "model-optional",
+    "en": "{repository} · optional",
+    "pl": "{repository} · opcjonalny",
+    "context": "3. Model opcjonalny niezainstalowany",
+    "source": "installer/windows/WizardModels.cs:92"
+  },
+  {
+    "key": "model-installed",
+    "en": "{repository} · installed",
+    "pl": "{repository} · zainstalowany",
+    "context": "3. Model podstawowy zainstalowany",
+    "source": "installer/windows/WizardModels.cs:92"
+  },
+  {
+    "key": "model-optional-installed",
+    "en": "{repository} · optional · installed",
+    "pl": "{repository} · opcjonalny · zainstalowany",
+    "context": "3. Model opcjonalny zainstalowany",
+    "source": "installer/windows/WizardModels.cs:92"
+  },
+  {
+    "key": "model-integrity-pass",
+    "en": "{repository} · SHA OK\n{snapshot_path}\n{revision}",
+    "pl": "{repository} · SHA OK\n{snapshot_path}\n{revision}",
+    "context": "3. Napraw → Sprawdź modele — wynik",
+    "source": "installer/windows/WizardModels.cs:61"
+  },
+  {
+    "key": "model-integrity-fail",
+    "en": "{repository} · missing or damaged files\n{snapshot_path}\n{revision}",
+    "pl": "{repository} · brakujące lub uszkodzone pliki\n{snapshot_path}\n{revision}",
+    "context": "3. Napraw → Sprawdź modele — wynik",
+    "source": "installer/windows/WizardModels.cs:61"
+  },
+  {
+    "key": "model-integrity-absent",
+    "en": "{repository} · optional · not installed\n{snapshot_path}\n{revision}",
+    "pl": "{repository} · opcjonalny · niezainstalowany\n{snapshot_path}\n{revision}",
+    "context": "3. Napraw → Sprawdź modele — wynik",
+    "source": "installer/windows/WizardModels.cs:61"
+  },
+  {
+    "key": "model-version",
+    "en": "Program version: {installed_version} · installer: {installer_version} · OK",
+    "pl": "Wersja programu: {installed_version} · instalator: {installer_version} · OK",
+    "context": "2. Doinstalowanie — zgodna wersja",
+    "source": "installer/windows/Wizard.cs:537"
+  },
+  {
+    "key": "model-version-mismatch",
+    "en": "Program version: {installed_version} · installer: {installer_version}\n{version_problem}",
+    "pl": "Wersja programu: {installed_version} · instalator: {installer_version}\n{version_problem}",
+    "context": "2. Doinstalowanie — problem zgodności wersji",
+    "source": "installer/windows/Wizard.cs:537"
+  },
+  {
+    "key": "overall-progress",
+    "en": "Overall progress · stages completed: {completed} / {total}",
+    "pl": "Postęp całej operacji · ukończone etapy: {completed} / {total}",
+    "context": "Instalacja — postęp całej operacji",
+    "source": "installer/windows/WizardProgress.cs:35"
+  },
+  {
+    "key": "downloads-count",
+    "en": "Downloads completed: {completed} · in progress: {in_progress}",
+    "pl": "Ukończone pobrania: {completed} · w toku: {in_progress}",
+    "context": "Instalacja — licznik pobierania",
+    "source": "installer/windows/WizardProgress.cs:36"
+  },
+  {
+    "key": "elapsed",
+    "en": "Elapsed: {hh_mm_ss}",
+    "pl": "Czas: {hh_mm_ss}",
+    "context": "Instalacja — czas trwania",
+    "source": "installer/windows/WizardProgress.cs:62"
+  },
+  {
+    "key": "file-bytes",
+    "en": "{downloaded_gb} / {total_gb} GB",
+    "pl": "{downloaded_gb} / {total_gb} GB",
+    "context": "Instalacja — znany rozmiar pliku",
+    "source": "installer/windows/WizardProgress.cs:81"
+  },
+  {
+    "key": "file-unknown-total",
+    "en": "{downloaded_gb} GB",
+    "pl": "{downloaded_gb} GB",
+    "context": "Instalacja — nieznany rozmiar końcowy",
+    "source": "installer/windows/WizardProgress.cs:81"
+  },
+  {
+    "key": "file-speed",
+    "en": "{speed} MB/s",
+    "pl": "{speed} MB/s",
+    "context": "Instalacja — prędkość pobierania",
+    "source": "installer/windows/WizardProgress.cs:82"
+  },
+  {
+    "key": "file-eta",
+    "en": "~{hh_mm_ss}",
+    "pl": "~{hh_mm_ss}",
+    "context": "Instalacja — mierzalne ETA bieżącego pliku",
+    "source": "installer/windows/WizardProgress.cs:83"
+  },
+  {
+    "key": "credential-error",
+    "en": "{error_code} · {error_message}",
+    "pl": "{error_code} · {error_message}",
+    "context": "Okno HF/OR — komunikat walidacji",
+    "source": "installer/windows/Credentials.cs:13"
+  },
+  {
+    "key": "log-entry",
+    "en": "{HH_mm_ss_fff_offset} · {message}",
+    "pl": "{HH_mm_ss_fff_offset} · {message}",
+    "context": "Wiersz dziennika technicznego",
+    "source": "installer/windows/Wizard.cs:599"
+  },
+  {
+    "key": "report-header",
+    "en": "EwP Setup {version} · {timestamp_iso}\nOperation: {operation}\n{log}",
+    "pl": "EwP Setup {version} · {timestamp_iso}\nOperation: {operation}\n{log}",
+    "context": "Nagłówek zapisanego raportu",
+    "source": "installer/windows/Wizard.cs:618",
+    "notes": "Aktualny raport ma Operation także przy PL. Wartości {operation} są technicznymi kodami install/update/repair/models/rollback/uninstall, nie etykietami."
+  },
+  {
+    "key": "report-name",
+    "en": "EwP-setup-report-{datecode}.txt",
+    "pl": "EwP-setup-report-{datecode}.txt",
+    "context": "Domyślna nazwa pliku raportu",
+    "source": "installer/windows/Wizard.cs:615",
+    "notes": "{datecode} obejmuje datę, czas, milisekundy i przesunięcie strefy; bez dwukropka. Zachować unikalność nazw."
+  },
+  {
+    "key": "or-account",
+    "en": "1. Create an account on OpenRouter and sign in.",
+    "pl": "1. Załóż konto OpenRouter i zaloguj się.",
+    "context": "4. Instrukcja OR — całe zdanie z linkiem",
+    "source": "installer/windows/WizardKeys.cs",
+    "notes": "Tekst linku jest fragmentem w Interfejs. Adres: https://openrouter.ai/"
+  },
+  {
+    "key": "or-credits",
+    "en": "2. Add credits for the models you want to use.",
+    "pl": "2. Doładuj konto na korzystanie z wybranych modeli.",
+    "context": "4. Instrukcja OR — całe zdanie z linkiem",
+    "source": "installer/windows/WizardKeys.cs",
+    "notes": "Tekst linku jest fragmentem w Interfejs. Adres: https://openrouter.ai/settings/credits"
+  },
+  {
+    "key": "or-workspaces",
+    "en": "3. Open workspaces and choose Default for this program.",
+    "pl": "3. Otwórz obszary robocze i wybierz Default dla tego programu.",
+    "context": "4. Instrukcja OR — całe zdanie z linkiem",
+    "source": "installer/windows/WizardKeys.cs",
+    "notes": "Tekst linku jest fragmentem w Interfejs. Adres: https://openrouter.ai/workspaces"
+  },
+  {
+    "key": "or-key",
+    "en": "4. Create an API key in that workspace. Set a low credit limit and paste the key into the installer.",
+    "pl": "4. Utwórz klucz API w wybranym obszarze. Ustaw niski limit wydatków klucza i wklej go do instalatora.",
+    "context": "4. Instrukcja OR — całe zdanie z linkiem",
+    "source": "installer/windows/WizardKeys.cs",
+    "notes": "Tekst linku jest fragmentem w Interfejs. Adres: https://openrouter.ai/workspaces/default/keys"
+  },
+  {
+    "key": "hf-account",
+    "en": "1. Create an account on Hugging Face and sign in.",
+    "pl": "1. Załóż konto Hugging Face i zaloguj się.",
+    "context": "Pomoc HF — całe zdanie z linkiem",
+    "source": "installer/windows/Wizard.cs:491",
+    "notes": "Adres linku: https://huggingface.co/join"
+  },
+  {
+    "key": "hf-model-terms",
+    "en": "2. Open the model page, complete the access form and accept the terms.",
+    "pl": "2. Otwórz stronę modelu, wypełnij formularz dostępu i zaakceptuj warunki.",
+    "context": "Pomoc HF — całe zdanie z linkiem",
+    "source": "installer/windows/Wizard.cs:492",
+    "notes": "Adres linku: https://huggingface.co/pyannote/speaker-diarization-community-1"
+  },
+  {
+    "key": "hf-token-settings",
+    "en": "3. In Settings → Access Tokens, create a read-only token (Read).",
+    "pl": "3. W Settings → Access Tokens utwórz token tylko do odczytu (Read).",
+    "context": "Pomoc HF — całe zdanie z linkiem",
+    "source": "installer/windows/Wizard.cs:493",
+    "notes": "Settings → Access Tokens to nazwa w serwisie HF. Adres: https://huggingface.co/settings/tokens"
+  },
+  {
+    "key": "confirmation-heading-rollback",
+    "en": "3. Restore previous version",
+    "pl": "3. Przywróć poprzednią wersję",
+    "context": "Nagłówek potwierdzenia / rollback",
+    "source": "installer/windows/Wizard.cs:232"
+  },
+  {
+    "key": "confirmation-heading-uninstall",
+    "en": "3. Uninstall",
+    "pl": "3. Odinstaluj",
+    "context": "Nagłówek potwierdzenia / uninstall",
+    "source": "installer/windows/Wizard.cs:232"
+  }
+]

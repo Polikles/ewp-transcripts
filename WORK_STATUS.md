@@ -1,3 +1,17 @@
+# Delivered installer text review table — 2026-11-25
+
+Owner requested the complete editable installer EN/PL table. Delivered 1148 entries in XLSX/CSV:
+179 UI, 57 full templates, 237 logs/scripts, 61 project notices, 569 original license paragraphs,
+15 links, 14 technical formats, 16 archived IDs. All 179 historical IDs retained; approved app
+workbook untouched. Packet: /home/linuch/project-ewp/deliveries/ewp-installer-text-review-2026-11-25;
+ZIP alongside it. Repository reference: docs/installer-copy-review/README.md.
+Checkpoint: [installer-copy-table](docs/checkpoints/2026-11-25-installer-copy-table.md).
+Round-trip/all-column checks, independent 175 T-call count, 1075 C# literal classifications,
+12 byte-identical original notices, placeholders/unique IDs/formula exclusion and Ruff PASS.
+No native Excel rendering available; layout metadata checked, full HTML preview supplied.
+NEXT: await owner corrections, then reconcile by ID and integrate approved wording/offline help.
+No product change/rebuild/new manual/model/paid test gate. Native app shell follows installer closure.
+
 # Delivered 0.24.2 — 2026-11-25
 
 0.24.2 delivered from7178bc7478897016e9663905739adb48afe73c00. Native run45683385827 SUCCESS:

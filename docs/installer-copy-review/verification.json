@@ -1,0 +1,25 @@
+{
+  "rows": 1148,
+  "sheets": {
+    "Interfejs": 179,
+    "Linki": 15,
+    "Raport_i_terminal": 237,
+    "Pelne_komunikaty": 57,
+    "Dane_i_formaty": 14,
+    "Oryginalne_licencje": 569,
+    "Notices_projektu": 61,
+    "Archiwum_ID": 16
+  },
+  "independent_T_call_count": 175,
+  "original_notices_byte_identical": 12,
+  "xlsx_csv_all_columns_equal": true,
+  "formulas": 0,
+  "historical_ids_retained": 179,
+  "approved_app_workbook_byte_unchanged": true,
+  "legacy_csv_git_unchanged": true,
+  "placeholder_sets": 57,
+  "lexer_fixture": "PASS",
+  "layout_metadata": "wrapped EN/PL, freeze panes, filters, hidden baseline, editable colours, row heights checked",
+  "native_excel_rendering": "not available; no native Excel/LibreOffice rendering claimed",
+  "checks": "PASS"
+}

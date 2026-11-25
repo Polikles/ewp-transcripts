@@ -11,3 +11,6 @@
 # Preserve the supplied third-party OFL notices byte-for-byte (including trailing spaces).
 src/ewp_transcripts/web_assets/brand/Montserrat-OFL.txt -whitespace
 src/ewp_transcripts/web_assets/brand/NotoSansMono-OFL.txt -whitespace
+
+# Review CSV keeps exact newlines and intentional spaces in fragments and original legal copy.
+docs/installer-copy-review/EwP-instalator-EN-PL-do-korekty.csv -text -whitespace

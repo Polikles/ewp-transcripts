@@ -1,3 +1,9 @@
+Owner request 2026-11-25: complete installer copy table now delivered in XLSX/CSV with stable IDs,
+full composed messages and project/vendor notices separated. See installer-copy-table checkpoint
+and docs/installer-copy-review/README.md. Next: returned owner wording → approved EN/PL integration
+and affected offline help. Native Windows interface/lifetime follows installer copy closure.
+No product changes or new functional/manual/model/provider tests for this inventory task.
+
 Owner follow-up2026-11-25 closes functional installer retesting after automatic required host
 checks (0.24.2): automated verification only, no further manual-test gate. Next planned stage is
 full installer EN/PL copy consolidation/owner wording review and audit of user-facing notices,
