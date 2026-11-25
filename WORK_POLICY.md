@@ -1,3 +1,5 @@
+Current boundary2026-11-25:0.24.1 delivered; follow opening TODO/status and model-preflight-selection checkpoint. Owner confirms mixed local three-model ASR queue; preserve that acceptance without repeated inference/paid tests. Await focused early-model/spacing/selection feedback.
+
 Current boundary2026-11-25:0.24.0 delivered from50cb47b after owner0.23.2 feedback. Optional
 Whisper v3/Turbo addition is authorized and implemented (earlier deferred-only prohibition is
 superseded); no public desktop weights established for Scribe/MAI. Follow opening TODO/status and

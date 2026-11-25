@@ -1,0 +1,74 @@
+{
+  "version": "0.24.1",
+  "source": "8e552126ced7a8a786a1af55319b785d5e8bfc0b",
+  "run_id": 45678022822,
+  "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45678022822",
+  "build_job": 139430706286,
+  "windows_job": 139431086438,
+  "local": {
+    "passed": 1176,
+    "native_skips": 12,
+    "integration_cases_included": 17,
+    "ruff_format_mypy": "PASS",
+    "mypy_files": 119
+  },
+  "native": {
+    "result": "PASS",
+    "wpf_groups": 35,
+    "windows_cases": 12,
+    "case_seconds": 31.65,
+    "installer_ui_changed": false
+  },
+  "browser": {
+    "result": "PASS",
+    "cases": [
+      "planning missing large-v3 rejected before staging",
+      "planning missing large-v3-turbo rejected before staging",
+      "model label separated by visible line and margin",
+      "light review switch 0",
+      "light review switch 2",
+      "light review switch 1",
+      "light review switch 3",
+      "light sidebar switch and refresh",
+      "dark review switch 0",
+      "dark review switch 2",
+      "dark review switch 1",
+      "dark review switch 3",
+      "dark sidebar switch and refresh",
+      "model removed after valid plan rejects direct staging before source preservation"
+    ],
+    "label_geometry": {
+      "gap": 5.59375,
+      "display": "block"
+    },
+    "page_errors": [],
+    "external_requests": [],
+    "model_or_provider_calls": 0
+  },
+  "application_screenshots_inspected": 3,
+  "archive_sha256": {
+    "installer-test-package": "5674a79dcaabc7bb0d4294d246d5e28bd94e16b7047835835f59a77d6415b875",
+    "native-windows-startup-evidence": "da51eedf4dce6597584c4c56b2885e6a86e13b651b5a3f0626a77b70bc330d19"
+  },
+  "product_hashes": {
+    "EwP-0.24.1-windows-x64.zip": "0e58eec7897b96ac609012e5cf7adf9488ead354de0969471f2fbdadb6039f63",
+    "EwP-0.24.1-ubuntu-x64.zip": "94d2c5e6bed7249e8d66f7e5f27f88a3147a294ebaa664152044fdef2344d583",
+    "EwP-Setup-0.24.1.exe": "bc72227f516a2a32fd54db1baefd7ea34be51f55b19022a1736deaa3722749b3",
+    "EwP-0.24.1-ubuntu-x64.tar.gz": "ccac42ce2d618409070ab9a7f787f4c879660b16371585ed9c70e67561939cf8",
+    "Install-EwP-0.24.1.ps1": "f54f80216ad59eaa2a55315911568437d901b48ad6b07c8e8dece86616d51564",
+    "Install-EwP-0.24.1.sh": "889f16bc357cba07afe56f7044f2d29a1e2931ff6c4bda6ccf2b062de5e16eb6"
+  },
+  "packaged_source_matches_local": true,
+  "owner_acceptance_preserved": "0.24.0 mixed local queue with large-v2, large-v3 and large-v3-turbo works",
+  "new_model_or_provider_calls": 0,
+  "models_pins_changed": false,
+  "prior_cloud_spend_usd": "0.0291461230985028369",
+  "delivery": "/home/linuch/project-ewp/deliveries/ewp-0.24.1-installers",
+  "pending": [
+    "Focused owner feedback on early model error and selection/spacing",
+    "Installer EN/PL/notices audit",
+    "Native Windows app interface after installer closure",
+    "Public release/signing/bootstrap activation"
+  ],
+  "unsigned_internal": true
+}

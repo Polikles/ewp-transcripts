@@ -3,15 +3,19 @@
 Owner confirms mixed queue with three different local ASR models works. Preserve that pass;
 no new model downloads/GPU/paid-provider campaign. Earlier waiting boundary is superseded.
 
-- [ ] Check selected local ASR availability during planning, before preparing/adding/starting work;
+- [x] Check selected local ASR availability during planning, before preparing/adding/starting work;
       missing model gets EN/PL install/restart/retry message, no backend preparation or hidden downloads.
       Guard direct staging/start too (model removed after plan or restored old queue).
-- [ ] Separate ASR model label from recording/settings in transcription queue.
-- [ ] Visibly outline the recording whose transcript is open in both left recording queue and
+- [x] Separate ASR model label from recording/settings in transcription queue.
+- [x] Visibly outline the recording whose transcript is open in both left recording queue and
       Source review & export → Choose recording table. Keep markers synced on switches/refresh,
       accessible selection state and legible in light/dark themes.
-- [ ] Focused backend/browser regression with multiple synthetic recordings and both themes,
+- [x] Focused backend/browser regression with multiple synthetic recordings and both themes,
       local quality gate, native artifact checks; update affected EN/PL help/changelog and deliver0.24.1.
+
+- [ ] Owner focused0.24.1 check: early missing-model feedback if an absent option is available,
+      model-label spacing, active recording outline in both lists and both themes. See
+      Instructions/MODEL_PREFLIGHT_SELECTION_RETEST_PL.md. Mixed-model ASR already owner-passed.
 
 Earlier tasks follow.
 
@@ -32,9 +36,9 @@ Earlier tasks follow.
 - [x] Document closed-weight limitations and remaining owner model runtime tests honestly.
 
 
-- [ ] Owner focused0.24.0 retest: add optional Whisper v3/Turbo, installed-model recognition,
-      queue/restored model names and actual inference on Windows GPU. Checklist:
-      Instructions/LOCAL_ASR_INSTALLER_RETEST_PL.md. No repeated paid/uninstall campaign.
+- [x] Owner0.24.0 feedback received: mixed queue with three local ASR models works. Preserve
+      that actual-inference acceptance; missing-model/selection issues promoted to0.24.1 above.
+      Do not impose a repeated model/transcription campaign.
 - [ ] Exact Scribe v2/MAI local parity remains blocked by absent established public desktop weights;
       do not substitute other models under their names. Revisit if officially released.
 

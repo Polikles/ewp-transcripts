@@ -1,3 +1,18 @@
+# Delivered 0.24.1 — 2026-11-25
+
+0.24.1 delivered from8e552126ced7a8a786a1af55319b785d5e8bfc0b. Native45678022822 SUCCESS:
+35 WPF groups/12 actual Windows cases;1176 local tests/17 integrations, Ruff/format/mypy119 PASS.
+Browser14 cases/3 inspected app screenshots PASS: early missing-model errors, post-plan deletion
+staging guard, queue label spacing, four-recording selection/sidebar switches/polling in both themes.
+Six local hashes and packaged source match CI. Owner mixed three-model local queue PASS retained.
+Files: /home/linuch/project-ewp/deliveries/ewp-0.24.1-installers.
+Checkpoint: docs/checkpoints/2026-11-25-model-preflight-selection.md and matching evidence JSON.
+Next is focused owner early-model/spacing/active-marker feedback; no repeated model/GPU/paid
+campaign, no rebuild merely on resume. Models/pins unchanged. Full installer/notices audit,
+native app shell and signing/public release/bootstrap remain later. EXE unsigned/internal.
+
+Earlier state follows.
+
 # Active owner follow-up — 2026-11-25 / 0.24.1
 
 Baselineb95533c / delivered0.24.0 source50cb47b. Owner confirms mixed-model local queue works.
