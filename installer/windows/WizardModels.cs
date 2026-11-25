@@ -39,8 +39,8 @@ sealed partial class Wizard
         if (picker.ShowDialog(this) != true) return;
         manualLocation = true;
         root.Text = operation == "install" ? InstallFolderFromPicker(picker.FolderName) : picker.FolderName;
-        locationChange?.Cancel(); ReadInstalled(); Render();
-        if (operation is "repair" or "models" && installed != null) await CheckHost();
+        locationChange?.Cancel(); ReadInstalled(); RefreshHostDisk(); Render();
+        await AutoCheckHost();
     }
 
     void RenderModels()

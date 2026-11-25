@@ -26,7 +26,7 @@ sealed partial class Wizard
         "visible information hover/focus feedback", "persistent technical log expansion",
         "disabled installed models and explicit reinstall", "real older-version rollback selection", "required-check click feedback",
         "five-step first install and optional OpenRouter page", "overall progress and stable metrics",
-        "same-version update refusal", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
+        "same-version update refusal", "automatic required host checks for install/update/repair/models", "disk-only folder refresh without repeated hardware probes", "failed host checks stay blocked after folder changes", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -100,6 +100,7 @@ sealed partial class Wizard
         busy = false; finished = successful = true; Render(); await Capture(previewDirectory, "pl-complete");
         await TestActionResetAndPresentation(previewDirectory);
         await TestModelMaintenance(previewDirectory);
+        await TestAutomaticHostChecks(previewDirectory);
         var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
         var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
         infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();
@@ -109,6 +110,56 @@ sealed partial class Wizard
         infoWindow.Close();
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
+    }
+
+    async Task TestAutomaticHostChecks(string? previews)
+    {
+        busy = finished = successful = false;
+        int calls = 0; long free = 100_000_000_000L;
+        var priorDisk = DiskProbe; var priorFind = FindInstallation;
+        DiskProbe = _ => (free, "TEST-AUTO-VOLUME");
+        HostCheckRunner = () => { calls++; Assert(page == 1 && busy, "automatic check runs on busy location page"); SetFixtureHost(); return Task.FromResult(0); };
+        try
+        {
+            foreach (string action in new[] { "install", "update", "repair", "models" })
+            {
+                string folder = Path.Combine(temporary, "test-auto-" + action); Directory.CreateDirectory(folder);
+                if (action != "install")
+                {
+                    File.WriteAllText(Path.Combine(folder, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = folder }));
+                    File.WriteAllText(Path.Combine(folder, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = folder, version = action == "update" ? "0.0.1" : version, active = "versions/test-1", local_models = false }));
+                }
+                FindInstallation = (_, _) => action == "install" ? null : InstallationDiscovery.Read(folder);
+                SelectOperation(action); root.Text = folder; await Task.Delay(250);
+                int previous = calls;
+                await Next();
+                Assert(page == 1 && calls == previous + 1 && hostReady && hostAttempted && CanAdvance, action + " auto-check completes without manual test click");
+                await AutoCheckHost();
+                Assert(calls == previous + 1, "cached/debounced check does not repeat hardware probes");
+                if (action == "install")
+                {
+                    string hardware = string.Join("|", host!.Value.GetProperty("checks").EnumerateArray().Where(r => r.GetProperty("code").GetString() != "disk").Select(r => r.GetRawText()));
+                    free = 24_000_000_000L; root.Text = folder + "-low-space"; await Task.Delay(300);
+                    Assert(calls == previous + 1 && !CanAdvance && !hostReady && hostAttempted, "low-space folder blocks without repeating full check");
+                    Assert(host!.Value.GetProperty("checks").EnumerateArray().Single(r => r.GetProperty("code").GetString() == "disk").GetProperty("context").GetProperty("free_bytes").GetInt64() == free, "cached disk table reflects changed volume");
+                    Assert(string.Join("|", host.Value.GetProperty("checks").EnumerateArray().Where(r => r.GetProperty("code").GetString() != "disk").Select(r => r.GetRawText())) == hardware, "CPU OS GPU and runtime results remain unchanged");
+                    language.SelectedIndex = 1; await Capture(previews, "pl-auto-check-new-disk-full");
+                    free = 100_000_000_000L; root.Text = folder + "-enough-space"; await Task.Delay(300);
+                    Assert(calls == previous + 1 && hostReady && CanAdvance, "adequate target recovers Next using only a disk check");
+                    await Capture(previews, "pl-auto-check-new-disk-ready");
+                    using var failed = JsonDocument.Parse(host!.Value.GetRawText().Replace("\"code\":\"architecture\",\"status\":\"pass\"", "\"code\":\"architecture\",\"status\":\"fail\""));
+                    host = failed.RootElement.Clone(); root.Text = folder + "-failed-cpu"; await Task.Delay(300);
+                    Assert(!hostReady && !CanAdvance && calls == previous + 1, "disk-only refresh cannot clear a failed CPU check");
+                }
+                if (action == "update") await Capture(previews, "pl-update-automatic-check-ready");
+            }
+            FindInstallation = (_, _) => null;
+            SelectOperation("update"); int atInvalid = calls; await Next();
+            Assert(page == 1 && calls == atInvalid && !CanAdvance, "unknown update folder waits without worker");
+            SelectOperation("uninstall"); await Next();
+            Assert(calls == atInvalid, "uninstall does not launch unneeded host tests");
+        }
+        finally { HostCheckRunner = null; DiskProbe = priorDisk; FindInstallation = priorFind; busy = finished = successful = false; }
     }
 
     async Task TestModelMaintenance(string? previews)

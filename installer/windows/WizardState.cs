@@ -24,7 +24,7 @@ sealed partial class Wizard
         {
             locationChange?.Cancel(); stateEpoch++;
             operation = value; rollbackTarget = null; page = 0; notice = progressStage = "";
-            host = installed = removal = null;
+            host = installed = removal = null; checkedLocalModels = null;
             hostReady = hostAttempted = previewReady = finished = successful = false;
             hfSecret = orSecret = ""; hfValid = orValid = false;
             terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = false;

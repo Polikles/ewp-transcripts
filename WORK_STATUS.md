@@ -1,3 +1,11 @@
+# Active correction — 2026-11-25 / 0.24.2
+
+Owner requests automatic required host check at step2 for Install/Update and disk-only refresh
+on target change. No further manual test requested/required. Follow opening TODO and
+[checkpoint](docs/checkpoints/2026-11-25-automatic-host-checks.md). Baseline2b45b7f.
+Next planned stage after this fix: full installer EN/PL copy and notices audit, then native app
+interface after installer closure. Do not start that broad next stage merely to answer the plan.
+
 # Delivered 0.24.1 — 2026-11-25
 
 0.24.1 delivered from8e552126ced7a8a786a1af55319b785d5e8bfc0b. Native45678022822 SUCCESS:

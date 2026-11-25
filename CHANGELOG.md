@@ -4,6 +4,14 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.24.2 — 2026-11-25 (automatic installer checks)
+
+- Start required computer checks automatically on entering Location for Install and Update,
+  as well as Repair and Add models, once the selected folder is valid.
+- Recheck target-disk free space when the folder changes while retaining CPU/OS/GPU/runtime
+  results. Keep Next and the structured disk row consistent with the current folder.
+
+
 ## 0.24.1 — 2026-11-25 (early model checks and active recording markers)
 
 - Reject unavailable selected local ASR models during planning, staging and queue start with

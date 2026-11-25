@@ -354,7 +354,7 @@ sealed partial class Wizard : Window
         if (!CanAdvance) { HighlightMissingRequirements(); return; }
         notice = "";
         if (finished) { Launch(); return; }
-        if (page == 0) { page = 1; ReadInstalled(); Render(); if (operation is "repair" or "models" && installed != null) await CheckHost(); return; }
+        if (page == 0) { page = 1; ReadInstalled(); Render(); await AutoCheckHost(); return; }
         if (page == 1)
         {
             page = 2; if (operation == "models") local.IsChecked = true; Render();
@@ -364,7 +364,7 @@ sealed partial class Wizard : Window
         if (page == 2 && operation == "install") { page = 3; Render(); return; }
         if (page == ProgressPage - 1) await RunOperation();
     }
-    void Back() { if (busy) return; notice = ""; if (finished) { finished = false; page = 1; } else page = Math.Max(0, page - 1); Render(); }
+    async void Back() { if (busy) return; notice = ""; if (finished) { finished = false; page = 1; } else page = Math.Max(0, page - 1); Render(); await AutoCheckHost(); }
     void Cancel()
     {
         if (!busy) { Close(); return; }
@@ -375,13 +375,15 @@ sealed partial class Wizard : Window
     void ScheduleLocation()
     {
         locationChange?.Cancel(); locationChange = new(); var token = locationChange.Token; int epoch = ++stateEpoch;
-        hostReady = hostAttempted = false; host = removal = null; previewReady = false; notice = ""; log.Clear();
-        ReadInstalled(); RefreshNavigation();
+        hostReady = false; hostAttempted = host != null; removal = null; previewReady = false; notice = ""; log.Clear();
+        ReadInstalled();
+        if (checkedLocalModels != null && checkedLocalModels != LocalSelected) { host = null; hostAttempted = false; }
+        RefreshNavigation();
         _ = RefreshAfterDelay(token, epoch);
     }
     async Task RefreshAfterDelay(CancellationToken token, int epoch)
     {
-        try { await Task.Delay(200, token); if (!token.IsCancellationRequested && stateEpoch == epoch) { RefreshLocation(); RenderHostRows(); RefreshNavigation(); if (!testing && page == 1 && operation is "repair" or "models" && !busy && !hostAttempted && LocationProblem() == null) await CheckHost(); } }
+        try { await Task.Delay(200, token); if (!token.IsCancellationRequested && stateEpoch == epoch) { RefreshLocation(); RefreshHostDisk(); RenderHostRows(); RefreshNavigation(); await AutoCheckHost(); } }
         catch (OperationCanceledException) { }
     }
     void ReadInstalled()
@@ -499,10 +501,17 @@ sealed partial class Wizard : Window
     {
         if (busy) return;
         int epoch = stateEpoch;
-        busy = true; hostAttempted = false; notice = ""; File.Delete(CancelFile); Render();
-        try { int code = await Worker("check", false); hostReady = epoch == stateEpoch && code == 0; if (!hostReady && epoch == stateEpoch) notice = "check_failed"; }
+        bool localForCheck = LocalSelected; checkedLocalModels = localForCheck;
+        busy = true; hostReady = hostAttempted = false; host = null; notice = ""; File.Delete(CancelFile); Render();
+        try { int code = await (HostCheckRunner?.Invoke() ?? Worker("check", false)); hostReady = epoch == stateEpoch && code == 0; if (!hostReady && epoch == stateEpoch) notice = "check_failed"; }
         catch { hostReady = false; notice = "check_unavailable"; }
-        finally { busy = false; hostAttempted = epoch == stateEpoch; Render(); }
+        finally
+        {
+            busy = false; hostAttempted = epoch == stateEpoch;
+            if (hostAttempted) checkedLocalModels = localForCheck;
+            Render();
+        }
+        if (epoch != stateEpoch) await AutoCheckHost();
     }
     async Task PreviewRemoval()
     {

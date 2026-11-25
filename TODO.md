@@ -1,3 +1,19 @@
+# Active follow-up — 2026-11-25 / target 0.24.2
+
+Owner waives further manual testing after this correction. Preserve mixed-model inference,
+uninstall and prior focused acceptance; use automated checks only for this change.
+
+- [ ] Auto-run required computer checks on entering step2 for Install/Update, also retaining
+      Repair/Add-models automatic diagnostics. Wait for a valid installation path; avoid duplicate runs.
+- [ ] Changing target folder automatically refreshes free-space checks on that volume without
+      redoing successful CPU/OS/GPU/runtime probes. Keep navigation and cached disk row accurate.
+- [ ] Focused native WPF regression plus normal gate, new immutable package, affected EN/PL help,
+      checkpoint/evidence. No new manual checklist or owner test gate.
+- [ ] Explain next planned stage: full installer EN/PL copy review and user-facing notices audit;
+      after installer closure, native Windows interface/lifetime. No broad next-stage work inferred.
+
+Earlier tasks follow.
+
 # Active feedback — 2026-11-25 / target 0.24.1
 
 Owner confirms mixed queue with three different local ASR models works. Preserve that pass;
