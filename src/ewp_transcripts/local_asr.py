@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from ewp_transcripts.config import ApplicationConfig, ModelsConfig
+from ewp_transcripts.domain.errors import ApplicationError
 
 
 def optional_asr_models() -> list[dict[str, Any]]:
@@ -38,18 +39,59 @@ def resolve_local_asr(config: ApplicationConfig) -> ApplicationConfig:
 
 
 def local_model_options(config: ApplicationConfig) -> list[dict[str, Any]]:
-    choices: list[dict[str, Any]] = [
-        {
-            "id": "configured",
-            "name": config.models.asr_model,
-            "path": config.models.asr_snapshot_path,
-        }
-    ]
-    choices.extend(
-        {"id": m["name"], "name": m["name"], "path": Path(m["path"]).expanduser()}
-        for m in optional_asr_models()
-    )
-    return [
-        {"id": m["id"], "name": m["name"], "installed": (m["path"] / "model.bin").is_file()}
-        for m in choices
-    ]
+    choices = []
+    for name in ["configured", "large-v3", "large-v3-turbo"]:
+        candidate = config.model_copy(
+            update={
+                "speech": config.speech.model_copy(
+                    update={"provider": "local", "local_model": name}
+                )
+            }
+        )
+        models = selected_models(candidate)
+        choices.append(
+            {"id": name, "name": models.asr_model, "installed": local_asr_available(models)}
+        )
+    return choices
+
+
+class LocalAsrUnavailable(ApplicationError, ValueError):
+    code = "GUI_LOCAL_ASR_MODEL_REQUIRED"
+
+    def __init__(self) -> None:
+        super().__init__(
+            "The selected model is not installed. "
+            "Install the model, restart the program and try again."
+        )
+
+
+def local_asr_available(models: ModelsConfig) -> bool:
+    """Cheap offline snapshot checks, without hashes, model imports or network access."""
+    target = models.asr_snapshot_path
+    if target.name != models.asr_revision:
+        return False
+    sizes: dict[str, int | None] = {"model.bin": None, "config.json": None, "tokenizer.json": None}
+    for entry in optional_asr_models():
+        if (
+            entry["repository"] == models.asr_repository
+            and entry["revision"] == models.asr_revision
+        ):
+            sizes = entry["files"]
+            break
+    try:
+        return all(
+            (target / name).is_file()
+            and (
+                (target / name).stat().st_size == size
+                if size is not None
+                else (target / name).stat().st_size > 0
+            )
+            for name, size in sizes.items()
+        )
+    except OSError:
+        return False
+
+
+def require_local_asr(config: ApplicationConfig) -> None:
+    if config.speech.provider == "local" and not local_asr_available(selected_models(config)):
+        raise LocalAsrUnavailable()

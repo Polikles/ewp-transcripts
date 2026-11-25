@@ -1,3 +1,20 @@
+# Active feedback — 2026-11-25 / target 0.24.1
+
+Owner confirms mixed queue with three different local ASR models works. Preserve that pass;
+no new model downloads/GPU/paid-provider campaign. Earlier waiting boundary is superseded.
+
+- [ ] Check selected local ASR availability during planning, before preparing/adding/starting work;
+      missing model gets EN/PL install/restart/retry message, no backend preparation or hidden downloads.
+      Guard direct staging/start too (model removed after plan or restored old queue).
+- [ ] Separate ASR model label from recording/settings in transcription queue.
+- [ ] Visibly outline the recording whose transcript is open in both left recording queue and
+      Source review & export → Choose recording table. Keep markers synced on switches/refresh,
+      accessible selection state and legible in light/dark themes.
+- [ ] Focused backend/browser regression with multiple synthetic recordings and both themes,
+      local quality gate, native artifact checks; update affected EN/PL help/changelog and deliver0.24.1.
+
+Earlier tasks follow.
+
 # Active owner feedback — 2026-11-25 / target 0.24.0
 
 - [x] Read supplied 0.23.2 report privately; retain owner pass: uninstall while app running.

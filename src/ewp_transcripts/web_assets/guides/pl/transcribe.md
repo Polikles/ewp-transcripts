@@ -49,3 +49,9 @@ zainstalować jawnie. Modele korzystają z dotychczasowego przetwarzania GPU, wy
 Scribe v2 i MAI pozostają w tej aplikacji dostępne tylko w chmurze: nie ustalono publicznych wag
 tych modeli do zwykłej instalacji na PC. Lokalne warianty Whisper odpowiadają ich wariantom
 chmurowym, lecz nie zastępują wszystkich zamkniętych modeli dostawców.
+
+Planowanie sprawdza, czy wybrany lokalny model ASR został zainstalowany. Gdy go brakuje lub
+pobranie jest niekompletne, doinstaluj ten model odpowiednim instalatorem, zrestartuj program
+i ponów planowanie. Dodanie do kolejki oraz jej start sprawdzają model ponownie; brak modelu
+pozostawia zadania oczekujące. Program nie pobiera modelu automatycznie i nie przełącza na chmurę.
+Kolejka pokazuje model w osobnym wierszu od nazwy i ustawień nagrania.

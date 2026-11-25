@@ -12,6 +12,8 @@ Use the numbered steps below with the matching GUI stage.
 
 Open the recording's review/export action in its queue. This prepares a new draft or restores that recording's saved draft. Existing canonical result JSON can be imported instead of transcribing again. The selected result and output root determine review identity; do not combine unrelated result/revision paths. Direct paths remain an advanced fallback.
 
+The recording whose transcript is open has a strong outline in both the left recording queue and the Choose recording list. The marker follows recording switches and queue refreshes in light and dark themes.
+
 ## 2. Speaker names and colors
 
 Set display names and check each block's speaker assignment. Add speaker creates an editable identity for this revision; it is not automatic voice recognition or a new ASR run. Reassign an in-use speaker's blocks before removing it.

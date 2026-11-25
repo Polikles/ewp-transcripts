@@ -49,3 +49,9 @@ installed explicitly. Both optional models use the existing GPU/alignment/diariz
 Scribe v2 and MAI remain cloud-only in this application: no public downloadable desktop weights
 were established for these exact models. Local Whisper choices cover their corresponding cloud
 presets, not the full set of proprietary providers.
+
+Planning checks whether the selected local ASR snapshot is installed. If it is missing or
+incomplete, install that model with the matching installer, restart the program and plan again.
+Staging and queue start check again; unavailable models leave jobs waiting. No automatic model
+download or cloud fallback occurs. The queue displays the model on a separate line from the
+recording name/settings.

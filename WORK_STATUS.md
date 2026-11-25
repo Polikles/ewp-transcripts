@@ -1,3 +1,10 @@
+# Active owner follow-up — 2026-11-25 / 0.24.1
+
+Baselineb95533c / delivered0.24.0 source50cb47b. Owner confirms mixed-model local queue works.
+Fix early missing-ASR feedback, queue model spacing and active transcript markers in both lists.
+Follow opening TODO and [checkpoint](docs/checkpoints/2026-11-25-model-preflight-selection.md).
+No new model/paid qualification required; retain previous acceptance/artifacts.
+
 # Delivered 0.24.0 — 2026-11-25
 
 Source50cb47b; native run45662554203 SUCCESS:35 WPF groups/12 actual Windows cases.

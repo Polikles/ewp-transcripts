@@ -2,6 +2,7 @@
 // UI copy only. Never translate transcript/provider payloads, paths, model IDs or form values.
 let guiLocale = "en";
 const guiPolish = new Map([
+  ["The selected model is not installed. Install the model, restart the program and try again.", "Wybrany model nie został zainstalowany. Doinstaluj model, zrestartuj program i spróbuj ponownie."],
   ["One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, check the connection to load a saved key, or choose Use saved OpenRouter key.", "Jeden klucz służy do ASR, korekty i tłumaczenia. Zapis systemowy jest opcjonalny. Jeśli magazyn jest niedostępny, użyj klucza tylko na sesję. Po restarcie sprawdź połączenie, aby wczytać zapisany klucz, albo wybierz Użyj zapisanego klucza."],
   ["Local ASR model", "Lokalny model ASR"],
   ["Configured local model (default)", "Skonfigurowany model lokalny (domyślny)"],

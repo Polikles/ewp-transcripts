@@ -15,7 +15,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from ewp_transcripts.application import dry_run, inspect_input
-from ewp_transcripts.config import SpeechConfig, load_config
+from ewp_transcripts.config import ApplicationConfig, SpeechConfig, load_config
 from ewp_transcripts.discovery import normalize_input_path
 from ewp_transcripts.domain.canonical import CanonicalResult, load_canonical_result
 from ewp_transcripts.domain.enums import LanguageMode
@@ -144,6 +144,7 @@ class GuiWorkflowController:
     prohibited_roots: tuple[Path, ...] = field(default_factory=default_gui_prohibited_roots)
     inspect_service: Service = inspect_input
     dry_run_service: Service = dry_run
+    model_validator: Callable[[ApplicationConfig], None] | None = None
     _operations: deque[GuiOperation] = field(default_factory=lambda: deque(maxlen=50))
 
     def run(self, kind: Literal["inspect", "dry-run"], document: dict[str, Any]) -> GuiOperation:
@@ -176,6 +177,8 @@ class GuiWorkflowController:
             if kind == "inspect":
                 result = self.inspect_service(input_path, config=config, **group_options)
             else:
+                if self.model_validator is not None:
+                    self.model_validator(config)
                 raw_output = document.get("output_directory")
                 if not isinstance(raw_output, str) or not raw_output.strip():
                     return self._failure(
@@ -245,6 +248,10 @@ class GuiWorkflowController:
 
     def operations(self) -> tuple[GuiOperation, ...]:
         return tuple(self._operations)
+
+    def validate_model(self, speech: SpeechConfig) -> None:
+        if self.model_validator is not None:
+            self.model_validator(load_config().model_copy(update={"speech": speech}))
 
     def completed_plan(
         self,

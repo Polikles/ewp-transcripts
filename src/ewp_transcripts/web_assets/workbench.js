@@ -69,6 +69,7 @@ function updateGuiContext() {
     translationForm.elements.namedItem("target_language").value,
     stageQueueSelections.correction.size, stageQueueSelections.translation.size]);
   updateGuiRecordings();
+  syncGuiRecordingSelection();
   if (context.dataset.signature === signature) { applyGuiSpeakerColors(); renderGuiTaskContext(job); return; }
   context.dataset.signature = signature;
   context.replaceChildren();
@@ -103,6 +104,18 @@ function updateGuiContext() {
   renderGuiTaskContext(job);
 }
 
+function syncGuiRecordingSelection() {
+  const result = guiActiveStage === "review" && reviewDocument?.result_path ? reviewDocument.result_path : guiActiveResult;
+  for (const button of document.querySelectorAll("#gui-recordings .gui-recording")) {
+    const active = result ? button.dataset.resultPath === result : button.dataset.jobId === guiActiveJobId;
+    button.setAttribute("aria-pressed", String(active));
+  }
+  for (const item of document.querySelectorAll(".stage-queue-item[data-result-path]")) {
+    const active = Boolean(result && item.dataset.resultPath === result);
+    if (active) item.setAttribute("aria-current", "true"); else item.removeAttribute("aria-current");
+  }
+}
+
 function updateGuiRecordings() {
   const list = document.getElementById("gui-recordings");
   if (!list) return;
@@ -114,7 +127,8 @@ function updateGuiRecordings() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "gui-recording"; button.dataset.status = job.status;
-    button.setAttribute("aria-pressed", String(job.job_id === guiActiveJobId || Boolean(job.result_path && job.result_path === guiActiveResult)));
+    button.dataset.jobId = job.job_id; button.dataset.resultPath = job.result_path || "";
+    button.setAttribute("aria-pressed", String(guiActiveResult ? job.result_path === guiActiveResult : job.job_id === guiActiveJobId));
     const identity = document.createElement("strong");
     identity.textContent = job.planned_job_id;
     const status = document.createElement("span");

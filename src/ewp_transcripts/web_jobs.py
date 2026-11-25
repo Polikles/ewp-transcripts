@@ -134,8 +134,10 @@ class GuiTranscriptionQueue:
         service: TranscriptionService = transcribe_one,
         history_path: Path | None = None,
         api_key_provider: Callable[[], str] = lambda: "",
+        model_validator: Callable[[ApplicationConfig], None] | None = None,
     ) -> None:
         self._api_key_provider = api_key_provider
+        self._model_validator = model_validator
         self._config = config
         self._service = service
         self._history = ProgressHistory(history_path)
@@ -296,6 +298,16 @@ class GuiTranscriptionQueue:
                 )
             return key
 
+    def preflight_models(self) -> None:
+        with self._lock:
+            self._preflight_models()
+
+    def _preflight_models(self) -> None:
+        if self._model_validator is not None:
+            for job in self._jobs.values():
+                if job.status == "staged":
+                    self._model_validator(self._config.model_copy(update={"speech": job.speech}))
+
     def start(
         self,
         *,
@@ -307,6 +319,7 @@ class GuiTranscriptionQueue:
 
         pending: list[tuple[str, Path, Path, str, LanguageMode, Literal["auto"] | int]] = []
         with self._lock:
+            self._preflight_models()
             cloud_pending = any(
                 job.status == "staged" and job.speech.provider == "openrouter"
                 for job in self._jobs.values()
@@ -688,6 +701,8 @@ class GuiTranscriptionQueue:
                 from ewp_transcripts.local_asr import resolve_local_asr
 
                 config = resolve_local_asr(config)
+                if self._model_validator is not None:
+                    self._model_validator(config)
                 tracker = RuntimeProgress(
                     self._history,
                     runtime_profile(
@@ -737,7 +752,8 @@ class GuiTranscriptionQueue:
                         "cause_type": type(error.__cause__).__name__ if error.__cause__ else "",
                         "action": (
                             ""
-                            if "OpenRouter API key is missing;" in str(error)
+                            if error.code == "GUI_LOCAL_ASR_MODEL_REQUIRED"
+                            or "OpenRouter API key is missing;" in str(error)
                             else "Cloud ASR failed. Check the shared key, credits, selected model, "
                             "timed-word support and current cost estimate; retry explicitly."
                             if job.speech.provider == "openrouter"

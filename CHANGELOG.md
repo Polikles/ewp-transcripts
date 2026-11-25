@@ -4,6 +4,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.24.1 — 2026-11-25 (early model checks and active recording markers)
+
+- Reject unavailable selected local ASR models during planning, staging and queue start with
+  an install/restart/retry instruction, without model loading or automatic downloads.
+- Separate model names from recording settings in the transcription queue.
+- Outline the active recording in the sidebar and workflow recording tables in both themes,
+  keeping selection synchronized with the open transcript and queue refreshes.
+
+
 ## 0.24.0 — 2026-11-25 (optional local ASR and installer polish)
 
 - Offer unchecked optional local Whisper Large v3 and Large v3 Turbo snapshots, explicit

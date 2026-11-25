@@ -339,7 +339,7 @@ async function refreshJobs() {
     statusText.textContent = queueJobStatusLabel(job);
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
-    {const hint=document.createElement("small"); hint.dataset.guiContent="true";
+    {const hint=document.createElement("small"); hint.className="queue-asr-model"; hint.dataset.guiContent="true";
       hint.textContent=job.speech?.provider === "openrouter" ? `OpenRouter · ${job.speech.model}`
         : `ASR · ${job.asr_model_name || (job.speech?.local_model !== "configured" && job.speech?.local_model) || guiUiText("Configured local model (default)")}`;
       identity.append(hint);}
@@ -1665,6 +1665,7 @@ function renderStageQueues(jobs) {
     for (const job of items) {
       const item = document.createElement("article");
       item.className = "stage-queue-item";
+      item.dataset.resultPath = job.result_path || "";
       if (definition.selectable) {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -1720,6 +1721,7 @@ function renderStageQueues(jobs) {
       selectAll.textContent = actionable.length > 0 && actionable.every(job => stageQueueSelections[definition.id].has(job.job_id)) ? "Clear selected actionable items" : "Select all actionable items";
     }
   }
+  if (typeof syncGuiRecordingSelection === "function") syncGuiRecordingSelection();
 }
 
 installStageQueues();

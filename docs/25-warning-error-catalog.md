@@ -234,3 +234,10 @@ For `SPEECH_ENGINE_ERROR`, those details include the underlying backend exceptio
 credential-redacted cause message. Unknown unexpected exceptions keep the sanitized
 `GUI_TRANSCRIPTION_FAILED` message. Run the dependency test, fix failed checks, and use the retained
 error details/state when a failure persists despite readiness checks.
+
+## Selected local ASR availability
+
+`GUI_LOCAL_ASR_MODEL_REQUIRED`: the selected pinned local ASR snapshot is absent or incomplete.
+Install the selected model with the matching installer, restart the program and try again.
+Planning/staging/start stop before media preparation or model loading. No automatic download or
+cloud fallback occurs. This check reads file presence/sizes; use Repair → Check models for hashes.

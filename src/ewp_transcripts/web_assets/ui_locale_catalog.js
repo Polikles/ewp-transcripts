@@ -2514,3 +2514,5 @@ for (const [en, pl] of [
     "Ostatni stan pracy jest niedostępny. Zachowano jego zapis; przywróć brakujące ścieżki lub wczytaj inny stan pracy."
   ]
 ]) guiPolish.set(en, pl);
+
+guiPolishErrorDescriptions.set("GUI_LOCAL_ASR_MODEL_REQUIRED", "Wybrany model nie został zainstalowany. Doinstaluj model, zrestartuj program i spróbuj ponownie.");

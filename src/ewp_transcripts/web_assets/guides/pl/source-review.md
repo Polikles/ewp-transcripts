@@ -12,6 +12,8 @@ Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
 
 Otwórz weryfikację i eksport wybranego nagrania z jego kolejki. Program przygotuje nowy szkic albo przywróci zapisany szkic tego nagrania. Można też zaimportować gotowy canonical JSON zamiast ponownie transkrybować. Wynik źródłowy i katalog pracy określają tożsamość weryfikacji; nie łącz ścieżek niezwiązanych wyników i rewizji. Ręczne ścieżki pozostają opcją zaawansowaną.
 
+Nagranie, którego transkrypcja jest otwarta, ma wyraźną obwódkę w kolejce nagrań po lewej oraz na liście Wybierz nagranie. Oznaczenie zmienia się razem z otwartym nagraniem i pozostaje po odświeżeniu kolejki, w jasnym i ciemnym motywie.
+
 ## 2. Imiona i kolory mówców
 
 Ustaw wyświetlane imiona i sprawdź przypisanie mówcy w każdym bloku. Dodaj mówcę tworzy edytowalną tożsamość w tej rewizji; nie rozpoznaje automatycznie głosu i nie uruchamia ASR. Przed usunięciem używanego mówcy przypisz jego bloki do innych osób.

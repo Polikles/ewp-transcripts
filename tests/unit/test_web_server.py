@@ -521,6 +521,7 @@ def test_staged_browser_audio_remains_after_selection_cache_closes(tmp_path: Pat
             resolve_allowed_path=base_workflows.resolve_allowed_path,
             resolve_transcription_options=base_workflows.resolve_transcription_options,
             resolve_group_options=base_workflows.resolve_group_options,
+            validate_model=lambda speech: None,
             completed_plan=Mock(return_value=plan),
         ),
         gui_transcriptions=transcriptions,
@@ -1028,6 +1029,7 @@ def test_transcription_queue_explains_an_existing_result(tmp_path: Path) -> None
     transcriptions.active_output_directory.return_value = None
     transcriptions.contains_active_input.return_value = False
     workflow = SimpleNamespace(
+        validate_model=lambda speech: None,
         resolve_allowed_path=lambda path, directory=False: Path(path),
         resolve_transcription_options=lambda document: ("pl", "auto"),
         resolve_group_options=GuiWorkflowController().resolve_group_options,

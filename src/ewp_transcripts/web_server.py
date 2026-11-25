@@ -451,7 +451,11 @@ class LocalGuiServer(ThreadingHTTPServer):
         application_config = load_config()
         local_provider_lock = threading.Lock()
         self.gui_config = config
-        self.gui_workflows = GuiWorkflowController(prohibited_roots=config.prohibited_roots)
+        from ewp_transcripts.local_asr import require_local_asr
+
+        self.gui_workflows = GuiWorkflowController(
+            prohibited_roots=config.prohibited_roots, model_validator=require_local_asr
+        )
         self.gui_inputs = GuiInputs(self.gui_workflows.resolve_allowed_path)
         self.gui_speech = GuiSpeechController(self.gui_inputs)
         self.gui_selections = GuiSelectionCache()
@@ -520,6 +524,7 @@ class LocalGuiServer(ThreadingHTTPServer):
                 self.gui_openrouter_api_key or os.environ.get(self.gui_openrouter_api_key_env, "")
             ),
             history_path=default_workspace_directory().parent / "runtime-timings.json",
+            model_validator=require_local_asr,
         )
         self.gui_startup_recovery = GuiStartupRecovery(
             default_workspace_directory().parent / "startup-recovery.json"
@@ -2360,6 +2365,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/v1/transcriptions/start":
                 try:
+                    self.server.gui_transcriptions.preflight_models()
                     allow_cloud = document.get("cloud_confirmed") is True
                     start_token_value = document.get("cloud_consent_token")
                     start_token = start_token_value if isinstance(start_token_value, str) else ""
@@ -2751,6 +2757,7 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                     )
                     return
                 speech = SpeechConfig.model_validate(document.get("speech", {}))
+                self.server.gui_workflows.validate_model(speech)
                 plan = self.server.gui_workflows.completed_plan(
                     input_path,
                     output_path,
@@ -2922,7 +2929,12 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 self._write_response(
                     _json_response(
                         HTTPStatus.BAD_REQUEST,
-                        {"error": {"code": "GUI_PATH_REJECTED", "message": str(error)}},
+                        {
+                            "error": {
+                                "code": getattr(error, "code", "GUI_PATH_REJECTED"),
+                                "message": str(error),
+                            }
+                        },
                     )
                 )
                 return

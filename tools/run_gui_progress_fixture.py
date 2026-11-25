@@ -33,7 +33,18 @@ def main():
     from ewp_transcripts.config import ApplicationConfig
     from ewp_transcripts.progress import ProgressEvent
 
-    config = ApplicationConfig.model_validate({"runtime": {"work_root": str(args.root / "work")}})
+    # Deliberately invalid speech bytes: the service below is synthetic, never a model loader.
+    # Keep the real GUI availability gate enabled, using an isolated complete-looking fixture.
+    snapshot = args.root / "models" / ("a" * 40)
+    snapshot.mkdir(parents=True, exist_ok=True)
+    for name in ["model.bin", "config.json", "tokenizer.json"]:
+        (snapshot / name).write_bytes(b"synthetic model-free fixture")
+    config = ApplicationConfig.model_validate(
+        {
+            "runtime": {"work_root": str(args.root / "work")},
+            "models": {"asr_snapshot_path": str(snapshot), "asr_revision": snapshot.name},
+        }
+    )
     web_server.load_config = lambda: config
     web_workflows.load_config = lambda: config
     web_jobs.runtime_profile = lambda *args: "synthetic-test-profile"
