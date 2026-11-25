@@ -343,7 +343,19 @@ def dispatch_get(
         )
     path = urlsplit(target).path
     if path == "/":
-        return _asset_response("index.html", "text/html; charset=utf-8")
+        from ewp_transcripts.web_runtime import system_ui_language
+
+        response = _asset_response("index.html", "text/html; charset=utf-8")
+        return WebResponse(
+            response.status,
+            response.content_type,
+            response.body.replace(
+                b'<html lang="en"',
+                b'<html data-system-language="'
+                + system_ui_language().encode("ascii")
+                + b'" lang="en"',
+            ),
+        )
     if path == "/help" or path.startswith("/help/"):
         locale = parse_qs(urlsplit(target).query).get("lang", ["en"])[0]
         guide = render_guide(
@@ -1309,7 +1321,10 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         locations_registry.remember(
                             output_directory=output, storage_directory=storage
                         )
+                    from ewp_transcripts.local_asr import local_model_options
+
                     available_locations = locations_registry.available().model_dump(mode="json")
+                    available_locations["local_asr_models"] = local_model_options(load_config())
                     default_output = os.environ.get("EWP_GUI_DEFAULT_OUTPUT_DIR", "").strip()
                     if not available_locations["output_directory"] and default_output:
                         available_locations["output_directory"] = str(
@@ -1541,13 +1556,20 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 key = self.server.gui_openrouter_api_key or os.environ.get(
                     self.server.gui_openrouter_api_key_env, ""
                 )
+                loaded_saved_key = False
                 if path.endswith("/check") and document.get("api_key"):
                     key = validate_api_key(document["api_key"])
+                elif path.endswith("/check") and not key:
+                    key = self.server.gui_credentials.perform("use")
+                    loaded_saved_key = True
                 speech_payload = (
                     self.server.gui_speech.check_key(key)
                     if path.endswith("/check")
                     else self.server.gui_speech.refresh(document.get("items", []))
                 )
+                if loaded_saved_key:
+                    self.server.gui_openrouter_api_key = key
+                speech_payload = {**speech_payload, "loaded_saved_key": loaded_saved_key}
                 self._write_response(_json_response(HTTPStatus.OK, speech_payload))
             except (ValueError, OSError, ApplicationError) as error:
                 self._write_response(

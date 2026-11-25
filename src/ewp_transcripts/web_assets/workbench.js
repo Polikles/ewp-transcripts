@@ -189,7 +189,8 @@ function installGuiShell() {
   bar.innerHTML = `<label>Interface language<select id="gui-locale"><option value="en">English</option><option value="pl">Polski</option></select></label>
     <label>Appearance<select id="gui-theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>`;
   header.append(bar);
-  document.querySelector("#gui-locale").value = guiPreferences.locale === "pl" ? "pl" : "en";
+  document.querySelector("#gui-locale").value = ["pl","en"].includes(guiPreferences.locale)
+    ? guiPreferences.locale : ((document.documentElement.dataset.systemLanguage || navigator.languages?.[0] || navigator.language || "en").toLowerCase().startsWith("pl") ? "pl" : "en");
   document.querySelector("#gui-theme").value = ["light", "dark"].includes(guiPreferences.theme) ? guiPreferences.theme : "system";
   guiLocale = document.querySelector("#gui-locale").value;
   document.querySelector("#gui-locale").addEventListener("change", event => { guiLocale = event.target.value; saveGuiPreferences(); translateGui(); });

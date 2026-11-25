@@ -37,3 +37,15 @@ Uruchom kolejkę przetwarza przygotowane zadania po kolei, pomijając ukończone
 Anuluj zadanie od razu anuluje oczekujące przetwarzanie, a dla rozpoczętego czeka na bezpieczny punkt. Poczekaj na stan końcowy. Ponów zastępuje wybrany nieudany lub anulowany wiersz nowym zadaniem przygotowanym do startu. Przetwarzanie zacznie się od początku po jawnym uruchomieniu kolejki; ukończone zadania nie ruszą ponownie. Usuń ukończone zadania z kolejki zachowuje pozostałe. Usunięcie wiersza nie kasuje opublikowanych plików.
 
 Udane ASR domyślnie zapisuje `*_results.json`, `*_segments.json` i `*_transcript.txt`. To surowe wyniki, a nie ręcznie zatwierdzone napisy. Zobacz [Pliki i eksporty](outputs.md). Przejdź do [Opcjonalnej korekty](optional-correction.md) albo od razu do [Weryfikacji i eksportu źródła](source-review.md). Przed zatrzymaniem zapisz stan; wznowienie opisuje [Zapisana praca](saved-work.md).
+
+## Opcjonalne lokalne modele ASR
+
+Lista lokalnych modeli zawiera model skonfigurowany (domyślnie large-v2), Whisper Large v3 i
+Whisper Large v3 Turbo. Dwa ostatnie zainstalujesz w instalatorze o tej samej wersji programu
+przez Doinstaluj modele lokalne; są opcjonalne i domyślnie niezaznaczone. Wybierz model przed
+planowaniem każdego nagrania. Kolejka pokazuje model zadania, a zapis pracy zachowuje wybór.
+Lokalny wybór nie przełącza na API i nie pobiera wag podczas transkrypcji. Brakujący model trzeba
+zainstalować jawnie. Modele korzystają z dotychczasowego przetwarzania GPU, wyrównania i diaryzacji.
+Scribe v2 i MAI pozostają w tej aplikacji dostępne tylko w chmurze: nie ustalono publicznych wag
+tych modeli do zwykłej instalacji na PC. Lokalne warianty Whisper odpowiadają ich wariantom
+chmurowym, lecz nie zastępują wszystkich zamkniętych modeli dostawców.

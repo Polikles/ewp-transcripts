@@ -71,7 +71,7 @@ sealed partial class Wizard : Window
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         shell.RowDefinitions.Add(new RowDefinition());
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        var header = new Grid { Background = ColorBrush("#355880"), Height = 104 };
+        var header = new Grid { Background = Branding.HeaderBackground(), Height = 104 };
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition());
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -578,7 +578,7 @@ sealed partial class Wizard : Window
         var request = new OperationRequest(op, root.Text, confirm, prepare && LocalSelected || op == "check" && operation == "models",
             prepare && terms.IsChecked == true, removeModels.IsChecked == true, removeKey.IsChecked == true,
             prepare && LocalSelected && hfValid ? hfSecret : "", op == "install" && orValid ? orSecret : "",
-            Environment.ProcessPath!, Environment.ProcessId, CancelFile, op == "models" ? selectedModels.ToArray() : null, repairModels || reinstallModels, operation == "rollback" ? rollbackTarget : null);
+            Environment.ProcessPath!, Environment.ProcessId, CancelFile, op == "models" || op == "install" && LocalSelected ? DownloadModels.Select(m => m.Code).ToArray() : null, repairModels || reinstallModels, operation == "rollback" ? rollbackTarget : null);
         async Task Output(string line)
         {
             string text = line, stage = ""; JsonElement? item = null;
@@ -592,7 +592,7 @@ sealed partial class Wizard : Window
                 if (item is JsonElement plan && stage == "preview") removal = plan;
                 if (item is JsonElement verification && stage == "model-verification") modelVerification = verification.GetProperty("models").Clone();
                 UpdateOperationProgress(stage, text, item);
-                if (stage != "log" && stage != "download" && stage.Length > 0 && IsProgressPage && progressStage != "cancel") { progressStage = stage; Render(); }
+                if (stage != "log" && stage != "model-item" && stage != "model-complete" && stage != "download" && stage.Length > 0 && IsProgressPage && progressStage != "cancel") { progressStage = stage; Render(); }
             });
         }
         if (OperationRunner.NeedsElevation(request))
@@ -640,6 +640,7 @@ sealed class ModelEntry
     public string Code { get; set; } = "";
     public string Revision { get; set; } = "";
     public bool Gated { get; set; }
+    public bool Optional { get; set; }
     public string Repository { get; set; } = "";
     public string Path { get; set; } = "";
     public long Bytes { get; set; }

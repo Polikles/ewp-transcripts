@@ -160,6 +160,10 @@ async function restoreWorkspaceLocations() {
   try {
     const payload=await queuePost("/api/v1/workspaces/locations",{},{feedback:false});
     defaultWorkflowOutput = payload.locations.output_directory || "";
+    for(const model of payload.locations.local_asr_models || []) {
+      const option=[...document.querySelector("#local-asr-model").options].find(item=>item.value===model.id);
+      if(option){option.textContent=model.name + (model.installed ? "" : (guiLocale === "pl" ? " · niezainstalowany" : " · not installed")); option.dataset.guiContent="true";}
+    }
     const untouched=!initialOutput && !initialStorage && workflowOutput.value===initialOutput && workspaceDirectory.value===initialStorage;
     restoringWorkspaceLocations=true;
     if(untouched && !initialOutput && workflowOutput.value===initialOutput && payload.locations.output_directory) {

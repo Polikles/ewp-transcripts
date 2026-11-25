@@ -6,6 +6,7 @@ installer.ui.045b64c49a3064c1,Next — ,Dalej — ,Wizard.cs,
 installer.ui.05418011a994f277,Cancelling safely… Downloaded cache files will remain.,Bezpieczne anulowanie… Pobrane pliki cache pozostaną.,Wizard.cs,
 installer.ui.0a606e4cbf2f2a9e,Enter OpenRouter key,Podaj klucz OpenRouter,Wizard.cs,
 installer.ui.0b350f9e4dd96bd4,Visual C++ libraries,Biblioteki Visual C++,Wizard.cs,
+installer.ui.0d1ef2fc03cc7901, · optional, · opcjonalny,WizardModels.cs,0.24.0 owner feedback; full installer copy review pending
 installer.ui.0d8b21a5642c0c14,Required space: ,Potrzebne miejsce: ,Wizard.cs,
 installer.ui.0ecd512acbfae536,Key valid,Klucz prawidłowy,Wizard.cs,
 installer.ui.1196b6c538ecc61a,Repair,Napraw,Wizard.cs,
@@ -68,6 +69,7 @@ installer.ui.6b17a11e1a45da9f,Program version: ,Wersja programu: ,Wizard.cs,0.23
 installer.ui.6e7d50e84f4731ef,Result,Wynik,WizardState.cs,
 installer.ui.6e8eb2b02596d8b0,Choose folder…,Wybierz folder…,Wizard.cs,
 installer.ui.71702bc80e0e873d,Test utilizes small Python runtime. No data is sent,Test korzysta z małego środowiska Python. Nie wysyła żadnych danych,Wizard.cs,
+installer.ui.72f4c90c76e8b5f0,optional · not installed,opcjonalny · niezainstalowany,WizardModels.cs,0.24.0 owner feedback; full installer copy review pending
 installer.ui.7595e7fce7e9f742, · installed, · zainstalowany,WizardModels.cs,0.23.1 owner feedback; full EN/PL review pending
 installer.ui.767fb8352ca09064,Hugging Face token,Token Hugging Face,Wizard.cs,
 installer.ui.76900f1bfd16c8d4,Back,Wstecz,Wizard.cs,

@@ -79,17 +79,16 @@ sealed partial class Wizard
         int phase = Array.IndexOf(operationPhases, stage);
         if (phase >= 0) overallPhase = Math.Max(overallPhase, phase);
         if (stage == "complete") overallPhase = operationPhases.Length;
-        if (stage == "download" && item is JsonElement data && data.TryGetProperty("bytes", out var count) &&
-            data.TryGetProperty("total", out var total) && total.ValueKind == JsonValueKind.Number && total.GetDouble() > 0)
+        if (stage == "download" && item is JsonElement data && data.TryGetProperty("bytes", out var count) && count.ValueKind == JsonValueKind.Number)
         {
             bool bytes = data.TryGetProperty("unit", out var unit) && unit.GetString() == "B";
-            double downloaded = count.GetDouble(), size = total.GetDouble();
+            double downloaded = count.GetDouble(), size = data.TryGetProperty("total", out var total) && total.ValueKind == JsonValueKind.Number ? total.GetDouble() : 0;
             string id = data.TryGetProperty("download_id", out var key) ? key.GetString() ?? text : stage + ":" + text;
             downloadsStarted.Add(id); downloadBytes[id] = Math.Max(downloadBytes.GetValueOrDefault(id), downloaded);
-            if (downloaded >= size) downloadsFinished.Add(id);
-            operationProgress.IsIndeterminate = false; operationProgress.Value = Math.Clamp(downloaded / size * 100, 0, 100);
+            if (size > 0 && downloaded >= size) downloadsFinished.Add(id);
+            operationProgress.IsIndeterminate = size <= 0; if (size > 0) operationProgress.Value = Math.Clamp(downloaded / size * 100, 0, 100);
             downloadProgress.Text = text; downloadProgress.ToolTip = text;
-            downloadAmount.Text = bytes ? GB((long)downloaded) + " / " + GB((long)size) + " GB" : downloaded + " / " + size;
+            downloadAmount.Text = bytes ? GB((long)downloaded) + (size > 0 ? " / " + GB((long)size) : "") + " GB" : downloaded + (size > 0 ? " / " + size : "");
             downloadRate.Text = bytes && data.TryGetProperty("rate", out var speed) && speed.ValueKind == JsonValueKind.Number ? (speed.GetDouble() / 1e6).ToString("0.0") + " MB/s" : "";
             downloadEta.Text = data.TryGetProperty("eta_seconds", out var remaining) && remaining.ValueKind == JsonValueKind.Number
                 ? "~" + TimeSpan.FromSeconds(Math.Clamp(remaining.GetDouble(), 0, 864000)).ToString(@"hh\:mm\:ss") : "";
@@ -103,7 +102,16 @@ sealed partial class Wizard
                 string id = "package:" + download.Groups[2].Value;
                 downloadsStarted.Add(id); if (download.Groups[1].Value == "Downloaded") downloadsFinished.Add(id);
             }
-            if (text.Length > 4 && text.Length < 300 && !text.TrimStart().StartsWith('"') && !text.TrimStart().StartsWith('{')) activityProgress.Text = text;
+            if (download.Success) activityProgress.Text = download.Groups[2].Value;
+        }
+        else if (stage == "model-complete")
+        {
+            foreach (string id in downloadsStarted.Where(id => id.StartsWith(text + ":", StringComparison.Ordinal))) downloadsFinished.Add(id);
+        }
+        else if (stage == "model-item")
+        {
+            activityProgress.Text = text; operationProgress.IsIndeterminate = true;
+            downloadProgress.Text = downloadAmount.Text = downloadRate.Text = downloadEta.Text = "";
         }
         else if (stage.Length > 0)
         {

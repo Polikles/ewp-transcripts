@@ -744,7 +744,8 @@ def test_real_icon_contains_all_windows_sizes_and_model_catalog_matches_pins():
     assert sizes == [16, 24, 32, 48, 64, 128, 256]
     config = tomllib.loads((ROOT / "src/ewp_transcripts/resources/default-config.toml").read_text())
     models = json.loads((ROOT / "installer/models.json").read_text())["models"]
-    assert len(models) == 4
+    assert len(models) == 6
+    assert all(m.get("optional") for m in models[4:])
     assert models[0]["revision"] == config["models"]["asr_revision"]
     assert models[1]["revision"] == config["models"]["alignment_revision"]
     assert models[2]["revision"] == config["models"]["english_alignment_revision"]
@@ -1017,3 +1018,58 @@ def test_runtime_record_publication_matches_live_identity_and_is_private(tmp_pat
     if os.name != "nt":
         assert path.stat().st_mode & 0o777 == 0o600
     assert not list(tmp_path.glob(".ewp-runtime-*"))
+
+
+@pytest.mark.parametrize("selected", [None, ["asr_v3_turbo"]])
+def test_optional_models_are_not_prepared_or_owned_without_explicit_selection(
+    tmp_path, monkeypatch, selected
+):
+    root = tmp_path / "installation"
+    release = root / "versions/test"
+    catalog = release / "control/models.json"
+    catalog.parent.mkdir(parents=True)
+    entries = [
+        {
+            "code": code,
+            "repository": "test/" + code,
+            "revision": "a" * 40,
+            "path": str(tmp_path / code),
+            "files": {"model.bin": 4},
+            "gated": False,
+            "optional": code != "asr",
+        }
+        for code in ["asr", "asr_v3_turbo"]
+    ]
+    manager.atomic_json(catalog, {"models": entries})
+    manager.atomic_json(
+        root / "owner.json", {"kind": manager.MAGIC, "root": str(root), "models": []}
+    )
+    monkeypatch.setattr(manager, "model_targets", lambda root, entries, *args: entries)
+    commands = []
+    monkeypatch.setattr(manager, "run", lambda command, **kw: commands.append(command))
+    manager.prepare_models(
+        root, release, selected=selected, redownload=False, terms=False, secrets={}
+    )
+    assert commands[0][-2:] == ["--model", "asr" if selected is None else "asr_v3_turbo"]
+    owned = manager.load_owner(root)["models"]
+    assert (str(tmp_path / "asr_v3_turbo") in owned) is (selected is not None)
+
+
+def test_extra_catalog_entries_do_not_break_configured_custom_base_model_targets(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(manager, "load_state", lambda root: None)
+    monkeypatch.setattr(
+        manager.subprocess,
+        "run",
+        lambda *a, **kw: manager.subprocess.CompletedProcess(
+            a[0], 0, stdout=json.dumps({"asr": str(tmp_path / "custom")})
+        ),
+    )
+    entries = [
+        {"code": "asr", "path": "~/default"},
+        {"code": "asr_v3", "path": str(tmp_path / "optional")},
+    ]
+    result = manager.model_targets(tmp_path, entries, tmp_path / "release")
+    assert result[0]["path"] == str(tmp_path / "custom")
+    assert result[1]["path"] == str(tmp_path / "optional")

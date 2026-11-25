@@ -62,3 +62,9 @@ file hashes to models.json, measured model/FFmpeg progress and timestamped repor
 readonly-file Windows removal. Root uninstall.exe/registered maintenance restrict actions.
 Automatic workspace recovery starts with the app; writable installs use work-state, protected
 installs use per-user state. Synthetic lifecycle/queue tests do not require downloaded models.
+
+0.24.0 adds two explicitly selected, unchecked local ASR models to the four baseline models.
+Optional metadata is mirrored to packaged local-asr-models.json; tests verify exact correspondence.
+Base pins remain unchanged. Updates never select new optional models automatically; missing
+unselected optional snapshots are not repair failures. Byte events use single writes; backend
+notices remain in technical details. The header reuses web-pattern-dark.svg beneath a dark veil.

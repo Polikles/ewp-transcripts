@@ -1,3 +1,11 @@
+# Active 2026-11-25 owner feedback
+
+Implement opening TODO as 0.24.0 (optional ASR selection is a feature addition).
+Baseline96cb2af / delivered0.23.2. Owner confirms successful uninstall while application running.
+Checkpoint: [installer/local ASR follow-up](docs/checkpoints/2026-11-25-local-asr-installer.md).
+Previous handoff holds superseded by new request. Preserve immutable deliveries/artists and previous
+paid spend; no paid tests needed. Owner next retest focuses add-models and ASR model execution.
+
 # EWP-transcripts work status
 
 Last updated: **2026-11-24**.

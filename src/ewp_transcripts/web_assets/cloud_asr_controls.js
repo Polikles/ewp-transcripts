@@ -3,6 +3,7 @@
 const cloudAsrPanel=document.createElement("details"); cloudAsrPanel.id="cloud-asr-panel";
 cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
   <label>ASR provider<select id="cloud-asr-provider"><option value="local">Local GPU (default)</option><option value="openrouter">OpenRouter cloud ASR</option></select></label>
+  <label id="local-asr-options">Local ASR model<select id="local-asr-model"><option value="configured">Configured local model (default)</option><option value="large-v3">Whisper Large v3</option><option value="large-v3-turbo">Whisper Large v3 Turbo</option></select><span class="field-hint">Install optional local models using Add local models in the installer. Scribe v2 and MAI are cloud-only here.</span></label>
   <div id="cloud-asr-options" hidden>
     <label>Cloud ASR model<select id="cloud-asr-model"></select></label>
     <div class="actions"><button type="button" id="cloud-asr-key">Manage OpenRouter key</button><button type="button" id="cloud-asr-check">Check key and OpenRouter connection</button><button type="button" id="cloud-asr-refresh">Refresh and estimate cost</button></div>
@@ -41,16 +42,17 @@ async function ensureGuiCloudConsent() {
 }
 function updateCloudAsrControls() {
   if(cloudConsentSnapshot && cloudConsentSnapshot!==cloudQueueConsentSnapshot())resetGuiCloudConsent();
+  document.querySelector("#local-asr-options").hidden=cloudProvider.value!=="local";
   document.querySelector("#cloud-asr-options").hidden=cloudProvider.value!=="openrouter";
   cloudConsent.hidden=cloudProvider.value!=="openrouter" && !guiQueueJobs.some(job=>job.speech?.provider==="openrouter" && job.status==="staged");
 }
-for(const element of [cloudProvider,cloudModel]) element.addEventListener("change",()=>{
+for(const element of [cloudProvider,cloudModel,document.querySelector("#local-asr-model")]) element.addEventListener("change",()=>{
   resetGuiCloudConsent(); invalidateMediaPlan(); updateCloudAsrControls();
 });
 document.querySelector("#cloud-asr-key").addEventListener("click",()=>openRouterKeyButton.click());
 document.querySelector("#cloud-asr-check").addEventListener("click",async event=>{
   const button=event.currentTarget,status=document.querySelector("#cloud-asr-check-status");button.disabled=true;status.textContent="Checking OpenRouter key and connection…";
-  try {await queuePost("/api/v1/speech/check",{},{trigger:button});status.textContent="OpenRouter key and connection are ready. No audio was uploaded.";}
+  try {const result=await queuePost("/api/v1/speech/check",{},{trigger:button});showOpenRouterCheckResult(result,status);}
   catch(error){status.textContent=error.message;}
   finally{button.disabled=false;}
 });
@@ -100,10 +102,11 @@ const decorateBeforeCloudAsr=decorateGuiMediaRequest;
 decorateGuiMediaRequest=function(request,episode=null) {
   decorateBeforeCloudAsr(request,episode);
   if(cloudProvider.value==="openrouter")request.speech={provider:"openrouter",model:cloudModel.value,cost_mode:"estimated"};
+  else request.speech={provider:"local",local_model:document.querySelector("#local-asr-model").value};
   return request;
 };
 // Retain the legacy field allowlist for saved profiles; its removed input is never restored.
-workspaceFieldIds.push("cloud-asr-provider","cloud-asr-model","cloud-asr-budget");
+workspaceFieldIds.push("local-asr-model","cloud-asr-provider","cloud-asr-model","cloud-asr-budget");
 const restoreFieldsBeforeCloudAsr=applyWorkspaceFields;
 applyWorkspaceFields=async function(...args) {
   resetGuiCloudConsent();const result=await restoreFieldsBeforeCloudAsr(...args);resetGuiCloudConsent();updateCloudAsrControls();return result;

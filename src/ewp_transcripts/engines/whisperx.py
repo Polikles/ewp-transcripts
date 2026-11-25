@@ -77,6 +77,7 @@ class WhisperXAsrEngine:
         snapshot: Path,
         *,
         revision: str,
+        name: str = "large-v2",
         device: str,
         compute_type: str,
         vad_method: str = "pyannote",
@@ -91,7 +92,7 @@ class WhisperXAsrEngine:
         self._module: _WhisperXModule | None = None
         self._model_info = EngineModelInfo(
             role="asr",
-            name="large-v2",
+            name=name,
             revision=revision,
             local_path=snapshot,
             library_versions=_library_versions(),

@@ -185,6 +185,8 @@ def test_installer_progress_reports_real_http_bytes_instead_of_snapshot_file_cou
     events = [
         json.loads(line) for line in capsys.readouterr().out.splitlines() if line.startswith("{")
     ]
+    assert events[0]["stage"] == "model-item" and events[-1]["stage"] == "model-complete"
+    events = [event for event in events if event["stage"] == "download"]
     assert events and events[-1]["bytes"] == events[-1]["total"] == 8
     assert events[-1]["unit"] == "B" and events[-1]["message"] == "model.bin"
     assert events[-1]["download_id"].endswith(":model.bin")

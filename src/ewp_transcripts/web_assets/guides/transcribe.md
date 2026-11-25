@@ -37,3 +37,15 @@ Start queue processes staged jobs sequentially, skipping completed ASR. Percenta
 Cancel task immediately cancels waiting work; running work waits for a safe boundary. Wait for a terminal status. Retry replaces the failed/cancelled row with a fresh staged attempt and starts processing from the beginning only after Start queue; it does not rerun completed jobs. Remove completed tasks from queue keeps unfinished/failed ones. Removing a queue row does not delete published files.
 
 By default successful ASR writes `*_results.json`, `*_segments.json` and `*_transcript.txt`. These are raw results, not manually approved subtitles. See [Files and exports](outputs.md). Continue with [Optional correction](optional-correction.md) or directly [Source review & export](source-review.md). Save a checkpoint before stopping; [Saved work](saved-work.md) explains restart behavior.
+
+## Optional local ASR models
+
+The local model selector offers the configured model (large-v2 by default), Whisper Large v3 and
+Whisper Large v3 Turbo. Install the latter two with the matching installer using Add local models;
+they are optional and unchecked by default. Select a model before planning each recording. The
+queue names the model for each job and saved work preserves that choice. A local choice never
+falls back to a cloud API or downloads weights during transcription. Missing weights must be
+installed explicitly. Both optional models use the existing GPU/alignment/diarization pipeline.
+Scribe v2 and MAI remain cloud-only in this application: no public downloadable desktop weights
+were established for these exact models. Local Whisper choices cover their corresponding cloud
+presets, not the full set of proprietary providers.

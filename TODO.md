@@ -1,3 +1,21 @@
+# Active owner feedback — 2026-11-25 / target 0.24.0
+
+- [ ] Read supplied 0.23.2 report privately; retain owner pass: uninstall while app running.
+- [ ] Keep raw dependency/HF notices in technical details only; expose structured phase/item names.
+- [ ] Reuse application dark pattern behind installer header; visually verify native previews.
+- [ ] First-run interface uses system/browser language (PL else EN); preserve explicit preference.
+- [ ] Explicit OR connection check loads OS key when session/env/input key absent, confirms saved-key
+      source and no audio upload; no automatic provider requests/start/upload consent.
+- [ ] Add optional unchecked local Whisper Large v3 and v3 Turbo with immutable metadata/hashes,
+      installer repair/add/remove/verification integration and real per-job model selection.
+      Investigate exact Scribe v2/MAI availability; do not fabricate downloadable local equivalents.
+- [ ] Queue displays actual chosen local/cloud model, including restored jobs.
+- [ ] Focused credential/language/model/recovery tests, local gate/native WPF checks, inspect previews,
+      update affected EN/PL docs/changelog and deliver immutable installer for model-focused owner test.
+- [ ] Document closed-weight limitations and remaining owner model runtime tests honestly.
+
+Earlier work follows for reference.
+
 # Immediate work queue
 
 ## Delivered0.23.2 follow-up —2026-11-24

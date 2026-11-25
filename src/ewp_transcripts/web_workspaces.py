@@ -33,6 +33,7 @@ _FIELD_NAMES = frozenset(
         "gui-translation-target",
         "gui-speaker-colors",
         "gui-palette-profile",
+        "local-asr-model",
         "cloud-asr-provider",
         "cloud-asr-model",
         "cloud-asr-budget",

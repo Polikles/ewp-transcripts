@@ -14,14 +14,14 @@ sealed partial class Wizard
     IEnumerable<string> VisibleOperations => localMaintenance ? ["repair", "uninstall"] : maintenance ? ["repair", "rollback", "uninstall"] : operations;
     bool PreparingModels => operation == "install" && LocalSelected || operation == "models" || repairModels || operation == "update" && UpdateChangesModels;
     bool UpdateChangesModels => operation == "update" && LocalSelected && installed is JsonElement state &&
-        !catalog.Models.All(m => ReadInstalledModelPins(state).Contains(m.Revision, StringComparison.Ordinal));
+        !catalog.Models.Where(m => !m.Optional).All(m => ReadInstalledModelPins(state).Contains(m.Revision, StringComparison.Ordinal));
     string ReadInstalledModelPins(JsonElement state)
     {
         try { return File.ReadAllText(Path.Combine(root.Text, state.GetProperty("active").GetString()!, "app/src/ewp_transcripts/resources/default-config.toml")); }
         catch { return ""; }
     }
     IEnumerable<ModelEntry> DownloadModels => catalog.Models.Where(m =>
-        (operation is "install" or "update" || selectedModels.Contains(m.Code)) && (repairModels || reinstallModels || ModelMissingBytes(m) > 0));
+        (operation is "install" or "update" && !m.Optional || selectedModels.Contains(m.Code)) && (repairModels || reinstallModels || ModelMissingBytes(m) > 0));
     bool NeedsHf => PreparingModels && DownloadModels.Any(m => m.Gated);
     bool ModelsCanContinue => !PreparingModels ||
         ((!NeedsHf || hfValid && terms.IsChecked == true) && ModelSpaceProblem() == null &&
@@ -30,7 +30,7 @@ sealed partial class Wizard
     void ResetModelState()
     {
         repairModels = reinstallModels = false; modelVerification = null; selectedModels.Clear();
-        foreach (var model in catalog.Models.Where(m => ModelMissingBytes(m) > 0)) selectedModels.Add(model.Code);
+        foreach (var model in catalog.Models.Where(m => !m.Optional && ModelMissingBytes(m) > 0)) selectedModels.Add(model.Code);
     }
 
     async void ChooseFolder()
@@ -58,7 +58,7 @@ sealed partial class Wizard
             if (modelVerification is JsonElement models)
             {
                 foreach (var result in models.EnumerateArray())
-                    body.Children.Add(Copy(result.GetProperty("repository").GetString() + " · " + (result.GetProperty("status").GetString() == "pass" ? "SHA OK" : T("missing or damaged files", "brakujące lub uszkodzone pliki")) + "\n" + result.GetProperty("path").GetString() + "\n" + result.GetProperty("revision").GetString(), muted: true));
+                    body.Children.Add(Copy(result.GetProperty("repository").GetString() + " · " + (result.GetProperty("status").GetString() == "pass" ? "SHA OK" : result.GetProperty("status").GetString() == "not-installed" ? T("optional · not installed", "opcjonalny · niezainstalowany") : T("missing or damaged files", "brakujące lub uszkodzone pliki")) + "\n" + result.GetProperty("path").GetString() + "\n" + result.GetProperty("revision").GetString(), muted: true));
                 body.Children.Add(ActionButton(T("Download models again…", "Pobierz ponownie modele…"), () => { repairModels = true; Render(); }, secondary: true));
             }
             if (busy) body.Children.Add(Copy(T("Checking model locations, pinned versions and file hashes…", "Sprawdzanie lokalizacji, wersji i sum kontrolnych modeli…")));
@@ -82,9 +82,9 @@ sealed partial class Wizard
             var list = new StackPanel();
             foreach (var model in catalog.Models)
             {
-                bool selectable = operation == "models" || repairModels;
-                var box = new CheckBox { IsChecked = selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable && (operation != "models" || reinstallModels || ModelMissingBytes(model) > 0),
-                    Content = new TextBlock { Text = model.Repository + (ModelMissingBytes(model) == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
+                bool selectable = operation == "models" || repairModels || operation == "install" && model.Optional;
+                var box = new CheckBox { IsChecked = model.Optional || selectable ? selectedModels.Contains(model.Code) : true, IsEnabled = selectable && (operation != "models" || reinstallModels || ModelMissingBytes(model) > 0),
+                    Content = new TextBlock { Text = model.Repository + (model.Optional ? T(" · optional", " · opcjonalny") : "") + (ModelMissingBytes(model) == 0 ? T(" · installed", " · zainstalowany") : ""), TextWrapping = TextWrapping.Wrap }, Margin = new Thickness(0, 3, 0, 3) };
                 box.Checked += (_, _) => { selectedModels.Add(model.Code); missingRequirements.Remove("models"); ClearRequirementNotice(); Render(); };
                 box.Unchecked += (_, _) => { selectedModels.Remove(model.Code); Render(); };
                 list.Children.Add(box);
@@ -115,7 +115,7 @@ sealed partial class Wizard
             if (await Worker("verify-models", false) != 0) throw new IOException();
             selectedModels.Clear();
             if (modelVerification is JsonElement models)
-                foreach (var model in models.EnumerateArray().Where(m => m.GetProperty("status").GetString() != "pass")) selectedModels.Add(model.GetProperty("code").GetString()!);
+                foreach (var model in models.EnumerateArray().Where(m => m.GetProperty("status").GetString() == "fail")) selectedModels.Add(model.GetProperty("code").GetString()!);
         }
         catch { notice = "model_check_failed"; }
         finally { busy = false; Render(); }

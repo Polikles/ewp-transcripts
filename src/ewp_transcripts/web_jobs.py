@@ -80,6 +80,7 @@ class GuiTranscriptionJob(BaseModel):
     selected_streams: dict[str, int] = Field(default_factory=dict)
     recording_id: str | None = None
     speech: SpeechConfig = SpeechConfig()
+    local_model_name: str = ""
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -182,6 +183,11 @@ class GuiTranscriptionQueue:
             selected_streams=selected_streams or {},
             recording_id=recording_id,
             speech=speech or SpeechConfig(),
+            local_model_name=(
+                speech.local_model
+                if speech and speech.local_model != "configured"
+                else self._config.models.asr_model
+            ),
             language=language,
             speaker_count=speaker_count,
             created_at=now,
@@ -675,6 +681,9 @@ class GuiTranscriptionQueue:
                     }
                 if job.speech.provider == "openrouter":
                     group_options.update(api_key=self._api_key_provider(), allow_cloud=True)
+                from ewp_transcripts.local_asr import resolve_local_asr
+
+                config = resolve_local_asr(config)
                 tracker = RuntimeProgress(
                     self._history,
                     runtime_profile(

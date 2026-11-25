@@ -1,3 +1,7 @@
+Owner follow-up2026-11-25 activates local model parity work: add compatible optional Whisper
+v3/v3-turbo, verify other exact providers public local weights, installer/credentials/locale polish.
+See opening TODO/checkpoint; supersedes deferred-only restriction immediately below.
+
 # Post-0.1 Roadmap
 
 Owner follow-up2026-11-24: later investigate local implementations of ASR models offered through

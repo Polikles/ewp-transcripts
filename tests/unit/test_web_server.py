@@ -1760,3 +1760,67 @@ def test_runtime_control_requires_private_token_and_matching_host(monkeypatch):
         handler.headers = headers
         handler._runtime_control(stop=False)
         assert responses[-1].status == 403
+
+
+@pytest.mark.parametrize(
+    "source", ["stored", "session", "environment", "typed", "absent", "failed-check", "csrf"]
+)
+def test_explicit_key_check_loads_saved_key_only_when_needed_and_after_success(monkeypatch, source):
+    from ewp_transcripts.credentials import CredentialStoreError
+
+    handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+    body = json.dumps({"api_key": "typed-fake-key"} if source == "typed" else {}).encode()
+    handler.path = "/api/v1/speech/check"
+    handler.headers = Message()
+    for key, value in {
+        "Host": "127.0.0.1:8765",
+        "Origin": "http://127.0.0.1:8765",
+        "Content-Length": str(len(body)),
+        "X-EWP-CSRF": "wrong" if source == "csrf" else "expected",
+    }.items():
+        handler.headers[key] = value
+    handler.rfile = BytesIO(body)
+    store = Mock()
+    store.perform.return_value = "stored-fake-key"
+    if source == "absent":
+        store.perform.side_effect = CredentialStoreError(
+            "No OpenRouter key is saved in the OS store."
+        )
+    speech = Mock(check_key=Mock(return_value={"status": "ok", "audio_uploaded": False}))
+    if source == "failed-check":
+        speech.check_key.side_effect = ValueError("Connection failed")
+    monkeypatch.setenv("EWP_TEST_ONLY_KEY", "env-fake-key" if source == "environment" else "")
+    handler.server = SimpleNamespace(
+        server_port=8765,
+        gui_csrf_token="expected",
+        gui_speech=speech,
+        gui_openrouter_api_key="session-fake-key" if source == "session" else "",
+        gui_openrouter_api_key_env="EWP_TEST_ONLY_KEY",
+        gui_credentials=store,
+    )
+    handler._write_response = Mock()
+    handler.do_POST()
+    response = handler._write_response.call_args.args[0]
+    assert not any(
+        key.encode() in response.body
+        for key in ["stored-fake-key", "env-fake-key", "typed-fake-key", "session-fake-key"]
+    )
+    if source in {"absent", "failed-check", "csrf"}:
+        assert response.status in {400, 403}
+        assert not handler.server.gui_openrouter_api_key
+    else:
+        assert response.status == 200
+        assert json.loads(response.body)["loaded_saved_key"] is (source == "stored")
+        expected = {
+            "session": "session-fake-key",
+            "environment": "env-fake-key",
+            "typed": "typed-fake-key",
+            "stored": "stored-fake-key",
+        }[source]
+        speech.check_key.assert_called_once_with(expected)
+    if source in {"session", "environment", "typed", "csrf"}:
+        store.perform.assert_not_called()
+    else:
+        store.perform.assert_called_once_with("use")
+    if source == "stored":
+        assert handler.server.gui_openrouter_api_key == "stored-fake-key"

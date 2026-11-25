@@ -4,6 +4,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.24.0 — 2026-11-25 (optional local ASR and installer polish)
+
+- Offer unchecked optional local Whisper Large v3 and Large v3 Turbo snapshots, explicit
+  per-job selection and model labels in the queue; preserve the large-v2 default and existing pins.
+- Keep dependency/HF notices in technical details and reuse the application motif in the header.
+- Choose first-run interface language from system/browser preferences; retain explicit overrides.
+- On an explicit OpenRouter connection check, load a saved OS key if no session/environment/input
+  key applies, and confirm its source without uploading audio or granting transcription consent.
+
+
 ## 0.23.2 — 2026-11-24 (managed runtime recovery and guided installer steps)
 
 - Recover interrupted Windows activity locks using an OS mutex and live process creation

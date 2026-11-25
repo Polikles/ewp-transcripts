@@ -47,7 +47,9 @@ def main() -> None:
     parser.add_argument("--public-only", action="store_true")
     parser.add_argument("--yes", action="store_true")
     parser.add_argument(
-        "--model", action="append", choices=("asr", "alignment_pl", "alignment_en", "diarization")
+        "--model",
+        action="append",
+        choices=("asr", "alignment_pl", "alignment_en", "diarization", "asr_v3", "asr_v3_turbo"),
     )
     parser.add_argument("--force-download", action="store_true")
     parser.add_argument("--progress-json", action="store_true")
@@ -81,7 +83,7 @@ def main() -> None:
                 self.last_report = now
                 elapsed = max(0.001, time.time() - self.start_t)
                 rate = max(0, self.n - self.initial) / elapsed
-                print(
+                sys.stdout.write(
                     json.dumps(
                         {
                             "stage": "download",
@@ -95,9 +97,10 @@ def main() -> None:
                             if self.total and rate
                             else None,
                         }
-                    ),
-                    flush=True,
+                    )
+                    + "\n"
                 )
+                sys.stdout.flush()
             return result
 
     if args.progress_json:
@@ -134,10 +137,19 @@ def main() -> None:
                 config.diarization.local_model_path,
             )
         )
+    from ewp_transcripts.local_asr import optional_asr_models
+
+    entries.extend(
+        (m["code"], m["repository"], m["revision"], Path(m["path"]).expanduser())
+        for m in optional_asr_models()
+        if args.model and m["code"] in args.model
+    )
     for code, repository, revision, target in entries:
         if args.model is not None and code not in args.model:
             continue
         active_repository = repository
+        if args.progress_json:
+            print(json.dumps({"stage": "model-item", "message": repository}), flush=True)
         token = os.environ.get("HF_TOKEN")
         if repository == config.diarization.model and not token:
             token = getpass.getpass("Hugging Face read token (accept model terms first): ")
@@ -151,6 +163,8 @@ def main() -> None:
             force_download=args.force_download,
             tqdm_class=DownloadProgress,
         )
+        if args.progress_json:
+            print(json.dumps({"stage": "model-complete", "message": repository}), flush=True)
     print("Pinned model preparation complete.")
 
 

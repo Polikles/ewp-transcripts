@@ -1,3 +1,3 @@
 """Single source for application/package/installer release identity."""
 
-__version__ = "0.23.2"
+__version__ = "0.24.0"

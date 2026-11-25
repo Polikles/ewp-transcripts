@@ -339,7 +339,10 @@ async function refreshJobs() {
     statusText.textContent = queueJobStatusLabel(job);
     status.append(statusText, renderRuntimeProgress(job));
     const identity = document.createElement("td");
-    if(job.speech?.provider === "openrouter") {const hint=document.createElement("small"); hint.textContent=`OpenRouter · ${job.speech.model}`; identity.append(hint);}
+    {const hint=document.createElement("small"); hint.dataset.guiContent="true";
+      hint.textContent=job.speech?.provider === "openrouter" ? `OpenRouter · ${job.speech.model}`
+        : `${guiLocale === "pl" ? "Lokalnie" : "Local"} · ${job.local_model_name || (job.speech?.local_model !== "configured" && job.speech?.local_model) || "large-v2"}`;
+      identity.append(hint);}
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");
     input.textContent = Object.keys(job.group_sources || {}).map(shortName).join(", ") || shortName(job.input_path);

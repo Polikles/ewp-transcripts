@@ -9,6 +9,14 @@ namespace EwP.Setup;
 
 static class Branding
 {
+    public static Brush HeaderBackground()
+    {
+        var layers = new DrawingGroup();
+        layers.Children.Add(new GeometryDrawing((Brush)new BrushConverter().ConvertFromString("#10232d")!, null, new RectangleGeometry(new Rect(0, 0, 384, 384))));
+        var motif = new DrawingGroup { Opacity = 0.27 }; motif.Children.Add(new ImageDrawing(Svg("web-pattern-dark.svg"), new Rect(0, 0, 384, 384))); layers.Children.Add(motif);
+        return new DrawingBrush(layers) { TileMode = TileMode.Tile, ViewportUnits = BrushMappingMode.Absolute, Viewport = new Rect(0, 0, 384, 384), Stretch = Stretch.Fill };
+    }
+
     public static ImageSource Svg(string name)
     {
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name)!; var xml = XDocument.Load(stream); var svg = xml.Root!; var values = svg.Attribute("viewBox")!.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(v => double.Parse(v, CultureInfo.InvariantCulture)).ToArray(); var bounds = new Rect(values[0], values[1], values[2], values[3]);

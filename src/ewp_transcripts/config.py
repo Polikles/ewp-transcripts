@@ -319,6 +319,7 @@ class RuntimeConfig(StrictConfigModel):
 
 
 class SpeechConfig(StrictConfigModel):
+    local_model: Literal["configured", "large-v3", "large-v3-turbo"] = "configured"
     provider: Literal["local", "openrouter"] = "local"
     model: Literal[
         "openai/whisper-large-v3",

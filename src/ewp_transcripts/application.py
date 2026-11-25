@@ -1729,6 +1729,9 @@ def transcribe_one(
     allow_cloud: bool = False,
 ) -> TranscriptionOutcome:
     """Run one inspected episode through safe publication."""
+    from ewp_transcripts.local_asr import resolve_local_asr
+
+    config = resolve_local_asr(config)
     check_cancellation(cancellation)
     started = time.perf_counter()
     emit_progress(progress, "inspect", "started")
@@ -1840,6 +1843,9 @@ def transcribe_batch(
     speaker_map: dict[str, str] | None = None,
 ) -> BatchTranscriptionOutcome:
     """Process inspected episodes sequentially and isolate per-job failures."""
+    from ewp_transcripts.local_asr import resolve_local_asr
+
+    config = resolve_local_asr(config)
 
     if config.speech.provider != "local":
         raise SpeechEngineError(
@@ -2149,9 +2155,13 @@ def _configured_export_formats(config: ApplicationConfig) -> tuple[ExportFormat,
 
 
 def _whisperx_asr(config: ApplicationConfig) -> AsrEngine:
+    from ewp_transcripts.local_asr import resolve_local_asr
+
+    config = resolve_local_asr(config)
     return WhisperXAsrEngine(
         config.models.asr_snapshot_path,
         revision=config.models.asr_revision,
+        name=config.models.asr_model,
         device=config.models.device,
         compute_type=config.models.compute_type,
     )

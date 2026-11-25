@@ -1,0 +1,100 @@
+[
+  {
+    "code": "asr_v3",
+    "name": "large-v3",
+    "repository": "Systran/faster-whisper-large-v3",
+    "revision": "edaa852ec7e145841d8ffdb056a99866b5f0a478",
+    "bytes": 3090839273,
+    "files": {
+      ".gitattributes": 1519,
+      "README.md": 2052,
+      "config.json": 2394,
+      "model.bin": 3087284237,
+      "preprocessor_config.json": 340,
+      "tokenizer.json": 2480617,
+      "vocabulary.json": 1068114
+    },
+    "path": "~/.cache/huggingface/hub/models--Systran--faster-whisper-large-v3/snapshots/edaa852ec7e145841d8ffdb056a99866b5f0a478",
+    "hashes": {
+      ".gitattributes": {
+        "algorithm": "git-sha1",
+        "digest": "a6344aac8c09253b3b630fb776ae94478aa0275b"
+      },
+      "README.md": {
+        "algorithm": "git-sha1",
+        "digest": "a84bfa7f20cac02ea5a99efa5eaf687ad58c1caf"
+      },
+      "config.json": {
+        "algorithm": "git-sha1",
+        "digest": "75336feae814999bae6ccccdecf177639ffc6f9d"
+      },
+      "model.bin": {
+        "algorithm": "sha256",
+        "digest": "69f74147e3334731bc3a76048724833325d2ec74642fb52620eda87352e3d4f1"
+      },
+      "preprocessor_config.json": {
+        "algorithm": "git-sha1",
+        "digest": "931c77a740890c46365c7ae0c9d350ba3cca908f"
+      },
+      "tokenizer.json": {
+        "algorithm": "git-sha1",
+        "digest": "3a5e2ba63acdcac9a19ba56cf9bd27f185bfff61"
+      },
+      "vocabulary.json": {
+        "algorithm": "git-sha1",
+        "digest": "0adcd01e7c237205d593b707e66dd5d7bc785d2d"
+      }
+    },
+    "gated": false,
+    "optional": true
+  },
+  {
+    "code": "asr_v3_turbo",
+    "name": "large-v3-turbo",
+    "repository": "dropbox-dash/faster-whisper-large-v3-turbo",
+    "revision": "0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf",
+    "bytes": 1621668947,
+    "files": {
+      ".gitattributes": 1519,
+      "README.md": 1445,
+      "config.json": 2263,
+      "model.bin": 1617884929,
+      "preprocessor_config.json": 340,
+      "tokenizer.json": 2710337,
+      "vocabulary.json": 1068114
+    },
+    "path": "~/.cache/huggingface/hub/models--dropbox-dash--faster-whisper-large-v3-turbo/snapshots/0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf",
+    "hashes": {
+      ".gitattributes": {
+        "algorithm": "git-sha1",
+        "digest": "a6344aac8c09253b3b630fb776ae94478aa0275b"
+      },
+      "README.md": {
+        "algorithm": "git-sha1",
+        "digest": "284b65fb822d8d95331b288fc2af14bc28ce3db7"
+      },
+      "config.json": {
+        "algorithm": "git-sha1",
+        "digest": "0351d1d6870005e865747b781b5d7c23ea0459cd"
+      },
+      "model.bin": {
+        "algorithm": "sha256",
+        "digest": "e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da"
+      },
+      "preprocessor_config.json": {
+        "algorithm": "git-sha1",
+        "digest": "931c77a740890c46365c7ae0c9d350ba3cca908f"
+      },
+      "tokenizer.json": {
+        "algorithm": "git-sha1",
+        "digest": "17456db595adc78a973f97d69d8cb50bc87c0b1c"
+      },
+      "vocabulary.json": {
+        "algorithm": "git-sha1",
+        "digest": "0adcd01e7c237205d593b707e66dd5d7bc785d2d"
+      }
+    },
+    "gated": false,
+    "optional": true
+  }
+]

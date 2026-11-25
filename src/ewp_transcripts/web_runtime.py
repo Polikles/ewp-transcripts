@@ -68,3 +68,18 @@ def publish_runtime(*, port: int) -> None:
         os.replace(temporary, path)
     finally:
         Path(temporary).unlink(missing_ok=True)
+
+
+def system_ui_language() -> str:
+    """Return the Windows user's UI language, or defer to browser preferences."""
+    import sys
+
+    if sys.platform == "win32":
+        import ctypes
+        import locale
+
+        language = locale.windows_locale.get(
+            ctypes.windll.kernel32.GetUserDefaultUILanguage(), "en"
+        )
+        return "pl" if language.lower().startswith("pl") else "en"
+    return ""

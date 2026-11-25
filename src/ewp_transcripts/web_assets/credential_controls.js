@@ -40,7 +40,7 @@ document.querySelector("#openrouter-key-dialog-status").after(credentialFooter);
 const credentialSettings = document.createElement("div");
 credentialSettings.id = "gui-credentials";
 credentialSettings.innerHTML = `<h3>OpenRouter API key</h3>
-  <p class="field-hint">One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, choose Use saved OpenRouter key.</p>`;
+  <p class="field-hint">One key is shared by ASR, correction and translation. OS storage is optional. If no secure store is available, use a session-only key. After restarting, check the connection to load a saved key, or choose Use saved OpenRouter key.</p>`;
 const credentialSettingsButton = document.createElement("button");
 credentialSettingsButton.type = "button";
 credentialSettingsButton.textContent = "Manage OpenRouter key";
@@ -71,8 +71,8 @@ document.querySelector("#check-openrouter-key").addEventListener("click",async e
   const button=event.currentTarget,input=document.querySelector("#openrouter-api-key"),status=keyCheckStatus;
   const key=input.value;input.value="";button.disabled=true;status.textContent="Checking OpenRouter key and connection…";
   try {
-    await queuePost("/api/v1/speech/check",key ? {api_key:key} : {},{trigger:button});
-    status.textContent="Key and connection are ready.\nNo audio was uploaded.";
+    const result=await queuePost("/api/v1/speech/check",key ? {api_key:key} : {},{trigger:button});
+    showOpenRouterCheckResult(result,status);
   }catch(error){status.textContent=error.message;}
   finally{input.value="";button.disabled=false;}
 });
@@ -92,3 +92,10 @@ keyCheckButton.addEventListener("click",updateSessionKeyButton);
 updateSessionKeyButton();
 
 document.querySelector("#save-openrouter-key").addEventListener("click",updateSessionKeyButton);
+
+function showOpenRouterCheckResult(result,status) {
+  if(result.loaded_saved_key){openRouterKeyConfigured=true;updateOpenRouterKeyStatus();}
+  status.textContent=result.loaded_saved_key
+    ? "OpenRouter key and connection are ready. Saved key loaded. No audio was uploaded."
+    : "OpenRouter key and connection are ready. No audio was uploaded.";
+}

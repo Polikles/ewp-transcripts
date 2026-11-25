@@ -638,6 +638,8 @@ def run(
                     event = None
                 if isinstance(event, dict) and event.get("stage") in {
                     "download",
+                    "model-item",
+                    "model-complete",
                     "python",
                     "dependencies",
                     "media",
@@ -972,13 +974,15 @@ def model_targets(
 ) -> list[dict[str, Any]]:
     state = load_state(root)
     # Read the installed configuration to respect custom paths; missing app falls back to pins.
-    targets: list[str] = []
+    targets: dict[str, str] = {}
     if state or release:
         release = release or active_path(root, state)
         program = (
             "import json;from ewp_transcripts.config import load_config;c=load_config();"
-            "print(json.dumps([str(c.models.asr_snapshot_path),str(c.models.alignment_snapshot_path),"
-            "str(c.models.english_alignment_snapshot_path),str(c.diarization.local_model_path)]))"
+            "print(json.dumps(dict(asr=str(c.models.asr_snapshot_path),"
+            "alignment_pl=str(c.models.alignment_snapshot_path),"
+            "alignment_en=str(c.models.english_alignment_snapshot_path),"
+            "diarization=str(c.diarization.local_model_path))))"
         )
         with contextlib.suppress(OSError, ValueError):
             result = subprocess.run(
@@ -990,15 +994,13 @@ def model_targets(
                 encoding="utf-8",
             )
             value = json.loads(result.stdout)
-            if (
-                isinstance(value, list)
-                and len(value) == len(entries)
-                and all(isinstance(p, str) for p in value)
+            if isinstance(value, dict) and all(
+                isinstance(k, str) and isinstance(p, str) for k, p in value.items()
             ):
                 targets = value
     return [
-        dict(entry, path=targets[i] if targets else str(Path(entry["path"]).expanduser()))
-        for i, entry in enumerate(entries)
+        dict(entry, path=targets.get(entry["code"], str(Path(entry["path"]).expanduser())))
+        for entry in entries
     ]
 
 
@@ -1031,7 +1033,11 @@ def verify_models(root: Path, catalog: Path) -> list[dict[str, Any]]:
             "repository": entry["repository"],
             "path": str(target),
             "revision": entry["revision"],
-            "status": "fail" if issues else "pass",
+            "status": "not-installed"
+            if entry.get("optional") and not target.exists()
+            else "fail"
+            if issues
+            else "pass",
             "issues": issues,
         }
         results.append(result)
@@ -1056,6 +1062,8 @@ def prepare_models(
         raise InstallError("Unknown model selection")
     downloads = []
     for entry in entries:
+        if selected is None and entry.get("optional"):
+            continue
         if selected is not None and entry["code"] not in selected:
             continue
         target = Path(entry["path"])
@@ -1067,7 +1075,16 @@ def prepare_models(
             downloads.append(entry)
     owner = load_owner(root)
     assert owner is not None
-    owner["models"] = sorted(set(owner.get("models", []) + [m["path"] for m in entries]))
+    owner["models"] = sorted(
+        set(
+            owner.get("models", [])
+            + [
+                m["path"]
+                for m in entries
+                if not m.get("optional") or selected and m["code"] in selected
+            ]
+        )
+    )
     atomic_json(root / "owner.json", owner)
     if not downloads:
         emit("models", "Pinned local models preserved; no download or HF token required")

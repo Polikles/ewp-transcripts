@@ -26,7 +26,7 @@ sealed partial class Wizard
         "visible information hover/focus feedback", "persistent technical log expansion",
         "disabled installed models and explicit reinstall", "real older-version rollback selection", "required-check click feedback",
         "five-step first install and optional OpenRouter page", "overall progress and stable metrics",
-        "same-version update refusal",
+        "same-version update refusal", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -152,6 +152,12 @@ sealed partial class Wizard
         progressStage = "verify"; Render(); UpdateLayout();
         Assert(!FindVisual<Expander>(body).Single().IsExpanded, "user can collapse log and keep it collapsed");
         busy = false;
+        operation = "install"; ResetModelState(); page = 2; Render();
+        Assert(catalog.Models.Count(m => m.Optional) == 2 && !DownloadModels.Any(m => m.Optional), "optional models never download by default");
+        selectedModels.Add("asr_v3_turbo"); Render();
+        Assert(DownloadModels.Any(m => m.Code == "asr_v3_turbo"), "explicit optional model selection reaches download request");
+        await Capture(previews, "pl-optional-local-asr");
+        operation = "update"; ResetModelState();
         TestRollbackChoices(existing);
 
         maintenance = true; page = 0; operation = "uninstall"; Render();
@@ -174,9 +180,18 @@ sealed partial class Wizard
         Assert(completed > 0 && overallProgress.Value == completed && activityProgress.Height == 32, "overall phase progress does not regress and activity reserves height");
         UpdateOperationProgress("log", "Downloading test-wheel (1MiB)", null);
         UpdateOperationProgress("log", "Downloaded test-wheel", null);
+        string previousActivity = activityProgress.Text;
+        UpdateOperationProgress("log", "Xet Storage is enabled for this repo, but the hf_xet package is not installed", null);
+        Assert(activityProgress.Text == previousActivity, "backend warnings never replace activity/package name");
+        UpdateOperationProgress("model-item", "Systran/faster-whisper-large-v3", null);
+        Assert(activityProgress.Text == "Systran/faster-whisper-large-v3", "structured model activity shows only repository");
         Assert(downloadsFinished.Contains("package:test-wheel"), "download counter includes completed dependencies");
         using (var finalDownload = JsonDocument.Parse("{\"bytes\":1000000000,\"total\":1000000000,\"unit\":\"B\",\"download_id\":\"fixture:model.bin\"}")) UpdateOperationProgress("download", "model.bin", finalDownload.RootElement);
         Assert(downloadsFinished.Contains("fixture:model.bin"), "download counter includes model byte transfers");
+        using (var unknown = JsonDocument.Parse("{\"bytes\":1000,\"total\":null,\"unit\":\"B\",\"download_id\":\"fixture:unknown.bin\"}")) UpdateOperationProgress("download", "unknown.bin", unknown.RootElement);
+        Assert(operationProgress.IsIndeterminate && downloadsStarted.Contains("fixture:unknown.bin"), "unknown byte total is honest and counted");
+        UpdateOperationProgress("model-complete", "fixture", null);
+        Assert(downloadsFinished.Contains("fixture:unknown.bin"), "repository completion closes unknown-total downloads");
         await Capture(previews, "pl-model-download-progress");
         busy = false; FindInstallation = InstallationDiscovery.Find;
     }
