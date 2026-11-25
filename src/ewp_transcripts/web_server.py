@@ -919,6 +919,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         planned_job_id=canonical.job_id,
                         language=LanguageMode(canonical.episode.language),
                         source_sha256=digest,
+                        asr_model_name=next(
+                            (m.name for m in canonical.processing.models if m.role == "asr"), ""
+                        ),
                     )
                     selected_payload: dict[str, object] = {
                         "imported": imported,
@@ -3002,6 +3005,9 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                         planned_job_id=canonical.job_id,
                         language=LanguageMode(canonical.episode.language),
                         source_sha256=digest,
+                        asr_model_name=next(
+                            (m.name for m in canonical.processing.models if m.role == "asr"), ""
+                        ),
                     )
                     added += int(imported)
                 payload = {"added": added}
@@ -3285,13 +3291,16 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 if not isinstance(existing, dict) or not isinstance(existing.get("path"), str):
                     raise ValueError("A staged job could not be safely replanned")
                 result_path = self.server.gui_workflows.resolve_allowed_path(existing["path"])
-                require_completed_canonical_result(result_path)
+                canonical = require_completed_canonical_result(result_path)
                 self.server.gui_transcriptions.register_completed_result(
                     result_path,
                     output_directory=output_path,
                     planned_job_id=str(item["planned_job_id"]),
                     language=language,
                     source_sha256=sha256_file(result_path),
+                    asr_model_name=next(
+                        (m.name for m in canonical.processing.models if m.role == "asr"), ""
+                    ),
                 )
                 if progress is not None:
                     progress(1)

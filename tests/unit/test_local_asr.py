@@ -92,7 +92,7 @@ def test_queue_retains_distinct_local_models_and_passes_selected_config_to_servi
             )
             for name in ["large-v3", "large-v3-turbo"]
         ]
-        assert [j.local_model_name for j in jobs] == ["large-v3", "large-v3-turbo"]
+        assert [j.asr_model_name for j in jobs] == ["large-v3", "large-v3-turbo"]
         assert calls == []
         queue.start()
         deadline = time.monotonic() + 2
@@ -133,3 +133,18 @@ def test_system_ui_language_reads_windows_user_setting(monkeypatch, code, expect
     )
     monkeypatch.setattr(sys, "platform", "win32")
     assert system_ui_language() == expected
+
+
+def test_completed_import_retains_canonical_asr_name_without_using_current_default(tmp_path):
+    queue = GuiTranscriptionQueue(config=ApplicationConfig())
+    try:
+        job, added = queue.register_completed_result(
+            tmp_path / "result.json",
+            output_directory=tmp_path,
+            planned_job_id="imported",
+            language="pl",
+            asr_model_name="large-v3-turbo",
+        )
+        assert added and job.status == "completed" and job.asr_model_name == "large-v3-turbo"
+    finally:
+        queue.close()

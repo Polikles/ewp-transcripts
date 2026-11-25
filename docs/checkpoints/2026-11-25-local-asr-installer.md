@@ -27,8 +27,21 @@ no fabricated local checkboxes, unrelated substitutes or third-party credentials
 Full local/cloud exact-model parity is therefore limited to publicly available Whisper weights.
 No additional provider cost or media upload; previous spend remains USD0.0291461230985028369.
 
-Local gate PASS1163 tests/12 native skips (17 integrations), Ruff/format/mypy119 files.
+Local gate PASS1167 tests/12 native skips (17 integrations), Ruff/format/mypy119 files.
 Credential tests cover saved/session/environment/typed precedence, unavailable storage, check failure,
 CSRF and no secret in replies. Optional selection tested through setup argument dispatch, installer
 ownership/defaults, configured custom target mapping and actual queue-to-service configuration.
 Browser/native tests and immutable artifacts pending. No model inference/GPU success claimed.
+
+Browser PASS with synthetic-only service and saved-key sentinel: Windows systemPL overrides
+English browser, explicit EN preference survives reload, requested PL saved-key confirmation,
+both check buttons activate saved key, no audio consent, optional local Turbo selection survives
+unplanned media autosave and staging/reload. Full server restart restores staged Turbo job with
+correct queue label and no processing. No external requests/page errors. Script/screenshots/report
+will accompany delivery. Build run45661594778/source740460a compiled successfully; native test pending.
+
+First native run45661594778/source740460a PASS35 WPF groups/12 Windows cases. A final queue-label
+review found imported completed canonical results need their recorded ASR name rather than the
+current configured default. Preserve the canonical role=asr name for these terminal imports and
+use generic ASR prefix where provider is not established; no rerun or altered result payload.
+Final source/build follows this focused correction.

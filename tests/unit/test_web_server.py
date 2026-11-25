@@ -426,7 +426,11 @@ def test_canonical_picker_import_remains_after_selection_cache_closes(
     cache._root = tmp_path / "cache"  # noqa: SLF001 - isolate this request's cache
     monkeypatch.setattr(
         "ewp_transcripts.web_server.require_completed_canonical_result",
-        lambda _: SimpleNamespace(job_id="episode", episode=SimpleNamespace(language="pl")),
+        lambda _: SimpleNamespace(
+            job_id="episode",
+            episode=SimpleNamespace(language="pl"),
+            processing=SimpleNamespace(models=[SimpleNamespace(role="asr", name="large-v2")]),
+        ),
     )
     handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
     headers = Message()
@@ -463,6 +467,7 @@ def test_canonical_picker_import_remains_after_selection_cache_closes(
     assert preserved.read_bytes() == body
     assert preserved.is_relative_to(output / ".ewp-gui-sources" / "canonical")
     assert len(transcriptions.register_completed_result.call_args.kwargs["source_sha256"]) == 64
+    assert transcriptions.register_completed_result.call_args.kwargs["asr_model_name"] == "large-v2"
 
 
 def test_staged_browser_audio_remains_after_selection_cache_closes(tmp_path: Path) -> None:

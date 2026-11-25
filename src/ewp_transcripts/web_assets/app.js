@@ -341,7 +341,7 @@ async function refreshJobs() {
     const identity = document.createElement("td");
     {const hint=document.createElement("small"); hint.dataset.guiContent="true";
       hint.textContent=job.speech?.provider === "openrouter" ? `OpenRouter · ${job.speech.model}`
-        : `${guiLocale === "pl" ? "Lokalnie" : "Local"} · ${job.local_model_name || (job.speech?.local_model !== "configured" && job.speech?.local_model) || "large-v2"}`;
+        : `ASR · ${job.asr_model_name || (job.speech?.local_model !== "configured" && job.speech?.local_model) || guiUiText("Configured local model (default)")}`;
       identity.append(hint);}
     identity.append(`${job.planned_job_id} · ${job.language} · speakers: ${job.speaker_count}`, renderWorkflowProgress(job));
     const input = document.createElement("td");

@@ -80,7 +80,7 @@ class GuiTranscriptionJob(BaseModel):
     selected_streams: dict[str, int] = Field(default_factory=dict)
     recording_id: str | None = None
     speech: SpeechConfig = SpeechConfig()
-    local_model_name: str = ""
+    asr_model_name: str = ""
     language: LanguageMode
     speaker_count: Literal["auto"] | int
     created_at: datetime
@@ -183,8 +183,10 @@ class GuiTranscriptionQueue:
             selected_streams=selected_streams or {},
             recording_id=recording_id,
             speech=speech or SpeechConfig(),
-            local_model_name=(
-                speech.local_model
+            asr_model_name=(
+                speech.model
+                if speech and speech.provider == "openrouter"
+                else speech.local_model
                 if speech and speech.local_model != "configured"
                 else self._config.models.asr_model
             ),
@@ -206,6 +208,7 @@ class GuiTranscriptionQueue:
         planned_job_id: str,
         language: LanguageMode,
         source_sha256: str = "",
+        asr_model_name: str = "",
     ) -> tuple[GuiTranscriptionJob, bool]:
         """Expose an existing canonical result to the local GUI workflow queues.
 
@@ -232,6 +235,7 @@ class GuiTranscriptionQueue:
                 updated_at=now,
                 result_path=normalized,
                 source_sha256=source_sha256,
+                asr_model_name=asr_model_name,
             )
             self._jobs[job.job_id] = job
             self._order.appendleft(job.job_id)
