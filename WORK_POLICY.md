@@ -1,3 +1,9 @@
+Current boundary2026-11-25:0.24.0 delivered from50cb47b after owner0.23.2 feedback. Optional
+Whisper v3/Turbo addition is authorized and implemented (earlier deferred-only prohibition is
+superseded); no public desktop weights established for Scribe/MAI. Follow opening TODO/status and
+local-asr-installer checkpoint/evidence. Owner next tests actual optional model install/inference;
+no paid/model campaign merely after resume. Preserve uninstall-while-running pass and old artifacts.
+
 # Work policy and context recovery
 
 Current boundary2026-11-24: owner0.22.2 install/desktop/transcription PASS is retained. New installer

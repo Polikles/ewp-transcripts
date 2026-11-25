@@ -1,3 +1,15 @@
+# Current delivery boundary — 2026-11-25
+
+0.24.0 source50cb47b/native45662554203 PASS35 WPF groups/12 Windows cases,1168 local tests,
+17 integrations, browser/full-server restart and33 inspected previews. Six local artifact hashes
+match CI. Follow opening TODO/status and local-asr-installer checkpoint/evidence. Owner confirms
+uninstall with app running. Next is focused optional Whisper v3/Turbo add-models/recognition and
+actual GPU inference retest; do not claim inference from model-free tests. Scribe v2/MAI public
+local desktop weights not established; do not fabricate equivalent choices. No more build/model/
+paid/artist campaign merely on resume. Full installer EN/PL/notices review and native app shell
+remain later; preserve prior accepted work, deliveries and exact cloud spend. Latest owner request
+supersedes earlier deferred-only local-parity restrictions below. EXE unsigned/internal.
+
 # AGENTS.md
 
 ## Delivered runtime/wizard follow-up —2026-11-24

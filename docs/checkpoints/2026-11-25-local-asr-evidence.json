@@ -1,0 +1,77 @@
+{
+  "version": "0.24.0",
+  "product_source": "50cb47be60b2f6fc4fe3769392398decb8688f62",
+  "workflow_run": 45662554203,
+  "workflow_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45662554203",
+  "build_job": 139375968325,
+  "windows_job": 139376437400,
+  "local": {
+    "passed": 1168,
+    "native_skips_on_linux": 12,
+    "integration_cases_included": 17,
+    "ruff_format_mypy": "PASS",
+    "mypy_files": 119
+  },
+  "native": {
+    "result": "PASS",
+    "wpf_groups": 35,
+    "windows_cases": 12,
+    "windows_case_seconds": 23.15,
+    "previews_inspected": 33
+  },
+  "browser": {
+    "result": "PASS",
+    "checks": [
+      "Windows UI language overrides English browser on first run",
+      "explicit language survives reload",
+      "saved OS key loaded on explicit check in both buttons",
+      "Polish requested success copy",
+      "no cloud upload consent",
+      "optional model retained before planning and after staging/reload",
+      "queue shows actual local model",
+      "no spontaneous processing"
+    ],
+    "page_errors": [],
+    "external_requests": []
+  },
+  "full_restart": {
+    "result": "PASS",
+    "full_server_restart": true,
+    "job": {
+      "status": "staged",
+      "model": "large-v3-turbo",
+      "label": "large-v3-turbo"
+    },
+    "audio_upload_consent": false
+  },
+  "artifact_archive_hashes": {
+    "installer-test-package": "f88dda7f3538b363fe9e6daf74d2b4c7ddc12041de83bb1015b0a67b3b9da869",
+    "native-windows-startup-evidence": "f501738b13733f9b0017d9874438257093b018b894b489b0301d4535450dc60e"
+  },
+  "product_hashes": {
+    "EwP-0.24.0-windows-x64.zip": "cc4647b9327a746a937081e4527d52374c203f5257e0dc137719b93f39055f50",
+    "EwP-0.24.0-ubuntu-x64.zip": "83a6cef6fdb9eca9b05a1905113050b6afcbc9cb7632962cea4a109d88190fea",
+    "EwP-Setup-0.24.0.exe": "500440236e9c274768642bf411fe58c973c2094b491bc271efc7f2930ebd27b6",
+    "EwP-0.24.0-ubuntu-x64.tar.gz": "b23bb097db6a647f2cec4011da2d07d9475bdea70e6024284083ad5c7df1c222",
+    "Install-EwP-0.24.0.ps1": "61bfc9198486d63fc03bffc182c4f8c56503fc98eec6694f4e78a22dfc4db1f2",
+    "Install-EwP-0.24.0.sh": "e5af6fdb31d89eeb12fc25210ab2321728792771ea0bb0bff9302f0808ad1d59"
+  },
+  "optional_local_asr": [
+    "large-v3",
+    "large-v3-turbo"
+  ],
+  "unchanged_base_model_pins": true,
+  "models_downloaded_for_agent_tests": false,
+  "paid_requests": 0,
+  "prior_total_cloud_spend_usd": "0.0291461230985028369",
+  "owner_confirmed": "0.23.2 uninstall succeeds while app is running",
+  "pending": [
+    "Owner optional-model install/recognition and GPU inference retest",
+    "Scribe v2/MAI exact local parity: public desktop weights not established",
+    "Full installer EN/PL and notices audit",
+    "Native Windows app interface after installer closure",
+    "Signing/public release/bootstrap activation"
+  ],
+  "unsigned_internal_build": true,
+  "delivery_directory": "/home/linuch/project-ewp/deliveries/ewp-0.24.0-installers"
+}

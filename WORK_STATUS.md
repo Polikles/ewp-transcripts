@@ -1,3 +1,27 @@
+# Delivered 0.24.0 — 2026-11-25
+
+Source50cb47b; native run45662554203 SUCCESS:35 WPF groups/12 actual Windows cases.
+Local1168/17 integrations, Ruff/format/mypy119 PASS, browser and full-server restart PASS,
+33 final native previews inspected; six product hashes and packaged source match CI.
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.24.0-installers.
+Checkpoint: [installer/local ASR](docs/checkpoints/2026-11-25-local-asr-installer.md),
+[evidence](docs/checkpoints/2026-11-25-local-asr-evidence.json),
+[focused owner model retest](Instructions/LOCAL_ASR_INSTALLER_RETEST_PL.md).
+
+Raw backend notices stay technical-only; installer header uses existing dark motif. First-run
+UI follows Windows user UI language/browser fallback; saved choice takes precedence. Explicit
+OR check loads stored key when no input/session/env key applies, without audio upload/consent.
+Unchecked optional local Whisper v3/Turbo use pinned snapshots and per-job selection; queue,
+recovery and imported canonical results display actual model names. Existing base pins unchanged.
+Owner confirms0.23.2 removal while app running; preserve this and prior workflow acceptance.
+Next: owner add-models/recognition and actual GPU inference tests. Agent downloaded metadata only,
+no model weights, media uploads or paid calls. Scribe v2/MAI desktop weights not established;
+exact full local/cloud parity remains limited by their availability. Full installer/notices audit,
+native app shell and public signing/release/bootstrap remain later. No new rebuild or paid/model/
+artist campaign merely on resume. Previous deliveries verified unchanged (38 hashes).
+
+Earlier state follows for reference.
+
 # Active 2026-11-25 owner feedback
 
 Implement opening TODO as 0.24.0 (optional ASR selection is a feature addition).

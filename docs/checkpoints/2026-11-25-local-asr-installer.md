@@ -45,3 +45,35 @@ review found imported completed canonical results need their recorded ASR name r
 current configured default. Preserve the canonical role=asr name for these terminal imports and
 use generic ASR prefix where provider is not established; no rerun or altered result payload.
 Final source/build follows this focused correction.
+
+Final source50cb47be60b2f6fc4fe3769392398decb8688f62. Local1168 PASS/12 native skips,
+Ruff/format/mypy119 files PASS (17 integration cases included). Final browser checks PASS;
+model labels include imports and never infer historical model identity from current defaults.
+All33 initial native previews inspected, including optional list/header/EN-PL/progress/credentials.
+Final rebuild45662554203 and artifact checks pending. Owner-focused model checklist is
+Instructions/LOCAL_ASR_INSTALLER_RETEST_PL.md; no repeated uninstall/paid qualification requested.
+
+## Final delivery
+
+0.24.0 from50cb47be60b2f6fc4fe3769392398decb8688f62. Final native run45662554203 SUCCESS:
+35 WPF groups/12 actual Windows cases (23.15s);33 final previews visually inspected. Local1168
+PASS/12 native skips,17 integration cases included; Ruff/format/mypy119 files PASS. Browser and
+actual server restart PASS with explicit locale, saved-key check, Turbo model identity and no
+spontaneous processing/audio consent. Six local hashes and packaged source/catalog match CI.
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.24.0-installers (EXE, bundles/scripts, checksum,
+preview gallery/ZIP, START-HERE-PL, RETEST-PL, EN/PL installer pairs, browser/native evidence).
+EXE SHA256500440236e9c274768642bf411fe58c973c2094b491bc271efc7f2930ebd27b6.
+Content-free evidence:2026-11-25-local-asr-evidence.json, also DELIVERY.json in the delivery.
+
+Owner next step: update to0.24.0, then Add local models with the SAME installer version, verify
+optional installed-model recognition, selected per-job model labels and real inference on Windows
+GPU using the focused checklist. No new model weights downloaded or paid calls by agent; model
+inference is NOT qualified by model-free test success. Prior app/uninstall/manual acceptance kept.
+Scribe v2/MAI public desktop weights not established: honest limitation, no fake local downloads.
+Full notices/installer text audit and native app shell remain later. Internal unsigned build;
+public bootstrap/signing/release activation pending. No further rebuild/test/artist/model campaign
+merely after resume. Disposable environment cleanup follows after evidence persistence.
+
+Cleanup complete: stopped own disposable synthetic servers/browser helpers and removed the exact
+/tmp/ewp-local-asr.Xwj3Ro task directory after preserving content-free evidence in delivery.38
+previous installer hashes verified unchanged. No private report/model/audio/credential committed.

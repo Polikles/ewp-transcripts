@@ -1,18 +1,25 @@
 # Active owner feedback — 2026-11-25 / target 0.24.0
 
-- [ ] Read supplied 0.23.2 report privately; retain owner pass: uninstall while app running.
-- [ ] Keep raw dependency/HF notices in technical details only; expose structured phase/item names.
-- [ ] Reuse application dark pattern behind installer header; visually verify native previews.
-- [ ] First-run interface uses system/browser language (PL else EN); preserve explicit preference.
-- [ ] Explicit OR connection check loads OS key when session/env/input key absent, confirms saved-key
+- [x] Read supplied 0.23.2 report privately; retain owner pass: uninstall while app running.
+- [x] Keep raw dependency/HF notices in technical details only; expose structured phase/item names.
+- [x] Reuse application dark pattern behind installer header; visually verify native previews.
+- [x] First-run interface uses system/browser language (PL else EN); preserve explicit preference.
+- [x] Explicit OR connection check loads OS key when session/env/input key absent, confirms saved-key
       source and no audio upload; no automatic provider requests/start/upload consent.
-- [ ] Add optional unchecked local Whisper Large v3 and v3 Turbo with immutable metadata/hashes,
+- [x] Add optional unchecked local Whisper Large v3 and v3 Turbo with immutable metadata/hashes,
       installer repair/add/remove/verification integration and real per-job model selection.
       Investigate exact Scribe v2/MAI availability; do not fabricate downloadable local equivalents.
-- [ ] Queue displays actual chosen local/cloud model, including restored jobs.
-- [ ] Focused credential/language/model/recovery tests, local gate/native WPF checks, inspect previews,
+- [x] Queue displays actual chosen local/cloud model, including restored jobs.
+- [x] Focused credential/language/model/recovery tests, local gate/native WPF checks, inspect previews,
       update affected EN/PL docs/changelog and deliver immutable installer for model-focused owner test.
-- [ ] Document closed-weight limitations and remaining owner model runtime tests honestly.
+- [x] Document closed-weight limitations and remaining owner model runtime tests honestly.
+
+
+- [ ] Owner focused0.24.0 retest: add optional Whisper v3/Turbo, installed-model recognition,
+      queue/restored model names and actual inference on Windows GPU. Checklist:
+      Instructions/LOCAL_ASR_INSTALLER_RETEST_PL.md. No repeated paid/uninstall campaign.
+- [ ] Exact Scribe v2/MAI local parity remains blocked by absent established public desktop weights;
+      do not substitute other models under their names. Revisit if officially released.
 
 Earlier work follows for reference.
 
@@ -43,13 +50,12 @@ See `docs/checkpoints/2026-11-24-runtime-wizard-autosave.md`. No paid/model camp
       updated affected EN/PL help/reference and distinct immutable delivery.
 - [x] Clean unneeded internal installers/build caches under current owner authorization. Retain
       useful accepted baselines, manifests and artist archives; full installer/notices review later.
-- [ ] LATER: local options matching ASR models available via OpenRouter, for local/cloud function
-      parity. Research hardware/licensing/runtime feasibility then; no model addition/download now.
+- [x] Local/OpenRouter parity feasibility activated by2026-11-25 request: optional Whisper v3/Turbo
+      implemented above; Scribe/MAI public desktop weights not established. No false local choices.
 
 
-- [ ] Owner focused0.23.2 retest: reopen after browser/terminal closure, default-output
-      two-track persistence, missing-check feedback, five-step first install and removal.
-      Automated checks PASS; no repeated paid/model/transcription campaign is needed.
+- [x] Owner0.23.2 feedback received2026-11-25: installation report and uninstall with running
+      application PASS. New corrections promoted to0.24.0 above; do not reopen old test campaigns.
 
 ## Delivered 0.23.1 owner follow-up — 2026-11-24
 
