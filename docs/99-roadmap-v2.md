@@ -1,3 +1,10 @@
+Owner follow-up2026-11-25 closes functional installer retesting after automatic required host
+checks (0.24.2): automated verification only, no further manual-test gate. Next planned stage is
+full installer EN/PL copy consolidation/owner wording review and audit of user-facing notices,
+then affected help updates. Native Windows app interface/lifetime follows installer closure.
+See opening TODO/status and automatic-host-checks checkpoint; do not execute the broad next
+stage merely to answer the owner's plan question. Prior mixed local ASR and removal passes kept.
+
 Owner follow-up2026-11-25 activates local model parity work: add compatible optional Whisper
 v3/v3-turbo, verify other exact providers public local weights, installer/credentials/locale polish.
 See opening TODO/checkpoint; supersedes deferred-only restriction immediately below.

@@ -3,14 +3,20 @@
 Owner waives further manual testing after this correction. Preserve mixed-model inference,
 uninstall and prior focused acceptance; use automated checks only for this change.
 
-- [ ] Auto-run required computer checks on entering step2 for Install/Update, also retaining
+- [x] Auto-run required computer checks on entering step2 for Install/Update, also retaining
       Repair/Add-models automatic diagnostics. Wait for a valid installation path; avoid duplicate runs.
-- [ ] Changing target folder automatically refreshes free-space checks on that volume without
+- [x] Changing target folder automatically refreshes free-space checks on that volume without
       redoing successful CPU/OS/GPU/runtime probes. Keep navigation and cached disk row accurate.
-- [ ] Focused native WPF regression plus normal gate, new immutable package, affected EN/PL help,
+- [x] Focused native WPF regression plus normal gate, new immutable package, affected EN/PL help,
       checkpoint/evidence. No new manual checklist or owner test gate.
-- [ ] Explain next planned stage: full installer EN/PL copy review and user-facing notices audit;
+- [x] Explain next planned stage: full installer EN/PL copy review and user-facing notices audit;
       after installer closure, native Windows interface/lifetime. No broad next-stage work inferred.
+
+Next planned stage (not started in this correction):
+- [ ] Full installer EN/PL text inventory with stable editable IDs, shorter/consistent disk copy,
+      and audit of user-facing notices/licensing/credits for project-only or misleading wording.
+- [ ] Integrate accepted wording and synchronize affected offline help.
+- [ ] Native Windows app shell/lifetime after installer closure; release/signing separately.
 
 Earlier tasks follow.
 
@@ -29,9 +35,9 @@ no new model downloads/GPU/paid-provider campaign. Earlier waiting boundary is s
 - [x] Focused backend/browser regression with multiple synthetic recordings and both themes,
       local quality gate, native artifact checks; update affected EN/PL help/changelog and deliver0.24.1.
 
-- [ ] Owner focused0.24.1 check: early missing-model feedback if an absent option is available,
-      model-label spacing, active recording outline in both lists and both themes. See
-      Instructions/MODEL_PREFLIGHT_SELECTION_RETEST_PL.md. Mixed-model ASR already owner-passed.
+- [x] Owner says no further manual tests after0.24.2 automatic-check correction.0.24.1 focused
+      checks already pass automatically; manual gate waived, without claiming an unreported pass.
+      Preserve actual mixed-model ASR acceptance.
 
 Earlier tasks follow.
 

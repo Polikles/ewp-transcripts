@@ -1,0 +1,62 @@
+{
+  "version": "0.24.2",
+  "source": "7178bc7478897016e9663905739adb48afe73c00",
+  "run_id": 45683385827,
+  "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45683385827",
+  "build_job": 139449484580,
+  "windows_job": 139449927868,
+  "local": {
+    "passed": 1176,
+    "native_skips_on_linux": 12,
+    "integrations_included": 17,
+    "ruff_format_mypy": "PASS",
+    "mypy_files": 119
+  },
+  "native": {
+    "result": "PASS",
+    "wpf_groups": 38,
+    "windows_cases": 12,
+    "windows_seconds": 36.06,
+    "new_previews_inspected": 3,
+    "preview_count": 36
+  },
+  "coverage": [
+    "automatic host checks on step2 for install update repair models",
+    "valid path required; unknown update target waits",
+    "uninstall avoids irrelevant host tests",
+    "path change refreshes disk only; CPU OS GPU runtime rows preserved",
+    "low disk blocks and sufficient disk recovers Next without full worker",
+    "failed CPU check remains blocking after disk refresh",
+    "duplicate automatic full checks avoided"
+  ],
+  "artifact_sha256": {
+    "installer-test-package": "a98277798e50b6976bcb64210eeed8c51d97a940bb99534d95c00e10a89d06b0",
+    "native-windows-startup-evidence": "48306b087af32cead479ca659b1c95206021109cd1b4efef339ff864446ca742"
+  },
+  "product_hashes": {
+    "EwP-0.24.2-windows-x64.zip": "1778c87cbdf2a6cc4e7f8e7387cb406de7b63b378fed855b5a3f361b892c24d4",
+    "EwP-0.24.2-ubuntu-x64.zip": "17998689429aabdf74426e33ef2c9f43880238bb64672da5875ee988e185ab71",
+    "EwP-Setup-0.24.2.exe": "27b34df73cb347fc87750a6d08a1f5bd5ceb39cd19008e694dc88932f0774f35",
+    "EwP-0.24.2-ubuntu-x64.tar.gz": "bb4bb1466bd625061bfeb21bc156c2f3e0744e3d305366d0e5554feccacb0e6e",
+    "Install-EwP-0.24.2.ps1": "20be44846f6aac761ee49d960062eb987f03e93888ab0569b0803c5c11127304",
+    "Install-EwP-0.24.2.sh": "ffa424feac283a4f14bfbb846862d4f8e00a59bd225e8f3f9672402ed17a824b"
+  },
+  "manual_retest_required": false,
+  "manual_retest_waived_by_owner": true,
+  "new_model_or_paid_campaign": false,
+  "prior_cloud_spend_usd": "0.0291461230985028369",
+  "prior_acceptance_preserved": [
+    "mixed local queue with three ASR models",
+    "uninstall while application running",
+    "prior app and installer focused fixes"
+  ],
+  "next_planned_stage": [
+    "full installer EN/PL text review and stable editable pairs",
+    "user-facing licenses/credits/notices audit",
+    "update affected offline help",
+    "native Windows interface/lifetime after installer closure"
+  ],
+  "public_release_or_signing_performed": false,
+  "unsigned_internal": true,
+  "delivery": "/home/linuch/project-ewp/deliveries/ewp-0.24.2-installers"
+}

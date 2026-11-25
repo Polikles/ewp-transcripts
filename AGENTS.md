@@ -1,3 +1,24 @@
+# Current boundary — 2026-11-25 / automatic-check correction closed
+
+0.24.2 delivered from7178bc7478897016e9663905739adb48afe73c00. Native run45683385827 SUCCESS:
+38 WPF groups/12 real Windows cases,1176 local tests/17 integrations, Ruff/format/mypy119 PASS.
+Three new native previews inspected; two archive digests/six product hashes and packaged help/source
+match CI. Delivery: /home/linuch/project-ewp/deliveries/ewp-0.24.2-installers.
+Checkpoint: docs/checkpoints/2026-11-25-automatic-host-checks.md and automatic-host-evidence.json.
+Required checks auto-start on step2 for Install/Update/Repair/Add-models with a valid target;
+folder changes refresh disk/Next while preserving CPU/OS/GPU/runtime checks. Hardware failures
+remain blocking; local-profile changes rerun the needed full diagnostic. No duplicate workers.
+
+Owner explicitly waives further manual retesting after this correction. Do not reopen a manual
+checklist, paid/model/transcription campaign or rebuild merely on resume. Preserve previous
+mixed-three-model inference, uninstall-while-running and application/manual acceptance.
+NEXT planned stage: full installer EN/PL text consolidation and user-facing licensing/credits/
+notices audit, then accepted wording/offline help updates. Native Windows app interface/lifetime
+follows installer closure. Broad next-stage work was not executed merely to answer the plan.
+Public release/signing/bootstrap activation remain later; EXE is unsigned/internal.
+
+Earlier boundaries follow.
+
 # Current delivery boundary — 2026-11-25 / 0.24.1
 
 0.24.1 delivered from8e552126ced7a8a786a1af55319b785d5e8bfc0b. Native45678022822 SUCCESS:

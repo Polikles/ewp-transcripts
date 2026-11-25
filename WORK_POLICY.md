@@ -1,3 +1,5 @@
+Current boundary2026-11-25:0.24.2 automatic required host checks delivered/automatically verified. Owner waives further manual retests; no new manual gate/model/paid campaign. Next planned work is full installer EN/PL and notices audit, then native app interface after installer closure. Follow opening TODO/status and automatic-host-checks checkpoint.
+
 Current boundary2026-11-25:0.24.1 delivered; follow opening TODO/status and model-preflight-selection checkpoint. Owner confirms mixed local three-model ASR queue; preserve that acceptance without repeated inference/paid tests. Await focused early-model/spacing/selection feedback.
 
 Current boundary2026-11-25:0.24.0 delivered from50cb47b after owner0.23.2 feedback. Optional
