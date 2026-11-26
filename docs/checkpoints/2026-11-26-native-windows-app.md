@@ -1,4 +1,27 @@
-# Native Windows application — 2026-11-26
+# Native Windows application — delivered0.25.0
+
+Final source9b8da316fc0a87fceebaf824f0342dc43788f004; run45811242398 PASS. Delivery:
+/home/linuch/project-ewp/deliveries/ewp-0.25.0-installers. See native-windows-app-evidence.json.
+1201 local tests/17 integrations,46 installer groups/18 Windows filesystem cases and4 desktop
+cycles pass.65 previews reviewed,4 full-size desktop/dialog views; complete opaque native dialog,
+all buttons within bounds. Both CI archives, six product hashes,446 packaged source files verified;
+final desktop host byte-identical to independent local compile.68 earlier delivery hashes preserved.
+EXE SHA25665ce4c0754d0297ae089ccbcb5a7579725844f5a02dc22b3355f1d86f7c4abdc.
+
+Implemented own WPF/WebView2 window and identity, direct shortcut, no console, focus-on-relaunch,
+suspended-before-job-owned Python tree, authenticated narrow lifecycle bridge, safe close/wait/stop,
+save-failure refusal/confirmed discard, autosave-off explicit flush, live-metric tolerance, durable
+pending media with Windows TEMP alias handling, and maintenance/reset-race coordination. Updated
+paired native copy and EN/PL bundled help. .NET self-contained; WebView2 Evergreen checked at startup.
+
+Agent work complete. Next is owner focused native-window feedback. Preserve prior application,
+mixed-model and installer passes; no repeated full inference/paid campaign. Actual owner Win11/GPU
+qualification is not implied by model-free Server2025 CI. Original web UI remains inside the native
+host. Public release/signing and AMD research/experimental adapter remain later. Exact cumulative
+cloud spend unchanged at USD0.0291461230985028369. Unsent candidates are disposable and not deliveries.
+
+Implementation log follows.
+
 
 Owner authorizes moving from delivered installer0.24.4 to native Windows interface/lifetime.
 Baseline5676d1d; preserve approved app workflow, owner EN/PL terminology/assets, model pins,

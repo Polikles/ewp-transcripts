@@ -1,0 +1,120 @@
+{
+  "version": "0.25.0",
+  "source_commit": "9b8da316fc0a87fceebaf824f0342dc43788f004",
+  "source_dirty": false,
+  "run_id": 45811242398,
+  "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45811242398",
+  "result": "PASS",
+  "local_gate": {
+    "passed": 1201,
+    "windows_only_skips": 19,
+    "integrations_included": 17,
+    "ruff_format_files": 306,
+    "mypy_files": 120,
+    "ruff_format_mypy": "PASS"
+  },
+  "native": {
+    "platform": "Microsoft Windows Server 2025 / 10.0.26100",
+    "installer_wpf_groups": 46,
+    "filesystem_cases": 18,
+    "filesystem_seconds": 28.05,
+    "desktop_cases": 1,
+    "desktop_seconds": 34.29,
+    "desktop_cycles": {
+      "crash": 21,
+      "save": 20,
+      "restore": 21,
+      "maintenance": 21
+    },
+    "desktop_previews": 16,
+    "wizard_previews": 49,
+    "overviews_inspected": true,
+    "full_size_inspected": [
+      "save/pl-desktop-light",
+      "save/en-desktop-dark",
+      "save/pl-native-close-dialog",
+      "save/en-native-close-dialog"
+    ],
+    "real_renderer_not_full_window_frame": true,
+    "native_close_background_opaque_buttons_fit": true
+  },
+  "coverage": {
+    "single_instance_focus": "actual minimized HWND restored by second launch",
+    "native_console_handle": 0,
+    "worker_grandchild_console_handles": [
+      0,
+      0
+    ],
+    "clean_process_tree": "manager/server and two real synthetic descendants exited after normal close, crash and maintenance",
+    "recovery": "pending media retained under outputs through full shutdown/restart and crash; no implicit planning/start",
+    "close_save_failure": "window/backend remain open; Wait remains cancellable afterwards",
+    "autosave_off": "explicit close flush saves without re-enabling preference",
+    "live_queue_metrics": "synthetic changing timestamps do not prevent durable close-save",
+    "transport_shutdown_race": "reset/abort regression + actual Windows maintenance",
+    "resource_policy": "strict origin rules + renderer foreign-fetch rejection",
+    "downloads": "actual local document download through embedded control",
+    "temporary_path_alias": "alias preservation unit regression + actual Windows restart cycle"
+  },
+  "artifacts": {
+    "EwP-0.25.0-windows-x64.zip": {
+      "sha256": "a34d68f2d911c236aae859d698d68d12d6146f9411471b214e167a01ba480f98",
+      "bytes": 76359122
+    },
+    "EwP-0.25.0-ubuntu-x64.zip": {
+      "sha256": "236336d3215847cefa7adba726ccf68b94169f18e4f3a1481bf8cc22bb32ccd8",
+      "bytes": 18626239
+    },
+    "EwP-Setup-0.25.0.exe": {
+      "sha256": "65ce4c0754d0297ae089ccbcb5a7579725844f5a02dc22b3355f1d86f7c4abdc",
+      "bytes": 216707128
+    },
+    "EwP-0.25.0-ubuntu-x64.tar.gz": {
+      "sha256": "b39a7c48b3a091e029f4e20bf4475545ab1086fc020eebeca192962fa5c30d1e",
+      "bytes": 35434651
+    },
+    "Install-EwP-0.25.0.ps1": {
+      "sha256": "6e47db971cc33ade981690fb32b415b95591d5b614b2eccea8f6af0e9519a496",
+      "bytes": 1426
+    },
+    "Install-EwP-0.25.0.sh": {
+      "sha256": "b9aec8ce522404246e27cfdd6716043b187489b898c237f744f6eb2e80ed9fb9",
+      "bytes": 808
+    }
+  },
+  "packaged_source_files_verified": 446,
+  "ci_artifacts": [
+    {
+      "id": 15114091363,
+      "name": "native-windows-startup-evidence",
+      "sha256": "648c6c542b3a8bd8b391e61b3a9e22fe9eb979dbf30b626a9cf20c6ca10f086f",
+      "bytes": 6095463
+    },
+    {
+      "id": 15113715959,
+      "name": "installer-test-package",
+      "sha256": "358a029d6f872b091f42c45906159766cd04e49b9b61fe6013aef981adf65e93",
+      "bytes": 266797953
+    }
+  ],
+  "desktop_host": {
+    "sha256": "42adfb3b51cc0fa084fa83e457c420fbf97a965f693a43aa5658588f47d1109c",
+    "independent_local_build_byte_identical": true,
+    "dotnet_sdk": "10.0.404",
+    "dotnet_runtime": "10.0.15",
+    "webview2_sdk": "1.0.4370.26",
+    "sdk_license_sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55"
+  },
+  "preservation": {
+    "prior_delivery_hashes": 68,
+    "owner_review_workbooks_model_pins_original_notices": "unchanged",
+    "cumulative_cloud_spend_usd": "0.0291461230985028369",
+    "new_paid_model_provider_calls": 0
+  },
+  "limits": [
+    "Real desktop tests use an isolated synthetic installation and generated PCM media; no ML packages/models or audio-provider requests.",
+    "Busy decisions and queue-metric churn are simulated; owned process trees are real. GPU/provider inference and a fresh owner Windows11 installation are not requalified.",
+    "Shared Microsoft WebView2 Evergreen Runtime is required; startup explains a missing runtime before launching Python.",
+    "Original reviewed web interface runs inside the native WPF/WebView2 window; editors were not rewritten as WPF controls.",
+    "EXE remains unsigned/internal. Owner desktop review, first public release/signing and AMD research remain later."
+  ]
+}

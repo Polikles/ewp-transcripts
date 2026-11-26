@@ -1,4 +1,4 @@
-# Active native Windows application interface — 2026-11-26 / target0.25.0
+# Delivered native Windows application interface — 2026-11-26 / 0.25.0
 
 - [x] Record desktop architecture preserving approved workflow/UI and model/runtime contracts;
       native window, no PowerShell/console, repeat launch focuses existing instance.
@@ -8,10 +8,13 @@
       or safe cancellation; save failure stays open, no backend/ML descendants orphaned after exit.
 - [x] Integrate launcher/shortcut/installer/update/removal and runtime dependency/notices packaging;
       keep explicit terminal/browser entry points and existing recovery/key/consent behavior.
-- [ ] Focused backend/browser/native Windows lifecycle, same-instance, real no-model process tests,
+- [x] Focused backend/browser/native Windows lifecycle, same-instance, real no-model process tests,
       current gates, native previews and fresh immutable installer0.25.0 with verified source/hashes.
-- [ ] Update EN/PL copy/help/checkpoints and deliver concrete desktop app for owner review.
+- [x] Update EN/PL copy/help/checkpoints and deliver concrete desktop app for owner review.
       No paid/model/transcription campaign; AMD research and first public release stay after native UI.
+
+- [ ] Focused owner desktop review. Preserve accepted inference/installer passes; public release
+      and AMD research remain later. No full manual/model/paid campaign on resume.
 
 Earlier stages follow.
 
@@ -26,7 +29,7 @@ Earlier stages follow.
 - [x] Show25 GB consistently in both fresh-install disk descriptions, including cached disk rerender.
 - [x] Focused automated/native negative regressions (no worker/data/root creation), normal gate,
       new0.24.4 artifact and source/hash/preview verification. Owner explicitly waives manual retest.
-- [ ] After delivery: native Windows application interface/lifetime is the next stage, not this task.
+- [x] Native Windows application interface/lifetime subsequently delivered in0.25.0; see opening task.
       Preserve AMD research and first public release AFTER native app interface.
 
 Earlier stages follow.
@@ -84,7 +87,7 @@ Copy stage requested after this correction:
 - [x] Full installer EN/PL text inventory with stable editable IDs and disk copy flagged for review,
       and inventory/audit flags in notices/licensing/credits for project-only or misleading wording.
 - [x] Integrate accepted wording and synchronize affected offline help (0.24.3).
-- [ ] Native Windows app shell/lifetime after installer closure; release/signing separately.
+- [x] Native Windows app shell/lifetime delivered in0.25.0; release/signing remain separately planned.
 
 Earlier tasks follow.
 

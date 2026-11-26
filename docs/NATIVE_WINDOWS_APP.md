@@ -55,3 +55,13 @@ restart recovery, file selection, no implicit queue start, save failure, busy de
 blocked external resources and absence of descendants after close/crash/removal. GPU/provider
 inference is not requalified by these tests. Existing owner passes and exact cloud spend remain.
 First public release and AMD research remain after native app delivery/qualification.
+
+
+## Delivered qualification — 0.25.0
+
+Source9b8da316fc0a87fceebaf824f0342dc43788f004, native run45811242398 PASS. All four actual
+window cycles, real process/console checks, native close controls/bounds, renderer download/origin
+checks and restart/maintenance behavior pass with synthetic media.1201 local tests and17 integrations
+pass;65 previews reviewed. See [evidence](checkpoints/2026-11-26-native-windows-app-evidence.json).
+This qualifies the host/lifetime without repeating GPU/provider inference. Owner desktop review
+is the next boundary; first publication and AMD research remain later.

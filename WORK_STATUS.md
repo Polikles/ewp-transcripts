@@ -1,13 +1,20 @@
-# Active native Windows app — 2026-11-26 / target 0.25.0
+# Delivered native Windows application — 2026-11-26 / 0.25.0
 
-Owner downloaded0.24.4 and explicitly authorizes native interface/lifetime implementation.
-Follow docs/checkpoints/2026-11-26-native-windows-app.md, docs/NATIVE_WINDOWS_APP.md and opening TODO.
-Native WPF/WebView2 host preserves approved UI; own identity/window, no console, single-instance
-focus, durable close/recovery, owned worker tree and installer/maintenance integration are active.
-First cross-compilation and175 focused Python cases pass; full gate, native Windows qualification
-and immutable0.25.0 delivery remain pending. Do not mistake model-free checks for GPU/provider tests.
-Preserve original deliveries/assets/review workbooks/model pins and paid spend. No paid campaign.
-AMD research/experimental adapter and first public release remain after native UI.
+0.25.0 delivered from9b8da316fc0a87fceebaf824f0342dc43788f004. Native run45811242398 PASS:
+46 installer WPF groups,18 Windows filesystem cases and4 real desktop cycles (one end-to-end case).
+1201 local tests/19 Windows skips,17 integrations, Ruff/format306/mypy120 PASS.65 previews reviewed
+in overview and4 desktop/close views full-size. Both CI archive digests/six product hashes/446 packaged
+source files verified; desktop EXE matches independent local build byte for byte.68 prior hashes kept.
+Native WPF/WebView2 window preserves approved UI, owns backend/worker job, has no console and focuses
+on repeat launch. Close flushes work, offers wait/stop, preserves save refusal; crash/maintenance
+leave no owned workers. Windows TEMP alias recovery and shutdown connection-reset races corrected.
+Files: /home/linuch/project-ewp/deliveries/ewp-0.25.0-installers.
+Checkpoint: docs/checkpoints/2026-11-26-native-windows-app.md and matching evidence JSON.
+NEXT: focused owner desktop-window/update/close feedback, not a repeated full inference campaign.
+Evergreen WebView2 Runtime required; missing-runtime UI links Microsoft before backend startup.
+GPU/provider inference not requalified; prior mixed-model/installer acceptance remains. No paid calls;
+cumulative spend USD0.0291461230985028369. AMD research/experimental adapter and first public release
+remain after desktop review. EXE unsigned/internal; no public publication/signing performed.
 
 Earlier boundaries follow.
 

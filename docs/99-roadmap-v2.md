@@ -1,3 +1,10 @@
+Owner native Windows application stage2026-11-26:0.25.0 implementation/agent qualification delivered.
+Own WPF/WebView2 window retains reviewed interface; console-free backend/worker lifetime, focus,
+durable close, restart and maintenance coordination pass native Windows tests. See native-windows-app
+checkpoint/evidence and opening TODO. Next is focused owner desktop feedback; existing inference
+acceptance stays closed. AMD research/experimental adapter and first public release follow desktop
+review. No public release/signing or new paid/model campaign in this stage.
+
 Owner follow-up2026-11-26: close existing-installation preflight and25GB wording as0.24.4,
 with automated checks only and no new manual gate. Native Windows application interface/lifetime
 is next after delivery. AMD research and first public release remain after that interface.
