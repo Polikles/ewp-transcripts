@@ -1,12 +1,19 @@
-# Active installation preflight correction — 2026-11-26 / 0.24.4
+# Delivered existing-installation preflight — 2026-11-26 / 0.24.4
 
-Owner feedback supersedes copy-review wait: block Install at step2 when any registered/managed
-installation exists, show version-specific maintenance guidance and25GB in both fresh-install
-labels. Shared early backend preflight, normal/native negative tests and new installer authorized.
-See opening TODO and docs/checkpoints/2026-11-26-install-preflight.md. Owner explicitly waives
-manual retests; next stage after this delivery is native Windows app UI/lifetime, not implemented
-in this task. Preserve prior passes, owner copy, HF model reuse and artifacts. AMD research and
-first public release remain AFTER native Windows app UI. No paid/model campaign.
+0.24.4 delivered from d280943b0fcdda3ecb184d74c8be10fd207898bd. Native run45795432181 PASS:
+46 WPF groups/18 actual Windows cases,1186 local tests/17 integrations, Ruff/format302/mypy119 PASS.
+Installer detects existing registered/managed installations at step2, including another target root;
+older/same/newer versions get Update/Repair/rollback-or-newer-installer guidance and actual path.
+GUI rechecks before Next/host/install, shared backend checks before model/key/host/runtime preparation
+and at registration. Negative tests prove no workers/new target creation and intact original files.
+Fresh-install folder and host labels both show25GB. Existing HF model-cache reuse is unchanged.
+All49 native previews inspected in overview,8 affected full-size views; both CI archives/six product
+hashes/source payload verified. All62 prior installer hashes, models/notices/review files preserved.
+Files: /home/linuch/project-ewp/deliveries/ewp-0.24.4-installers.
+Checkpoint: docs/checkpoints/2026-11-26-install-preflight.md and install-preflight-evidence.json.
+Owner explicitly waives further manual retests. NEXT planned work is native Windows application
+interface/lifetime; no new checklist, build/model/paid campaign on resume. AMD research and first
+public release/EXE in releases/ remain AFTER native app interface. EXE unsigned/internal.
 
 Earlier boundaries follow.
 

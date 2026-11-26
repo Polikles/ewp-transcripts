@@ -1,13 +1,13 @@
 # Active installation preflight correction — 2026-11-26 / target 0.24.4
 
-- [ ] Detect an existing installation for Install at step2, independent of the selected new folder;
+- [x] Detect an existing installation for Install at step2, independent of the selected new folder;
       show detected version/path and block before diagnostics/downloads/files are created.
-- [ ] Older version → Update; same version → Repair; newer version → Restore previous version
+- [x] Older version → Update; same version → Repair; newer version → Restore previous version
       or newer-installer release link. Preserve existing installation and cache reuse/token rules.
-- [ ] Add shared backend registration preflight before host checks/model/credential/network work;
+- [x] Add shared backend registration preflight before host checks/model/credential/network work;
       retain final registration guard for races. Cover script/direct entry points and registry views.
-- [ ] Show25 GB consistently in both fresh-install disk descriptions, including cached disk rerender.
-- [ ] Focused automated/native negative regressions (no worker/data/root creation), normal gate,
+- [x] Show25 GB consistently in both fresh-install disk descriptions, including cached disk rerender.
+- [x] Focused automated/native negative regressions (no worker/data/root creation), normal gate,
       new0.24.4 artifact and source/hash/preview verification. Owner explicitly waives manual retest.
 - [ ] After delivery: native Windows application interface/lifetime is the next stage, not this task.
       Preserve AMD research and first public release AFTER native app interface.
@@ -26,7 +26,7 @@ Earlier stages follow.
 - [x] Add existing application light pattern to installer light body, retain dark patterned header.
 - [x] Focused copy/link/footnote/theme native checks, normal gate, fresh versioned native installer,
       inspected Windows previews and verified immutable delivery for owner's manual copy/layout review.
-- [ ] Owner manual copy/layout review of delivered0.24.3 (no renewed full transcription campaign).
+- [x] Owner0.24.3 review reached functional feedback; further manual retests waived after0.24.4.
 - [ ] After native Windows interface, publish first public release and place its .exe in releases/;
       prepare binary storage for the standalone EXE (current157311032 bytes) before public publishing.
 - [ ] Later, AFTER native Windows interface: research AMD adapter feasibility across ASR/alignment/

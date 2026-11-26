@@ -1,0 +1,92 @@
+{
+  "version": "0.24.4",
+  "source_commit": "d280943b0fcdda3ecb184d74c8be10fd207898bd",
+  "source_dirty": false,
+  "run_id": 45795432181,
+  "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45795432181",
+  "result": "PASS",
+  "local_gate": {
+    "passed": 1186,
+    "windows_only_skips": 18,
+    "integration_tests_included": 17,
+    "focused_distribution_tests": 72,
+    "ruff_format": "PASS",
+    "mypy_files": 119
+  },
+  "native": {
+    "wpf_groups": 46,
+    "windows_cases": 18,
+    "case_duration_seconds": 29.15,
+    "previews": 49,
+    "overview_inspected": true,
+    "full_size_inspected": [
+      "en-install-existing-0.0.1",
+      "en-install-existing-0.24.4",
+      "en-install-existing-99.0.0",
+      "pl-install-existing-0.0.1",
+      "pl-install-existing-0.24.4",
+      "pl-install-existing-99.0.0",
+      "en-step-2",
+      "pl-auto-check-new-disk-ready"
+    ]
+  },
+  "regressions": {
+    "existing_older_same_newer_both_languages": "PASS",
+    "blocked_before_host_model_key_runtime_workers": "PASS",
+    "new_target_not_created": "PASS",
+    "original_installation_untouched": "PASS",
+    "new_folder_cannot_bypass_detection": "PASS",
+    "recheck_before_next_and_operation": "PASS",
+    "windows_registry_hives_views": "HKCU/HKLM 32/64 unit matrix; real HKCU 32/64 negative install cases",
+    "cached_disk_labels_both_25gb": "PASS",
+    "fresh_install_and_explicit_maintenance": "PASS",
+    "hf_cache_reuse": "preserved"
+  },
+  "artifacts": {
+    "EwP-0.24.4-windows-x64.zip": {
+      "sha256": "d9404b6902b7525a165be01f1d02c13073cb016285448e263cacc2585f5b968b",
+      "bytes": 16975693
+    },
+    "EwP-0.24.4-ubuntu-x64.zip": {
+      "sha256": "66e12a0612b2f3c0675ea4572e58413cd7cccf3cabbea84790fe4c450dedb29e",
+      "bytes": 18621515
+    },
+    "EwP-Setup-0.24.4.exe": {
+      "sha256": "fcac161fb30fec3ae83eb97843d6f4903653eeb14ecc13be1619cab8610f5254",
+      "bytes": 157323320
+    },
+    "EwP-0.24.4-ubuntu-x64.tar.gz": {
+      "sha256": "75e3314356d930f56722d9fbc50577f3f194c929178db0f6b2da36395cf83086",
+      "bytes": 35429458
+    },
+    "Install-EwP-0.24.4.ps1": {
+      "sha256": "f2d14ee5df4a4fd4dc78eedc7dfbc5ac67b620bfa22785aef7d14ff19c5c84df",
+      "bytes": 1426
+    },
+    "Install-EwP-0.24.4.sh": {
+      "sha256": "b0a670c3c2e660f7ca41bd578e5a9687887cc038fd1e2507e28c53e99e520de3",
+      "bytes": 808
+    }
+  },
+  "ci_artifacts": [
+    {
+      "id": 15103194439,
+      "name": "installer-test-package",
+      "sha256": "721025c80b7f7c12cdf1bc09d583f122bf3607e4b58358290ffb7c0fa97f6538"
+    },
+    {
+      "id": 15104657705,
+      "name": "native-windows-startup-evidence",
+      "sha256": "38abc75124dbb0bb8fb3d17f55647ee22e19b2e11725c0e1d1bf898b36dae051"
+    }
+  ],
+  "bundle_hashes_verified": true,
+  "app_and_manager_sources_match_commit": true,
+  "prior_installer_hashes_verified": 62,
+  "models_notices_licenses_workbooks_unchanged": true,
+  "owner_manual_retest": "explicitly waived",
+  "next_stage": "native Windows application interface/lifetime",
+  "amd_and_public_release": "after native Windows application interface",
+  "public_release_or_signing_performed": false,
+  "new_model_downloads_or_paid_provider_tests": false
+}

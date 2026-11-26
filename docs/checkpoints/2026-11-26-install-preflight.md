@@ -28,3 +28,42 @@ Native WPF covers6 locale/version cases, root change bypass, manual/auto checks,
 late registration before operation, newer-installer link and matching25GB labels on cached refresh.
 Six real Windows registry-view/version tests are added, preserving any preexisting real key.
 Native clean-source build/results/previews and final hashes pending; no manual retest gate.
+
+First clean candidate source d280943b0fcdda3ecb184d74c8be10fd207898bd;
+Windows run45795432181. All62 previous installer payload hashes verified; model pins, notices,
+AGPL and both original review workbooks unchanged. Owner reports0.24.3 uninstall succeeded and
+original earlier installation remained intact; preserve that qualification. Manual retest waiver
+supersedes prior copy-review waiting boundary. Next after final artifact delivery: native Windows
+application interface/lifetime, not a further owner checklist. No native app work in this fix.
+
+## Final verified delivery
+
+- [x] Detect before data/workers, version-specific EN/PL guidance, original root displayed;
+  changing new target cannot bypass detection. Newer-installer phrase links releases.
+- [x] Same-root explicit maintenance preserved; failed/new Install cannot alter existing files.
+- [x] Recheck before Next/host/install and early shared backend/CLI, final registration race guard.
+- [x]25GB fresh-install labels, cache/disk rerender and actual gate agree.
+- [x]1186 local tests,17 integrations, Ruff/format302/mypy119 PASS;72 focused distribution tests.
+- [x] Native run45795432181 SUCCESS:46 WPF groups,18 Windows cases (29.15s), including6 actual
+  registry-view/version refusal cases without workers. No skipped native cases.
+- [x]49 native previews inspected as overview,8 full-size focused screens: three version relations
+  in EN/PL and EN/PL fresh-install matching25GB labels. Paths/actions/link visible and readable.
+- [x] Two CI artifact digests/six product hashes, full bundle manifest, every packaged app file and
+  manager.py match clean source d280943b0fcdda3ecb184d74c8be10fd207898bd.
+- [x] All62 earlier artifact hashes, model pins, project/vendor notices, AGPL and original review
+  workbooks unchanged. No new downloads of models, paid-provider calls or transcript campaign.
+- [x] Owner explicitly waives manual retest; no manual gate left open for this correction.
+
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.24.4-installers.
+EXE EwP-Setup-0.24.4.exe:157323320 bytes, SHA256
+fcac161fb30fec3ae83eb97843d6f4903653eeb14ecc13be1619cab8610f5254.
+Machine evidence:2026-11-26-install-preflight-evidence.json / delivery DELIVERY.json,
+windows-self-test.json, previews/, SHA256SUMS.txt. No public release/signing/bootstrap activation.
+Temporary signed URLs initially expired during approval; refreshed only after approved downloader
+started, both archive hashes then matched. Temporary downloads/configs/candidates cleaned after
+preserving final evidence and delivery. Private originals and prior deliveries stay untouched.
+
+Next planned stage: native Windows application interface/lifetime; AMD research (experimental
+without hardware qualification) and first public release follow that interface. Do not reopen
+manual testing, model/paid tests or another rebuild merely on resume. Prior user uninstall/update/
+mixed-model qualification and cumulative cloud spend USD0.0291461230985028369 remain preserved.
