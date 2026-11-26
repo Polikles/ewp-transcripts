@@ -137,7 +137,9 @@ sealed partial class Wizard
             operation = "install"; page = 3; busy = finished = false; Render(); UpdateLayout();
             var note = body.Children.OfType<TextBlock>().Single(t => t.Text.StartsWith("*"));
             int index = body.Children.IndexOf(note); var instruction = (TextBlock)body.Children[index - 1];
-            Assert(note.FontSize < instruction.FontSize && instruction.Text.Contains("*") && !instruction.Text.Contains("$2") && note.Text.Contains("$2"), "spending comment is separate and smaller / " + locale);
+            string instructionText = new TextRange(instruction.ContentStart, instruction.ContentEnd).Text;
+            Assert(note.FontSize < instruction.FontSize, $"spending comment is smaller / {locale}: {note.FontSize} < {instruction.FontSize}");
+            Assert(instructionText.Contains("*") && !instructionText.Contains("$2") && note.Text.Contains("$2"), "spending comment is separate from linked instruction / " + locale);
             Assert(note.TransformToAncestor(body).Transform(new Point()).Y >= instruction.TransformToAncestor(body).Transform(new Point(0, instruction.ActualHeight)).Y, "footnote below linked instruction");
             Assert(NoticeFile.EndsWith(Pl ? "NOTICE_PL.txt" : "NOTICE.txt"), "notice follows installer language");
             string notices = File.ReadAllText(NoticeFile);

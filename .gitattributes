@@ -14,3 +14,6 @@ src/ewp_transcripts/web_assets/brand/NotoSansMono-OFL.txt -whitespace
 
 # Review CSV keeps exact newlines and intentional spaces in fragments and original legal copy.
 docs/installer-copy-review/EwP-instalator-EN-PL-do-korekty.csv -text -whitespace
+
+# Preserve the owner-reviewed Polish licensing prose exactly, including source whitespace.
+LICENSING_PL.md -whitespace

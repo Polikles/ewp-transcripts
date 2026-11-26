@@ -25,3 +25,11 @@ Final local quality gate PASS: Ruff check/format302 files, mypy119 files,1176 te
 PASS. Native WPF adds all6 language/action release-link cases, model version-row link, footnote
 separation/size/position, no stale link on rerender, localized notice selection and light-body
 artwork tests/previews. Final clean committed native CI artifact and visual inspection pending.
+
+First native candidatecf30d68/run45785066739 compiles/builds and reaches new copy tests but
+fails combined footnote assertion. Actual EN/PL OpenRouter previews show correct smaller,
+separate comment and new light motif. Linked instruction uses WPF Inlines: compare rendered
+TextRange rather than TextBlock.Text in the test, and split font/content assertions for diagnosis.
+All6 release-link action/locale cases passed before that assertion; no candidate delivered.
+Preserve owner trailing whitespace in LICENSING_PL.md via exact .gitattributes exception,
+matching the existing verbatim-notice policy. No runtime wording changed in this follow-up.
