@@ -41,3 +41,32 @@ removed; other optional enhancements after release.
 After refreshing editable package metadata offline for0.26.1, full gate1223 passed/20 Windows skips,
 including17 integrations; Ruff/format310/mypy122 PASS. Initial gate caught stale0.26.0 editable
 metadata, not a runtime failure. Native clean-source qualification/delivery still pending.
+
+## Final qualification and delivery
+
+Product source d6dd924fb27fe749c4084742d89c4eff0d337db4, public standard run45899926602 PASS on the
+first run.47 WPF installer groups;18 actual Windows filesystem cases (50.01s); six desktop cycles
+(63/66/64/64/67/64 checks,44.86s); actual pinned AMD DLL import (42.11s) PASS without models/inference.
+First startup follows system light; subsequent saved dark and explicit-light restart are preserved.
+Existing Snap/maximization, busy/save-refusal, paused recovery and owned-child cleanup remain PASS.
+175 native previews reviewed in overview,10 affected views full-size.24 blank surfaces with four
+sampled pixels each and24 caption pixels match expected colors; accepted popup and LEFT player remain.
+No separate browser suite rerun; shared initial document is exercised in actual WebView2 plus unit
+route/CSP/order checks. Owner confirms both Snap sides; current theme correction is not owner-reviewed.
+
+Both CI archive digests, six products, three manifests (Windows241/Ubuntu236 files) and232 committed
+source/control blobs per bundle verified. Native EXE matches independent same-source build exactly;
+86 prior product hashes preserved. Current EXE142183758bytes SHA256
+8f5178f200308a9a33fdb5b91f5a61535797e6053a7d4f24c327780417cec8b1,34.39% smaller than0.26.0.
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.26.1-installers.
+Matching evidence JSON and native files are retained independently of7-day CI expiry. No paid/model
+campaign, billing change, certificate creation, signing or public release; physical GTX1070/AMD
+qualification is explicitly unperformed. Private signing instructions remain solely in VM home.
+
+Next: final release consistency/notices review, delivery/storage or minimal-online-bootstrap design
+if selected, owner-provided eligible certificate and PRIVATE signing finalization, then first public
+release/download activation. Artist and future hardware tests do not block it; local Scribe/MAI is
+removed; Ollama/all other optional enhancements are after public release.
+
+Final documentation verification:355 relative links resolve; six help mirror pairs and all six
+product hashes pass. Post-qualification changes are documentation/evidence only; no new build.

@@ -137,3 +137,9 @@ additional full restart verifies explicit light appearance after earlier dark/sy
 The compressed wizard/native executable still require the normal lifecycle/integrity regression.
 No new runner/service, billing setting, retention change or model/provider campaign is introduced.
 Internal artifacts are unsigned; required first-public-release signing happens outside Git/Actions.
+
+[45899926602](https://github.com/Polikles/ewp-transcripts/actions/runs/45899926602) passed on the
+first run fromd6dd924, including47 installer groups,18 filesystem cases and six real desktop cycles.
+Both archive digests and final products were verified/copied to the VM; see
+[qualification evidence](checkpoints/2026-11-26-release-readiness-evidence.json). No new billing audit
+or physical GPU inference qualification is implied.

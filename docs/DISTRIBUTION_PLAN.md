@@ -1,6 +1,6 @@
 # Installation, updates, removal and versioning plan
 
-Current implementation: managed lifecycle/terminal packages/Windows wizard are delivered, followed by owner installer feedback through0.24.4, native desktop0.25.0, Personalization0.25.1 and experimental Windows AMD ASR0.26.0. See [AMD scope and limits](AMD_EXPERIMENTAL.md), [current next actions](99-roadmap-v2.md#current-next-actions--2026-11-26) and [qualification](checkpoints/2026-11-26-snap-amd-evidence.json). First public release/assets/online bootstrap activation remain. The original dated planning contract below is historical; it does not reopen completed work or add Docker/research gates.
+Current implementation: managed lifecycle/terminal packages/Windows wizard are delivered, followed by owner installer feedback through0.24.4, native desktop0.25.0, Personalization0.25.1 and experimental Windows AMD ASR0.26.0. See [AMD scope and limits](AMD_EXPERIMENTAL.md), [current next actions](99-roadmap-v2.md#current-next-actions--2026-11-26) and [qualification](checkpoints/2026-11-26-snap-amd-evidence.json). First public release/assets/online bootstrap activation remain. Owner2026-11-26 requires signing BEFORE public release, with procedure/keys outside Git; see current VERSIONING policy. The original dated planning contract below is historical; it does not reopen completed work or add Docker/research gates.
 
 Status: planned, 2026-11-23. Owner requests the next-step plan and expands distribution scope.
 This document does not announce an installer, change the application version or publish a release.

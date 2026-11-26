@@ -206,5 +206,18 @@
   "candidate_delivered": false,
   "no_models_or_ml_wheels_in_bundle": true,
   "unchanged_source_assets_and_vendor_notices": true,
-  "native_qualification_pending": true
+  "native_qualification_pending": false,
+  "final_qualified_delivery": {
+    "version": "0.26.1",
+    "source_commit": "d6dd924fb27fe749c4084742d89c4eff0d337db4",
+    "run_id": 45899926602,
+    "exe_bytes": 142183758,
+    "exe_sha256": "8f5178f200308a9a33fdb5b91f5a61535797e6053a7d4f24c327780417cec8b1",
+    "windows_zip_bytes": 76733622,
+    "desktop_exe_bytes": 65419679,
+    "reduction_percent": 34.39,
+    "native_desktop_cycles": 6,
+    "result": "PASS",
+    "unsigned_internal": true
+  }
 }

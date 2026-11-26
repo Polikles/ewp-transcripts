@@ -1,14 +1,39 @@
-# Active pre-release corrections — 2026-11-26 / target0.26.1
+# Delivered themed surfaces, hardware guidance and smaller installer — 2026-11-26 /0.26.1
 
-Owner confirms LEFT/RIGHT Snap restoration. Fix theme-aware blank startup/shutdown surfaces;
-first use Windows theme, later the app preference. Document NVIDIA/VRAM/RAM recommendations and
-queue compatibility-first GTX1070/8GB,32GB RAM,i5-10400F measurements/scripts for later hardware.
-Audit/compress installer payloads, preserving integrity and online pinned dependency preparation.
-Signing is REQUIRED before the first public release; its procedure, keys and credentials MUST
-stay outside Git. Owner instructions are private in VM home. Artist work remains non-blocking.
-Remove local Scribe/MAI from the plan. Ollama/all other optional enhancements are AFTER release.
-Read opening TODO, current roadmap and docs/checkpoints/2026-11-26-release-readiness.md.
-No physical GTX1070/AMD or paid/model campaign; prior artifacts/pins/approved work stay immutable.
+Owner confirms LEFT/RIGHT Snap restoration.0.26.1 fixes blank startup/closing surfaces using Windows
+theme first, then saved explicit/system app preference. Opaque WPF/WebView backgrounds are set
+before controller creation; document is shown after load and renderer hidden after durable close-save.
+Synchronous theme bootstrap also precedes browser styles/deferred scripts. Accepted Personalization,
+contrasting centered close popup, LEFT-sidebar player and worker/save-refusal behavior remain.
+
+README, Settings & About and EN/PL help recommend recent NVIDIA RTX12GB+ VRAM/32GB RAM/SSD as a
+provisional starting point; tested reference remains RTX3090/24GB.8GB is NOT a qualified baseline.
+Later GTX1070/8GB,32GB RAM,i5-10400F tests/collector scripts are queued: compatibility first, since
+current torch2.8/cu128 excludes Pascal, then VRAM/RAM peaks, timings/OOM/headroom. No hardware now.
+
+Measured payload inventory: native desktop plus duplicated self-contained .NET runtime caused growth;
+no models/ML wheels/private data are embedded. Compressing both Windows executables reduces EXE
+216719416→142183758bytes (-34.39%). No dependency/model pin or approved asset/license/workbook changes.
+A minimal online bootstrap remains a separate delivery/storage design, not a published URL today.
+
+Source d6dd924fb27fe749c4084742d89c4eff0d337db4; standard public run45899926602 PASS, one run.
+Local1223 passed/20 Windows skips,17 integrations,Ruff/format310/mypy122. Native47 WPF groups,
+18 filesystem cases,six desktop cycles (63/66/64/64/67/64 checks),AMD DLL import PASS without GPU/model.
+175 previews overview/10 affected full-size;24 blank frames×4 pixels and24 caption matches PASS.
+Both CI digests/six product hashes/three bundles232 source blobs/independent native EXE byte match
+verified;86 earlier hashes preserved. Six help mirrors and355 relative links verified.
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.26.1-installers.
+Read docs/checkpoints/2026-11-26-release-readiness.md and matching evidence; docs/HARDWARE.md,
+docs/INSTALLER_SIZE.md, current TODO/roadmap hold limits and actual next actions.
+
+Signing is REQUIRED before first public release. Procedure, keys and credentials MUST stay outside
+Git; owner-only instructions are /home/linuch/EwP-podpisywanie-EXE-instrukcja.md (0600), not in Git or
+installer delivery. No certificate purchased/generated; current internal EXE remains unsigned.
+Artist availability/screenshots and future physical GTX1070/AMD tests remain non-blocking. Local
+Scribe/MAI removed from plan; Ollama/other optional enhancements are AFTER first public release.
+NEXT: final release consistency/notices and artifact/storage preparation, private signing with an
+eligible owner certificate, then deliberate public release/download activation. No public release,
+physical-GPU/provider requalification, paid calls or billing changes. Spend USD0.0291461230985028369.
 
 Earlier evidence follows.
 

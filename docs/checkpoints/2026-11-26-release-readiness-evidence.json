@@ -1,0 +1,312 @@
+{
+  "version": "0.26.1",
+  "source_commit": "d6dd924fb27fe749c4084742d89c4eff0d337db4",
+  "source_dirty": false,
+  "run_id": 45899926602,
+  "products": [
+    {
+      "file": "EwP-0.26.1-windows-x64.zip",
+      "sha256": "5bc0ad818d6fbfcb30877ef1692a52e98bbe37c2a1f7a61a9e8c530639f3ef49",
+      "bytes": 76733622
+    },
+    {
+      "file": "EwP-0.26.1-ubuntu-x64.zip",
+      "sha256": "49387011709477a9a0016c223699d1f2b1e29b56b06b206d60de56c57f6cfe0b",
+      "bytes": 18644244
+    },
+    {
+      "file": "EwP-Setup-0.26.1.exe",
+      "sha256": "8f5178f200308a9a33fdb5b91f5a61535797e6053a7d4f24c327780417cec8b1",
+      "bytes": 142183758
+    },
+    {
+      "file": "EwP-0.26.1-ubuntu-x64.tar.gz",
+      "sha256": "68cfcc1d1010c45927a5ba2e2f9ca61d2e5ed0cb4aa31d514817e7c60963fd18",
+      "bytes": 35453112
+    },
+    {
+      "file": "Install-EwP-0.26.1.ps1",
+      "sha256": "7ceaa909b0f33362a058e3dede4205612255c5a81df1ab464d80d925d63b4cda",
+      "bytes": 1426
+    },
+    {
+      "file": "Install-EwP-0.26.1.sh",
+      "sha256": "d137cde027bc696d18244ac119fa44fe5f8d417cab571ba22c4902f069f8c79a",
+      "bytes": 808
+    }
+  ],
+  "bundles": [
+    {
+      "file": "EwP-0.26.1-windows-x64.zip",
+      "manifest_files": 241,
+      "committed_source_files": 232
+    },
+    {
+      "file": "EwP-0.26.1-ubuntu-x64.zip",
+      "manifest_files": 236,
+      "committed_source_files": 232
+    },
+    {
+      "file": "EwP-0.26.1-ubuntu-x64.tar.gz",
+      "manifest_files": 236,
+      "committed_source_files": 232
+    }
+  ],
+  "native_exe_independent_byte_match": true,
+  "previous_hashes_preserved": 86,
+  "result": "PASS",
+  "ci": {
+    "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45899926602",
+    "conclusion": "success",
+    "runs_used": 1,
+    "linux_job": 140182928649,
+    "windows_job": 140183317437,
+    "artifacts": [
+      {
+        "id": 15156090418,
+        "name": "native-windows-startup-evidence",
+        "sha256": "29e687f0a4bc17935f4e2cde0927fdbe3660b1db29f505f2298efce243b6139c",
+        "bytes": 15636368,
+        "expires_at": "2026-12-03T21:46:18Z"
+      },
+      {
+        "id": 15155840769,
+        "name": "installer-test-package",
+        "sha256": "441e6c317f528a0d75215abae2ea2bb5a764c92eb14fd12a08d9ec9c491040a8",
+        "bytes": 267015953,
+        "expires_at": "2026-12-03T21:43:00Z"
+      }
+    ],
+    "archive_digests_verified": true,
+    "retention_days": 7,
+    "paid_runners": false,
+    "billing_limits_changed": false
+  },
+  "local": {
+    "pytest_passed": 1223,
+    "windows_only_skips": 20,
+    "included_integrations": 17,
+    "ruff_format_files": 310,
+    "mypy_source_files": 122,
+    "csharp_cross_builds": 2,
+    "guide_mirror_pairs": 6,
+    "relative_links_checked": 355
+  },
+  "native": {
+    "installer_groups": 47,
+    "filesystem_cases": 18,
+    "filesystem_seconds": 50.01,
+    "desktop_seconds": 44.86,
+    "desktop_phases": {
+      "save": {
+        "result": "PASS",
+        "checks": 63,
+        "startup_appearance": {
+          "Theme": "light",
+          "TitleBarMode": "system",
+          "TitleBarColor": "#24485c",
+          "ThemePreference": "system"
+        },
+        "startup_placement": null,
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        }
+      },
+      "restore": {
+        "result": "PASS",
+        "checks": 66,
+        "startup_appearance": {
+          "Theme": "dark",
+          "TitleBarMode": "application",
+          "TitleBarColor": "#5b193f",
+          "ThemePreference": "dark"
+        },
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": -7,
+          "Top": 0,
+          "Right": 519,
+          "Bottom": 727,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        }
+      },
+      "crash": {
+        "result": "PASS",
+        "checks": 64,
+        "startup_appearance": {
+          "Theme": "dark",
+          "TitleBarMode": "application",
+          "TitleBarColor": "#5b193f",
+          "ThemePreference": "dark"
+        },
+        "startup_placement": {
+          "Left": -7,
+          "Top": 0,
+          "Right": 519,
+          "Bottom": 727,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      },
+      "maintenance": {
+        "result": "PASS",
+        "checks": 64,
+        "startup_appearance": {
+          "Theme": "dark",
+          "TitleBarMode": "application",
+          "TitleBarColor": "#5b193f",
+          "ThemePreference": "dark"
+        },
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      },
+      "amd-interface": {
+        "result": "PASS",
+        "checks": 67,
+        "startup_appearance": {
+          "Theme": "dark",
+          "TitleBarMode": "application",
+          "TitleBarColor": "#5b193f",
+          "ThemePreference": "dark"
+        },
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      },
+      "light-restart": {
+        "result": "PASS",
+        "checks": 64,
+        "startup_appearance": {
+          "Theme": "light",
+          "TitleBarMode": "application",
+          "TitleBarColor": "#5b193f",
+          "ThemePreference": "light"
+        },
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      }
+    },
+    "amd_import": {
+      "result": "PASS",
+      "ctranslate2": {
+        "version": "4.9.1",
+        "library_import": true
+      },
+      "pinned_runtime": "7.2.0.dev0",
+      "models_downloaded": false,
+      "gpu_inference_tested": false,
+      "physical_amd_card_available": false
+    },
+    "amd_import_seconds": 42.11
+  },
+  "visual_review": {
+    "wizard_previews": 53,
+    "desktop_previews": 122,
+    "overview_all_reviewed": true,
+    "affected_full_size_views_reviewed": 10,
+    "blank_surface_frames": 24,
+    "blank_samples_per_frame": 4,
+    "caption_pixel_matches": 24,
+    "all_pixel_checks_pass": true,
+    "pixel_evidence_sha256": "15e05ff97e6be06f29138d0f6a8cd817cdfe25ef3ab41b6a12e5de300190fe39",
+    "standalone_browser_suite_rerun": false,
+    "shared_gui_current_native_webview_qualification": true
+  },
+  "size": {
+    "previous_exe_bytes": 216719416,
+    "current_exe_bytes": 142183758,
+    "reduction_percent": 34.39,
+    "self_contained": true,
+    "online_model_dependencies_unchanged": true
+  },
+  "owner_acceptance": {
+    "left_right_snap": "PASS reported by owner",
+    "current_theme_fix_owner_review": "not yet reported",
+    "personalization_and_closing_popup": "previously accepted"
+  },
+  "qualification_limits": {
+    "physical_gtx1070_available": false,
+    "physical_amd_available": false,
+    "gpu_inference_tested": false,
+    "models_downloaded": false,
+    "paid_provider_calls": false,
+    "prior_provider_spend_usd": "0.0291461230985028369",
+    "public_release": false,
+    "signed_executable": false,
+    "private_signing_guide_outside_repository": true,
+    "private_guide_mode": "0600"
+  }
+}

@@ -1,6 +1,7 @@
 # Current next actions — 2026-11-26
 
-Current delivered product: **0.26.0 internal preview**; active correction target **0.26.1**. Managed installation/update/repair/removal, native
+Current product: **0.26.1 internal preview**. LEFT/RIGHT Snap is owner-accepted; themed blank
+startup/closing, hardware guidance and compressed installer are delivered with native qualification. Managed installation/update/repair/removal, native
 Windows interface, Personalization, durable closing and actual Windows Snap recovery are delivered.
 Windows AMD ASR is implemented and visibly **experimental**, with CPU alignment/diarization and no
 physical AMD inference qualification. See [AMD scope](AMD_EXPERIMENTAL.md) and
@@ -12,10 +13,9 @@ Backlog is maintained in this document; TODO holds the immediate queue, not a co
 
 | Order / lane | Remaining action and completion boundary |
 | --- | --- |
-| 1 — current corrections | LEFT/RIGHT Snap is owner-accepted. Finish theme-aware startup/shutdown surfaces, hardware guidance and measured installer-size reduction. Preserve accepted Personalization/closing/player behavior. |
-| 2 — release preparation | Check final EN/PL docs, notices/credits/licenses, metadata and compatibility wording against actual contents. Keep approved wording and original legal texts. |
-| 3 — artifacts and mandatory signing | Prepare final source/version/notes/artifacts and installer storage in `releases/`. Signing is REQUIRED before the first public release; its procedure and all private keys/credentials remain entirely outside Git. Current internal test builds are unsigned. No certificate purchase is authorized here. |
-| 4 — first public release | Publish the deliberate signed versioned tag/release/assets, then verify real downloads/checksums and matching Windows/Ubuntu bootstrap URLs. Preserve immutable earlier deliveries. |
+| 1 — release preparation | Check final EN/PL docs, notices/credits/licenses, metadata and compatibility wording against actual contents. Keep approved wording and original legal texts. |
+| 2 — artifacts and mandatory signing | Prepare final source/version/notes/artifacts and installer storage in `releases/`. Signing is REQUIRED before the first public release; its procedure and all private keys/credentials remain entirely outside Git. Current internal test builds are unsigned. No certificate purchase is authorized here. |
+| 3 — first public release | Publish the deliberate signed versioned tag/release/assets, then verify real downloads/checksums and matching Windows/Ubuntu bootstrap URLs. Preserve immutable earlier deliveries. |
 | Later hardware — non-blocking | When the owner obtains GTX1070/8GB,32GB RAM,i5-10400F: establish runtime/kernel compatibility first, then measure default/optional models and stages, sampled VRAM/RAM peaks, timings and headroom. PyTorch2.8/cu128 does not support Pascal; no8GB baseline is established. Optional collector scripts are queued in TODO. |
 | Parallel — artwork | Artist has no availability date; icons and later screenshots do not block our work or release. Preserve sent archives. |
 
@@ -36,7 +36,9 @@ speaker-count research, full model catalog/favorites/loading management, manual 
 alternate translation chunking, owned input snapshots, whole-block audio following and unselected
 scheduling/automatic-maintenance programs. Historical sections describing them are not current tasks.
 
-Latest reconciliation: [documentation/plan checkpoint](checkpoints/2026-11-26-amd-docs-plan.md).
+Latest qualification: [release-readiness checkpoint](checkpoints/2026-11-26-release-readiness.md)
+and [size audit](INSTALLER_SIZE.md); earlier [plan reconciliation](checkpoints/2026-11-26-amd-docs-plan.md)
+is retained as history.
 The current product correction may use the documented standard public CI; no paid/model campaign
 or public release is part of it. Private signing instructions and keys are excluded from Git.
 

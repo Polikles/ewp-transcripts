@@ -1,17 +1,17 @@
-# Pre-release hardware guidance, theme transitions and installer audit — 2026-11-26
+# Delivered hardware guidance, theme transitions and installer audit — 2026-11-26
 
-- [ ] Document recommended NVIDIA/local hardware and VRAM, distinguishing the tested RTX3090/24GB
+- [x] Document recommended NVIDIA/local hardware and VRAM, distinguishing the tested RTX3090/24GB
       reference from an unqualified8GB floor, AMD experimental and cloud-only requirements.
-- [ ] Record owner acceptance of both left/right half-screen placement; fix startup/shutdown blank
+- [x] Record owner acceptance of both left/right half-screen placement; fix startup/shutdown blank
       backgrounds: first launch follows Windows theme, subsequent launches follow app theme.
-- [ ] Add future GTX1070/8GB,32GB RAM,i5-10400F qualification and optional collector scripts to TODO:
+- [x] Add future GTX1070/8GB,32GB RAM,i5-10400F qualification and optional collector scripts to TODO:
       hardware/driver/model/runtime identity, sampled peak VRAM/RAM, per-stage timings/OOM/headroom.
-- [ ] Research signing prerequisites and prepare owner-only instructions outside the repository;
+- [x] Research signing prerequisites and prepare owner-only instructions outside the repository;
       no signing procedure, private key, token PIN or credential in Git. Signing is required BEFORE
       the first public release; no certificate purchase/publication is authorized here.
-- [ ] Audit actual EXE/bundle sizes against pre-desktop builds and remove avoidable packaging bulk;
+- [x] Audit actual EXE/bundle sizes against pre-desktop builds and remove avoidable packaging bulk;
       evaluate a minimal online bootstrap using concrete measured findings, preserving integrity.
-- [ ] Reconcile plan: artist remains non-blocking; remove local Scribe/MAI parity; Ollama/other
+- [x] Reconcile plan: artist remains non-blocking; remove local Scribe/MAI parity; Ollama/other
       optional enhancements are AFTER first public release. Update docs/checkpoint, verify changes
       and deliver a distinct installer if product bytes change. Preserve all prior deliveries.
 
@@ -27,7 +27,9 @@
 ## Next product actions
 
 - [x] Owner confirms0.26.0 window placement restores both LEFT and RIGHT half-screen layouts.
-- [ ] Finish the active theme/hardware/packaging task above and final release consistency review.
+- [x] Theme/hardware/packaging correction0.26.1 delivered with native qualification.
+- [ ] Complete final release consistency/notices review; settle artifact storage/minimal-bootstrap
+      design before public publishing, preserving exact hashes and safe recovery.
 - [ ] Prepare final source/version/notes/artifacts/SHA256 and large-EXE storage at `releases/`.
 - [ ] REQUIRE signing before first public release. Owner obtains an eligible public code-signing
       certificate; signing procedure/keys/credentials stay entirely outside the repository.
