@@ -11,6 +11,7 @@ All notable changes to EWP-transcripts are documented here.
 - Add Personalization under User profile in Settings & About: theme, language, default palette,
   playback speed, review layouts and ETA. Share these controls with browser mode; native Windows
   additionally offers system/application/custom title-bar colors with contrasting caption text.
+  Keep the custom-color swatch readable beside its mode selector.
   Include preferences in portable profiles and remap conflicting imported custom palettes.
 - Show saving/shutdown progress in a centered native popup with the opposite application theme.
   Retain the existing durable-save, cancellation and save-failure protection.

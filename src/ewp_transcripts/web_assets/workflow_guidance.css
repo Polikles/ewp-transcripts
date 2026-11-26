@@ -225,6 +225,7 @@
 #gui-personalization-dialog::backdrop { background: #00121e99; }
 .gui-personalization-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .6rem 1rem; }
 .gui-personalization-grid label, .gui-personalization-grid :is(input,select) { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.gui-personalization-grid input[type=color] { width: 100%; height: 2.75rem; padding: .25rem; }
 #gui-personalization-dialog .field-hint { font-size: .8rem; }
 .gui-preference { font-weight: 400; }
 .gui-preference input { width: auto; }

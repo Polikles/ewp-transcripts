@@ -33,6 +33,13 @@ existing keep-working/wait tests passed before that test error. Replace the unsu
 with actual setter HRESULT checks and whole-window PrintWindow previews (including native caption),
 then rerun the Windows qualification. No product delivery from the failed run.
 
+Second run45884667195 PASS (a806fe7):46 wizard groups,18 filesystem cases and4 desktop cycles
+(49/50/50/50 assertions),105 previews. Bundle hashes/source and independent native EXE match.
+Whole-window images show actual custom/application caption colors; shutdown cards are opaque and
+opposite-themed. Visual inspection found the HTML color input rendered as a thin swatch because
+of generic padding; give it an explicit44px height and4px padding. Final delivery remains pending
+this small visual correction's build. Earlier0.25.1 candidate was not delivered to the owner.
+
 Scratch path is in
 /tmp/ewp-current-window-task. Only documented public standard Actions for final Windows checks;
 no paid audio/model/provider campaigns. Old0.25.0 remains immutable.
