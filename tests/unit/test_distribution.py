@@ -1235,3 +1235,21 @@ def test_native_removal_refuses_to_force_close_after_save_failure(tmp_path, monk
     )
     with pytest.raises(manager.InstallError, match="could not save work"):
         manager.stop_running_application(tmp_path / "managed")
+
+
+@pytest.mark.parametrize(
+    "failure", [ConnectionResetError("closed"), ConnectionAbortedError("closed")]
+)
+def test_runtime_ping_tolerates_server_closing_between_identity_probe_and_response(
+    monkeypatch, failure
+):
+    import urllib.request
+    from types import SimpleNamespace
+
+    def closed(*args, **kwargs):
+        raise failure
+
+    monkeypatch.setattr(
+        urllib.request, "build_opener", lambda *handlers: SimpleNamespace(open=closed)
+    )
+    assert manager.runtime_request({"port": 8765, "token": "x" * 64, "pid": 123}, "ping") is None

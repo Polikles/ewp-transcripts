@@ -53,3 +53,9 @@ Final hardening additionally applies CREATE_NO_WINDOW to media/diagnostic/picker
 only in desktop sessions; CLI remains unchanged. Qualification adds actual worker/grandchild console
 handle checks through that shared adapter. New full gate/native build and final artifact verification
 remain pending before delivery. No new inference/GPU/provider qualification or paid spending.
+
+Native run45808741094: all four in-window cycles/console checks passed, but the external maintenance
+caller hit ConnectionResetError while polling a server that had just exited. Treat transport EOF/reset
+as an unavailable response, then confirm process/host identities have exited; never skip that check.
+Add deterministic transport-reset regressions. This fixes a real shutdown/maintenance race, not an
+inference failure. Final gate/native rerun pending; freeze scope to resolving this final qualification.

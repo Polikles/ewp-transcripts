@@ -17,6 +17,7 @@ All notable changes to EWP-transcripts are documented here.
   starts planning/transcription automatically. Own the backend and worker processes through a
   Windows process job so a terminated host cannot leave processing behind.
 - Coordinate update/repair/uninstall with the window's save/close handshake, preserving work-state.
+  Treat an HTTP connection closing during the shutdown handshake as normal completion.
   Keep explicit browser/CLI launch and compatibility with retained older versions on rollback.
 - Require Microsoft WebView2 Evergreen Runtime for the managed desktop window; show a native
   diagnostic/download link when missing before starting the application backend. Bundle the host's

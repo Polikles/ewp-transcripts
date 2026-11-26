@@ -360,7 +360,7 @@ def runtime_record(root: Path) -> dict[str, Any] | None:
 
 
 def runtime_request(record: dict[str, Any], action: str) -> dict[str, Any] | None:
-    import urllib.error
+    import http.client
     import urllib.request
 
     base = f"http://127.0.0.1:{record['port']}"
@@ -379,7 +379,7 @@ def runtime_request(record: dict[str, Any], action: str) -> dict[str, Any] | Non
         with opener.open(request, timeout=2) as response:
             result = json.load(response)
         return result if result.get("pid") == record["pid"] else None
-    except (urllib.error.URLError, TimeoutError, ValueError):
+    except (OSError, ValueError, http.client.HTTPException):
         return None
 
 
