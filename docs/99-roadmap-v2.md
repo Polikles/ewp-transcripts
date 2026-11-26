@@ -1,3 +1,14 @@
+# Snap recovery and experimental AMD delivered — 2026-11-26
+
+0.26.0 fixes actual Windows half-screen Snap recovery and adds Windows AMD ASR through an isolated
+CTranslate2 ROCm worker, with CPU alignment/diarization and explicit experimental acknowledgement.
+Native run45892474997 and verified delivery pass; no physical AMD inference is claimed.
+See snap-amd checkpoint/evidence and AMD_EXPERIMENTAL.md. Next: focused owner Snap/update feedback,
+remaining release work and first public release. Personalization and centered closing are accepted;
+keep the source player in the LEFT sidebar. No new paid/model campaign.
+
+Earlier roadmap entries follow.
+
 # Window/personalization follow-up — 2026-11-26
 
 Owner broadly accepted0.25.0 and requested four focused corrections.0.25.1 delivers window geometry,

@@ -58,6 +58,22 @@ Microsoft references checked 2026-11-26:
 [window placement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowplacement),
 [DWM attributes](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute).
 
+### Snapped geometry and AMD qualification (0.26.0)
+
+GetWindowPlacement may retain pre-Snap normal bounds. Normal windows now save GetWindowRect screen
+coordinates with an explicit marker, and restore them with SetWindowPos. Legacy workspace records
+and maximized normal rectangles retain SetWindowPlacement behavior; unavailable displays fall back
+safely. Debounced saves observe actual geometry immediately, retaining it through minimization.
+Minimum width480 permits half-screen use on smaller displays. A saved record wins on1080p too;
+without one, the centered default is bounded by the current work area. After updating, position or
+snap once and close to replace incomplete pre0.26.0 records.
+
+Native run45892474997 verifies real Win+Left and full process restart, all five desktop lifecycle
+cycles, accepted Personalization/closing/sidebar behavior and actual AMD DLL import without models.
+AMD ASR runs in a private HIP process owned by the native job; alignment/diarization use CPU.
+See [AMD scope and limits](AMD_EXPERIMENTAL.md) and [evidence](checkpoints/2026-11-26-snap-amd-evidence.json).
+No physical AMD inference qualification is implied.
+
 ### Build and dependencies
 
 Use the existing pinned.NET10 WPF toolchain and exact stable WebView2 SDK1.0.4370.26. Ship the

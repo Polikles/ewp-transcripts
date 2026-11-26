@@ -1,0 +1,236 @@
+{
+  "version": "0.26.0",
+  "source_commit": "6c5fbcd463283187f99b262ae819012c56249347",
+  "source_dirty": false,
+  "run_id": 45892474997,
+  "products": [
+    {
+      "file": "EwP-0.26.0-windows-x64.zip",
+      "sha256": "44152ea0222a70ac5dc3e7f8eb568b6cf7cf58ab44555e895758266070187d75",
+      "bytes": 76366433
+    },
+    {
+      "file": "EwP-0.26.0-ubuntu-x64.zip",
+      "sha256": "ffd6eb3da17c9611591175469574efbac68fd1e162d3c554e1bdf30e01067806",
+      "bytes": 18639213
+    },
+    {
+      "file": "EwP-Setup-0.26.0.exe",
+      "sha256": "ee80dd5e446f115d3b12893e8962227a94dd96be33b48acf59af2cda6a783cd1",
+      "bytes": 216719416
+    },
+    {
+      "file": "EwP-0.26.0-ubuntu-x64.tar.gz",
+      "sha256": "66f714277e4d5ad8df82479f3a08f6c25d97dd4d5a1e4b607226bcaa9c42da76",
+      "bytes": 35448368
+    },
+    {
+      "file": "Install-EwP-0.26.0.ps1",
+      "sha256": "207fa062d6eaeaa89777948782823e15dbdf48d8e69b2794cd9e9fd05f669e14",
+      "bytes": 1426
+    },
+    {
+      "file": "Install-EwP-0.26.0.sh",
+      "sha256": "bed8c76b367cb7fc1e0529f47a4b91bb60e7ce7155796387cd358906d6933ee3",
+      "bytes": 808
+    }
+  ],
+  "bundles": [
+    {
+      "file": "EwP-0.26.0-windows-x64.zip",
+      "manifest_files": 240,
+      "committed_source_files": 231
+    },
+    {
+      "file": "EwP-0.26.0-ubuntu-x64.zip",
+      "manifest_files": 235,
+      "committed_source_files": 231
+    },
+    {
+      "file": "EwP-0.26.0-ubuntu-x64.tar.gz",
+      "manifest_files": 235,
+      "committed_source_files": 231
+    }
+  ],
+  "native_exe_independent_byte_match": true,
+  "previous_hashes_preserved": 80,
+  "result": "PASS",
+  "ci": {
+    "url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45892474997",
+    "runs_used": 1,
+    "conclusion": "success",
+    "linux_job": 140158231978,
+    "windows_job": 140158622561,
+    "artifacts": [
+      {
+        "id": 15152810555,
+        "name": "native-windows-startup-evidence",
+        "sha256": "497e8c04accf255b1245ddf38280281f6592bc9b9b80da1fc20cd97ab89dbb67",
+        "bytes": 11967751,
+        "expires_at": "2026-12-03T20:42:29Z"
+      },
+      {
+        "id": 15151708804,
+        "name": "installer-test-package",
+        "sha256": "41c0ffec3e8af50ea6f99ec09ba37990ea86f17ea166256511cbb72a6c15cf9f",
+        "bytes": 266821798,
+        "expires_at": "2026-12-03T20:38:59Z"
+      }
+    ],
+    "archive_digests_verified": true,
+    "retention_days": 7,
+    "paid_runners": false,
+    "billing_limits_changed": false
+  },
+  "local": {
+    "pytest_passed": 1222,
+    "windows_only_skips": 20,
+    "included_integrations": 17,
+    "ruff_format_files": 310,
+    "mypy_source_files": 122,
+    "amd_setup_script_lint_format": "PASS",
+    "csharp_cross_builds": 2
+  },
+  "native": {
+    "installer_groups": 47,
+    "filesystem_cases": 18,
+    "filesystem_seconds": 30.72,
+    "desktop_seconds": 45.52,
+    "desktop_phases": {
+      "save": {
+        "result": "PASS",
+        "checks": 49,
+        "startup_placement": null,
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        }
+      },
+      "restore": {
+        "result": "PASS",
+        "checks": 52,
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": -7,
+          "Top": 0,
+          "Right": 519,
+          "Bottom": 727,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        }
+      },
+      "crash": {
+        "result": "PASS",
+        "checks": 50,
+        "startup_placement": {
+          "Left": -7,
+          "Top": 0,
+          "Right": 519,
+          "Bottom": 727,
+          "Maximized": false,
+          "ScreenCoordinates": true,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      },
+      "maintenance": {
+        "result": "PASS",
+        "checks": 50,
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      },
+      "amd-interface": {
+        "result": "PASS",
+        "checks": 51,
+        "startup_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        },
+        "final_placement": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "ScreenCoordinates": false,
+          "Valid": true
+        }
+      }
+    },
+    "amd_import": {
+      "result": "PASS",
+      "ctranslate2": {
+        "version": "4.9.1",
+        "library_import": true
+      },
+      "pinned_runtime": "7.2.0.dev0",
+      "models_downloaded": false,
+      "gpu_inference_tested": false,
+      "physical_amd_card_available": false
+    },
+    "amd_import_seconds": 53.35,
+    "snap_actual_win_left_and_full_restart_match": true
+  },
+  "visual_review": {
+    "wizard_previews": 53,
+    "desktop_previews": 71,
+    "overview_all_reviewed": true,
+    "full_size_affected_views_reviewed": 10,
+    "caption_pixel_matches": 20,
+    "caption_pixel_result": "PASS",
+    "browser_suite_rerun": false,
+    "prior_0251_browser_acceptance_preserved": true
+  },
+  "qualification_limits": {
+    "physical_amd_card_available": false,
+    "gpu_inference_tested": false,
+    "models_downloaded": false,
+    "paid_provider_calls": false,
+    "prior_provider_spend_usd": "0.0291461230985028369",
+    "public_release": false,
+    "signed_executable": false
+  }
+}

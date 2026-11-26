@@ -119,3 +119,12 @@ Matching content-verified installer/evidence copies are preserved on the VM inde
 expiry. The initial two candidates were not handed to the owner. Final source and artifact hashes
 are recorded in the [qualification evidence](checkpoints/2026-11-26-window-personalization-evidence.json).
 These job results do not establish any new account-level invoice total.
+
+## Snap and AMD follow-up build — 2026-11-26
+
+One standard public run, [45892474997](https://github.com/Polikles/ewp-transcripts/actions/runs/45892474997),
+passed for0.26.0 source6c5fbcd. It covers the real Snap/restart test, all existing native regressions,
+four localized AMD warning views and pinned ROCm DLL import without GPU inference or model downloads.
+Both archive digests and final products were verified and copied to the VM before expiry.
+See [qualification evidence](checkpoints/2026-11-26-snap-amd-evidence.json). Existing two jobs,
+7-day retention, public guards and owner zero paid limits remain. This is not an account invoice audit.

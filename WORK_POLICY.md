@@ -1,12 +1,29 @@
-# Active Snap recovery and AMD stage — 2026-11-26 / target0.26.0
+# Delivered Snap recovery and experimental AMD — 2026-11-26 / 0.26.0
 
-Owner accepts0.25.1 Personalization and closing popup. Fix half-screen Windows Snap recovery,
-then implement AMD support visibly(experimental), with Install/Update AMD-detection acknowledgement
-("obsługa kart AMD jest eksperymentalna i nie została przetestowana" / "Rozumiem, kontynuuj").
-AMD stage is NOW authorized. See opening TODO and docs/checkpoints/2026-11-26-snap-amd.md.
-No physical AMD card: document real limitations, qualify adapters/installer without claiming GPU
-inference. Preserve NVIDIA/model pins, approved copy/assets, LEFT-sidebar player and all prior
-deliveries. No paid API campaign/public release. Standard public CI/7-day retention remains.
+Owner accepted Personalization and centered closing. Windows Snap now captures the actual screen
+rectangle, restoring a half-screen window across a full restart; maximized/normal/minimized and
+changed-monitor recovery remain covered. After updating, snap once and close to replace the older
+incomplete record. On 1080p restore the saved state; only a missing/invalid record uses the centered
+default, bounded by the work area. The player remains in the LEFT sidebar.
+
+AMD Windows ASR uses an isolated official CTranslate2 HIP worker; alignment/diarization use CPU.
+PCI display-adapter detection triggers the exact requested Install/Update acknowledgement dialog;
+AMD CPUs alone do not. Visible experimental labels, managed dependency setup/repair and automatic
+diagnostics are implemented. NVIDIA/model pins remain unchanged. No physical AMD card is available:
+actual GPU inference/performance is UNTESTED; DLL import success does not qualify a GPU.
+
+Product source 6c5fbcd463283187f99b262ae819012c56249347; public native run 45892474997 PASS on its
+first run. Local 1222 passed / 20 Windows skips (17 integrations), Ruff/format310/mypy122 PASS;
+47 WPF installer groups,18 Windows filesystem cases, five real desktop cycles (49/52/50/50/51 checks)
+and real pinned ROCm DLL import PASS.124 native previews reviewed in overview,10 affected views
+full-size;20 caption pixel matches PASS. Both CI archives, six product hashes, three source bundles
+and independent desktop EXE byte match verified;80 prior product hashes preserved.
+Delivery: /home/linuch/project-ewp/deliveries/ewp-0.26.0-installers.
+See docs/checkpoints/2026-11-26-snap-amd.md and its evidence JSON; docs/AMD_EXPERIMENTAL.md defines
+compatibility and CPU stages. Standard public CI/7-day retention/zero paid budgets unchanged.
+No paid/provider/model campaign; cumulative spend remains USD0.0291461230985028369.
+NEXT: owner focused Snap/update feedback, remaining release tasks, then first public release.
+Physical AMD qualification remains explicitly unperformed. EXE unsigned/internal; no public release.
 
 Earlier boundaries follow.
 

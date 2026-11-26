@@ -1,13 +1,16 @@
 # Snap recovery and AMD(experimental) — 2026-11-26 /0.26.0
 
-- [ ] Persist/restore actual snapped half-screen bounds, normal position and maximization; verify
+- [x] Persist/restore actual snapped half-screen bounds, normal position and maximization; verify
       actual Windows snapping/restart and1080p/default fallback without changing accepted UI.
-- [ ] Research official AMD runtime compatibility; implement an actual experimental acceleration
+- [x] Research official AMD runtime compatibility; implement an actual experimental acceleration
       path, preserve NVIDIA defaults/model pins, and state CPU stages/hardware limitations.
-- [ ] Detect AMD display adapters (not AMD CPUs), show requested blocking acknowledgement after
+- [x] Detect AMD display adapters (not AMD CPUs), show requested blocking acknowledgement after
       host checks for Install/Update; cover repeated checks/localization and mixed GPU hosts.
-- [ ] Integrate managed install/update/repair/runtime diagnostics and visible experimental labels;
+- [x] Integrate managed install/update/repair/runtime diagnostics and visible experimental labels;
       meaningful tests, guides/compatibility and fresh verified0.26.0 installer. No paid campaign.
+
+- [ ] Focused owner Snap/update feedback, remaining release checklist and first public release.
+      Physical AMD inference qualification requires suitable hardware and is not claimed.
 
 Earlier stages follow.
 
@@ -25,8 +28,8 @@ Earlier stages follow.
 - [x] Update EN/PL/profile compatibility, focused browser/native regressions, current gate and docs;
       deliver immutable0.25.1 installer with verified native evidence/hashes. No paid/model campaign.
 
-- [ ] Owner reviews focused0.25.1 window/personalization/player changes; then proceed to AMD
-      (experimental) and remaining release work. No repeated full inference/paid campaign.
+- [x] Owner accepted Personalization and closing; Snap correction and experimental AMD delivered
+      in0.26.0 above. Preserve LEFT-sidebar player; no repeated full inference/paid campaign.
 
 Earlier stages follow.
 
@@ -37,7 +40,7 @@ Earlier stages follow.
 - [x] Add public-only job guard,7-day retention for new artifacts and cancellation of older same-ref
       runs. Validate locally and publish with [skip ci]; do not start another cloud build.
 - [x] Owner broadly accepts native interface0.25.0; requested corrections delivered in0.25.1 above.
-- [ ] Then research and implement AMD acceleration support with a visible (experimental) label;
+- [x] Research and implement AMD acceleration support with a visible (experimental) label;
       cover supported engines/runtime/installer behavior without claiming physical AMD validation.
 - [ ] Close remaining release tasks, then prepare first public release. No publication in this turn.
 
