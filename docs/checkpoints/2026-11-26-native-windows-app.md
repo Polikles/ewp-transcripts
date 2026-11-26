@@ -45,3 +45,11 @@ is unavailable after shutdown. Root cause: Windows TEMP 8.3 alias differs from r
 long path, bypassing temporary-picker preservation. Canonicalize GuiSelectionCache.root before its
 ownership comparisons; add alias regression and assert post-close pending files lie under outputs.
 This is a real Windows recovery bug, independent of model/media decoding; valid WAV alone did not fix it.
+
+Native run45807984303 from49fda8b PASS:46 installer WPF groups,18 Windows filesystem cases and
+all4 complete desktop cycles (save, restore, crash/focus, maintenance). Recovery alias fix confirmed:
+pending media persist under outputs, both restarts idle, owned descendants gone on close/crash.
+Final hardening additionally applies CREATE_NO_WINDOW to media/diagnostic/picker subprocess adapters
+only in desktop sessions; CLI remains unchanged. Qualification adds actual worker/grandchild console
+handle checks through that shared adapter. New full gate/native build and final artifact verification
+remain pending before delivery. No new inference/GPU/provider qualification or paid spending.

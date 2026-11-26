@@ -94,11 +94,17 @@ def test_real_desktop_save_restart_focus_and_crash_owns_process_tree(tmp_path):
     (sites / "sitecustomize.py").write_text(
         """import json,os,subprocess,sys
 if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
- code=("import json,os,subprocess,sys,time; from pathlib import Path; "
-       "p=subprocess.Popen([sys.executable,'-c','import time;time.sleep(600)'],"
-       "creationflags=0x08000000);Path(os.environ['EWP_TEST_WORKER_RECORD'])"
-       ".write_text(json.dumps([os.getpid(),p.pid]));time.sleep(600)")
- subprocess.Popen([sys.executable,"-c",code],creationflags=0x08000000)
+ from ewp_transcripts.platform_runtime import background_creation_flags
+ code=("import ctypes,json,os,subprocess,sys,time;from pathlib import Path;"
+       "from ewp_transcripts.platform_runtime import background_creation_flags;"
+       "p=subprocess.Popen([sys.executable,'-c',"
+       "'import ctypes,time;print(ctypes.windll.kernel32.GetConsoleWindow(),flush=True);"
+       "time.sleep(600)'],stdout=subprocess.PIPE,text=True,"
+       "creationflags=background_creation_flags());"
+       "consoles=[ctypes.windll.kernel32.GetConsoleWindow(),int(p.stdout.readline())];"
+       "Path(os.environ['EWP_TEST_WORKER_RECORD']).write_text("
+       "json.dumps({'pids':[os.getpid(),p.pid],'consoles':consoles}));time.sleep(600)")
+ subprocess.Popen([sys.executable,"-c",code],creationflags=background_creation_flags())
 """,
         encoding="utf-8",
     )
@@ -131,11 +137,9 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                 assert data["result"] == "PASS", data
                 state_directory = Path(data["state_directory"])
                 wait_until(worker_record.exists)
-                descendants = [
-                    data["manager_pid"],
-                    data["server_pid"],
-                    *json.loads(worker_record.read_text()),
-                ]
+                workers = json.loads(worker_record.read_text())
+                assert workers["consoles"] == [0, 0], workers
+                descendants = [data["manager_pid"], data["server_pid"], *workers["pids"]]
                 if phase == "crash":
                     # Second launch must focus the existing window without spawning another server.
                     user = ctypes.windll.user32

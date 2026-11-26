@@ -57,3 +57,13 @@ def test_posix_directory_sync_keeps_flush_and_closes_on_error(tmp_path, monkeypa
         platform_runtime.fsync_directory(tmp_path)
     runtime_os.fsync.assert_called_once_with(42)
     runtime_os.close.assert_called_once_with(42)
+
+
+@pytest.mark.parametrize("windows", [False, True])
+@pytest.mark.parametrize("desktop", ["", "0", "1"])
+def test_only_owned_windows_desktop_hides_helper_consoles(monkeypatch, windows, desktop):
+    monkeypatch.setattr(platform_runtime, "WINDOWS", windows)
+    monkeypatch.setenv("EWP_DESKTOP_MODE", desktop)
+    assert platform_runtime.background_creation_flags() == (
+        0x08000000 if windows and desktop == "1" else 0
+    )

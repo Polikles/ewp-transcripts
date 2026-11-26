@@ -35,6 +35,7 @@ from ewp_transcripts.domain.models import JobStateRecord
 from ewp_transcripts.domain.revision import sha256_file
 from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.native_picker import select_native_file
+from ewp_transcripts.platform_runtime import background_creation_flags
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
 from ewp_transcripts.web_desktop import DesktopLifecycle
@@ -218,6 +219,7 @@ def _select_local_directory() -> str | None:
                 text=True,
                 encoding="utf-8",
                 timeout=600,
+                creationflags=background_creation_flags(),
             )
         except (OSError, subprocess.TimeoutExpired) as error:
             launcher = f"/init → {Path(command[0]).name}" if interpreter else Path(command[0]).name
@@ -3469,6 +3471,7 @@ def _open_browser(url: str) -> None:
                         text=True,
                         errors="replace",
                         timeout=20,
+                        creationflags=background_creation_flags(),
                     )
                 except (OSError, subprocess.TimeoutExpired) as error:
                     launcher = (

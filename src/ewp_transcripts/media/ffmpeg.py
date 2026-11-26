@@ -7,12 +7,19 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from ewp_transcripts.domain.errors import AudioPreparationError
+from ewp_transcripts.platform_runtime import background_creation_flags
 
 CommandRunner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
 
 
 def _run_command(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(list(arguments), check=False, capture_output=True, text=True)
+    return subprocess.run(
+        list(arguments),
+        check=False,
+        capture_output=True,
+        text=True,
+        creationflags=background_creation_flags(),
+    )
 
 
 def prepare_working_audio(

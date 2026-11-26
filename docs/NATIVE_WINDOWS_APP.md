@@ -11,7 +11,9 @@ A full rewrite of the approved editors as WPF controls is outside this implement
 The native host validates the managed installation and starts private Python without a console.
 Python retains the existing OS-lifetime installation lock. The host owns Python and its descendants
 in a Windows kill-on-close Job Object, including inference/media/provider workers. The initial
-process is created suspended and assigned before its venv redirector can spawn the real interpreter. Repeated launch
+process is created suspended and assigned before its venv redirector can spawn the real interpreter.
+Media, diagnostic and picker subprocess adapters use CREATE_NO_WINDOW only in desktop sessions;
+explicit CLI/browser behavior is preserved. Repeated launch
 uses a current-user named pipe to focus the existing window; no second backend is created.
 
 The native management credential travels only through child environment/loopback HTTP headers.

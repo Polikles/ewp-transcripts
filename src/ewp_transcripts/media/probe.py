@@ -11,6 +11,7 @@ from typing import Any
 
 from ewp_transcripts.domain import AudioStream, MediaProbeResult
 from ewp_transcripts.domain.errors import MediaProbeError, NoAudioStreamError
+from ewp_transcripts.platform_runtime import background_creation_flags
 
 CommandRunner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
 
@@ -22,6 +23,7 @@ def _run_command(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
         timeout=30,
+        creationflags=background_creation_flags(),
     )
 
 

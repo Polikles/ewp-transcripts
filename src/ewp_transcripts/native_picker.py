@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 
+from ewp_transcripts.platform_runtime import background_creation_flags
+
 
 def select_native_file() -> str | None:
     commands: list[list[str]] = []
@@ -36,7 +38,13 @@ def select_native_file() -> str | None:
     for command in commands:
         try:
             result = subprocess.run(
-                command, capture_output=True, text=True, encoding="utf-8", check=False, timeout=600
+                command,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=False,
+                timeout=600,
+                creationflags=background_creation_flags(),
             )
         except (OSError, subprocess.SubprocessError):
             continue

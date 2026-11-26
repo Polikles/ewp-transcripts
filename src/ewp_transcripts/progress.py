@@ -18,6 +18,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
+from ewp_transcripts.platform_runtime import background_creation_flags
+
 
 @dataclass(frozen=True)
 class ProgressEvent:
@@ -69,6 +71,7 @@ def _gpu_identity() -> str:
             capture_output=True,
             text=True,
             timeout=2,
+            creationflags=background_creation_flags(),
             check=False,
         )
         return result.stdout.strip() if result.returncode == 0 else "unavailable"

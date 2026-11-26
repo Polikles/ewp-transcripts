@@ -11,6 +11,7 @@ from pathlib import Path
 from ewp_transcripts.domain import ChannelMetrics
 from ewp_transcripts.domain.errors import ChannelAnalysisError
 from ewp_transcripts.media.channel_metrics import measure_stereo_channels
+from ewp_transcripts.platform_runtime import background_creation_flags
 
 ANALYSIS_SAMPLE_RATE_HZ = 16000
 _FRAME_BYTES = 4
@@ -75,6 +76,7 @@ def measure_file_channels(
             arguments,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
+            creationflags=background_creation_flags(),
         )
     except OSError as error:
         raise ChannelAnalysisError("Unable to start FFmpeg channel analysis") from error

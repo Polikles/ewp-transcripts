@@ -14,6 +14,7 @@ from ewp_transcripts import __version__
 from ewp_transcripts.config import ApplicationConfig
 from ewp_transcripts.domain import DiagnosticCheck, DiagnosticStatus, DoctorResult
 from ewp_transcripts.domain.enums import LanguageMode
+from ewp_transcripts.platform_runtime import background_creation_flags
 
 CommandRunner = Callable[[Sequence[str]], subprocess.CompletedProcess[str]]
 ExecutableFinder = Callable[[str], str | None]
@@ -26,6 +27,7 @@ def _run_command(arguments: Sequence[str]) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
         timeout=60,
+        creationflags=background_creation_flags(),
     )
 
 

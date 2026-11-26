@@ -11,6 +11,11 @@ from pathlib import Path
 WINDOWS = sys.platform == "win32"
 
 
+def background_creation_flags() -> int:
+    """Keep media/diagnostic/picker helpers console-free in the Windows desktop session."""
+    return 0x08000000 if WINDOWS and os.environ.get("EWP_DESKTOP_MODE") == "1" else 0
+
+
 def prepare_native_environment() -> None:
     """Expose the user's private Windows media/CUDA DLLs without changing system PATH."""
     if not WINDOWS:
