@@ -14,3 +14,6 @@ output-ewp-transcripts/
 
 installer/windows/bin/
 installer/windows/obj/
+
+desktop/windows/bin/
+desktop/windows/obj/

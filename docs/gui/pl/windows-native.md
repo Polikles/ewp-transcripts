@@ -2,7 +2,20 @@
 
 ## Uruchamianie instalacji zarządzanej
 
-Okno terminala ma tytuł EwP Transcripts. Ponowne kliknięcie skrótu otwiera działającą aplikację w przeglądarce. Zamknięcie samej przeglądarki pozostawia serwer włączony. Po zakończeniu zatrzymaj go przez Ctrl+C; blokada po przerwanym uruchomieniu jest odzyskiwana automatycznie. Deinstalacja zamyka zweryfikowaną instancję przed usunięciem plików programu.
+Od wersji0.25.0 skrót instalacji zarządzanej otwiera własne okno EwP Transcripts, bez terminala
+PowerShell i bez osobnej przeglądarki. Ponowne kliknięcie skrótu przywołuje istniejące okno.
+Zamknięcie zapisuje dodane pliki, stan pracy i edycję transkrypcji przed zatrzymaniem programu.
+Podczas aktywnej pracy wybierz kontynuowanie, oczekiwanie na zakończenie albo zatrzymanie i zamknięcie.
+Błąd zapisu pozostawia okno otwarte. Ponowne uruchomienie przywraca pracę bez automatycznego
+planowania ani uruchamiania kolejki. Aktualizacja i deinstalacja proszą okno o zapis i zamknięcie;
+nieudany zapis blokuje usuwanie.
+
+Okno wymaga Microsoft WebView2 Evergreen Runtime. Jeśli go brakuje, komunikat zawiera odnośnik do
+strony Microsoft. Biblioteki .NET są częścią aplikacji. Ustawienia okna i jego profil znajdują się
+w `%LOCALAPPDATA%\EwPTranscriptsState\desktop`; stan pracy zachowuje dotychczasowe położenie.
+Tryb przeglądarkowy można jawnie uruchomić przez `launch.ps1 -Browser`; wtedy zamknięcie samej
+przeglądarki pozostawia serwer włączony i zatrzymuje się go przez Ctrl+C w terminalu.
+Powrót do zachowanej wersji sprzed0.25.0 korzysta z jej trybu przeglądarkowego.
 
 
 Ta strona opisuje instalację i naprawę z repozytorium. Nowy kreator i paczki zarządzane opisuje [Instalacja i aktualizacja](installation.md). Ich prywatny FFmpeg jest pod katalogiem instalacji, a nie w osobnej domyślnej lokalizacji checkoutu. Program był sprawdzony przez właściciela na Windows 11; nowa instalacja zarządzana ma osobne zatwierdzenie.

@@ -1,3 +1,16 @@
+# Active native Windows app — 2026-11-26 / target 0.25.0
+
+Owner downloaded0.24.4 and explicitly authorizes native interface/lifetime implementation.
+Follow docs/checkpoints/2026-11-26-native-windows-app.md, docs/NATIVE_WINDOWS_APP.md and opening TODO.
+Native WPF/WebView2 host preserves approved UI; own identity/window, no console, single-instance
+focus, durable close/recovery, owned worker tree and installer/maintenance integration are active.
+First cross-compilation and175 focused Python cases pass; full gate, native Windows qualification
+and immutable0.25.0 delivery remain pending. Do not mistake model-free checks for GPU/provider tests.
+Preserve original deliveries/assets/review workbooks/model pins and paid spend. No paid campaign.
+AMD research/experimental adapter and first public release remain after native UI.
+
+Earlier boundaries follow.
+
 # Delivered existing-installation preflight — 2026-11-26 / 0.24.4
 
 0.24.4 delivered from d280943b0fcdda3ecb184d74c8be10fd207898bd. Native run45795432181 PASS:

@@ -543,8 +543,11 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
         "dotnet-LICENSE.txt",
         "dotnet-THIRD-PARTY-NOTICES.txt",
         "windowsdesktop-LICENSE.txt",
+        "webview2-LICENSE.txt",
     ):
         (downloads / name).write_text("public license")
+    (downloads / "desktop-publish").mkdir()
+    (downloads / "desktop-publish/EwP.Transcripts.exe").write_bytes(b"synthetic desktop host")
     first = builder.build(tmp_path / "first", downloads)[0]
     second = builder.build(tmp_path / "second", downloads)[0]
     assert first.read_bytes() == second.read_bytes()
@@ -1173,3 +1176,62 @@ def test_windows_registration_discovery_reads_every_hive_and_view(
     monkeypatch.setattr(manager, "os", SimpleNamespace(name="nt"))
     assert manager.registered_installations() == [(tmp_path, "1.0.0")]
     assert set(probed) == {(1, 64), (1, 32), (2, 64), (2, 32)}
+
+
+def test_native_launch_keeps_handshake_out_of_arguments_and_disables_browser(
+    tmp_path, lifecycle, monkeypatch
+):
+    root, _ = lifecycle
+    state = install(root, bundle(tmp_path, "1.0.0"))
+    token = "private-desktop-token-" + "x" * 40
+    monkeypatch.setenv("EWP_NATIVE_TOKEN", token)
+    original = manager.subprocess.Popen
+    seen = []
+
+    def child(command, **kwargs):
+        if "gui" in command:
+            assert "--no-open-browser" in command
+            assert token not in " ".join(command)
+            assert kwargs["env"]["EWP_RUNTIME_TOKEN"] == token
+            assert kwargs["env"]["EWP_DESKTOP_MODE"] == "1"
+            seen.append(True)
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(manager.subprocess, "Popen", child)
+    manager.launch(root, native=True)
+    assert seen and (root / state["active"] / "app/launched").exists()
+    assert token not in (root / "installation.json").read_text()
+
+
+def test_native_shortcut_selection_follows_active_version_after_rollback(tmp_path):
+    root = tmp_path / "managed"
+    executable = root / "EwP.Transcripts.exe"
+    executable.parent.mkdir()
+    executable.write_bytes(b"native host")
+    control = root / "versions/new/control"
+    control.mkdir(parents=True)
+    (control / executable.name).write_bytes(b"native host")
+    assert manager.native_executable(root, {"active": "versions/new"}) == executable
+    assert manager.native_executable(root, {"active": "versions/old"}) is None
+
+
+def test_native_removal_refuses_to_force_close_after_save_failure(tmp_path, monkeypatch):
+    record = {
+        "pid": 123,
+        "identity": "server",
+        "desktop": True,
+        "desktop_pid": 456,
+        "desktop_identity": "host",
+    }
+    monkeypatch.setattr(manager, "runtime_record", lambda root: record)
+    monkeypatch.setattr(
+        manager, "process_identity", lambda pid: ("server" if pid == 123 else "host", 1, "app")
+    )
+    monkeypatch.setattr(manager, "runtime_request", lambda *args: {"close_refused": True})
+    monkeypatch.setattr(
+        manager,
+        "terminate_installed_process",
+        lambda *args: pytest.fail("must not kill on failed save"),
+    )
+    with pytest.raises(manager.InstallError, match="could not save work"):
+        manager.stop_running_application(tmp_path / "managed")

@@ -14,6 +14,7 @@ import subprocess
 import tarfile
 from pathlib import Path
 
+from build_desktop import build_desktop
 from build_distribution import ROOT, build
 
 
@@ -60,6 +61,7 @@ def build_setup(tools: Path, output: Path, *, allow_dirty: bool = False) -> None
         ),
     ]:
         shutil.copyfile(source, tools / name)
+    build_desktop(tools, version)
     artifacts = build(output, tools, allow_dirty=allow_dirty)
     windows = next(p for p in artifacts if "windows" in p.name)
     publish = tools / ("publish-" + output.name)

@@ -1,3 +1,20 @@
+# Active native Windows application interface — 2026-11-26 / target0.25.0
+
+- [x] Record desktop architecture preserving approved workflow/UI and model/runtime contracts;
+      native window, no PowerShell/console, repeat launch focuses existing instance.
+- [x] Implement Windows desktop host with own task-manager identity/icon and embedded approved UI;
+      authenticated owned local backend, constrained navigation/external links, file/media/export support.
+- [x] Controlled close: flush change-aware autosave/review drafts; warn for active work, allow waiting
+      or safe cancellation; save failure stays open, no backend/ML descendants orphaned after exit.
+- [x] Integrate launcher/shortcut/installer/update/removal and runtime dependency/notices packaging;
+      keep explicit terminal/browser entry points and existing recovery/key/consent behavior.
+- [ ] Focused backend/browser/native Windows lifecycle, same-instance, real no-model process tests,
+      current gates, native previews and fresh immutable installer0.25.0 with verified source/hashes.
+- [ ] Update EN/PL copy/help/checkpoints and deliver concrete desktop app for owner review.
+      No paid/model/transcription campaign; AMD research and first public release stay after native UI.
+
+Earlier stages follow.
+
 # Active installation preflight correction — 2026-11-26 / target 0.24.4
 
 - [x] Detect an existing installation for Install at step2, independent of the selected new folder;

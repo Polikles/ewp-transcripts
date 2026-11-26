@@ -37,6 +37,7 @@ from ewp_transcripts.gui_library import GuiLibrary
 from ewp_transcripts.native_picker import select_native_file
 from ewp_transcripts.storage import preserve_gui_selected_source
 from ewp_transcripts.web_corrections import GuiCorrectionController, GuiCorrectionError
+from ewp_transcripts.web_desktop import DesktopLifecycle
 from ewp_transcripts.web_dictionaries import GuiDictionaryController
 from ewp_transcripts.web_downloads import GuiExportDownloads
 from ewp_transcripts.web_guides import render_guide
@@ -423,6 +424,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("native_picker_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("cloud_asr_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("startup_recovery.js").read_bytes()
+        body += b"\n" + assets.joinpath("desktop_bridge.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()
         body += b"\n" + assets.joinpath("review_editor_display.css").read_bytes()
@@ -453,6 +455,7 @@ class LocalGuiServer(ThreadingHTTPServer):
         application_config = load_config()
         local_provider_lock = threading.Lock()
         self.gui_config = config
+        self.gui_desktop = DesktopLifecycle(enabled=os.environ.get("EWP_DESKTOP_MODE") == "1")
         from ewp_transcripts.local_asr import require_local_asr
 
         self.gui_workflows = GuiWorkflowController(
@@ -622,8 +625,26 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 )
             )
             return
-        self._write_response(_json_response(HTTPStatus.OK, runtime_status()))
-        if stop:
+        desktop = getattr(self.server, "gui_desktop", None)
+        commit = urlsplit(self.path).query == "close=commit"
+        refuse = urlsplit(self.path).query == "close=refuse"
+        if stop and desktop is not None and desktop.enabled:
+            if refuse:
+                desktop.refuse_close()
+            else:
+                desktop.request_close()
+        status = runtime_status()
+        if desktop is not None:
+            status.update(
+                desktop.status(
+                    running_jobs=sum(
+                        job.status in {"queued", "running", "cancel_requested"}
+                        for job in self.server.gui_transcriptions.jobs()
+                    )
+                )
+            )
+        self._write_response(_json_response(HTTPStatus.OK, status))
+        if stop and (desktop is None or not desktop.enabled or commit):
             self.server.checkpoint_recovery()
             threading.Thread(target=self.server.shutdown, daemon=True).start()
 
@@ -831,6 +852,14 @@ class LocalGuiRequestHandler(BaseHTTPRequestHandler):
                 return
 
     def do_POST(self) -> None:  # noqa: N802
+        desktop = getattr(self.server, "gui_desktop", None)
+        if desktop is None:
+            self._handle_post()
+        else:
+            with desktop.request(urlsplit(self.path).path):
+                self._handle_post()
+
+    def _handle_post(self) -> None:
         host = self.headers.get("Host", "")
         expected_origin = f"http://127.0.0.1:{self.server.server_port}"
         if host not in {

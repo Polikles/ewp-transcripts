@@ -60,6 +60,9 @@ def publish_runtime(*, port: int) -> None:
                     "identity": current_process_identity(),
                     "port": port,
                     "token": token,
+                    "desktop": os.environ.get("EWP_DESKTOP_MODE") == "1",
+                    "desktop_pid": int(os.environ.get("EWP_DESKTOP_HOST_PID", "0")),
+                    "desktop_identity": os.environ.get("EWP_DESKTOP_HOST_IDENTITY", ""),
                 },
                 stream,
             )

@@ -2,7 +2,19 @@
 
 ## Managed launch and shutdown
 
-The console is titled EwP Transcripts. Clicking the shortcut again reopens the running application in your browser. Closing the browser alone keeps the server running. Stop it with Ctrl+C when finished; interrupted Windows activity locks are recovered automatically. Uninstall closes the verified application instance before removing its program files.
+Since0.25.0 the managed shortcut opens a dedicated EwP Transcripts window without PowerShell
+or a separate browser. Opening the shortcut again brings that window forward. Closing saves pending
+files, workspace state and transcript edits before stopping the application. During active work choose
+Keep working, Wait and close, or Stop and close. Save failure keeps the window open. Restart restores
+work without automatically planning or starting the queue. Update/uninstall request the same save and
+close; a failed save blocks removal.
+
+The window requires Microsoft WebView2 Evergreen Runtime. A missing-runtime message links to
+Microsoft's runtime page. .NET libraries are included. Window preferences and the renderer profile
+live under `%LOCALAPPDATA%\EwPTranscriptsState\desktop`; work-state keeps its existing location.
+Explicit browser mode remains available through `launch.ps1 -Browser`; closing that browser leaves
+the server running, so stop it with Ctrl+C in its terminal. Restoring a retained version older
+than0.25.0 uses its browser launch mode.
 
 
 This page covers source-checkout setup/repair. For the new managed wizard and terminal bundles, use [Installation and updates](installation.md). Managed private FFmpeg is below its installation root, not the separate source-checkout default. The application workflow was owner-tested on Windows 11; new managed installation acceptance is recorded separately.

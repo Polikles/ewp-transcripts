@@ -4,6 +4,21 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.25.0 — 2026-11-26 (Windows desktop application)
+
+- Launch managed Windows installations in their own EwP window with taskbar identity/icon and
+  no terminal. Preserve the reviewed transcription/review interface inside a local WebView2 host;
+  opening the shortcut again brings the existing window forward.
+- Save pending media and editor/workspace changes before closing. During active work offer Keep
+  working, Wait and close, or Stop and close; a failed save keeps the window open. Recovery never
+  starts planning/transcription automatically. Own the backend and worker processes through a
+  Windows process job so a terminated host cannot leave processing behind.
+- Coordinate update/repair/uninstall with the window's save/close handshake, preserving work-state.
+  Keep explicit browser/CLI launch and compatibility with retained older versions on rollback.
+- Require Microsoft WebView2 Evergreen Runtime for the managed desktop window; show a native
+  diagnostic/download link when missing before starting the application backend. Bundle the host's
+  .NET runtime and original WebView2 SDK license; no browser runtime/model is downloaded silently.
+
 ## 0.24.4 — 2026-11-26 (early existing-installation checks)
 
 - Refuse a new installation at Location step2 when an existing installation is detected, even

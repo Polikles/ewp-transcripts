@@ -81,6 +81,13 @@ def build(output: Path, downloads: Path, *, allow_dirty: bool = False) -> list[P
                 assert stream
                 binary = stream.read()
         files = {**sources, "tools/" + ("uv.exe" if target == "windows-x64" else "uv"): binary}
+        if target == "windows-x64":
+            files["control/EwP.Transcripts.exe"] = (
+                downloads / "desktop-publish/EwP.Transcripts.exe"
+            ).read_bytes()
+            files["licenses/webview2-LICENSE.txt"] = (
+                downloads / "webview2-LICENSE.txt"
+            ).read_bytes()
         for name in ("LICENSE-MIT", "LICENSE-APACHE"):
             license_path = downloads / name
             if not license_path.exists():

@@ -850,6 +850,7 @@ function renderGuiAudioChoices() {
 workflowInput.after(audioChoices);
 let pendingGuiResultFiles=[];
 let guiResultImportBusy=false;
+let guiMediaImportBusy=false;
 async function importPendingGuiResults() {
   const root=workflowOutput.value.trim();
   if(!pendingGuiResultFiles.length || !root || guiResultImportBusy) return;
@@ -868,6 +869,7 @@ workflowOutput.addEventListener("change",()=>{if(pendingGuiResultFiles.length)vo
 nativeMediaInput.addEventListener("change", async () => {
   const files=[...(nativeMediaInput.files || [])];nativeMediaInput.value="";
   if(!files.length)return;
+  guiMediaImportBusy=true;
   const status=document.querySelector("#operation-status");nativeMediaButton.disabled=true;
   const errors=[];let mediaAdded=0;
   try {
@@ -890,6 +892,7 @@ nativeMediaInput.addEventListener("change", async () => {
     else if(!mediaAdded && !files.some(file=>file.name.toLowerCase().endsWith(".json")))status.textContent="These files are already in the list.";
   }catch(error){status.textContent=error.message;}
   finally{
+    guiMediaImportBusy=false;
     nativeMediaButton.disabled=false;
     // Persist selected files as soon as their upload/settings are complete, without planning.
     document.dispatchEvent(new Event("ewp-workspace-changed"));

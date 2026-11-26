@@ -350,6 +350,10 @@ def runtime_record(root: Path) -> dict[str, Any] | None:
         raise InstallError("Invalid application runtime record")
     identity = process_identity(record["pid"])
     if not identity or identity[0] != record.get("identity"):
+        if record.get("desktop") is True:
+            host = process_identity(record.get("desktop_pid", 0))
+            if host and host[0] == record.get("desktop_identity"):
+                raise InstallError("Close the EwP Transcripts desktop window before maintenance")
         path.unlink(missing_ok=True)
         return None
     return record
@@ -504,13 +508,26 @@ def stop_running_application(root: Path) -> None:
         return
     emit("shutdown", "Closing the running EwP Transcripts application and saving queue state")
     runtime_request(record, "stop")
-    deadline = time.monotonic() + 15
+    native = record.get("desktop") is True
+    deadline = time.monotonic() + (90 if native else 15)
     while time.monotonic() < deadline:
         identity = process_identity(record["pid"])
-        if identity is None or identity[0] != record["identity"]:
+        host = process_identity(record.get("desktop_pid", 0)) if native else None
+        host_alive = host is not None and host[0] == record.get("desktop_identity")
+        if (identity is None or identity[0] != record["identity"]) and not host_alive:
             runtime_session_path(root).unlink(missing_ok=True)
             return
+        if native:
+            status = runtime_request(record, "ping")
+            if status and status.get("close_refused"):
+                raise InstallError(
+                    "The application could not save work; resolve this before removal"
+                )
         time.sleep(0.1)
+    if native:
+        raise InstallError(
+            "The desktop application is still saving or closing; retry after it exits"
+        )
     terminate_installed_process(root, record["pid"], record["identity"])
     deadline = time.monotonic() + 5
     while process_alive(record["pid"]) and time.monotonic() < deadline:
@@ -1274,9 +1291,15 @@ def register(root: Path, state: dict[str, Any]) -> None:
             **os.environ,
             "EWP_SHORTCUT": str(Path.home() / "Desktop/EwP Transcripts.lnk"),
             "EWP_LAUNCH": str(
-                Path(os.environ["SYSTEMROOT"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                native_executable(root, state)
+                or (
+                    Path(os.environ["SYSTEMROOT"])
+                    / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                )
             ),
-            "EWP_ARGS": f'-NoProfile -ExecutionPolicy Bypass -File "{root / "launch.ps1"}"',
+            "EWP_ARGS": ""
+            if native_executable(root, state)
+            else f'-NoProfile -ExecutionPolicy Bypass -File "{root / "launch.ps1"}"',
             "EWP_ROOT": str(root),
             "EWP_ICON": str(root / "EwP.ico"),
         }
@@ -1514,6 +1537,7 @@ def install(
                 "Remove-EwP.ps1",
                 "models.json",
                 "EwP.ico",
+                "EwP.Transcripts.exe",
             ):
                 if (release / "control" / name).exists():
                     atomic_copy(release / "control" / name, root / name)
@@ -1558,17 +1582,34 @@ def install(
             raise
 
 
+def native_executable(root: Path, state: dict[str, Any]) -> Path | None:
+    executable = root / "EwP.Transcripts.exe"
+    return (
+        executable
+        if executable.is_file()
+        and (active_path(root, state) / "control/EwP.Transcripts.exe").is_file()
+        else None
+    )
+
+
 def write_launchers(root: Path) -> None:
     if os.name == "nt":
         (root / "EwP.cmd").write_text('@echo off\n"%~dp0tools-launch.cmd"\n')
         # PowerShell reads the atomic pointer, never executes it as code.
-        script = r"""$ErrorActionPreference='Stop'
+        script = r"""param([switch]$Browser)
+$ErrorActionPreference='Stop'
 try{$Host.UI.RawUI.WindowTitle='EwP Transcripts'}catch{}
 $r=$PSScriptRoot
 $s=Get-Content -Encoding UTF8 -LiteralPath (Join-Path $r 'installation.json') -Raw|ConvertFrom-Json
 if($s.kind -ne 'ewp-transcripts-managed-v1' -or
    $s.active -notmatch '^versions[\\/][a-zA-Z0-9.\\-]+$' -or $s.root -ne $r){
  throw 'Invalid installation inventory'
+}
+if(-not $Browser -and
+   (Test-Path -LiteralPath (Join-Path $r ($s.active+'\control\EwP.Transcripts.exe'))) -and
+   (Test-Path -LiteralPath (Join-Path $r 'EwP.Transcripts.exe'))){
+ Start-Process -FilePath (Join-Path $r 'EwP.Transcripts.exe')
+ exit 0
 }
 $python=Join-Path $r ($s.active+'\app\.venv\Scripts\python.exe')
 & $python (Join-Path $r 'manager.py') launch --root $r
@@ -1655,7 +1696,7 @@ def default_output_directory(root: Path) -> Path:
     return directory
 
 
-def launch(root: Path) -> None:
+def launch(root: Path, *, native: bool = False) -> None:
     if os.name == "nt":
         import ctypes
 
@@ -1665,22 +1706,40 @@ def launch(root: Path) -> None:
     state = load_state(root)
     if state is None:
         raise InstallError("No managed installation found")
-    if reopen_running_application(root):
+    if native and runtime_record(root) is not None:
+        raise InstallError(
+            "An application session is already running; close it before desktop launch"
+        )
+    if not native and reopen_running_application(root):
         return
     with exclusive(root):
         release = active_path(root, state)
         environment = app_env(root)
         environment["EWP_GUI_STATE_DIR"] = str(gui_state_directory(root))
         environment["EWP_GUI_DEFAULT_OUTPUT_DIR"] = str(default_output_directory(root))
-        token = uuid.uuid4().hex + uuid.uuid4().hex
+        token = (
+            os.environ.get("EWP_NATIVE_TOKEN", "")
+            if native
+            else uuid.uuid4().hex + uuid.uuid4().hex
+        )
+        if len(token) < 32:
+            raise InstallError("Invalid desktop management handshake")
+        environment["EWP_DESKTOP_MODE"] = "1" if native else "0"
         environment["EWP_RUNTIME_TOKEN"] = token
         record_path = runtime_session_path(root)
         environment["EWP_RUNTIME_RECORD"] = str(record_path)
         environment["EWP_RUNTIME_ROOT"] = str(root)
         process = subprocess.Popen(
-            [str(app_python(release)), "-m", "ewp_transcripts", "gui"],
+            [
+                str(app_python(release)),
+                "-m",
+                "ewp_transcripts",
+                "gui",
+                *(["--no-open-browser"] if native else []),
+            ],
             cwd=release / "app",
             env=environment,
+            creationflags=subprocess.CREATE_NO_WINDOW if native and os.name == "nt" else 0,
         )
         try:
             code = process.wait()
@@ -1717,6 +1776,7 @@ def removal_preview(root: Path) -> dict[str, Any]:
         "Install-EwP.sh",
         "Remove-EwP.ps1",
         "EwP-Setup.exe",
+        "EwP.Transcripts.exe",
         "wizards",
         "EwP.cmd",
         "tools-launch.cmd",
@@ -2080,6 +2140,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--remove-models", action="store_true")
     parser.add_argument("--remove-key", action="store_true")
     parser.add_argument("--secrets-stdin", action="store_true")
+    parser.add_argument("--native-session", action="store_true")
     parser.add_argument("--cancel-file", type=Path)
     parser.add_argument("--save-openrouter-key", action="store_true")
     parser.add_argument("--model", action="append")
@@ -2128,7 +2189,10 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "rollback":
             rollback(root, args.target_release)
         elif args.action == "launch":
-            launch(root)
+            if args.native_session:
+                launch(root, native=True)
+            else:
+                launch(root)
         elif args.action == "uninstall":
             uninstall(
                 root,

@@ -663,6 +663,10 @@ sealed partial class Wizard : Window
     }
     void Launch()
     {
+        var state = InstallationDiscovery.Read(root.Text)?.State;
+        string desktop = Path.Combine(root.Text, "EwP.Transcripts.exe");
+        if (state is JsonElement active && File.Exists(desktop) && File.Exists(Path.Combine(root.Text, active.GetProperty("active").GetString()!, "control/EwP.Transcripts.exe")))
+        { Process.Start(new ProcessStartInfo(desktop) { UseShellExecute = true }); Close(); return; }
         string path = Path.Combine(root.Text, "launch.ps1");
         if (!File.Exists(path)) return;
         var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe")) { UseShellExecute = true };

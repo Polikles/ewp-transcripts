@@ -68,3 +68,15 @@ Optional metadata is mirrored to packaged local-asr-models.json; tests verify ex
 Base pins remain unchanged. Updates never select new optional models automatically; missing
 unselected optional snapshots are not repair failures. Byte events use single writes; backend
 notices remain in technical details. The header reuses web-pattern-dark.svg beneath a dark veil.
+
+
+0.25.0 adds `desktop/windows/EwP.Desktop.csproj` and the packaged `control/EwP.Transcripts.exe`.
+`build_setup.py` builds it before composing the Windows bundle. Its exact WebView2 SDK is locked
+in `desktop/windows/packages.lock.json`; the original SDK license ships in `licenses/`.
+The installed shortcut and wizard launch this EXE directly, without PowerShell. Explicit
+`launch.ps1 -Browser` remains available and retained pre-desktop releases use browser mode.
+The Evergreen WebView2 Runtime must exist on the target; the host checks before starting Python.
+Architecture and security: [native application](../docs/NATIVE_WINDOWS_APP.md).
+CI also installs only tiny non-ML GUI dependencies in an isolated fixture and tests the real
+window/renderer, pending-file recovery, save refusal, focus and child-process cleanup after crash.
+These tests never download models or send audio; they do not qualify GPU/provider inference.

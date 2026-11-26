@@ -54,9 +54,9 @@ async function initializeAutomaticRecovery() {
 
 async function saveAutomaticWorkspace(force = false) {
   if (!csrfToken || workspaceRestoreBusy || workspaceAutosaveBusy || guiBatchBusy || guiQueueStarting ||
-      !workspaceAutosave.checked || workspaceAutosave.disabled || (!force && !automaticRecoveryReady)) return;
+      !workspaceAutosave.checked || workspaceAutosave.disabled || (!force && !automaticRecoveryReady)) return false;
   const fingerprint = workspaceFingerprint();
-  if (!force && fingerprint === lastWorkspaceFingerprint && !reviewDirty && !translationReviewDirty) return;
+  if (!force && fingerprint === lastWorkspaceFingerprint && !reviewDirty && !translationReviewDirty) return true;
   workspaceAutosaveBusy = true;
   let saveSucceeded = false;
   try {
@@ -87,6 +87,7 @@ async function saveAutomaticWorkspace(force = false) {
     if (saveSucceeded && automaticRecoveryReady && workspaceAutosave.checked && workspaceFingerprint() !== lastWorkspaceFingerprint)
       scheduleAutomaticWorkspaceSave();
   }
+  return saveSucceeded;
 }
 
 function scheduleAutomaticWorkspaceSave() {

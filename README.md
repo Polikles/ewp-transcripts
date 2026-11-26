@@ -1,6 +1,6 @@
 # EWP Transcriber
 
-Local-first transcript workflow for podcasts and similar recordings: local GPU or optional cloud ASR, human correction, optional translation and verified subtitle exports. The executable is `transcriber`; the browser GUI is served locally.
+Local-first transcript workflow for podcasts and similar recordings: local GPU or optional cloud ASR, human correction, optional translation and verified subtitle exports. The executable is `transcriber`; the GUI is served locally, with a dedicated Windows window for managed installations.
 
 [English user manual](docs/gui/README.md) · [Polska instrukcja użytkownika](docs/gui/pl/README.md) · [Quick start](Instructions/GUI_QUICKSTART.md) · [Advanced CLI runbook](Instructions/README.md)
 
