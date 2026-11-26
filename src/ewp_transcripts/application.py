@@ -2158,6 +2158,14 @@ def _whisperx_asr(config: ApplicationConfig) -> AsrEngine:
     from ewp_transcripts.local_asr import resolve_local_asr
 
     config = resolve_local_asr(config)
+    if config.models.accelerator == "amd":
+        from ewp_transcripts.engines.amd import AmdAsrEngine
+
+        return AmdAsrEngine(
+            config.models.asr_snapshot_path,
+            revision=config.models.asr_revision,
+            name=config.models.asr_model,
+        )
     return WhisperXAsrEngine(
         config.models.asr_snapshot_path,
         revision=config.models.asr_revision,
@@ -2173,7 +2181,7 @@ def _whisperx_alignment(config: ApplicationConfig) -> AlignmentEngine:
         revision=config.models.alignment_revision,
         english_snapshot=config.models.english_alignment_snapshot_path,
         english_revision=config.models.english_alignment_revision,
-        device=config.models.device,
+        device="cpu" if config.models.accelerator == "amd" else config.models.device,
     )
 
 
@@ -2181,7 +2189,7 @@ def _pyannote_diarization(config: ApplicationConfig) -> DiarizationEngine:
     return PyannoteDiarizationEngine(
         config.diarization.local_model_path,
         revision=config.diarization.model_revision,
-        device=config.models.device,
+        device="cpu" if config.models.accelerator == "amd" else config.models.device,
     )
 
 
@@ -2203,9 +2211,11 @@ def _runtime_environment(config: ApplicationConfig) -> CanonicalEnvironment:
         python=platform.python_version(),
         whisperx=_distribution_version("whisperx"),
         pytorch=_distribution_version("torch"),
-        device=config.models.device,
+        device="amd-rocm-asr/cpu-alignment-diarization (experimental)"
+        if config.models.accelerator == "amd"
+        else config.models.device,
         compute_type=config.models.compute_type,
-        batch_size=config.models.batch_size,
+        batch_size=1 if config.models.accelerator == "amd" else config.models.batch_size,
     )
 
 

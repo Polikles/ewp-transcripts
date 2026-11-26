@@ -362,6 +362,8 @@ def dispatch_get(
                 b'<html lang="en"',
                 b'<html data-system-language="'
                 + system_ui_language().encode("ascii")
+                + b'" data-local-accelerator="'
+                + (b"amd" if os.environ.get("EWP_LOCAL_ACCELERATOR") == "amd" else b"nvidia")
                 + b'" lang="en"',
             ),
         )

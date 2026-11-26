@@ -2,6 +2,14 @@
 const guiDiagnosticPattern = /^([A-Z][A-Z0-9]*_[A-Z0-9_]+):\s*([\s\S]*)$/;
 // Additional audited UI copy. Keys remain English; codes and user content are preserved.
 for (const [en, pl] of [
+  ["Local GPU · AMD (experimental)", "Lokalna karta AMD (experimental)"],
+  ["AMD ROCm (experimental) · CPU alignment/diarization", "AMD ROCm (experimental) · wyrównanie i mówcy na CPU"],
+  ["AMD support is experimental and has not been tested on physical hardware. ASR uses ROCm; word alignment and diarization use CPU.", "Obsługa AMD jest eksperymentalna i nie została przetestowana na fizycznej karcie. ASR używa ROCm; wyrównanie słów i rozpoznawanie mówców działają na CPU."],
+  ["AMD ROCm ASR (experimental); CPU alignment and diarization.", "ASR AMD ROCm (experimental); wyrównanie i rozpoznawanie mówców na CPU."],
+  ["AMD ROCm (experimental) is unavailable. Repair the AMD runtime and check the supported GPU/driver.", "AMD ROCm (experimental) jest niedostępne. Napraw środowisko AMD i sprawdź obsługiwaną kartę oraz sterownik."],
+  ["AMD HIP backend verified; PyTorch stages use CPU.", "Sprawdzono środowisko AMD HIP; etapy PyTorch używają CPU."],
+  ["AMD HIP runtime/device check failed; no NVIDIA CUDA or CPU ASR fallback was used.", "Test środowiska lub karty AMD HIP nie powiódł się. Nie uruchomiono zastępczo ASR na NVIDIA CUDA ani CPU."],
+  ["Speech libraries, TorchCodec/FFmpeg and AMD HIP load successfully (experimental).", "Biblioteki mowy, TorchCodec/FFmpeg i AMD HIP ładują się poprawnie (experimental)."],
   ["Personalization", "Personalizacja"],
   ["Close", "Zamknij"],
   ["Changes are saved immediately on this device and included when you save a user profile.", "Zmiany są zapisywane od razu na tym urządzeniu i uwzględniane przy zapisie profilu użytkownika."],

@@ -2,6 +2,15 @@
 
 ## Uruchamianie instalacji zarządzanej
 
+### AMD (experimental)
+
+Instalacja Windows z kartą AMD może używać eksperymentalnego profilu ROCm dla ASR. Wyrównanie słów
+i rozpoznawanie mówców działa wtedy na CPU. Obsługa AMD nie została przetestowana na fizycznej karcie.
+Po wykryciu karty AMD podczas instalacji lub aktualizacji pojawia się ostrzeżenie z przyciskiem
+„Rozumiem, kontynuuj”, również na komputerze z kartami obu producentów. Zaktualizuj sterownik AMD
+i sprawdź automatyczną diagnostykę przed lokalną transkrypcją. Instalator pobiera zweryfikowane
+biblioteki AMD i zachowuje obecne modele. [Zakres zgodności i testów AMD](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
+
 Okno pamięta ostatnią pozycję, rozmiar i maksymalizację. Przy braku poprawnego zapisu używa
 domyślnego położenia na środku. Windows przenosi zapisaną pozycję spoza dostępnych ekranów
 na dostępny monitor. Kolor belki zmienia Personalizacja w Ustawieniach i informacjach → Profil

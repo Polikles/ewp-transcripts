@@ -4,7 +4,7 @@ param(
  [ValidateSet('check','verify-models','models','install','update','repair','rollback','launch','uninstall')][string]$Action='install',
  [string]$Root='',
  [string]$Bundle='', [string]$CancelFile='', [switch]$Local, [switch]$CloudOnly, [switch]$AcceptModelTerms, [switch]$Yes,
- [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin,
+ [switch]$RemoveModels, [switch]$RemoveKey, [switch]$SaveOpenRouterKey, [switch]$SecretsStdin, [switch]$AcceptExperimentalAmd,
  [string]$Models='', [switch]$Redownload, [string]$TargetRelease=''
 )
 $ErrorActionPreference='Stop'
@@ -19,6 +19,7 @@ if(!$Root){
 }
 $manager=Join-Path $PSScriptRoot 'manager.py'
 $argsToManager=@($manager,$Action,'--root',$Root)
+if($AcceptExperimentalAmd){$argsToManager+='--accept-amd-experimental'}
 if($Bundle){$argsToManager+=@('--bundle',(Resolve-Path -LiteralPath $Bundle).Path)}
 if($CancelFile){$argsToManager+=@('--cancel-file',$CancelFile)}
 foreach($model in $Models.Split(',',[StringSplitOptions]::RemoveEmptyEntries)){$argsToManager+=@('--model',$model)}

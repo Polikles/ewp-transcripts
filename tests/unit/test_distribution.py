@@ -88,6 +88,81 @@ def install(root: Path, archive: Path):
     return manager.install(root, archive, local=False, terms=False, secrets={})
 
 
+def test_amd_acknowledgement_blocks_before_creating_installation(tmp_path, lifecycle, monkeypatch):
+    root, registrations = lifecycle
+    monkeypatch.setattr(
+        manager,
+        "host_report",
+        lambda *args: {
+            "ready": True,
+            "checks": [
+                {
+                    "code": "gpu",
+                    "context": {"accelerator": "amd", "amd_devices": [{"name": "Radeon"}]},
+                }
+            ],
+        },
+    )
+    with pytest.raises(manager.InstallError, match="--accept-amd-experimental"):
+        install(root, bundle(tmp_path, "1.0.0"))
+    assert not root.exists() and not registrations
+
+
+def test_amd_profile_and_acknowledgement_survive_update_and_launch_environment(
+    tmp_path, lifecycle, monkeypatch
+):
+    root, registrations = lifecycle
+    monkeypatch.setattr(
+        manager,
+        "host_report",
+        lambda *args: {
+            "ready": True,
+            "checks": [
+                {
+                    "code": "gpu",
+                    "context": {"accelerator": "amd", "amd_devices": [{"name": "Radeon"}]},
+                }
+            ],
+        },
+    )
+    first = manager.install(
+        root, bundle(tmp_path, "1.0.0"), local=False, terms=False, secrets={}, amd_accepted=True
+    )
+    assert first["local_accelerator"] == "amd" and first["amd_acknowledged"]
+    second = install(root, bundle(tmp_path, "1.1.0"))
+    assert second["local_accelerator"] == "amd" and second["amd_acknowledged"]
+    assert manager.app_env(root)["EWP_LOCAL_ACCELERATOR"] == "amd"
+
+
+@pytest.mark.parametrize(
+    "rows,expected",
+    [
+        ([], []),
+        ([{"Name": "AMD CPU", "PNPDeviceID": "ACPI\\CPU", "DriverVersion": "1"}], []),
+        (
+            [
+                {
+                    "Name": "Radeon RX 7900 XTX",
+                    "PNPDeviceID": "PCI\\VEN_1002&DEV_1234",
+                    "DriverVersion": "1",
+                }
+            ],
+            ["Radeon RX 7900 XTX"],
+        ),
+    ],
+)
+def test_amd_detection_uses_display_pci_vendor_not_cpu_or_architecture(monkeypatch, rows, expected):
+    import subprocess
+
+    monkeypatch.setattr(manager.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(
+        manager.subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess([], 0, json.dumps(rows), ""),
+    )
+    assert [d["name"] for d in manager.amd_display_adapters()] == expected
+
+
 def test_real_process_lifecycle_update_failure_rollback_and_safe_removal(tmp_path, lifecycle):
     root, registrations = lifecycle
     first = install(root, bundle(tmp_path, "1.0.0"))

@@ -8,6 +8,22 @@ namespace EwP.Desktop;
 
 sealed partial class DesktopWindow
 {
+    async Task SnapLeftForTest()
+    {
+        WindowState = WindowState.Normal; BringToFront();
+        var before = WindowPlacement.Capture(this)!;
+        TestKey(0x5b, 0, 0, UIntPtr.Zero); TestKey(0x25, 0, 0, UIntPtr.Zero);
+        TestKey(0x25, 0, 2, UIntPtr.Zero); TestKey(0x5b, 0, 2, UIntPtr.Zero);
+        await Until(() => Task.FromResult(WindowPlacement.Capture(this) is { ScreenCoordinates: true } value
+            && value.Right - value.Left < before.Right - before.Left - 100), 10);
+        placement.Save(this);
+        var snapped = placement.Saved!;
+        Check(!snapped.Maximized && snapped.ScreenCoordinates && snapped.Right - snapped.Left < before.Right - before.Left - 100,
+            "actual Windows Win+Left Snap persists the visible half-screen rectangle");
+        CaptureFrame("windows-snap-left");
+    }
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "keybd_event")]
+    static extern void TestKey(byte key, byte scan, uint flags, UIntPtr extra);
     async Task CheckPlacement()
     {
         var current = WindowPlacement.Capture(this);

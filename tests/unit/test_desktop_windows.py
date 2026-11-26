@@ -113,12 +113,19 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
     executable = root / "EwP.Transcripts.exe"
     state_directory = None
     try:
-        for phase in ["save", "restore", "crash", "maintenance"]:
+        for phase in ["save", "restore", "crash", "maintenance", "amd-interface"]:
             worker_record = tmp_path / f"{phase}-workers.json"
             report = evidence / f"{phase}.json"
             environment = {**os.environ, "EWP_TEST_WORKER_RECORD": str(worker_record)}
+            if phase == "amd-interface":
+                state = json.loads((root / "installation.json").read_text(encoding="utf-8"))
+                state["local_accelerator"] = "amd"
+                (root / "installation.json").write_text(json.dumps(state), encoding="utf-8")
+                environment["EWP_DESKTOP_EXPECT_AMD"] = "1"
             if phase != "save":
                 environment["EWP_DESKTOP_EXPECT_RECOVERY"] = "1"
+            if phase == "restore":
+                environment["EWP_DESKTOP_SNAP_TEST"] = "1"
             if phase in {"crash", "maintenance"}:
                 environment["EWP_DESKTOP_CRASH_TEST"] = "1"
             args = [

@@ -2,6 +2,15 @@
 
 ## Managed launch and shutdown
 
+### AMD (experimental)
+
+On AMD-only Windows installations, ASR can use the experimental ROCm profile; alignment and
+speaker diarization use CPU. AMD support has not been tested on a physical AMD card. Install/Update
+shows an acknowledgement after detecting an AMD display adapter, including mixed GPU computers.
+Keep the AMD driver current and read automatic diagnostics before local transcription. The installer
+downloads verified AMD runtime libraries; existing model snapshots are reused. See the
+[AMD compatibility/qualification notes](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
+
 The window remembers its last position, normal size and maximized state. Without valid saved
 geometry it uses the centered default. Windows brings an off-screen saved position back onto
 an available display. Personalization in Settings & About → User profile controls the title bar.

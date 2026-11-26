@@ -1,3 +1,15 @@
+# Active Snap recovery and AMD stage — 2026-11-26 / target0.26.0
+
+Owner accepts0.25.1 Personalization and closing popup. Fix half-screen Windows Snap recovery,
+then implement AMD support visibly(experimental), with Install/Update AMD-detection acknowledgement
+("obsługa kart AMD jest eksperymentalna i nie została przetestowana" / "Rozumiem, kontynuuj").
+AMD stage is NOW authorized. See opening TODO and docs/checkpoints/2026-11-26-snap-amd.md.
+No physical AMD card: document real limitations, qualify adapters/installer without claiming GPU
+inference. Preserve NVIDIA/model pins, approved copy/assets, LEFT-sidebar player and all prior
+deliveries. No paid API campaign/public release. Standard public CI/7-day retention remains.
+
+Earlier boundaries follow.
+
 # Delivered window personalization and compact playback — 2026-11-26 / 0.25.1
 
 0.25.1 delivered from1a665b33b24772f93c8c8aa7ec22c5a83a0aad08. Final native45885593097 PASS:

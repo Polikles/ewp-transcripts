@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import tomllib
 from collections.abc import Mapping
@@ -81,6 +82,7 @@ class ChannelsConfig(StrictConfigModel):
 
 
 class ModelsConfig(StrictConfigModel):
+    accelerator: Literal["nvidia", "amd"] = "nvidia"
     asr_model: str = "large-v2"
     asr_repository: str = "Systran/faster-whisper-large-v2"
     asr_revision: str = "f0fe81560cb8b68660e564f55dd99207059c092e"
@@ -421,6 +423,8 @@ def load_config(
     preset_data = PRESETS.get(preset_name, {})
 
     resolved = _packaged_defaults()
+    if os.environ.get("EWP_LOCAL_ACCELERATOR") == "amd":
+        resolved = _merge(resolved, {"models": {"accelerator": "amd"}})
     for layer in (preset_data, user_data, project_data, explicit_data, override_data):
         resolved = _merge(resolved, layer)
 

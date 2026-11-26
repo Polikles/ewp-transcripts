@@ -70,6 +70,8 @@ sealed partial class DesktopWindow
         var runtime = (await backend.Request())!.Value; testServerPid = runtime.GetProperty("pid").GetInt32();
         Check(Flag(runtime, "desktop") && !Flag(runtime, "busy"), "authenticated owned desktop backend ready");
         Check(GetConsoleWindow() == IntPtr.Zero, "native application has no console");
+        if (Environment.GetEnvironmentVariable("EWP_DESKTOP_EXPECT_AMD") == "1")
+            Check(await ScriptFlag("document.documentElement.dataset.localAccelerator==='amd' && document.querySelector('#cloud-asr-provider option[value=local]').textContent.includes('(experimental)')"), "managed AMD profile is visibly experimental in the actual renderer without loading models");
         await CheckPlacement();
         Check(!AppConfig.IsLocal("http://127.0.0.1:8765.evil/") && !AppConfig.IsLocal("http://localhost:8765/") && !AppConfig.IsResource("file:///C:/private") && !AppConfig.IsResource("https://example.com/"), "strict loopback origin and resource rules");
         Check(!AppConfig.IsDocument(AppConfig.Origin + "/help") && !AppConfig.IsDocument(AppConfig.Origin + "/assets/app.js"), "only the root document can answer native lifecycle requests");
@@ -124,6 +126,7 @@ sealed partial class DesktopWindow
         if (previews != null) CloseChoice.CaptureAndCheck(this, previews);
         // First restart checks normal bounds; subsequent restarts also check maximization.
         WindowState = restored ? WindowState.Maximized : WindowState.Normal;
+        if (Environment.GetEnvironmentVariable("EWP_DESKTOP_SNAP_TEST") == "1") await SnapLeftForTest();
         placement.Save(this);
         WriteTestResult("PASS");
         // A crash qualification caller keeps the host alive until it verifies same-instance activation

@@ -20,3 +20,6 @@ native-018,Work could not be saved. The program remains open. Check Saved work a
 native-019,Stopping active work and closing…,Zatrzymywanie zadań i zamykanie…,DesktopWindow.cs
 native-020,Closing was stopped to protect unsaved work. Try again after the current operation.,"Zamykanie zostało wstrzymane, aby chronić niezapisaną pracę. Spróbuj ponownie po bieżącej operacji.",DesktopWindow.cs
 native-021,"EwP Transcripts could not start. Check whether it is already running, or choose Repair in the installer.","Nie udało się uruchomić EwP Transcripts. Sprawdź, czy program jest już uruchomiony, albo wybierz Napraw w instalatorze.",Program.cs
+amd-001,AMD GPU support is experimental and has not been tested.,obsługa kart AMD jest eksperymentalna i nie została przetestowana,installer/windows/WizardAmd.cs
+amd-002,"I understand, continue","Rozumiem, kontynuuj",installer/windows/WizardAmd.cs
+amd-003,Review AMD warning…,Przeczytaj ostrzeżenie AMD…,installer/windows/Wizard.cs

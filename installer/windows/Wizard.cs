@@ -317,7 +317,7 @@ sealed partial class Wizard : Window
     bool CanAdvance => !busy && (finished ? successful : page switch
     {
         0 => true,
-        1 => LocationProblem() == null && (!IsInstall || hostReady),
+        1 => LocationProblem() == null && (!IsInstall || hostReady) && AmdAccepted,
         2 => IsInstall ? ModelsCanContinue : operation == "rollback" || previewReady,
         3 when operation == "install" => true,
         _ => false
@@ -483,7 +483,7 @@ sealed partial class Wizard : Window
     string GB(long bytes) => (bytes / 1e9).ToString(bytes is > 0 and < 1_000_000_000 ? "0.###" : "0.#", CultureInfo.GetCultureInfo(Pl ? "pl-PL" : "en-US"));
     string? ModelSpaceProblem()
     {
-        if (!GpuReady) return T("A working NVIDIA driver is required for local models. Update your drivers and go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA. Zaktualizuj sterownik i wróć do testu komputera albo odznacz \"modele lokalne\".");
+        if (!GpuReady) return T("A working NVIDIA or AMD driver is required for local models. AMD support is experimental. Update your drivers and go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA lub AMD. Obsługa AMD jest eksperymentalna. Zaktualizuj sterownik i wróć do testu komputera albo odznacz \"modele lokalne\".");
         try
         {
             string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache/huggingface/hub");
@@ -549,6 +549,7 @@ sealed partial class Wizard : Window
             Render();
         }
         if (epoch != stateEpoch) await AutoCheckHost();
+        else if (hostAttempted) ShowAmdWarning();
     }
     async Task PreviewRemoval()
     {
@@ -559,6 +560,7 @@ sealed partial class Wizard : Window
     }
     async Task RunOperation()
     {
+        if (!AmdAccepted) { page = 1; ShowAmdWarning(); return; }
         if (operation == "install")
         {
             ReadInstalled();
@@ -573,6 +575,7 @@ sealed partial class Wizard : Window
     {
         hostRows.Children.Clear();
         if (host is not JsonElement result) return;
+        if (!AmdAccepted) hostRows.Children.Add(ActionButton(T("Review AMD warning…", "Przeczytaj ostrzeżenie AMD…"), ShowAmdWarning));
         if (operation == "models" && installed is JsonElement installedState)
         {
             string current = installedState.GetProperty("version").GetString()!;
@@ -616,7 +619,7 @@ sealed partial class Wizard : Window
             "architecture" => T("64-bit processor: ", "Procesor 64-bit: ") + Field("cpu_model"),
             "platform" => T("System: ", "System: ") + Field("name"),
             "disk" => T("Disk space: ", "Miejsce na dysku: ") + "(" + GB(context.GetProperty("free_bytes").GetInt64()) + T(" GB free; ", " GB wolne; ") + GB(operation == "install" ? 25_000_000_000L : context.GetProperty("installation_bytes").GetInt64()) + T(" GB required", " GB wymagane") + (context.TryGetProperty("additional_bytes", out var additional) && operation != "install" ? T(" for program and basic models; additional free space: ", " na program i podstawowe modele; dodatkowe wolne miejsce: ") + GB(additional.GetInt64()) + " GB" : "") + ")",
-            "gpu" => T("GPU driver: ", "Sterownik GPU: ") + (context.TryGetProperty("devices", out var devices) && devices.GetArrayLength() > 0 ? string.Join("; ", devices.EnumerateArray().Select(d => d.GetProperty("name").GetString() + " · " + d.GetProperty("driver").GetString())) : T("not detected", "nie wykryto")),
+            "gpu" => T("GPU driver: ", "Sterownik GPU: ") + (context.TryGetProperty("devices", out var devices) && devices.GetArrayLength() > 0 ? string.Join("; ", devices.EnumerateArray().Select(d => d.GetProperty("name").GetString() + " · " + d.GetProperty("driver").GetString())) : T("not detected", "nie wykryto")) + (context.TryGetProperty("amd_devices", out var amd) && amd.GetArrayLength() > 0 ? " · AMD (experimental)" : ""),
             "vc_runtime" => T("Visual C++ libraries", "Biblioteki Visual C++"),
             _ => "FFmpeg / ffprobe"
         };
@@ -629,7 +632,7 @@ sealed partial class Wizard : Window
         var request = new OperationRequest(op, root.Text, confirm, prepare && LocalSelected || op == "check" && operation == "models",
             prepare && terms.IsChecked == true, removeModels.IsChecked == true, removeKey.IsChecked == true,
             prepare && LocalSelected && hfValid ? hfSecret : "", op == "install" && orValid ? orSecret : "",
-            Environment.ProcessPath!, Environment.ProcessId, CancelFile, op == "models" || op == "install" && LocalSelected ? DownloadModels.Select(m => m.Code).ToArray() : null, repairModels || reinstallModels, operation == "rollback" ? rollbackTarget : null);
+            Environment.ProcessPath!, Environment.ProcessId, CancelFile, op == "models" || op == "install" && LocalSelected ? DownloadModels.Select(m => m.Code).ToArray() : null, repairModels || reinstallModels, operation == "rollback" ? rollbackTarget : null, AmdKey.Length > 0 && AmdAccepted);
         async Task Output(string line)
         {
             string text = line, stage = ""; JsonElement? item = null;

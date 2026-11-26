@@ -28,6 +28,13 @@ from ewp_transcripts.web_server import (
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
+def test_managed_amd_profile_is_exposed_as_a_fixed_gui_marker(tmp_path, monkeypatch):
+    monkeypatch.setenv("EWP_LOCAL_ACCELERATOR", "amd")
+    config = WebConfiguration.create(port=8765)
+    response = dispatch_get(config, server_port=8765, host="127.0.0.1:8765", target="/")
+    assert b'data-local-accelerator="amd"' in response.body
+
+
 @pytest.mark.parametrize(
     ("filename", "expected"),
     [

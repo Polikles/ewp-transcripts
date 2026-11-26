@@ -30,7 +30,8 @@ sealed partial class Wizard
         "same-version update refusal", "automatic required host checks for install/update/repair/models", "disk-only folder refresh without repeated hardware probes", "failed host checks stay blocked after folder changes", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
         "reviewed EN/PL copy and localized project notices", "newer-installer release links in every maintenance flow", "separate smaller OpenRouter spending footnote", "application-pattern light body",
         "Install detects other roots before checks/downloads", "existing older/same/newer installation guidance", "late appearing installation blocks before operation", "consistent fresh-install 25 GB labels",
-        "no installation/model/provider operation; broker transport probe only"
+        "no installation/model/provider operation; broker transport probe only",
+        "AMD display-adapter warning, acknowledgement and mixed-GPU host result"
     ];
 
     internal async Task SelfTest(string? previewDirectory)
@@ -106,6 +107,7 @@ sealed partial class Wizard
         await TestAutomaticHostChecks(previewDirectory);
         await TestReviewedCopy(previewDirectory);
         await TestNewInstallPreflight(previewDirectory);
+        await TestAmdWarning(previewDirectory);
         var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
         var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
         infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();

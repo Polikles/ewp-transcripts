@@ -182,7 +182,42 @@ def _cuda_check(runner: CommandRunner) -> DiagnosticCheck:
     )
 
 
-def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> DiagnosticCheck:
+def _amd_checks(runner: CommandRunner) -> tuple[DiagnosticCheck, ...]:
+    try:
+        result = runner(
+            [
+                sys.executable,
+                "-c",
+                "from ewp_transcripts.amd_runtime import require_amd_runtime; "
+                "print(require_amd_runtime())",
+            ]
+        )
+        ready = result.returncode == 0 and bool(result.stdout.strip())
+    except (OSError, subprocess.SubprocessError):
+        ready = False
+    return (
+        DiagnosticCheck(
+            code="gpu",
+            status=DiagnosticStatus.PASS if ready else DiagnosticStatus.FAIL,
+            message="AMD ROCm ASR (experimental); CPU alignment and diarization."
+            if ready
+            else "AMD ROCm (experimental) is unavailable. Repair the AMD runtime "
+            "and check the supported GPU/driver.",
+        ),
+        DiagnosticCheck(
+            code="cuda",
+            status=DiagnosticStatus.PASS if ready else DiagnosticStatus.FAIL,
+            message="AMD HIP backend verified; PyTorch stages use CPU."
+            if ready
+            else "AMD HIP runtime/device check failed; no NVIDIA CUDA or CPU ASR "
+            "fallback was used.",
+        ),
+    )
+
+
+def _speech_runtime_check(
+    runner: CommandRunner, environ: Mapping[str, str], *, amd: bool = False
+) -> DiagnosticCheck:
     script = (
         "import os; os.environ['HF_HUB_OFFLINE']='1'; "
         "from ewp_transcripts.engines.ffmpeg_compat import prepare_speech_libraries; "
@@ -192,6 +227,12 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
         "from ewp_transcripts.engines.pyannote import _load_pyannote; _load_pyannote(); "
         "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))"
     )
+    if amd:
+        # HIP is checked in its own child by _amd_checks; avoid mixing its OpenMP DLLs with torch.
+        script = script.replace(
+            "import ctranslate2; print(ctranslate2.get_supported_compute_types('cuda'))",
+            "print('CPU alignment/diarization libraries loaded; HIP checked separately')",
+        )
     try:
         completed = runner([sys.executable, "-c", script])
     except (OSError, subprocess.SubprocessError) as error:
@@ -211,7 +252,11 @@ def _speech_runtime_check(runner: CommandRunner, environ: Mapping[str, str]) -> 
         code="speech_runtime",
         status=DiagnosticStatus.PASS if completed.returncode == 0 else DiagnosticStatus.FAIL,
         message=(
-            "Speech libraries, TorchCodec/FFmpeg and CTranslate2 CUDA load successfully."
+            (
+                "Speech libraries, TorchCodec/FFmpeg and AMD HIP load successfully (experimental)."
+                if amd
+                else "Speech libraries, TorchCodec/FFmpeg and CTranslate2 CUDA load successfully."
+            )
             if completed.returncode == 0
             else (
                 "Speech dependencies failed to load. Save work, stop the GUI and run "
@@ -329,9 +374,20 @@ def run_doctor(
         ),
         _command_check("ffmpeg", ["-version"], finder, runner),
         _command_check("ffprobe", ["-version"], finder, runner),
-        _gpu_check(finder, runner),
-        _cuda_check(runner),
-        *((_speech_runtime_check(runner, environ),) if test_speech_runtime else ()),
+        *(
+            _amd_checks(runner)
+            if effective_config.models.accelerator == "amd"
+            else (_gpu_check(finder, runner), _cuda_check(runner))
+        ),
+        *(
+            (
+                _speech_runtime_check(
+                    runner, environ, amd=effective_config.models.accelerator == "amd"
+                ),
+            )
+            if test_speech_runtime
+            else ()
+        ),
         _model_check(
             "asr_model",
             "ASR",

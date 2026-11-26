@@ -1,3 +1,16 @@
+# Snap recovery and AMD(experimental) — 2026-11-26 /0.26.0
+
+- [ ] Persist/restore actual snapped half-screen bounds, normal position and maximization; verify
+      actual Windows snapping/restart and1080p/default fallback without changing accepted UI.
+- [ ] Research official AMD runtime compatibility; implement an actual experimental acceleration
+      path, preserve NVIDIA defaults/model pins, and state CPU stages/hardware limitations.
+- [ ] Detect AMD display adapters (not AMD CPUs), show requested blocking acknowledgement after
+      host checks for Install/Update; cover repeated checks/localization and mixed GPU hosts.
+- [ ] Integrate managed install/update/repair/runtime diagnostics and visible experimental labels;
+      meaningful tests, guides/compatibility and fresh verified0.26.0 installer. No paid campaign.
+
+Earlier stages follow.
+
 # Desktop personalization and source-player follow-up — 2026-11-26 / 0.25.1
 
 - [x] Persist/restore actual normal window bounds, position and maximized state; default without a

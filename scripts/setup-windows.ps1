@@ -31,6 +31,11 @@ try {
     if ($Repair) { $syncArgs += @('--reinstall-package', 'torchcodec', '--reinstall-package', 'pyannote-audio') }
     & uv @syncArgs
     if ($LASTEXITCODE -ne 0) { throw 'Locked dependency installation failed.' }
+    if($env:EWP_LOCAL_ACCELERATOR -eq 'amd'){
+        Write-SetupPhase 'dependencies' 'Preparing AMD ROCm ASR (experimental); CPU alignment and diarization'
+        & uv run --locked --no-sync python scripts/setup-amd.py
+        if($LASTEXITCODE -ne 0){throw 'Experimental AMD runtime installation failed.'}
+    }
     $prefix = if ($env:EWP_FFMPEG_PREFIX) { $env:EWP_FFMPEG_PREFIX } else { Join-Path $env:LOCALAPPDATA 'ewp-transcripts\ffmpeg-7' }
     $dll = Join-Path $prefix 'bin\avutil-59.dll'
     if ($Repair -or -not (Test-Path $dll)) {

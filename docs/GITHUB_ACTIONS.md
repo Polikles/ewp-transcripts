@@ -74,6 +74,14 @@ an Actions cache retained between runs.
 
 ## Controls and future changes
 
+The0.26.0 AMD/Snap follow-up adds one native step within the existing standard Windows job:
+download the pinned official AMD runtime wheels into a disposable environment and verify actual
+CTranslate2 DLL import. It uploads only a small JSON report, not ROCm binaries. It does not run
+AMD inference, download models, use paid/GPU runners or change billing budgets. Existing job
+timeouts, public-only guards, concurrency and7-day retention remain unchanged. The desktop test
+also exercises Win+Left Snap and restart. This extends concrete platform verification; it does not
+claim physical AMD hardware qualification.
+
 - Both jobs run only when the event identifies a public repository. If visibility becomes private,
   the jobs are skipped until the owner reviews billing and explicitly authorizes a different policy.
 - One run per workflow/ref is allowed; a newer run cancels an older in-progress run for that ref.

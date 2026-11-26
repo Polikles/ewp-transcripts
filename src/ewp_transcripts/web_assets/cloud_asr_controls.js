@@ -1,5 +1,7 @@
 "use strict";
 
+const guiAmdProfile = document.documentElement.dataset.localAccelerator === "amd";
+
 const cloudAsrPanel=document.createElement("details"); cloudAsrPanel.id="cloud-asr-panel";
 cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
   <label>ASR provider<select id="cloud-asr-provider"><option value="local">Local GPU (default)</option><option value="openrouter">OpenRouter cloud ASR</option></select></label>
@@ -14,6 +16,12 @@ cloudAsrPanel.innerHTML=`<summary>Transcription engine</summary>
     <p class="field-hint">Whisper models need one speaker per track. Scribe and MAI handle mixed-speaker audio better.</p>
   </div>`;
 mediaOptionsPanel.after(cloudAsrPanel);
+if (guiAmdProfile) {
+  cloudAsrPanel.querySelector('option[value="local"]').textContent="Local GPU · AMD (experimental)";
+  const info=document.createElement("p");info.className="field-hint";
+  info.textContent="AMD support is experimental and has not been tested on physical hardware. ASR uses ROCm; word alignment and diarization use CPU.";
+  document.querySelector("#local-asr-options").after(info);
+}
 const cloudProvider=document.querySelector("#cloud-asr-provider"), cloudModel=document.querySelector("#cloud-asr-model");
 for(const model of ["openai/whisper-large-v3","openai/whisper-large-v3-turbo","elevenlabs/scribe-v2","microsoft/mai-transcribe-2"]) {
   const option=document.createElement("option"); option.value=model; option.textContent=model; cloudModel.append(option);

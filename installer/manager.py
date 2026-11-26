@@ -799,6 +799,44 @@ def validate_elevated_model_targets(paths: list[str], home: Path | None = None) 
                     raise InstallError("Elevated model download would leave the user profile")
 
 
+def amd_display_adapters() -> list[dict[str, str]]:
+    """Query PCI display adapters; an AMD CPU/AMD64 architecture is not an AMD GPU."""
+    if platform.system() != "Windows":
+        return []
+    try:
+        result = subprocess.run(
+            [
+                "powershell.exe",
+                "-NoProfile",
+                "-Command",
+                "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); "
+                "@(Get-CimInstance Win32_VideoController | Where-Object { "
+                "$_.PNPDeviceID -match 'VEN_1002' } | Select-Object "
+                "Name,DriverVersion,PNPDeviceID) | ConvertTo-Json -Compress",
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=15,
+            creationflags=0x08000000,
+        )
+        value = json.loads(result.stdout.lstrip("\ufeff")) if result.returncode == 0 else []
+        rows = value if isinstance(value, list) else [value]
+        return [
+            {
+                "name": str(row["Name"]),
+                "driver": str(row.get("DriverVersion") or ""),
+                "vendor": "amd",
+            }
+            for row in rows
+            if isinstance(row, dict)
+            and "VEN_1002" in str(row.get("PNPDeviceID", "")).upper()
+            and isinstance(row.get("Name"), str)
+        ]
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return []
+
+
 def host_report(root: Path, local: bool) -> dict[str, Any]:
     system = platform.system()
     checks: list[dict[str, Any]] = []
@@ -901,11 +939,19 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
                 ]
         except (OSError, subprocess.TimeoutExpired):
             pass
+    amd_devices = amd_display_adapters()
+    selected_accelerator = "amd" if amd_devices and not devices else "nvidia"
     check(
         "gpu",
-        "pass" if devices else ("fail" if local else "warning"),
-        "NVIDIA driver visible" if devices else "No usable NVIDIA driver detected",
-        devices=devices,
+        "pass" if devices or amd_devices else ("fail" if local else "warning"),
+        "AMD ROCm (experimental); CPU alignment/diarization"
+        if selected_accelerator == "amd"
+        else "NVIDIA driver visible"
+        if devices
+        else "No usable NVIDIA or AMD GPU driver detected",
+        devices=[*devices, *amd_devices],
+        amd_devices=amd_devices,
+        accelerator=selected_accelerator,
     )
     if system == "Linux":
         missing = [name for name in ("ffmpeg", "ffprobe") if not shutil.which(name)]
@@ -953,6 +999,7 @@ def app_env(root: Path) -> dict[str, str]:
         "PYTHONUNBUFFERED": "1",
         "UV_NO_CONFIG": "1",
         "PYTHONIOENCODING": "utf-8",
+        "EWP_LOCAL_ACCELERATOR": (load_state(root) or {}).get("local_accelerator", "nvidia"),
     }
 
 
@@ -1131,7 +1178,9 @@ def prepare_models(
     )
 
 
-def diagnose_runtime(root: Path, release: Path, *, local: bool) -> None:
+def diagnose_runtime(
+    root: Path, release: Path, *, local: bool, accelerator: str | None = None
+) -> None:
     """Always diagnose after maintenance; missing unselected models are a reported warning."""
     emit("verify", "Running automatic runtime and model diagnostics")
     command = [str(app_python(release)), "-m", "ewp_transcripts", "doctor", "--json-output"]
@@ -1140,7 +1189,10 @@ def diagnose_runtime(root: Path, release: Path, *, local: bool) -> None:
     report = run(
         command,
         cwd=release / "app",
-        environment=app_env(root),
+        environment={
+            **app_env(root),
+            **({"EWP_LOCAL_ACCELERATOR": accelerator} if accelerator else {}),
+        },
         capture=True,
         acceptable_codes=(0, 3),
     )
@@ -1339,6 +1391,7 @@ def install(
     check_host: bool = True,
     model_codes: list[str] | None = None,
     redownload: bool = False,
+    amd_accepted: bool = False,
 ) -> dict[str, Any]:
     root = safe_root(root)
     check_cancelled()
@@ -1348,6 +1401,21 @@ def install(
         raise InstallError("Choose the bundle for this operating system")
     old = load_state(root)
     registration_preflight(root, meta["version"])
+    report = host_report(root, local)
+    emit("host", "Host checks completed", **report)
+    gpu_context = next(
+        (item.get("context", {}) for item in report["checks"] if item["code"] == "gpu"), {}
+    )
+    accelerator = gpu_context.get("accelerator", "nvidia")
+    if old and old.get("local_accelerator") == "amd" and gpu_context.get("amd_devices"):
+        accelerator = "amd"
+    if accelerator == "amd" and not (amd_accepted or old and old.get("amd_acknowledged")):
+        raise InstallError(
+            "AMD GPU support is experimental and has not been tested. "
+            "Acknowledge it with --accept-amd-experimental to continue."
+        )
+    if check_host and not report["ready"]:
+        raise InstallError("Resolve failed host checks before installation")
     hf_checked = False
     if local and model_codes != []:
         with zipfile.ZipFile(bundle) as archive:
@@ -1381,10 +1449,6 @@ def install(
         raise InstallError(
             "Choose an empty directory; existing non-managed files will not be replaced"
         )
-    report = host_report(root, local)
-    emit("host", "Host checks completed", **report)
-    if check_host and not report["ready"]:
-        raise InstallError("Resolve failed host checks before installation")
     root.mkdir(parents=True, exist_ok=True)
     with exclusive(root):
         if owner is None:
@@ -1408,6 +1472,7 @@ def install(
             if os.name != "nt":
                 uv.chmod(0o700)
             env = app_env(root)
+            env["EWP_LOCAL_ACCELERATOR"] = accelerator
             env.pop("UV_NO_CONFIG", None)
             env["UV_PYTHON_PREFERENCE"] = "only-managed"
             env["UV_PROJECT_ENVIRONMENT"] = str(release / "app/.venv")
@@ -1493,7 +1558,7 @@ def install(
             ).strip()
             if actual != meta["version"]:
                 raise InstallError("Installed version does not match the selected bundle")
-            diagnose_runtime(root, release, local=local)
+            diagnose_runtime(root, release, local=local, accelerator=accelerator)
             if secrets.get("openrouter_key"):
                 emit("credentials", "Saving the optional OpenRouter key in the OS store")
                 # stdin, not argv/history or persistent config. Child emits sanitized failures only.
@@ -1528,6 +1593,8 @@ def install(
                     else None
                 ),
                 "local_models": local,
+                "local_accelerator": accelerator,
+                "amd_acknowledged": bool(amd_accepted or old and old.get("amd_acknowledged")),
                 "updated_at": time.time(),
             }
             for name in (
@@ -2136,6 +2203,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--local", action="store_true")
     parser.add_argument("--cloud-only", action="store_true")
     parser.add_argument("--accept-model-terms", action="store_true")
+    parser.add_argument("--accept-amd-experimental", action="store_true")
     parser.add_argument("--yes", action="store_true")
     parser.add_argument("--remove-models", action="store_true")
     parser.add_argument("--remove-key", action="store_true")
@@ -2261,6 +2329,7 @@ def main(argv: list[str] | None = None) -> int:
                     else args.model
                 ),
                 redownload=args.redownload,
+                amd_accepted=args.accept_amd_experimental,
             )
         return 0
     except (InstallError, OSError, ValueError) as error:

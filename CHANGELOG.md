@@ -4,6 +4,23 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.26.0 — 2026-11-26 (Snap recovery and experimental AMD)
+
+- Remember the actual visible window rectangle after Windows Snap, including half-screen layouts,
+  alongside normal position/maximization. Keep screen coordinates distinct from legacy workspace
+  coordinates, preserve last geometry while minimized and recover disconnected-monitor positions.
+  Allow narrower windows for half-screen layouts; without a saved record use the centered default.
+- Detect AMD PCI display adapters during installer host checks, including mixed NVIDIA/AMD PCs.
+  Install/Update shows an explicit experimental/untested notice with I understand, continue;
+  closing the notice leaves Next blocked. AMD processors alone never trigger it.
+- Add a Windows AMD ASR profile using separately SHA-256-pinned official CTranslate2 ROCm4.9.1
+  and AMD SDK7.2 runtime wheels. Preserve NVIDIA locked dependencies and all pinned model snapshots.
+  Word alignment and diarization use CPU; AMD ASR uses serial float16 decoding without implicit
+  CPU/NVIDIA fallback. Mark the profile experimental in the GUI, diagnostics and provenance.
+- Preserve the selected profile through managed launch/update/repair, apply its dependency overlay
+  after locked installation and diagnose after setup. Verify actual Windows DLL imports separately
+  from the unperformed physical AMD inference test. No physical AMD GPU is available for qualification.
+
 ## 0.25.1 — 2026-11-26 (window preferences and compact playback)
 
 - Remember native window position, normal size and maximized state; use the centered default

@@ -13,7 +13,7 @@ namespace EwP.Setup;
 
 sealed record OperationRequest(string Operation, string Root, bool Confirm, bool Local, bool Terms,
     bool RemoveModels, bool RemoveKey, string HfToken, string OpenRouterKey, string WizardSource,
-    int WizardPid, string CancelFile, string[]? Models = null, bool Redownload = false, string? RollbackTarget = null);
+    int WizardPid, string CancelFile, string[]? Models = null, bool Redownload = false, string? RollbackTarget = null, bool AmdAccepted = false);
 
 static class OperationRunner
 {
@@ -80,6 +80,7 @@ static class OperationRunner
         if (request.Confirm || request.Operation == "check") info.ArgumentList.Add("-Yes");
         info.ArgumentList.Add(request.Local ? "-Local" : "-CloudOnly");
         if (request.Terms) info.ArgumentList.Add("-AcceptModelTerms");
+        if (request.AmdAccepted) info.ArgumentList.Add("-AcceptExperimentalAmd");
         if (request.Models is { Length: > 0 }) { info.ArgumentList.Add("-Models"); info.ArgumentList.Add(string.Join(",", request.Models)); }
         if (request.Redownload) info.ArgumentList.Add("-Redownload");
         if (request.RollbackTarget != null) { info.ArgumentList.Add("-TargetRelease"); info.ArgumentList.Add(request.RollbackTarget); }

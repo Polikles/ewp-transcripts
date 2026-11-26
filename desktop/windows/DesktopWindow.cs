@@ -46,7 +46,7 @@ sealed partial class DesktopWindow : Window
     {
         this.config = config; this.testReport = testReport; this.previews = previews;
         Title = "EwP Transcripts · " + Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
-        MinWidth = Math.Min(760, SystemParameters.WorkArea.Width); MinHeight = Math.Min(560, SystemParameters.WorkArea.Height);
+        MinWidth = Math.Min(480, SystemParameters.WorkArea.Width); MinHeight = Math.Min(560, SystemParameters.WorkArea.Height);
         Width = Math.Min(1360, SystemParameters.WorkArea.Width); Height = Math.Min(940, SystemParameters.WorkArea.Height);
         placement = new WindowPlacement(Path.Combine(config.StateDirectory, "window.json"));
         startupPlacement = placement.Saved;
@@ -55,7 +55,7 @@ sealed partial class DesktopWindow : Window
         try { var saved = JsonSerializer.Deserialize<Appearance>(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))); if (saved != null && TitleBar.Valid(saved)) appearance = saved; } catch { }
         SourceInitialized += (_, _) => appliedAppearance = TitleBar.Apply(this, appearance);
         geometryTimer.Tick += (_, _) => { geometryTimer.Stop(); placement.Save(this); };
-        void SaveGeometry(object? sender, EventArgs args) { if (!IsLoaded || closed) return; geometryTimer.Stop(); geometryTimer.Start(); }
+        void SaveGeometry(object? sender, EventArgs args) { if (!IsLoaded || closed) return; placement.Observe(this); geometryTimer.Stop(); geometryTimer.Start(); }
         LocationChanged += SaveGeometry; SizeChanged += (_, _) => SaveGeometry(this, EventArgs.Empty); StateChanged += SaveGeometry;
         Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemPreferenceChanged;
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); shell.RowDefinitions.Add(new RowDefinition());

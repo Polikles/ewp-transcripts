@@ -270,7 +270,7 @@ function guiTaskContextContent(job) {
   const target = translationReview?.result_path === guiActiveResult ? translationReview.direction.target_language
     : translationForm.elements.namedItem("result_path").value === guiActiveResult && guiActiveResult
       ? translationForm.elements.namedItem("target_language").value : "—";
-  for (const [name, value] of [["Recording language", source], ["Translation target", target], ["Audio processing", "Local · WhisperX"]]) {
+  for (const [name, value] of [["Recording language", source], ["Translation target", target], ["Audio processing", job?.speech?.provider === "openrouter" ? "OpenRouter cloud ASR" : document.documentElement.dataset.localAccelerator === "amd" ? "AMD ROCm (experimental) · CPU alignment/diarization" : "Local · WhisperX"]]) {
     const term = document.createElement("dt"), description = document.createElement("dd");
     term.textContent = name; description.textContent = value; values.append(term, description);
   }

@@ -1,0 +1,37 @@
+{
+  "platform": "windows-x64",
+  "experimental": true,
+  "asr": "CTranslate2 ROCm",
+  "alignment": "cpu",
+  "diarization": "cpu",
+  "ctranslate2": {
+    "version": "4.9.1",
+    "url": "https://github.com/OpenNMT/CTranslate2/releases/download/v4.9.1/rocm-python-wheels-Windows.zip",
+    "file": "rocm-python-wheels-Windows.zip",
+    "size": 193989716,
+    "sha256": "59ea928a2219dde5f9fdf3bb63fc340e751103467f73d75a4e1cdec9e1e9863f",
+    "member": "temp-windows/ctranslate2-4.9.1-cp312-cp312-win_amd64.whl",
+    "wheel_sha256": "9a12619db8acfc8639c7019709eb7e6a42ef9c668a9e7f74a6801cc0783c6db6",
+    "dll_sha256": "dc33a3fb3c872210778f1ff0ef5dbedf92344dae517a85015da8a0965562b05b"
+  },
+  "packages": [
+    {
+      "package": "rocm_sdk_core",
+      "version": "7.2.0.dev0",
+      "file": "rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl",
+      "url": "https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl",
+      "sha256": "f8dac46ea54d570dd73a694e9f6793e80889a8168dd484be57b0d2f65079dde3",
+      "size": 636833391,
+      "unpacked": 1863204727
+    },
+    {
+      "package": "rocm_sdk_libraries_custom",
+      "version": "7.2.0.dev0",
+      "file": "rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl",
+      "url": "https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_libraries_custom-7.2.0.dev0-py3-none-win_amd64.whl",
+      "sha256": "29a155b8f0da7b4ea05481ba665dc08749462a66bfc7cee27a6976bdea41f0cc",
+      "size": 492439790,
+      "unpacked": 1726650322
+    }
+  ]
+}
