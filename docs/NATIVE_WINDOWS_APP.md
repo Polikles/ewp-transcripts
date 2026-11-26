@@ -2,7 +2,8 @@
 
 Owner authorization: 2026-11-26; first target0.25.0. Preserve the approved HTML/CSS/JS workflow
 inside a native WPF Windows window using WebView2. The app has its own icon/process/taskbar identity,
-no PowerShell console and one window per installation/user. CLI/browser mode stays explicit.
+no PowerShell console and one window per installation/user. CLI/browser mode stays explicit. New native-only wording is paired in [EN/PL copy](desktop-ui-en-pl.csv);
+the approved application and installer workbooks are unchanged.
 A full rewrite of the approved editors as WPF controls is outside this implementation.
 
 ## Ownership and closing

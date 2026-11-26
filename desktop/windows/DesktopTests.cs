@@ -74,6 +74,11 @@ sealed partial class DesktopWindow
         await Until(async () => !Flag(await Ui("status"), "busy"));
         await CloseApplication();
         Check(!backend.Process.HasExited && !closed && view.IsEnabled && notice.Visibility == Visibility.Visible, "invalid work state refuses close and keeps backend/window alive");
+        poll.Stop(); testBusy = true; testChoice = CloseAction.Wait;
+        await CloseApplication();
+        notice.Children.OfType<Button>().Single(button => Equals(button.Tag, "wait")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Check(!waiting && !closed, "waiting remains cancellable after an earlier save failure");
+        testBusy = false; testChoice = CloseAction.Stop; poll.Start();
         await view.ExecuteScriptAsync("workspaceName.value=''");
         await view.ExecuteScriptAsync("workspaceAutosave.checked=false");
         Check(Flag(await Ui("prepare-close"), "ok"), "close flush durably saves pending media without a chosen name");

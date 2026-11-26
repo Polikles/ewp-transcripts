@@ -28,3 +28,9 @@ started, pending media/no-auto-start/close choices/locales/security checks passe
 Fix uses busy action buttons/generation flags, not hidden dialog metadata. Added explicit save with
 autosave off, confirmed discard recovery, and suspended-start job assignment before Python redirector
 spawn (eliminates assignment race). Cross-compile passes; qualification rerun pending.
+
+Native run45805338977: installer and18 Windows cases PASS; desktop advanced through startup,
+media/save failure and durable close-save but found activateWorkspace re-enabling disabled autosave.
+Preserve that preference after the explicit close flush. Also retain cancel-Wait after a prior
+save failure and remove its button before actual shutdown; native regression covers this sequence.
+Cross-build passes; rerun pending. Existing68 delivery SHA256 entries verified unchanged.

@@ -218,15 +218,17 @@ sealed partial class DesktopWindow : Window
                 if (choice == CloseAction.Wait)
                 {
                     waiting = true; ShowNotice(T("The program will close after active work finishes.", "Program zamknie się po zakończeniu aktywnych zadań."));
-                    if (notice.Children.Count == 2)
+                    if (!notice.Children.OfType<Button>().Any(button => Equals(button.Tag, "wait")))
                     {
-                        var cancel = new Button { Content = T("Keep working", "Kontynuuj pracę"), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0), Padding = new Thickness(12, 4, 12, 4) };
+                        var cancel = new Button { Tag = "wait", Content = T("Keep working", "Kontynuuj pracę"), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0), Padding = new Thickness(12, 4, 12, 4) };
                         cancel.Click += (_, _) => { waiting = false; notice.Children.Remove(cancel); notice.Visibility = Visibility.Collapsed; }; notice.Children.Add(cancel);
                     }
                     return;
                 }
             }
-            waiting = false; view.IsEnabled = false;
+            waiting = false;
+            foreach (var button in notice.Children.OfType<Button>().Where(button => Equals(button.Tag, "wait")).ToArray()) notice.Children.Remove(button);
+            view.IsEnabled = false;
             ShowNotice(T("Saving work before closing…", "Zapisywanie pracy przed zamknięciem…"), true);
             var saved = await Ui("prepare-close");
             if (!Flag(saved, "ok"))

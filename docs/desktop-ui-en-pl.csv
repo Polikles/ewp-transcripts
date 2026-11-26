@@ -1,0 +1,22 @@
+ID,English,Polski,Source
+native-001,Work is still running,Trwa przetwarzanie,CloseChoice.cs
+native-002,"Wait for active work to finish, or stop it and close the program. Work state is saved before closing. Interrupted tasks will not restart automatically when you reopen the program.",Możesz zaczekać na zakończenie zadań albo je zatrzymać i zamknąć program. Przed zamknięciem stan pracy zostanie zapisany. Przerwane zadania nie uruchomią się same po ponownym otwarciu.,CloseChoice.cs
+native-003,Keep working,Kontynuuj pracę,CloseChoice.cs
+native-004,Wait and close,Zaczekaj i zamknij,CloseChoice.cs
+native-005,Stop and close,Zatrzymaj i zamknij,CloseChoice.cs
+native-006,en-native-close-dialog.png,pl-native-close-dialog.png,CloseChoice.cs
+native-007,Close without saving…,Zamknij bez zapisu…,DesktopWindow.cs
+native-008,Discard changes since the last successful save and stop all active work?,Odrzucić zmiany od ostatniego poprawnego zapisu i zatrzymać wszystkie aktywne zadania?,DesktopWindow.cs
+native-009,Starting EwP Transcripts…,Uruchamianie EwP Transcripts…,DesktopWindow.cs
+native-010,EwP Transcripts could not start. Repair the installation or check Microsoft WebView2 Runtime. Details: ,Nie udało się uruchomić EwP Transcripts. Napraw instalację lub sprawdź składnik Microsoft WebView2 Runtime. Szczegóły: ,DesktopWindow.cs
+native-011,Get Microsoft WebView2 Runtime,Pobierz składnik Microsoft WebView2 Runtime,DesktopWindow.cs
+native-012,The interface stopped responding. Restart the program to restore saved work.,"Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.",DesktopWindow.cs
+native-013,The application runtime stopped. Saved work will be restored after restart. Close this window to restart the program.,"Proces programu został zatrzymany. Zapisana praca zostanie przywrócona po restarcie. Zamknij to okno, aby ponownie uruchomić program.",DesktopWindow.cs
+native-014,The application runtime is unavailable. Close the window? Changes made since the last successful save may be lost.,Proces programu jest niedostępny. Zamknąć okno? Zmiany od ostatniego poprawnego zapisu mogą zostać utracone.,DesktopWindow.cs
+native-015,The program will close after active work finishes.,Program zamknie się po zakończeniu aktywnych zadań.,DesktopWindow.cs
+native-016,Keep working,Kontynuuj pracę,DesktopWindow.cs
+native-017,Saving work before closing…,Zapisywanie pracy przed zamknięciem…,DesktopWindow.cs
+native-018,Work could not be saved. The program remains open. Check Saved work and try again.,Nie udało się zapisać pracy. Program pozostaje otwarty. Sprawdź Zapisaną pracę i spróbuj ponownie.,DesktopWindow.cs
+native-019,Stopping active work and closing…,Zatrzymywanie zadań i zamykanie…,DesktopWindow.cs
+native-020,Closing was stopped to protect unsaved work. Try again after the current operation.,"Zamykanie zostało wstrzymane, aby chronić niezapisaną pracę. Spróbuj ponownie po bieżącej operacji.",DesktopWindow.cs
+native-021,"EwP Transcripts could not start. Check whether it is already running, or choose Repair in the installer.","Nie udało się uruchomić EwP Transcripts. Sprawdź, czy program jest już uruchomiony, albo wybierz Napraw w instalatorze.",Program.cs

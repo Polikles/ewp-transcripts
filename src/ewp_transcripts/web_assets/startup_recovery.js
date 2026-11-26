@@ -56,6 +56,7 @@ async function saveAutomaticWorkspace(force = false, closing = false) {
   if (!csrfToken || workspaceRestoreBusy || workspaceAutosaveBusy || guiBatchBusy || guiQueueStarting ||
       (!closing && (!workspaceAutosave.checked || workspaceAutosave.disabled)) || (!force && !automaticRecoveryReady)) return false;
   const fingerprint = workspaceFingerprint();
+  const autosaveEnabled = workspaceAutosave.checked;
   if (!force && fingerprint === lastWorkspaceFingerprint && !reviewDirty && !translationReviewDirty) return true;
   workspaceAutosaveBusy = true;
   let saveSucceeded = false;
@@ -68,7 +69,7 @@ async function saveAutomaticWorkspace(force = false, closing = false) {
     const media = collectPendingGuiMedia();
     const payload = await workspacePost("/api/v1/workspaces/save", {
       workspace_id:activeWorkspaceId, name, current_step:lastWorkspaceStep,
-      fields:collectWorkspaceFields(), pending_media:media, autosave:workspaceAutosave.checked,
+      fields:collectWorkspaceFields(), pending_media:media, autosave:autosaveEnabled,
     }, {feedback:false, storageDirectory:storage});
     const saved = payload.workspace;
     const unchanged = fingerprint === workspaceFingerprint();
@@ -83,6 +84,7 @@ async function saveAutomaticWorkspace(force = false, closing = false) {
   } catch (error) {
     workspaceAutosaveStatus.textContent = `Auto-save could not save the tracked changes and will retry: ${error.message}`;
   } finally {
+    if (closing) workspaceAutosave.checked = autosaveEnabled;
     workspaceAutosaveBusy = false;
     if (saveSucceeded && automaticRecoveryReady && workspaceAutosave.checked && workspaceFingerprint() !== lastWorkspaceFingerprint)
       scheduleAutomaticWorkspaceSave();
