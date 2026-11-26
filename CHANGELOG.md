@@ -14,7 +14,8 @@ All notable changes to EWP-transcripts are documented here.
   before session cleanup and remain available after a complete restart.
 - Save pending media and editor/workspace changes before closing. During active work offer Keep
   working, Wait and close, or Stop and close; a failed save keeps the window open. Recovery never
-  starts planning/transcription automatically. Own the backend and worker processes through a
+  starts planning/transcription automatically. Live queue metrics do not prevent a durable close-save.
+  Own the backend and worker processes through a
   Windows process job so a terminated host cannot leave processing behind.
 - Coordinate update/repair/uninstall with the window's save/close handshake, preserving work-state.
   Treat an HTTP connection closing during the shutdown handshake as normal completion.

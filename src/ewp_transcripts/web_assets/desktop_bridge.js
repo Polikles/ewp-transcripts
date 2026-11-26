@@ -2,6 +2,11 @@
 
 // This bridge exposes only save/readiness results; the native management secret never enters JS.
 if (window.chrome?.webview) {
+  const editableFingerprint = fingerprint => {
+    const value = JSON.parse(fingerprint || "{}");
+    delete value.queue; // Live queue metrics are checkpointed by the backend on shutdown.
+    return JSON.stringify(value);
+  };
   const desktopStatus = () => ({
     ready: automaticRecoveryReady && !workspaceRestoreBusy,
     busy: guiBatchBusy || guiQueueStarting || workspaceRestoreBusy || guiMediaImportBusy || guiResultImportBusy ||
@@ -21,8 +26,17 @@ if (window.chrome?.webview) {
       while ((!automaticRecoveryReady || workspaceRestoreBusy || workspaceAutosaveBusy || guiBatchBusy || guiQueueStarting || guiMediaImportBusy || guiResultImportBusy) && Date.now() < deadline)
         await new Promise(resolve => setTimeout(resolve, 100));
       ok = automaticRecoveryReady && !workspaceRestoreBusy && !workspaceAutosaveBusy && !guiBatchBusy && !guiQueueStarting && !guiMediaImportBusy && !guiResultImportBusy;
-      if (ok) ok = (await saveAutomaticWorkspace(true, true)) === true;
-      if (ok) ok = !reviewDirty && !translationReviewDirty && workspaceFingerprint() === lastWorkspaceFingerprint;
+      if (ok) {
+        ok = false;
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          if ((await saveAutomaticWorkspace(true, true)) !== true) break;
+          if (!reviewDirty && !translationReviewDirty &&
+              editableFingerprint(workspaceFingerprint()) === editableFingerprint(lastWorkspaceFingerprint)) {
+            ok = true;
+            break;
+          }
+        }
+      }
     }
     window.chrome.webview.postMessage({type:"lifecycle-result", id:message.id, ok, ...desktopStatus()});
   });

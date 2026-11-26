@@ -59,3 +59,10 @@ caller hit ConnectionResetError while polling a server that had just exited. Tre
 as an unavailable response, then confirm process/host identities have exited; never skip that check.
 Add deterministic transport-reset regressions. This fixes a real shutdown/maintenance race, not an
 inference failure. Final gate/native rerun pending; freeze scope to resolving this final qualification.
+
+Native run45809460119 fromcfb0f60 PASS all46 WPF groups/18 Windows cases and4 desktop cycles,
+including actual helper/grandchild console handles0 and clean maintenance exit. Final code review
+also covers changing queue timestamps during close: ignore only queue metrics in the editable-state
+comparison (backend checkpoints latest jobs on shutdown), retry durable path adoption up to3 times,
+and retain strict review/pending-media/form checks. Added model-free native live-metric regression;
+last qualification pending. Full local gate1201 PASS/19 skips;17 integrations PASS, no paid calls.

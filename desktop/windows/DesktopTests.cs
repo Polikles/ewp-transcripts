@@ -112,6 +112,9 @@ sealed partial class DesktopWindow
         await view.ExecuteScriptAsync("workspaceAutosave.checked=true");
         Check(!Flag(await Ui("status"), "dirty"), "no dirty state remains after close flush");
         Check(!await ScriptFlag("guiQueueJobs.some(j=>['queued','running'].includes(j.status))"), "close flush never starts the queue");
+        await view.ExecuteScriptAsync("guiQueueJobs=[{job_id:'native-progress',status:'running',updated_at:'0'}];window.nativeProgressTicks=0;window.nativeProgressTimer=setInterval(()=>{window.nativeProgressTicks++;if(guiQueueJobs[0])guiQueueJobs[0].updated_at=String(Date.now())},5)");
+        Check(Flag(await Ui("prepare-close"), "ok") && await ScriptFlag("window.nativeProgressTicks>0"), "changing queue metrics do not block durable close-save");
+        await view.ExecuteScriptAsync("clearInterval(window.nativeProgressTimer);guiQueueJobs=[]");
         testDownloadPath = Path.Combine(Path.GetDirectoryName(testReport!)!, "desktop-notice-download.txt");
         await view.ExecuteScriptAsync("(()=>{const a=document.createElement('a');a.href='/assets/brand/NOTICE.txt';a.download='notice.txt';document.body.append(a);a.click();a.remove();})()");
         await Until(() => Task.FromResult(File.Exists(testDownloadPath)));
