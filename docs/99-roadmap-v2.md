@@ -1,3 +1,11 @@
+Owner follow-up 2026-11-26: returned installer text corrections activate integration and a new
+manual copy/layout review build (0.24.3); compare values, never require Decyzja. See opening TODO
+and installer-reviewed-copy checkpoint. Keep original AGPL/vendor licenses and technical English.
+AFTER native Windows interface: research AMD acceleration adapter feasibility for ASR/alignment/
+diarization, Windows runtimes and packaging; no AMD card available, so any unqualified adapter
+must be labelled experimental. No AMD implementation or downloads in the current copy task.
+First public release and .exe placement in repository releases/ follow native interface completion.
+
 Owner request 2026-11-25: complete installer copy table now delivered in XLSX/CSV with stable IDs,
 full composed messages and project/vendor notices separated. See installer-copy-table checkpoint
 and docs/installer-copy-review/README.md. Next: returned owner wording → approved EN/PL integration

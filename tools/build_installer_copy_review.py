@@ -814,9 +814,8 @@ def workbook(rows, manifest, output):
         [
             "Jak poprawiać",
             (
-                "Edytuj EN i PL. Możesz poprawiać oba języki. W Dec"
-                "yzja wybierz ZMIANA, BEZ ZMIAN, USUNĄĆ lub PYTANIE"
-                "; dopisz uwagi."
+                "Edytuj EN i PL. Porównamy wartości przed i po po ID. "
+                "Kolumna Decyzja nie jest wymagana; uwagi są opcjonalne."
             ),
         ],
         [

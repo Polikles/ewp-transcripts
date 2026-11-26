@@ -48,7 +48,7 @@ sealed partial class Wizard
         body.Children.Add(Heading("3. " + (operation == "install" ? T("Local models and HF token", "Lokalne modele i token HF") : OperationName(operation))));
         if (operation == "update" && !UpdateChangesModels)
         {
-            body.Children.Add(Copy(T("Only the program will be updated. Model versions are unchanged; no model downloads or keys are needed.", "Zaktualizowany zostanie tylko program. Wersje modeli są takie same; pobieranie modeli i klucze nie są potrzebne.")));
+            body.Children.Add(Copy(T("Only the program will be updated. Model versions are unchanged.", "Zaktualizowany zostanie tylko program. Wersje modeli pozostają bez zmian.")));
             return;
         }
         if (operation == "repair")
@@ -63,7 +63,7 @@ sealed partial class Wizard
             }
             if (busy) body.Children.Add(Copy(T("Checking model locations, pinned versions and file hashes…", "Sprawdzanie lokalizacji, wersji i sum kontrolnych modeli…")));
             if (!repairModels) { AddLog(); return; }
-            body.Children.Add(Link(T("Return to program-only repair", "Wróć do naprawy samego programu"), () => { repairModels = false; Render(); }));
+            body.Children.Add(Link(T("Return to program-only repair", "Wróć do naprawy programu"), () => { repairModels = false; Render(); }));
         }
         if (operation == "install")
         {

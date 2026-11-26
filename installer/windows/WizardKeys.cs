@@ -30,7 +30,9 @@ sealed partial class Wizard
         LinkedStep(body, "1. ", T("Create an account", "Załóż konto"), "https://openrouter.ai/", T(" on OpenRouter and sign in.", " OpenRouter i zaloguj się."));
         LinkedStep(body, "2. ", T("Add credits", "Doładuj konto"), "https://openrouter.ai/settings/credits", T(" for the models you want to use.", " na korzystanie z wybranych modeli."));
         LinkedStep(body, "3. ", T("Open workspaces", "Otwórz obszary robocze"), "https://openrouter.ai/workspaces", T(" and choose Default for this program.", " i wybierz Default dla tego programu."));
-        LinkedStep(body, "4. ", T("Create an API key", "Utwórz klucz API"), "https://openrouter.ai/workspaces/default/keys", T(" in that workspace. Set a low credit limit and paste the key into the installer.", " w wybranym obszarze. Ustaw niski limit wydatków klucza i wklej go do instalatora."));
+        LinkedStep(body, "4. ", T("Create an API key", "Utwórz klucz API"), "https://openrouter.ai/workspaces/default/keys", T(" in that workspace. Set a low credit limit* and paste the key into the installer.", " w wybranym obszarze. Ustaw niski limit wydatków klucza* i wklej go do instalatora."));
+        var spendingNote = Copy(T("*in our testing $2 was enough for a few transcriptions", "*w naszych testach $2 wystarczyło na wiele transkrypcji"), muted: true);
+        spendingNote.Margin = new Thickness(0, -8, 0, 14); body.Children.Add(spendingNote);
         body.Children.Add(Copy(T("The key is checked without sending recordings and saved in the OS credential store during installation. This does not grant consent to upload audio.", "Klucz jest sprawdzany bez wysyłania nagrań i zapisywany w magazynie systemowym podczas instalacji. Nie oznacza to zgody na wysyłanie audio."), muted: true));
         body.Children.Add(Link(T("Detailed instructions for this procedure", "Szczegółowa instrukcja tej procedury"), () => Open("https://learn.openrouter.ai/courses/first-request/create-an-api-key")));
     }

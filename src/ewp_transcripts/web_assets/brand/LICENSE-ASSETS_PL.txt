@@ -1,0 +1,11 @@
+Zasoby właściciela EwP — warunki dystrybucji
+
+Właściciel praw/źródło: Damian Szczęch / Etyka w Pętli — https://etykawpetli.pl/
+English credit: Damian Szczech / Ethics in the Loop — https://ethicsintheloop.eu/
+Wszelkie prawa zastrzeżone, za wyjątkiem ograniczonego zezwolenia poniżej oraz obowiązującego prawa.
+
+Dostarczone materiały graficzne związane z marką EwP mogą być kopiowane i rozpowszechniane wraz z powiązanym Programem, w tym z jego forkami, pod warunkiem, że dostarczone pliki zasobów pozostaną niezmodyfikowane oraz zachowane zostaną informacje o właścicielu/źródle i odpowiednie uznanie autorstwa twórcy. Zasoby te nie mogą być rozpowszechniane jako samodzielny zbiór. Fork może je zastąpić niezależnie dostarczonymi zasobami. Zezwolenie na modyfikację programu nie upoważnia do modyfikowania dostarczonych zasobów właściciela.
+
+Należy podawać autorstwo faktycznego twórcy grafiki z imienia i nazwiska lub pseudonimu wraz z jego własnym adresem URL, oddzielnie od właściciela praw. Obecnie dostarczone materiały graficzne: Cyryl. [Adres URL oczekuje na uzupełnienie w rejestrze źródeł]. Zapisy dla poszczególnych zasobów mogą wskazywać innych twórców. Nie należy wymyślać ani zgadywać brakujących informacji o autorstwie.
+
+Niniejszy zapis obejmuje wyłącznie określone zasoby należące do EwP. Nie zmienia on licencji Programu, licencji fontów i ikon podmiotów trzecich, istniejących licencji wycinków ani praw do wyników generowanych przez użytkownika. Tę licencję oraz odpowiednie informacje o autorstwie poszczególnych zasobów należy dołączyć przy publicznym rozpowszechnianiu narzędzia. Prywatna księga marki (brandbook) i przykładowe transkrypcje źródłowe nie są objęte publiczną licencją dla zasobów.

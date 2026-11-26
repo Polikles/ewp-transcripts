@@ -1,3 +1,21 @@
+# Active owner copy integration — 2026-11-26 / target 0.24.3
+
+- [ ] Compare returned private XLSX EN/PL/notes to immutable original by stable ID, ignoring Decyzja;
+      preserve technical report/terminal English and original AGPL/vendor licenses.
+- [ ] Integrate all owner corrections and explicit blank project-notice deletions; reconcile complete
+      templates with fragments, update approved reference/catalog and affected EN/PL offline help.
+- [ ] Link every “download a newer installer” message to repository releases folder; retain later
+      first public release + EXE placement after native Windows app completion (no publication now).
+- [ ] Render OpenRouter $2 test-spend footnote below instruction in smaller type in all occurrences.
+- [ ] Add existing application light pattern to installer light body, retain dark patterned header.
+- [ ] Focused copy/link/footnote/theme native checks, normal gate, fresh versioned native installer,
+      inspected Windows previews and verified immutable delivery for owner's manual copy/layout review.
+- [ ] Later, AFTER native Windows interface: research AMD adapter feasibility across ASR/alignment/
+      diarization, Windows/runtime support and packaging. No AMD hardware available; any unqualified
+      adapter must be visibly labelled experimental. Research/implementation not in this task.
+
+Earlier stages follow.
+
 # Active stage — 2026-11-25 / complete installer copy review table
 
 - [x] Inventory complete installer WPF screens/actions/modals/tooltips/errors/progress/report/startup,

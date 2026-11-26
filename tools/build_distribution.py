@@ -52,7 +52,14 @@ def build(output: Path, downloads: Path, *, allow_dirty: bool = False) -> list[P
                 and path.suffix not in {".pyc", ".log"}
             ):
                 sources["app/" + path.relative_to(ROOT).as_posix()] = source_bytes(name)
-    for name in ("pyproject.toml", "uv.lock", "README.md", "LICENSE", "LICENSING.md"):
+    for name in (
+        "pyproject.toml",
+        "uv.lock",
+        "README.md",
+        "LICENSE",
+        "LICENSING.md",
+        "LICENSING_PL.md",
+    ):
         sources["app/" + name] = source_bytes(name)
     for name in ("manager.py", "Install-EwP.ps1", "Install-EwP.sh", "Remove-EwP.ps1"):
         sources["control/" + name] = source_bytes("installer/" + name)

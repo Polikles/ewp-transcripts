@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -27,6 +28,7 @@ sealed partial class Wizard
         "disabled installed models and explicit reinstall", "real older-version rollback selection", "required-check click feedback",
         "five-step first install and optional OpenRouter page", "overall progress and stable metrics",
         "same-version update refusal", "automatic required host checks for install/update/repair/models", "disk-only folder refresh without repeated hardware probes", "failed host checks stay blocked after folder changes", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
+        "reviewed EN/PL copy and localized project notices", "newer-installer release links in every maintenance flow", "separate smaller OpenRouter spending footnote", "application-pattern light body",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -101,6 +103,7 @@ sealed partial class Wizard
         await TestActionResetAndPresentation(previewDirectory);
         await TestModelMaintenance(previewDirectory);
         await TestAutomaticHostChecks(previewDirectory);
+        await TestReviewedCopy(previewDirectory);
         var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
         var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
         infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();
@@ -110,6 +113,40 @@ sealed partial class Wizard
         infoWindow.Close();
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
+    }
+
+    async Task TestReviewedCopy(string? previews)
+    {
+        Assert(((Grid)Content).Background is DrawingBrush { TileMode: TileMode.Tile } light && light.Drawing is DrawingGroup { Children.Count: 2 }, "light body uses opaque tiled application artwork");
+        string folder = Path.Combine(temporary, "test-copy-newer"); Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, "owner.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = folder }));
+        File.WriteAllText(Path.Combine(folder, "installation.json"), JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = folder, version = "99.0.0", active = "versions/newer", local_models = false }));
+        foreach (int locale in new[] { 0, 1 })
+        {
+            language.SelectedIndex = locale;
+            foreach (string action in new[] { "update", "repair", "models" })
+            {
+                SelectOperation(action); root.Text = folder; await Task.Delay(250); ReadInstalled();
+                page = 1; SetFixtureHost(); hostReady = true; Render(); UpdateLayout();
+                Assert(!CanAdvance && LocationProblem() != null, "newer program blocks " + action);
+                Assert(diskStatus.Inlines.OfType<Hyperlink>().Single().NavigateUri.AbsoluteUri == InstallerReleasesUrl, "release hyperlink in " + action + " location / " + locale);
+                if (action == "models")
+                    Assert(FindVisual<TextBlock>(hostRows).SelectMany(t => t.Inlines.OfType<Hyperlink>()).Any(h => h.NavigateUri.AbsoluteUri == InstallerReleasesUrl), "model version result links releases too");
+                if (action is "models" or "update") await Capture(previews, $"{(Pl ? "pl" : "en")}-newer-installer-{action}");
+            }
+            operation = "install"; page = 3; busy = finished = false; Render(); UpdateLayout();
+            var note = body.Children.OfType<TextBlock>().Single(t => t.Text.StartsWith("*"));
+            int index = body.Children.IndexOf(note); var instruction = (TextBlock)body.Children[index - 1];
+            Assert(note.FontSize < instruction.FontSize && instruction.Text.Contains("*") && !instruction.Text.Contains("$2") && note.Text.Contains("$2"), "spending comment is separate and smaller / " + locale);
+            Assert(note.TransformToAncestor(body).Transform(new Point()).Y >= instruction.TransformToAncestor(body).Transform(new Point(0, instruction.ActualHeight)).Y, "footnote below linked instruction");
+            Assert(NoticeFile.EndsWith(Pl ? "NOTICE_PL.txt" : "NOTICE.txt"), "notice follows installer language");
+            string notices = File.ReadAllText(NoticeFile);
+            Assert(notices.Contains("Cyryl") && !notices.Contains("Assets copied") && !notices.Contains("brandbook 0.4.0"), "owner removed internal notice paragraph");
+            await Capture(previews, $"{(Pl ? "pl" : "en")}-reviewed-openrouter-footnote");
+        }
+        Width = 700; Height = 760; await Capture(previews, "pl-reviewed-openrouter-narrow"); Width = 820; Height = 860;
+        var reused = Copy("Download a newer installer."); SetCopy(reused, "All ready.");
+        Assert(!reused.Inlines.OfType<Hyperlink>().Any() && reused.Text == "All ready.", "replaced dynamic copy drops stale release link");
     }
 
     async Task TestAutomaticHostChecks(string? previews)

@@ -789,6 +789,10 @@ function translateGui() {
   guiTranslationObserver?.disconnect();
   clearStaleGuiErrorDiagnostics();
   document.documentElement.lang = guiLocale;
+  for (const link of document.querySelectorAll('a[href^="/assets/brand/NOTICE"], a[href^="/assets/brand/LICENSE-ASSETS"]')) {
+    const name = link.getAttribute("href").includes("LICENSE-ASSETS") ? "LICENSE-ASSETS" : "NOTICE";
+    link.setAttribute("href", `/assets/brand/${name}${guiLocale === "pl" ? "_PL" : ""}.txt`);
+  }
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {

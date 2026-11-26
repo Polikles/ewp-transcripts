@@ -1,0 +1,13 @@
+Materiały identyfikacji wizuwalnej EwP: Cyryl.
+
+Właściciel praw: Damian Szczęch / Etyka w Pętli, https://etykawpetli.pl/.
+
+English: Damian Szczech / Ethics in the Loop, https://ethicsintheloop.eu/.
+
+Adres URL twórcy: placeholder blogcyryla.pl; TODO replace when supplied.
+
+See LICENSE-ASSETS.txt.
+
+Czcionki: Montserrat, Noto Sans Mono, załączone noty OFL.
+
+Ikony: Lucide 1.71.0, załączone noty ISC.

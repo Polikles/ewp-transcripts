@@ -4,6 +4,15 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.24.3 — 2026-11-26 (reviewed installer copy)
+
+- Apply owner-reviewed English/Polish installer copy by comparing original and returned values;
+  remove the two explicitly cleared project-notice paragraphs and add Polish project notices.
+  Keep diagnostic/log text and original AGPL/vendor licenses unchanged.
+- Link every newer-installer instruction to the repository releases folder, show the OpenRouter
+  test-spend comment below its instruction in smaller type, and tile the application light pattern
+  behind the light installer body while retaining the dark header.
+
 ## 0.24.2 — 2026-11-25 (automatic installer checks)
 
 - Start required computer checks automatically on entering Location for Install and Update,

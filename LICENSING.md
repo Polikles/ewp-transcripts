@@ -60,7 +60,7 @@ Users are responsible for reviewing and complying with the applicable terms befo
 
 ## 6. External APIs and Services
 
-Certain optional features may communicate with external APIs or services, including services used for correction, translation, or other post-processing.
+Certain optional features may communicate with external APIs or services, including services used for ASR, correction, translation, or other post-processing.
 
 Those services are independent from `ewp-transcripts` and may be subject to separate terms of service, privacy policies, usage restrictions, pricing, or licensing conditions.
 
@@ -101,4 +101,4 @@ Any separately licensed commercial version may be subject to different warranty,
 EwP identity artwork remains proprietary under its included `LICENSE-ASSETS.txt`; it is not
 relicensed by the software AGPL grant. Montserrat and Noto Sans Mono retain their included OFL
 notices; Lucide icons retain their included ISC notice. See `brand/NOTICE.txt` for provenance,
-owner/source credits, creator credit and the unverified creator-URL TODO.
+owner/source credits, creator credit and the creator-URL.

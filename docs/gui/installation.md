@@ -1,18 +1,25 @@
 # Installation and updates
 
+The wizard includes owner-reviewed EN/PL copy and the application light pattern behind its body.
+Newer-installer prompts link to the [releases folder](https://github.com/Polikles/ewp-transcripts/tree/main/releases).
+The first public installer will appear there after the native Windows interface is complete.
+The smaller $2 comment below the OpenRouter instruction describes previous tests, not a cost
+guarantee. Project notices follow the selected language; original AGPL/vendor licenses and
+technical logs/reports retain their original English.
+
 ## Choose installation mode
 
-1. For the Windows graphical installer, run `EwP-Setup-0.24.2.exe` and follow the wizard below.
+1. For the Windows graphical installer, run `EwP-Setup-0.24.3.exe` and follow the wizard below.
 2. For terminal installation, download the Windows ZIP or Ubuntu tar.gz/ZIP and run the short commands below. No manual repository checkout or preinstalled Python/uv is required.
 3. Keep an existing source checkout if that is how you develop/run the app; use the source-update section instead of treating it as a managed installation.
 
-Managed installation was introduced in0.22.0;0.24.2 corrects the graphical wizard. Current test artifacts are provided with the owner handoff and by the repository's Installer build and Windows startup Actions workflow. Public online bootstrap URLs are activated only when the matching versioned release is published. Do not try a guessed download URL. The GUI EXE is currently unsigned; no code-signing certificate has been supplied.
+Managed installation was introduced in0.22.0;0.24.3 corrects the graphical wizard. Current test artifacts are provided with the owner handoff and by the repository's Installer build and Windows startup Actions workflow. Public online bootstrap URLs are activated only when the matching versioned release is published. Do not try a guessed download URL. The GUI EXE is currently unsigned; no code-signing certificate has been supplied.
 
 Current targets are Windows 11 x64 and Ubuntu 24.04/26.04, including WSL2. Existing application workflow tests on Windows/WSL remain accepted. The new managed lifecycle has real Ubuntu VM evidence; native Windows 11 installation/removal acceptance is separate from compiling or launching the wizard on a Windows CI runner. Reference GPU: RTX 3090 24 GB. At least 8 GB on another NVIDIA GPU remains an unqualified expectation.
 
 ## Windows wizard
 
-Run `EwP-Setup-0.24.2.exe` from a normal user account. It embeds the application bundle,
+Run `EwP-Setup-0.24.3.exe` from a normal user account. It embeds the application bundle,
 its own graphical runtime and the centered framed EwP icon, not multi-GB model data.
 
 1. **Action and language.** Select English/Polski and one radio action: Install, Update, Repair,
@@ -102,8 +109,8 @@ or key is written to a profile, report or plaintext fallback. See [Settings](set
 Windows PowerShell, from the directory containing the downloaded ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.24.2-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.24.2-windows-x64.zip
+Expand-Archive .\EwP-0.24.3-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.24.3-windows-x64.zip
 ```
 
 Add `-Local -AcceptModelTerms` after accepting the upstream gated-model terms to prepare local models. The token prompt is hidden; blank can reuse complete models. Add `-SaveOpenRouterKey` only if you want a separate hidden prompt and explicit OS-store save. `-Root 'D:\Apps\EwP'` chooses a custom empty location. The execution-policy override applies to this invocation only. Keep filenames/paths quoted when they contain spaces.
@@ -112,13 +119,13 @@ Ubuntu 24.04/26.04, from the downloaded tar.gz directory:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.24.2-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.24.3-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Add `--local --accept-model-terms` for local models, `--save-openrouter-key` for an optional hidden OR prompt, or `--root "$HOME/Apps/EwP"` for a custom directory. Missing Ubuntu prerequisites can be installed with an explicit sudo prompt. Do not install a Linux display driver inside WSL; the Windows NVIDIA driver provides WSL CUDA. A bare-metal Ubuntu compatibility claim requires actual execution evidence, not inference from WSL alone.
 
-Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.24.2.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
+Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.24.3.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
 
 ## Managed update and rollback
 

@@ -493,7 +493,14 @@ def test_distribution_is_deterministic_and_excludes_untracked_private_files(tmp_
         "private benchmark/sample.txt": "PRIVATE-CORPUS-MUST-NOT-SHIP",
         **{
             n: "public project metadata"
-            for n in ("pyproject.toml", "uv.lock", "README.md", "LICENSE", "LICENSING.md")
+            for n in (
+                "pyproject.toml",
+                "uv.lock",
+                "README.md",
+                "LICENSE",
+                "LICENSING.md",
+                "LICENSING_PL.md",
+            )
         },
         **{
             f"installer/{n}": "# helper"

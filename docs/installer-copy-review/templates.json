@@ -127,8 +127,8 @@
   },
   {
     "key": "disk-folder-new",
-    "en": "Disk space: {free_gb} GB free · at least 25 GB (20 + 5 GB margin)",
-    "pl": "Miejsce na dysku: {free_gb} GB wolne · co najmniej 25 GB (20 + 5 GB marginesu)",
+    "en": "Disk space: {free_gb} GB free · at least 25 GB",
+    "pl": "Miejsce na dysku: {free_gb} GB wolne · co najmniej 25 GB",
     "context": "2. Instalacja — opis przy folderze",
     "source": "installer/windows/Wizard.cs:432-433",
     "notes": "Do skrócenia i ujednolicenia. Próg25 GB obejmuje20 GB budżetu i5 GB marginesu. Zachowaj {free_gb}."
@@ -143,7 +143,7 @@
   {
     "key": "disk-protected",
     "en": "{folder_disk_description}\nWindows may ask for administrator permission when the operation starts.",
-    "pl": "{folder_disk_description}\nWindows może poprosić o uprawnienia administratora przy rozpoczęciu operacji.",
+    "pl": "{folder_disk_description}\nWindows może poprosić o uprawnienia administratora przy rozpoczęciu działania.",
     "context": "2. Folder chroniony — dodatkowa informacja",
     "source": "installer/windows/Wizard.cs:434"
   },
@@ -193,8 +193,8 @@
   },
   {
     "key": "required-cache",
-    "en": "Not enough space on the model-cache disk. Required free space: {required_gb} GB",
-    "pl": "Za mało miejsca na dysku cache modeli. Potrzebne wolne miejsce: {required_gb} GB",
+    "en": "Not enough space for model-cache. Required free space: {required_gb} GB",
+    "pl": "Za mało miejsca na cache modeli. Potrzebne wolne miejsce: {required_gb} GB",
     "context": "3. Brak miejsca na cache modeli",
     "source": "installer/windows/Wizard.cs:458"
   },
@@ -366,8 +366,8 @@
   },
   {
     "key": "or-key",
-    "en": "4. Create an API key in that workspace. Set a low credit limit and paste the key into the installer.",
-    "pl": "4. Utwórz klucz API w wybranym obszarze. Ustaw niski limit wydatków klucza i wklej go do instalatora.",
+    "en": "4. Create an API key in that workspace. Set a low credit limit* and paste the key into the installer.",
+    "pl": "4. Utwórz klucz API w wybranym obszarze. Ustaw niski limit wydatków klucza* i wklej go do instalatora.",
     "context": "4. Instrukcja OR — całe zdanie z linkiem",
     "source": "installer/windows/WizardKeys.cs",
     "notes": "Tekst linku jest fragmentem w Interfejs. Adres: https://openrouter.ai/workspaces/default/keys"
@@ -390,8 +390,8 @@
   },
   {
     "key": "hf-token-settings",
-    "en": "3. In Settings → Access Tokens, create a read-only token (Read).",
-    "pl": "3. W Settings → Access Tokens utwórz token tylko do odczytu (Read).",
+    "en": "3. In Settings → Access Tokens, create a read-only token.",
+    "pl": "3. W Settings → Access Tokens utwórz token tylko do odczytu.",
     "context": "Pomoc HF — całe zdanie z linkiem",
     "source": "installer/windows/Wizard.cs:493",
     "notes": "Settings → Access Tokens to nazwa w serwisie HF. Adres: https://huggingface.co/settings/tokens"
@@ -409,5 +409,12 @@
     "pl": "3. Odinstaluj",
     "context": "Nagłówek potwierdzenia / uninstall",
     "source": "installer/windows/Wizard.cs:232"
+  },
+  {
+    "key": "or-spending-footnote",
+    "en": "*in our testing $2 was enough for a few transcriptions",
+    "pl": "*w naszych testach $2 wystarczyło na wiele transkrypcji",
+    "context": "OpenRouter — osobny komentarz mniejszą czcionką pod punktem 4",
+    "source": "installer/windows/WizardKeys.cs:34"
   }
 ]

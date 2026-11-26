@@ -1,7 +1,9 @@
 # Teksty instalatora EwP — korekta EN/PL
 
-Tabela przedstawia obecne teksty instalatora **0.24.2**. Jest materiałem do korekty;
-jej przygotowanie nie zmienia tekstów programu. Zatwierdzony wcześniej arkusz
+Baza do porównania przedstawia teksty instalatora **0.24.2**. Została zachowana bez zmian.
+Korekty właściciela z 2026-11-26 porównano po ID i wartościach EN/PL; kolumna
+`Decyzja` nie jest wymagana ani używana. Zaakceptowane wartości i korekty integracyjne
+są w `approved-2026-11-26.json`; katalog bieżący w `installer/ui-en-pl.csv`. Zatwierdzony wcześniej arkusz
 interfejsu aplikacji pozostaje bez zmian.
 
 Otwórz **EwP-instalator-EN-PL-do-korekty-2026-11-25.xlsx**, zacznij od arkusza `Start`.
@@ -11,8 +13,8 @@ Podgląd `podglad.html` w paczce służy do czytania; korekty wpisuj w XLSX albo
 ## Jak poprawiać
 
 - Edytuj kolumny **EN** i **PL**. Możesz poprawiać oba języki.
-- W kolumnie **Decyzja** wybierz `ZMIANA`, `BEZ ZMIAN`, `USUNĄĆ` lub `PYTANIE`.
-  Komentarze i propozycje reorganizacji wpisz w **Uwagi do korekty**.
+- Wartości przed i po porównujemy automatycznie po ID. **Decyzja** jest ignorowana.
+  Komentarze i propozycje reorganizacji możesz wpisać w **Uwagi do korekty**.
 - Zachowaj **ID**, nazwy parametrów w `{nawiasach}`, kody, nazwy własne i istotne
   spacje we fragmentach. Możesz filtrować i sortować wiersze.
 - Przy zmianie pełnego zdania nie musisz poprawiać osobno jego wszystkich fragmentów.

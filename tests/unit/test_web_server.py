@@ -1069,6 +1069,8 @@ def test_preview_resources_are_fixed_local_routes() -> None:
         ("brand/montserrat.woff2", b"wOF2"),
         ("brand/mono.woff2", b"wOF2"),
         ("brand/NOTICE.txt", b"Cyryl"),
+        ("brand/NOTICE_PL.txt", "Właściciel praw".encode()),
+        ("brand/LICENSE-ASSETS_PL.txt", b"warunki dystrybucji"),
     ]:
         response = dispatch_get(
             config, server_port=8765, host="localhost:8765", target="/assets/" + asset

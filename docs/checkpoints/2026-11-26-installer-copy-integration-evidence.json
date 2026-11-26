@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "original_workbook_sha256": "7b6448a8d0eab3ab13452b4576e38303c1b2eaf083da715e90ad88f4d97ec440",
+  "returned_workbook_sha256": "5153ce467954654388243e6bcf26d6f6d9d0b6baf8b866f35e365d67bb02eb81",
+  "decision_column_used": false,
+  "reviewed_rows": 1148,
+  "changed_ui": 25,
+  "changed_full_templates": 1,
+  "changed_project_notice_rows": 59,
+  "deleted_project_notice_paragraphs": 2,
+  "all_changed_ui_literals_present": true,
+  "all_6_project_notice_files_match_owner": true,
+  "technical_english_unchanged": true,
+  "agpl_and_vendor_license_bytes_unchanged": true,
+  "approved_app_workbook_unchanged": true,
+  "amd_research": "TODO after native Windows interface; experimental until hardware qualification",
+  "public_release": "deferred after native Windows interface",
+  "local_gate": {
+    "tests_passed": 1176,
+    "windows_only_skips": 12,
+    "integration_tests_included": 17,
+    "ruff": "PASS",
+    "format_files": 302,
+    "mypy_files": 119
+  }
+}

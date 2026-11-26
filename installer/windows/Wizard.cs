@@ -66,7 +66,7 @@ sealed partial class Wizard : Window
         ZipFile.ExtractToDirectory(embedded, Path.Combine(temporary, "payload"));
         using (var source = Assembly.GetExecutingAssembly().GetManifestResourceStream("models.json")!)
             catalog = JsonSerializer.Deserialize<Catalog>(source, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!;
-        var shell = new Grid { Background = Paper }; Content = shell;
+        var shell = new Grid { Background = Branding.BodyBackground() }; Content = shell;
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         shell.RowDefinitions.Add(new RowDefinition());
@@ -113,7 +113,26 @@ sealed partial class Wizard : Window
     }
 
     internal static TextBlock Heading(string text) => new() { Text = text, FontSize = 23, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 16), TextWrapping = TextWrapping.Wrap };
-    internal static TextBlock Copy(string text, bool muted = false) => new() { Text = text, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 14), Foreground = muted ? Muted : Ink, FontSize = muted ? 12 : 14 };
+    internal static TextBlock Copy(string text, bool muted = false)
+    {
+        var block = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 14), Foreground = muted ? Muted : Ink, FontSize = muted ? 12 : 14 };
+        SetCopy(block, text); return block;
+    }
+    internal const string InstallerReleasesUrl = "https://github.com/Polikles/ewp-transcripts/tree/main/releases";
+    internal static void SetCopy(TextBlock block, string text)
+    {
+        block.Inlines.Clear();
+        foreach (string phrase in new[] { "download a newer installer", "pobierz nowszą wersję instalatora" })
+        {
+            int index = text.IndexOf(phrase, StringComparison.OrdinalIgnoreCase);
+            if (index < 0) continue;
+            block.Inlines.Add(new Run(text[..index]));
+            var link = new Hyperlink(new Run(text.Substring(index, phrase.Length))) { NavigateUri = new Uri(InstallerReleasesUrl), Foreground = ColorBrush("#245B80") };
+            link.RequestNavigate += (_, e) => { Open(e.Uri.AbsoluteUri); e.Handled = true; };
+            block.Inlines.Add(link); block.Inlines.Add(new Run(text[(index + phrase.Length)..])); return;
+        }
+        block.Text = text;
+    }
     internal static Button ActionButton(string text, Action callback, bool secondary = false)
     {
         var button = new Button { Content = text, Padding = new Thickness(16, 9, 16, 9), Margin = new Thickness(0, 0, 8, 0), MinHeight = 36, Background = ColorBrush(secondary ? "#FFFFFF" : "#355880"), Foreground = secondary ? Ink : Brushes.White, BorderBrush = ColorBrush("#BCCBD6"), BorderThickness = new Thickness(secondary ? 1 : 0), HorizontalAlignment = HorizontalAlignment.Left, Cursor = Cursors.Hand };
@@ -148,12 +167,12 @@ sealed partial class Wizard : Window
     };
     string OperationHelp => operation switch
     {
-        "install" => T("Install the program in a new folder. Choose local models or OpenRouter on the following screens.", "Zainstaluj program w nowym folderze. Na kolejnych ekranach wybierzesz modele lokalne lub OpenRouter."),
-        "update" => T("Update an existing managed installation to the version in this installer. Work, models and saved keys remain.", "Zaktualizuj istniejącą instalację zarządzaną do wersji z tego instalatora. Praca, modele i zapisane klucze pozostaną."),
-        "repair" => T("Restore program files and dependencies for the same installed version. User work remains.", "Przywróć pliki programu i zależności dla tej samej zainstalowanej wersji. Praca pozostanie."),
+        "install" => T("Install the program in a new folder. Choose local models or OpenRouter on the following screens.", "Zainstaluj program w wybranym folderze. Na kolejnych ekranach wybierzesz modele lokalne lub OpenRouter."),
+        "update" => T("Update program to the version of this installer. Saved work, models and keys remain unchanged.", "Zaktualizuj program do wersji z tego instalatora. Zapisana praca, modele i klucze pozostaną bez zmian."),
+        "repair" => T("Restore program files and dependencies for the same installed version. User work remains.", "Przywróć pliki programu i zależności dla tej samej zainstalowanej wersji. Zapisana praca pozostanie bez zmian."),
         "models" => T("Add local models. If the program version is lower than the installer version, update the program first.", "Doinstaluj modele lokalne. Jeśli wersja programu jest niższa niż wersja instalatora, najpierw zaktualizuj program."),
-        "rollback" => T("Activate the retained previous program version. No models or user files are removed.", "Przywróć zachowaną poprzednią wersję programu. Modele i pliki użytkownika nie będą usuwane."),
-        _ => T("Preview removal, then choose whether to keep shared models and the saved API key. Recordings and work remain.", "Przejrzyj plan usunięcia i wybierz, czy zachować współdzielone modele i klucz API. Nagrania i praca pozostaną.")
+        "rollback" => T("Fix/restore the previous version of the program. No models or user files are removed.", "Przywróć zachowaną poprzednią wersję programu. Modele i pliki użytkownika nie zostaną usunięte."),
+        _ => T("Preview removal, then choose whether to keep shared models and the saved API key. Recordings and work remain.", "Przejrzyj plan usunięcia i wybierz, czy zachować współdzielone modele i zapisany klucz API. Zapisana praca i nagrania pozostaną bez zmian.")
     };
 
     void Render()
@@ -184,7 +203,7 @@ sealed partial class Wizard : Window
     void RenderWelcome()
     {
         body.Children.Add(Heading(T("What would you like to do?", "Co chcesz zrobić?")));
-        body.Children.Add(Copy(T("Choose your language above and select one action.", "Wybierz język powyżej i jedno działanie poniżej."), muted: true));
+        body.Children.Add(Copy(T("Choose installer language and select one action.", "Wybierz język instalatora i jedno działanie."), muted: true));
         var choices = new StackPanel(); actionChoices.Clear();
         foreach (string op in VisibleOperations)
         {
@@ -203,7 +222,7 @@ sealed partial class Wizard : Window
         else
         {
             if (operation != "install" && detected == null)
-                body.Children.Add(Copy(T("No managed installation was detected. Choose its folder if you have one.", "Nie wykryto instalacji zarządzanej. Wybierz jej folder, jeśli program był już zainstalowany."), muted: true));
+                body.Children.Add(Copy(T("No active installation was detected. Choose its folder, if the program is already installed.", "Nie wykryto aktywnej instalacji. Wskaż folder, jeśli program jest już zainstalowany."), muted: true));
             body.Children.Add(Copy(operation == "install" ? T("Program installation folder", "Folder instalacji programu") : T("Installed program folder", "Folder zainstalowanego programu")));
             body.Children.Add(root);
             var chooseFolder = ActionButton(T("Choose folder…", "Wybierz folder…"), ChooseFolder, secondary: true);
@@ -240,7 +259,7 @@ sealed partial class Wizard : Window
         {
             body.Children.Add(Copy(T("The following application files will be removed:", "Zostaną usunięte następujące pliki programu:")));
             body.Children.Add(new TextBox { IsReadOnly = true, Text = string.Join(Environment.NewLine, plan.GetProperty("paths").EnumerateArray().Select(v => v.GetString())), TextWrapping = TextWrapping.Wrap, Height = 130, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, FontSize = 12, Padding = new Thickness(8) });
-            LabelCheck(removeModels, T("Also remove the recorded model snapshots (may be shared with other programs)", "Usuń także zapisane wersje modeli (mogą być współdzielone z innymi programami)")); body.Children.Add(removeModels);
+            LabelCheck(removeModels, T("Also remove the recorded model snapshots (may be shared with other programs!)", "Usuń także zapisane wersje modeli (mogą być współdzielone z innymi programami!)")); body.Children.Add(removeModels);
             LabelCheck(removeKey, T("Also remove the saved OpenRouter key", "Usuń także zapisany klucz OpenRouter")); body.Children.Add(removeKey);
             body.Children.Add(Copy(T("Recordings, results and saved work remain. Keep the defaults if another checkout uses these models.", "Nagrania, wyniki i zapisy pracy pozostaną. Zachowaj ustawienia domyślne, jeśli inne repozytorium używa tych modeli."), muted: true));
         }
@@ -258,7 +277,7 @@ sealed partial class Wizard : Window
         if (busy) { var gear = BusyGear(); gear.Width = gear.Height = 48; gear.Margin = new Thickness(0, 0, 0, 14); gear.Visibility = Visibility.Visible; body.Children.Add(gear); }
         RenderOperationProgress();
         body.Children.Add(Copy(ProgressMessage()));
-        if (finished && successful && operation == "uninstall") body.Children.Add(Copy(T("Program files and shortcuts have been removed. Closing this window removes the installer itself.", "Pliki programu i skróty zostały usunięte. Zamknięcie tego okna usunie sam deinstalator.")));
+        if (finished && successful && operation == "uninstall") body.Children.Add(Copy(T("Program files and shortcuts have been removed. Closing this window removes the installer itself.", "Pliki programu i skróty zostały usunięte. Zamknięcie tego okna usunie deinstalator.")));
         AddLog(expand: finished && !successful);
     }
 
@@ -274,7 +293,7 @@ sealed partial class Wizard : Window
             "dependencies" => T("Installing program dependencies…", "Instalowanie zależności programu…"),
             "python" => T("Preparing the Python runtime…", "Przygotowywanie środowiska Python…"),
             "media" => T("Downloading and installing FFmpeg…", "Pobieranie i instalowanie FFmpeg…"),
-            "models" => T("Preparing local models…", "Przygotowywanie modeli lokalnych…"),
+            "models" => T("Preparing local models…", "Przygotowanie modeli lokalnych…"),
             "verify" => T("Checking installed program…", "Sprawdzanie zainstalowanego programu…"),
             "credentials" => T("Saving the optional key in the OS store…", "Zapisywanie opcjonalnego klucza w magazynie systemowym…"),
             "cancel" => T("Cancelling safely… Downloaded cache files will remain.", "Bezpieczne anulowanie… Pobrane pliki cache pozostaną."),
@@ -403,11 +422,11 @@ sealed partial class Wizard : Window
             if (operation == "install")
             {
                 if (Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any() && InstallationDiscovery.Read(path) is not { State: null }) return T("Choose an empty folder; for an existing installation choose Update or Repair.", "Wybierz pusty folder; dla istniejącej instalacji wybierz Aktualizuj lub Napraw.");
-                if (DiskProbe(path).Free < 25_000_000_000) return T("At least 25 GB is required (20 GB installation + 5 GB free margin).", "Potrzeba co najmniej 25 GB (20 GB instalacji + 5 GB wolnego miejsca).");
+                if (DiskProbe(path).Free < 25_000_000_000) return T("At least 25 GB of free space is required.", "Potrzeba co najmniej 25 GB wolnego miejsca.");
             }
             else
             {
-                if (!File.Exists(Path.Combine(path, "owner.json"))) return T("Select an existing managed installation.", "Wybierz istniejącą instalację zarządzaną.");
+                if (!File.Exists(Path.Combine(path, "owner.json"))) return T("Select an existing installation.", "Wybierz istniejącą instalację.");
                 if (operation != "uninstall" && installed == null) return T("This installation is incomplete; use Uninstall before installing again.", "Ta instalacja jest niekompletna; przed ponowną instalacją wybierz Odinstaluj.");
                 if (installed is JsonElement state)
                 {
@@ -415,13 +434,13 @@ sealed partial class Wizard : Window
                     if (operation is "repair" or "models" && current != version) return Version.Parse(current) > Version.Parse(version)
                         ? T("Download a newer installer matching the installed program version.", "Pobierz nowszą wersję instalatora zgodną z wersją programu.")
                         : T("Update the program first.", "Najpierw zaktualizuj program.");
-                    if (operation == "update" && current == version) return T("This version is already installed. Choose Repair if needed.", "Ta wersja jest już zainstalowana. W razie potrzeby wybierz Napraw.");
-                    if (operation == "update" && Version.Parse(current) > Version.Parse(version)) return T("This installer is older; use Restore previous version instead.", "Ten instalator jest starszy; wybierz Przywróć poprzednią wersję.");
+                    if (operation == "update" && current == version) return T("This version is already installed. Choose \"Repair\" if needed.", "Ta wersja jest już zainstalowana. W razie potrzeby wybierz funkcję \"Napraw\".");
+                    if (operation == "update" && Version.Parse(current) > Version.Parse(version)) return T("This installer is older; use \"Restore previous version\" instead or download a newer installer.", "Ten instalator jest starszy; wybierz \"Przywróć poprzednią wersję\" lub pobierz nowszą wersję instalatora.");
                     if (operation == "rollback" && RollbackChoices().Count == 0) return T("No files from an older version were found.", "Nie znaleziono plików starszej wersji.");
                 }
             }
         }
-        catch { return T("Cannot access this folder or its disk.", "Nie można odczytać folderu lub jego dysku."); }
+        catch { return T("Cannot access this folder or disk.", "Nie można odczytać folderu lub dysku."); }
         return null;
     }
     void RefreshLocation()
@@ -432,12 +451,12 @@ sealed partial class Wizard : Window
             if (string.IsNullOrWhiteSpace(root.Text)) { diskStatus.Text = ""; return; }
             var disk = DiskProbe(root.Text);
             string text = T("Disk space: ", "Miejsce na dysku: ") + GB(disk.Free) + T(" GB free", " GB wolne");
-            if (operation == "install") text += T(" · at least 25 GB (20 + 5 GB margin)", " · co najmniej 25 GB (20 + 5 GB marginesu)");
-            if (IsInstall && OperationRunner.IsNormallyProtected(root.Text)) text += "\n" + T("Windows may ask for administrator permission when the operation starts.", "Windows może poprosić o uprawnienia administratora przy rozpoczęciu operacji.");
+            if (operation == "install") text += T(" · at least 25 GB", " · co najmniej 25 GB");
+            if (IsInstall && OperationRunner.IsNormallyProtected(root.Text)) text += "\n" + T("Windows may ask for administrator permission when the operation starts.", "Windows może poprosić o uprawnienia administratora przy rozpoczęciu działania.");
             if (installed is JsonElement state) text += "\n" + T("Installed version: ", "Zainstalowana wersja: ") + state.GetProperty("version").GetString();
-            diskStatus.Text = text + (problem == null ? "" : "\n" + problem); diskStatus.Foreground = problem == null ? Muted : Error;
+            SetCopy(diskStatus, text + (problem == null ? "" : "\n" + problem)); diskStatus.Foreground = problem == null ? Muted : Error;
         }
-        catch { diskStatus.Text = problem ?? ""; diskStatus.Foreground = Error; }
+        catch { SetCopy(diskStatus, problem ?? ""); diskStatus.Foreground = Error; }
     }
     static (long Free, string Volume) ProbeDisk(string value)
     {
@@ -448,14 +467,14 @@ sealed partial class Wizard : Window
     string GB(long bytes) => (bytes / 1e9).ToString(bytes is > 0 and < 1_000_000_000 ? "0.###" : "0.#", CultureInfo.GetCultureInfo(Pl ? "pl-PL" : "en-US"));
     string? ModelSpaceProblem()
     {
-        if (!GpuReady) return T("A working NVIDIA driver is required for local models. Go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA. Wróć do testu komputera albo odznacz modele lokalne.");
+        if (!GpuReady) return T("A working NVIDIA driver is required for local models. Update your drivers and go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA. Zaktualizuj sterownik i wróć do testu komputera albo odznacz \"modele lokalne\".");
         try
         {
             string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache/huggingface/hub");
             long missing = DownloadModels.Sum(m => repairModels || reinstallModels ? m.Bytes : ModelMissingBytes(m));
             var modelDisk = DiskProbe(cache); var appDisk = DiskProbe(root.Text);
             long required = 1_000_000_000 + missing + (string.Equals(modelDisk.Volume, appDisk.Volume, StringComparison.OrdinalIgnoreCase) && operation == "install" ? Math.Max(0, 25_000_000_000 - catalog.Models.Sum(m => m.Bytes)) : 0);
-            if (modelDisk.Free < required) return T("Not enough space on the model-cache disk. Required free space: ", "Za mało miejsca na dysku cache modeli. Potrzebne wolne miejsce: ") + GB(required) + " GB";
+            if (modelDisk.Free < required) return T("Not enough space for model-cache. Required free space: ", "Za mało miejsca na cache modeli. Potrzebne wolne miejsce: ") + GB(required) + " GB";
         }
         catch { return T("Cannot check model-cache disk space.", "Nie można sprawdzić miejsca na dysku cache modeli."); }
         return null;
@@ -489,7 +508,7 @@ sealed partial class Wizard : Window
         }
         Step("1. ", T("Create an account", "Załóż konto"), "https://huggingface.co/join", T(" on Hugging Face and sign in.", " Hugging Face i zaloguj się."));
         Step("2. ", T("Open the model page", "Otwórz stronę modelu"), "https://huggingface.co/pyannote/speaker-diarization-community-1", T(", complete the access form and accept the terms.", ", wypełnij formularz dostępu i zaakceptuj warunki."));
-        Step(T("3. In ", "3. W "), "Settings → Access Tokens", "https://huggingface.co/settings/tokens", T(", create a read-only token (Read).", " utwórz token tylko do odczytu (Read)."));
+        Step(T("3. In ", "3. W "), "Settings → Access Tokens", "https://huggingface.co/settings/tokens", T(", create a read-only token.", " utwórz token tylko do odczytu."));
         panel.Children.Add(Copy(T("4. Copy it into the installer and check access.", "4. Wklej go do instalatora i sprawdź dostęp.")));
         panel.Children.Add(Link(T("Detailed instructions for this procedure", "Szczegółowa instrukcja tej procedury"), () => Open("https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/HUGGINGFACE_ACCESS" + (Pl ? "_PL" : "") + ".md")));
         var footer = new Grid { Margin = new Thickness(0, 12, 0, 0) }; footer.ColumnDefinitions.Add(new ColumnDefinition()); footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -553,12 +572,12 @@ sealed partial class Wizard : Window
             if (status == "warning")
             {
                 var icon = Symbols.Warning(); icon.HorizontalAlignment = HorizontalAlignment.Left; icon.VerticalAlignment = VerticalAlignment.Center;
-                icon.ToolTip = code == "platform" ? T("Older Windows version — compatibility not guaranteed", "Starsza wersja Windows — działanie niegwarantowane") : T("Check could not confirm readiness", "Test nie potwierdził gotowości");
+                icon.ToolTip = code == "platform" ? T("Older Windows version — compatibility not guaranteed", "Starsza wersja Windows — nie gwarantujemy działania") : T("Check could not confirm readiness", "Test nie potwierdził gotowości");
                 Grid.SetColumn(icon, 1); grid.Children.Add(icon);
             }
             else
             {
-                var state = new TextBlock { Text = status == "pass" ? "OK" : T("action required", "wymaga działania"), Foreground = status == "pass" ? Success : Error, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
+                var state = new TextBlock { Text = status == "pass" ? "OK" : T("action required", "wymagane działanie"), Foreground = status == "pass" ? Success : Error, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(state, 1); grid.Children.Add(state);
             }
             hostRows.Children.Add(grid);
@@ -627,7 +646,8 @@ sealed partial class Wizard : Window
         foreach (string argument in new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path }) start.ArgumentList.Add(argument);
         Process.Start(start); Close();
     }
-    internal void ShowLicenses() => Open(Credits.Prepare(Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE.txt"), Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE-readable.txt")));
+    internal string NoticeFile => Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/" + (Pl ? "NOTICE_PL.txt" : "NOTICE.txt"));
+    internal void ShowLicenses() => Open(Credits.Prepare(NoticeFile, Path.Combine(temporary, "payload/app/src/ewp_transcripts/web_assets/brand/NOTICE-readable.txt")));
     static void Open(string value) => Process.Start(new ProcessStartInfo(value) { UseShellExecute = true });
     internal static void VerifyBundle(string path)
     {
