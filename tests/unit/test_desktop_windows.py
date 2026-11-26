@@ -113,7 +113,7 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
     executable = root / "EwP.Transcripts.exe"
     state_directory = None
     try:
-        for phase in ["save", "restore", "crash", "maintenance", "amd-interface"]:
+        for phase in ["save", "restore", "crash", "maintenance", "amd-interface", "light-restart"]:
             worker_record = tmp_path / f"{phase}-workers.json"
             report = evidence / f"{phase}.json"
             environment = {**os.environ, "EWP_TEST_WORKER_RECORD": str(worker_record)}
@@ -122,6 +122,7 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                 state["local_accelerator"] = "amd"
                 (root / "installation.json").write_text(json.dumps(state), encoding="utf-8")
                 environment["EWP_DESKTOP_EXPECT_AMD"] = "1"
+                environment["EWP_DESKTOP_FINAL_LIGHT"] = "1"
             if phase != "save":
                 environment["EWP_DESKTOP_EXPECT_RECOVERY"] = "1"
             if phase == "restore":
@@ -142,6 +143,16 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                 wait_until(report.exists, 120)
                 data = json.loads(report.read_text(encoding="utf-8"))
                 assert data["result"] == "PASS", data
+                if phase == "save":
+                    assert data["startup_appearance"]["ThemePreference"] == "system"
+                else:
+                    assert data["startup_appearance"]["Theme"] == (
+                        "light" if phase == "light-restart" else "dark"
+                    )
+                    assert (
+                        data["startup_appearance"]["ThemePreference"]
+                        == data["startup_appearance"]["Theme"]
+                    )
                 state_directory = Path(data["state_directory"])
                 wait_until(worker_record.exists)
                 workers = json.loads(worker_record.read_text())

@@ -1,3 +1,20 @@
+# Pre-release hardware guidance, theme transitions and installer audit — 2026-11-26
+
+- [ ] Document recommended NVIDIA/local hardware and VRAM, distinguishing the tested RTX3090/24GB
+      reference from an unqualified8GB floor, AMD experimental and cloud-only requirements.
+- [ ] Record owner acceptance of both left/right half-screen placement; fix startup/shutdown blank
+      backgrounds: first launch follows Windows theme, subsequent launches follow app theme.
+- [ ] Add future GTX1070/8GB,32GB RAM,i5-10400F qualification and optional collector scripts to TODO:
+      hardware/driver/model/runtime identity, sampled peak VRAM/RAM, per-stage timings/OOM/headroom.
+- [ ] Research signing prerequisites and prepare owner-only instructions outside the repository;
+      no signing procedure, private key, token PIN or credential in Git. Signing is required BEFORE
+      the first public release; no certificate purchase/publication is authorized here.
+- [ ] Audit actual EXE/bundle sizes against pre-desktop builds and remove avoidable packaging bulk;
+      evaluate a minimal online bootstrap using concrete measured findings, preserving integrity.
+- [ ] Reconcile plan: artist remains non-blocking; remove local Scribe/MAI parity; Ollama/other
+      optional enhancements are AFTER first public release. Update docs/checkpoint, verify changes
+      and deliver a distinct installer if product bytes change. Preserve all prior deliveries.
+
 # Documentation and next-plan reconciliation — 2026-11-26
 
 - [x] Make the delivered AMD implementation discoverable from README, docs index, configuration
@@ -7,19 +24,28 @@
 - [x] Validate documentation links/mirrors/version examples and record a checkpoint. Documentation
       only: no new installer, cloud run, GPU/model/provider campaign or public publication.
 
-## Next product actions (details in the current roadmap)
+## Next product actions
 
-- [ ] Address any newly reported0.26.0 Snap/update defects; no repeated full manual/model campaign.
-- [ ] Final release consistency review: current EN/PL docs, notices/credits/licenses, metadata and
-      exact supported/experimental platform wording, preserving approved copy and original licenses.
-- [ ] Prepare final release version/source/notes/artifacts/SHA256 and EXE storage in `releases/`.
-- [ ] Publish the deliberate first public tag/release/assets; verify actual downloads and matching
-      online bootstrap URLs afterward. No publication is part of this documentation-only request.
-- [ ] Parallel/non-blocking: artist feedback/icons, then final screenshots; optional signing if a
-      certificate becomes available. AMD hardware qualification remains unavailable/non-blocking.
+- [x] Owner confirms0.26.0 window placement restores both LEFT and RIGHT half-screen layouts.
+- [ ] Finish the active theme/hardware/packaging task above and final release consistency review.
+- [ ] Prepare final source/version/notes/artifacts/SHA256 and large-EXE storage at `releases/`.
+- [ ] REQUIRE signing before first public release. Owner obtains an eligible public code-signing
+      certificate; signing procedure/keys/credentials stay entirely outside the repository.
+- [ ] Publish the deliberate first public tag/release/assets after signed-artifact verification;
+      check actual downloads and matching Windows/Ubuntu online bootstrap URLs.
+- [ ] Later, when owner's GTX1070/8GB,32GB RAM,i5-10400F PC is available: compatibility-first tests.
+      Current torch2.8/cu128 excludes Pascal. Establish compatible kernels/compute types before
+      running the default and optional ASR models, alignment/diarization, retry/cancel/repeated jobs.
+      Prepare optional collector scripts for OS/CPU/GPU/driver/runtime/model/batch identity,
+      baseline/sampled peak VRAM, RAM, CPU/GPU load and per-stage timings; record sampling and
+      WDDM limits, OOM/headroom and matched RTX3090 reference.8GB is NOT qualified yet; no blind
+      dependency swap, new paid campaign or physical test is claimed. This does not block release.
+- [ ] Parallel/non-blocking: integrate artist feedback/icons whenever supplied, then screenshots.
+- [ ] AFTER first public release: consider Ollama and remaining optional enhancements/research in
+      the roadmap. Local Scribe/MAI is removed from the plan; no public weights, no parity task.
 
 Current plan: [roadmap](docs/99-roadmap-v2.md#current-next-actions--2026-11-26).
-Older task sections below are historical completion records; superseded waits are not new gates.
+Older sections retain history; stale optional-signing/AMD/Scribe waits do not override this queue.
 
 # Snap recovery and AMD(experimental) — 2026-11-26 /0.26.0
 
@@ -32,8 +58,8 @@ Older task sections below are historical completion records; superseded waits ar
 - [x] Integrate managed install/update/repair/runtime diagnostics and visible experimental labels;
       meaningful tests, guides/compatibility and fresh verified0.26.0 installer. No paid campaign.
 
-- [ ] Focused owner Snap/update feedback, remaining release checklist and first public release.
-      Physical AMD inference qualification requires suitable hardware and is not claimed.
+- [x] Owner confirms LEFT/RIGHT Snap restoration. Current closing/startup flash follow-up above
+      is separate; physical AMD qualification remains unperformed, release tasks remain current.
 
 Earlier stages follow.
 
@@ -202,8 +228,7 @@ Earlier tasks follow.
 - [x] Owner0.24.0 feedback received: mixed queue with three local ASR models works. Preserve
       that actual-inference acceptance; missing-model/selection issues promoted to0.24.1 above.
       Do not impose a repeated model/transcription campaign.
-- [ ] Exact Scribe v2/MAI local parity remains blocked by absent established public desktop weights;
-      do not substitute other models under their names. Revisit if officially released.
+Local Scribe v2/MAI parity was removed from the plan by owner2026-11-26; retain existing cloud choices.
 
 Earlier work follows for reference.
 
@@ -314,7 +339,7 @@ Historical acceptance checklist superseded by later owner install/update/model/r
 focused follow-ups. Preserve exact reported passes; do not infer unreported UAC/hardware qualification.
 - [x] Affected EN/PL lifecycle docs and packaged help maintained through current changes; final
       release consistency review remains in the current queue.
-- [ ] After native acceptance: deliberate release/tag/assets/online bootstrap activation; signing decision if a certificate becomes available. Nothing public has been activated.
+- [ ] After native acceptance: deliberate release/tag/assets/online bootstrap activation; signing is REQUIRED before first public release under the current owner instruction. Nothing public has been activated.
 - [ ] Parallel/non-blocking: integrate artist feedback/icons when supplied; documentation screenshots after final artwork. Preserve sent archives.
 
 Repeated historical boxes below are completion records, not separate open tasks. Full profile

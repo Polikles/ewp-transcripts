@@ -191,6 +191,8 @@ function installGuiShell() {
   const settings = document.createElement("section");
   settings.innerHTML = `<h2 id="gui-settings-heading">Settings & About</h2>
     <p>Local-first audio transcription. LLM correction and translation are optional. Source export never requires translation or dictionaries.</p>
+    <p>Recommended for local ASR: a recent NVIDIA RTX with 12 GB VRAM or more, 32 GB RAM and an SSD. Tested reference: RTX 3090 with 24 GB VRAM. 8 GB is not yet a validated minimum.</p>
+    <p>GPU architecture and runtime compatibility also matter. Cloud ASR and existing-result review do not require a local NVIDIA GPU. Windows AMD support is experimental.</p>
     <p>Provider readiness and disclosure consent remain in each optional stage. Local API endpoints are separately operated; the application cannot guarantee third-party logging, retention, forwarding or storage location.</p>
     <p>Audio is processed locally. Correction and translation send transcript text only after explicit scoped consent. Keys stay in server memory and are never saved in workspaces.</p>
     <p><a href="/help" target="_blank" rel="noreferrer">Open the complete local GUI instructions</a></p>

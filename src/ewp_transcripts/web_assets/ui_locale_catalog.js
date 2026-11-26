@@ -2,6 +2,8 @@
 const guiDiagnosticPattern = /^([A-Z][A-Z0-9]*_[A-Z0-9_]+):\s*([\s\S]*)$/;
 // Additional audited UI copy. Keys remain English; codes and user content are preserved.
 for (const [en, pl] of [
+  ["Recommended for local ASR: a recent NVIDIA RTX with 12 GB VRAM or more, 32 GB RAM and an SSD. Tested reference: RTX 3090 with 24 GB VRAM. 8 GB is not yet a validated minimum.", "Zalecane do lokalnego ASR: nowsza karta NVIDIA RTX z co najmniej 12 GB VRAM, 32 GB RAM i dysk SSD. Konfiguracja odniesienia: RTX 3090 z 24 GB VRAM. 8 GB nie jest jeszcze potwierdzonym minimum."],
+  ["GPU architecture and runtime compatibility also matter. Cloud ASR and existing-result review do not require a local NVIDIA GPU. Windows AMD support is experimental.", "Znaczenie ma również zgodność architektury GPU i bibliotek. ASR w chmurze i praca z gotowymi wynikami nie wymagają lokalnej karty NVIDIA. Obsługa AMD w Windows jest eksperymentalna."],
   ["Local GPU · AMD (experimental)", "Lokalna karta AMD (experimental)"],
   ["AMD ROCm (experimental) · CPU alignment/diarization", "AMD ROCm (experimental) · wyrównanie i mówcy na CPU"],
   ["AMD support is experimental and has not been tested on physical hardware. ASR uses ROCm; word alignment and diarization use CPU.", "Obsługa AMD jest eksperymentalna i nie została przetestowana na fizycznej karcie. ASR używa ROCm; wyrównanie słów i rozpoznawanie mówców działają na CPU."],

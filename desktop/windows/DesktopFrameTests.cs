@@ -12,6 +12,7 @@ sealed partial class DesktopWindow
     void CaptureFrame(string name)
     {
         if (previews == null) return;
+        Directory.CreateDirectory(previews);
         var handle = new WindowInteropHelper(this).Handle;
         GetWindowRect(handle, out var rect); int width = rect.Right - rect.Left, height = rect.Bottom - rect.Top;
         var source = GetWindowDC(handle); var memory = CreateCompatibleDC(source);

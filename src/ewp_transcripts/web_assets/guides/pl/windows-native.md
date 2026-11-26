@@ -49,6 +49,11 @@ W repozytorium źródłowym AMD przed przygotowaniem lub naprawą ustaw
 NVIDIA; wtedy ponów przygotowanie lub naprawę AMD. Powyższe polecenia bez tej zmiany opisują
 bazowy wariant NVIDIA. [Procedura AMD](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
 
+Przy pierwszym uruchomieniu tło pustego okna odpowiada jasnemu/ciemnemu motywowi Windows.
+Potem używa zapisanego motywu programu; wybór systemowy nadal podąża za Windows. Tło ładowania
+i pustego okna przy zamykaniu pozostaje w tym motywie. Wyśrodkowany komunikat zapisu/zamykania
+zachowuje kontrastowy wygląd. Przywracanie lewej i prawej połowy ekranu jest potwierdzone w pracy.
+
 ## Naprawa
 
 Zapisz pracę i zatrzymaj GUI, a następnie uruchom:

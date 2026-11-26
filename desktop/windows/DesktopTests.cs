@@ -19,7 +19,7 @@ sealed partial class DesktopWindow
     void WriteTestResult(string result, string error = "")
     {
         if (testReport == null) return;
-        File.WriteAllText(testReport, JsonSerializer.Serialize(new { result, error, version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(3), pid = Environment.ProcessId, manager_pid = testManagerPid, server_pid = testServerPid, window_handle = new System.Windows.Interop.WindowInteropHelper(this).Handle.ToInt64(), state_directory = config.StateDirectory, window_placement = WindowPlacement.Capture(this), startup_placement = startupPlacement, appearance, checks = testChecks }));
+        File.WriteAllText(testReport, JsonSerializer.Serialize(new { result, error, version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(3), pid = Environment.ProcessId, manager_pid = testManagerPid, server_pid = testServerPid, window_handle = new System.Windows.Interop.WindowInteropHelper(this).Handle.ToInt64(), state_directory = config.StateDirectory, window_placement = WindowPlacement.Capture(this), startup_placement = startupPlacement, startup_appearance = startupAppearance, appearance, checks = testChecks }));
     }
     async Task Until(Func<Task<bool>> check, int seconds = 40)
     {
@@ -70,6 +70,10 @@ sealed partial class DesktopWindow
         var runtime = (await backend.Request())!.Value; testServerPid = runtime.GetProperty("pid").GetInt32();
         Check(Flag(runtime, "desktop") && !Flag(runtime, "busy"), "authenticated owned desktop backend ready");
         Check(GetConsoleWindow() == IntPtr.Zero, "native application has no console");
+        Check(startupAppearance.Theme == (startupAppearance.ThemePreference == "system" ? TitleBar.SystemDark ? "dark" : "light" : startupAppearance.Theme),
+            "first or system-preference startup follows Windows; explicit saved theme remains selected");
+        Check(await ScriptFlag($"document.documentElement.dataset.theme==='{startupAppearance.Theme}'"),
+            "first displayed document matches the startup surface theme");
         if (Environment.GetEnvironmentVariable("EWP_DESKTOP_EXPECT_AMD") == "1")
             Check(await ScriptFlag("document.documentElement.dataset.localAccelerator==='amd' && document.querySelector('#cloud-asr-provider option[value=local]').textContent.includes('(experimental)')"), "managed AMD profile is visibly experimental in the actual renderer without loading models");
         await CheckPlacement();
@@ -127,6 +131,12 @@ sealed partial class DesktopWindow
         // First restart checks normal bounds; subsequent restarts also check maximization.
         WindowState = restored ? WindowState.Maximized : WindowState.Normal;
         if (Environment.GetEnvironmentVariable("EWP_DESKTOP_SNAP_TEST") == "1") await SnapLeftForTest();
+        if (Environment.GetEnvironmentVariable("EWP_DESKTOP_FINAL_LIGHT") == "1")
+        {
+            await view.ExecuteScriptAsync("(()=>{const t=document.querySelector('#gui-theme');t.value='light';t.dispatchEvent(new Event('change'));})()");
+            await Until(() => Task.FromResult(appearance.Theme == "light"));
+            CheckSurfaceTheme("final-light-before-restart");
+        }
         placement.Save(this);
         WriteTestResult("PASS");
         // A crash qualification caller keeps the host alive until it verifies same-instance activation

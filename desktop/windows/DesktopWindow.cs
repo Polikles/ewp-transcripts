@@ -21,7 +21,7 @@ sealed partial class DesktopWindow : Window
 {
     readonly AppConfig config;
     readonly OwnedBackend backend = new();
-    readonly WebView2 view = new();
+    readonly WebView2 view = new() { Visibility = Visibility.Hidden };
     readonly Grid shell = new();
     readonly StackPanel notice = new() { Margin = new Thickness(16, 10, 16, 10) };
     readonly TextBlock message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 14 };
@@ -29,7 +29,8 @@ sealed partial class DesktopWindow : Window
     readonly WindowPlacement placement;
     readonly SavedPlacement? startupPlacement;
     readonly DispatcherTimer geometryTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
-    Appearance appearance = new();
+    Appearance appearance = new(TitleBar.SystemDark ? "dark" : "light", ThemePreference: "system");
+    readonly Appearance startupAppearance;
     AppliedAppearance? appliedAppearance;
     ClosingProgress? closingProgress;
     readonly DispatcherTimer poll = new() { Interval = TimeSpan.FromMilliseconds(500) };
@@ -50,9 +51,11 @@ sealed partial class DesktopWindow : Window
         Width = Math.Min(1360, SystemParameters.WorkArea.Width); Height = Math.Min(940, SystemParameters.WorkArea.Height);
         placement = new WindowPlacement(Path.Combine(config.StateDirectory, "window.json"));
         startupPlacement = placement.Saved;
-        WindowStartupLocation = placement.Saved == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.Manual; Background = Color("#F5F2E9"); Foreground = Color("#273342"); FontFamily = new FontFamily("Segoe UI");
+        WindowStartupLocation = placement.Saved == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.Manual; FontFamily = new FontFamily("Segoe UI");
         using (var icon = Assembly.GetExecutingAssembly().GetManifestResourceStream("EwP.ico")!) Icon = BitmapFrame.Create(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-        try { var saved = JsonSerializer.Deserialize<Appearance>(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))); if (saved != null && TitleBar.Valid(saved)) appearance = saved; } catch { }
+        try { var saved = JsonSerializer.Deserialize<Appearance>(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))); if (saved != null && TitleBar.Valid(saved)) appearance = TitleBar.Resolve(saved); } catch { }
+        startupAppearance = appearance;
+        ApplySurfaceTheme();
         SourceInitialized += (_, _) => appliedAppearance = TitleBar.Apply(this, appearance);
         geometryTimer.Tick += (_, _) => { geometryTimer.Stop(); placement.Save(this); };
         void SaveGeometry(object? sender, EventArgs args) { if (!IsLoaded || closed) return; placement.Observe(this); geometryTimer.Stop(); geometryTimer.Start(); }
@@ -86,13 +89,18 @@ sealed partial class DesktopWindow : Window
         try
         {
             ShowNotice(T("Starting EwP Transcripts…", "Uruchamianie EwP Transcripts…"), true);
+            if (testReport != null) { await Task.Delay(120); CheckSurfaceTheme("startup-before-webview"); }
             // Check before starting Python, so a missing browser runtime leaves no server behind.
             CoreWebView2Environment.GetAvailableBrowserVersionString();
             var environment = await CoreWebView2Environment.CreateAsync(null, Path.Combine(config.StateDirectory, "WebView2"));
             if (closed) return;
-            await view.EnsureCoreWebView2Async(environment);
+            var options = environment.CreateCoreWebView2ControllerOptions();
+            options.DefaultBackgroundColor = view.DefaultBackgroundColor;
+            await view.EnsureCoreWebView2Async(environment, options);
             if (closed) return;
             ConfigureWebView(environment);
+            ApplySurfaceTheme();
+            if (testReport != null) { await Task.Delay(120); CheckSurfaceTheme("startup-empty-webview"); }
             backend.Start(config);
             var deadline = DateTime.UtcNow.AddSeconds(60);
             JsonElement? status = null;
@@ -109,7 +117,7 @@ sealed partial class DesktopWindow : Window
             view.NavigationCompleted += (_, e) => loaded.TrySetResult(e.IsSuccess);
             view.Source = new Uri(AppConfig.Origin + "/");
             if (!await loaded.Task.WaitAsync(TimeSpan.FromSeconds(30))) throw new IOException("Application page could not load");
-            ready = true; notice.Visibility = Visibility.Collapsed; poll.Start();
+            ready = true; notice.Visibility = Visibility.Collapsed; view.Visibility = Visibility.Visible; poll.Start();
             if (testReport != null) await SelfTest();
         }
         catch (Exception error)
@@ -169,14 +177,24 @@ sealed partial class DesktopWindow : Window
         };
         core.ProcessFailed += (_, _) => { if (!closing && !closed) { ShowNotice(T("The interface stopped responding. Restart the program to restore saved work.", "Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.")); OfferDiscard(); } };
     }
-    void SystemPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => Dispatcher.BeginInvoke(new Action(() => { if (!closed) appliedAppearance = TitleBar.Apply(this, appearance); }));
+    void SystemPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => Dispatcher.BeginInvoke(new Action(() => { if (!closed) { appearance = TitleBar.Resolve(appearance); ApplySurfaceTheme(); appliedAppearance = TitleBar.Apply(this, appearance); } }));
+    void ApplySurfaceTheme()
+    {
+        bool dark = appearance.Theme == "dark";
+        Background = shell.Background = Color(dark ? "#10232d" : "#eef3f7");
+        Foreground = Color(dark ? "#f5f7fa" : "#1c3543");
+        view.DefaultBackgroundColor = dark ? System.Drawing.Color.FromArgb(255, 16, 35, 45) : System.Drawing.Color.FromArgb(255, 238, 243, 247);
+        if (view.CoreWebView2 != null)
+            view.CoreWebView2.Profile.PreferredColorScheme = appearance.ThemePreference == "system"
+                ? CoreWebView2PreferredColorScheme.Auto : dark ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light;
+    }
     void ApplyAppearance(JsonElement value)
     {
-        var next = new Appearance(value.GetProperty("theme").GetString() ?? "light", value.GetProperty("titleBarMode").GetString() ?? "system", value.GetProperty("titleBarColor").GetString() ?? "#24485c");
+        var next = new Appearance(value.GetProperty("theme").GetString() ?? "light", value.GetProperty("titleBarMode").GetString() ?? "system", value.GetProperty("titleBarColor").GetString() ?? "#24485c", value.TryGetProperty("themePreference", out var preference) ? preference.GetString() : null);
         if (!TitleBar.Valid(next)) return;
-        appearance = next; appliedAppearance = TitleBar.Apply(this, next);
+        appearance = TitleBar.Resolve(next); ApplySurfaceTheme(); appliedAppearance = TitleBar.Apply(this, appearance);
         if (value.TryGetProperty("locale", out var locale)) pl = locale.GetString() == "pl";
-        try { File.WriteAllText(Path.Combine(config.StateDirectory, "appearance.json"), JsonSerializer.Serialize(next)); } catch { }
+        try { File.WriteAllText(Path.Combine(config.StateDirectory, "appearance.json"), JsonSerializer.Serialize(appearance)); } catch { }
     }
     void ShowClosingProgress(string text)
     {
@@ -270,6 +288,7 @@ sealed partial class DesktopWindow : Window
                 return;
             }
             ShowClosingProgress(T("Stopping active work and closing…", "Zatrzymywanie zadań i zamykanie…"));
+            view.Visibility = Visibility.Hidden;
             await backend.Request("commit");
             if (backend.Process != null)
             {
@@ -284,9 +303,9 @@ sealed partial class DesktopWindow : Window
             ShowNotice(T("Closing was stopped to protect unsaved work. Try again after the current operation.", "Zamykanie zostało wstrzymane, aby chronić niezapisaną pracę. Spróbuj ponownie po bieżącej operacji.")); SaveDiagnostic(error.GetType().Name);
             OfferDiscard();
         }
-        finally { HideClosingProgress(); closing = false; if (!closed) view.IsEnabled = true; }
+        finally { HideClosingProgress(); closing = false; if (!closed) { view.Visibility = Visibility.Visible; view.IsEnabled = true; } }
     }
-    void FinishClose() { if (closed) return; placement.Save(this); HideClosingProgress(); allowClose = true; Close(); }
+    void FinishClose() { if (closed) return; placement.Save(this); view.Visibility = Visibility.Hidden; HideClosingProgress(); allowClose = true; Close(); }
     void SaveDiagnostic(string error)
     {
         try { File.WriteAllText(Path.Combine(config.StateDirectory, "desktop.log"), DateTimeOffset.Now.ToString("o") + "\n" + error + "\n" + backend.Diagnostic); } catch { }

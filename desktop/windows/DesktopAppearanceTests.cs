@@ -8,6 +8,15 @@ namespace EwP.Desktop;
 
 sealed partial class DesktopWindow
 {
+    void CheckSurfaceTheme(string phase)
+    {
+        bool dark = appearance.Theme == "dark";
+        var expected = (Color)ColorConverter.ConvertFromString(dark ? "#10232d" : "#eef3f7");
+        Check(((SolidColorBrush)Background).Color == expected && ((SolidColorBrush)shell.Background).Color == expected
+            && view.DefaultBackgroundColor.ToArgb() == System.Drawing.Color.FromArgb(255, expected.R, expected.G, expected.B).ToArgb(),
+            phase + " native shell and opaque WebView background follow the app theme");
+        CaptureFrame(phase + "-" + appearance.Theme);
+    }
     async Task SnapLeftForTest()
     {
         WindowState = WindowState.Normal; BringToFront();
@@ -59,6 +68,12 @@ sealed partial class DesktopWindow
     }
     async Task CheckPersonalization(string locale, string theme)
     {
+        CheckSurfaceTheme(locale + "-live-theme");
+        var visible = view.Visibility;
+        view.Visibility = Visibility.Hidden;
+        await Task.Delay(120);
+        CheckSurfaceTheme(locale + "-closing-blank");
+        view.Visibility = visible;
         await view.ExecuteScriptAsync("showGuiStage('settings');document.querySelector('#gui-personalization').click()");
         Check(await ScriptFlag("document.querySelector('#gui-personalization-dialog').open && !document.querySelector('#gui-personal-native').hidden"), "desktop personalization includes native title-bar settings");
         await view.ExecuteScriptAsync("(()=>{let m=document.querySelector('#gui-titlebar-mode');m.value='custom';m.dispatchEvent(new Event('input'));let c=document.querySelector('#gui-titlebar-color');c.value='#5b193f';c.dispatchEvent(new Event('input'));})()");
@@ -74,7 +89,8 @@ sealed partial class DesktopWindow
         Check(appliedAppearance!.Succeeded, "DWM accepts caption and text matching the resolved app theme");
         CaptureFrame(locale + "-application-titlebar-" + theme);
         using (var saved = JsonDocument.Parse(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))))
-            Check(saved.RootElement.GetProperty("Theme").GetString() == theme, "resolved native appearance is cached for next startup");
+            Check(saved.RootElement.GetProperty("Theme").GetString() == theme && saved.RootElement.GetProperty("ThemePreference").GetString() == theme,
+                "native appearance and explicit theme preference are cached for next startup");
         ShowClosingProgress(T("Saving work before closing…", "Zapisywanie pracy przed zamknięciem…"));
         var dialog = closingProgress!; dialog.UpdateLayout();
         Check(Math.Abs(dialog.Left + dialog.ActualWidth / 2 - Left - ActualWidth / 2) < 3

@@ -28,6 +28,23 @@ from ewp_transcripts.web_server import (
 from ewp_transcripts.web_workflows import GuiWorkflowController
 
 
+def test_theme_bootstrap_is_synchronous_before_styles_and_application() -> None:
+    config = WebConfiguration.create(port=8765)
+    page = dispatch_get(config, server_port=8765, host="127.0.0.1:8765", target="/")
+    assert (
+        page.body.index(b'<script src="/assets/theme_bootstrap.js"></script>')
+        < page.body.index(b'rel="stylesheet"')
+        < page.body.index(b'src="/assets/app.js" defer')
+    )
+    script = dispatch_get(
+        config, server_port=8765, host="127.0.0.1:8765", target="/assets/theme_bootstrap.js"
+    )
+    assert script.status == 200
+    assert script.content_type == "text/javascript; charset=utf-8"
+    assert b"ewp-gui-preferences-v1" in script.body
+    assert "'unsafe-inline'" not in SECURITY_HEADERS["Content-Security-Policy"]
+
+
 def test_managed_amd_profile_is_exposed_as_a_fixed_gui_marker(tmp_path, monkeypatch):
     monkeypatch.setenv("EWP_LOCAL_ACCELERATOR", "amd")
     config = WebConfiguration.create(port=8765)

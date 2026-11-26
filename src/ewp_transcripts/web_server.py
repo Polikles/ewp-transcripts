@@ -85,7 +85,11 @@ API_VERSION = "1.0"
 REPOSITORY_URL = "https://github.com/Polikles/ewp-transcripts"
 ISSUES_URL = f"{REPOSITORY_URL}/issues"
 LICENSE_URL = f"{REPOSITORY_URL}/blob/main/LICENSE"
-_ASSET_TYPES = {"app.css": "text/css; charset=utf-8", "app.js": "text/javascript; charset=utf-8"}
+_ASSET_TYPES = {
+    "app.css": "text/css; charset=utf-8",
+    "app.js": "text/javascript; charset=utf-8",
+    "theme_bootstrap.js": "text/javascript; charset=utf-8",
+}
 # Fixed resource manifest: never interpret a browser-supplied path as a filesystem path.
 _ASSET_TYPES.update(
     {

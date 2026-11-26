@@ -8,6 +8,7 @@
     <SelfContained>true</SelfContained>
     <RuntimeFrameworkVersion>10.0.15</RuntimeFrameworkVersion>
     <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <AssemblyName>EwP.Transcripts</AssemblyName>
     <Product>EwP Transcripts</Product>

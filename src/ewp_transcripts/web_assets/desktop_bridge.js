@@ -9,6 +9,7 @@ if (window.chrome?.webview) {
   };
   const appearance = () => ({
     theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    themePreference: ["light","dark"].includes(guiPreferences.theme) ? guiPreferences.theme : "system",
     titleBarMode: ["system","application","custom"].includes(guiPreferences.titleBarMode) ? guiPreferences.titleBarMode : "system",
     titleBarColor: /^#[a-f0-9]{6}$/i.test(guiPreferences.titleBarColor || "") ? guiPreferences.titleBarColor : "#24485c",
     locale: document.documentElement.lang === "pl" ? "pl" : "en",

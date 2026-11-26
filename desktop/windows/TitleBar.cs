@@ -7,7 +7,7 @@ using Microsoft.Win32;
 
 namespace EwP.Desktop;
 
-sealed record Appearance(string Theme = "light", string TitleBarMode = "system", string TitleBarColor = "#24485c");
+sealed record Appearance(string Theme = "light", string TitleBarMode = "system", string TitleBarColor = "#24485c", string? ThemePreference = null);
 sealed record AppliedAppearance(uint Caption, uint Text, int ImmersiveResult, int CaptionResult, int TextResult)
 {
     public bool Succeeded => ImmersiveResult == 0 && CaptionResult == 0 && TextResult == 0;
@@ -18,7 +18,8 @@ static class TitleBar
     {
         get { try { return Convert.ToInt32(Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", 1)) == 0; } catch { return false; } }
     }
-    public static bool Valid(Appearance value) => value.Theme is "light" or "dark" && value.TitleBarMode is "system" or "application" or "custom" && Regex.IsMatch(value.TitleBarColor, "^#[a-fA-F0-9]{6}$");
+    public static bool Valid(Appearance value) => value.Theme is "light" or "dark" && value.ThemePreference is null or "system" or "light" or "dark" && value.TitleBarMode is "system" or "application" or "custom" && Regex.IsMatch(value.TitleBarColor, "^#[a-fA-F0-9]{6}$");
+    public static Appearance Resolve(Appearance value) => value.ThemePreference == "system" ? value with { Theme = SystemDark ? "dark" : "light" } : value;
     static uint ColorRef(string color) { uint rgb = uint.Parse(color.AsSpan(1), NumberStyles.HexNumber); return (rgb >> 16) | (rgb & 0xff00) | ((rgb & 0xff) << 16); }
     public static AppliedAppearance? Apply(Window window, Appearance value)
     {

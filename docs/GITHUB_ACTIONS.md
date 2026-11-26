@@ -128,3 +128,12 @@ four localized AMD warning views and pinned ROCm DLL import without GPU inferenc
 Both archive digests and final products were verified and copied to the VM before expiry.
 See [qualification evidence](checkpoints/2026-11-26-snap-amd-evidence.json). Existing two jobs,
 7-day retention, public guards and owner zero paid limits remain. This is not an account invoice audit.
+
+## Themed blank-window and compressed-package follow-up (0.26.1)
+
+The existing standard public two-job workflow qualifies the0.26.1 correction. Native desktop
+checks capture pre-WebView/empty startup surfaces and both themed blank closing surfaces; an
+additional full restart verifies explicit light appearance after earlier dark/system startup.
+The compressed wizard/native executable still require the normal lifecycle/integrity regression.
+No new runner/service, billing setting, retention change or model/provider campaign is introduced.
+Internal artifacts are unsigned; required first-public-release signing happens outside Git/Actions.

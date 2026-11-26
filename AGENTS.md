@@ -1,3 +1,17 @@
+# Active pre-release corrections — 2026-11-26 / target0.26.1
+
+Owner confirms LEFT/RIGHT Snap restoration. Fix theme-aware blank startup/shutdown surfaces;
+first use Windows theme, later the app preference. Document NVIDIA/VRAM/RAM recommendations and
+queue compatibility-first GTX1070/8GB,32GB RAM,i5-10400F measurements/scripts for later hardware.
+Audit/compress installer payloads, preserving integrity and online pinned dependency preparation.
+Signing is REQUIRED before the first public release; its procedure, keys and credentials MUST
+stay outside Git. Owner instructions are private in VM home. Artist work remains non-blocking.
+Remove local Scribe/MAI from the plan. Ollama/all other optional enhancements are AFTER release.
+Read opening TODO, current roadmap and docs/checkpoints/2026-11-26-release-readiness.md.
+No physical GTX1070/AMD or paid/model campaign; prior artifacts/pins/approved work stay immutable.
+
+Earlier evidence follows.
+
 # Delivered Snap recovery and experimental AMD — 2026-11-26 / 0.26.0
 
 Owner accepted Personalization and centered closing. Windows Snap now captures the actual screen

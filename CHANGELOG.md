@@ -4,6 +4,19 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.26.1 — 2026-11-26 (themed startup and compact packaging)
+
+- Match the initial native shell, empty WebView and shutdown surface to the saved application
+  theme; first launch follows Windows. Cache the system/explicit preference separately, set the
+  browser background before creation, and reveal the document only when loaded. Resolve browser
+  appearance before styles/deferred scripts, preserving light/dark preferences without flashing.
+- Compress the self-contained .NET payloads in both Windows executables; retain the bundled
+  application, pinned runtime, integrity checks and existing online dependency/model preparation.
+- Publish practical NVIDIA/VRAM/RAM recommendations in README, EN/PL manuals and Settings & About,
+  distinguishing the tested24GB reference, provisional recommendation and unqualified8GB target.
+  Document current PyTorch CUDA12.8/Pascal incompatibility before later GTX1070 hardware tests.
+
+
 ## 0.26.0 — 2026-11-26 (Snap recovery and experimental AMD)
 
 - Remember the actual visible window rectangle after Windows Snap, including half-screen layouts,

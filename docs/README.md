@@ -39,6 +39,10 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 
 ## Current installation and platform guidance
 
+- [Installer size review](INSTALLER_SIZE.md): measured payload inventory, compression and online-bootstrap boundary.
+- [Hardware recommendations](HARDWARE.md): tested NVIDIA reference, practical VRAM/RAM guidance,
+  older-card compatibility and later GTX1070 qualification.
+
 - [AMD acceleration (experimental)](AMD_EXPERIMENTAL.md): implemented Windows ASR adapter,
   CPU alignment/diarization, detection/acknowledgement, pinned dependencies and untested GPU boundary.
 - [Native Windows application](NATIVE_WINDOWS_APP.md): window preferences, owned processes,

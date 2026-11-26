@@ -1,6 +1,6 @@
 # Current next actions — 2026-11-26
 
-Current product: **0.26.0 internal preview**. Managed installation/update/repair/removal, native
+Current delivered product: **0.26.0 internal preview**; active correction target **0.26.1**. Managed installation/update/repair/removal, native
 Windows interface, Personalization, durable closing and actual Windows Snap recovery are delivered.
 Windows AMD ASR is implemented and visibly **experimental**, with CPU alignment/diarization and no
 physical AMD inference qualification. See [AMD scope](AMD_EXPERIMENTAL.md) and
@@ -12,17 +12,17 @@ Backlog is maintained in this document; TODO holds the immediate queue, not a co
 
 | Order / lane | Remaining action and completion boundary |
 | --- | --- |
-| 1 — focused feedback | Address any newly reported0.26.0 Snap/update issue. Owner has accepted Personalization/closing;0.26.0 Snap is automatically verified, without claiming owner acceptance. No repeated full manual/inference campaign is required by this plan. |
-| 2 — release preparation | Reconcile current README/manuals/download examples, version/release metadata, compatibility wording and shipped notices/credits/licenses with the actual release contents. Preserve approved wording and original vendor/AGPL texts; fix concrete remaining inconsistencies rather than restarting terminology review. |
-| 3 — distribution preparation | Prepare the final version/source, release notes, artifacts and SHA256; settle storage of the standalone EXE in the requested repository `releases/` location (current0.26.0 EXE216719416bytes), and corresponding public release assets/download URLs. Public tag/release and online bootstrap activation are not yet done. |
-| 4 — first public release | Publish the deliberate versioned tag/release and required installer location, then verify actual downloads/checksums and matching Windows/Ubuntu online bootstrap URLs. Do not advertise unpublished URLs or overwrite an earlier immutable build. |
-| Parallel — optional signing | Evaluate signing only if an appropriate certificate becomes available. The current EXE is unsigned; a successful build is not a signature. No certificate purchase/service is authorized by this plan. |
-| Parallel — artwork | Integrate supplied artist feedback/icons when available, without a deadline; preserve sent archives. Take final documentation screenshots after artwork. This does not block other work. |
+| 1 — current corrections | LEFT/RIGHT Snap is owner-accepted. Finish theme-aware startup/shutdown surfaces, hardware guidance and measured installer-size reduction. Preserve accepted Personalization/closing/player behavior. |
+| 2 — release preparation | Check final EN/PL docs, notices/credits/licenses, metadata and compatibility wording against actual contents. Keep approved wording and original legal texts. |
+| 3 — artifacts and mandatory signing | Prepare final source/version/notes/artifacts and installer storage in `releases/`. Signing is REQUIRED before the first public release; its procedure and all private keys/credentials remain entirely outside Git. Current internal test builds are unsigned. No certificate purchase is authorized here. |
+| 4 — first public release | Publish the deliberate signed versioned tag/release/assets, then verify real downloads/checksums and matching Windows/Ubuntu bootstrap URLs. Preserve immutable earlier deliveries. |
+| Later hardware — non-blocking | When the owner obtains GTX1070/8GB,32GB RAM,i5-10400F: establish runtime/kernel compatibility first, then measure default/optional models and stages, sampled VRAM/RAM peaks, timings and headroom. PyTorch2.8/cu128 does not support Pascal; no8GB baseline is established. Optional collector scripts are queued in TODO. |
+| Parallel — artwork | Artist has no availability date; icons and later screenshots do not block our work or release. Preserve sent archives. |
 
-Physical AMD inference/performance testing requires a suitable card and remains an optional future
-qualification, not a first-release gate. The experimental warning remains until supported evidence
-justifies changing it. Exact local Scribe v2/MAI parity remains dependent on official usable desktop
-weights becoming available; do not substitute other models under those names.
+Physical AMD inference/performance testing remains unavailable and non-blocking; keep the
+experimental warning. **Local Scribe v2/MAI is removed from the plan**, because usable public weights
+are absent. Existing cloud choices are unaffected. **Ollama and all other optional enhancements
+are AFTER the first public release**, without an assigned implementation date.
 
 Later optional backlog: Ollama/further local engines; word/phrase playback highlighting; alignment/
 timing refinements; instruction review with less-technical users; non-speech authoring; advanced
@@ -37,7 +37,8 @@ alternate translation chunking, owned input snapshots, whole-block audio followi
 scheduling/automatic-maintenance programs. Historical sections describing them are not current tasks.
 
 Latest reconciliation: [documentation/plan checkpoint](checkpoints/2026-11-26-amd-docs-plan.md).
-No public release, new build/CI or paid/model campaign was executed by this documentation review.
+The current product correction may use the documented standard public CI; no paid/model campaign
+or public release is part of it. Private signing instructions and keys are excluded from Git.
 
 Earlier roadmap entries follow.
 

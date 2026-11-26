@@ -48,6 +48,11 @@ replace the HIP overlay with the base NVIDIA wheel; rerun AMD setup/repair if th
 The source commands above otherwise describe the NVIDIA baseline. See the
 [AMD source procedure](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
 
+At first launch the blank startup window follows Windows light/dark appearance. Later launches
+use the saved application theme; system selection continues following Windows. Loading and empty
+closing surfaces use that same background, while the centered save/shutdown popup keeps its
+contrasting theme. Left and right half-screen Snap restoration is owner-confirmed.
+
 ## Repair
 
 Save work and stop the GUI, then run:

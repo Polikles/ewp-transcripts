@@ -58,6 +58,21 @@ Microsoft references checked 2026-11-26:
 [window placement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowplacement),
 [DWM attributes](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute).
 
+### Startup and closing surfaces (0.26.1)
+
+Resolve the first blank window from Windows app theme; thereafter use the cached application
+preference, preserving explicit light/dark versus system. Legacy appearance records retain their
+resolved theme. Apply the same opaque background to WPF shell and WebView before controller
+creation; use controller options for early browser background and reveal the document after load.
+The document resolves its stored/system theme synchronously before styles/deferred application JS,
+also improving browser first paint. After successful save, hide the renderer while stopping owned
+work so its disposal exposes the same themed shell. Save refusal restores the live interface.
+The existing centered contrasting progress popup remains unchanged.
+
+Both Windows single-file executables compress their embedded .NET payloads. The bundle still
+contains the native app and pinned runtime; ML/model dependencies remain explicit online downloads.
+No unsupported assembly trimming or new system runtime prerequisite is introduced.
+
 ### Snapped geometry and AMD qualification (0.26.0)
 
 GetWindowPlacement may retain pre-Snap normal bounds. Normal windows now save GetWindowRect screen

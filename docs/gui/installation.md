@@ -18,15 +18,26 @@ Repair for the same version, or Restore previous version/a newer installer for a
 The original location and version are shown. Both fresh-install disk descriptions require 25 GB.
 The check is repeated before preparation; cached complete models still do not require an HF token.
 
+## Recommended hardware
+
+For local ASR, a practical starting recommendation is a recent **NVIDIA RTX with 12 GB VRAM or more**,
+**32 GB RAM**, a multicore x64 CPU and an SSD. The tested reference is **RTX 3090 /24 GB VRAM**.
+The recommendation is not a qualification of every matching card; **8 GB is not yet a tested minimum**.
+Architecture matters too: current PyTorch 2.8/CUDA 12.8 binaries exclude Pascal, including GTX 1070.
+Later GTX 1070/32 GB/i5-10400F tests must establish a compatible runtime before assessing VRAM headroom.
+Allow 25 GB for initial installation plus extra models/media/outputs. Cloud ASR and result review
+need no local NVIDIA GPU. AMD Windows remains experimental, with CPU alignment/diarization.
+[Hardware detail and qualification](https://github.com/Polikles/ewp-transcripts/blob/main/docs/HARDWARE.md).
+
 ## Choose installation mode
 
-1. For the Windows graphical installer, run `EwP-Setup-0.26.0.exe` and follow the wizard below.
+1. For the Windows graphical installer, run `EwP-Setup-0.26.1.exe` and follow the wizard below.
 2. For terminal installation, download the Windows ZIP or Ubuntu tar.gz/ZIP and run the short commands below. No manual repository checkout or preinstalled Python/uv is required.
 3. Keep an existing source checkout if that is how you develop/run the app; use the source-update section instead of treating it as a managed installation.
 
 Managed installation was introduced in0.22.0;0.25.0 adds the Windows application window. Current test artifacts are provided with the owner handoff and by the repository's Installer build and Windows startup Actions workflow. Public online bootstrap URLs are activated only when the matching versioned release is published. Do not try a guessed download URL. The GUI EXE is currently unsigned; no code-signing certificate has been supplied.
 
-Current targets are Windows 11 x64 and Ubuntu 24.04/26.04, including WSL2. Existing application workflow tests on Windows/WSL remain accepted. The new managed lifecycle has real Ubuntu VM evidence; native Windows 11 installation/removal acceptance is separate from compiling or launching the wizard on a Windows CI runner. Reference GPU: RTX 3090 24 GB. At least 8 GB on another NVIDIA GPU remains an unqualified expectation.
+Current targets are Windows 11 x64 and Ubuntu 24.04/26.04, including WSL2. Existing application workflow tests on Windows/WSL remain accepted. The new managed lifecycle has real Ubuntu VM evidence; native Windows 11 installation/removal acceptance is separate from compiling or launching the wizard on a Windows CI runner. Reference GPU: RTX 3090 24 GB. The 8 GB target remains unvalidated; GPU architecture and runtime compatibility are separate requirements.
 
 ## AMD on Windows (experimental)
 
@@ -45,7 +56,7 @@ and [Windows setup/repair](windows-native.md). This adapter does not enable AMD 
 
 ## Windows wizard
 
-Run `EwP-Setup-0.26.0.exe` from a normal user account. It embeds the application bundle,
+Run `EwP-Setup-0.26.1.exe` from a normal user account. It embeds the application bundle,
 its own graphical runtime and the centered framed EwP icon, not multi-GB model data.
 
 1. **Action and language.** Select English/Polski and one radio action: Install, Update, Repair,
@@ -135,8 +146,8 @@ or key is written to a profile, report or plaintext fallback. See [Settings](set
 Windows PowerShell, from the directory containing the downloaded ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.26.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.0-windows-x64.zip
+Expand-Archive .\EwP-0.26.1-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.1-windows-x64.zip
 ```
 
 Add `-Local -AcceptModelTerms` after accepting the upstream gated-model terms to prepare local models. The token prompt is hidden; blank can reuse complete models. Add `-SaveOpenRouterKey` only if you want a separate hidden prompt and explicit OS-store save. `-Root 'D:\Apps\EwP'` chooses a custom empty location. The execution-policy override applies to this invocation only. Keep filenames/paths quoted when they contain spaces.
@@ -145,13 +156,13 @@ Ubuntu 24.04/26.04, from the downloaded tar.gz directory:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.26.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.26.1-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Add `--local --accept-model-terms` for local models, `--save-openrouter-key` for an optional hidden OR prompt, or `--root "$HOME/Apps/EwP"` for a custom directory. Missing Ubuntu prerequisites can be installed with an explicit sudo prompt. Do not install a Linux display driver inside WSL; the Windows NVIDIA driver provides WSL CUDA. A bare-metal Ubuntu compatibility claim requires actual execution evidence, not inference from WSL alone.
 
-Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.26.0.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
+Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.26.1.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
 
 ## Managed update and rollback
 

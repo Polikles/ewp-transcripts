@@ -35,3 +35,9 @@ For a new handoff:
 installation/distribution. The application workflow's prior acceptance does not automatically
 qualify a new installer on Windows 11 or a different GPU. Code signing requires an appropriate
 certificate and is separate from a successful build; current owner-test EXE is unsigned.
+
+Owner release requirement2026-11-26: signing is mandatory BEFORE the first public release. Current
+internal review builds remain unsigned. The signing procedure, private keys, provider credentials
+and owner instructions must remain outside this repository. Artist availability and optional
+hardware/research work do not block release. Never treat an unsigned internal build as a public
+signed artifact; preserve its original bytes and release provenance.

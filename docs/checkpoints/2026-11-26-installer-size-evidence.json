@@ -1,0 +1,210 @@
+{
+  "baseline": [
+    {
+      "version": "0.24.4",
+      "exe_bytes": 157323320,
+      "bundle_bytes": 16975693,
+      "unpacked_bytes": 36404300,
+      "file_count": 232,
+      "largest": [
+        {
+          "file": "tools/uv.exe",
+          "bytes": 32581424,
+          "compressed": 15226897
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/mono.woff2",
+          "bytes": 734492,
+          "compressed": 733741
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/montserrat.woff2",
+          "bytes": 215980,
+          "compressed": 216013
+        },
+        {
+          "file": "app/uv.lock",
+          "bytes": 145591,
+          "compressed": 44040
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/app.js",
+          "bytes": 197508,
+          "compressed": 42187
+        },
+        {
+          "file": "control/EwP.ico",
+          "bytes": 39387,
+          "compressed": 39079
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/ui_locale_catalog.js",
+          "bytes": 129048,
+          "compressed": 36295
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_server.py",
+          "bytes": 164833,
+          "compressed": 25251
+        }
+      ]
+    },
+    {
+      "version": "0.25.0",
+      "exe_bytes": 216707128,
+      "bundle_bytes": 76359122,
+      "unpacked_bytes": 177610488,
+      "file_count": 236,
+      "largest": [
+        {
+          "file": "control/EwP.Transcripts.exe",
+          "bytes": 141191416,
+          "compressed": 59377580
+        },
+        {
+          "file": "tools/uv.exe",
+          "bytes": 32581424,
+          "compressed": 15226897
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/mono.woff2",
+          "bytes": 734492,
+          "compressed": 733741
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/montserrat.woff2",
+          "bytes": 215980,
+          "compressed": 216013
+        },
+        {
+          "file": "app/uv.lock",
+          "bytes": 145591,
+          "compressed": 44040
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/app.js",
+          "bytes": 197595,
+          "compressed": 42201
+        },
+        {
+          "file": "control/EwP.ico",
+          "bytes": 39387,
+          "compressed": 39079
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/ui_locale_catalog.js",
+          "bytes": 129048,
+          "compressed": 36295
+        }
+      ]
+    },
+    {
+      "version": "0.25.1",
+      "exe_bytes": 216707128,
+      "bundle_bytes": 76360033,
+      "unpacked_bytes": 177648124,
+      "file_count": 237,
+      "largest": [
+        {
+          "file": "control/EwP.Transcripts.exe",
+          "bytes": 141215992,
+          "compressed": 59374174
+        },
+        {
+          "file": "tools/uv.exe",
+          "bytes": 32581424,
+          "compressed": 15226897
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/mono.woff2",
+          "bytes": 734492,
+          "compressed": 733741
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/montserrat.woff2",
+          "bytes": 215980,
+          "compressed": 216013
+        },
+        {
+          "file": "app/uv.lock",
+          "bytes": 145591,
+          "compressed": 44040
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/app.js",
+          "bytes": 197595,
+          "compressed": 42201
+        },
+        {
+          "file": "control/EwP.ico",
+          "bytes": 39387,
+          "compressed": 39079
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/ui_locale_catalog.js",
+          "bytes": 130168,
+          "compressed": 36708
+        }
+      ]
+    },
+    {
+      "version": "0.26.0",
+      "exe_bytes": 216719416,
+      "bundle_bytes": 76366433,
+      "unpacked_bytes": 177675372,
+      "file_count": 241,
+      "largest": [
+        {
+          "file": "control/EwP.Transcripts.exe",
+          "bytes": 141220088,
+          "compressed": 59371920
+        },
+        {
+          "file": "tools/uv.exe",
+          "bytes": 32581424,
+          "compressed": 15226897
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/mono.woff2",
+          "bytes": 734492,
+          "compressed": 733741
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/brand/montserrat.woff2",
+          "bytes": 215980,
+          "compressed": 216013
+        },
+        {
+          "file": "app/uv.lock",
+          "bytes": 145591,
+          "compressed": 44040
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/app.js",
+          "bytes": 197595,
+          "compressed": 42201
+        },
+        {
+          "file": "control/EwP.ico",
+          "bytes": 39387,
+          "compressed": 39079
+        },
+        {
+          "file": "app/src/ewp_transcripts/web_assets/ui_locale_catalog.js",
+          "bytes": 131531,
+          "compressed": 37157
+        }
+      ]
+    }
+  ],
+  "local_compressed_candidate": {
+    "exe_bytes": 142183758,
+    "desktop_bytes": 65419679,
+    "windows_zip_bytes": 76733582,
+    "source_dirty": true
+  },
+  "candidate_delivered": false,
+  "no_models_or_ml_wheels_in_bundle": true,
+  "unchanged_source_assets_and_vendor_notices": true,
+  "native_qualification_pending": true
+}
