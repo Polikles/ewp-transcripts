@@ -86,3 +86,43 @@ def test_native_commit_rejects_foreign_origin_and_wrong_token(monkeypatch) -> No
     handler._runtime_control(stop=True)
     assert responses[-1].status == 403
     assert not handler.server.gui_desktop.status(running_jobs=0)["close_requested"]
+
+
+def test_selection_cache_canonicalizes_temp_alias_before_preserving_media(tmp_path, monkeypatch):
+    import io
+    from pathlib import Path
+
+    from ewp_transcripts.web_server import GuiSelectionCache
+
+    actual = tmp_path / "actual-temp"
+    actual.mkdir()
+    alias = tmp_path / "short-temp"
+    alias.symlink_to(actual, target_is_directory=True)
+    monkeypatch.setattr("ewp_transcripts.web_server.tempfile.gettempdir", lambda: str(alias))
+    selections = GuiSelectionCache()
+    try:
+        selected = selections.store(
+            filename="episode.wav", content_length=4, source=io.BytesIO(b"RIFF")
+        )
+        assert selections.root == actual / "ewp-transcripts-gui-selections"
+        assert selections.root in selected.resolve().parents
+        handler = LocalGuiRequestHandler.__new__(LocalGuiRequestHandler)
+        handler.server = SimpleNamespace(
+            gui_selections=selections,
+            gui_workflows=SimpleNamespace(
+                resolve_allowed_path=lambda raw, directory=False: Path(raw).resolve(
+                    strict=not directory
+                )
+            ),
+        )
+        fields = {"input-path": str(selected), "output-path": str(tmp_path / "outputs")}
+        saved = handler._preserve_workspace_media(
+            [{"path": str(selected), "name": "episode.wav"}], fields
+        )
+        preserved = Path(saved[0]["path"])
+        assert preserved.is_relative_to(tmp_path / "outputs")
+        assert fields["input-path"] == str(preserved)
+    finally:
+        selections.close()
+    assert preserved.read_bytes() == b"RIFF"
+    assert not selected.exists()

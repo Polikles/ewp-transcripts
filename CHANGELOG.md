@@ -9,6 +9,8 @@ All notable changes to EWP-transcripts are documented here.
 - Launch managed Windows installations in their own EwP window with taskbar identity/icon and
   no terminal. Preserve the reviewed transcription/review interface inside a local WebView2 host;
   opening the shortcut again brings the existing window forward.
+- Canonicalize Windows temporary-directory aliases so selected files are copied to durable storage
+  before session cleanup and remain available after a complete restart.
 - Save pending media and editor/workspace changes before closing. During active work offer Keep
   working, Wait and close, or Stop and close; a failed save keeps the window open. Recovery never
   starts planning/transcription automatically. Own the backend and worker processes through a

@@ -171,6 +171,12 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                     lambda descendants=descendants: not any(alive(pid) for pid in descendants)
                 )
                 assert (root / "work-state").is_dir()
+                workspaces = list((root / "outputs").glob("*.workspace.json"))
+                assert workspaces
+                for workspace in workspaces:
+                    for media in json.loads(workspace.read_text(encoding="utf-8"))["pending_media"]:
+                        source = Path(media["path"])
+                        assert source.is_relative_to(root / "outputs") and source.is_file()
             finally:
                 if process.poll() is None:
                     process.kill()
@@ -178,7 +184,8 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                 if report.exists() and json.loads(report.read_text())["result"] != "PASS":
                     snapshot = {
                         str(path.relative_to(root)): json.loads(path.read_text(encoding="utf-8"))
-                        for path in (root / "work-state").rglob("*.json")
+                        for folder in [root / "work-state", root / "outputs"]
+                        for path in folder.rglob("*.json")
                         if path.stat().st_size < 1_000_000
                     }
                     (evidence / f"{phase}-synthetic-state.json").write_text(

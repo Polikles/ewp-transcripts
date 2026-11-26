@@ -39,3 +39,9 @@ Native run45805850072: first full desktop save/close, all19 in-window checks and
 PASS; restart phase timed out before recovery-ready. No product delivery yet. Investigating recovery
 with explicit synthetic-state diagnostics/screenshots. Test media is now a valid generated PCM WAV,
 not arbitrary bytes. Full local gate remains1192 PASS; no models/provider/GPU qualification implied.
+
+Native run45806882034 reproduces restart failure: recovery record/catalog present but pending source
+is unavailable after shutdown. Root cause: Windows TEMP 8.3 alias differs from resolve_allowed_path's
+long path, bypassing temporary-picker preservation. Canonicalize GuiSelectionCache.root before its
+ownership comparisons; add alias regression and assert post-close pending files lie under outputs.
+This is a real Windows recovery bug, independent of model/media decoding; valid WAV alone did not fix it.

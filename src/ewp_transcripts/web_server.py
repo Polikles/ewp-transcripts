@@ -249,7 +249,11 @@ class GuiSelectionCache:
     """Own session-only copies selected through browser file controls."""
 
     def __init__(self) -> None:
-        self._root = Path(tempfile.gettempdir()) / "ewp-transcripts-gui-selections"
+        # Windows TEMP may use an 8.3 alias while resolved uploads use the long path.
+        # Compare canonical paths so browser picks are copied durably before cache cleanup.
+        self._root = (Path(tempfile.gettempdir()) / "ewp-transcripts-gui-selections").resolve(
+            strict=False
+        )
         self._run_id = uuid4()
         self._workspaces: list[WorkDirectory] = []
 
