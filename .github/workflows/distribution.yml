@@ -24,8 +24,13 @@ on:
       - 'scripts/setup-windows.ps1'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
+    # Standard public-repository runners are free; private use needs owner billing review.
+    if: ${{ github.event.repository.private == false }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -46,8 +51,9 @@ jobs:
           name: installer-test-package
           path: ${{ runner.temp }}/installer-artifacts/
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 7
   windows-startup:
+    if: ${{ github.event.repository.private == false }}
     needs: build
     runs-on: windows-latest
     timeout-minutes: 10
@@ -103,6 +109,7 @@ jobs:
         if: always()
         with:
           name: native-windows-startup-evidence
+          retention-days: 7
           path: |
             installers/windows-self-test.json
             installers/previews/

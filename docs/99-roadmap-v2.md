@@ -1,3 +1,9 @@
+Owner sequence2026-11-26: desktop0.25.0 has NOT yet been owner-tested. Document Actions/costs now;
+owner interface test → any fixes → implement AMD support marked (experimental), without physical
+AMD hardware qualification → remaining release tasks → first public release. AMD work is the next
+stage after interface feedback, not merely a permanently deferred question. No AMD or public release
+execution before that boundary. See docs/GITHUB_ACTIONS.md and opening TODO/status.
+
 Owner native Windows application stage2026-11-26:0.25.0 implementation/agent qualification delivered.
 Own WPF/WebView2 window retains reviewed interface; console-free backend/worker lifetime, focus,
 durable close, restart and maintenance coordination pass native Windows tests. See native-windows-app

@@ -1,3 +1,17 @@
+# Actions cost transparency and next stages — 2026-11-26
+
+Owner has NOT yet tested desktop0.25.0. Current task documents existing GitHub Actions usage/costs
+and adds public-only jobs,7-day new-artifact retention and same-ref concurrency cancellation.
+See docs/GITHUB_ACTIONS.md and docs/checkpoints/2026-11-26-actions-costs-plan.md.
+No new cloud build, product rebuild, billing-setting change or remote artifact deletion in this task.
+NEXT: owner desktop/interface test → fixes → AMD support visibly marked (experimental), with no
+physical AMD hardware available → remaining release tasks → first public release. AMD is authorized
+as the stage AFTER interface feedback, not as an immediate implementation/research campaign.
+Before introducing external CI/billing changes, explain usage/costs; paid execution/allowance changes
+require owner approval. Existing0.25.0 package/source/native evidence and prior passes remain intact.
+
+Earlier boundaries follow.
+
 # Delivered native Windows application — 2026-11-26 / 0.25.0
 
 0.25.0 delivered from9b8da316fc0a87fceebaf824f0342dc43788f004. Native run45811242398 PASS:

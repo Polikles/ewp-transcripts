@@ -80,3 +80,7 @@ Architecture and security: [native application](../docs/NATIVE_WINDOWS_APP.md).
 CI also installs only tiny non-ML GUI dependencies in an isolated fixture and tests the real
 window/renderer, pending-file recovery, save refusal, focus and child-process cleanup after crash.
 These tests never download models or send audio; they do not qualify GPU/provider inference.
+
+CI usage, free/public runner rules, artifact storage,7-day retention and owner billing controls are
+documented in [GitHub Actions](../docs/GITHUB_ACTIONS.md). Public-only job guards prevent automatic
+private-repository execution; same-ref runs cancel superseded work. This does not publish releases.

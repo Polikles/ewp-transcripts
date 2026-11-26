@@ -1,3 +1,16 @@
+# Actions documentation and sequencing — 2026-11-26
+
+- [x] Explain GitHub Actions purpose, triggers, runners, artifact retention, cost boundaries and
+      account-level billing limits; verify public repository and inventory existing artifacts.
+- [x] Add public-only job guard,7-day retention for new artifacts and cancellation of older same-ref
+      runs. Validate locally and publish with [skip ci]; do not start another cloud build.
+- [ ] Owner tests native interface0.25.0; resolve any resulting feedback before AMD work.
+- [ ] Then research and implement AMD acceleration support with a visible (experimental) label;
+      cover supported engines/runtime/installer behavior without claiming physical AMD validation.
+- [ ] Close remaining release tasks, then prepare first public release. No publication in this turn.
+
+Earlier stages follow.
+
 # Delivered native Windows application interface — 2026-11-26 / 0.25.0
 
 - [x] Record desktop architecture preserving approved workflow/UI and model/runtime contracts;

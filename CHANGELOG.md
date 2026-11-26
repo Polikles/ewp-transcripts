@@ -4,6 +4,9 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+- Document GitHub Actions usage and cost boundaries; restrict CI jobs to public repositories,
+  retain new build/evidence artifacts for7 days and cancel superseded runs on the same ref.
+
 ## 0.25.0 — 2026-11-26 (Windows desktop application)
 
 - Launch managed Windows installations in their own EwP window with taskbar identity/icon and

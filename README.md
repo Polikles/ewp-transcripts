@@ -63,6 +63,7 @@ One OpenRouter key serves ASR, correction and translation. It can live only in t
 - [Complete EN manual](docs/gui/README.md) and [complete PL manual](docs/gui/pl/README.md).
 - [Advanced CLI](Instructions/README.md), [Windows](Instructions/WINDOWS_NATIVE.md), [Ubuntu upgrade repair](WSL%20config/UBUNTU_UPGRADE.md).
 - [Configuration defaults](src/ewp_transcripts/resources/default-config.toml), [schemas](schemas), [examples](examples).
+- [GitHub Actions: builds, Windows checks and costs](docs/GITHUB_ACTIONS.md).
 - [Changelog](CHANGELOG.md), [testing strategy](docs/TESTING_STRATEGY.md), [current checkpoint](WORK_STATUS.md), [tasks](TODO.md), [roadmap](docs/99-roadmap-v2.md).
 - [Reviewed EN/PL interface reference](docs/ui-language/README.md), [artwork and third-party notices](src/ewp_transcripts/web_assets/brand/NOTICE.txt).
 
