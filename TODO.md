@@ -1,15 +1,18 @@
 # Active owner copy integration — 2026-11-26 / target 0.24.3
 
-- [ ] Compare returned private XLSX EN/PL/notes to immutable original by stable ID, ignoring Decyzja;
-      preserve technical report/terminal English and original AGPL/vendor licenses.
-- [ ] Integrate all owner corrections and explicit blank project-notice deletions; reconcile complete
+- [x] Compare returned private XLSX EN/PL/notes to immutable original by stable ID, ignoring Decyzja;
+      preserve technical report/terminal English and original AGPL/vendor licenses. Completed owner diff:25 UI/1 full/59 notice rows;2 deleted paragraphs.
+- [x] Integrate all owner corrections and explicit blank project-notice deletions; reconcile complete
       templates with fragments, update approved reference/catalog and affected EN/PL offline help.
-- [ ] Link every “download a newer installer” message to repository releases folder; retain later
+- [x] Link every “download a newer installer” message to repository releases folder; retain later
       first public release + EXE placement after native Windows app completion (no publication now).
-- [ ] Render OpenRouter $2 test-spend footnote below instruction in smaller type in all occurrences.
-- [ ] Add existing application light pattern to installer light body, retain dark patterned header.
-- [ ] Focused copy/link/footnote/theme native checks, normal gate, fresh versioned native installer,
+- [x] Render OpenRouter $2 test-spend footnote below instruction in smaller type in all occurrences.
+- [x] Add existing application light pattern to installer light body, retain dark patterned header.
+- [x] Focused copy/link/footnote/theme native checks, normal gate, fresh versioned native installer,
       inspected Windows previews and verified immutable delivery for owner's manual copy/layout review.
+- [ ] Owner manual copy/layout review of delivered0.24.3 (no renewed full transcription campaign).
+- [ ] After native Windows interface, publish first public release and place its .exe in releases/;
+      prepare binary storage for the standalone EXE (current157311032 bytes) before public publishing.
 - [ ] Later, AFTER native Windows interface: research AMD adapter feasibility across ASR/alignment/
       diarization, Windows/runtime support and packaging. No AMD hardware available; any unqualified
       adapter must be visibly labelled experimental. Research/implementation not in this task.
@@ -26,7 +29,7 @@ Earlier stages follow.
       current/original copy and correction/status/notes fields; retain existing app workbook unchanged.
 - [x] Automated coverage/duplicate/round-trip/placeholder and workbook layout metadata checks
       (no native Excel/LibreOffice rendering available); deliver review files/instructions/checkpoint. No product changes/build/manual retest.
-- [ ] Await returned wording corrections before applying product text/help; native app shell stays later.
+- [x] Returned corrections integrated in0.24.3; native app shell stays after copy/layout approval.
 
 Earlier stages follow.
 
@@ -47,7 +50,7 @@ uninstall and prior focused acceptance; use automated checks only for this chang
 Copy stage requested after this correction:
 - [x] Full installer EN/PL text inventory with stable editable IDs and disk copy flagged for review,
       and inventory/audit flags in notices/licensing/credits for project-only or misleading wording.
-- [ ] Integrate accepted wording and synchronize affected offline help.
+- [x] Integrate accepted wording and synchronize affected offline help (0.24.3).
 - [ ] Native Windows app shell/lifetime after installer closure; release/signing separately.
 
 Earlier tasks follow.

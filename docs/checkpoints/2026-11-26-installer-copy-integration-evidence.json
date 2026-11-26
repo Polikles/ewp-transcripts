@@ -22,5 +22,82 @@
     "ruff": "PASS",
     "format_files": 302,
     "mypy_files": 119
+  },
+  "delivery": {
+    "version": "0.24.3",
+    "source_commit": "d57480694fbc197037ebd3114756a5d794a5e88c",
+    "source_dirty": false,
+    "run_id": 45785526544,
+    "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45785526544",
+    "result": "PASS",
+    "local_gate": {
+      "passed": 1176,
+      "skipped_windows": 12,
+      "integrations_included": 17,
+      "mypy_files": 119,
+      "ruff_format": "PASS"
+    },
+    "native": {
+      "groups": 42,
+      "windows_cases": 12,
+      "case_duration_seconds": 20.85,
+      "previews": 43,
+      "contact_sheet_inspected": true,
+      "full_size_inspected": [
+        "en-openrouter-step",
+        "pl-openrouter-step",
+        "en-newer-installer-update",
+        "pl-reviewed-openrouter-narrow",
+        "pl-newer-installer-models",
+        "en-step-1",
+        "pl-reviewed-openrouter-footnote"
+      ]
+    },
+    "artifacts": {
+      "EwP-0.24.3-windows-x64.zip": {
+        "sha256": "6c4e4f397a4ad7d679143342d640ad6959a8276e47e2f08b184cd69211474762",
+        "bytes": 16974694
+      },
+      "EwP-0.24.3-ubuntu-x64.zip": {
+        "sha256": "2a1f4fa223b4c564d98dc60301f47afcf593bffbb31f126b57d3ca6258a4206b",
+        "bytes": 18620517
+      },
+      "EwP-Setup-0.24.3.exe": {
+        "sha256": "c8a84a356260e8c646dee528ad6de653ebadfe1dccfddaecc518954ad462e09b",
+        "bytes": 157311032
+      },
+      "EwP-0.24.3-ubuntu-x64.tar.gz": {
+        "sha256": "69fb7d16c64eb4179bae7a3abc2cabcb09de4e71e2f2a1fe5f6ab0bb8872201a",
+        "bytes": 35427694
+      },
+      "Install-EwP-0.24.3.ps1": {
+        "sha256": "229b040fcee7c822e784faa474dc32f059570f961fff21926de7924f45fc8d28",
+        "bytes": 1426
+      },
+      "Install-EwP-0.24.3.sh": {
+        "sha256": "92b86ecb78eb394d63039b78213f13c4fbd7e1af01c47280415f199abfd1b6c4",
+        "bytes": 808
+      }
+    },
+    "ci_artifacts": [
+      {
+        "id": 15099089369,
+        "name": "installer-test-package",
+        "sha256": "a14f5304ef3e37556ae1ac88cd1b698d28a6a196320ea8ecd9020f91f7f4a35c"
+      },
+      {
+        "id": 15100362235,
+        "name": "native-windows-startup-evidence",
+        "sha256": "9d582bf92020c3e08e3b2caa3de815243ea485cb1949e83f023c6548ae7e1d38"
+      }
+    ],
+    "prior_installer_hashes_verified": 56,
+    "all_bundle_hashes_verified": true,
+    "all_app_files_match_committed_source": true,
+    "model_pins_unchanged": true,
+    "original_agpl_and_vendor_notices_unchanged": true,
+    "owner_manual_review": "pending copy/layout review, no new transcription test requested",
+    "release": "unsigned internal review build; no public release created",
+    "amd": "research after native Windows interface; experimental until hardware qualification"
   }
 }

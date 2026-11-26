@@ -1,13 +1,18 @@
-# Active owner integration — 2026-11-26 / 0.24.3
+# Delivered owner copy integration — 2026-11-26 / 0.24.3
 
-Returned private installer XLSX is authorized for value-by-ID integration; Decyzja is ignored.
-See opening TODO and docs/checkpoints/2026-11-26-installer-reviewed-copy.md. Apply approved EN/PL,
-explicit blank notice deletions, language-specific project notices, release-folder hyperlinks,
-small separate OR spend footnote, and light body artwork. Prepare a new installer for owner
-manual copy/layout review. Prior “await returned table/no build” boundary is superseded.
-Original AGPL/vendor licenses and technical English remain. No AMD adapter/research now: TODO
-AFTER native Windows interface, experimental without hardware qualification. First public release
-and .exe in releases/ also follow native interface. No paid/model/provider campaign; old artifacts kept.
+0.24.3 delivered from d57480694fbc197037ebd3114756a5d794a5e88c, native run45785526544 PASS:
+42 WPF groups/12 real Windows cases,1176 local tests/17 integrations, Ruff/format/mypy119 PASS.
+All43 native previews inspected in overview and7 focused full-size views; six product hashes,
+CI archive digests and source payload verified. Files: /home/linuch/project-ewp/deliveries/ewp-0.24.3-installers.
+Follow opening TODO and docs/checkpoints/2026-11-26-installer-reviewed-copy.md / integration evidence.
+Owner EN/PL values applied without Decyzja;2 explicit notice deletions, Polish companion notices,
+release-folder hyperlinks, separate smaller OR spend footnote and light body motif delivered.
+Original AGPL/vendor licenses, report/terminal English, model pins, app workbook and56 prior
+installer hashes unchanged. Raw private returned XLSX remains private; approved values archived.
+NEXT: owner manual text/layout review. No repeated full transcription/model/paid campaign or build
+merely on resume. Native Windows app interface follows installer copy/layout closure. AMD research
+is TODO AFTER native interface; experimental without hardware qualification. First public release
+and .exe in releases/ also follow native interface; no public release/signing done here.
 
 Earlier boundaries follow.
 
