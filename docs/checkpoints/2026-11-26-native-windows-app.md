@@ -66,3 +66,10 @@ also covers changing queue timestamps during close: ignore only queue metrics in
 comparison (backend checkpoints latest jobs on shutdown), retry durable path adoption up to3 times,
 and retain strict review/pending-media/form checks. Added model-free native live-metric regression;
 last qualification pending. Full local gate1201 PASS/19 skips;17 integrations PASS, no paid calls.
+
+Native run45810181669 from9153d77 PASS; archive digests/six product hashes/446 packaged source files
+verified, desktop host byte-identical to the independent local build.65 images inspected in overview.
+Visual review found close-dialog captures omitted the window background and clipped content margins.
+Use an opaque padded dialog root; native checks now assert background alpha and complete button bounds.
+Unsent9153d77 candidate moved to task scratch without overwriting it; final source/build will differ.
+All68 prior owner-delivery hashes remain untouched. Final fresh candidate/native render review pending.
