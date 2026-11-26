@@ -10,6 +10,22 @@ HIP ASR runs in a private child process so its OpenMP/DLL runtime is isolated fr
 stages. The native application's owned process job also owns this worker. Doctor probes HIP and
 the CPU speech libraries separately; transcript data travels only through the local worker pipe.
 
+Implemented in **0.26.0**, product source `6c5fbcd463283187f99b262ae819012c56249347`.
+See [native qualification evidence](checkpoints/2026-11-26-snap-amd-evidence.json) and
+[EN](gui/windows-native.md) / [PL](gui/pl/windows-native.md) launch instructions.
+
+## Implementation map
+
+| Component | Responsibility |
+| --- | --- |
+| `installer/manager.py`, `installer/windows/WizardAmd.cs` | PCI display-adapter detection, profile inventory, preflight and blocking Install/Update acknowledgement |
+| `scripts/setup-amd.py`, `scripts/setup-windows.ps1` | Verified dependency overlay after the ordinary locked environment setup |
+| `src/ewp_transcripts/resources/amd-windows-runtime.json` | Exact upstream URLs, sizes, archive/wheel/DLL SHA-256 pins |
+| `src/ewp_transcripts/config.py`, `application.py` | Hardware-profile default, explicit-config precedence, AMD ASR plus CPU stages |
+| `src/ewp_transcripts/engines/amd.py`, `amd_runtime.py` | Private HIP ASR worker, offline pinned models, runtime identity/device checks |
+| `src/ewp_transcripts/doctor.py` | Separate HIP and CPU diagnostics to avoid mixing DLL/OpenMP runtimes |
+| `tests/unit/test_amd.py`, `test_amd_windows.py` | Adapter/failure/download guards and actual native DLL-import qualification without models |
+
 ## Installation and profile selection
 
 Install/Update host checks query PCI display adapters, not processor architecture. An AMD processor
@@ -17,6 +33,10 @@ or the name AMD64 does not activate AMD support. An AMD display adapter also tri
 on a mixed NVIDIA/AMD PC. Close the warning to stay at the computer-check page, or choose
 **I understand, continue** to acknowledge it. A repeated render/disk refresh does not reopen the
 same acknowledged warning; a new installer session or operation requires its acknowledgement.
+The Polish dialog says **obsługa kart AMD jest eksperymentalna i nie została przetestowana**,
+with **Rozumiem, kontynuuj**. Terminal installation uses the same backend acknowledgement:
+`Install-EwP.ps1 -AcceptExperimentalAmd` (manager flag `--accept-amd-experimental`). This does
+not grant model terms or cloud-upload consent.
 
 Fresh AMD-only hosts select the AMD runtime profile; fresh mixed hosts retain the NVIDIA profile.
 An existing AMD profile is retained while its adapter remains available. The managed state stores
@@ -46,7 +66,18 @@ repair or `scripts/setup-windows.ps1` with the AMD profile environment selected.
 launch uses the prepared environment without synchronizing it again.
 
 Source-checkout users explicitly set `$env:EWP_LOCAL_ACCELERATOR='amd'` before setup and launch;
-keep that selection for subsequent repair. This adapter does not enable AMD on Ubuntu/WSL, Ryzen
+keep that selection for subsequent repair. Use `--no-sync` when invoking the prepared AMD
+environment so uv does not replace the verified HIP overlay with the base NVIDIA wheel:
+
+```powershell
+$env:EWP_LOCAL_ACCELERATOR = 'amd'
+powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1 -Install
+uv run --locked --no-sync transcriber doctor --test-speech-runtime
+uv run --locked --no-sync transcriber gui
+```
+
+Model preparation remains a separate deliberate step as described in the installation guide.
+This adapter does not enable AMD on Ubuntu/WSL, Ryzen
 NPUs, DirectML or arbitrary ROCm/PyTorch combinations. NVIDIA remains the unchanged default there.
 
 ## Qualification boundary

@@ -42,6 +42,12 @@ The PowerShell execution-policy override applies only to that invocation. The sc
 
 Private FFmpeg is normally under `%LOCALAPPDATA%\ewp-transcripts\ffmpeg-7`. Launch prepares process-specific media/Torch DLL lookup. An explicit `EWP_FFMPEG_PREFIX` can point to another supported shared-build root containing `bin`. A system FFmpeg executable or static build alone does not provide the compatible DLLs required by TorchCodec 0.7.
 
+For an AMD source checkout, set `$env:EWP_LOCAL_ACCELERATOR='amd'` before setup/repair and
+use `uv run --locked --no-sync` for doctor, model preparation and launch. Ordinary uv sync can
+replace the HIP overlay with the base NVIDIA wheel; rerun AMD setup/repair if that happens.
+The source commands above otherwise describe the NVIDIA baseline. See the
+[AMD source procedure](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
+
 ## Repair
 
 Save work and stop the GUI, then run:

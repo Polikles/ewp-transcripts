@@ -43,6 +43,12 @@ Obejście polityki PowerShell działa tylko dla tego uruchomienia. Skrypt używa
 
 Prywatny FFmpeg zwykle znajduje się w `%LOCALAPPDATA%\ewp-transcripts\ffmpeg-7`. Program przygotowuje wyszukiwanie DLL audio i Torch dla własnego procesu. Jawne `EWP_FFMPEG_PREFIX` może wskazywać inny zgodny katalog współdzielonej wersji z podkatalogiem `bin`. Sam systemowy FFmpeg lub kompilacja statyczna nie zapewniają DLL potrzebnych TorchCodec 0.7.
 
+W repozytorium źródłowym AMD przed przygotowaniem lub naprawą ustaw
+`$env:EWP_LOCAL_ACCELERATOR='amd'`. Diagnostykę, przygotowanie modeli i program uruchamiaj przez
+`uv run --locked --no-sync`. Zwykła synchronizacja uv może zastąpić biblioteki HIP bazowym pakietem
+NVIDIA; wtedy ponów przygotowanie lub naprawę AMD. Powyższe polecenia bez tej zmiany opisują
+bazowy wariant NVIDIA. [Procedura AMD](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md).
+
 ## Naprawa
 
 Zapisz pracę i zatrzymaj GUI, a następnie uruchom:

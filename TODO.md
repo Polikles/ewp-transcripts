@@ -1,3 +1,26 @@
+# Documentation and next-plan reconciliation — 2026-11-26
+
+- [x] Make the delivered AMD implementation discoverable from README, docs index, configuration
+      and EN/PL installation/native guides; document scope, acknowledgement, pins and test limits.
+- [x] Reconcile remaining TODO/backlog/roadmap items with delivered work; distinguish release work,
+      optional/dependent follow-ups and removed scope. Report next steps without executing them.
+- [x] Validate documentation links/mirrors/version examples and record a checkpoint. Documentation
+      only: no new installer, cloud run, GPU/model/provider campaign or public publication.
+
+## Next product actions (details in the current roadmap)
+
+- [ ] Address any newly reported0.26.0 Snap/update defects; no repeated full manual/model campaign.
+- [ ] Final release consistency review: current EN/PL docs, notices/credits/licenses, metadata and
+      exact supported/experimental platform wording, preserving approved copy and original licenses.
+- [ ] Prepare final release version/source/notes/artifacts/SHA256 and EXE storage in `releases/`.
+- [ ] Publish the deliberate first public tag/release/assets; verify actual downloads and matching
+      online bootstrap URLs afterward. No publication is part of this documentation-only request.
+- [ ] Parallel/non-blocking: artist feedback/icons, then final screenshots; optional signing if a
+      certificate becomes available. AMD hardware qualification remains unavailable/non-blocking.
+
+Current plan: [roadmap](docs/99-roadmap-v2.md#current-next-actions--2026-11-26).
+Older task sections below are historical completion records; superseded waits are not new gates.
+
 # Snap recovery and AMD(experimental) — 2026-11-26 /0.26.0
 
 - [x] Persist/restore actual snapped half-screen bounds, normal position and maximization; verify
@@ -61,8 +84,8 @@ Earlier stages follow.
 - [x] Update EN/PL copy/help/checkpoints and deliver concrete desktop app for owner review.
       No paid/model/transcription campaign; AMD research and first public release stay after native UI.
 
-- [ ] Focused owner desktop review. Preserve accepted inference/installer passes; public release
-      and AMD research remain later. No full manual/model/paid campaign on resume.
+Historical owner-review wait superseded by0.25.1/0.26.0 feedback and fixes above. Personalization
+and closing accepted; no unreported0.26.0 owner Snap pass is claimed.
 
 Earlier stages follow.
 
@@ -96,10 +119,9 @@ Earlier stages follow.
       inspected Windows previews and verified immutable delivery for owner's manual copy/layout review.
 - [x] Owner0.24.3 review reached functional feedback; further manual retests waived after0.24.4.
 - [ ] After native Windows interface, publish first public release and place its .exe in releases/;
-      prepare binary storage for the standalone EXE (current157311032 bytes) before public publishing.
-- [ ] Later, AFTER native Windows interface: research AMD adapter feasibility across ASR/alignment/
-      diarization, Windows/runtime support and packaging. No AMD hardware available; any unqualified
-      adapter must be visibly labelled experimental. Research/implementation not in this task.
+      prepare binary storage for the standalone EXE (0.26.0:216719416 bytes) before public publishing.
+- [x] AMD research and implementation delivered in0.26.0: Windows HIP ASR, CPU alignment/diarization,
+      experimental labels and acknowledgement. Physical AMD qualification remains unperformed.
 
 Earlier stages follow.
 
@@ -248,8 +270,8 @@ See `docs/checkpoints/2026-11-24-workspace-uninstall-followup.md`.
       checks; distinct test version and immutable verified delivery; maintain affected EN/PL docs.
 - [x] Owner0.23.1 feedback received; confirmed removal/work-state pass retained. Remaining
       corrections and focused acceptance are promoted to0.23.2 above.
-- [ ] Deferred until copy review: shorten disk-space prose. Native Windows app interface remains
-      after installer closure; no new paid/model campaign or artist-archive changes.
+- [x] Installer copy review/integration delivered in0.24.3,25GB consistency in0.24.4; native
+      Windows interface delivered in0.25.0. No duplicate copy/native task remains here.
 
 Updated: 2026-11-24. Read WORK_POLICY.md, WORK_STATUS.md and the active checkpoint after resume.
 Authoritative sequencing: [roadmap](docs/99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
@@ -278,16 +300,20 @@ See `docs/checkpoints/2026-11-24-installer-lifecycle-startup.md`.
 - [x] Clean idle Ctrl+C/launcher shutdown; preserve running-job safeguards.
 - [x] After installer fixes: automatic startup recovery/autosave from launch, before output selection; associate saved state with output root, respect protected install directories.
 - [x] Focused regression/integration/native Windows previews/lifecycle checks; new versioned delivery and affected EN/PL docs. See checkpoint/evidence; actual owner0.23.0 review remains pending.
-- [ ] Later, after installer closure: native Windows application interface with controlled lifetime and unsaved/active-work handling. Do not implement the native app shell in this installer pass.
+- [x] Native Windows interface with controlled lifetime and unsaved/active-work handling delivered
+      in0.25.0, followed by Personalization and Snap fixes through0.26.0.
 
 Historical handoff (superseded by active feedback above):
 Read [complete session handoff](docs/checkpoints/2026-11-24-session-handoff.md). Owner was reviewing
 installer0.22.2 and will send feedback in a NEW session. No product changes/builds requested now.
 
-- [ ] Receive and address the next owner installer review; prepare a new version only for a new changed build.
-- [ ] After installer GUI completion, consolidate full installer EN/PL copy for owner correction and integrate it.
-- [ ] Actual owner Win11 managed-install/UAC/local-model and focused lifecycle acceptance after GUI approval; preserve prior application workflow acceptance.
-- [ ] Maintain affected EN/PL installation/update/removal docs and packaged help after accepted installer changes.
+- [x] Subsequent owner installer reviews addressed through0.24.4; later desktop/AMD builds retain
+      focused qualification rather than reopening this historical wait.
+- [x] Complete installer EN/PL copy inventory, owner correction and integration delivered in0.24.3.
+Historical acceptance checklist superseded by later owner install/update/model/removal reports and
+focused follow-ups. Preserve exact reported passes; do not infer unreported UAC/hardware qualification.
+- [x] Affected EN/PL lifecycle docs and packaged help maintained through current changes; final
+      release consistency review remains in the current queue.
 - [ ] After native acceptance: deliberate release/tag/assets/online bootstrap activation; signing decision if a certificate becomes available. Nothing public has been activated.
 - [ ] Parallel/non-blocking: integrate artist feedback/icons when supplied; documentation screenshots after final artwork. Preserve sent archives.
 
@@ -309,7 +335,7 @@ functional warnings/errors and changed-step docs are adjusted now.
 - [x] Replace literal (i) button with a proper accessible information icon opening HF help.
 - [x] Reflow installer license/artwork text into paragraphs and meaningful line breaks, preserving original attribution/licensing and asset files.
 - [x] Add meaningful Python/native tests for drive-root sibling paths, protected permission flow/lock, detection/reset, version/VC outcomes, control alignment and info icon; inspect native screenshots. Run normal gates, clean matching artifacts, docs/checkpoints, commit/push.
-- [ ] After GUI approval: consolidate full installer EN/PL descriptions/communications for owner review. This is intentionally deferred, not part of current wording polish.
+- [x] Full installer EN/PL descriptions inventoried, owner-reviewed and integrated in0.24.3.
 
 Agent delivery complete:0.22.2 sourced51b106; native run45238109373 PASS,46 installer tests,
 1127 Python tests,17 integrations and2 actual native filesystem tests PASS.19 native PNGs

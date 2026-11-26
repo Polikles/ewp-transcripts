@@ -1,11 +1,43 @@
-# Snap recovery and experimental AMD delivered — 2026-11-26
+# Current next actions — 2026-11-26
 
-0.26.0 fixes actual Windows half-screen Snap recovery and adds Windows AMD ASR through an isolated
-CTranslate2 ROCm worker, with CPU alignment/diarization and explicit experimental acknowledgement.
-Native run45892474997 and verified delivery pass; no physical AMD inference is claimed.
-See snap-amd checkpoint/evidence and AMD_EXPERIMENTAL.md. Next: focused owner Snap/update feedback,
-remaining release work and first public release. Personalization and centered closing are accepted;
-keep the source player in the LEFT sidebar. No new paid/model campaign.
+Current product: **0.26.0 internal preview**. Managed installation/update/repair/removal, native
+Windows interface, Personalization, durable closing and actual Windows Snap recovery are delivered.
+Windows AMD ASR is implemented and visibly **experimental**, with CPU alignment/diarization and no
+physical AMD inference qualification. See [AMD scope](AMD_EXPERIMENTAL.md) and
+[0.26.0 evidence](checkpoints/2026-11-26-snap-amd-evidence.json).
+
+This section is the current execution sequence. Earlier dated status paragraphs and detailed
+proposals below retain history; they do not reopen completed work or override the owner dispositions.
+Backlog is maintained in this document; TODO holds the immediate queue, not a competing roadmap.
+
+| Order / lane | Remaining action and completion boundary |
+| --- | --- |
+| 1 — focused feedback | Address any newly reported0.26.0 Snap/update issue. Owner has accepted Personalization/closing;0.26.0 Snap is automatically verified, without claiming owner acceptance. No repeated full manual/inference campaign is required by this plan. |
+| 2 — release preparation | Reconcile current README/manuals/download examples, version/release metadata, compatibility wording and shipped notices/credits/licenses with the actual release contents. Preserve approved wording and original vendor/AGPL texts; fix concrete remaining inconsistencies rather than restarting terminology review. |
+| 3 — distribution preparation | Prepare the final version/source, release notes, artifacts and SHA256; settle storage of the standalone EXE in the requested repository `releases/` location (current0.26.0 EXE216719416bytes), and corresponding public release assets/download URLs. Public tag/release and online bootstrap activation are not yet done. |
+| 4 — first public release | Publish the deliberate versioned tag/release and required installer location, then verify actual downloads/checksums and matching Windows/Ubuntu online bootstrap URLs. Do not advertise unpublished URLs or overwrite an earlier immutable build. |
+| Parallel — optional signing | Evaluate signing only if an appropriate certificate becomes available. The current EXE is unsigned; a successful build is not a signature. No certificate purchase/service is authorized by this plan. |
+| Parallel — artwork | Integrate supplied artist feedback/icons when available, without a deadline; preserve sent archives. Take final documentation screenshots after artwork. This does not block other work. |
+
+Physical AMD inference/performance testing requires a suitable card and remains an optional future
+qualification, not a first-release gate. The experimental warning remains until supported evidence
+justifies changing it. Exact local Scribe v2/MAI parity remains dependent on official usable desktop
+weights becoming available; do not substitute other models under those names.
+
+Later optional backlog: Ollama/further local engines; word/phrase playback highlighting; alignment/
+timing refinements; instruction review with less-technical users; non-speech authoring; advanced
+channels/crosstalk/surround; audio repair/comparison; extra subtitle formats. Research benchmarks,
+public/private corpora, universal dictionaries, hardware presets and accurate ETA studies remain
+outside required delivery. Full portable-profile exchange retains provisional acceptance; browser
+zoom200% is optional/unchecked. None of these become a new release gate.
+
+Removed/outside selected scope: Docker, bilingual HTML, extra editorial/LLM punctuation modes,
+speaker-count research, full model catalog/favorites/loading management, manual timing overrides,
+alternate translation chunking, owned input snapshots, whole-block audio following and unselected
+scheduling/automatic-maintenance programs. Historical sections describing them are not current tasks.
+
+Latest reconciliation: [documentation/plan checkpoint](checkpoints/2026-11-26-amd-docs-plan.md).
+No public release, new build/CI or paid/model campaign was executed by this documentation review.
 
 Earlier roadmap entries follow.
 
@@ -270,7 +302,7 @@ terminology approval remains task 10.
 | B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
 | 10 | Complete: stable-ID EN–PL file returned, corrections integrated and resulting interface accepted (checklist1–5 PASS). |
 | 11 | EN audit/update and full PL manuals prepared/verified, with fifteen chapters per language and offline help. New artist-reference ZIP delivered; screenshots wait for final icons. |
-| 12 | Current next package: versioning, update/rollback, Windows/Ubuntu terminal install/uninstall and Windows graphical wizard per the 2026-11-23 distribution plan. Implementation/Ubuntu VM checks delivered in0.22.0; native Windows installer acceptance and public release remain distinct. |
+| 12 | Managed lifecycle and Windows/Ubuntu packages delivered, followed by owner installer feedback, native Windows app and experimental AMD through0.26.0. First public release/download activation remains; use the current action table above. |
 | Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
 
 The sequence is serial within each package. A test checklist is delivered against concrete reviewed

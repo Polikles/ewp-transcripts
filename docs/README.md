@@ -1,7 +1,7 @@
 # Documentation Index
 
 Start ongoing work with [TODO](../TODO.md), [WORK_STATUS](../WORK_STATUS.md) and the
-[owner scope/current roadmap](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
+[owner scope/current roadmap](99-roadmap-v2.md#current-next-actions--2026-11-26).
 Older milestone procedures and checkpoints retain evidence, not competing current priorities.
 
 ## Normative documents
@@ -36,6 +36,18 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 | [GUI step instructions](gui/README.md) | Full instructions for every workflow stage and supporting tool |
 | [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
+
+## Current installation and platform guidance
+
+- [AMD acceleration (experimental)](AMD_EXPERIMENTAL.md): implemented Windows ASR adapter,
+  CPU alignment/diarization, detection/acknowledgement, pinned dependencies and untested GPU boundary.
+- [Native Windows application](NATIVE_WINDOWS_APP.md): window preferences, owned processes,
+  safe closing and platform qualification.
+- [EN installation/update/removal](gui/installation.md) and [PL instructions](gui/pl/installation.md).
+- [Version and delivery policy](VERSIONING.md), [distribution plan](DISTRIBUTION_PLAN.md)
+  and [GitHub Actions usage/costs](GITHUB_ACTIONS.md).
+- [0.26.0 qualification evidence](checkpoints/2026-11-26-snap-amd-evidence.json) and
+  [remaining action plan/backlog](99-roadmap-v2.md#current-next-actions--2026-11-26).
 
 ## Architecture Decision Records
 

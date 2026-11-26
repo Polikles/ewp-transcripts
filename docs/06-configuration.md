@@ -15,6 +15,15 @@ From highest to lowest priority:
 
 The effective configuration must be stored in `results.json`, excluding secrets.
 
+### Local accelerator profile (0.26.0)
+
+`[models].accelerator` accepts `"nvidia"` (default) or `"amd"` (experimental Windows ASR).
+Managed launch sets `EWP_LOCAL_ACCELERATOR=amd` for an installed AMD profile; this supplies a
+profile default before explicit TOML/CLI settings, which retain higher precedence. Selecting AMD
+in configuration alone does not install its runtime or models. The AMD adapter uses float16 ASR
+in an isolated HIP worker, with CPU alignment/diarization and serial decoding. See
+[AMD installation, runtime pins and limits](AMD_EXPERIMENTAL.md). The NVIDIA baseline is unchanged.
+
 ## 2. Locations
 
 Recommended locations:

@@ -51,17 +51,33 @@ Pola postępu zachowują położenie, a raz otwarty dziennik pozostaje rozwinię
 
 ## Wybierz sposób instalacji
 
-1. W Windows uruchom kreator `EwP-Setup-0.25.0.exe` i wykonaj opisane niżej kroki.
+1. W Windows uruchom kreator `EwP-Setup-0.26.0.exe` i wykonaj opisane niżej kroki.
 2. Do instalacji terminalowej pobierz ZIP Windows albo tar.gz/ZIP Ubuntu i użyj krótkich poleceń poniżej. Nie trzeba ręcznie klonować repozytorium ani wcześniej instalować Python i uv.
 3. Jeśli pracujesz z repozytorium jako programista lub dotychczasowy użytkownik, zachowaj ten sposób i korzystaj z sekcji aktualizacji checkoutu. To nie jest instalacja zarządzana.
 
-Instalacja zarządzana pojawiła się w0.22.0;0.25.0 poprawia kreator graficzny. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
+Instalacja zarządzana pojawiła się w0.22.0;0.25.0 dodaje własne okno aplikacji Windows. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
 
 Obecne cele to Windows 11 x64 oraz Ubuntu 24.04/26.04, w tym WSL2. Wcześniejsze testy programu w Windows/WSL pozostają zaakceptowane. Nowy cykl instalacji zarządzanej ma rzeczywiste testy na VM Ubuntu; pełny test instalacji i usuwania na Windows 11 jest osobny od kompilacji lub uruchomienia okien na runnerze CI. Testowe GPU to RTX 3090 24 GB. Oczekiwanie działania na innych NVIDIA z co najmniej 8 GB VRAM nadal nie jest gwarancją.
 
+## AMD w Windows (experimental)
+
+Od0.26.0 komputer Windows z samą kartą AMD może używać ROCm/HIP do ASR. Wyrównanie słów
+oraz rozpoznawanie mówców działa na CPU. Transkrypcja i wydajność na fizycznej karcie AMD nie
+zostały przetestowane. Wykrycie karty AMD przy instalacji lub aktualizacji otwiera okienko
+**obsługa kart AMD jest eksperymentalna i nie została przetestowana** z przyciskiem
+**Rozumiem, kontynuuj**. Zamknięcie okienka pozostawia „Dalej” zablokowane. Ostrzeżenie pojawia się
+również przy kartach obu producentów; nowa instalacja domyślnie zachowuje wtedy NVIDIA.
+Sam procesor AMD nie uruchamia tego profilu. Odpowiedni sterownik GPU instaluje się osobno.
+
+Zweryfikowane biblioteki wymagają dodatkowo około1,33GB pobierania i3,71GB po rozpakowaniu,
+bez zmiany modeli. Automatyczna diagnostyka sprawdza dostępność HIP i float16; niezgodny sprzęt
+lub sterownik kończy się błędem diagnostyki. W terminalu potwierdzenie ma postać
+`-AcceptExperimentalAmd`. [Opis implementacji i ograniczeń](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md)
+oraz [uruchamianie i naprawa Windows](windows-native.md). Ten adapter nie włącza AMD w Ubuntu/WSL.
+
 ## Kreator Windows
 
-Uruchom `EwP-Setup-0.25.0.exe` na zwykłym koncie użytkownika. Paczka zawiera program,
+Uruchom `EwP-Setup-0.26.0.exe` na zwykłym koncie użytkownika. Paczka zawiera program,
 środowisko graficzne i wyśrodkowane logo EwP w ramce; nie zawiera wielogigabajtowych modeli.
 
 1. **Działanie i język.** Wybierz English/Polski oraz jedno działanie: Zainstaluj, Aktualizuj,
@@ -131,8 +147,8 @@ Tokeny/klucze nie trafiają do profili, raportów ani tekstowego zapisu awaryjne
 PowerShell w Windows, w katalogu pobranego ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.25.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.25.0-windows-x64.zip
+Expand-Archive .\EwP-0.26.0-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.0-windows-x64.zip
 ```
 
 Po zaakceptowaniu warunków modelu dodaj `-Local -AcceptModelTerms`, aby przygotować modele lokalne. Monit tokenu jest ukryty; pusta odpowiedź pozwala użyć kompletnych modeli. `-SaveOpenRouterKey` włącza osobny ukryty monit i jawny zapis OR w systemie. `-Root 'D:\Apps\EwP'` wybiera własny pusty katalog. Obejście polityki PowerShell dotyczy tylko tego uruchomienia. Ścieżki ze spacjami obejmuj cudzysłowami.
@@ -141,13 +157,13 @@ Ubuntu 24.04/26.04, w katalogu pobranego tar.gz:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.25.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.26.0-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Dodaj `--local --accept-model-terms` dla modeli, `--save-openrouter-key` dla ukrytego monitu OR lub `--root "$HOME/Apps/EwP"` dla innej lokalizacji. Brakujące pakiety Ubuntu można zainstalować po jawnym monicie sudo. Nie instaluj sterownika ekranu Linuksa wewnątrz WSL; CUDA udostępnia sterownik Windows. Zgodność z fizycznym Ubuntu trzeba potwierdzić wykonaniem, a nie wnioskować tylko z WSL.
 
-Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.25.0.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
+Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.26.0.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
 
 ## Aktualizacja zarządzana i poprzednia wersja
 

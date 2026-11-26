@@ -1,3 +1,17 @@
+# AMD documentation and remaining plan reconciled — 2026-11-26
+
+Documentation-only follow-up to0.26.0: AMD implementation/profile/runtime/test limits are linked
+from README/docs index/configuration and EN/PL installation/native guides. Current download examples
+use0.26.0; four packaged guide pairs match.285 relative links and diff whitespace pass.
+Historical native/AMD/copy TODO waits are reconciled. Read the opening current-next-actions table in
+docs/99-roadmap-v2.md and docs/checkpoints/2026-11-26-amd-docs-plan.md before earlier dated plans.
+NEXT: final release consistency review and artifact/storage preparation, then deliberate first
+public release/download activation; address concrete new Snap/update feedback if supplied.
+Physical AMD testing, artist feedback/screenshots, optional signing/research remain non-blocking.
+No new installer/build/CI/model/provider campaign/publication; verified0.26.0 bytes remain unchanged.
+
+Earlier delivery evidence follows.
+
 # Delivered Snap recovery and experimental AMD — 2026-11-26 / 0.26.0
 
 Owner accepted Personalization and centered closing. Windows Snap now captures the actual screen

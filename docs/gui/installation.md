@@ -20,7 +20,7 @@ The check is repeated before preparation; cached complete models still do not re
 
 ## Choose installation mode
 
-1. For the Windows graphical installer, run `EwP-Setup-0.25.0.exe` and follow the wizard below.
+1. For the Windows graphical installer, run `EwP-Setup-0.26.0.exe` and follow the wizard below.
 2. For terminal installation, download the Windows ZIP or Ubuntu tar.gz/ZIP and run the short commands below. No manual repository checkout or preinstalled Python/uv is required.
 3. Keep an existing source checkout if that is how you develop/run the app; use the source-update section instead of treating it as a managed installation.
 
@@ -28,9 +28,24 @@ Managed installation was introduced in0.22.0;0.25.0 adds the Windows application
 
 Current targets are Windows 11 x64 and Ubuntu 24.04/26.04, including WSL2. Existing application workflow tests on Windows/WSL remain accepted. The new managed lifecycle has real Ubuntu VM evidence; native Windows 11 installation/removal acceptance is separate from compiling or launching the wizard on a Windows CI runner. Reference GPU: RTX 3090 24 GB. At least 8 GB on another NVIDIA GPU remains an unqualified expectation.
 
+## AMD on Windows (experimental)
+
+Since0.26.0, AMD-only Windows hosts can use the ROCm/HIP ASR adapter. Word alignment and speaker
+diarization run on CPU. Physical AMD inference/performance has not been tested. During Install
+or Update, detecting an AMD display adapter opens **AMD GPU support is experimental and has not
+been tested.** Choose **I understand, continue** to proceed; closing the dialog leaves Next blocked.
+Mixed NVIDIA/AMD hosts also show the warning but retain NVIDIA by default on a new installation.
+An AMD processor alone does not trigger it. Install the appropriate GPU driver separately.
+
+The verified AMD dependency overlay adds about1.33GB download /3.71GB extracted, without changing
+model snapshots. Automatic doctor checks the HIP device and float16 support; unsupported hardware
+or drivers fail diagnostics. Terminal installation acknowledges this with `-AcceptExperimentalAmd`.
+See [implementation and limits](https://github.com/Polikles/ewp-transcripts/blob/main/docs/AMD_EXPERIMENTAL.md)
+and [Windows setup/repair](windows-native.md). This adapter does not enable AMD on Ubuntu/WSL.
+
 ## Windows wizard
 
-Run `EwP-Setup-0.25.0.exe` from a normal user account. It embeds the application bundle,
+Run `EwP-Setup-0.26.0.exe` from a normal user account. It embeds the application bundle,
 its own graphical runtime and the centered framed EwP icon, not multi-GB model data.
 
 1. **Action and language.** Select English/Polski and one radio action: Install, Update, Repair,
@@ -44,7 +59,7 @@ its own graphical runtime and the centered framed EwP icon, not multi-GB model d
    OK and change language immediately with the language selector. Windows uses its release name
    (for example26H2); older/unknown releases show a compatibility warning. The Visual C++ link opens
    Microsoft's instructions only after a missing or inconclusive runtime result; it does not trigger a direct executable download. Install a missing
-   NVIDIA driver separately. Host tests prepare a small private Python runtime if needed.
+   NVIDIA or AMD driver, as applicable, separately. Host tests prepare a small private Python runtime if needed.
 3. **Local models and HF token.** Select **Use local models on my GPU…** to show the fixed checked
    baseline model list and required space (about8.4 GB before cache reuse, plus sentence data).
    Optional unchecked Whisper Large v3 (about3.1 GB) and Large v3 Turbo (about1.6 GB) can be added. Existing
@@ -120,8 +135,8 @@ or key is written to a profile, report or plaintext fallback. See [Settings](set
 Windows PowerShell, from the directory containing the downloaded ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.25.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.25.0-windows-x64.zip
+Expand-Archive .\EwP-0.26.0-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.0-windows-x64.zip
 ```
 
 Add `-Local -AcceptModelTerms` after accepting the upstream gated-model terms to prepare local models. The token prompt is hidden; blank can reuse complete models. Add `-SaveOpenRouterKey` only if you want a separate hidden prompt and explicit OS-store save. `-Root 'D:\Apps\EwP'` chooses a custom empty location. The execution-policy override applies to this invocation only. Keep filenames/paths quoted when they contain spaces.
@@ -130,13 +145,13 @@ Ubuntu 24.04/26.04, from the downloaded tar.gz directory:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.25.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.26.0-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Add `--local --accept-model-terms` for local models, `--save-openrouter-key` for an optional hidden OR prompt, or `--root "$HOME/Apps/EwP"` for a custom directory. Missing Ubuntu prerequisites can be installed with an explicit sudo prompt. Do not install a Linux display driver inside WSL; the Windows NVIDIA driver provides WSL CUDA. A bare-metal Ubuntu compatibility claim requires actual execution evidence, not inference from WSL alone.
 
-Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.25.0.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
+Use the accompanying SHA256SUMS file to check downloaded artifacts. Online entry scripts `Install-EwP-0.26.0.ps1` and `.sh` are generated with exact payload hashes for the corresponding release; they cannot download an unpublished release. These scripts and the GUI share the same lifecycle manager, dependency lock and model rules.
 
 ## Managed update and rollback
 

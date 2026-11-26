@@ -6,27 +6,27 @@ Local-first transcript workflow for podcasts and similar recordings: local GPU o
 
 ## Current status
 
-Version 0.23.0 is an internal preview on `main`. Managed installation/update/removal and a standalone Windows wizard are new; their focused native Windows 11 acceptance is separate from the already accepted application workflow. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification.
+Version 0.26.0 is an internal preview on `main`, with managed installation/update/removal, a standalone Windows wizard and a dedicated Windows application window. Installer and desktop qualification are recorded separately from GPU inference. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a compatibility or performance guarantee. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification. Windows AMD ASR is available as **experimental**, with CPU word alignment/diarization and no physical AMD inference qualification; see [AMD implementation and limits](docs/AMD_EXPERIMENTAL.md).
 
 The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
 
 ## Install and launch
 
-Use the standalone Windows wizard `EwP-Setup-0.23.0.exe`, or the terminal packages below.
-Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers will be enabled after native installer acceptance. The test EXE is unsigned. No manual repository clone or preinstalled Python/uv is needed for these packages.
+Use the standalone Windows wizard `EwP-Setup-0.26.0.exe`, or the terminal packages below.
+Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers remain pending the deliberate first public release. The test EXE is unsigned. No manual repository clone or preinstalled Python/uv is needed for these packages.
 
-Windows PowerShell, after downloading `EwP-0.23.0-windows-x64.zip`:
+Windows PowerShell, after downloading `EwP-0.26.0-windows-x64.zip`:
 
 ```powershell
-Expand-Archive .\EwP-0.23.0-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.23.0-windows-x64.zip -Local -AcceptModelTerms
+Expand-Archive .\EwP-0.26.0-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.0-windows-x64.zip -Local -AcceptModelTerms
 ```
 
 Ubuntu 24.04/26.04, including WSL2, after downloading the corresponding tar.gz:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.23.0-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.26.0-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip" --local --accept-model-terms
 ```
 
@@ -54,7 +54,7 @@ The default raw ASR files are `*_results.json`, `*_segments.json` and `*_transcr
 
 ## Local processing and optional providers
 
-Local ASR uses pinned WhisperX/pyannote/alignment snapshots. Optional OpenRouter ASR uploads audio; assisted correction/translation sends text to OpenRouter or a separately operated LM Studio endpoint after scoped consent. Provider prices, availability and data policies can change. No API response is human approval. Cloud ASR requires real word timestamps and splits long audio into bounded requests; paid retries are explicit.
+Local ASR uses pinned Whisper snapshots with pyannote/alignment models. The NVIDIA path uses WhisperX; the experimental Windows AMD path uses an isolated CTranslate2 ROCm/HIP worker for ASR and CPU alignment/diarization. Install/Update detects AMD display adapters and requires the experimental-support acknowledgement. AMD CPUs alone do not select this profile. [AMD setup, runtime pins and qualification](docs/AMD_EXPERIMENTAL.md) describe the additional download and hardware limits. Optional OpenRouter ASR uploads audio; assisted correction/translation sends text to OpenRouter or a separately operated LM Studio endpoint after scoped consent. Provider prices, availability and data policies can change. No API response is human approval. Cloud ASR requires real word timestamps and splits long audio into bounded requests; paid retries are explicit.
 
 One OpenRouter key serves ASR, correction and translation. It can live only in the GUI server's memory or be deliberately saved in the OS credential store. Connected browsers share the server's active key. Workspaces/profiles/browser storage never contain it or upload/verification confirmations. The app is a single-user loopback tool, not a multi-user hosted service.
 
@@ -63,6 +63,8 @@ One OpenRouter key serves ASR, correction and translation. It can live only in t
 - [Complete EN manual](docs/gui/README.md) and [complete PL manual](docs/gui/pl/README.md).
 - [Advanced CLI](Instructions/README.md), [Windows](Instructions/WINDOWS_NATIVE.md), [Ubuntu upgrade repair](WSL%20config/UBUNTU_UPGRADE.md).
 - [Configuration defaults](src/ewp_transcripts/resources/default-config.toml), [schemas](schemas), [examples](examples).
+- [AMD acceleration (experimental): implementation, installation and limits](docs/AMD_EXPERIMENTAL.md).
+- [Native Windows application: window, lifecycle and qualification](docs/NATIVE_WINDOWS_APP.md).
 - [GitHub Actions: builds, Windows checks and costs](docs/GITHUB_ACTIONS.md).
 - [Changelog](CHANGELOG.md), [testing strategy](docs/TESTING_STRATEGY.md), [current checkpoint](WORK_STATUS.md), [tasks](TODO.md), [roadmap](docs/99-roadmap-v2.md).
 - [Reviewed EN/PL interface reference](docs/ui-language/README.md), [artwork and third-party notices](src/ewp_transcripts/web_assets/brand/NOTICE.txt).
