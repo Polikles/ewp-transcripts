@@ -13,6 +13,7 @@ namespace EwP.Desktop;
 sealed partial class DesktopWindow
 {
     readonly List<string> testChecks = new();
+    bool isolatedTest;
     int testManagerPid, testServerPid;
     void Check(bool condition, string name) { if (!condition) throw new InvalidOperationException("Desktop self-test: " + name); testChecks.Add(name); }
     void WriteTestResult(string result, string error = "")
@@ -27,6 +28,30 @@ sealed partial class DesktopWindow
         throw new TimeoutException("Desktop self-test condition timed out");
     }
     async Task<bool> ScriptFlag(string code) => await view.ExecuteScriptAsync(code) == "true";
+    async Task TestFailure(Exception error)
+    {
+        string detail = error.Message + "\n" + backend.Diagnostic;
+        if (isolatedTest)
+        {
+            try
+            {
+                await CaptureUi("failure");
+                detail += "\n" + await view.ExecuteScriptAsync("JSON.stringify({ready:automaticRecoveryReady,restoring:workspaceRestoreBusy,autosave:workspaceAutosaveStatus.textContent,workspace:workspaceStatus.textContent,pending:collectPendingGuiMedia().length,options:[...workspaceList.options].map(o=>({available:o.dataset.available,value:o.value}))})");
+            }
+            catch { }
+        }
+        WriteTestResult("FAIL", detail);
+    }
+    static string TestWave()
+    {
+        using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
+        writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); writer.Write(356);
+        writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt ")); writer.Write(16);
+        writer.Write((short)1); writer.Write((short)1); writer.Write(16000); writer.Write(32000);
+        writer.Write((short)2); writer.Write((short)16); writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));
+        writer.Write(320); writer.Write(new byte[320]);
+        return Convert.ToBase64String(stream.ToArray());
+    }
     async Task CaptureUi(string name)
     {
         if (previews == null) return;
@@ -39,6 +64,7 @@ sealed partial class DesktopWindow
         // Explicit model-free qualification only: never inject test content into a real installation.
         using var owner = JsonDocument.Parse(File.ReadAllText(Path.Combine(config.Root, "owner.json")));
         Check(owner.RootElement.GetProperty("id").GetString() == "native-desktop-test", "isolated owned test installation");
+        isolatedTest = true;
         await Until(async () => Flag(await Ui("status"), "ready"));
         testManagerPid = backend.Process!.Id;
         var runtime = (await backend.Request())!.Value; testServerPid = runtime.GetProperty("pid").GetInt32();
@@ -53,7 +79,7 @@ sealed partial class DesktopWindow
         if (Environment.GetEnvironmentVariable("EWP_DESKTOP_EXPECT_RECOVERY") == "1") Check(restored, "pending media survived the previous full application shutdown");
         if (!restored)
         {
-            await view.ExecuteScriptAsync("(()=>{const d=new DataTransfer();d.items.add(new File([new Uint8Array(364)],'native-test-s00e01.wav',{type:'audio/wav'}));nativeMediaInput.files=d.files;nativeMediaInput.dispatchEvent(new Event('change',{bubbles:true}));})()");
+            await view.ExecuteScriptAsync("(()=>{const d=new DataTransfer();d.items.add(new File([Uint8Array.from(atob('" + TestWave() + "'),c=>c.charCodeAt(0))],'native-test-s00e01.wav',{type:'audio/wav'}));nativeMediaInput.files=d.files;nativeMediaInput.dispatchEvent(new Event('change',{bubbles:true}));})()");
             await Until(async () => (await Ui("status")).GetProperty("pending_count").GetInt32() == 1);
             Check(!await ScriptFlag("guiQueueJobs.some(j=>['queued','running'].includes(j.status))"), "adding media does not plan or start transcription");
         }

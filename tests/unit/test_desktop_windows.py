@@ -175,6 +175,15 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                 if process.poll() is None:
                     process.kill()
                     process.wait(timeout=10)
+                if report.exists() and json.loads(report.read_text())["result"] != "PASS":
+                    snapshot = {
+                        str(path.relative_to(root)): json.loads(path.read_text(encoding="utf-8"))
+                        for path in (root / "work-state").rglob("*.json")
+                        if path.stat().st_size < 1_000_000
+                    }
+                    (evidence / f"{phase}-synthetic-state.json").write_text(
+                        json.dumps(snapshot, indent=2), encoding="utf-8"
+                    )
     finally:
         if state_directory is not None:
             shutil.rmtree(state_directory, ignore_errors=True)

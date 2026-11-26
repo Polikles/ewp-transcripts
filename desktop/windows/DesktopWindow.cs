@@ -101,7 +101,7 @@ sealed partial class DesktopWindow : Window
         catch (Exception error)
         {
             if (closed) return;
-            if (testReport != null) { WriteTestResult("FAIL", error.Message + "\n" + backend.Diagnostic); FinishClose(); return; }
+            if (testReport != null) { await TestFailure(error); FinishClose(); return; }
             view.Visibility = Visibility.Collapsed;
             ShowNotice(T("EwP Transcripts could not start. Repair the installation or check Microsoft WebView2 Runtime. Details: ", "Nie udało się uruchomić EwP Transcripts. Napraw instalację lub sprawdź składnik Microsoft WebView2 Runtime. Szczegóły: ") + Path.Combine(config.StateDirectory, "desktop.log"));
             var link = new TextBlock { Margin = new Thickness(0, 14, 0, 0) };

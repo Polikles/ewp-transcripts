@@ -34,3 +34,8 @@ media/save failure and durable close-save but found activateWorkspace re-enablin
 Preserve that preference after the explicit close flush. Also retain cancel-Wait after a prior
 save failure and remove its button before actual shutdown; native regression covers this sequence.
 Cross-build passes; rerun pending. Existing68 delivery SHA256 entries verified unchanged.
+
+Native run45805850072: first full desktop save/close, all19 in-window checks and descendant cleanup
+PASS; restart phase timed out before recovery-ready. No product delivery yet. Investigating recovery
+with explicit synthetic-state diagnostics/screenshots. Test media is now a valid generated PCM WAV,
+not arbitrary bytes. Full local gate remains1192 PASS; no models/provider/GPU qualification implied.
