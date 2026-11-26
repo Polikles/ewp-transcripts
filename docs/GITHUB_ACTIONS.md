@@ -87,8 +87,11 @@ an Actions cache retained between runs.
 - If the owner wants all automatic runs stopped, remove the `push` trigger and retain manual dispatch,
   or disable the workflow in repository settings. That is not the current configuration.
 
-This documentation/guardrail change does not rebuild or replace0.25.0. The application package is
+The initial documentation/guardrail change did not rebuild or replace0.25.0. That application package is
 still sourced from `9b8da316fc0a87fceebaf824f0342dc43788f004`, qualified by run `45811242398`.
-The owner has not yet tested it. Next: owner interface test and fixes, then AMD support marked
+The owner subsequently reviewed it and requested window/personalization/player corrections for0.25.1.
+The owner reports $0.89 consumed usage minus $0.89 discounts = $0 billable, with spending limits set0;
+this is owner-supplied account information, not an API billing audit. The documented public standard
+workflow is used for actual Windows qualification of the corrections. Next: focused review/fixes, then AMD support marked
 **(experimental)** without a claim of physical AMD validation, remaining release tasks, and only
 then the first public product release.

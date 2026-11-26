@@ -215,6 +215,48 @@ def test_native_playback_rates_can_be_saved_in_profiles(speed):
     assert GuiPreferences(playbackSpeed=speed).playbackSpeed == speed
 
 
+def test_legacy_profile_gains_safe_personalization_defaults(tmp_path):
+    profile = capture(controller(tmp_path / "source")).model_dump(mode="json")
+    for key in ("defaultPalette", "titleBarMode", "titleBarColor"):
+        profile["preferences"].pop(key)
+    restored = controller(tmp_path / "target").restore(profile)["profile"]["preferences"]
+    assert restored["defaultPalette"] == "configured"
+    assert restored["titleBarMode"] == "system"
+    assert restored["titleBarColor"] == "#24485c"
+
+
+def test_personalization_transfer_remaps_conflicting_default_palette(tmp_path):
+    source, target = controller(tmp_path / "source"), controller(tmp_path / "target")
+    source.library.save_profile(name="Personal", colors=["#123456"])
+    target.library.save_profile(name="Personal", colors=["#654321"])
+    profile = source.capture(
+        name="Appearance",
+        preferences={
+            "defaultPalette": "Personal",
+            "titleBarMode": "custom",
+            "titleBarColor": "#5b193f",
+        },
+        fields={},
+        workspaces=(),
+        dictionary_paths=[],
+    )
+    prefs = target.restore(profile.model_dump(mode="json"))["profile"]["preferences"]
+    palettes = {item["id"]: item["colors"] for item in target.library.profiles()["profiles"]}
+    assert palettes[prefs["defaultPalette"]] == ["#123456"]
+    assert palettes["Personal"] == ["#654321"]
+    assert prefs["titleBarMode"] == "custom" and prefs["titleBarColor"] == "#5b193f"
+
+
+@pytest.mark.parametrize("prefs", [{"titleBarMode": "invalid"}, {"titleBarColor": "red"}])
+def test_invalid_native_personalization_is_rejected_before_writes(tmp_path, prefs):
+    document = capture(controller(tmp_path / "source")).model_dump(mode="json")
+    document["preferences"].update(prefs)
+    target = controller(tmp_path / "target")
+    with pytest.raises(ValueError):
+        target.restore(document)
+    assert not target.directory.exists()
+
+
 def test_portable_profile_keeps_pending_media_references_without_media_or_approval(tmp_path):
     from datetime import UTC, datetime
 

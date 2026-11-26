@@ -19,7 +19,7 @@ sealed partial class DesktopWindow
     void WriteTestResult(string result, string error = "")
     {
         if (testReport == null) return;
-        File.WriteAllText(testReport, JsonSerializer.Serialize(new { result, error, version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(3), pid = Environment.ProcessId, manager_pid = testManagerPid, server_pid = testServerPid, window_handle = new System.Windows.Interop.WindowInteropHelper(this).Handle.ToInt64(), state_directory = config.StateDirectory, checks = testChecks }));
+        File.WriteAllText(testReport, JsonSerializer.Serialize(new { result, error, version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!.ToString(3), pid = Environment.ProcessId, manager_pid = testManagerPid, server_pid = testServerPid, window_handle = new System.Windows.Interop.WindowInteropHelper(this).Handle.ToInt64(), state_directory = config.StateDirectory, window_placement = WindowPlacement.Capture(this), startup_placement = startupPlacement, appearance, checks = testChecks }));
     }
     async Task Until(Func<Task<bool>> check, int seconds = 40)
     {
@@ -70,6 +70,7 @@ sealed partial class DesktopWindow
         var runtime = (await backend.Request())!.Value; testServerPid = runtime.GetProperty("pid").GetInt32();
         Check(Flag(runtime, "desktop") && !Flag(runtime, "busy"), "authenticated owned desktop backend ready");
         Check(GetConsoleWindow() == IntPtr.Zero, "native application has no console");
+        await CheckPlacement();
         Check(!AppConfig.IsLocal("http://127.0.0.1:8765.evil/") && !AppConfig.IsLocal("http://localhost:8765/") && !AppConfig.IsResource("file:///C:/private") && !AppConfig.IsResource("https://example.com/"), "strict loopback origin and resource rules");
         Check(!AppConfig.IsDocument(AppConfig.Origin + "/help") && !AppConfig.IsDocument(AppConfig.Origin + "/assets/app.js"), "only the root document can answer native lifecycle requests");
         await view.ExecuteScriptAsync("window.nativeBlocked=false;fetch('https://example.com/').then(r=>{window.nativeBlocked=r.status===403}).catch(()=>{window.nativeBlocked=true})");
@@ -94,6 +95,7 @@ sealed partial class DesktopWindow
         {
             await view.ExecuteScriptAsync($"(()=>{{const l=document.querySelector('#gui-locale');l.value='{locale}';l.dispatchEvent(new Event('change'));const t=document.querySelector('#gui-theme');t.value='{theme}';t.dispatchEvent(new Event('change'));}})()");
             await CaptureUi(locale + "-desktop-" + theme);
+            await CheckPersonalization(locale, theme);
             Check((await Ui("status")).GetProperty("locale").GetString() == locale, "native lifecycle follows explicit " + locale + " preference");
         }
         await view.ExecuteScriptAsync("workspaceName.value='x'.repeat(101)");
@@ -120,6 +122,9 @@ sealed partial class DesktopWindow
         await Until(() => Task.FromResult(File.Exists(testDownloadPath)));
         Check(File.ReadAllText(testDownloadPath).Contains("Cyryl"), "embedded download writes the selected local file"); testDownloadPath = null;
         if (previews != null) CloseChoice.CaptureAndCheck(this, previews);
+        // First restart checks normal bounds; subsequent restarts also check maximization.
+        WindowState = restored ? WindowState.Maximized : WindowState.Normal;
+        placement.Save(this);
         WriteTestResult("PASS");
         // A crash qualification caller keeps the host alive until it verifies same-instance activation
         // and kills it externally. Normal qualification executes the real save/stop/close path.

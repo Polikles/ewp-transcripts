@@ -430,6 +430,7 @@ def _asset_response(name: str, content_type: str) -> WebResponse:
         body += b"\n" + assets.joinpath("native_picker_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("cloud_asr_controls.js").read_bytes()
         body += b"\n" + assets.joinpath("startup_recovery.js").read_bytes()
+        body += b"\n" + assets.joinpath("personalization.js").read_bytes()
         body += b"\n" + assets.joinpath("desktop_bridge.js").read_bytes()
     if name == "app.css":
         body += b"\n" + assets.joinpath("review_editor_recovery.css").read_bytes()

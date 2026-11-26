@@ -34,6 +34,32 @@ creation-identity and OS-mutex recovery handles abandoned metadata at next start
 
 ## Packaging and runtime
 
+### Window preferences (0.25.1)
+
+Persist the Win32 normal rectangle and maximized state atomically before HWND destruction and
+after a short geometry debounce. Minimized windows retain their normal/maximized restore state.
+Missing, old width/height-only or invalid records use the centered default; SetWindowPlacement
+recovers off-screen rectangles when displays change. Repeated launch restores a minimized window
+without losing its maximized state. Geometry is per-installation local state, not a portable profile.
+
+Settings & About → User profile → Personalization shares language/theme, default palette, playback
+speed, review layouts and ETA with browser mode. Portable profiles include these preferences;
+custom palette conflicts are remapped without changing existing colors. Native-only title-bar modes
+are system (default), application theme and custom RGB color. A narrow appearance WebView message
+updates DWM caption/text attributes with contrasting text; system preference changes are observed.
+Cache resolved appearance locally for the next window before the renderer is ready.
+
+Save/shutdown progress is an owned, centered native popup with the opposite app theme. This avoids
+WebView2 child-window airspace hiding a WPF overlay. Save refusal still keeps the window/backend
+open; busy decisions and owned-worker lifetime remain unchanged. Source audio stays in the left
+sidebar, bounded to its normal column, with the Chromium additional-controls menu preserved.
+
+Microsoft references checked 2026-11-26:
+[window placement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowplacement),
+[DWM attributes](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute).
+
+### Build and dependencies
+
 Use the existing pinned.NET10 WPF toolchain and exact stable WebView2 SDK1.0.4370.26. Ship the
 SDK's actual license with existing.NET/uv notices; retain all owner-reviewed project/legal prose.
 Use the shared Evergreen WebView2 Runtime. Check before launching Python; if unavailable, show

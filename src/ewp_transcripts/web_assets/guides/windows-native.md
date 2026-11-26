@@ -2,6 +2,11 @@
 
 ## Managed launch and shutdown
 
+The window remembers its last position, normal size and maximized state. Without valid saved
+geometry it uses the centered default. Windows brings an off-screen saved position back onto
+an available display. Personalization in Settings & About → User profile controls the title bar.
+Saving and shutdown progress appears centered in the opposite theme for contrast.
+
 Since0.25.0 the managed shortcut opens a dedicated EwP Transcripts window without PowerShell
 or a separate browser. Opening the shortcut again brings that window forward. Closing saves pending
 files, workspace state and transcript edits before stopping the application. During active work choose

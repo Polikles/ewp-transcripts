@@ -1,3 +1,19 @@
+# Desktop personalization and source-player follow-up — 2026-11-26 / 0.25.1
+
+- [ ] Persist/restore actual normal window bounds, position and maximized state; default without a
+      valid record; handle minimized/changed monitor layout safely.
+- [ ] Add shared Personalization menu under User profile: theme/system, EN/PL, default palette,
+      applicable display preferences; native title bar follows system/application or chosen color.
+- [ ] Center save/close status over the app in the opposite theme; preserve safe-save refusal,
+      busy decisions and worker shutdown. Verify real opaque native rendering.
+- [ ] Keep audio in the LEFT sidebar (explicit owner clarification); remove review-only oversized
+      column expansion; keep Chromium audio overflow menu
+      visible within a compact player, responsive in browser and native app.
+- [ ] Update EN/PL/profile compatibility, focused browser/native regressions, current gate and docs;
+      deliver immutable0.25.1 installer with verified native evidence/hashes. No paid/model campaign.
+
+Earlier stages follow.
+
 # Actions documentation and sequencing — 2026-11-26
 
 - [x] Explain GitHub Actions purpose, triggers, runners, artifact retention, cost boundaries and

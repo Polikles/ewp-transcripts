@@ -2,6 +2,11 @@
 
 ## Uruchamianie instalacji zarządzanej
 
+Okno pamięta ostatnią pozycję, rozmiar i maksymalizację. Przy braku poprawnego zapisu używa
+domyślnego położenia na środku. Windows przenosi zapisaną pozycję spoza dostępnych ekranów
+na dostępny monitor. Kolor belki zmienia Personalizacja w Ustawieniach i informacjach → Profil
+użytkownika. Postęp zapisu i zamykania pojawia się na środku, w przeciwnym motywie dla kontrastu.
+
 Od wersji0.25.0 skrót instalacji zarządzanej otwiera własne okno EwP Transcripts, bez terminala
 PowerShell i bez osobnej przeglądarki. Ponowne kliknięcie skrótu przywołuje istniejące okno.
 Zamknięcie zapisuje dodane pliki, stan pracy i edycję transkrypcji przed zatrzymaniem programu.

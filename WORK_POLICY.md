@@ -1,3 +1,17 @@
+# Active desktop personalization and layout follow-up — 2026-11-26 / target0.25.1
+
+Owner broadly accepts0.25.0 interface and requests four corrections: persisted window size/position
+with default fallback; theme-aware title bar plus Personalization in User profile (shared language,
+theme/default palette and native title-bar options); centered contrasting save/close status; compact
+source-review player without widening layout. Browser shares applicable personalization/player fixes.
+Owner confirms Actions $0.89 consumed minus$0.89 discounts=$0 billable and spending limits0.
+Follow opening TODO and docs/checkpoints/2026-11-26-window-personalization.md. Use documented public
+standard Actions only for concrete Windows qualification;7-day retention/public guards stay active.
+Preserve immutable0.25.0, reviewed copy/assets/model pins, paused recovery and cloud spend. AMD
+(experimental) and first public release follow closure of these interface corrections, not this pass.
+
+Earlier boundaries follow.
+
 # Actions cost transparency and next stages — 2026-11-26
 
 Owner has NOT yet tested desktop0.25.0. Current task documents existing GitHub Actions usage/costs

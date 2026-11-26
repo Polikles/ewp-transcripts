@@ -1,0 +1,174 @@
+{
+  "result": "PASS",
+  "checks": [
+    "browser hides native-only title-bar controls",
+    "personalization changes resolved app theme",
+    "personalization is localized in Polish",
+    "header controls stay synchronized",
+    "personalization changes use existing persistent preferences",
+    "preferences survive a full page reload",
+    "saved portable user profile restores personalization",
+    "default palette is used without overwriting saved recording colors",
+    "system theme reacts to dark OS preference",
+    "system theme reacts without losing selected mode",
+    "Escape closes personalization",
+    "1600/light: review preserves main-column position",
+    "1600/light: player stays bounded in left sidebar",
+    "1600/light: page has no horizontal overflow",
+    "1600/light: three-dot menu fits inside audio controls",
+    "1600/light: additional-options menu opens",
+    "1600/dark: review preserves main-column position",
+    "1600/dark: player stays bounded in left sidebar",
+    "1600/dark: page has no horizontal overflow",
+    "1600/dark: three-dot menu fits inside audio controls",
+    "1600/dark: additional-options menu opens",
+    "1280/light: review preserves main-column position",
+    "1280/light: player stays bounded in left sidebar",
+    "1280/light: page has no horizontal overflow",
+    "1280/light: three-dot menu fits inside audio controls",
+    "1280/light: additional-options menu opens",
+    "1280/dark: review preserves main-column position",
+    "1280/dark: player stays bounded in left sidebar",
+    "1280/dark: page has no horizontal overflow",
+    "1280/dark: three-dot menu fits inside audio controls",
+    "1280/dark: additional-options menu opens",
+    "1024/light: review preserves main-column position",
+    "1024/light: player stays bounded in left sidebar",
+    "1024/light: page has no horizontal overflow",
+    "1024/light: three-dot menu fits inside audio controls",
+    "1024/light: additional-options menu opens",
+    "1024/dark: review preserves main-column position",
+    "1024/dark: player stays bounded in left sidebar",
+    "1024/dark: page has no horizontal overflow",
+    "1024/dark: three-dot menu fits inside audio controls",
+    "1024/dark: additional-options menu opens",
+    "900/light: review preserves main-column position",
+    "900/light: player stays bounded in left sidebar",
+    "900/light: page has no horizontal overflow",
+    "900/light: three-dot menu fits inside audio controls",
+    "900/light: additional-options menu opens",
+    "900/dark: review preserves main-column position",
+    "900/dark: player stays bounded in left sidebar",
+    "900/dark: page has no horizontal overflow",
+    "900/dark: three-dot menu fits inside audio controls",
+    "900/dark: additional-options menu opens",
+    "390/light: review preserves main-column position",
+    "390/light: player stays bounded in left sidebar",
+    "390/light: page has no horizontal overflow",
+    "390/light: three-dot menu fits inside audio controls",
+    "390/light: additional-options menu opens",
+    "390/dark: review preserves main-column position",
+    "390/dark: player stays bounded in left sidebar",
+    "390/dark: page has no horizontal overflow",
+    "390/dark: three-dot menu fits inside audio controls",
+    "390/dark: additional-options menu opens",
+    "no JavaScript errors throughout interaction and reload"
+  ],
+  "layouts": [
+    {
+      "width": 1600,
+      "theme": "light",
+      "audio_width": 222,
+      "menu_center": [
+        216.0625,
+        321.765625
+      ]
+    },
+    {
+      "width": 1600,
+      "theme": "dark",
+      "audio_width": 222,
+      "menu_center": [
+        216.0625,
+        321.765625
+      ]
+    },
+    {
+      "width": 1280,
+      "theme": "light",
+      "audio_width": 222,
+      "menu_center": [
+        220.0625,
+        324.96875
+      ]
+    },
+    {
+      "width": 1280,
+      "theme": "dark",
+      "audio_width": 222,
+      "menu_center": [
+        220.0625,
+        324.96875
+      ]
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "audio_width": 222,
+      "menu_center": [
+        220.0625,
+        324.96875
+      ]
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "audio_width": 222,
+      "menu_center": [
+        220.0625,
+        324.96875
+      ]
+    },
+    {
+      "width": 900,
+      "theme": "light",
+      "audio_width": 318,
+      "menu_center": [
+        301.0,
+        370.359375
+      ]
+    },
+    {
+      "width": 900,
+      "theme": "dark",
+      "audio_width": 318,
+      "menu_center": [
+        301.0,
+        370.359375
+      ]
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "audio_width": 318,
+      "menu_center": [
+        301.0,
+        484.140625
+      ]
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "audio_width": 318,
+      "menu_center": [
+        301.0,
+        484.140625
+      ]
+    }
+  ],
+  "audio": "one second synthetic silence; no ASR/models/provider requests",
+  "script_sha256": "64d9f1adb3557398046099b410b29b6586299397c0242c91afeacfd3e8ac225a",
+  "preview_files": [
+    "browser-en-personalization-light.png",
+    "browser-pl-personalization-dark.png",
+    "browser-player-1280-dark.png",
+    "browser-player-1280-light.png",
+    "browser-player-390-dark.png",
+    "browser-player-390-light.png"
+  ],
+  "previews_inspected": [
+    "browser-player-1280-light.png",
+    "browser-player-390-dark.png",
+    "browser-pl-personalization-dark.png"
+  ]
+}

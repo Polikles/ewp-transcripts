@@ -154,6 +154,7 @@ if os.environ.get("EWP_DESKTOP_MODE")=="1" and "gui" in sys.argv:
                             not user.IsIconic(wintypes.HWND(data["window_handle"]))
                         )
                     )
+                    assert user.IsZoomed(wintypes.HWND(data["window_handle"]))
                     process.kill()
                 elif phase == "maintenance":
                     # Exercise the real uninstall/update stop handshake against the live window.

@@ -10,6 +10,14 @@ Używaj poniższych kroków razem z odpowiadającym im etapem GUI.
 
 ## 1. Preferencje i profil
 
+Przycisk **Personalizacja** pod nagłówkiem **Profil użytkownika** otwiera wybór motywu interfejsu
+(systemowy/jasny/ciemny), języka, domyślnej palety barw mówców, szybkości odtwarzania, układu
+weryfikacji źródła i tłumaczeń oraz ETA. Zmiany zapisują się od razu na tym urządzeniu; zapis
+i eksport profilu także je uwzględniają. Skróty motywu i języka w nagłówku pozostają zsynchronizowane.
+Domyślna paleta dotyczy nagrań bez zapisanych kolorów mówców; wcześniej zastosowane kolory pozostają.
+W aplikacji Windows można dodatkowo wybrać belkę okna zgodną z motywem systemu, motywem programu
+lub własnym kolorem. Wersja przeglądarkowa korzysta z belki swojej przeglądarki.
+
 Motyw i język interfejsu wybiera się niezależnie od języka nagrania i tłumaczenia. Przy pierwszym uruchomieniu interfejs odczytuje język użytkownika Windows (polski lub angielski; poza Windows — język przeglądarki). Ręcznie zapisany wybór ma pierwszeństwo. Procent i czas, który upłynął, są zwykłymi wskaźnikami kolejki. ETA jest domyślnie wyłączone. Staje się dostępne po trzech udanych porównywalnych lokalnych transkrypcjach na tym komputerze: zgodny język, modele, układ ścieżek i mówców oraz etapy. Szacuje przetwarzanie, nie ręczną korektę, i nie musi być dokładne. Kalibracja czasu nie jest przenoszona z profilem.
 
 Zapisz profil przechowuje lokalny snapshot, a wczytanie go przywraca. Eksport profilu pobiera jeden `ewp-user-profile.json`; import przyjmuje ten pojedynczy JSON. Zawiera preferencje, własne palety, nazwane lokalizacje i ostatnie projekty, wpisy katalogów obszarów pracy oraz domyślnie dostępne wersje słowników. Wyłącz dołączanie słowników, jeśli chcesz mniejszy plik z odwołaniami; wtedy przenieś dokładne słowniki osobno.

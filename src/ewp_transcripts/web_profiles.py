@@ -33,6 +33,9 @@ class GuiPreferences(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     locale: Literal["en", "pl"] = "en"
     theme: Literal["system", "light", "dark"] = "system"
+    defaultPalette: str = Field(default="configured", min_length=1, max_length=80)
+    titleBarMode: Literal["system", "application", "custom"] = "system"
+    titleBarColor: str = Field(default="#24485c", pattern=r"^#[a-fA-F0-9]{6}$")
     showEta: bool = False
     playbackSpeed: float = 1
     reviewLayout: Literal["one", "all"] = "one"
@@ -342,6 +345,9 @@ class GuiProfileController:
                 self._write(destination, imported_workspace.model_dump(mode="json"))
             imported.append(identifier)
         preferences = profile.preferences.model_dump()
+        preferences["defaultPalette"] = palette_names.get(
+            profile.preferences.defaultPalette, profile.preferences.defaultPalette
+        )
         if profile.dictionaries:
             preferences["dictionaryDirectory"] = str(self.directory / "profile-dictionaries")
         restored = profile.model_copy(

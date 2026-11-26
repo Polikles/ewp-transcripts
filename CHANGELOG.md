@@ -4,6 +4,18 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.25.1 — 2026-11-26 (window preferences and compact playback)
+
+- Remember native window position, normal size and maximized state; use the centered default
+  for missing/invalid preferences and let Windows recover positions from disconnected displays.
+- Add Personalization under User profile in Settings & About: theme, language, default palette,
+  playback speed, review layouts and ETA. Share these controls with browser mode; native Windows
+  additionally offers system/application/custom title-bar colors with contrasting caption text.
+  Include preferences in portable profiles and remap conflicting imported custom palettes.
+- Show saving/shutdown progress in a centered native popup with the opposite application theme.
+  Retain the existing durable-save, cancellation and save-failure protection.
+- Keep source audio in the left recording sidebar, remove its review-only column expansion and
+  bound the player width while retaining its additional-options menu in native and browser modes.
 - Document GitHub Actions usage and cost boundaries; restrict CI jobs to public repositories,
   retain new build/evidence artifacts for7 days and cancel superseded runs on the same ref.
 

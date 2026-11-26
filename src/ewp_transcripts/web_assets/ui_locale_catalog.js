@@ -2,6 +2,22 @@
 const guiDiagnosticPattern = /^([A-Z][A-Z0-9]*_[A-Z0-9_]+):\s*([\s\S]*)$/;
 // Additional audited UI copy. Keys remain English; codes and user content are preserved.
 for (const [en, pl] of [
+  ["Personalization", "Personalizacja"],
+  ["Close", "Zamknij"],
+  ["Changes are saved immediately on this device and included when you save a user profile.", "Zmiany są zapisywane od razu na tym urządzeniu i uwzględniane przy zapisie profilu użytkownika."],
+  ["Default color palette", "Domyślna paleta barw"],
+  ["Playback speed", "Szybkość odtwarzania"],
+  ["Source review display", "Widok weryfikacji źródła"],
+  ["Translation review display", "Widok weryfikacji tłumaczenia"],
+  ["A few units at a time", "Kilka jednostek naraz"],
+  ["All units", "Wszystkie jednostki"],
+  ["The default palette is used for recordings without saved speaker colors. Applied recording colors stay unchanged.", "Domyślna paleta jest używana dla nagrań bez zapisanych kolorów mówców. Kolory zastosowane do nagrania pozostają bez zmian."],
+  ["Window title bar", "Górna belka okna"],
+  ["Title bar appearance", "Wygląd górnej belki"],
+  ["System theme", "Motyw systemu"],
+  ["Match application theme", "Dopasuj do motywu programu"],
+  ["Custom color", "Własny kolor"],
+  ["Title bar color", "Kolor górnej belki"],
   ["Transcription engine", "Silnik transkrypcji"],
   ["ASR provider", "Dostawca ASR"],
   ["Local GPU (default)", "Lokalna karta GPU (domyślnie)"],

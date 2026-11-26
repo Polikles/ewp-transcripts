@@ -10,6 +10,14 @@ Use the numbered steps below with the matching GUI stage.
 
 ## 1. Preferences and profile
 
+Open **Personalization** below **User profile** to choose the interface theme (system/light/dark),
+language, default speaker-color palette, playback speed, source/translation review layouts and ETA.
+Changes are saved immediately on this device; saving/exporting a user profile also captures them.
+The header theme/language shortcuts stay synchronized. The default palette applies to recordings
+without saved speaker colors; recording colors already applied remain unchanged.
+The Windows application additionally offers a title bar following the system theme, application
+theme or a custom color. Browser mode uses the browser's own title bar.
+
 Choose theme and interface language independently of recording/translation language. On first launch the interface follows the Windows user interface language (Polish or English; browser preference elsewhere). An explicitly saved interface language takes precedence. Percent and elapsed time are ordinary queue feedback. ETA is off by default and becomes available after three successful comparable local transcriptions on this computer: matching language, models, stream/speaker arrangement and phases. It estimates processing, not human review, and need not be accurate. Timing calibration is not transferred in a profile.
 
 Save profile stores a local snapshot; Load saved profile restores it. Export profile downloads one `ewp-user-profile.json`; Import profile accepts that single JSON. It contains preferences, custom palettes, named locations/recent project references, workspace catalog records and, by default, available dictionary editions. Clear Include dictionaries in profile for a smaller reference-only export; transfer exact dictionaries separately in that case.

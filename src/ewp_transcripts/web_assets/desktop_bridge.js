@@ -7,13 +7,22 @@ if (window.chrome?.webview) {
     delete value.queue; // Live queue metrics are checkpointed by the backend on shutdown.
     return JSON.stringify(value);
   };
+  const appearance = () => ({
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    titleBarMode: ["system","application","custom"].includes(guiPreferences.titleBarMode) ? guiPreferences.titleBarMode : "system",
+    titleBarColor: /^#[a-f0-9]{6}$/i.test(guiPreferences.titleBarColor || "") ? guiPreferences.titleBarColor : "#24485c",
+    locale: document.documentElement.lang === "pl" ? "pl" : "en",
+  });
+  const sendAppearance = () => window.chrome.webview.postMessage({type:"appearance",...appearance()});
+  document.addEventListener("ewp-preferences-changed",sendAppearance);
+  sendAppearance();
   const desktopStatus = () => ({
+    ...appearance(),
     ready: automaticRecoveryReady && !workspaceRestoreBusy,
     busy: guiBatchBusy || guiQueueStarting || workspaceRestoreBusy || guiMediaImportBusy || guiResultImportBusy ||
       guiQueueJobs.some(job => ["queued", "running", "cancel_requested"].includes(job.status)) ||
       Boolean(document.querySelector('[data-generation-busy="true"], button[aria-busy="true"]')),
     dirty: reviewDirty || translationReviewDirty || workspaceFingerprint() !== lastWorkspaceFingerprint,
-    locale: document.documentElement.lang === "pl" ? "pl" : "en",
     pending_count: collectPendingGuiMedia().length,
   });
   window.chrome.webview.addEventListener("message", async event => {

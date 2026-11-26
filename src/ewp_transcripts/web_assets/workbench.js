@@ -155,6 +155,7 @@ function updateGuiRecordings() {
 function saveGuiPreferences() {
   guiPreferences.locale = guiLocale;
   localStorage.setItem(guiPreferencesKey, JSON.stringify(guiPreferences));
+  document.dispatchEvent(new Event("ewp-preferences-changed"));
 }
 function applyGuiTheme() {
   const preference = document.querySelector("#gui-theme").value;
@@ -311,9 +312,11 @@ let guiPreviewResult = "";
 let guiColorProfiles = [];
 function guiAppliedSpeakerColors() {
   const colors = guiSavedSpeakerColors();
+  const profile = guiColorProfiles.find(item => guiProfileValue(item) === (guiPreferences.defaultPalette || "configured"));
+  const defaults = profile?.colors?.length ? profile.colors : guiExamplePalette;
   return Object.fromEntries((reviewDocument?.speakers || []).map(id => {
     const n = Number(id.match(/\d+$/)?.[0] || 1) - 1;
-    return [id, /^#[0-9a-f]{6}$/i.test(colors[id] || "") ? colors[id] : guiExamplePalette[n % guiExamplePalette.length]];
+    return [id, /^#[0-9a-f]{6}$/i.test(colors[id] || "") ? colors[id] : defaults[n % defaults.length]];
   }));
 }
 function guiSpeakerColors() {
@@ -356,7 +359,7 @@ function renderGuiProfileSwatches() {
 function renderGuiColorProfiles(payload, selected = "") {
   guiColorProfiles = payload.profiles;
   const select = document.querySelector("#gui-export-palette");
-  const value = selected || select.value || "configured";
+  const value = selected || select.value || guiPreferences.defaultPalette || "configured";
   select.replaceChildren();
   for (const profile of guiColorProfiles) {
     const option = document.createElement("option"); option.value = guiProfileValue(profile);
@@ -365,6 +368,7 @@ function renderGuiColorProfiles(payload, selected = "") {
   select.value = value;
   if (!select.value) select.value = "configured";
   renderGuiProfileSwatches();
+  document.dispatchEvent(new Event("ewp-palettes-loaded"));
 }
 async function loadGuiColorProfiles() {
   try { renderGuiColorProfiles(await queuePost("/api/v1/dictionaries/profiles", {}, {feedback:false})); }

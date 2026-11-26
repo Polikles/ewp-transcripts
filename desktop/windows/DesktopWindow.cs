@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Web.WebView2.Core;
+using System.Windows.Interop;
 using Microsoft.Web.WebView2.Wpf;
 using Microsoft.Win32;
 
@@ -25,6 +26,11 @@ sealed partial class DesktopWindow : Window
     readonly StackPanel notice = new() { Margin = new Thickness(16, 10, 16, 10) };
     readonly TextBlock message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 14 };
     readonly ProgressBar progress = new() { IsIndeterminate = true, Height = 3, Margin = new Thickness(0, 8, 0, 0) };
+    readonly WindowPlacement placement;
+    readonly SavedPlacement? startupPlacement;
+    readonly DispatcherTimer geometryTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
+    Appearance appearance = new();
+    ClosingProgress? closingProgress;
     readonly DispatcherTimer poll = new() { Interval = TimeSpan.FromMilliseconds(500) };
     readonly Dictionary<string, TaskCompletionSource<JsonElement>> replies = new();
     bool pl = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "pl";
@@ -41,16 +47,23 @@ sealed partial class DesktopWindow : Window
         Title = "EwP Transcripts · " + Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
         MinWidth = Math.Min(760, SystemParameters.WorkArea.Width); MinHeight = Math.Min(560, SystemParameters.WorkArea.Height);
         Width = Math.Min(1360, SystemParameters.WorkArea.Width); Height = Math.Min(940, SystemParameters.WorkArea.Height);
-        WindowStartupLocation = WindowStartupLocation.CenterScreen; Background = Color("#F5F2E9"); Foreground = Color("#273342"); FontFamily = new FontFamily("Segoe UI");
+        placement = new WindowPlacement(Path.Combine(config.StateDirectory, "window.json"));
+        startupPlacement = placement.Saved;
+        WindowStartupLocation = placement.Saved == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.Manual; Background = Color("#F5F2E9"); Foreground = Color("#273342"); FontFamily = new FontFamily("Segoe UI");
         using (var icon = Assembly.GetExecutingAssembly().GetManifestResourceStream("EwP.ico")!) Icon = BitmapFrame.Create(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-        try { using var data = JsonDocument.Parse(File.ReadAllText(Path.Combine(config.StateDirectory, "window.json"))); Width = Math.Clamp(data.RootElement.GetProperty("width").GetDouble(), MinWidth, SystemParameters.WorkArea.Width); Height = Math.Clamp(data.RootElement.GetProperty("height").GetDouble(), MinHeight, SystemParameters.WorkArea.Height); } catch { }
+        try { var saved = JsonSerializer.Deserialize<Appearance>(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))); if (saved != null && TitleBar.Valid(saved)) appearance = saved; } catch { }
+        SourceInitialized += (_, _) => TitleBar.Apply(this, appearance);
+        geometryTimer.Tick += (_, _) => { geometryTimer.Stop(); placement.Save(this); };
+        void SaveGeometry(object? sender, EventArgs args) { if (!IsLoaded || closed) return; geometryTimer.Stop(); geometryTimer.Start(); }
+        LocationChanged += SaveGeometry; SizeChanged += (_, _) => SaveGeometry(this, EventArgs.Empty); StateChanged += SaveGeometry;
+        Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemPreferenceChanged;
         shell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); shell.RowDefinitions.Add(new RowDefinition());
         notice.Children.Add(message); notice.Children.Add(progress); shell.Children.Add(notice); Grid.SetRow(view, 1); shell.Children.Add(view); Content = shell;
-        Loaded += async (_, _) => await Initialize();
+        Loaded += async (_, _) => { placement.Restore(this); await Initialize(); };
         Closing += OnClosing; Closed += OnClosed;
         poll.Tick += async (_, _) => await Poll();
     }
-    internal void BringToFront() { if (closed) return; if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal; Show(); Activate(); Topmost = true; Topmost = false; Focus(); }
+    internal void BringToFront() { if (closed) return; WindowPlacement.Reveal(this); Show(); Activate(); Topmost = true; Topmost = false; Focus(); }
     void ShowNotice(string text, bool busy = false)
     {
         message.Text = text; notice.Visibility = Visibility.Visible; progress.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
@@ -130,6 +143,7 @@ sealed partial class DesktopWindow : Window
             {
                 using var data = JsonDocument.Parse(e.WebMessageAsJson);
                 var value = data.RootElement;
+                if (value.GetProperty("type").GetString() == "appearance") { ApplyAppearance(value); return; }
                 if (value.GetProperty("type").GetString() != "lifecycle-result") return;
                 string id = value.GetProperty("id").GetString()!;
                 if (replies.TryGetValue(id, out var reply)) reply.TrySetResult(value.Clone());
@@ -154,6 +168,22 @@ sealed partial class DesktopWindow : Window
         };
         core.ProcessFailed += (_, _) => { if (!closing && !closed) { ShowNotice(T("The interface stopped responding. Restart the program to restore saved work.", "Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.")); OfferDiscard(); } };
     }
+    void SystemPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => Dispatcher.BeginInvoke(new Action(() => { if (!closed) TitleBar.Apply(this, appearance); }));
+    void ApplyAppearance(JsonElement value)
+    {
+        var next = new Appearance(value.GetProperty("theme").GetString() ?? "light", value.GetProperty("titleBarMode").GetString() ?? "system", value.GetProperty("titleBarColor").GetString() ?? "#24485c");
+        if (!TitleBar.Valid(next)) return;
+        appearance = next; TitleBar.Apply(this, next);
+        if (value.TryGetProperty("locale", out var locale)) pl = locale.GetString() == "pl";
+        try { File.WriteAllText(Path.Combine(config.StateDirectory, "appearance.json"), JsonSerializer.Serialize(next)); } catch { }
+    }
+    void ShowClosingProgress(string text)
+    {
+        notice.Visibility = Visibility.Collapsed;
+        if (closingProgress == null) { closingProgress = new ClosingProgress(this, appearance.Theme == "dark"); closingProgress.SetMessage(text); closingProgress.Show(); }
+        else closingProgress.SetMessage(text);
+    }
+    void HideClosingProgress() { closingProgress?.Complete(); closingProgress = null; }
     static void OpenExternal(string address)
     {
         if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) || !(uri.Scheme == "https" || AppConfig.IsLocal(address))) return;
@@ -208,7 +238,7 @@ sealed partial class DesktopWindow : Window
                     "EwP Transcripts", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes) return;
                 FinishClose(); return;
             }
-            var ui = await Ui("status"); pl = ui.GetProperty("locale").GetString() == "pl";
+            var ui = await Ui("status"); pl = ui.GetProperty("locale").GetString() == "pl"; ApplyAppearance(ui);
             var runtime = await backend.Request();
             bool busy = Flag(ui, "busy") || runtime is JsonElement state && Flag(state, "busy") || testReport != null && testBusy;
             if (busy && !maintenance)
@@ -229,7 +259,7 @@ sealed partial class DesktopWindow : Window
             waiting = false;
             foreach (var button in notice.Children.OfType<Button>().Where(button => Equals(button.Tag, "wait")).ToArray()) notice.Children.Remove(button);
             view.IsEnabled = false;
-            ShowNotice(T("Saving work before closing…", "Zapisywanie pracy przed zamknięciem…"), true);
+            ShowClosingProgress(T("Saving work before closing…", "Zapisywanie pracy przed zamknięciem…"));
             var saved = await Ui("prepare-close");
             if (!Flag(saved, "ok"))
             {
@@ -238,7 +268,7 @@ sealed partial class DesktopWindow : Window
                 OfferDiscard();
                 return;
             }
-            ShowNotice(T("Stopping active work and closing…", "Zatrzymywanie zadań i zamykanie…"), true);
+            ShowClosingProgress(T("Stopping active work and closing…", "Zatrzymywanie zadań i zamykanie…"));
             await backend.Request("commit");
             if (backend.Process != null)
             {
@@ -253,9 +283,9 @@ sealed partial class DesktopWindow : Window
             ShowNotice(T("Closing was stopped to protect unsaved work. Try again after the current operation.", "Zamykanie zostało wstrzymane, aby chronić niezapisaną pracę. Spróbuj ponownie po bieżącej operacji.")); SaveDiagnostic(error.GetType().Name);
             OfferDiscard();
         }
-        finally { closing = false; if (!closed) view.IsEnabled = true; }
+        finally { HideClosingProgress(); closing = false; if (!closed) view.IsEnabled = true; }
     }
-    void FinishClose() { if (closed) return; allowClose = true; Close(); }
+    void FinishClose() { if (closed) return; placement.Save(this); HideClosingProgress(); allowClose = true; Close(); }
     void SaveDiagnostic(string error)
     {
         try { File.WriteAllText(Path.Combine(config.StateDirectory, "desktop.log"), DateTimeOffset.Now.ToString("o") + "\n" + error + "\n" + backend.Diagnostic); } catch { }
@@ -264,7 +294,8 @@ sealed partial class DesktopWindow : Window
     {
         closed = true; poll.Stop();
         foreach (var item in replies.Values) item.TrySetCanceled();
-        try { var bounds = RestoreBounds; File.WriteAllText(Path.Combine(config.StateDirectory, "window.json"), JsonSerializer.Serialize(new { width = bounds.Width, height = bounds.Height })); } catch { }
+        geometryTimer.Stop(); Microsoft.Win32.SystemEvents.UserPreferenceChanged -= SystemPreferenceChanged;
+        HideClosingProgress();
         view.Dispose(); backend.Dispose();
     }
 }

@@ -161,16 +161,10 @@
 
 .gui-job-status { font-size: .65rem; white-space: nowrap; }
 
-@media (min-width: 56.251rem) {
-  .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr); }
-}
-#gui-source-playback audio { display: block; height: 54px; }
-@media (min-width: 56.251rem) and (max-width: 75rem) {
-  .gui-workbench[data-gui-active-stage="review"] #gui-stage-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@media (min-width: 90rem) {
-  .gui-workbench[data-gui-active-stage="review"] { grid-template-columns: 22.5rem minmax(0, 1fr) minmax(11rem, 13rem); }
-}
+/* Keep audio beside the recording list without expanding the review column. */
+#gui-source-playback { width: min(100%, 20rem); max-width: 100%; box-sizing: border-box; padding-inline: 0; margin: .75rem 0 1rem; }
+#gui-source-playback h3 { margin: 0 0 .5rem; font-size: .9rem; }
+#gui-source-playback audio { display: block; width: 100%; max-width: 100%; height: 54px; }
 
 /* A plan keeps word boundaries; very narrow windows scroll only the table. */
 .plan-table-scroll { grid-column: 1 / -1; min-width: 0; max-width: 100%; overflow-x: auto; }
@@ -226,3 +220,12 @@
 .gui-guide code { font-size: .9em; }
 .gui-guide nav { border-top: 1px solid #999; margin-top: 2rem; padding-top: .5rem; }
 .gui-guide .guide-languages { font-size: .9rem; }
+
+#gui-personalization-dialog { width: min(36rem, calc(100vw - 3rem)); max-height: calc(100vh - 3rem); overflow: auto; box-sizing: border-box; padding: 1.2rem; border: 2px solid var(--gui-line); border-radius: .7rem; color: var(--gui-ink); background: var(--gui-surface); font: inherit; }
+#gui-personalization-dialog::backdrop { background: #00121e99; }
+.gui-personalization-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .6rem 1rem; }
+.gui-personalization-grid label, .gui-personalization-grid :is(input,select) { min-width: 0; max-width: 100%; box-sizing: border-box; }
+#gui-personalization-dialog .field-hint { font-size: .8rem; }
+.gui-preference { font-weight: 400; }
+.gui-preference input { width: auto; }
+@media (max-width: 36rem) { .gui-personalization-grid { grid-template-columns: minmax(0,1fr); } }

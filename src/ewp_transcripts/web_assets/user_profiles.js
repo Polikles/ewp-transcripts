@@ -7,7 +7,7 @@ function downloadGuiFile(filename, payload, type = "application/json") {
 }
 const userProfilePanel = document.createElement("div"); userProfilePanel.id = "gui-user-profile";
 userProfilePanel.innerHTML = `<h3>User preferences</h3>
-  <label class="confirmation"><input type="checkbox" id="gui-show-eta"> Show estimated remaining time (ETA)</label>
+  <label class="gui-preference"><input type="checkbox" id="gui-show-eta"> Show estimated remaining time (ETA)</label>
   <p class="field-hint">ETA is off by default. Estimates become available after 3 successful transcriptions with comparable language, models and track configuration on this computer. Timing history stays on this computer and is not transferred with a profile.</p>
   <h3>User profile</h3>
   <p class="field-hint">One JSON file contains preferences, current workflow settings, saved workspace manifests, custom palettes, project references and optionally dictionaries from the selected library and referenced workspaces. Media, transcripts, API keys, permissions and running jobs are excluded. Other workspace catalogs must be selected before saving. Referenced recordings and outputs must be transferred separately.</p>
@@ -20,7 +20,7 @@ etaPreference.checked = guiPreferences.showEta === true;
 etaPreference.addEventListener("change", () => { guiPreferences.showEta = etaPreference.checked; saveGuiPreferences(); jobsSignature = ""; void refreshJobs(); });
 const userProfileStatus = document.querySelector("#user-profile-status");
 function collectGuiPreferences() {
-  return {locale:guiLocale, theme:document.querySelector("#gui-theme").value, showEta:etaPreference.checked,
+  return {defaultPalette:guiPreferences.defaultPalette || "configured", titleBarMode:guiPreferences.titleBarMode || "system", titleBarColor:guiPreferences.titleBarColor || "#24485c", locale:guiLocale, theme:document.querySelector("#gui-theme").value, showEta:etaPreference.checked,
     playbackSpeed:Number(guiPreferences.playbackSpeed || 1), reviewLayout:localStorage.getItem("ewp-review-layout") || "one",
     translationLayout:localStorage.getItem("ewp-translation-review-layout") || "few", dictionaryDirectory:document.querySelector("#library-directory").value};
 }
@@ -32,6 +32,7 @@ async function saveUserProfile(trigger) {
 async function applyUserProfile(payload) {
   const profile = payload.profile, preferences = profile.preferences;
   guiPreferences = {...preferences}; guiLocale = preferences.locale;
+  document.querySelector("#gui-export-palette").value = preferences.defaultPalette || "configured";
   document.querySelector("#gui-locale").value = guiLocale;
   document.querySelector("#gui-theme").value = preferences.theme; applyGuiTheme();
   etaPreference.checked = preferences.showEta; playbackAudio.playbackRate = preferences.playbackSpeed;

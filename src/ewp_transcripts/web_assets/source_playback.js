@@ -7,7 +7,7 @@ let sourcePlaybackSeekRequest = 0;
 let sourcePlaybackPromise = null;
 const sourcePlayback = document.createElement("section");
 sourcePlayback.id = "gui-source-playback"; sourcePlayback.hidden = true;
-const playbackHeading = document.createElement("h2"); playbackHeading.textContent = "Recording audio";
+const playbackHeading = document.createElement("h3"); playbackHeading.textContent = "Recording audio";
 const playbackSourceLabel = document.createElement("label"); playbackSourceLabel.textContent = "Audio source";
 const playbackSource = document.createElement("select"); playbackSource.id = "gui-playback-source";
 playbackSourceLabel.append(playbackSource);
