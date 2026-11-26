@@ -1,16 +1,19 @@
 # Desktop personalization and source-player follow-up — 2026-11-26 / 0.25.1
 
-- [ ] Persist/restore actual normal window bounds, position and maximized state; default without a
+- [x] Persist/restore actual normal window bounds, position and maximized state; default without a
       valid record; handle minimized/changed monitor layout safely.
-- [ ] Add shared Personalization menu under User profile: theme/system, EN/PL, default palette,
+- [x] Add shared Personalization menu under User profile: theme/system, EN/PL, default palette,
       applicable display preferences; native title bar follows system/application or chosen color.
-- [ ] Center save/close status over the app in the opposite theme; preserve safe-save refusal,
+- [x] Center save/close status over the app in the opposite theme; preserve safe-save refusal,
       busy decisions and worker shutdown. Verify real opaque native rendering.
-- [ ] Keep audio in the LEFT sidebar (explicit owner clarification); remove review-only oversized
+- [x] Keep audio in the LEFT sidebar (explicit owner clarification); remove review-only oversized
       column expansion; keep Chromium audio overflow menu
       visible within a compact player, responsive in browser and native app.
-- [ ] Update EN/PL/profile compatibility, focused browser/native regressions, current gate and docs;
+- [x] Update EN/PL/profile compatibility, focused browser/native regressions, current gate and docs;
       deliver immutable0.25.1 installer with verified native evidence/hashes. No paid/model campaign.
+
+- [ ] Owner reviews focused0.25.1 window/personalization/player changes; then proceed to AMD
+      (experimental) and remaining release work. No repeated full inference/paid campaign.
 
 Earlier stages follow.
 
@@ -20,7 +23,7 @@ Earlier stages follow.
       account-level billing limits; verify public repository and inventory existing artifacts.
 - [x] Add public-only job guard,7-day retention for new artifacts and cancellation of older same-ref
       runs. Validate locally and publish with [skip ci]; do not start another cloud build.
-- [ ] Owner tests native interface0.25.0; resolve any resulting feedback before AMD work.
+- [x] Owner broadly accepts native interface0.25.0; requested corrections delivered in0.25.1 above.
 - [ ] Then research and implement AMD acceleration support with a visible (experimental) label;
       cover supported engines/runtime/installer behavior without claiming physical AMD validation.
 - [ ] Close remaining release tasks, then prepare first public release. No publication in this turn.

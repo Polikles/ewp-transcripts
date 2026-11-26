@@ -91,3 +91,13 @@ checks and restart/maintenance behavior pass with synthetic media.1201 local tes
 pass;65 previews reviewed. See [evidence](checkpoints/2026-11-26-native-windows-app-evidence.json).
 This qualifies the host/lifetime without repeating GPU/provider inference. Owner desktop review
 is the next boundary; first publication and AMD research remain later.
+
+## Delivered follow-up — 0.25.1
+
+Source1a665b33b24772f93c8c8aa7ec22c5a83a0aad08, Windows45885593097 PASS: four actual desktop
+cycles, saved normal/maximized bounds, off-screen/invalid fallback, minimized-instance activation,
+DWM setter results and16 exact caption-pixel comparisons from full-window captures. Shared browser
+preferences/player pass62 checks; local1205 tests and17 integrations pass. Centered opposite-theme
+shutdown cards preserve safe-save and worker lifetime.105 native previews reviewed; see
+[evidence](checkpoints/2026-11-26-window-personalization-evidence.json). Owner focused review follows;
+AMD(experimental), remaining release work and first public release stay after interface closure.

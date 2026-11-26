@@ -1,14 +1,24 @@
-# Active desktop personalization and layout follow-up — 2026-11-26 / target0.25.1
+# Delivered window personalization and compact playback — 2026-11-26 / 0.25.1
 
-Owner broadly accepts0.25.0 interface and requests four corrections: persisted window size/position
-with default fallback; theme-aware title bar plus Personalization in User profile (shared language,
-theme/default palette and native title-bar options); centered contrasting save/close status; compact
-source-review player without widening layout. Browser shares applicable personalization/player fixes.
-Owner confirms Actions $0.89 consumed minus$0.89 discounts=$0 billable and spending limits0.
-Follow opening TODO and docs/checkpoints/2026-11-26-window-personalization.md. Use documented public
-standard Actions only for concrete Windows qualification;7-day retention/public guards stay active.
-Preserve immutable0.25.0, reviewed copy/assets/model pins, paused recovery and cloud spend. AMD
-(experimental) and first public release follow closure of these interface corrections, not this pass.
+0.25.1 delivered from1a665b33b24772f93c8c8aa7ec22c5a83a0aad08. Final native45885593097 PASS:
+46 installer groups,18 filesystem cases,4 desktop cycles (49/50/50/50 checks). Local1205 tests/
+19 Windows skips,17 integrations, Ruff/format306/mypy120 PASS. Browser62 checks across five widths
+and both themes; audio remains in the LEFT sidebar, bounded with a usable three-dot menu and no
+review-only column expansion. Shared Personalization covers language/theme/default palette and
+other display preferences; native adds system/application/custom title-bar color with clear swatch.
+Actual position/normal bounds/maximization survive restart; off-screen/invalid fallback and repeat
+focus preserve usability. Centered native save/shutdown popup uses the opposite theme; safe-save
+refusal, paused recovery and owned-worker cleanup remain covered.
+105 native previews reviewed in overview,10 affected views full-size;16 whole-window caption color
+pixel matches PASS. Both CI archive digests, six product hashes, all three bundles/source payloads
+and independent native EXE verified. All74 prior product hashes preserved. Three documented public
+standard CI runs (one test-getter correction, one visual-swatch correction),7-day retention; no paid
+provider/model campaign or billing-limit changes. Spend remains USD0.0291461230985028369.
+Files: /home/linuch/project-ewp/deliveries/ewp-0.25.1-installers.
+Read docs/checkpoints/2026-11-26-window-personalization.md and matching evidence JSON.
+NEXT: focused owner review of these corrections, then AMD visibly (experimental), without physical
+AMD qualification, remaining release work and first public release. No AMD implementation/publication
+or full manual/model/transcription retest started here. EXE remains unsigned/internal.
 
 Earlier boundaries follow.
 

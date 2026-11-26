@@ -95,3 +95,19 @@ this is owner-supplied account information, not an API billing audit. The docume
 workflow is used for actual Windows qualification of the corrections. Next: focused review/fixes, then AMD support marked
 **(experimental)** without a claim of physical AMD validation, remaining release tasks, and only
 then the first public product release.
+
+## Window/personalization follow-up builds — 2026-11-26
+
+Three standard public runs were used for0.25.1, with7-day retention and the existing zero-budget
+owner controls unchanged. No model/provider jobs or paid runner were introduced.
+
+| Run | Result and purpose |
+| --- | --- |
+| [45883926205](https://github.com/Polikles/ewp-transcripts/actions/runs/45883926205) | New native test incorrectly attempted a DWM setter-only property getter; installer/filesystem and initial geometry checks passed. |
+| [45884667195](https://github.com/Polikles/ewp-transcripts/actions/runs/45884667195) | Passed corrected API checks and full-window captures; visual review found the thin color-input swatch. |
+| [45885593097](https://github.com/Polikles/ewp-transcripts/actions/runs/45885593097) | Final readable swatch, full native regressions and delivered0.25.1. |
+
+Matching content-verified installer/evidence copies are preserved on the VM independently of Actions
+expiry. The initial two candidates were not handed to the owner. Final source and artifact hashes
+are recorded in the [qualification evidence](checkpoints/2026-11-26-window-personalization-evidence.json).
+These job results do not establish any new account-level invoice total.

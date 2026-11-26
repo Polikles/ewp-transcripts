@@ -1,0 +1,225 @@
+{
+  "version": "0.25.1",
+  "source_commit": "1a665b33b24772f93c8c8aa7ec22c5a83a0aad08",
+  "source_dirty": false,
+  "run_id": 45885593097,
+  "products": [
+    {
+      "file": "EwP-0.25.1-windows-x64.zip",
+      "sha256": "5cf228726e35d27268edd6e7c50f1db6eec605885bd940441b64034f2b491ca3",
+      "bytes": 76360033
+    },
+    {
+      "file": "EwP-0.25.1-ubuntu-x64.zip",
+      "sha256": "9b2bbf25541998aa7943cd4b1d90f9ea07ff219cee9f2a1d0a6401f4a30cbea7",
+      "bytes": 18630557
+    },
+    {
+      "file": "EwP-Setup-0.25.1.exe",
+      "sha256": "516613e77b114ba60b2b5bc5b7513c487c239098bf87ba4e2d1b64c44e470f96",
+      "bytes": 216707128
+    },
+    {
+      "file": "EwP-0.25.1-ubuntu-x64.tar.gz",
+      "sha256": "99a2c5c41f93203b72e7d8ee80dde3a611cba506519bb512787dd7a64066a0fb",
+      "bytes": 35438823
+    },
+    {
+      "file": "Install-EwP-0.25.1.ps1",
+      "sha256": "4fe5159563b12e6f618baf7b3fc47a42269d614fb4f7848585c7c817561583b0",
+      "bytes": 1426
+    },
+    {
+      "file": "Install-EwP-0.25.1.sh",
+      "sha256": "0460b2fa73a2261deb25bcc1d25096fd9d2fefa9556d6b23ed864d1c1b030009",
+      "bytes": 808
+    }
+  ],
+  "bundles": [
+    {
+      "file": "EwP-0.25.1-windows-x64.zip",
+      "manifest_files": 236,
+      "committed_source_files": 227
+    },
+    {
+      "file": "EwP-0.25.1-ubuntu-x64.zip",
+      "manifest_files": 231,
+      "committed_source_files": 227
+    },
+    {
+      "file": "EwP-0.25.1-ubuntu-x64.tar.gz",
+      "manifest_files": 231,
+      "committed_source_files": 227
+    }
+  ],
+  "native_exe_independent_byte_match": true,
+  "previous_hashes_preserved": 74,
+  "run_url": "https://github.com/Polikles/ewp-transcripts/actions/runs/45885593097",
+  "result": "PASS",
+  "local_gate": {
+    "passed": 1205,
+    "windows_only_skips": 19,
+    "integrations_included": 17,
+    "ruff_format_files": 306,
+    "mypy_files": 120,
+    "ruff_format_mypy": "PASS"
+  },
+  "browser": {
+    "checks": 62,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "widths": [
+      390,
+      900,
+      1024,
+      1280,
+      1600
+    ],
+    "report": "2026-11-26-window-personalization-browser.json",
+    "native_color_input_style": "final44px/4px swatch validated in native captures; browser hides this field"
+  },
+  "native": {
+    "platform": "Microsoft Windows Server 2025 / 10.0.26100",
+    "wizard_groups": 46,
+    "filesystem_cases": 18,
+    "filesystem_seconds": 26.35,
+    "desktop_cases": 1,
+    "desktop_cycles": {
+      "crash": 50,
+      "save": 49,
+      "restore": 50,
+      "maintenance": 50
+    },
+    "window_placements": {
+      "crash": {
+        "startup": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "Valid": true
+        },
+        "final": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "Valid": true
+        }
+      },
+      "save": {
+        "startup": null,
+        "final": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "Valid": true
+        }
+      },
+      "restore": {
+        "startup": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": false,
+          "Valid": true
+        },
+        "final": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "Valid": true
+        }
+      },
+      "maintenance": {
+        "startup": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "Valid": true
+        },
+        "final": {
+          "Left": 24,
+          "Top": 28,
+          "Right": 984,
+          "Bottom": 684,
+          "Maximized": true,
+          "Valid": true
+        }
+      }
+    },
+    "wizard_previews": 49,
+    "desktop_previews": 56,
+    "overviews_inspected": true,
+    "full_size_inspected": [
+      "save/en-application-titlebar-dark",
+      "save/pl-application-titlebar-light",
+      "save/en-custom-titlebar-dark",
+      "save/pl-custom-titlebar-light",
+      "save/pl-saving-light",
+      "save/en-saving-dark",
+      "save/pl-personalization-light",
+      "save/en-personalization-dark",
+      "save/pl-sidebar-player-light",
+      "save/en-sidebar-player-dark"
+    ],
+    "whole_window_caption_pixel_matches": 16,
+    "native_close_progress_opaque_centered_contrast": true,
+    "repeat_focus_retains_maximization": true,
+    "offscreen_recovery_and_invalid_fallback": true,
+    "worker_tree_and_safe_save_regression": "PASS",
+    "desktop_seconds": 38.55
+  },
+  "ci_iterations": [
+    {
+      "run_id": 45883926205,
+      "result": "FAIL",
+      "reason": "new test used an unsupported DWM caption-color getter; installer/filesystem/initial geometry checks passed"
+    },
+    {
+      "run_id": 45884667195,
+      "result": "PASS",
+      "reason": "setter HRESULTs plus actual full-frame capture; visual review found a thin color swatch"
+    },
+    {
+      "run_id": 45885593097,
+      "result": "PASS",
+      "reason": "final readable swatch and all native regressions"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 15149132410,
+      "name": "native-windows-startup-evidence",
+      "sha256": "a3f26b72f38af83c349ebdf39c6c263f3797b3f1f7c973daebbdd379f648bfae",
+      "bytes": 10460607,
+      "expires_at": "2026-12-03T19:45:07Z"
+    },
+    {
+      "id": 15147934585,
+      "name": "installer-test-package",
+      "sha256": "3781aec42bd3dce8fe40ce4197e1cb371cedbfaf2275fbe2d7aa425d2cebe836",
+      "bytes": 266809809,
+      "expires_at": "2026-12-03T19:42:55Z"
+    }
+  ],
+  "limits": {
+    "models_or_gpu_inference_requalified": false,
+    "new_provider_requests": 0,
+    "cumulative_provider_spend_usd": "0.0291461230985028369",
+    "public_release": false,
+    "signed": false
+  },
+  "delivery_directory": "/home/linuch/project-ewp/deliveries/ewp-0.25.1-installers"
+}

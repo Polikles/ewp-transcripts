@@ -1,3 +1,14 @@
+# Window/personalization follow-up — 2026-11-26
+
+Owner broadly accepted0.25.0 and requested four focused corrections.0.25.1 delivers window geometry,
+shared Personalization/native title-bar modes, centered contrasting shutdown progress and compact
+LEFT-sidebar source audio with its additional-options menu. Native45885593097, local/browser
+checks and verified delivery pass; see window-personalization checkpoint/evidence. Next is focused
+owner review, then AMD marked(experimental), remaining release work and first public release.
+No physical AMD/GPU/provider requalification or public publication is implied by these UI checks.
+
+Earlier roadmap entries follow.
+
 Owner sequence2026-11-26: desktop0.25.0 has NOT yet been owner-tested. Document Actions/costs now;
 owner interface test → any fixes → implement AMD support marked (experimental), without physical
 AMD hardware qualification → remaining release tasks → first public release. AMD work is the next
