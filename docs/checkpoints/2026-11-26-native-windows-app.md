@@ -21,3 +21,10 @@ Updated EN/PL managed-launch/installation documentation and mirrored bundled gui
 uses a content-hashed NuGet lock and original SDK license. Cross-build PASS after security/cancellation
 changes. Added actual renderer external-fetch blocking, download and maintenance handshake checks
 for Windows CI (pending). Source version0.25.0; approved app/installer workbooks unchanged.
+
+Native run45804521730: installer46 WPF groups/18 filesystem cases PASS; desktop FAIL because
+hidden restore dialog's permanent aria-busy was counted as active work. Actual renderer and backend
+started, pending media/no-auto-start/close choices/locales/security checks passed before timeout.
+Fix uses busy action buttons/generation flags, not hidden dialog metadata. Added explicit save with
+autosave off, confirmed discard recovery, and suspended-start job assignment before Python redirector
+spawn (eliminates assignment race). Cross-compile passes; qualification rerun pending.

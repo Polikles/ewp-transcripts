@@ -6,7 +6,7 @@ if (window.chrome?.webview) {
     ready: automaticRecoveryReady && !workspaceRestoreBusy,
     busy: guiBatchBusy || guiQueueStarting || workspaceRestoreBusy || guiMediaImportBusy || guiResultImportBusy ||
       guiQueueJobs.some(job => ["queued", "running", "cancel_requested"].includes(job.status)) ||
-      Boolean(document.querySelector('[data-generation-busy="true"], [aria-busy="true"]')),
+      Boolean(document.querySelector('[data-generation-busy="true"], button[aria-busy="true"]')),
     dirty: reviewDirty || translationReviewDirty || workspaceFingerprint() !== lastWorkspaceFingerprint,
     locale: document.documentElement.lang === "pl" ? "pl" : "en",
     pending_count: collectPendingGuiMedia().length,
@@ -21,7 +21,7 @@ if (window.chrome?.webview) {
       while ((!automaticRecoveryReady || workspaceRestoreBusy || workspaceAutosaveBusy || guiBatchBusy || guiQueueStarting || guiMediaImportBusy || guiResultImportBusy) && Date.now() < deadline)
         await new Promise(resolve => setTimeout(resolve, 100));
       ok = automaticRecoveryReady && !workspaceRestoreBusy && !workspaceAutosaveBusy && !guiBatchBusy && !guiQueueStarting && !guiMediaImportBusy && !guiResultImportBusy;
-      if (ok) ok = (await saveAutomaticWorkspace(true)) === true;
+      if (ok) ok = (await saveAutomaticWorkspace(true, true)) === true;
       if (ok) ok = !reviewDirty && !translationReviewDirty && workspaceFingerprint() === lastWorkspaceFingerprint;
     }
     window.chrome.webview.postMessage({type:"lifecycle-result", id:message.id, ok, ...desktopStatus()});

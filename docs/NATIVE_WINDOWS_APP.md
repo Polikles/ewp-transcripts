@@ -9,7 +9,8 @@ A full rewrite of the approved editors as WPF controls is outside this implement
 
 The native host validates the managed installation and starts private Python without a console.
 Python retains the existing OS-lifetime installation lock. The host owns Python and its descendants
-in a Windows kill-on-close Job Object, including inference/media/provider workers. Repeated launch
+in a Windows kill-on-close Job Object, including inference/media/provider workers. The initial
+process is created suspended and assigned before its venv redirector can spawn the real interpreter. Repeated launch
 uses a current-user named pipe to focus the existing window; no second backend is created.
 
 The native management credential travels only through child environment/loopback HTTP headers.
@@ -20,7 +21,8 @@ and autofill are disabled. Browser profile/preferences stay in private user stat
 
 On close, save pending media/workflow state and source/translation drafts before shutdown. Paused
 staged tasks remain paused after restart. Active work offers Keep working / Wait and close / Stop
-and close. Save failures keep the window open. Graceful cancellation is attempted before the owned
+and close. Save failures keep the window open. Explicit close also saves if periodic autosave was disabled;
+it does not re-enable that preference. A separate discard action requires confirmation. Graceful cancellation is attempted before the owned
 process job is closed, preventing invisible background work. Uninstall requests the same flush;
 if the UI refuses because saving failed, removal stops without deleting application files.
 The application window remains until its owned backend has exited (or durable-save cancellation

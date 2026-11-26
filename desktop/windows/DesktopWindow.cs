@@ -55,6 +55,18 @@ sealed partial class DesktopWindow : Window
     {
         message.Text = text; notice.Visibility = Visibility.Visible; progress.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
     }
+    void OfferDiscard()
+    {
+        if (notice.Children.OfType<Button>().Any(button => Equals(button.Tag, "discard"))) return;
+        var discard = new Button { Tag = "discard", Content = T("Close without saving…", "Zamknij bez zapisu…"), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0), Padding = new Thickness(12, 4, 12, 4) };
+        discard.Click += (_, _) =>
+        {
+            if (MessageBox.Show(this,
+                T("Discard changes since the last successful save and stop all active work?", "Odrzucić zmiany od ostatniego poprawnego zapisu i zatrzymać wszystkie aktywne zadania?"),
+                "EwP Transcripts", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.Yes) FinishClose();
+        };
+        notice.Children.Add(discard);
+    }
     async Task Initialize()
     {
         try
@@ -89,7 +101,7 @@ sealed partial class DesktopWindow : Window
         catch (Exception error)
         {
             if (closed) return;
-            if (testReport != null) { WriteTestResult("FAIL", error.Message); FinishClose(); return; }
+            if (testReport != null) { WriteTestResult("FAIL", error.Message + "\n" + backend.Diagnostic); FinishClose(); return; }
             view.Visibility = Visibility.Collapsed;
             ShowNotice(T("EwP Transcripts could not start. Repair the installation or check Microsoft WebView2 Runtime. Details: ", "Nie udało się uruchomić EwP Transcripts. Napraw instalację lub sprawdź składnik Microsoft WebView2 Runtime. Szczegóły: ") + Path.Combine(config.StateDirectory, "desktop.log"));
             var link = new TextBlock { Margin = new Thickness(0, 14, 0, 0) };
@@ -140,7 +152,7 @@ sealed partial class DesktopWindow : Window
             }
             finally { deferral.Complete(); }
         };
-        core.ProcessFailed += (_, _) => { if (!closing && !closed) ShowNotice(T("The interface stopped responding. Restart the program to restore saved work.", "Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.")); };
+        core.ProcessFailed += (_, _) => { if (!closing && !closed) { ShowNotice(T("The interface stopped responding. Restart the program to restore saved work.", "Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.")); OfferDiscard(); } };
     }
     static void OpenExternal(string address)
     {
@@ -221,6 +233,7 @@ sealed partial class DesktopWindow : Window
             {
                 if (maintenance) await backend.Request("refuse");
                 ShowNotice(T("Work could not be saved. The program remains open. Check Saved work and try again.", "Nie udało się zapisać pracy. Program pozostaje otwarty. Sprawdź Zapisaną pracę i spróbuj ponownie."));
+                OfferDiscard();
                 return;
             }
             ShowNotice(T("Stopping active work and closing…", "Zatrzymywanie zadań i zamykanie…"), true);
@@ -236,6 +249,7 @@ sealed partial class DesktopWindow : Window
         {
             if (maintenance) await backend.Request("refuse");
             ShowNotice(T("Closing was stopped to protect unsaved work. Try again after the current operation.", "Zamykanie zostało wstrzymane, aby chronić niezapisaną pracę. Spróbuj ponownie po bieżącej operacji.")); SaveDiagnostic(error.GetType().Name);
+            OfferDiscard();
         }
         finally { closing = false; if (!closed) view.IsEnabled = true; }
     }

@@ -52,9 +52,9 @@ async function initializeAutomaticRecovery() {
   workspaceAutosaveStatus.textContent = "Auto-save active. Changes are saved within a few seconds.";
 }
 
-async function saveAutomaticWorkspace(force = false) {
+async function saveAutomaticWorkspace(force = false, closing = false) {
   if (!csrfToken || workspaceRestoreBusy || workspaceAutosaveBusy || guiBatchBusy || guiQueueStarting ||
-      !workspaceAutosave.checked || workspaceAutosave.disabled || (!force && !automaticRecoveryReady)) return false;
+      (!closing && (!workspaceAutosave.checked || workspaceAutosave.disabled)) || (!force && !automaticRecoveryReady)) return false;
   const fingerprint = workspaceFingerprint();
   if (!force && fingerprint === lastWorkspaceFingerprint && !reviewDirty && !translationReviewDirty) return true;
   workspaceAutosaveBusy = true;
@@ -68,7 +68,7 @@ async function saveAutomaticWorkspace(force = false) {
     const media = collectPendingGuiMedia();
     const payload = await workspacePost("/api/v1/workspaces/save", {
       workspace_id:activeWorkspaceId, name, current_step:lastWorkspaceStep,
-      fields:collectWorkspaceFields(), pending_media:media, autosave:true,
+      fields:collectWorkspaceFields(), pending_media:media, autosave:workspaceAutosave.checked,
     }, {feedback:false, storageDirectory:storage});
     const saved = payload.workspace;
     const unchanged = fingerprint === workspaceFingerprint();

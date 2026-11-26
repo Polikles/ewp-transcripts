@@ -75,7 +75,10 @@ sealed partial class DesktopWindow
         await CloseApplication();
         Check(!backend.Process.HasExited && !closed && view.IsEnabled && notice.Visibility == Visibility.Visible, "invalid work state refuses close and keeps backend/window alive");
         await view.ExecuteScriptAsync("workspaceName.value=''");
+        await view.ExecuteScriptAsync("workspaceAutosave.checked=false");
         Check(Flag(await Ui("prepare-close"), "ok"), "close flush durably saves pending media without a chosen name");
+        Check(await ScriptFlag("!workspaceAutosave.checked"), "close saves explicitly without re-enabling a disabled autosave preference");
+        await view.ExecuteScriptAsync("workspaceAutosave.checked=true");
         Check(!Flag(await Ui("status"), "dirty"), "no dirty state remains after close flush");
         Check(!await ScriptFlag("guiQueueJobs.some(j=>['queued','running'].includes(j.status))"), "close flush never starts the queue");
         testDownloadPath = Path.Combine(Path.GetDirectoryName(testReport!)!, "desktop-notice-download.txt");

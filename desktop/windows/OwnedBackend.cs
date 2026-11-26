@@ -35,12 +35,7 @@ sealed class OwnedBackend : IDisposable
         start.Environment["EWP_DESKTOP_HOST_PID"] = Environment.ProcessId.ToString();
         start.Environment["EWP_DESKTOP_HOST_IDENTITY"] = System.Diagnostics.Process.GetCurrentProcess().StartTime.ToFileTimeUtc().ToString();
         start.Environment["PYTHONIOENCODING"] = "utf-8";
-        Process = new Process { StartInfo = start, EnableRaisingEvents = true };
-        Process.OutputDataReceived += (_, e) => Capture(e.Data);
-        Process.ErrorDataReceived += (_, e) => Capture(e.Data);
-        if (!Process.Start()) throw new IOException("Application runtime did not start");
-        if (!AssignProcessToJobObject(job, Process.Handle)) { Process.Kill(true); throw new System.ComponentModel.Win32Exception(); }
-        Process.BeginOutputReadLine(); Process.BeginErrorReadLine();
+        Process = SuspendedProcess.Start(start, job, Capture);
     }
     public async Task<JsonElement?> Request(string? close = null)
     {
@@ -62,5 +57,4 @@ sealed class OwnedBackend : IDisposable
     [StructLayout(LayoutKind.Sequential)] struct JobLimits { public BasicLimits Basic; public IoCounters Io; public UIntPtr ProcessMemory, JobMemory, PeakProcessMemory, PeakJobMemory; }
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr CreateJobObject(IntPtr attributes, string? name);
     [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(SafeFileHandle job, int type, IntPtr value, uint length);
-    [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(SafeFileHandle job, IntPtr process);
 }
