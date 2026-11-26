@@ -4,6 +4,16 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.24.4 — 2026-11-26 (early existing-installation checks)
+
+- Refuse a new installation at Location step2 when an existing installation is detected, even
+  at another path. Show its location/version and direct older/same/newer versions to Update,
+  Repair, or Restore previous version/a newer installer respectively.
+- Repeat the check before starting installation and in the shared backend before host/model/key/
+  dependency work. Preserve the original installation and avoid populating a conflicting new folder.
+- Show the same full 25 GB fresh-install requirement beside the folder and in computer-check results,
+  including disk-only refreshes. Keep reuse of existing models without an unnecessary HF token.
+
 ## 0.24.3 — 2026-11-26 (reviewed installer copy)
 
 - Apply owner-reviewed English/Polish installer copy by comparing original and returned values;

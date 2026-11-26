@@ -1,3 +1,15 @@
+# Active installation preflight correction — 2026-11-26 / 0.24.4
+
+Owner feedback supersedes copy-review wait: block Install at step2 when any registered/managed
+installation exists, show version-specific maintenance guidance and25GB in both fresh-install
+labels. Shared early backend preflight, normal/native negative tests and new installer authorized.
+See opening TODO and docs/checkpoints/2026-11-26-install-preflight.md. Owner explicitly waives
+manual retests; next stage after this delivery is native Windows app UI/lifetime, not implemented
+in this task. Preserve prior passes, owner copy, HF model reuse and artifacts. AMD research and
+first public release remain AFTER native Windows app UI. No paid/model campaign.
+
+Earlier boundaries follow.
+
 # Delivered owner copy integration — 2026-11-26 / 0.24.3
 
 0.24.3 delivered from d57480694fbc197037ebd3114756a5d794a5e88c, native run45785526544 PASS:

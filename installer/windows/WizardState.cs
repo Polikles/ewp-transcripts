@@ -29,7 +29,7 @@ sealed partial class Wizard
             hfSecret = orSecret = ""; hfValid = orValid = false;
             terms.IsChecked = removeModels.IsChecked = removeKey.IsChecked = false;
             log.Clear(); logExpanded = false; missingRequirements.Clear(); ResetModelState(); ResetOperationProgress(); File.Delete(CancelFile);
-            detected = value == "install" ? null : FindInstallation(preferredMaintenanceRoot, value == "uninstall");
+            detected = FindInstallation(preferredMaintenanceRoot, value is "install" or "uninstall");
             manualLocation = detected == null;
             root.Text = value == "install" ? InstallationDiscovery.DefaultRoot : detected?.Root ?? "";
             installed = detected?.State;
@@ -72,13 +72,13 @@ sealed partial class Wizard
     bool ShowVcHelp => hostAttempted && (host is not JsonElement result ||
         !result.GetProperty("checks").EnumerateArray().Any(c => c.GetProperty("code").GetString() == "vc_runtime" && c.GetProperty("status").GetString() == "pass"));
 
-    void RenderDetectedLocation()
+    void RenderDetectedLocation(bool allowChange = true)
     {
         body.Children.Add(Copy(T("Detected installation", "Wykryta instalacja"), muted: true));
         var info = new StackPanel();
         info.Children.Add(new TextBlock { Text = detected?.Version.Length > 0 ? "EwP Transcripts " + detected.Version : "EwP Transcripts", FontSize = 16, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
-        info.Children.Add(new TextBlock { Text = root.Text, TextWrapping = TextWrapping.Wrap, Foreground = Muted, FontSize = 13 });
+        info.Children.Add(new TextBlock { Text = detected?.Root ?? root.Text, TextWrapping = TextWrapping.Wrap, Foreground = Muted, FontSize = 13 });
         body.Children.Add(Card(info));
-        body.Children.Add(Link(T("Choose another installation…", "Wybierz inną instalację…"), ChooseFolder));
+        if (allowChange) body.Children.Add(Link(T("Choose another installation…", "Wybierz inną instalację…"), ChooseFolder));
     }
 }

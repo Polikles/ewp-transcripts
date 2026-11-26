@@ -1158,17 +1158,81 @@ def changed_model_codes(root: Path, bundle: Path) -> list[str]:
     ]
 
 
+def registered_installations() -> list[tuple[Path, str]]:
+    """Read registration before any dependency/model work, across Windows hives/views."""
+    if os.name != "nt":
+        desktop = Path.home() / ".local/share/applications/ewp-transcripts.desktop"
+        if not desktop.exists():
+            return []
+        if desktop.is_symlink():
+            raise InstallError("Existing desktop entry preserved; verify the original installation")
+        for line in desktop.read_text(encoding="utf-8").splitlines():
+            if line.startswith("X-EwP-Root="):
+                return [(Path(line.removeprefix("X-EwP-Root=")), "")]
+        raise InstallError("Existing desktop entry preserved; use the original install location")
+    import winreg
+
+    found = []
+    for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        for view in (winreg.KEY_WOW64_64KEY, winreg.KEY_WOW64_32KEY):
+            try:
+                with winreg.OpenKey(
+                    hive,
+                    r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts",
+                    0,
+                    winreg.KEY_READ | view,
+                ) as key:
+                    location = winreg.QueryValueEx(key, "InstallLocation")[0]
+                    with contextlib.suppress(FileNotFoundError):
+                        version = str(winreg.QueryValueEx(key, "DisplayVersion")[0])
+                        found.append((Path(location), version))
+                        continue
+                    found.append((Path(location), ""))
+            except FileNotFoundError:
+                continue
+            except OSError as error:
+                raise InstallError(
+                    "Cannot verify the existing installation registration"
+                ) from error
+    return found
+
+
+def existing_installation_message(version: str, selected: str) -> str:
+    try:
+        order = tuple(map(int, version.split(".")))
+        target = tuple(map(int, selected.split(".")))
+    except ValueError:
+        return "An existing installation was detected; uninstall it before installing again"
+    if order < target:
+        return f"Installed version {version}; choose Update instead of Install"
+    if order == target:
+        return f"Version {version} is already installed; choose Repair"
+    return (
+        f"Installed version {version} is newer; choose Restore previous version or download "
+        "a newer installer: https://github.com/Polikles/ewp-transcripts/tree/main/releases"
+    )
+
+
+def registration_preflight(root: Path, version: str) -> None:
+    for location, registered_version in registered_installations():
+        if os.path.normcase(str(location.resolve())) != os.path.normcase(str(root.resolve())):
+            state = load_state(location)
+            current = state["version"] if state else registered_version
+            raise InstallError(f"{existing_installation_message(current, version)}: {location}")
+
+
+def new_installation_preflight(root: Path, version: str) -> None:
+    registration_preflight(root, version)
+    state = load_state(root)
+    if state:
+        raise InstallError(existing_installation_message(state["version"], version))
+
+
 def register(root: Path, state: dict[str, Any]) -> None:
+    registration_preflight(root, state["version"])
     if os.name == "nt":
         import winreg
 
-        registry_path = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts"
-        with (
-            contextlib.suppress(FileNotFoundError),
-            winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path) as existing,
-        ):
-            if winreg.QueryValueEx(existing, "InstallLocation")[0] != str(root):
-                raise InstallError("Use the existing installation location, or uninstall it first")
         with winreg.CreateKey(
             winreg.HKEY_CURRENT_USER,
             r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts",
@@ -1260,6 +1324,7 @@ def install(
     if meta["platform"] != expected:
         raise InstallError("Choose the bundle for this operating system")
     old = load_state(root)
+    registration_preflight(root, meta["version"])
     hf_checked = False
     if local and model_codes != []:
         with zipfile.ZipFile(bundle) as archive:
@@ -2076,6 +2141,11 @@ def main(argv: list[str] | None = None) -> int:
         else:
             if args.bundle is None:
                 raise InstallError("Select a versioned bundle with --bundle")
+            selected_version = inspect_bundle(args.bundle)["version"]
+            if args.action == "install":
+                new_installation_preflight(root, selected_version)
+            else:
+                registration_preflight(root, selected_version)
             local_requested = args.local
             existing = load_state(root)
             if args.action == "update" and existing:

@@ -1,3 +1,8 @@
+Owner follow-up2026-11-26: close existing-installation preflight and25GB wording as0.24.4,
+with automated checks only and no new manual gate. Native Windows application interface/lifetime
+is next after delivery. AMD research and first public release remain after that interface.
+See opening TODO and install-preflight checkpoint. Preserve previous accepted copy/models/tests.
+
 Owner follow-up 2026-11-26: returned installer text corrections activate integration and a new
 manual copy/layout review build (0.24.3); compare values, never require Decyzja. See opening TODO
 and installer-reviewed-copy checkpoint. Keep original AGPL/vendor licenses and technical English.

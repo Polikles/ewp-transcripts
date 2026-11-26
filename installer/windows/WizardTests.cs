@@ -29,6 +29,7 @@ sealed partial class Wizard
         "five-step first install and optional OpenRouter page", "overall progress and stable metrics",
         "same-version update refusal", "automatic required host checks for install/update/repair/models", "disk-only folder refresh without repeated hardware probes", "failed host checks stay blocked after folder changes", "optional local ASR unchecked defaults and selection", "technical-only backend notices", "application-pattern header",
         "reviewed EN/PL copy and localized project notices", "newer-installer release links in every maintenance flow", "separate smaller OpenRouter spending footnote", "application-pattern light body",
+        "Install detects other roots before checks/downloads", "existing older/same/newer installation guidance", "late appearing installation blocks before operation", "consistent fresh-install 25 GB labels",
         "no installation/model/provider operation; broker transport probe only"
     ];
 
@@ -61,7 +62,7 @@ sealed partial class Wizard
         DiskProbe = _ => (100_000_000_000L, "TEST-VOLUME");
         var cpu = HostStrings(); Assert(cpu.Contains("64-bit processor: Test CPU"), "host structured model");
         language.SelectedIndex = 1; Assert(HostStrings().Contains("Procesor 64-bit") && !HostStrings().Contains("GB free"), "cached host PL");
-        language.SelectedIndex = 0; Assert(HostStrings().Contains("GB free") && HostStrings().Contains("20 GB required") && !HostStrings().Contains("wolne"), "cached host EN");
+        language.SelectedIndex = 0; Assert(HostStrings().Contains("GB free") && HostStrings().Contains("25 GB required") && !HostStrings().Contains("20 GB required") && !HostStrings().Contains("wolne"), "cached host EN has full 25GB requirement");
         await Next(); Assert(page == 2 && !CanAdvance && !terms.IsEnabled, "HF gate initially closed");
         language.SelectedIndex = 1; await Capture(previewDirectory, "pl-models-before-token"); language.SelectedIndex = 0;
         local.IsChecked = false; Assert(CanAdvance, "cloud/review install needs no credential");
@@ -104,6 +105,7 @@ sealed partial class Wizard
         await TestModelMaintenance(previewDirectory);
         await TestAutomaticHostChecks(previewDirectory);
         await TestReviewedCopy(previewDirectory);
+        await TestNewInstallPreflight(previewDirectory);
         var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
         var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
         infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();
@@ -113,6 +115,50 @@ sealed partial class Wizard
         infoWindow.Close();
         if (previewDirectory != null) SaveExeIcon(Path.Combine(previewDirectory, "exe-icon.png"));
         finished = false; successful = false; hfSecret = orSecret = ""; hfValid = orValid = false;
+    }
+
+    async Task TestNewInstallPreflight(string? previews)
+    {
+        var priorFind = FindInstallation; var priorDisk = DiskProbe;
+        int workers = 0;
+        HostCheckRunner = () => { workers++; SetFixtureHost(); return Task.FromResult(0); };
+        DiskProbe = _ => (100_000_000_000L, "TEST-PREFLIGHT-VOLUME");
+        busy = finished = successful = false;
+        try
+        {
+            foreach (int locale in new[] { 0, 1 })
+            foreach (var (current, expected) in new[] { ("0.0.1", locale == 1 ? "Aktualizuj" : "Update"), (version, locale == 1 ? "Napraw" : "Repair"), ("99.0.0", locale == 1 ? "Przywróć poprzednią wersję" : "Restore previous version") })
+            {
+                language.SelectedIndex = locale;
+                string oldRoot = Path.Combine(temporary, "registered-original");
+                using var state = JsonDocument.Parse(JsonSerializer.Serialize(new { kind = "ewp-transcripts-managed-v1", root = oldRoot, version = current, active = "versions/original" }));
+                var info = new InstallationInfo(oldRoot, state.RootElement.Clone());
+                FindInstallation = (_, partial) => { Assert(partial, "Install includes partial registrations"); return info; };
+                SelectOperation("install"); root.Text = Path.Combine(temporary, "new-target-" + locale + "-" + current); await Task.Delay(250);
+                await Next(); UpdateLayout();
+                Assert(page == 1 && !CanAdvance && workers == 0 && detected?.Root == oldRoot, "Install detects registered root before worker");
+                Assert(LocationProblem()!.Contains(expected) && VisibleText(body).Contains(oldRoot) && VisibleText(body).Contains(current), "existing version/path and correct action shown");
+                await Next(); await CheckHost();
+                Assert(page == 1 && workers == 0 && !Directory.Exists(root.Text), "blocked Install never creates target or runs diagnostics");
+                if (current == "99.0.0") Assert(diskStatus.Inlines.OfType<Hyperlink>().Single().NavigateUri.AbsoluteUri == InstallerReleasesUrl, "newer existing version offers release link");
+                await Capture(previews, $"{(Pl ? "pl" : "en")}-install-existing-{current}");
+                root.Text += "-different-folder"; await Task.Delay(250);
+                Assert(!CanAdvance && workers == 0 && !Directory.Exists(root.Text), "another new folder cannot bypass registration");
+            }
+            FindInstallation = (_, _) => null;
+            SelectOperation("install"); root.Text = Path.Combine(temporary, "clean-new-target"); await Task.Delay(250);
+            await Next();
+            Assert(page == 1 && CanAdvance && workers == 1 && !Directory.Exists(root.Text), "no installation allows diagnostics without creating target");
+            foreach (int locale in new[] { 0, 1 })
+            {
+                language.SelectedIndex = locale; RefreshHostDisk(); Render();
+                Assert(diskStatus.Text.Contains("25 GB") && HostStrings().Contains(locale == 1 ? "25 GB wymagane" : "25 GB required"), "both disk descriptions show25GB after rerender");
+            }
+            FindInstallation = (_, _) => new InstallationInfo(Path.Combine(temporary, "late-registration"), null, version);
+            page = 3; await RunOperation();
+            Assert(page == 1 && !busy && !finished && workers == 1 && !Directory.Exists(root.Text), "registration appearing late is rechecked before install worker");
+        }
+        finally { FindInstallation = priorFind; DiskProbe = priorDisk; HostCheckRunner = null; busy = finished = successful = false; }
     }
 
     async Task TestReviewedCopy(string? previews)

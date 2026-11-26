@@ -1,3 +1,19 @@
+# Active installation preflight correction — 2026-11-26 / target 0.24.4
+
+- [ ] Detect an existing installation for Install at step2, independent of the selected new folder;
+      show detected version/path and block before diagnostics/downloads/files are created.
+- [ ] Older version → Update; same version → Repair; newer version → Restore previous version
+      or newer-installer release link. Preserve existing installation and cache reuse/token rules.
+- [ ] Add shared backend registration preflight before host checks/model/credential/network work;
+      retain final registration guard for races. Cover script/direct entry points and registry views.
+- [ ] Show25 GB consistently in both fresh-install disk descriptions, including cached disk rerender.
+- [ ] Focused automated/native negative regressions (no worker/data/root creation), normal gate,
+      new0.24.4 artifact and source/hash/preview verification. Owner explicitly waives manual retest.
+- [ ] After delivery: native Windows application interface/lifetime is the next stage, not this task.
+      Preserve AMD research and first public release AFTER native app interface.
+
+Earlier stages follow.
+
 # Active owner copy integration — 2026-11-26 / target 0.24.3
 
 - [x] Compare returned private XLSX EN/PL/notes to immutable original by stable ID, ignoring Decyzja;

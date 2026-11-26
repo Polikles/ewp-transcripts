@@ -1080,3 +1080,96 @@ def test_extra_catalog_entries_do_not_break_configured_custom_base_model_targets
     result = manager.model_targets(tmp_path, entries, tmp_path / "release")
     assert result[0]["path"] == str(tmp_path / "custom")
     assert result[1]["path"] == str(tmp_path / "optional")
+
+
+@pytest.mark.parametrize(
+    ("current", "message"),
+    [("0.9.0", "choose Update"), ("1.0.0", "choose Repair"), ("2.0.0", "newer installer")],
+)
+def test_conflicting_registration_stops_before_any_preparation(
+    tmp_path, monkeypatch, current, message
+):
+    original = tmp_path / "original"
+    original.mkdir()
+    marker = original / "keep.txt"
+    marker.write_bytes(b"existing installation must remain untouched")
+    root = tmp_path / "new destination"
+    archive = bundle(tmp_path, "1.0.0")
+    monkeypatch.setattr(manager, "registered_installations", lambda: [(original, current)])
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("preflight must precede host/model/network/runtime work")
+
+    for function in ["host_report", "model_targets", "check_hf_access", "run"]:
+        monkeypatch.setattr(manager, function, forbidden)
+    with pytest.raises(manager.InstallError, match=message):
+        manager.install(root, archive, local=True, terms=True, secrets={"hf_token": "never-sent"})
+    monkeypatch.setattr("builtins.input", forbidden)
+    monkeypatch.setattr(manager.getpass, "getpass", forbidden)
+    assert manager.main(["install", "--root", str(root), "--bundle", str(archive), "--local"]) == 2
+    assert not root.exists()
+    assert list(original.iterdir()) == [marker]
+    assert marker.read_bytes() == b"existing installation must remain untouched"
+
+
+@pytest.mark.parametrize("current", ["0.9.0", "1.0.0", "2.0.0"])
+def test_new_install_at_owned_root_requires_explicit_maintenance(tmp_path, monkeypatch, current):
+    root = tmp_path / "owned"
+    manager.atomic_json(
+        root / "installation.json",
+        {
+            "kind": manager.MAGIC,
+            "root": str(root),
+            "active": "versions/original",
+            "version": current,
+        },
+    )
+    original = (root / "installation.json").read_bytes()
+    monkeypatch.setattr(manager, "registered_installations", lambda: [(root, current)])
+    with pytest.raises(manager.InstallError, match="choose"):
+        manager.new_installation_preflight(root, "1.0.0")
+    # Shared install function must still permit explicit update/repair at the same location.
+    manager.registration_preflight(root, "1.0.0")
+    assert (root / "installation.json").read_bytes() == original
+
+
+@pytest.mark.parametrize(("wanted_hive", "wanted_view"), [(1, 64), (1, 32), (2, 64), (2, 32)])
+def test_windows_registration_discovery_reads_every_hive_and_view(
+    tmp_path, monkeypatch, wanted_hive, wanted_view
+):
+    from types import SimpleNamespace
+
+    class Key:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    probed = []
+
+    def open_key(hive, path, reserved, access):
+        probed.append((hive, access))
+        if (hive, access) != (wanted_hive, wanted_view):
+            raise FileNotFoundError()
+        return Key()
+
+    monkeypatch.setitem(
+        sys.modules,
+        "winreg",
+        SimpleNamespace(
+            HKEY_CURRENT_USER=1,
+            HKEY_LOCAL_MACHINE=2,
+            KEY_READ=0,
+            KEY_WOW64_64KEY=64,
+            KEY_WOW64_32KEY=32,
+            OpenKey=open_key,
+            QueryValueEx=lambda key, name: (
+                str(tmp_path) if name == "InstallLocation" else "1.0.0",
+                1,
+            ),
+        ),
+    )
+    monkeypatch.setattr(manager, "os", SimpleNamespace(name="nt"))
+    assert manager.registered_installations() == [(tmp_path, "1.0.0")]
+    assert set(probed) == {(1, 64), (1, 32), (2, 64), (2, 32)}

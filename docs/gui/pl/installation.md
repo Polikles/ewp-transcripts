@@ -8,6 +8,12 @@ wyświetla się osobno mniejszą czcionką. Informacje projektu są dostępne po
 AGPL i licencje dostawców pozostają w niezmienionej wersji angielskiej. Dziennik i raport
 techniczny również pozostają po angielsku.
 
+Nowa instalacja wykrywa istniejącą instalację w kroku 2, przed diagnostyką i pobieraniem,
+również po wybraniu innego pustego folderu. Dla starszej wersji wybierz Aktualizuj, dla tej samej
+Napraw, a dla nowszej Przywróć poprzednią wersję lub pobierz nowszy instalator. Kreator pokazuje
+wykryty folder i wersję. Oba opisy miejsca przy nowej instalacji wymagają 25 GB. Sprawdzenie jest
+ponawiane przed przygotowaniem programu. Kompletne modele w cache nadal nie wymagają tokenu HF.
+
 ## Bieżące zachowanie instalatora
 
 Aktualizacja zachowuje niezmienione wersje modeli i nie wymaga tokenu HF ani klucza OR.
@@ -39,17 +45,17 @@ Pola postępu zachowują położenie, a raz otwarty dziennik pozostaje rozwinię
 
 ## Wybierz sposób instalacji
 
-1. W Windows uruchom kreator `EwP-Setup-0.24.3.exe` i wykonaj opisane niżej kroki.
+1. W Windows uruchom kreator `EwP-Setup-0.24.4.exe` i wykonaj opisane niżej kroki.
 2. Do instalacji terminalowej pobierz ZIP Windows albo tar.gz/ZIP Ubuntu i użyj krótkich poleceń poniżej. Nie trzeba ręcznie klonować repozytorium ani wcześniej instalować Python i uv.
 3. Jeśli pracujesz z repozytorium jako programista lub dotychczasowy użytkownik, zachowaj ten sposób i korzystaj z sekcji aktualizacji checkoutu. To nie jest instalacja zarządzana.
 
-Instalacja zarządzana pojawiła się w0.22.0;0.24.3 poprawia kreator graficzny. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
+Instalacja zarządzana pojawiła się w0.22.0;0.24.4 poprawia kreator graficzny. Paczki testowe są dostępne w przekazanej paczce oraz w zadaniu Actions „Installer build and Windows startup” repozytorium. Publiczne skrypty pobierania zaczną działać po publikacji pasującego wydania. Nie zgaduj adresu pobierania. Obecny EXE jest niepodpisany; nie dostarczono certyfikatu podpisywania kodu.
 
 Obecne cele to Windows 11 x64 oraz Ubuntu 24.04/26.04, w tym WSL2. Wcześniejsze testy programu w Windows/WSL pozostają zaakceptowane. Nowy cykl instalacji zarządzanej ma rzeczywiste testy na VM Ubuntu; pełny test instalacji i usuwania na Windows 11 jest osobny od kompilacji lub uruchomienia okien na runnerze CI. Testowe GPU to RTX 3090 24 GB. Oczekiwanie działania na innych NVIDIA z co najmniej 8 GB VRAM nadal nie jest gwarancją.
 
 ## Kreator Windows
 
-Uruchom `EwP-Setup-0.24.3.exe` na zwykłym koncie użytkownika. Paczka zawiera program,
+Uruchom `EwP-Setup-0.24.4.exe` na zwykłym koncie użytkownika. Paczka zawiera program,
 środowisko graficzne i wyśrodkowane logo EwP w ramce; nie zawiera wielogigabajtowych modeli.
 
 1. **Działanie i język.** Wybierz English/Polski oraz jedno działanie: Zainstaluj, Aktualizuj,
@@ -119,8 +125,8 @@ Tokeny/klucze nie trafiają do profili, raportów ani tekstowego zapisu awaryjne
 PowerShell w Windows, w katalogu pobranego ZIP:
 
 ```powershell
-Expand-Archive .\EwP-0.24.3-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.24.3-windows-x64.zip
+Expand-Archive .\EwP-0.24.4-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.24.4-windows-x64.zip
 ```
 
 Po zaakceptowaniu warunków modelu dodaj `-Local -AcceptModelTerms`, aby przygotować modele lokalne. Monit tokenu jest ukryty; pusta odpowiedź pozwala użyć kompletnych modeli. `-SaveOpenRouterKey` włącza osobny ukryty monit i jawny zapis OR w systemie. `-Root 'D:\Apps\EwP'` wybiera własny pusty katalog. Obejście polityki PowerShell dotyczy tylko tego uruchomienia. Ścieżki ze spacjami obejmuj cudzysłowami.
@@ -129,13 +135,13 @@ Ubuntu 24.04/26.04, w katalogu pobranego tar.gz:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.24.3-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.24.4-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip"
 ```
 
 Dodaj `--local --accept-model-terms` dla modeli, `--save-openrouter-key` dla ukrytego monitu OR lub `--root "$HOME/Apps/EwP"` dla innej lokalizacji. Brakujące pakiety Ubuntu można zainstalować po jawnym monicie sudo. Nie instaluj sterownika ekranu Linuksa wewnątrz WSL; CUDA udostępnia sterownik Windows. Zgodność z fizycznym Ubuntu trzeba potwierdzić wykonaniem, a nie wnioskować tylko z WSL.
 
-Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.24.3.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
+Plik SHA256SUMS służy do sprawdzenia pobranych plików. Skrypty online `Install-EwP-0.24.4.ps1` i `.sh` są generowane z dokładnymi hashami paczek pasującego wydania; nie pobiorą nieopublikowanego wydania. Skrypty i GUI używają wspólnego mechanizmu, blokady zależności i zasad modeli.
 
 ## Aktualizacja zarządzana i poprzednia wersja
 

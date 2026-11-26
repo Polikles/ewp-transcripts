@@ -149,11 +149,11 @@
   },
   {
     "key": "disk-host-install",
-    "en": "Disk space: ({free_gb} GB free; {installation_gb} GB required)",
-    "pl": "Miejsce na dysku: ({free_gb} GB wolne; {installation_gb} GB wymagane)",
+    "en": "Disk space: ({free_gb} GB free; 25 GB required)",
+    "pl": "Miejsce na dysku: ({free_gb} GB wolne; 25 GB wymagane)",
     "context": "2. Wiersz testu dysku przy instalacji",
     "source": "installer/windows/Wizard.cs:575",
-    "notes": "DO KOREKTY: opis pokazuje20 GB, lecz blokada uwzględnia25 GB. Trzeba jawnie rozróżnić budżet i wymagany margines; nie zmieniać liczb w kodzie przez samą korektę tekstu."
+    "notes": "Full fresh-install threshold, including reserve, matches the folder gate (0.24.4)."
   },
   {
     "key": "disk-host-maintenance",
@@ -416,5 +416,26 @@
     "pl": "*w naszych testach $2 wystarczyło na wiele transkrypcji",
     "context": "OpenRouter — osobny komentarz mniejszą czcionką pod punktem 4",
     "source": "installer/windows/WizardKeys.cs:34"
+  },
+  {
+    "key": "new-install-existing-older",
+    "en": "Installed version: {installed_version}. Choose Update instead of Install.",
+    "pl": "Zainstalowana wersja: {installed_version}. Wybierz Aktualizuj zamiast Zainstaluj.",
+    "context": "2. New installation blocked by existing older version",
+    "source": "installer/windows/Wizard.cs / ExistingInstallProblem"
+  },
+  {
+    "key": "new-install-existing-same",
+    "en": "Installed version: {installed_version}. This version is already installed. Choose Repair.",
+    "pl": "Zainstalowana wersja: {installed_version}. Ta wersja jest już zainstalowana. Wybierz Napraw.",
+    "context": "2. New installation blocked by existing same version",
+    "source": "installer/windows/Wizard.cs / ExistingInstallProblem"
+  },
+  {
+    "key": "new-install-existing-newer",
+    "en": "Installed version: {installed_version}. Choose Restore previous version or download a newer installer.",
+    "pl": "Zainstalowana wersja: {installed_version}. Wybierz Przywróć poprzednią wersję lub pobierz nowszą wersję instalatora.",
+    "context": "2. New installation blocked by existing newer version",
+    "source": "installer/windows/Wizard.cs / ExistingInstallProblem"
   }
 ]

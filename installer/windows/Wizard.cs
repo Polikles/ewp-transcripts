@@ -218,6 +218,7 @@ sealed partial class Wizard : Window
     {
         body.Children.Add(Heading(T("2. Location and checks", "2. Lokalizacja i test")));
         body.Children.Add(Copy(OperationHelp, muted: true));
+        if (operation == "install" && detected != null) RenderDetectedLocation(allowChange: false);
         if (operation != "install" && detected != null && !manualLocation) RenderDetectedLocation();
         else
         {
@@ -370,6 +371,7 @@ sealed partial class Wizard : Window
     async Task Next()
     {
         if (busy) return;
+        if (page == 1 && operation == "install") ReadInstalled();
         if (!CanAdvance) { HighlightMissingRequirements(); return; }
         notice = "";
         if (finished) { Launch(); return; }
@@ -408,7 +410,8 @@ sealed partial class Wizard : Window
     void ReadInstalled()
     {
         var info = InstallationDiscovery.Read(root.Text); installed = info?.State;
-        if (operation != "install") { detected = info; if (info != null) local.IsChecked = operation == "models" || info.LocalModels; }
+        if (operation == "install") detected = FindInstallation(preferredMaintenanceRoot, true) ?? info;
+        else { detected = info; if (info != null) local.IsChecked = operation == "models" || info.LocalModels; }
 
     }
     string? LocationProblem()
@@ -421,6 +424,7 @@ sealed partial class Wizard : Window
                 return T("Choose a separate program folder.", "Wybierz osobny folder programu.");
             if (operation == "install")
             {
+                if (detected != null) return ExistingInstallProblem(detected);
                 if (Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any() && InstallationDiscovery.Read(path) is not { State: null }) return T("Choose an empty folder; for an existing installation choose Update or Repair.", "Wybierz pusty folder; dla istniejącej instalacji wybierz Aktualizuj lub Napraw.");
                 if (DiskProbe(path).Free < 25_000_000_000) return T("At least 25 GB of free space is required.", "Potrzeba co najmniej 25 GB wolnego miejsca.");
             }
@@ -442,6 +446,18 @@ sealed partial class Wizard : Window
         }
         catch { return T("Cannot access this folder or disk.", "Nie można odczytać folderu lub dysku."); }
         return null;
+    }
+    string ExistingInstallProblem(InstallationInfo info)
+    {
+        if (!Version.TryParse(info.Version, out var existing))
+            return T("An existing installation was detected. Uninstall it before installing again.", "Wykryto istniejącą instalację. Przed ponowną instalacją wybierz Odinstaluj.");
+        string prefix = T("Installed version: ", "Zainstalowana wersja: ") + info.Version + ". ";
+        int order = existing.CompareTo(Version.Parse(version));
+        return prefix + (order < 0
+            ? T("Choose Update instead of Install.", "Wybierz Aktualizuj zamiast Zainstaluj.")
+            : order == 0
+                ? T("This version is already installed. Choose Repair.", "Ta wersja jest już zainstalowana. Wybierz Napraw.")
+                : T("Choose Restore previous version or download a newer installer.", "Wybierz Przywróć poprzednią wersję lub pobierz nowszą wersję instalatora."));
     }
     void RefreshLocation()
     {
@@ -519,6 +535,8 @@ sealed partial class Wizard : Window
     async Task CheckHost()
     {
         if (busy) return;
+        ReadInstalled();
+        if (LocationProblem() != null) { Render(); return; }
         int epoch = stateEpoch;
         bool localForCheck = LocalSelected; checkedLocalModels = localForCheck;
         busy = true; hostReady = hostAttempted = false; host = null; notice = ""; File.Delete(CancelFile); Render();
@@ -541,6 +559,11 @@ sealed partial class Wizard : Window
     }
     async Task RunOperation()
     {
+        if (operation == "install")
+        {
+            ReadInstalled();
+            if (LocationProblem() != null) { page = 1; Render(); return; }
+        }
         page = ProgressPage; busy = true; finished = successful = false; progressStage = ""; ResetOperationProgress(); operationClock.Start(); File.Delete(CancelFile); Render();
         try { successful = await Worker(repairModels ? "models" : operation, true) == 0; }
         catch { successful = false; log.AppendText("INSTALLER_OPERATION_FAILED\n"); }
@@ -592,7 +615,7 @@ sealed partial class Wizard : Window
         {
             "architecture" => T("64-bit processor: ", "Procesor 64-bit: ") + Field("cpu_model"),
             "platform" => T("System: ", "System: ") + Field("name"),
-            "disk" => T("Disk space: ", "Miejsce na dysku: ") + "(" + GB(context.GetProperty("free_bytes").GetInt64()) + T(" GB free; ", " GB wolne; ") + GB(context.GetProperty("installation_bytes").GetInt64()) + T(" GB required", " GB wymagane") + (context.TryGetProperty("additional_bytes", out var additional) && operation != "install" ? T(" for program and basic models; additional free space: ", " na program i podstawowe modele; dodatkowe wolne miejsce: ") + GB(additional.GetInt64()) + " GB" : "") + ")",
+            "disk" => T("Disk space: ", "Miejsce na dysku: ") + "(" + GB(context.GetProperty("free_bytes").GetInt64()) + T(" GB free; ", " GB wolne; ") + GB(operation == "install" ? 25_000_000_000L : context.GetProperty("installation_bytes").GetInt64()) + T(" GB required", " GB wymagane") + (context.TryGetProperty("additional_bytes", out var additional) && operation != "install" ? T(" for program and basic models; additional free space: ", " na program i podstawowe modele; dodatkowe wolne miejsce: ") + GB(additional.GetInt64()) + " GB" : "") + ")",
             "gpu" => T("GPU driver: ", "Sterownik GPU: ") + (context.TryGetProperty("devices", out var devices) && devices.GetArrayLength() > 0 ? string.Join("; ", devices.EnumerateArray().Select(d => d.GetProperty("name").GetString() + " · " + d.GetProperty("driver").GetString())) : T("not detected", "nie wykryto")),
             "vc_runtime" => T("Visual C++ libraries", "Biblioteki Visual C++"),
             _ => "FFmpeg / ffprobe"

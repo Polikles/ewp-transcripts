@@ -483,3 +483,51 @@ finally:lock.unlink(missing_ok=True)
         identity = manager.process_identity(record["pid"]) if record else None
         if identity and identity[0] == record["identity"]:
             subprocess.run(["taskkill.exe", "/PID", str(record["pid"]), "/F"], capture_output=True)
+
+
+@pytest.mark.parametrize("current", ["0.9.0", "1.0.0", "2.0.0"])
+@pytest.mark.parametrize("view", [0x100, 0x200])
+def test_native_registered_other_root_blocks_before_preparation(
+    tmp_path, monkeypatch, current, view
+):
+    import winreg
+    import zipfile
+
+    key_path = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts"
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_READ | view):
+            pytest.skip("A real registration exists; never replace it in a native test")
+    except FileNotFoundError:
+        pass
+    original = tmp_path / "original"
+    original.mkdir()
+    keep = original / "keep.txt"
+    keep.write_bytes(b"original installation preserved")
+    target = tmp_path / "new target"
+    archive = tmp_path / "synthetic.zip"
+    with zipfile.ZipFile(archive, "w") as zipped:
+        zipped.writestr(
+            "bundle.json",
+            json.dumps({"format": 1, "platform": "windows-x64", "version": "1.0.0", "sha256": {}}),
+        )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("registered existing install must stop before any worker")
+
+    for function in ["host_report", "check_hf_access", "model_targets", "run"]:
+        monkeypatch.setattr(manager, function, forbidden)
+    try:
+        with winreg.CreateKeyEx(
+            winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_WRITE | view
+        ) as key:
+            winreg.SetValueEx(key, "InstallLocation", 0, winreg.REG_SZ, str(original))
+            winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, current)
+        expected = "Update" if current == "0.9.0" else "Repair" if current == "1.0.0" else "newer"
+        with pytest.raises(manager.InstallError, match=expected):
+            manager.install(
+                target, archive, local=True, terms=True, secrets={"hf_token": "never-sent"}
+            )
+        assert not target.exists()
+        assert keep.read_bytes() == b"original installation preserved"
+    finally:
+        winreg.DeleteKeyEx(winreg.HKEY_CURRENT_USER, key_path, view)

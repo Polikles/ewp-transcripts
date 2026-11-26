@@ -5,9 +5,9 @@ using Microsoft.Win32;
 
 namespace EwP.Setup;
 
-record InstallationInfo(string Root, JsonElement? State)
+record InstallationInfo(string Root, JsonElement? State, string RegisteredVersion = "")
 {
-    public string Version => State?.GetProperty("version").GetString() ?? "";
+    public string Version => State?.GetProperty("version").GetString() ?? RegisteredVersion;
     public bool LocalModels => State is JsonElement s && s.TryGetProperty("local_models", out var local) && local.ValueKind == JsonValueKind.True;
 }
 
@@ -18,6 +18,7 @@ static class InstallationDiscovery
     internal static InstallationInfo? Find(string? preferred = null, bool includePartial = false)
     {
         var candidates = new List<string>();
+        var registrations = new List<InstallationInfo>();
         if (!string.IsNullOrWhiteSpace(preferred)) candidates.Add(preferred);
         foreach (var hive in new[] { RegistryHive.CurrentUser, RegistryHive.LocalMachine })
             foreach (var view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
@@ -25,16 +26,20 @@ static class InstallationDiscovery
                 {
                     using var registry = RegistryKey.OpenBaseKey(hive, view);
                     using var key = registry.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\EwPTranscripts");
-                    if (key?.GetValue("InstallLocation") is string root) candidates.Add(root);
+                    if (key?.GetValue("InstallLocation") is string root && !string.IsNullOrWhiteSpace(root))
+                    {
+                        candidates.Add(root);
+                        registrations.Add(new(Path.GetFullPath(root), null, key.GetValue("DisplayVersion") as string ?? ""));
+                    }
                 }
-                catch (Exception e) when (e is IOException or System.Security.SecurityException or UnauthorizedAccessException) { }
+                catch (Exception e) when (e is IOException or System.Security.SecurityException or UnauthorizedAccessException or ArgumentException) { }
         candidates.Add(DefaultRoot);
         foreach (var programs in new[] { Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolder.ProgramFilesX86 })
         {
             string parent = Environment.GetFolderPath(programs);
             if (parent.Length > 0) candidates.Add(Path.Combine(parent, "EwPTranscripts"));
         }
-        return FindIn(candidates, includePartial);
+        return FindIn(candidates, includePartial) ?? (includePartial ? registrations.FirstOrDefault() : null);
     }
 
     internal static InstallationInfo? FindIn(IEnumerable<string> candidates, bool includePartial)
