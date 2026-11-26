@@ -30,6 +30,7 @@ sealed partial class DesktopWindow : Window
     readonly SavedPlacement? startupPlacement;
     readonly DispatcherTimer geometryTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
     Appearance appearance = new();
+    AppliedAppearance? appliedAppearance;
     ClosingProgress? closingProgress;
     readonly DispatcherTimer poll = new() { Interval = TimeSpan.FromMilliseconds(500) };
     readonly Dictionary<string, TaskCompletionSource<JsonElement>> replies = new();
@@ -52,7 +53,7 @@ sealed partial class DesktopWindow : Window
         WindowStartupLocation = placement.Saved == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.Manual; Background = Color("#F5F2E9"); Foreground = Color("#273342"); FontFamily = new FontFamily("Segoe UI");
         using (var icon = Assembly.GetExecutingAssembly().GetManifestResourceStream("EwP.ico")!) Icon = BitmapFrame.Create(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
         try { var saved = JsonSerializer.Deserialize<Appearance>(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))); if (saved != null && TitleBar.Valid(saved)) appearance = saved; } catch { }
-        SourceInitialized += (_, _) => TitleBar.Apply(this, appearance);
+        SourceInitialized += (_, _) => appliedAppearance = TitleBar.Apply(this, appearance);
         geometryTimer.Tick += (_, _) => { geometryTimer.Stop(); placement.Save(this); };
         void SaveGeometry(object? sender, EventArgs args) { if (!IsLoaded || closed) return; geometryTimer.Stop(); geometryTimer.Start(); }
         LocationChanged += SaveGeometry; SizeChanged += (_, _) => SaveGeometry(this, EventArgs.Empty); StateChanged += SaveGeometry;
@@ -168,12 +169,12 @@ sealed partial class DesktopWindow : Window
         };
         core.ProcessFailed += (_, _) => { if (!closing && !closed) { ShowNotice(T("The interface stopped responding. Restart the program to restore saved work.", "Interfejs przestał odpowiadać. Uruchom program ponownie, aby przywrócić zapisaną pracę.")); OfferDiscard(); } };
     }
-    void SystemPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => Dispatcher.BeginInvoke(new Action(() => { if (!closed) TitleBar.Apply(this, appearance); }));
+    void SystemPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs args) => Dispatcher.BeginInvoke(new Action(() => { if (!closed) appliedAppearance = TitleBar.Apply(this, appearance); }));
     void ApplyAppearance(JsonElement value)
     {
         var next = new Appearance(value.GetProperty("theme").GetString() ?? "light", value.GetProperty("titleBarMode").GetString() ?? "system", value.GetProperty("titleBarColor").GetString() ?? "#24485c");
         if (!TitleBar.Valid(next)) return;
-        appearance = next; TitleBar.Apply(this, next);
+        appearance = next; appliedAppearance = TitleBar.Apply(this, next);
         if (value.TryGetProperty("locale", out var locale)) pl = locale.GetString() == "pl";
         try { File.WriteAllText(Path.Combine(config.StateDirectory, "appearance.json"), JsonSerializer.Serialize(next)); } catch { }
     }

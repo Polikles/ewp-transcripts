@@ -46,15 +46,17 @@ sealed partial class DesktopWindow
         await view.ExecuteScriptAsync("showGuiStage('settings');document.querySelector('#gui-personalization').click()");
         Check(await ScriptFlag("document.querySelector('#gui-personalization-dialog').open && !document.querySelector('#gui-personal-native').hidden"), "desktop personalization includes native title-bar settings");
         await view.ExecuteScriptAsync("(()=>{let m=document.querySelector('#gui-titlebar-mode');m.value='custom';m.dispatchEvent(new Event('input'));let c=document.querySelector('#gui-titlebar-color');c.value='#5b193f';c.dispatchEvent(new Event('input'));})()");
-        await Until(() => Task.FromResult(TitleBar.ReadCaption(this) == 0x3f195b));
-        Check(true, "custom title-bar preference changes the actual DWM caption color");
+        await Until(() => Task.FromResult(appliedAppearance?.Caption == 0x3f195b));
+        Check(appliedAppearance!.Succeeded, "DWM accepts custom caption and contrasting text attributes");
+        CaptureFrame(locale + "-custom-titlebar-" + theme);
         await CaptureUi(locale + "-personalization-" + theme);
         await view.ExecuteScriptAsync("(()=>{let m=document.querySelector('#gui-titlebar-mode');m.value='system';m.dispatchEvent(new Event('input'));})()");
-        await Until(() => Task.FromResult(TitleBar.ReadCaption(this) == uint.MaxValue));
-        Check(true, "system title-bar preference restores Windows caption color");
+        await Until(() => Task.FromResult(appliedAppearance?.Caption == uint.MaxValue));
+        Check(appliedAppearance!.Succeeded, "DWM accepts resetting caption and text to system defaults");
         await view.ExecuteScriptAsync("(()=>{let m=document.querySelector('#gui-titlebar-mode');m.value='application';m.dispatchEvent(new Event('input'));document.querySelector('#gui-personal-close').click();})()");
-        await Until(() => Task.FromResult(TitleBar.ReadCaption(this) == (theme == "dark" ? 0x3f3012u : 0xe9f2f5u)));
-        Check(true, "application title-bar preference follows the resolved app theme");
+        await Until(() => Task.FromResult(appliedAppearance?.Caption == (theme == "dark" ? 0x3f3012u : 0xe9f2f5u)));
+        Check(appliedAppearance!.Succeeded, "DWM accepts caption and text matching the resolved app theme");
+        CaptureFrame(locale + "-application-titlebar-" + theme);
         using (var saved = JsonDocument.Parse(File.ReadAllText(Path.Combine(config.StateDirectory, "appearance.json"))))
             Check(saved.RootElement.GetProperty("Theme").GetString() == theme, "resolved native appearance is cached for next startup");
         ShowClosingProgress(T("Saving work before closing…", "Zapisywanie pracy przed zamknięciem…"));

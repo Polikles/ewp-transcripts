@@ -26,6 +26,13 @@ focused screenshots. See window-personalization-browser.json. Local C# cross-bui
 Initial local gate1205/19skips passes; after0.25.1 bump refresh editable package metadata before
 final gate. Actual Windows/native qualification and immutable delivery remain pending.
 
+First Windows run45883926205: installer46 groups and18 filesystem cases PASS; desktop stops at
+the new caption-color getter assertion. Microsoft documents caption/text color as DwmSetWindowAttribute
+options, not readable DwmGetWindowAttribute properties. Geometry/default/off-screen recovery and
+existing keep-working/wait tests passed before that test error. Replace the unsupported getter
+with actual setter HRESULT checks and whole-window PrintWindow previews (including native caption),
+then rerun the Windows qualification. No product delivery from the failed run.
+
 Scratch path is in
 /tmp/ewp-current-window-task. Only documented public standard Actions for final Windows checks;
 no paid audio/model/provider campaigns. Old0.25.0 remains immutable.
