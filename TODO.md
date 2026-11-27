@@ -4,6 +4,11 @@ Delivered product remains **0.26.2**. This task changes plans and release policy
 installer hardware gates or CI execution. The older mandatory-signing rule is superseded:
 the first several public releases may be unsigned. Keep signing instructions/keys outside Git.
 
+Sequencing/responsibility proposal: [execution order](docs/EXECUTION_ORDER.md). It groups the
+first-release critical path, bounded post-release work, research and larger changes with agent/
+owner/test responsibilities. Owner will select the next sequence; it is not an approved new
+feature priority or an instruction to start every optional item in numeric order.
+
 ## Before and around the first public release
 
 - [x] Record owner acceptance of theme/Snap, compressed installer size and NVIDIA preflight/docs.

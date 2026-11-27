@@ -1,7 +1,7 @@
 # Development handoff
 
 Read [status](../WORK_STATUS.md), [TODO](../TODO.md), [policy](../WORK_POLICY.md),
-[roadmap](99-roadmap-v2.md) and [active checkpoint](checkpoints/2026-11-27-owner-release-decisions.md).
+[roadmap](99-roadmap-v2.md) and [active checkpoint](checkpoints/2026-11-27-execution-order.md).
 Product0.26.2/source040e008 remains qualified and unchanged. Latest task revises plans only.
 Early public releases may be UNSIGNED; signing is deferred, not blocking. Prioritize attestations,
 local-English-first owner-reviewed cybersecurity/privacy review and missing user privacy policy.
@@ -15,5 +15,9 @@ Remove highlighting, separate reader tests and old5.12–5.14 benchmarks. Bounde
 and optional uncertain sound detection later. Profile transfer/200% zoom in upcoming-release checks;
 physical AMD/other GPUs unavailable/unplanned, corpus accuracy deferred without date.
 Artist integration/test is the dependency for illustrated docs only. No runtime/CI/publication change.
+
+Latest planning task: [proposed execution/responsibility matrix](EXECUTION_ORDER.md) groups before/
+after-release work, bounded changes/research/larger tracks and agent/owner/manual-test involvement.
+Owner selects sequence next; no optional implementation priority is inferred from its numbering.
 
 Original chronology: [verbatim snapshot](../archive/project-status/2026-11-27-development-handoff.txt).

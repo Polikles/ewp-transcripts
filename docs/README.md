@@ -49,6 +49,8 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
   safe closing and platform qualification.
 - [EN installation/update/removal](gui/installation.md) and [PL instructions](gui/pl/installation.md).
 - [Per-version release policy](RELEASE_POLICY.md) and [release checklist](RELEASE_CHECKLIST.md).
+- [Proposed execution order and responsibility matrix](EXECUTION_ORDER.md): before/after release,
+  bounded work versus larger changes, agent autonomy and owner decisions/tests.
 - [Security/privacy review plan](SECURITY_REVIEW_PLAN.md): local EN report and owner approval first, then framework applicability/mapping; privacy policy gap.
 - [Independent MSIX/Store research plan](MSIX_STORE_PLAN.md) and [versioned release index](../releases/README.md).
 - [Version and delivery policy](VERSIONING.md), [distribution plan](DISTRIBUTION_PLAN.md)

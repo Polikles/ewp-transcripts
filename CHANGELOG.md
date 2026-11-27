@@ -4,6 +4,10 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+- Propose a dependency-based before/after-release execution matrix, separating bounded work,
+  research and larger changes, with agent autonomy, owner approvals and focused manual-test roles.
+  This is planning only; accepted release gates and current binaries/workflow are unchanged.
+
 - Confirm owner release decisions: require verified attestations and approved general security
   report/privacy policy before first release; quick update afterward. Accept Release-assets/index
   storage, model-free cloud-first Store package, shared planned EXE/Store hardware tiers and publisher

@@ -9,6 +9,10 @@ retains delivered evidence. The latest owner decisions supersede older signing, 
 and research proposals. [Historical snapshots](../archive/project-status/inventory.json) remain
 unchanged; do not replay their NEXT instructions or cancelled obligations.
 
+For the proposed order and per-task autonomy/owner-approval/manual-test split, see
+[execution order and responsibilities](EXECUTION_ORDER.md). That proposal helps the owner select
+post-release priorities; the accepted scope and first-release gates below do not change.
+
 ## Delivered foundation
 
 <a id="13-gui"></a>

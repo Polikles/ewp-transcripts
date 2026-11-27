@@ -1,6 +1,6 @@
 # Current status — release plan revised, 2026-11-27
 
-Active checkpoint: docs/checkpoints/2026-11-27-owner-release-decisions.md.
+Active checkpoint: docs/checkpoints/2026-11-27-execution-order.md.
 The current product remains **0.26.2**, source040e0084fec778f4ee82dbff590b3a38d217fc5b,
 native run45970090999 PASS. Delivery: /home/linuch/project-ewp/deliveries/ewp-0.26.2-installers.
 Local1261 passed/20 Windows skips, native48 wizard groups/18 filesystem cases/6 desktop cycles,
@@ -36,7 +36,12 @@ No new physical GPU/model/provider tests; spend USD0.0291461230985028369 unchang
   NVIDIA tests unavailable and not planned; corpus accuracy deferrals have no scheduled date.
 - Artist integration/test is the dependency only for complete illustrated docs, not release.
 
-NEXT: SEC-01/PRIV-01 general local-English-first review/policy and REL-01 attestation implementation.
-All six owner questions are answered; no policy clarification blocks those tasks. No review report,
-policy approval, attestations, hardware-gate implementation or publication was completed by this edit.
-Portable plan v3 and the answered decision list live beside the repository, outside Git.
+Current task: propose grouping/order and per-task responsibility/test matrix, now written in
+docs/EXECUTION_ORDER.md and the local Polish Kolejnosc-dzialan-EwP-2026-11-27.txt. Owner will use
+it to select sequencing; no optional feature priority is silently accepted. Proposed next path:
+SEC-01/PRIV-01 drafts, REL-01/REL-02 preparation, actual findings remediation, final delta review/
+release checks, owner report/policy/publication approvals, release verification. Pages afterward,
+then suggested Quick update+hardware batch. Larger Store/audio tracks start with a design decision.
+All six prior policy questions remain settled. No report, policy approval, attestation, runtime/CI
+implementation or publication occurred in this planning task. Portable v3 and answered decisions
+remain current accepted scope records; the new local sequencing matrix is a proposal beside them.

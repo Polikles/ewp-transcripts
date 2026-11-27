@@ -1,0 +1,27 @@
+{
+  "result": "PASS",
+  "baseline": "ba58dd9",
+  "scope": "Proposed task grouping/order and responsibility matrix; no implementation/publication",
+  "markdown_documents": 301,
+  "local_links_checked": 569,
+  "maintained_link_errors": 0,
+  "historical_broken_paths_preserved": 9,
+  "requirements_traced": 153,
+  "historical_snapshots_unchanged": 7,
+  "runtime_and_ci_unchanged": true,
+  "application_tests_rerun": false,
+  "product_version": "0.26.2",
+  "proposed_task_groups": {
+    "A": 7,
+    "B": 7,
+    "C": 4,
+    "D": 10
+  },
+  "additional_tracks": "REL-04 release boundary; independent artwork/docs, recurring checks, unscheduled hardware/material",
+  "portable_file": {
+    "file": "Kolejnosc-dzialan-EwP-2026-11-27.txt",
+    "sha256": "93466d27b70b42f3472075792cc3e69bea2684d40f00fcf8278fd0d87b61f3e4",
+    "bytes": 17034
+  },
+  "priority_selection_pending": true
+}
