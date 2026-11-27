@@ -2,7 +2,7 @@
   "documents": 293,
   "maintained_documents": 147,
   "historical_documents": 146,
-  "local_links_checked": 524,
+  "local_links_checked": 528,
   "broken_links": [
     {
       "file": "archive/mvp-validation-runbooks/PHASE0_RESULTS.md",
@@ -73,8 +73,8 @@
     },
     {
       "file": "AGENTS.md",
-      "sha256": "5cc4701c67725f4f549964980855723f021859a0f240aa37a09b636104496233",
-      "lines": 197,
+      "sha256": "1a6e28d45500384189aaebd3c8ef34f73a737befae5ca7646952e62ddb34f6b5",
+      "lines": 198,
       "historical": false,
       "local_links": 0,
       "requirements": []
@@ -265,7 +265,7 @@
     },
     {
       "file": "README.md",
-      "sha256": "4584e05d76e2b8963b1c77a93ba2d7a9d2f0f2dbfe2e7ab8b9bb326014d3f103",
+      "sha256": "88cea76763db565fa7eb55a4ec0e9c8ccef353dc42f6b8194843eeae5a89e34d",
       "lines": 106,
       "historical": false,
       "local_links": 35,
@@ -273,7 +273,7 @@
     },
     {
       "file": "TODO.md",
-      "sha256": "d8f67f0427d0bd9e081a143a0eba98c14701c666371c82564d3f27d481308f4f",
+      "sha256": "096445cfe62f2f8f740a272016d208da12f8c5939ecc15439ef7d982d1e99a78",
       "lines": 36,
       "historical": false,
       "local_links": 0,
@@ -289,8 +289,8 @@
     },
     {
       "file": "WORK_STATUS.md",
-      "sha256": "d29ef909acdf0fb8542d964966be27d2d6c3423a57bb960fbf2414c2a9ba6203",
-      "lines": 25,
+      "sha256": "433549a2692702301acd7f5892bf5bbc33172e7fea80e1d6ac5790f5456f0c4e",
+      "lines": 31,
       "historical": false,
       "local_links": 0,
       "requirements": []
@@ -891,8 +891,8 @@
     },
     {
       "file": "docs/00-development-handoff.md",
-      "sha256": "ac7d17782009fd578e43cc696fa768420788e191efe407ff9d7f480e8ec9986d",
-      "lines": 13,
+      "sha256": "1ed4f7301ae345cbd7f0e06315a76806accd16be9592b3e3942a2d1e20ab90a3",
+      "lines": 15,
       "historical": false,
       "local_links": 6,
       "requirements": []
@@ -1461,7 +1461,7 @@
     },
     {
       "file": "docs/99-roadmap-v2.md",
-      "sha256": "c545000985a7df300bd87788a73d35a3062f7989a2d59ad8e28cc9c2930e7dd0",
+      "sha256": "906a8137ff4fab4a43e8cdc4d6ff53aff5be920632b636f8c8b6ae559af9c5c6",
       "lines": 89,
       "historical": false,
       "local_links": 4,
@@ -1487,7 +1487,7 @@
     },
     {
       "file": "docs/DISTRIBUTION_PLAN.md",
-      "sha256": "5731407378ea431e2aa045fea9d6eed699f161881d7fed0443f053e9df59f664",
+      "sha256": "26c21222a1c563db7109d7e74136023072b854a7edc8cfea100510d08d0b139e",
       "lines": 46,
       "historical": false,
       "local_links": 4,
@@ -1495,10 +1495,10 @@
     },
     {
       "file": "docs/DOCUMENTATION_AUDIT.md",
-      "sha256": "a39c779fe5be712483f47a1927db4ab341e38f2181889ac25c5f76d2af307d90",
-      "lines": 37,
+      "sha256": "04bd953a7e307e7d487e70dd366d34f5bf725f5ef49c1624199168c7cf7b31ec",
+      "lines": 55,
       "historical": false,
-      "local_links": 0,
+      "local_links": 2,
       "requirements": [
         "FR-A05"
       ]
@@ -1513,7 +1513,7 @@
     },
     {
       "file": "docs/HARDWARE.md",
-      "sha256": "af481f6b473743c4965085fa6f29b64dc3fcdbd78b0504c9b9324492c860ea16",
+      "sha256": "ceebad6fada05fb78cb616520e86789094d79abf107261dea1c57e44853f8df8",
       "lines": 60,
       "historical": false,
       "local_links": 6,
@@ -2181,10 +2181,10 @@
     },
     {
       "file": "docs/checkpoints/2026-11-27-nvidia-docs-audit.md",
-      "sha256": "592697f8d288a95f4ebf8a080b81d271bb107bba2caf6c4837b0b27f14a0e244",
-      "lines": 40,
+      "sha256": "c54c999092f2f7eb7566574b64a01cbc4d174f9d5c50831d5ba4dd10b682512f",
+      "lines": 74,
       "historical": true,
-      "local_links": 0,
+      "local_links": 3,
       "requirements": [
         "FR-A05"
       ]
@@ -2740,5 +2740,9 @@
   "frozen_archive_links_retained": 9,
   "maintained_link_errors": 0,
   "original_requirements_preserved": 148,
-  "new_gpu_requirements": 5
+  "new_gpu_requirements": 5,
+  "snapshot_source_blobs_verified": 7,
+  "guide_mirror_pairs_verified": 30,
+  "product_source_commit": "040e0084fec778f4ee82dbff590b3a38d217fc5b",
+  "qualification": "docs/checkpoints/2026-11-27-nvidia-docs-audit-evidence.json"
 }

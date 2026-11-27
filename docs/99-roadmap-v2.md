@@ -11,7 +11,7 @@ Historical proposals are not requirements to implement, and old NEXT gates do no
 
 ## Current correction and next sequence
 
-Owner accepts0.26.1 theme/Snap and compressed142MB EXE. Active target0.26.2 finishes NVIDIA
+Owner accepts0.26.1 theme/Snap and compressed142MB EXE. Delivered0.26.2 finishes NVIDIA
 architecture/driver/VRAM guidance and full documentation reconciliation.12GB+ VRAM is approximate
 full-local guidance; smaller compatible cards may work but are untested/unguaranteed, probably
 will fail and should use cloud ASR. Unsupported architectures cannot use the locked local pipeline.
@@ -19,7 +19,7 @@ See [hardware policy](HARDWARE.md) and [active checkpoint](checkpoints/2026-11-2
 
 | Order | Selected next action |
 | --- | --- |
-| 1 | Finish/qualify the current diagnostic and documentation changes, preserving accepted UI/lifecycle/model behavior. |
+| 1 — complete | Diagnostic and documentation changes qualified in0.26.2; accepted UI/lifecycle/model behavior preserved. |
 | 2 | Plan the signing and first public release approach with the owner, before any other backlog. Signing is mandatory before public release; procedure, private instructions, keys and credentials stay outside Git. No purchase/sign/publication today. |
 | 3 | Settle standalone EXE storage in the requested repository releases/ location, public assets, source/version/notes and final signed-artifact/checksum contracts. The compressed installer size is accepted; stop further slimming/minimal-downloader work. |
 | 4 | Execute only the deliberate first-public-release step, then verify actual downloads/checksums and Windows/Ubuntu bootstrap URLs. Current internal artifacts are unsigned and not public releases. |

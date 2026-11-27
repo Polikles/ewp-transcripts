@@ -12,7 +12,7 @@ The workflow supports PL/EN/automatic source language, audio and video, synchron
 
 ## Recommended hardware
 
-For fully local transcription, use a compatible **NVIDIA GPU with12 GB VRAM or more**, **32 GB RAM**, a
+For fully local transcription, use a compatible **NVIDIA GPU with 12 GB VRAM or more**, **32 GB RAM**, a
 multicore x64 CPU and SSD. The tested reference remains **RTX 3090/24 GB**.12 GB is approximate guidance.
 Smaller configurations may work, but have not been tested and are not guaranteed; **cloud ASR is
 recommended below 12 GB VRAM**.

@@ -4,11 +4,12 @@
 
 Read WORK_STATUS.md, TODO.md, WORK_POLICY.md, docs/99-roadmap-v2.md and the active checkpoint
 before work. User directions supersede historical records.0.26.1 window theme/Snap and142MB EXE
-are owner-accepted. Active target0.26.2: NVIDIA architecture/driver/VRAM notices and full docs audit.
+are owner-accepted. Delivered0.26.2: NVIDIA architecture/driver/VRAM notices and full docs audit;
+normal/native gates PASS, immutable delivery and evidence are linked from WORK_STATUS.
 12GB+ VRAM is approximate local guidance; smaller compatible GPUs are untested, may work but likely
 fail and should use cloud ASR. GTX1070/legacy-profile/telemetry tests and further EXE slimming are
 CANCELLED. Preserve compressed self-contained packaging, model/NVIDIA/AMD pins and immutable files.
-Signing and first-public-release approach will be PLANNED after this task, before other backlog.
+NEXT: PLAN signing and first-public-release approach, before other backlog.
 Signing is mandatory before public release; its procedure, keys and credentials MUST stay outside
 Git. No publication/certificate purchase/paid/model campaign here. Artist non-blocking; local
 Scribe/MAI removed; Ollama/other optional enhancements after public release. No physical-GPU claim
@@ -41,7 +42,7 @@ The project is a **modular monolith**.
 The primary dependency direction is:
 
 ```text
-CLI or future GUI
+CLI or GUI
         |
         v
 application.py
@@ -61,7 +62,7 @@ pipeline.py and domain services
 Mandatory boundaries:
 
 1. `cli.py` is an adapter. It must not contain transcription, grouping, hashing, subtitle, or storage logic.
-2. `application.py` is the stable application-facing API for both CLI and the future GUI.
+2. `application.py` is the stable application-facing API for both CLI and GUI.
 3. `pipeline.py` orchestrates work but delegates implementation details to focused modules.
 4. `domain/` must not import Typer, Rich, WhisperX, pyannote, torch, or FFmpeg adapters.
 5. WhisperX may be imported only inside `engines/whisperx.py`.

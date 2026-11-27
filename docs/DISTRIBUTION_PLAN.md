@@ -1,8 +1,8 @@
 # Managed distribution — current contract, 2026-11-27
 
 The agreed distribution implementation is delivered; further EXE slimming/minimal downloaders are
-CLOSED after owner acceptance of compression and142MB size. The next task after the current audit
-is to PLAN signing and the first public release, before optional backlog. Actual signing procedure,
+CLOSED after owner acceptance of compression and142MB size. The documentation audit and0.26.2
+qualification are complete. NEXT: PLAN signing and the first public release, before optional backlog. Actual signing procedure,
 keys and credentials stay outside Git; signing is mandatory before public publication.
 
 ## Delivered behavior to preserve

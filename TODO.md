@@ -1,13 +1,13 @@
-# Immediate work — 2026-11-27 / target0.26.2
+# Completed work — 2026-11-27 / delivered 0.26.2
 
 - [x] Record owner acceptance of themed startup/closing, LEFT/RIGHT Snap and compressed142MB EXE.
 - [x] Cancel GTX1070/legacy-profile/telemetry tests and further/minimal-online installer work.
 - [x] Research exact pinned CUDA/PyTorch/CT2 architecture and project driver compatibility boundary.
-- [ ] Finish NVIDIA unsupported/unknown architecture/driver and compatible <12GB VRAM notices in
+- [x] Finish NVIDIA unsupported/unknown architecture/driver and compatible <12GB VRAM notices in
       installer host checks. Keep cloud available and a deliberate low-VRAM local choice; tests.
-- [ ] Finish full documentation inventory/link/requirement/plan audit and EN/PL synchronization;
+- [x] Finish full documentation inventory/link/requirement/plan audit and EN/PL synchronization;
       preserve all old plan bytes in clearly historical snapshots, reconcile stale current claims.
-- [ ] Normal/native regression and fresh immutable0.26.2 artifact/source/hash/visual verification;
+- [x] Normal/native regression and fresh immutable0.26.2 artifact/source/hash/visual verification;
       content-free evidence and clean handoff. No paid/model/new-hardware inference campaign.
 
 # Next — signing and first-release PLANNING

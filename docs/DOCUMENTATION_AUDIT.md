@@ -3,7 +3,7 @@
 Scope: all tracked/new Markdown documents, normative requirements/traceability, current user/operator
 instructions, TODO/backlog/roadmap, licensing/navigation and historical acceptance boundaries.
 Exact inventory/link/requirement evidence is in [the audit inventory](checkpoints/2026-11-27-documentation-audit-evidence.json).
-Current product target0.26.2; previous immutable deliveries and original dated qualification remain.
+Product0.26.2 qualified and delivered; previous immutable deliveries and original dated qualification remain.
 
 ## Findings and corrections
 
@@ -34,11 +34,12 @@ Historical checklists/checkpoints/ADRs retain their own dates/qualified scope. T
 request to rerun all prior manual tests or restore removed requirements. The active authority is
 AGENTS/WORK_POLICY/WORK_STATUS/TODO and the current roadmap, not any archived NEXT paragraph.
 
-Final automatic link/anchor/requirement coverage and native checks are recorded before handoff.
+Final automatic link/anchor/requirement coverage is in the linked inventory. Native checks and
+artifact/source verification are in [qualification evidence](checkpoints/2026-11-27-nvidia-docs-audit-evidence.json).
 
 ## Verification at the documentation freeze
 
-293 Markdown files inventoried:147 maintained and146 historical;524 local file/anchor references
+293 Markdown files inventoried:147 maintained and146 historical;528 local file/anchor references
 checked. All148 original requirement IDs are preserved, plus five new GPU requirements; all153
 are covered by traceability with no undefined IDs. Seven original authority/handoff/distribution
 snapshots match their recorded source blobs byte-for-byte. All30 user-guide pairs match source/offline
