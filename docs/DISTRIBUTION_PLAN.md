@@ -1,9 +1,17 @@
 # Managed distribution — current contract, 2026-11-27
 
-The agreed distribution implementation is delivered; further EXE slimming/minimal downloaders are
-CLOSED after owner acceptance of compression and142MB size. The documentation audit and0.26.2
-qualification are complete. NEXT: PLAN signing and the first public release, before optional backlog. Actual signing procedure,
-keys and credentials stay outside Git; signing is mandatory before public publication.
+The agreed EXE/terminal implementation is delivered; compressed ~142 MB size is accepted and
+further slimming/minimal downloaders are closed. Early public releases may be unsigned; mandatory
+pre-release signing is withdrawn. Later free OSS/owner-approved Actions signing keeps actual
+procedure/private keys outside Git. Follow [release policy](RELEASE_POLICY.md),
+[checklist](RELEASE_CHECKLIST.md) and [revised roadmap](99-roadmap-v2.md).
+
+Prioritize production attestations early. Plan startup Quick update/Repair/reinstall/Download newer
+installer plus Other actions based on detected version. The proposed releases/ metadata plus Release
+assets design awaits owner agreement because current EXE exceeds ordinary Git's100 MiB file limit.
+Required GH Pages follows first release under the latest sequencing statement. MSIX/Store is a
+separate [post-release channel research task](MSIX_STORE_PLAN.md), not an EXE replacement. Preserve
+usable installed CLI and review pipeline documentation when discovery/packaging changes.
 
 ## Delivered behavior to preserve
 
@@ -40,7 +48,7 @@ GPU inference; WSL/RTX3090 and native Windows owner evidence retain exact scopes
 manual/model/provider campaign is required. Current [checkpoint](checkpoints/2026-11-27-nvidia-docs-audit.md)
 and preceding qualification files state tested versions and unavailable hardware honestly.
 
-Artist availability is non-blocking; screenshots wait for supplied artwork. Local Scribe/MAI,
+Artist availability is non-blocking; complete illustrated docs follow artwork integration and interface tests. Local Scribe/MAI,
 GTX1070/legacy tests/collectors, more installer slimming and Docker are not current obligations.
 Ollama and remaining optional enhancements are AFTER the first public release. All original plan
 clauses/numbering are preserved in [verbatim historical plan](../archive/project-status/2026-11-27-DISTRIBUTION_PLAN.txt).

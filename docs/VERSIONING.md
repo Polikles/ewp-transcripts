@@ -36,8 +36,12 @@ installation/distribution. The application workflow's prior acceptance does not 
 qualify a new installer on Windows 11 or a different GPU. Code signing requires an appropriate
 certificate and is separate from a successful build; current owner-test EXE is unsigned.
 
-Owner release requirement2026-11-26: signing is mandatory BEFORE the first public release. Current
-internal review builds remain unsigned. The signing procedure, private keys, provider credentials
-and owner instructions must remain outside this repository. Artist availability and optional
-hardware/research work do not block release. Never treat an unsigned internal build as a public
-signed artifact; preserve its original bytes and release provenance.
+Owner revision2026-11-27 supersedes the previous signing prerequisite: the first several public
+releases may be UNSIGNED. Later free OSS signing/owner-approved Actions integration is research,
+not a release blocker or paid-certificate commitment. Actual signing procedure, private keys,
+provider credentials and owner instructions remain outside this repository. Always describe actual
+signing status accurately. Apply [release policy](RELEASE_POLICY.md) and the
+[per-version checklist](RELEASE_CHECKLIST.md) to EVERY release, including changelog AND release
+description, package-matched README/instructions/hardware/licenses/notices, evidence, final-byte
+hashes/provenance and actual published-download verification. Attestations are prioritized early;
+new automated enforcement is not yet implemented. Preserve original build bytes and provenance.

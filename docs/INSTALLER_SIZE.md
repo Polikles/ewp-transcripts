@@ -34,7 +34,7 @@ setup. This conclusion closes the earlier evaluation; it is not a pending releas
 
 Exact measured inventories and final qualification status are in
 [installer-size evidence](checkpoints/2026-11-26-installer-size-evidence.json). Preserve all prior
-installer bytes. Public executable artifacts require signing, with the procedure/keys outside Git.
+installer bytes. Early public artifacts may be unsigned under the revised release policy. Later signing procedure/keys remain outside Git.
 
 Primary implementation reference:
 [.NET single-file compression](https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview#compress-assemblies-in-single-file-apps).

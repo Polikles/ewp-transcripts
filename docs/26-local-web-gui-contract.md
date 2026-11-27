@@ -3,8 +3,10 @@
 Current scope2026-11-27: the common frontend is delivered in browser mode and native WPF/WebView2
 Windows. Docker and whole-block following are removed from selected delivery. Later dated sections
 record increments, not new acceptance gates. Use [current roadmap](99-roadmap-v2.md),
-[native lifecycle](NATIVE_WINDOWS_APP.md) and [hardware policy](HARDWARE.md). Optional word/phrase
-highlighting and other retained refinements are AFTER public release; GTX1070/telemetry cancelled.
+[native lifecycle](NATIVE_WINDOWS_APP.md) and [hardware policy](HARDWARE.md). Playback highlighting
+is removed. Retained feature refinements are AFTER public release; GTX1070/telemetry and benchmark
+programs old5.12–5.14 are cancelled. Full profile transfer and200%
+browser zoom enter upcoming-release scenarios. Illustrated docs follow artist integration/tests.
 
 ## 1. Scope
 
@@ -281,8 +283,8 @@ the active source, then load or prepare that item's own exact draft. Preview sav
 edits before validating the saved draft; Apply and export remain explicit separate actions.
 
 Where source media is available, the GUI SHOULD provide synchronized playback, seeking from
-a transcript unit, keyboard operation and persistent light/dark preferences. Optional word/phrase
-highlighting is after public release; whole-block automatic following is removed. Minor source timing inaccuracies are evidence for
+a transcript unit, keyboard operation and persistent light/dark preferences. Word/phrase highlighting
+and whole-block automatic following are removed. Minor source timing inaccuracies are evidence for
 later timing work, not permission for the GUI to silently alter canonical timing.
 
 ## 7. Jobs, diagnostics, and recovery

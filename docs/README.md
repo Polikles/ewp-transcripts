@@ -34,7 +34,7 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 | [26 - Local browser GUI contract](26-local-web-gui-contract.md) | Shared native Windows/browser interface, security, workflows, and implementation slices |
 | [29 - Guided workflow and prototype comparison](29-guided-workflow-and-prototype.md) | Numbered stage guides, review usability and prototype reconciliation |
 | [GUI step instructions](gui/README.md) | Full instructions for every workflow stage and supporting tool |
-| [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
+| [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Current owner release, security/privacy, distribution and bounded post-release backlog |
 | [Sources](SOURCES.md) | Official technical sources used by the specification |
 
 ## Current installation and platform guidance
@@ -48,6 +48,9 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 - [Native Windows application](NATIVE_WINDOWS_APP.md): window preferences, owned processes,
   safe closing and platform qualification.
 - [EN installation/update/removal](gui/installation.md) and [PL instructions](gui/pl/installation.md).
+- [Per-version release policy](RELEASE_POLICY.md) and [release checklist](RELEASE_CHECKLIST.md).
+- [Security/privacy review plan](SECURITY_REVIEW_PLAN.md): local EN report and owner approval first, then framework applicability/mapping; privacy policy gap.
+- [Independent MSIX/Store research plan](MSIX_STORE_PLAN.md) and [versioned release index](../releases/README.md).
 - [Version and delivery policy](VERSIONING.md), [distribution plan](DISTRIBUTION_PLAN.md)
   and [GitHub Actions usage/costs](GITHUB_ACTIONS.md).
 - [Current documentation audit](DOCUMENTATION_AUDIT.md) and [0.26.1 qualification](checkpoints/2026-11-26-release-readiness-evidence.json) and

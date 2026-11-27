@@ -4,6 +4,13 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+- Revise release policy: permit early unsigned releases, prioritize verifiable artifact provenance,
+  formalize per-version documentation/notes/checklist obligations and track large-binary storage.
+- Plan local-English-first owner-approved security/privacy reports, framework applicability and a
+  complete privacy policy; add quick-update entry, required Pages and independent post-release MSIX/
+  Store research. Refine/remove optional scope and add profile-transfer/200% zoom release scenarios.
+- These are planning/documentation changes; existing0.26.2 binaries, CI and hardware gates are unchanged.
+
 ## 0.26.2 — 2026-11-27 (NVIDIA compatibility and documentation reconciliation)
 
 - Check NVIDIA Compute Capability, driver and per-card VRAM against the locked CUDA12.8 Update1

@@ -1,11 +1,17 @@
 # Security and Privacy
 
+This is a technical contract, not a complete user-facing privacy policy or a completed security
+assessment. The owner-requested [review plan](SECURITY_REVIEW_PLAN.md) requires a general local
+English report first, owner approval before publication, then framework applicability/mapping.
+PRIV-01 tracks the missing consolidated policy. Requirements below must be checked against code;
+they are not blanket assurance that every control works in all environments.
+
 ## 1. Threat model
 
 The application may process unpublished podcasts, training recordings, and personal data. Primary risks include:
 
 - accidental upload to an external service;
-- exposure of the Hugging Face token;
+- exposure of Hugging Face/OpenRouter/API credentials in memory, environment, IPC or OS stores;
 - leaving audio in temporary directories;
 - overwriting results;
 - writing full transcript text to logs;
@@ -17,8 +23,13 @@ The application may process unpublished podcasts, training recordings, and perso
 - the MVP pipeline runs locally;
 - transcription performs no network requests in offline mode;
 - no telemetry;
-- `HF_TOKEN` is read only from an environment variable or a future secure GUI store;
-- the token is never serialized;
+- HF model setup accepts a deliberately supplied transient token through the installer/setup
+  environment; normal complete offline snapshots require no token. Review all transport/error paths;
+- GUI OpenRouter session keys may be deliberately saved/read/deleted in the OS credential store
+  (Windows Credential Manager/Linux Secret Service), with no plaintext fallback; inherited
+  environment keys remain a separate source. See [current key behavior](gui/settings.md);
+- secrets MUST NOT be serialized into workspaces/profiles/results/logs/reports. Transport to the
+  intended provider is a separate authorized boundary, not permission to persist the key elsewhere;
 - default logs do not contain transcript content;
 - the work directory is private to the current user;
 - symbolic links are not followed by default;
@@ -27,22 +38,26 @@ The application may process unpublished podcasts, training recordings, and perso
 
 ## 3. Network use
 
-Permitted network operations are separated from transcription:
+Explicit network operations and modes must be distinguished:
 
 - explicit model downloads;
+- installation/runtime dependency downloads and user-triggered connection/provider checks;
+- explicitly selected cloud ASR audio transfer, or correction/translation text transfer, with
+  separate scoped consent and offline enforcement. A key check is not upload consent;
 - future update checks only with consent and outside the MVP.
 
 `transcribe` in offline mode should configure libraries so that missing models cannot be downloaded implicitly.
 
-### Future correction and translation APIs
+### Implemented provider boundaries
 
 Cloud LLM/API use is never an offline operation. It must be explicitly selected and must
 show a clear data-transfer warning before transcript content leaves the machine. In an
 interactive session the choices are: reject and continue without the cloud operation,
 accept once, or accept persistently. Persistent consent is scoped to the exact provider,
 endpoint, operation class, and warning-policy version; changing any of them prompts
-again. Non-interactive use requires an explicit consent flag or matching stored consent
-and must never infer acceptance.
+again. Non-interactive correction/translation uses the documented explicit consent mechanism.
+GUI audio/text confirmations and restored workspace/profile state have their own scoped behavior;
+never infer consent merely from loading work, finding a key or an earlier CLI consent record.
 
 A loopback/local LLM API is preferable for privacy but is still a separate process and
 API boundary. The application cannot guarantee what that server logs, retains, or
@@ -80,3 +95,16 @@ A future publication/redaction mode may remove or pseudonymize paths from shared
 - local vulnerability scanning as part of the release gate;
 - dependency upgrades in dedicated pull requests with audio-quality regression tests;
 - backend versions recorded in every result.
+
+Early public releases may be unsigned under [release policy](RELEASE_POLICY.md). Production build
+attestations are prioritized but not implemented by this documentation task; they establish
+verifiable provenance, not a Windows trusted signature or an absence of vulnerabilities.
+
+## 6. Policy and review gaps
+
+The consolidated user policy must explain actual data locations/content, retention/deletion after
+success/failure/crash/uninstall, local plaintext files and OS protections, source-path metadata,
+optional external transfers/provider responsibility, installation traffic, consent/credential
+controls and project contact. Do not invent encryption, deletion guarantees or third-party retention.
+SEC-01 verifies these mechanisms at code/process/OS/network/supply-chain levels and records threats,
+tradeoffs and residual risk. Reports remain LOCAL/EN until the owner approves publication.

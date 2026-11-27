@@ -3,7 +3,7 @@
 Current scope2026-11-27 is the delivered native Windows/browser transcript workflow: local or
 optional cloud ASR, manual/assisted correction/translation, dictionaries, verified exports, durable
 work and managed lifecycle. Use [current roadmap](99-roadmap-v2.md) for selected post-release work.
-Signing/release planning follows the current GPU/docs audit. Historical increment boundaries below
+Early releases may be unsigned; provenance/security/privacy and release preparation follow the current plan. Historical increment boundaries below
 retain their original milestone context; they do not make delivered GUI/Windows work planned again.
 Hardware guidance is [12GB+ compatible NVIDIA, with exact library/driver limits](HARDWARE.md);
 smaller compatible cards are untested/unguaranteed and should use cloud ASR. GTX1070 tests and
@@ -29,7 +29,7 @@ results.json → TXT / SRT / VTT / segments.json
 
 ## 2. Target user
 
-A technical user working locally on Windows with WSL2 running Ubuntu and an NVIDIA GPU. The MVP version is a CLI application; a potential GUI will use the same application core. There is a plan of creating a containerized version for less technical users. Same stack should also work under bare-metal Ubuntu
+Users work through native Windows, browser or CLI using the same application core; Ubuntu/WSL terminal and browser workflows remain supported within their qualified scope. Installed distribution must retain usable CLI entry points for a planned tool pipeline. Docker is outside selected scope. Fully local ASR and cloud ASR have separate hardware requirements.
 
 ## 3. MVP scope
 
@@ -61,7 +61,7 @@ The MVP includes:
   selected delivery. Additional interface languages are not scheduled; source language defaults PL.
 - Advanced audio repair/channel handling, non-speech authoring and extra subtitle formats remain
   optional AFTER public release. Existing diagnostics never silently modify the source.
-- Hardware presets/research are optional; GTX1070 tests/collectors/legacy adaptation are cancelled.
+- Broad correction/translation/public-corpus/dictionary/model/hardware benchmark programs are removed. Reference-material expansion and annotated-quality deferrals remain unscheduled; GTX1070 tests/collectors/legacy adaptation are cancelled.
 
 ## 5. Input assumptions
 

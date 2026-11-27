@@ -1,8 +1,16 @@
 # Testing Strategy
 
+Owner revision2026-11-27: [current roadmap](99-roadmap-v2.md) and [release checklist](RELEASE_CHECKLIST.md)
+override older research proposals below. Comparative/human-vs-machine, translation/public-corpus/
+universal-dictionary/model/hardware benchmark programs are removed from the active plan. Existing
+tools/evidence remain; no new campaign is implied. Full profile transfer and actual browser200%
+zoom enter upcoming-release scenarios. Physical AMD/other NVIDIA tests are unavailable/unplanned;
+annotated-corpus quality is deferred without date. Screenshots await artist integration/interface tests.
+
 Owner scope update (2026-11-20): the current [roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20)
-controls required work. Corpus/quality research, general dictionaries and hardware/preset benchmark
-programs described here are optional nice-to-have, not current project completion gates. Existing
+controls required work. The old comparative correction/translation/public-corpus/general-dictionary/model/hardware benchmark
+programs are removed from the active plan by the owner revision2026-11-27. Existing tooling/evidence
+remains; annotated-quality deferrals remain unscheduled, not project completion gates. Existing
 unit/integration, security, data-lineage and packaging checks remain required; preserve all accepted
 historical evidence. This is a practical podcast/recording workflow tool.
 
@@ -13,9 +21,10 @@ The testing system must validate four distinct concerns:
 1. software correctness independent of ML quality;
 2. integration with the local operating environment and FFmpeg;
 3. functional correctness of the complete GPU pipeline;
-4. measurable transcription, diarization, timing, and performance quality on a public external dataset.
+4. retain existing quality evidence and explicit annotated-material deferrals; a new public-dataset
+   benchmark program is not in the current owner plan.
 
-All tests run locally. GitHub Actions or another hosted CI system is not required.
+Local quality checks and the documented standard public GitHub Actions Windows packaging/lifecycle checks have distinct roles; see GITHUB_ACTIONS.md. Production release attestations/enforcement are planned, not yet implemented.
 
 ## 2. Test environments
 
@@ -32,7 +41,7 @@ Used periodically and before releases. It should:
 - run `uv sync --locked`;
 - use an independent virtual environment;
 - install and test the built wheel, not only an editable checkout;
-- use a separately mounted or downloaded external dataset;
+- use already authorized suitable reference material when a relevant regression needs it;
 - validate offline operation after models are prepared.
 
 This environment replaces the installation/reproducibility role normally covered by hosted CI.

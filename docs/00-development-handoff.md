@@ -1,15 +1,16 @@
 # Development handoff
 
-Start with [current status](../WORK_STATUS.md), [TODO](../TODO.md), [work policy](../WORK_POLICY.md),
-[roadmap](99-roadmap-v2.md) and [active checkpoint](checkpoints/2026-11-27-nvidia-docs-audit.md).
-Completed in0.26.2: NVIDIA library/driver/VRAM preflight and full documentation reconciliation.
-Clean source040e008, native run45970090999 PASS; qualification and immutable delivery are in WORK_STATUS.
-Theme,
-LEFT/RIGHT Snap and compressed142MB EXE are owner-accepted. Cancel GTX1070/telemetry and further
-installer slimming. Signing/first-release approach is the next PLANNING task before other backlog.
-Signing is mandatory before public release; its procedure/keys stay outside Git. Artist non-blocking.
-No public release, new paid/model campaign or unreported physical GPU pass is implied.
+Read [status](../WORK_STATUS.md), [TODO](../TODO.md), [policy](../WORK_POLICY.md),
+[roadmap](99-roadmap-v2.md) and [active checkpoint](checkpoints/2026-11-27-release-plan-revision.md).
+Product0.26.2/source040e008 remains qualified and unchanged. Latest task revises plans only.
+Early public releases may be UNSIGNED; signing is deferred, not blocking. Prioritize attestations,
+local-English-first owner-reviewed cybersecurity/privacy review and missing user privacy policy.
+Framework applicability/mapping follows the general report. No private reports in Git before approval.
+Resolve release-gate/storage/Store-tier questions. Quick update planned; required Pages after first
+release; independent MSIX/Store later, installed CLI retained. See RELEASE_POLICY/CHECKLIST.
+Remove highlighting, separate reader tests and old5.12–5.14 benchmarks. Bounded audio/poor-audio mode
+and optional uncertain sound detection later. Profile transfer/200% zoom in upcoming-release checks;
+physical AMD/other GPUs unavailable/unplanned, corpus accuracy deferred without date.
+Artist integration/test is the dependency for illustrated docs only. No runtime/CI/publication change.
 
-Original handoff and chronology are retained in
-[verbatim historical snapshot](../archive/project-status/2026-11-27-development-handoff.txt).
-Canonical contracts/schemas and dated checkpoints retain their evidence; do not replay obsolete gates.
+Original chronology: [verbatim snapshot](../archive/project-status/2026-11-27-development-handoff.txt).

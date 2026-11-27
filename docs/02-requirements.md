@@ -163,7 +163,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-L12** Provider credentials MUST NOT be stored in URLs, browser history, local storage, logs, artifacts, or job records. Provider operations MUST preserve endpoint classification, explicit scoped consent, and strict-offline enforcement.
 - **FR-L13** The packaged GUI MUST use bundled assets and MUST NOT require runtime CDNs, telemetry, remote fonts, or externally hosted scripts/styles.
 - **FR-L14** The GUI MUST provide version, license/warranty, source-code, and issue-tracker information.
-- **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, keyboard operation and theme settings. Optional word/phrase highlighting remains post-release; whole-block automatic following is removed from selected scope.
+- **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, keyboard operation and theme settings. Playback highlighting (word/phrase or whole-block following) is removed from selected scope.
 - **FR-L16** The frontend and backend MUST reject incompatible API versions rather than continuing with partial behavior.
 - **FR-L17** The local server MUST validate browser host/origin, protect state-changing requests against cross-site request forgery, escape untrusted content, use a restrictive content-security policy, and serve only validated artifacts.
 - **FR-L18** Planning SHOULD expose per-file language and speaker-count controls and MUST label values chosen by configuration or automatic inference as automatic rather than as explicit operator choices.

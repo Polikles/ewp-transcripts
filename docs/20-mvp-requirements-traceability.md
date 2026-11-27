@@ -1,7 +1,7 @@
 # MVP requirements traceability
 
-Current scope is governed by the [current owner roadmap](99-roadmap-v2.md). Broad research and
-hardware benchmarks are optional after public release; GTX1070/telemetry is cancelled. Preserve
+Current scope is governed by the [current owner roadmap](99-roadmap-v2.md). The old broad research/benchmark
+programs are removed; annotated-quality deferrals remain unscheduled. GTX1070/telemetry is cancelled. Preserve
 accepted Windows/WSL/local/cloud, recovery, native UI/lifecycle and installer passes. Full profile
 exchange remains provisionally accepted; physical AMD and other-card inference are not qualified.
 The [documentation audit](DOCUMENTATION_AUDIT.md) reconciles these rows with current code/evidence.
@@ -140,7 +140,7 @@ not a blanket claim of physical GPU or every platform/input quality.
 | FR-L08, FR-L09 | verified | Non-final correction/translation candidates, exact-lineage manual review/audit/export; retain prior external qualification without a new paid pilot. |
 | FR-L10 | verified | Dictionary identity/version/provenance, proposal review and immutable project publication are delivered. |
 | FR-L11, FR-L12 | implemented | Coded failures, scoped disclosure/consent, no artifact/browser-secret persistence; optional OS credential save/read/delete and saved-key connection check are delivered in `credentials.py` and focused tests. |
-| FR-L14, FR-L15, NFR-018 | implemented | About/license/version, responsive keyboard/palette/theme, mixed playback/seeking/speed and native Personalization. Word/phrase highlighting is optional post-release; whole-block following removed.200% browser zoom remains optional/unchecked. |
+| FR-L14, FR-L15, NFR-018 | implemented | About/license/version, responsive keyboard/palette/theme, mixed playback/seeking/speed and native Personalization. Playback highlighting is removed. Actual200% browser zoom and full profile transfer are upcoming-release scenarios; record results/exceptions, not assumed passes. |
 | FR-L18 | implemented | Per-job language/speakers/model and explicit planning/staging, pending selections and paused recovery; current owner workflow/restart passes retained. |
 | NFR-017, NFR-019 | implemented | Shared web/service/offline assets, Windows/WSL owner evidence and native lifecycle regression. Docker is not a retained qualification gate; offline local operation requires explicitly installed models. |
 

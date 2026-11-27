@@ -1,10 +1,12 @@
-# Windows installers
+# Releases index — storage decision pending
 
-The first public installer will be added here with the first public release after the native
-Windows application interface is complete. This directory does not contain a public installer yet.
+This directory exists for the planned versioned distribution index. There is no public product
+release or downloadable binary here yet. Do not commit the current ~142 MB EXE as an ordinary Git
+blob: it exceeds GitHub's100 MiB limit.
 
-Internal review builds are provided separately during development.
+Proposed structure, pending owner agreement: releases/<version>/ notes/metadata/SHA256 and links
+to actual GitHub Release assets. Keep at least2–3 downloadable versions; agree older archival and
+retain source/provenance/checksums. Possible later MSIX/DEB assets are not current deliverables.
+LFS requires a separate quota/billing decision and has not been enabled.
 
-Before the first public release, final executable artifacts must be signed and verified. Signing
-procedures and private keys/credentials are maintained outside this repository. Installer size and
-storage are reviewed before publishing; internal test builds remain unsigned and separate.
+See [release policy](../docs/RELEASE_POLICY.md) and [roadmap](../docs/99-roadmap-v2.md).

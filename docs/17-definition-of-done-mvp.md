@@ -1,8 +1,9 @@
 # Definition of Done — MVP
 
 Owner scope update (2026-11-20): the current [roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20)
-controls required work. Corpus/quality research, general dictionaries and hardware/preset benchmark
-programs described here are optional nice-to-have, not current project completion gates. Existing
+controls required work. The old comparative correction/translation/public-corpus/general-dictionary/model/hardware benchmark
+programs are removed from the active plan by the owner revision2026-11-27. Existing tooling/evidence
+remains; annotated-quality deferrals remain unscheduled, not project completion gates. Existing
 unit/integration, security, data-lineage and packaging checks remain required; preserve all accepted
 historical evidence. This is a practical podcast/recording workflow tool.
 

@@ -1,5 +1,10 @@
 # Documentation and requirement reconciliation — 2026-11-27
 
+This records the earlier0.26.2 documentation freeze. A later owner plan revision on the same date
+supersedes its signing/highlighting/research/site sequencing statements; see the current roadmap
+and checkpoints/2026-11-27-release-plan-revision.md. Original inventory counts/hashes describe that
+freeze, not the subsequent edited documentation. Do not treat historical findings as current gates.
+
 Scope: all tracked/new Markdown documents, normative requirements/traceability, current user/operator
 instructions, TODO/backlog/roadmap, licensing/navigation and historical acceptance boundaries.
 Exact inventory/link/requirement evidence is in [the audit inventory](checkpoints/2026-11-27-documentation-audit-evidence.json).

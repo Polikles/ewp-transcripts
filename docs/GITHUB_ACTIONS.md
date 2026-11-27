@@ -1,5 +1,13 @@
 # GitHub Actions: builds, Windows checks and costs
 
+Current owner revision2026-11-27: early releases may be unsigned; mandatory pre-release signing is
+withdrawn. Prioritize production artifact attestations early; see [release policy](RELEASE_POLICY.md).
+Plan job-scoped OIDC/attestations permissions, pinned Actions, final-byte digest/identity verification
+and retained provenance. Attestations are not Authenticode or a malware guarantee. No workflow,
+permissions, billing, retention, public release or Pages deployment changed in this plan revision.
+Later free OSS signing may integrate with Actions and owner approval; actual private signing
+procedure/keys remain outside Git. Historical run descriptions below retain their dates.
+
 Last checked: 2026-11-26. Workflow: [distribution.yml](../.github/workflows/distribution.yml).
 Repository visibility was verified through GitHub's repository API: **public**.
 Public source visibility is separate from publishing the first versioned product release.
@@ -136,7 +144,7 @@ checks capture pre-WebView/empty startup surfaces and both themed blank closing 
 additional full restart verifies explicit light appearance after earlier dark/system startup.
 The compressed wizard/native executable still require the normal lifecycle/integrity regression.
 No new runner/service, billing setting, retention change or model/provider campaign is introduced.
-Internal artifacts are unsigned; required first-public-release signing happens outside Git/Actions.
+Internal artifacts were unsigned. The then-current signing prerequisite was later withdrawn; future private signing can integrate with owner-approved Actions without putting keys/procedure in Git.
 
 [45899926602](https://github.com/Polikles/ewp-transcripts/actions/runs/45899926602) passed on the
 first run fromd6dd924, including47 installer groups,18 filesystem cases and six real desktop cycles.

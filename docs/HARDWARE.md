@@ -56,5 +56,5 @@ Fresh installation needs 25 GB on the target volume, plus additional models, med
 model cache may be on another volume. Cloud ASR and existing-result review do not require a local
 NVIDIA GPU. Cloud operations still need a key/network and exact explicit upload/text consent.
 Owner accepts the compressed 142 MB self-contained installer; no further slimming or downloader is
-planned. Artist work is non-blocking. Signing/release planning follows the documentation audit;
+planned. Artist work is non-blocking. Early releases may be unsigned; production attestations and release preparation are planned;
 no physical-GPU/provider tests or public release are implied by these recommendations.

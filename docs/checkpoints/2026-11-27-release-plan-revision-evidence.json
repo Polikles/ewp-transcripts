@@ -1,0 +1,74 @@
+{
+  "result": "PASS",
+  "scope": "Planning/documentation only; no runtime/CI/deployment/report publication",
+  "baseline": "569fa03",
+  "markdown_documents": 298,
+  "local_links_checked": 561,
+  "maintained_link_errors": 0,
+  "frozen_archive_links": [
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_RESULTS.md",
+      "target": "../docs/07-results-data-model.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_SPIKE.md",
+      "target": "../docs/adr/0007-accurate-preset-asr-model.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_MODEL_COMPARISON.md",
+      "target": "../docs/adr/0007-accurate-preset-asr-model.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "INSTALL_WSL.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "INSTALL_TOOLS.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "CUDA_SETUP.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "MODEL_SETUP.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "OFFLINE_MODE.md",
+      "reason": "missing file"
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PROMOTE_PHASE0_DEPENDENCIES.md",
+      "target": "../pyproject.toml",
+      "reason": "missing file"
+    }
+  ],
+  "requirements_preserved": 153,
+  "historical_snapshots_unchanged": 7,
+  "runtime_and_ci_unchanged": true,
+  "product_version": "0.26.2",
+  "new_app_tests_run": false,
+  "portable_files": [
+    {
+      "file": "Plan-projektu-EwP-2026-11-27-v2.txt",
+      "bytes": 13996,
+      "sha256": "8d60025f6557d4ff99104d0c64cafff161ecb25cb386fc8a68e8d5c0ccfe485b"
+    },
+    {
+      "file": "Pytania-do-planu-EwP-2026-11-27.txt",
+      "bytes": 4097,
+      "sha256": "756f2e5e03f654bdf4dcb0e814b519974e013b0ad0d2622b3b27f4121abb4012"
+    }
+  ],
+  "primary_research_date": "2026-11-27",
+  "remaining": "Owner release/storage/Store-tier/contact decisions; then prioritized implementation/review tasks"
+}

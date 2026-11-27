@@ -8,7 +8,7 @@ Local-first transcript workflow for podcasts and similar recordings: local GPU o
 
 Version 0.26.2 is an internal preview on `main`, with managed installation/update/removal, a standalone Windows wizard and a dedicated Windows application window. Installer and desktop qualification are recorded separately from GPU inference. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Recommendations and older-card limits are stated below; VRAM alone does not establish compatibility. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification. Windows AMD ASR is available as **experimental**, with CPU word alignment/diarization and no physical AMD inference qualification; see [AMD implementation and limits](docs/AMD_EXPERIMENTAL.md).
 
-The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
+The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad comparative research/benchmark programs are removed from the active plan; annotated-quality limits remain explicit. See the [scope and roadmap](docs/99-roadmap-v2.md).
 
 ## Recommended hardware
 
@@ -31,7 +31,7 @@ alignment/diarization and no physical-card qualification.
 ## Install and launch
 
 Use the standalone Windows wizard `EwP-Setup-0.26.2.exe`, or the terminal packages below.
-Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers remain pending the deliberate first public release. The test EXE is unsigned. No manual repository clone or preinstalled Python/uv is needed for these packages.
+Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers remain pending the deliberate first public release. The test EXE is unsigned; the first several public releases may also be unsigned. [Release policy](docs/RELEASE_POLICY.md) tracks early provenance attestations, per-version verification and deferred signing. No manual repository clone or preinstalled Python/uv is needed for these packages.
 
 Windows PowerShell, after downloading `EwP-0.26.2-windows-x64.zip`:
 

@@ -1,31 +1,36 @@
-# Current status — NVIDIA preflight and documentation audit complete, 2026-11-27
+# Current status — release plan revised, 2026-11-27
 
-Active checkpoint: docs/checkpoints/2026-11-27-nvidia-docs-audit.md. Delivered 0.26.2.
-Baseline b762505; delivered0.26.1/source d6dd924, native run45899926602 PASS, immutable package in
-/home/linuch/project-ewp/deliveries/ewp-0.26.1-installers. Owner now accepts initial/closing theme,
-LEFT/RIGHT Snap and compressed142183758byte EXE. Preserve these passes.
+Active checkpoint: docs/checkpoints/2026-11-27-release-plan-revision.md.
+The current product remains **0.26.2**, source040e0084fec778f4ee82dbff590b3a38d217fc5b,
+native run45970090999 PASS. Delivery: /home/linuch/project-ewp/deliveries/ewp-0.26.2-installers.
+Local1261 passed/20 Windows skips, native48 wizard groups/18 filesystem cases/6 desktop cycles,
+AMD DLL import,189 visual previews; all6 product hashes and92 previous products verified.
+See docs/checkpoints/2026-11-27-nvidia-docs-audit-evidence.json. Owner accepts theme, Snap and size.
 
-Implemented: exact CUDA12.8.90/driver/Compute Capability preflight, unsupported/unknown
-GPU cloud guidance and compatible lower-VRAM warning with optional local choice. No model/runtime
-pin changes. Full documentation audit and normal/native qualification PASS. Product source
-040e0084fec778f4ee82dbff590b3a38d217fc5b; native run45970090999 PASS. Internal unsigned delivery:
-/home/linuch/project-ewp/deliveries/ewp-0.26.2-installers (EXE142200142 bytes). Local1261 passed/20
-Windows skips; native48 wizard groups,18 filesystem cases,6 desktop cycles, AMD library import.
-189 visual previews reviewed; source/manifests/all6 hashes and92 previous products verified.
-No physical new GPU inference is claimed. Qualification: docs/checkpoints/2026-11-27-nvidia-docs-audit-evidence.json.
+This task revises plans/docs only. No app/installer code, pins, binaries, remote settings, CI
+permissions, signing services, certificate purchases, attestations or public releases were changed.
+No new physical GPU/model/provider tests; spend USD0.0291461230985028369 unchanged.
 
-Current owner decisions:12GB+ VRAM approximate full-local recommendation; compatible lower memory
-may work but is untested/unguaranteed and cloud ASR is recommended. GTX1070/telemetry/legacy-profile
-and further EXE slimming cancelled. Artist non-blocking; local Scribe/MAI removed. Signing/release
-approach is NEXT planning work before other backlog; mandatory signing before public release,
-procedure/keys outside Git. No signing/purchase/publication in the current task.
+## Owner decisions now authoritative
 
-Accepted foundation: local/cloud ASR and three-local-model mixed queues, reviewed EN/PL workflow,
-manual/assisted correction and translation, verified exports, recovery/autosave, installer lifecycle,
-native ownership/closing/Personalization. Full profile exchange remains provisional. Physical AMD
-inference is untested; no new GPU/provider campaign. Spend USD0.0291461230985028369 unchanged.
+- Early public releases MAY BE UNSIGNED; signing no longer blocks them. Later free OSS signing
+  research, potentially SignPath + owner-approved Actions; private procedure/keys outside Git.
+- Prioritize build attestations early; formal per-version release checklist/notes/docs consistency.
+- General cybersecurity/privacy review FIRST local EN outside Git, then owner review/approval;
+  framework applicability/mapping follows. Only approved reports go under docs/security/.
+- Existing technical privacy requirements/guides are not a complete user-facing privacy policy;
+  policy preparation is tracked explicitly, with truthful data flows and owner/contact decisions.
+- Quick-update entry, releases/ storage and required GH Pages site added. Latest site timing is
+  AFTER first release; binary Git limit and proposed Release-assets/index design need agreement.
+- MSIX/Store is a separate post-release channel research task, including individual account,
+  Store updates/signing, optional model wizard, CLI preservation and proposed hardware tiers.
+- Remove highlighting, separate reader tests and old5.12–5.14 research/benchmark programs.
+  Bound audio repair; separate poor-audio mode plus one-file repaired/composite export. Optional
+  sound detection is research with uncertain accuracy, not promised high-accuracy recognition.
+- Profile transfer and200% browser zoom become upcoming-release scenarios. Physical AMD/other
+  NVIDIA tests unavailable and not planned; corpus accuracy deferrals have no scheduled date.
+- Artist integration/test is the dependency only for complete illustrated docs, not release.
 
-NEXT: plan private signing and the first public release, before optional backlog. See TODO and
-current roadmap for exact remaining actions. Historical chronology, original wording
-and every earlier status/plan row are preserved byte-for-byte in archive/project-status/inventory.json;
-original dated qualification checkpoints/evidence remain in docs/checkpoints.
+NEXT: resolve owner release-gate/storage/Store-tier questions and prioritize SEC/PRIV/REL/INST IDs
+from TODO and docs/99-roadmap-v2.md before implementation. Do not start unrelated optional work.
+The portable v2 plan and question list live beside the repository, outside Git.

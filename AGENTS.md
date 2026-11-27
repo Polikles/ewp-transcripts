@@ -3,17 +3,23 @@
 ## Current work and authority — 2026-11-27
 
 Read WORK_STATUS.md, TODO.md, WORK_POLICY.md, docs/99-roadmap-v2.md and the active checkpoint
-before work. User directions supersede historical records.0.26.1 window theme/Snap and142MB EXE
-are owner-accepted. Delivered0.26.2: NVIDIA architecture/driver/VRAM notices and full docs audit;
-normal/native gates PASS, immutable delivery and evidence are linked from WORK_STATUS.
-12GB+ VRAM is approximate local guidance; smaller compatible GPUs are untested, may work but likely
-fail and should use cloud ASR. GTX1070/legacy-profile/telemetry tests and further EXE slimming are
-CANCELLED. Preserve compressed self-contained packaging, model/NVIDIA/AMD pins and immutable files.
-NEXT: PLAN signing and first-public-release approach, before other backlog.
-Signing is mandatory before public release; its procedure, keys and credentials MUST stay outside
-Git. No publication/certificate purchase/paid/model campaign here. Artist non-blocking; local
-Scribe/MAI removed; Ollama/other optional enhancements after public release. No physical-GPU claim
-from model-free tests. Preserve cumulative provider spend USD0.0291461230985028369.
+before work. Product0.26.2 and prior owner UI/lifecycle acceptance remain qualified and immutable.
+Owner plan revision2026-11-27 supersedes the mandatory-signing rule: early public releases MAY BE
+UNSIGNED. Actual signing procedure/private instructions/keys stay outside Git; later free OSS
+signing research may use owner-approved Actions, not a paid certificate commitment.
+NEXT: resolve release gates/storage and prioritize SEC/PRIV/REL/INST tasks. General cybersecurity
+report FIRST local EN OUTSIDE Git; then owner approval before publishing. Applicable frameworks
+and separate mapping follow the general report. Existing technical docs are not a complete user
+privacy policy. Attestations are prioritized early; current CI permissions were not changed.
+Quick update is planned. Required GH Pages follows first release per latest owner sequencing.
+MSIX/Store is an independent post-release research channel, preserving installed CLI and optional
+model setup. Future proposed Store hardware tiers are not current installer code or qualification.
+Remove highlighting, separate reader tests and benchmark programs old5.12–5.14. Bound audio prep;
+separate poor-audio attempt with one-file repaired/composite export; sound detection experimental.
+Profile transfer/200% zoom are upcoming-release scenarios. Physical AMD/other NVIDIA unavailable,
+no tests planned; annotated-corpus accuracy deferred without date. Artist only blocks illustrated
+docs after integration/test. GTX1070, slimming and local Scribe/MAI stay removed. Preserve pins,
+brand/licenses/workbooks, immutable packages, zero paid budgets and provider spend USD0.0291461230985028369.
 
 ## 1. Project goal
 
@@ -175,8 +181,8 @@ make test-integration
 Changes touching WhisperX, alignment, pyannote, CUDA, model loading, or performance must run
 relevant available GPU/E2E functional regression checks with authorized representative material.
 Record unavailable hardware/material honestly; never claim qualification from model-free tests.
-Broad external-dataset/model/hardware benchmark campaigns are optional under the current owner
-scope and must not be imposed as a new project-completion gate.
+Broad comparative dataset/model/hardware benchmark campaigns are removed from the active owner
+plan. Existing regression checks remain; do not impose a new project-completion campaign.
 
 All disposable pilot outputs, provider resume state, generated candidates, temporary
 exports, and intermediate benchmark bundles MUST be written under a dedicated `mktemp -d`
