@@ -33,7 +33,7 @@ sealed partial class Wizard
                 gpu["context"]!["devices"] = new JsonArray(device!.DeepClone());
                 host = JsonSerializer.SerializeToElement(report); hostReady = true;
                 Render(); UpdateLayout();
-                string text = HostStrings();
+                string text = VisibleText(hostRows);
                 Assert(CanAdvance && GpuReady == usable, "GPU notice never blocks cloud installation; low VRAM still permits deliberate local choice");
                 if (state == "unsupported_architecture") Assert(text.Contains(Pl ? "Lokalna transkrypcja nie zadziała" : "Local transcription will not work"), "unsupported architecture has an actionable localized warning");
                 if (state == "low_vram") Assert(text.Contains("12 GB VRAM") && text.Contains(Pl ? "nie gwarantujemy" : "not guaranteed"), "low VRAM remains explicitly untested/unguaranteed");

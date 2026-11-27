@@ -44,4 +44,7 @@ hardware-ui-en-pl.csv. Seven source snapshots are exact. Full audit inventory co
 147 maintained/146 historical,524 file/anchor links,153 traced IDs (148 retained +5 additive).
 Nine legacy relative links are intentionally retained only in already-frozen MVP runbooks.
 Latest local gate1261/20,311 formatting and122 mypy files passes; latest C# installer build0 warnings/
-errors includes null-VRAM protection. Source commit/native CI/artifact and visual checks pending.
+errors includes null-VRAM protection. First native run45969545192 stopped in the new assertion:
+the test read only the short host summary, excluding the separate rendered GPU notice. Corrected
+the assertion to read actual visible host controls. No production rendering change was needed.
+Fresh clean-source/native CI/artifact and visual checks pending.
