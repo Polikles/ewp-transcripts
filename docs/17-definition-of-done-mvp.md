@@ -35,7 +35,7 @@ until representative archive-derived inputs exist.
 The lexical WER/CER portion has an accepted three-case Polish baseline. Timestamp,
 DER/JER, English, and statistically representative thresholds are explicitly deferred by
 [ADR-0014](adr/0014-dataset-dependent-quality-gates.md) until annotated archive-derived
-references exist; the combined checkbox therefore remains open.
+references exist; these measurements remain explicitly deferred research and do not create an open delivery gate.
 - [x] A 60-minute file completes on RTX 3090 without OOM.
 - [x] A batch of at least ten files shows no accumulating VRAM use.
 - [x] SRT and VTT have been reviewed manually in a private YouTube upload.

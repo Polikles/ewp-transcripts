@@ -1,9 +1,10 @@
 # MVP requirements traceability
 
-Current scope is governed by the [2026-11-20 owner decisions](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20).
-Broad research metrics, hardware presets and ETA accuracy studies are optional, not current
-completion gates. Preserve earlier accepted results; current owner acceptance excludes a full
-profile exchange and latest restart recovery, with browser/palette behavior accepted.
+Current scope is governed by the [current owner roadmap](99-roadmap-v2.md). Broad research and
+hardware benchmarks are optional after public release; GTX1070/telemetry is cancelled. Preserve
+accepted Windows/WSL/local/cloud, recovery, native UI/lifecycle and installer passes. Full profile
+exchange remains provisionally accepted; physical AMD and other-card inference are not qualified.
+The [documentation audit](DOCUMENTATION_AUDIT.md) reconciles these rows with current code/evidence.
 
 This matrix audits every normative requirement against production code, automated
 tests, and accepted external evidence. It is a release-control document, not a claim
@@ -92,7 +93,7 @@ Their normative definitions are in `02-requirements.md` and `13-transcript-revis
 | FR-J09, FR-J10 | verified | Preview equivalence and external-editor lifecycle tests; staged VS Code editing is the preferred operator path. |
 | FR-J13, FR-J14 | verified | Revision provenance/statistics and reconstructable or published detailed audit. |
 | FR-J16, FR-J17 | verified | Revision resolution and TXT/SRT/VTT/segments export use one `EffectiveTranscript` without audio or models. |
-| NFR-013, NFR-014 | verified | Determinism fixtures and shared CLI/correction/translation application boundaries; the future GUI must reuse them. |
+| NFR-013, NFR-014 | verified | Determinism fixtures and shared CLI/correction/translation application boundaries; the delivered GUI reuses them. |
 
 ## v0.3 automated-correction requirements
 
@@ -125,19 +126,32 @@ The v0.4 contracts are defined in `23-v0.4-translation-contract.md`,
 
 ## Local browser GUI requirements
 
-ADR-0021 and `26-local-web-gui-contract.md` define the common WSL2, bare-metal Ubuntu, and
-future-Docker interface. The application GUI is implemented separately from the exported HTML transcript player.
-The evidence below distinguishes delivered functions from retained proposals.
+ADR-0021 and `26-local-web-gui-contract.md` define the shared frontend/core. Native Windows embeds
+it in WPF/WebView2; browser mode remains explicit. Docker is outside selected delivery. This GUI is
+separate from exported HTML transcript fragments. Implemented means current code/automated evidence,
+not a blanket claim of physical GPU or every platform/input quality.
 
-| Requirement | Status | Planned implementation/evidence |
+| Requirement | Status | Current implementation/evidence |
 | --- | --- | --- |
-| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | `transcriber gui`, bundled offline assets, loopback-only adapter, `/api/v1` health/about/root endpoints, and frontend compatibility rejection. All workflow stages call the application services directly. |
-| FR-L03, FR-L17, NFR-020 | partial | Windows/WSL/POSIX paths normalize before ordinary-user-space/system-denylist validation; Host/Origin/CSRF validation, restrictive CSP, safe fixed routing, and negative tests are implemented. Safe file selection rejects symlinks/system trees. General verified export-download identities remain retained proposal E02. |
-| FR-L04, FR-L05 | implemented | Browser inspect/dry-run calls existing services; an explicitly confirmed single-worker queue invokes atomic transcription, survives browser refresh, and waits safely on server shutdown. Explicit cancellation and richer persisted GUI history remain later operational enhancements. |
-| FR-L06, FR-L07 | implemented | Structured browser transcript editor hides/protects anchors, saves with hash conflict detection, requires exact saved preview before immutable manual apply, and exports the selected verified revision through existing services. The owner accepts the current workflow; latest restart recovery and full profile exchange remain unchecked. |
-| FR-L08, FR-L09 | verified | Correction and translation candidate generation, structured manual editors, exact-lineage preview/apply, translation audit/export, and direct handoffs passed external browser qualification. |
-| FR-L10 | verified | Compatible correction/translation dictionaries are catalogued and selectable; proposal review retains approved/rejected decisions and publishes immutable project dictionaries with exact provenance. |
-| FR-L11, FR-L12 | implemented | Coded failures cover startup, routes, paths, credentials, providers, models, and confirmations. Provider workflows require explicit disclosure/consent and keep optional OpenRouter credentials only in server-process memory. |
-| FR-L14, FR-L15, NFR-018 | partial | Version, license/warranty, source, and issue information is implemented in the responsive keyboard-native shell. Synchronized mixed/single media review, seeking, playback speed, PL/EN and explicit themes are implemented and owner-accepted. Any automatic audio-follow enhancement remains a separate proposal. |
-| FR-L18 | implemented | Inspect, exact dry-run authorization, staged queue evidence, and execution carry an explicit per-job language and speaker count. The owner accepts the current workflow; latest restart recovery and full profile exchange remain unchecked. |
-| NFR-017, NFR-019 | planned | Shared contract tests across WSL2-compatible/native launch modes, then the identical packaged application in Docker; offline acceptance after model setup. |
+| FR-L00, FR-L01, FR-L02, FR-L13, FR-L16 | implemented | Shared web application services, bundled assets, loopback API/version checks; native WPF host embeds the same frontend. `test_web_server.py`, `test_desktop_windows.py`, native checkpoints. |
+| FR-L03, FR-L17, NFR-020 | verified | Safe filesystem/picker guards, Host/Origin/CSRF/CSP, escaping and verified export-download identity are delivered. `web_downloads.py`, `test_web_downloads.py`, `test_web_filesystem.py`; accepted package A/B evidence. |
+| FR-L04, FR-L05 | implemented | Inspect/dry-run/staging, explicit single-worker start, cancellation and durable pending-media/workspace restoration. `cancellation.py`, `web_recovery.py`, `test_web_recovery.py`, workspace and native lifecycle tests; owner recovery acceptance retained. |
+| FR-L06, FR-L07 | implemented | Anchored immutable source reviews/exports and saved drafts/recovery use existing revision services. Current owner workflow passes retained; full profile exchange remains provisional. |
+| FR-L08, FR-L09 | verified | Non-final correction/translation candidates, exact-lineage manual review/audit/export; retain prior external qualification without a new paid pilot. |
+| FR-L10 | verified | Dictionary identity/version/provenance, proposal review and immutable project publication are delivered. |
+| FR-L11, FR-L12 | implemented | Coded failures, scoped disclosure/consent, no artifact/browser-secret persistence; optional OS credential save/read/delete and saved-key connection check are delivered in `credentials.py` and focused tests. |
+| FR-L14, FR-L15, NFR-018 | implemented | About/license/version, responsive keyboard/palette/theme, mixed playback/seeking/speed and native Personalization. Word/phrase highlighting is optional post-release; whole-block following removed.200% browser zoom remains optional/unchecked. |
+| FR-L18 | implemented | Per-job language/speakers/model and explicit planning/staging, pending selections and paused recovery; current owner workflow/restart passes retained. |
+| NFR-017, NFR-019 | implemented | Shared web/service/offline assets, Windows/WSL owner evidence and native lifecycle regression. Docker is not a retained qualification gate; offline local operation requires explicitly installed models. |
+
+## Current managed hardware preflight
+
+| Requirement | Status | Implementation/evidence |
+| --- | --- | --- |
+| FR-M00, FR-M01 | implemented | `installer/manager.py` queries CC/driver/per-card VRAM; `WizardGpu.cs` renders EN/PL unsupported/low-memory notices. `test_nvidia_preflight.py` and native `WizardGpuTests.cs`; exact scope in HARDWARE.md. |
+| FR-M02, FR-M03 | implemented | Early no-mutation local guard, cloud-safe warning status/app-only maintenance, independent low-VRAM choice. Standard-library metadata checks; no physical inference claim. Focused Python/native tests and current checkpoint. |
+| FR-M04 | implemented | Existing AMD profile/acknowledgement and isolated-runtime/CPU-stage tests retained; actual DLL import is distinct from unavailable physical AMD inference. |
+
+FR-A05 remains the narrow core directory-discovery deferral in ADR-0017; current GUI media probing
+does not satisfy that generic CLI obligation. Dataset-dependent English/three-speaker/timing/DER
+quality stays deferred under ADR-0014 as optional research, not an unrecorded release blocker.

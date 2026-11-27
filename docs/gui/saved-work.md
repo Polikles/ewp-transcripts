@@ -30,8 +30,8 @@ recovery file to be overwritten by an empty state.
 
 Queue outcomes continue to be checkpointed while the browser is closed. Unfinished work restores
 as staged jobs and requires a new explicit start. Closing a browser tab still leaves the local
-server running; stop it with Ctrl+C after work finishes. A native Windows app interface is planned
-after installer acceptance.
+server running; stop it with Ctrl+C after work finishes. Managed Windows uses the delivered native window: closing flushes saved work/review drafts and
+stops its owned backend; active work offers wait/stop. A save failure keeps the window open.
 
 ## 3. Load saved work
 

@@ -36,7 +36,7 @@ uv run --locked transcriber benchmark --help
 
 `revise` prepares editable source review, validates it and publishes immutable revisions. Its `correct` provider path generates assistance and may incur charges even in preview. `translate` prepares manual translation, validates, publishes, audits and exports; `automate` creates a non-final candidate. `dictionary` proposes mappings from exact result/revision pairs and publishes reviewed decisions. `benchmark` is an advanced private research/evaluation tool, not required for the normal podcast workflow.
 
-For complete advanced flag examples, see the repository's [CLI runbook](../../Instructions/README.md). All CLI diagnostics/help preserve technical English codes. The Polish manual explains the ordinary terminal workflow; it does not translate executable command names, flags or JSON fields. GUI workspaces/profiles are managed in the GUI, not by inventing command names.
+For complete advanced flag examples, see the repository's [CLI runbook](https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/README.md). All CLI diagnostics/help preserve technical English codes. The Polish manual explains the ordinary terminal workflow; it does not translate executable command names, flags or JSON fields. GUI workspaces/profiles are managed in the GUI, not by inventing command names.
 
 ## Local CLI example
 

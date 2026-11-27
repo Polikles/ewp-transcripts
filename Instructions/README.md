@@ -24,7 +24,7 @@ uv run --locked transcriber revise COMMAND --help
 
 The GUI plans every unqueued selection, supports grouped tracks, local/cloud ASR, optional LLM correction/translation and manual review. It no longer has a separate Inspect step or redundant preparation button. Use [the current per-stage guides](../docs/gui/README.md) for its exact actions. Terminal `inspect` remains available. Closing the browser does not stop a running job; save work before stopping the server.
 
-RTX 3090 24 GB is the tested reference. Other NVIDIA GPUs with at least 8 GB VRAM are expected to work without a guarantee. Broad benchmarks/hardware studies are optional; the historical private benchmark procedures linked later are research tools, not installation or normal workflow gates.
+RTX3090/24GB is the tested reference. Fully local ASR is recommended with a compatible NVIDIA GPU and12GB+ VRAM; smaller configurations may work but are untested/unguaranteed and should use cloud ASR. See [exact CUDA/architecture/driver policy](../docs/HARDWARE.md). Broad benchmarks/hardware studies are optional; the historical private benchmark procedures linked later are research tools, not installation or normal workflow gates.
 
 For detailed WSL setup/maintenance references, see [system requirements](../WSL%20config/SYSTEM_REQUIREMENTS.md), [WSL installation](../WSL%20config/INSTALL_WSL.md), [tools](../WSL%20config/INSTALL_TOOLS.md), [CUDA](../WSL%20config/CUDA_SETUP.md), [application setup](../WSL%20config/INSTALL_APPLICATION.md), [Hugging Face access](../WSL%20config/HUGGING_FACE_TOKEN.md), [model preparation](../WSL%20config/MODEL_SETUP.md) and [offline mode](../WSL%20config/OFFLINE_MODE.md).
 

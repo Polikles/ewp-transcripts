@@ -88,6 +88,34 @@ def install(root: Path, archive: Path):
     return manager.install(root, archive, local=False, terms=False, secrets={})
 
 
+def test_unsupported_gpu_blocks_local_preparation_before_files_or_downloads(
+    tmp_path, lifecycle, monkeypatch
+):
+    root, registrations = lifecycle
+    monkeypatch.setattr(
+        manager,
+        "host_report",
+        lambda *args: {
+            "ready": True,
+            "checks": [
+                {
+                    "code": "gpu",
+                    "status": "warning",
+                    "context": {
+                        "accelerator": "nvidia",
+                        "compatibility": "unsupported_architecture",
+                        "local_supported": False,
+                    },
+                }
+            ],
+        },
+    )
+    monkeypatch.setattr(manager, "run", lambda *a, **kw: pytest.fail("No child/download permitted"))
+    with pytest.raises(manager.InstallError, match="Use cloud ASR"):
+        manager.install(root, bundle(tmp_path, "1.0.0"), local=True, terms=True, secrets={})
+    assert not root.exists() and registrations == []
+
+
 def test_amd_acknowledgement_blocks_before_creating_installation(tmp_path, lifecycle, monkeypatch):
     root, registrations = lifecycle
     monkeypatch.setattr(

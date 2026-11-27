@@ -24,16 +24,13 @@ removed application feature is required. Compression can add startup decompressi
 Windows startup/lifecycle qualification passed:47 installer groups,18 filesystem cases and six
 desktop cycles in run45899926602. No physical GPU inference is implied.
 
-## Smaller online installer boundary
+## Further slimming — closed
 
-A bootstrap carrying only the wizard could download an immutable, hash-pinned application bundle
-from the selected public release. It would reduce the initial file further, while the total required
-application/runtime download remains. It needs stable published assets, verified network/retry/error
-handling before host diagnostics, and safe cache/recovery for update/repair/offline maintenance.
-No guessed unpublished URL or short-lived Actions URL should be an installer download contract.
-The current package remains self-contained for its UI/application; ordinary dependency/model setup
-is already online. A new online bootstrap is a separate packaging change, not an untested removal
-of the embedded bundle. Settle its delivery/storage design before public publication if selected.
+Owner2026-11-27 accepts the compressed self-contained installer at this size. No minimal downloader,
+shared-runtime restructuring or further slimming is planned. A downloader would add another trusted
+network/retry/recovery step before application dependency preparation, without changing the total
+necessary payload. Keep current package integrity, runtime independence and online dependency/model
+setup. This conclusion closes the earlier evaluation; it is not a pending release decision.
 
 Exact measured inventories and final qualification status are in
 [installer-size evidence](checkpoints/2026-11-26-installer-size-evidence.json). Preserve all prior

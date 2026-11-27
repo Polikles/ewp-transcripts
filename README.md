@@ -6,41 +6,45 @@ Local-first transcript workflow for podcasts and similar recordings: local GPU o
 
 ## Current status
 
-Version 0.26.1 is an internal preview on `main`, with managed installation/update/removal, a standalone Windows wizard and a dedicated Windows application window. Installer and desktop qualification are recorded separately from GPU inference. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Recommendations and older-card limits are stated below; VRAM alone does not establish compatibility. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification. Windows AMD ASR is available as **experimental**, with CPU word alignment/diarization and no physical AMD inference qualification; see [AMD implementation and limits](docs/AMD_EXPERIMENTAL.md).
+Version 0.26.2 is an internal preview on `main`, with managed installation/update/removal, a standalone Windows wizard and a dedicated Windows application window. Installer and desktop qualification are recorded separately from GPU inference. The owner has accepted the current GUI, EN/PL interface copy and focused Windows workflow fixes. Native Windows 11 x64 and WSL2 Ubuntu 24.04/26.04 are the current paths; the reference GPU is RTX 3090 with 24 GB VRAM. Recommendations and older-card limits are stated below; VRAM alone does not establish compatibility. Full portable-profile exchange has provisional owner acceptance rather than complete manual qualification. Windows AMD ASR is available as **experimental**, with CPU word alignment/diarization and no physical AMD inference qualification; see [AMD implementation and limits](docs/AMD_EXPERIMENTAL.md).
 
 The workflow supports PL/EN/automatic source language, audio and video, synchronized speaker tracks, explicit cancellation/retry, work checkpoints, dictionaries and portable preferences. Recognition and translation quality still require human checking. Latest cloud qualification used short Polish samples; no representative English sample was supplied. Broad research benchmarks and hardware studies are optional, not everyday prerequisites. See the [scope and roadmap](docs/99-roadmap-v2.md).
 
 ## Recommended hardware
 
-For local transcription, start with a **recent NVIDIA RTX GPU with 12 GB VRAM or more**, **32 GB RAM**,
-a multicore x64 CPU and SSD storage. The owner-tested reference is **RTX 3090 with 24 GB VRAM**.
-These are practical recommendations;12 GB/32 GB is not a measured guarantee for every model/card.
-**8 GB VRAM remains an unvalidated lower target.** Older cards also need compatible kernels: the
-current PyTorch 2.8/CUDA 12.8 packages do not support Pascal GPUs such as GTX 1070. That machine's
-future tests will first establish runtime compatibility before memory/performance qualification.
-See [hardware recommendations and test boundary](docs/HARDWARE.md).
+For fully local transcription, use a compatible **NVIDIA GPU with12 GB VRAM or more**, **32 GB RAM**, a
+multicore x64 CPU and SSD. The tested reference remains **RTX 3090/24 GB**.12 GB is approximate guidance.
+Smaller configurations may work, but have not been tested and are not guaranteed; **cloud ASR is
+recommended below 12 GB VRAM**.
 
-Allow at least25 GB for a fresh local installation, plus optional models, recordings and outputs.
-Cloud ASR and existing-result review do not require a local NVIDIA GPU. AMD Windows ASR is
-[experimental](docs/AMD_EXPERIMENTAL.md), with CPU alignment/diarization and no physical AMD test.
+The locked stack uses CUDA 12.8 Update 1 (runtime 12.8.90) and requires a supported **Compute Capability
+7.0+** architecture: Volta, or Turing and later for common GeForce (RTX 20xx/GTX 16xx onward).
+The project driver baseline is **Windows/WSL 572.61 / native Linux 570.124.06**. Maxwell/Pascal, including GTX 1070,
+cannot use this local pipeline. No separate system CUDA Toolkit is needed. Installer host checks
+explain unsupported hardware and low VRAM; preflight does not guarantee inference/performance.
+See [exact hardware/library compatibility](docs/HARDWARE.md).
+
+Allow 25 GB for a fresh install plus optional models, recordings and outputs. Cloud ASR/result review
+need no local NVIDIA GPU. AMD Windows remains [experimental](docs/AMD_EXPERIMENTAL.md), with CPU
+alignment/diarization and no physical-card qualification.
 
 ## Install and launch
 
-Use the standalone Windows wizard `EwP-Setup-0.26.1.exe`, or the terminal packages below.
+Use the standalone Windows wizard `EwP-Setup-0.26.2.exe`, or the terminal packages below.
 Current acceptance builds are attached to [Installer build and Windows startup](https://github.com/Polikles/ewp-transcripts/actions/workflows/distribution.yml) (GitHub sign-in may be required), and supplied in the owner handoff. Public release downloads/online launchers remain pending the deliberate first public release. The test EXE is unsigned. No manual repository clone or preinstalled Python/uv is needed for these packages.
 
-Windows PowerShell, after downloading `EwP-0.26.1-windows-x64.zip`:
+Windows PowerShell, after downloading `EwP-0.26.2-windows-x64.zip`:
 
 ```powershell
-Expand-Archive .\EwP-0.26.1-windows-x64.zip -DestinationPath .\EwPSetup
-powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.1-windows-x64.zip -Local -AcceptModelTerms
+Expand-Archive .\EwP-0.26.2-windows-x64.zip -DestinationPath .\EwPSetup
+powershell -ExecutionPolicy Bypass -File .\EwPSetup\control\Install-EwP.ps1 -Bundle .\EwP-0.26.2-windows-x64.zip -Local -AcceptModelTerms
 ```
 
 Ubuntu 24.04/26.04, including WSL2, after downloading the corresponding tar.gz:
 
 ```bash
 mkdir -p EwPSetup
-tar -xzf EwP-0.26.1-ubuntu-x64.tar.gz -C EwPSetup
+tar -xzf EwP-0.26.2-ubuntu-x64.tar.gz -C EwPSetup
 bash EwPSetup/control/Install-EwP.sh install --bundle "$PWD/EwPSetup/bundle.zip" --local --accept-model-terms
 ```
 

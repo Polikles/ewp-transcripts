@@ -1,0 +1,2744 @@
+{
+  "documents": 293,
+  "maintained_documents": 147,
+  "historical_documents": 146,
+  "local_links_checked": 524,
+  "broken_links": [
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_RESULTS.md",
+      "target": "../docs/07-results-data-model.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_SPIKE.md",
+      "target": "../docs/adr/0007-accurate-preset-asr-model.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_MODEL_COMPARISON.md",
+      "target": "../docs/adr/0007-accurate-preset-asr-model.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "INSTALL_WSL.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "INSTALL_TOOLS.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "CUDA_SETUP.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "MODEL_SETUP.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "target": "OFFLINE_MODE.md",
+      "reason": "missing file",
+      "historical": true
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PROMOTE_PHASE0_DEPENDENCIES.md",
+      "target": "../pyproject.toml",
+      "reason": "missing file",
+      "historical": true
+    }
+  ],
+  "defined_requirements": 153,
+  "untraced_requirements": [],
+  "undefined_traceability_ids": [],
+  "inventory": [
+    {
+      "file": ".github/pull_request_template.md",
+      "sha256": "3a0fd4fd634fa23983aa8ccc1ac41f82867e060b2c1c0210c3f8b9e9dd32a33c",
+      "lines": 17,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "AGENTS.md",
+      "sha256": "5cc4701c67725f4f549964980855723f021859a0f240aa37a09b636104496233",
+      "lines": 197,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "CHANGELOG.md",
+      "sha256": "dba777457531a480e773ec58d2ab20a9b05f9009159cb59d29de7da2ec9a80d3",
+      "lines": 1998,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "sha256": "20586f2e4961fea2be6477e2bd9a9a2c7291c39115c7e5290c42766a6027d606",
+      "lines": 65,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "CONTRIBUTOR_TERMS.md",
+      "sha256": "dcada90ae2cb5d7537ddfd44205dde3c1285f8c63b7391a0e165059306d9e5a0",
+      "lines": 100,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "DEVELOPMENT.md",
+      "sha256": "02ad1a86923dbcc7ca2863a0d198bf56b644cc92cb77f04cd869fb33fc1c43d5",
+      "lines": 55,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_PACKAGE_A_RETEST.md",
+      "sha256": "76586553c88265d3265b1cac99292189284d905e774654240962014c10c1ffaa",
+      "lines": 54,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_PACKAGE_A_TEST_CHECKLIST.md",
+      "sha256": "0dfd46ed6bc4a05902e0bdd21c18242f892cea16197ee9a9ab02cff181c86642",
+      "lines": 103,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md",
+      "sha256": "bef8dddd49ded68146d5606031793d301895a90a3e149e2456fcef89357b3b72",
+      "lines": 165,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_PREVIEW_TEST_PLAN.md",
+      "sha256": "50771815a9e3dd7e898190b996fbe82cd41161b1e513ffe7ea8f3b48b40c6a10",
+      "lines": 69,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_QUICKSTART.md",
+      "sha256": "7f29945defb5f252f2b4d45b578881975352d7eec68c5df0a8aa5a4b6b7ae826",
+      "lines": 26,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_TERMINOLOGY_APPROVAL.md",
+      "sha256": "619333d740b021e63e385ba86642dc53a8acc18f821e95ec2a83036b410277e3",
+      "lines": 27,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_UPDATE_TEST_CHECKLIST.md",
+      "sha256": "3aad8d34623553a7c8600d898f18ef48f9e91b096ec0639174375b51d63f1412",
+      "lines": 42,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/GUI_WINDOWS_REFRESH_RETEST.md",
+      "sha256": "9c32dd88077894a9d36a49602aef05f062f784f34faf543bdb40f0d836820824",
+      "lines": 27,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/HUGGINGFACE_ACCESS.md",
+      "sha256": "cab5ae8a8e48af50a17ce742e40b92b19fb3862f51df5997cecadcb961a435f1",
+      "lines": 34,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/HUGGINGFACE_ACCESS_PL.md",
+      "sha256": "81c2494759a51794e3d8d5fbd289e8269009f13852e6a9ce4b52302c19d6c932",
+      "lines": 34,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/INSTALLER_ACCEPTANCE.md",
+      "sha256": "c53f43bdd5ceea78254a271e12e085492de5b1692dab1842f7411d539c6247cf",
+      "lines": 105,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/INSTALLER_QUALIFICATION_PLAN.md",
+      "sha256": "035a0d69ad4596a1b60ff7bf95c3e370abd49898ecd4660b44d2d4e291b48d7e",
+      "lines": 18,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/LOCAL_ASR_INSTALLER_RETEST_PL.md",
+      "sha256": "798d18713ff3003fbe53e20f20162b3cfa7fa3d5a93a9ac492db2b0b3224dbd5",
+      "lines": 57,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/MODEL_PREFLIGHT_SELECTION_RETEST_PL.md",
+      "sha256": "fa57ec10af37451cf8d3efda45e306e8a33ef6c5a004d60b085f6d76fc8bbfdc",
+      "lines": 20,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/README.md",
+      "sha256": "32296f6d0f7d397dae86664602a80a48fe096676ed399785e52389388eba7cfa",
+      "lines": 760,
+      "historical": false,
+      "local_links": 21,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/UI_LANGUAGE_REVIEW.md",
+      "sha256": "a8a3075d5417ec379161c88fdfff8d15e3884e5da025adc285afbd76219341c3",
+      "lines": 61,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "Instructions/WINDOWS_NATIVE.md",
+      "sha256": "3578826edfe3f55c3242525e248caa40aecfc0137665f9058b2d94cac950399e",
+      "lines": 5,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "LICENSING.md",
+      "sha256": "6ae89e7362d1aaa22419dd7c7f5de60689b6d6aaaea0994122919e385948b283",
+      "lines": 104,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "LICENSING_PL.md",
+      "sha256": "401f14bb42a060fd7bffc833c24dad41ba40e1431f7840482d5344b9a5618842",
+      "lines": 99,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "README.md",
+      "sha256": "4584e05d76e2b8963b1c77a93ba2d7a9d2f0f2dbfe2e7ab8b9bb326014d3f103",
+      "lines": 106,
+      "historical": false,
+      "local_links": 35,
+      "requirements": []
+    },
+    {
+      "file": "TODO.md",
+      "sha256": "d8f67f0427d0bd9e081a143a0eba98c14701c666371c82564d3f27d481308f4f",
+      "lines": 36,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WORK_POLICY.md",
+      "sha256": "2a96843ffebd878e7ff5c544917b3cdc9d9ea20a3c4c589e83d644a415efd0fe",
+      "lines": 27,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WORK_STATUS.md",
+      "sha256": "d29ef909acdf0fb8542d964966be27d2d6c3423a57bb960fbf2414c2a9ba6203",
+      "lines": 25,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/CUDA_SETUP.md",
+      "sha256": "093e8a7828f6b2e9cd9ebe3ce4a13621f9d16a85426e00648c85f26344979856",
+      "lines": 39,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/FEEDBACK_FOR_V2.md",
+      "sha256": "9484a7d7c380ae2b0bbbdb4e97197b1bcc242a0e4a551d86d9534e39670a72d1",
+      "lines": 106,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/HUGGING_FACE_TOKEN.md",
+      "sha256": "03b043e295631b900a5078affffea6e79c824858dd68be1de311fe5f8a8e8049",
+      "lines": 105,
+      "historical": false,
+      "local_links": 7,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/INSTALL_APPLICATION.md",
+      "sha256": "73585575e91cd1b4535914063d2b91956011ae9b5cb4d6675739c6a330cfc226",
+      "lines": 52,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/INSTALL_TOOLS.md",
+      "sha256": "5c9e8214a37a3352066ee9d420aadae9813b571897c46a042ad472bcefeb62e8",
+      "lines": 79,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/INSTALL_WSL.md",
+      "sha256": "4b5f3c8942d3531ad500f87b09e3eda839d06a89b32a8eaa25a1d653917b217e",
+      "lines": 64,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/MODEL_SETUP.md",
+      "sha256": "ba35a1b524a9486f6980aebfb79639196afcc894058f1742f92ca16627ad6d90",
+      "lines": 81,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/OFFLINE_MODE.md",
+      "sha256": "14955fb5b6feba26f7781574b84eae47a197febce931a8952440e320dbf64068",
+      "lines": 30,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/README.md",
+      "sha256": "8c729731540a5b4fcbf9b0f999dc1603f5053c3bc7d49262521357e1caa379ba",
+      "lines": 66,
+      "historical": false,
+      "local_links": 20,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/REVISE_TRANSCRIPTS.md",
+      "sha256": "8a313e610452fbaa118739a86525f693277248f34293e8b1e6baa6bd8c9b3cd9",
+      "lines": 320,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/RUN_RELEASE_FRESH_WSL_INSTALL.md",
+      "sha256": "77410e1f7b831bcf232b1aa9e1c6a5c6eb123fc7ff31946f42a66dc0a482b7ff",
+      "lines": 175,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/RUN_V03_LOCAL_LLM_BENCHMARK.md",
+      "sha256": "40a21334ed512929167a384b0dbfceb190626ebd0056662e763f1334f3b946a3",
+      "lines": 248,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/SYSTEM_REQUIREMENTS.md",
+      "sha256": "fa7f3f4fff787ed979eb81629f774a7c3f10753f1904e9bd5c279d7e53172ec3",
+      "lines": 45,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/TRANSLATE_TRANSCRIPTS.md",
+      "sha256": "2970f3f322df38835ce1482bd2d6c3ad2c50f05a6ba97584eb5adc00227bdf93",
+      "lines": 292,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/TROUBLESHOOTING.md",
+      "sha256": "7ba017b9dc7e9d9bb27b1986efa1cef694cf8f4fdf946e70180a7766cda709e7",
+      "lines": 100,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/UBUNTU_UPGRADE.md",
+      "sha256": "1c10c26ef8d9cc992b0920eb36c1dc8b9a97d1b96b5c9d6a2be05d1eeb45d067",
+      "lines": 5,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/USE_CURRENT_MVP.md",
+      "sha256": "f22476a6fcd403c5be08ebe5fb23397426bdce075c0351797aef8313c195cd24",
+      "lines": 164,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "WSL config/VERIFY_ENVIRONMENT.md",
+      "sha256": "e61cc34e9939ddb9d78a2fcd3b7c16e8917388f86365764e75686f5d900e8c95",
+      "lines": 77,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/README_old.md",
+      "sha256": "8654efe2f7147b2b10a2ef26dd084c8c973472c0a4672bb0f5b1a750c079804d",
+      "lines": 11,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/instructions.md",
+      "sha256": "6648b4ce32318c3de72aeac83500b26b0b81af6b53ff671b5d431250df4e5e40",
+      "lines": 21,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-planning/13-implementation-plan.md",
+      "sha256": "a49e7829dbe4b9f93bd140f7fd15541f1606b271160542de3c35889632379b37",
+      "lines": 165,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-planning/MVP_IMPLEMENTATION_PLAN.md",
+      "sha256": "e6702233a99ac78115ae0783d0252924f64d251b2d9f5579902dfdfe22946c18",
+      "lines": 469,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-planning/README.md",
+      "sha256": "429940e969eff56e6f1595e4c0a755c1840ba5602623d5c6ec2b68608ae544d1",
+      "lines": 8,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-planning/REPOSITORY_STRUCTURE.md",
+      "sha256": "d8229a9684aa9ed777cb23245744869825d5c470395f28bba1a24263ef9f0ae0",
+      "lines": 590,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/DEPENDENCY_CANDIDATE_MATRIX.md",
+      "sha256": "6bf98c97f9a0d88681b702288eaeb46f1e4e7a3493d5e9f5a0e54777f8ea5b32",
+      "lines": 128,
+      "historical": true,
+      "local_links": 7,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/EXTRACT_LONG_SUBTITLE_FAILURES.md",
+      "sha256": "366a0285ee5a16b670f103f742ddc2bd62e1efb68fc58286d8b71470055766a3",
+      "lines": 28,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/MEASURE_PHASE2_CHANNELS.md",
+      "sha256": "bbff5ca1e12abfbb0280fe085de22bf9d53e0749bbdf3b0e926e0619f122ed4e",
+      "lines": 85,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_MEDIA_INVENTORY.md",
+      "sha256": "bdc89970b021e7c773938346ee71aa8fe16a617917cc201bc9fcb349891af190",
+      "lines": 50,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_RESULTS.md",
+      "sha256": "1148c796dfecf8cf1861f420cf59ab6010ecd392119b0f92c66eb25a41d18e86",
+      "lines": 415,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE0_SPIKE.md",
+      "sha256": "7517bc8146629ea0111304bc27b51904530191331a38e16ff343d93b2c289d54",
+      "lines": 112,
+      "historical": true,
+      "local_links": 14,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PHASE1_RESULTS.md",
+      "sha256": "303bdb9d0e505c7d160bc92629ccbb5dc9396b9f689cc2b29e4dc9f376cd1741",
+      "lines": 58,
+      "historical": true,
+      "local_links": 1,
+      "requirements": [
+        "FR-G04"
+      ]
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_ENGLISH_ALIGNMENT.md",
+      "sha256": "e38e015aef5b6d90396fb7e0937df9df40ea94477a2fd656f7ce0f222087f517",
+      "lines": 116,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_MODELS.md",
+      "sha256": "a12fb122c781032e870607aa1105fb038f73cb2a14563d1601de63a13ef752fd",
+      "lines": 210,
+      "historical": true,
+      "local_links": 7,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_MODEL_COMPARISON.md",
+      "sha256": "41af6a82a954c78539cfa94dc5d66554ab727609f9d504afd71630c1e60efeb8",
+      "lines": 149,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PREPARE_PHASE0_WSL.md",
+      "sha256": "0a266d16443155f85daad085acb9dd60c655cf61a3a9f4afee1a75534b6135cf",
+      "lines": 349,
+      "historical": true,
+      "local_links": 10,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/PROMOTE_PHASE0_DEPENDENCIES.md",
+      "sha256": "809651dcee46f33040f6a5f37c6509a2458e1550d83cda4f6e62b3a96d855cc3",
+      "lines": 131,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/README.md",
+      "sha256": "2dd651343000384de4d50d6f5c165c236a6b51007e9d9e57bd3114c77e8e5333",
+      "lines": 11,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_ASR_ALIGNMENT.md",
+      "sha256": "aecf3a4570f2917b1f0edca26784f6e33f293bba1bff8926afa47e2f6ea510dd",
+      "lines": 275,
+      "historical": true,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_DIARIZATION.md",
+      "sha256": "3b01b8d56d4be11536ebdc4fd2dc39ef50e392051bad213438f2482caf9b17a7",
+      "lines": 236,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_INTEGRATED.md",
+      "sha256": "4f34511bb743ab10a3221d41f789596347f99dc8263de28b81a8b9277ce92094",
+      "lines": 360,
+      "historical": true,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_MODEL_COMPARISON.md",
+      "sha256": "6b28f84fe6fd379e378d8a74d2c1ae9cc1e0e4acb4e18b0559bbaeff14566f08",
+      "lines": 132,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_NETWORK_BLOCK.md",
+      "sha256": "fd8f5b7b7fe7ce9efbc2451b513db283c8b12ff7eefe7a3cfbe1cb608395346b",
+      "lines": 153,
+      "historical": true,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE0_REPEAT.md",
+      "sha256": "131eb751785551a003ec8802cbab5f8bde8194228796634b9ea8e8e928f7316b",
+      "lines": 77,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE2_INSPECT.md",
+      "sha256": "30ba95e12bc245ccebfce60c9b6d0fe4f0e4ce836454251f1bee7b47624467b8",
+      "lines": 172,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE2_QUALITY_DIAGNOSTICS.md",
+      "sha256": "a0eb229352f7b434625166772d5ca5b1d7a4e00503dee11b6f638222e0e97f36",
+      "lines": 129,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE3_DRY_RUN.md",
+      "sha256": "3dab6c1357ed0b29388c9b37eec418bc8785bda1ae05c5ff6f1f5550c9f06041",
+      "lines": 195,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE3_STORAGE_STATE.md",
+      "sha256": "ef3fd83e48364439367d98796f9ca84336c796ce0b4f8f2b1e14d704d9135b05",
+      "lines": 161,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE4_EXPORTS.md",
+      "sha256": "85ece48a826e97d99c7df363ba35ccfd7cfe1300d5cf46b9c994e1be717a9fb0",
+      "lines": 167,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE5_FAILURE_RESTART.md",
+      "sha256": "6214c7092f70f6b6cad57554833778ccadb60ca8f3f08dfbb1175a737df81a8e",
+      "lines": 224,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE5_SINGLE_SPEAKER.md",
+      "sha256": "96f581857afd9fc3b0885d6eae089a3bb831b4213ccd4128bb56551bebc3f9c2",
+      "lines": 248,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE6_BATCH.md",
+      "sha256": "88865dacce4d64b7b863214c0af7cea15878240a942fc3193aae7e96ee67c9f4",
+      "lines": 241,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE7_SOURCE_SPEAKERS.md",
+      "sha256": "5439f26abd5df0f25eb2aab22f47a9d5da03509c06e2a58bda2bfc7bb15059df",
+      "lines": 326,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE8_DIARIZATION.md",
+      "sha256": "ba1841dd5b1bcd5d0f13f28e4db821884d8dcb618927d087c029842fd51910dc",
+      "lines": 252,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_BATCH_STABILITY.md",
+      "sha256": "659e4bb743c50bf02c22bc146fbae883014c84a17e298b17f4deee7ea49b407c",
+      "lines": 272,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_CLEAN.md",
+      "sha256": "c145c30d258624044a0d786799de42a9f3440aa0f5b9ecb7815b2d8c764896e3",
+      "lines": 150,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_INTERRUPT_RESTART.md",
+      "sha256": "de72a287488bfa41d0fbf0c4b5c277c56a26dc07b96a63f34df4c9032baa8505",
+      "lines": 268,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_LEXICAL_BASELINE.md",
+      "sha256": "819e62affd31e929878304e0e3357c61f2539dea86ebfdea1d6d3929fdffb50b",
+      "lines": 225,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_LONG_DURATION.md",
+      "sha256": "c80f4be0be161d84b536edbb0d573d3bbc3d501eed7c0ff448f7511a65bc385f",
+      "lines": 301,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_PHASE9_WHEEL_INSTALL.md",
+      "sha256": "24066417c6bbff323a54be59caf9a2b6d61bf285d97ceb317ece0cb85a0f847e",
+      "lines": 290,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_DOCTOR.md",
+      "sha256": "8f26ab205cdb0739ba341b22638d19943f1f354030f4bc2b0ece96b6eaf7cc00",
+      "lines": 97,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_EXPLICIT_GROUP.md",
+      "sha256": "66d068fd573f077b1ce521533edbb6a637cc269025bdcbd591db894f0564efc5",
+      "lines": 187,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_FAST_NOISY_AUDIO.md",
+      "sha256": "247da7218d2d78000bb00be2a932736047a6da859b2b05dbe923389f6c32ee5d",
+      "lines": 145,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_FORMAT_MATRIX.md",
+      "sha256": "f2eec112594cfa8e5233ab71d1f63e067ec8cc32fdcd5acbc05d6eda5216d452",
+      "lines": 143,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_LONG_SUBTITLE_FINAL_CUE_RETEST.md",
+      "sha256": "be4e08e885dbba0ceb3b3e4f57a861db1c1201af08e24575be4bc29001e4ecd8",
+      "lines": 41,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_LONG_SUBTITLE_RETEST.md",
+      "sha256": "1d82561a54670c786fb2e82aaa0e177e50e839e55592b8452b8be9479e839dd2",
+      "lines": 93,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_LONG_SUBTITLE_REVIEW.md",
+      "sha256": "e83692289be2582d06840967e566c87c56e419018e2991606703b8dbc31f45e5",
+      "lines": 93,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_LONG_SUBTITLE_TURN_RETEST.md",
+      "sha256": "15ad14c1747891b33dde724c0439dc91da496dcfe87103b99c3da60593062d34",
+      "lines": 70,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_LONG_SUBTITLE_YOUTUBE_TIMING.md",
+      "sha256": "e63ae84a551f7be0d53cbc3e33a28a961e93a92a11a8bac64e58680788748d81",
+      "lines": 82,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_OBSERVABILITY.md",
+      "sha256": "865740dfed372f845aa94f3b7f2f026694d099f2823d2accb07671955ae36b6d",
+      "lines": 152,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/RUN_RELEASE_PRIVATE_YOUTUBE_SUBTITLES.md",
+      "sha256": "1728de005e9412db31cc19dd28556e8a398007d5bcb106a07edaecc1ae312f3c",
+      "lines": 400,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/TEST_MEDIA_PREPARATION.md",
+      "sha256": "5bd0dc08ae5b96390bb7e13e2862e15cf26c06519f92137c910058b7834873b0",
+      "lines": 130,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "archive/mvp-validation-runbooks/VERIFIED_BASELINE.md",
+      "sha256": "b6bd22110b0c86344df410e0215c851fde8c35b66a24689a6facd41807996b63",
+      "lines": 52,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "archive/project-status/README.md",
+      "sha256": "4b945e6c0589ee9f171a9267a20a2a9c1a9e27d2a29d065961a3a8db0a6057e4",
+      "lines": 11,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "dictionaries/README.md",
+      "sha256": "b36ad428f17f2bc6562406724b40072bcc6323b7994ab44eba455d3ddabfe26b",
+      "lines": 23,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/00-development-handoff.md",
+      "sha256": "ac7d17782009fd578e43cc696fa768420788e191efe407ff9d7f480e8ec9986d",
+      "lines": 13,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "docs/01-product-scope.md",
+      "sha256": "c02ddeeae3865410cb34be1e11d94b9ac92640c516dadace607dabe018b82bd3",
+      "lines": 106,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/02-requirements.md",
+      "sha256": "104d9618f44e1a0d1db054b983de7431fc8ff44503eca4194a05afbc9a733898",
+      "lines": 205,
+      "historical": false,
+      "local_links": 0,
+      "requirements": [
+        "FR-A01",
+        "FR-A02",
+        "FR-A03",
+        "FR-A04",
+        "FR-A05",
+        "FR-A07",
+        "FR-A08",
+        "FR-A08.1",
+        "FR-A08.2",
+        "FR-A08.3",
+        "FR-B00",
+        "FR-B01",
+        "FR-B02",
+        "FR-B03",
+        "FR-B04",
+        "FR-B05",
+        "FR-B06",
+        "FR-B07",
+        "FR-B08",
+        "FR-C00",
+        "FR-C01",
+        "FR-C02",
+        "FR-C03",
+        "FR-C04",
+        "FR-C05",
+        "FR-C06",
+        "FR-C07",
+        "FR-C08",
+        "FR-C09",
+        "FR-D00",
+        "FR-D01",
+        "FR-D02",
+        "FR-D03",
+        "FR-D04",
+        "FR-D05",
+        "FR-D06",
+        "FR-D07",
+        "FR-E00",
+        "FR-E01",
+        "FR-E02",
+        "FR-E03",
+        "FR-E04",
+        "FR-E05",
+        "FR-E06",
+        "FR-E07",
+        "FR-E08",
+        "FR-F00",
+        "FR-F01",
+        "FR-F02",
+        "FR-F03",
+        "FR-F04",
+        "FR-F05",
+        "FR-F06",
+        "FR-F07",
+        "FR-F08",
+        "FR-F09",
+        "FR-G00",
+        "FR-G01",
+        "FR-G02",
+        "FR-G03",
+        "FR-G04",
+        "FR-G05",
+        "FR-G06",
+        "FR-H00",
+        "FR-H01",
+        "FR-H02",
+        "FR-H03",
+        "FR-I00",
+        "FR-I01",
+        "FR-I02",
+        "FR-J00",
+        "FR-J01",
+        "FR-J02",
+        "FR-J03",
+        "FR-J04",
+        "FR-J05",
+        "FR-J06",
+        "FR-J07",
+        "FR-J08",
+        "FR-J09",
+        "FR-J10",
+        "FR-J11",
+        "FR-J12",
+        "FR-J13",
+        "FR-J14",
+        "FR-J15",
+        "FR-J16",
+        "FR-J17",
+        "FR-J18",
+        "FR-K00",
+        "FR-K01",
+        "FR-K02",
+        "FR-K03",
+        "FR-K04",
+        "FR-K05",
+        "FR-K06",
+        "FR-K07",
+        "FR-K08",
+        "FR-K09",
+        "FR-K10",
+        "FR-K11",
+        "FR-K12",
+        "FR-K13",
+        "FR-K14",
+        "FR-K15",
+        "FR-K16",
+        "FR-K17",
+        "FR-K18",
+        "FR-K19",
+        "FR-L00",
+        "FR-L01",
+        "FR-L02",
+        "FR-L03",
+        "FR-L04",
+        "FR-L05",
+        "FR-L06",
+        "FR-L07",
+        "FR-L08",
+        "FR-L09",
+        "FR-L10",
+        "FR-L11",
+        "FR-L12",
+        "FR-L13",
+        "FR-L14",
+        "FR-L15",
+        "FR-L16",
+        "FR-L17",
+        "FR-L18",
+        "FR-M00",
+        "FR-M01",
+        "FR-M02",
+        "FR-M03",
+        "FR-M04",
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004",
+        "NFR-005",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "NFR-011",
+        "NFR-012",
+        "NFR-013",
+        "NFR-014",
+        "NFR-015",
+        "NFR-016",
+        "NFR-017",
+        "NFR-018",
+        "NFR-019",
+        "NFR-020"
+      ]
+    },
+    {
+      "file": "docs/03-architecture.md",
+      "sha256": "4a18bcd106bba813a695aee4e3ebbbba1d642134fb6f3be3ad9a4903f80e534a",
+      "lines": 189,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/04-input-and-grouping.md",
+      "sha256": "97290e4a6d50e32187deda3ca4f1d9169cfdb7abc9331c51afa3def169087df8",
+      "lines": 273,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/05-cli-specification.md",
+      "sha256": "0534c89d3644aa3b40ec61b225a35c002a7a2c0d72db878611f2d8afdb27993d",
+      "lines": 443,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/06-configuration.md",
+      "sha256": "09f19fe737d8f6ab5aeafecb3b478c7188f727d7223f3d1d37b2c192eff35d83",
+      "lines": 238,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/07-results-data-model.md",
+      "sha256": "0f428a317c97b0e34b5e8926203054ba1ea11373bc25379316bff2a52b2bd72d",
+      "lines": 161,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/08-export-formats.md",
+      "sha256": "faaacc2d45ca949fd5078fcdd98e3f9f362517f997d7ee096f64546b188d0746",
+      "lines": 228,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/09-state-errors-and-logging.md",
+      "sha256": "50c37fa7144ad81cc7f662390fe9d40211738cc5a54bb07f27d94046cf0047f4",
+      "lines": 186,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/10-wsl2-installation.md",
+      "sha256": "21c24f1a3edde6ebc622768531304e9f69a4ab10c374f8c04ab1b6ff3e660578",
+      "lines": 110,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/11-security-and-privacy.md",
+      "sha256": "60ff4ae6c427be8c8f60c791b5658224184c9dffaef33cd765cad7cd79d354ee",
+      "lines": 82,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/12-testing-and-acceptance.md",
+      "sha256": "fbe1130ad91927ec270bc82c6791fbda236d03b06c1a3e2012d37bee46279580",
+      "lines": 280,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/13-transcript-revisions.md",
+      "sha256": "51202c1f4462b45efd1be071113c3fa417fcc1d137b3c59f03a0ef9298d99ccd",
+      "lines": 523,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/14-dependency-baseline.md",
+      "sha256": "c09fa05387edd664df9d1bf44e5886bdd39774ebb52b05dd7a52cd37c0f3777b",
+      "lines": 76,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/15-glossary.md",
+      "sha256": "dc66329c0ff57d0ae7e009f9b60bb8ac4815dab49afd73d981632af763d8f6de",
+      "lines": 30,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/16-risk-register.md",
+      "sha256": "7de3da70e3222326757a586f6c9aa1e2706cc88fd4a98e8e735b9d2623812aba",
+      "lines": 18,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/17-definition-of-done-mvp.md",
+      "sha256": "7abde83f995bdf4f25cbc1bcbfede5778a1eec04ef1cd1e53d2849475804faff",
+      "lines": 62,
+      "historical": false,
+      "local_links": 4,
+      "requirements": [
+        "FR-A05"
+      ]
+    },
+    {
+      "file": "docs/18-quality-evaluation.md",
+      "sha256": "2167c781416f3ae37dc820cb72ce444ffeedf4a57cb3eb5c2b365bc6cb43d8f3",
+      "lines": 147,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/20-mvp-requirements-traceability.md",
+      "sha256": "3efdf0d7c1156a372f5c2a61c872e0e902e672376bd5c68d775a17533716e2d2",
+      "lines": 157,
+      "historical": false,
+      "local_links": 2,
+      "requirements": [
+        "FR-A01",
+        "FR-A02",
+        "FR-A03",
+        "FR-A04",
+        "FR-A05",
+        "FR-A07",
+        "FR-A08",
+        "FR-A08.1",
+        "FR-A08.2",
+        "FR-A08.3",
+        "FR-B00",
+        "FR-B01",
+        "FR-B02",
+        "FR-B03",
+        "FR-B04",
+        "FR-B05",
+        "FR-B06",
+        "FR-B07",
+        "FR-B08",
+        "FR-C00",
+        "FR-C01",
+        "FR-C02",
+        "FR-C03",
+        "FR-C04",
+        "FR-C05",
+        "FR-C06",
+        "FR-C07",
+        "FR-C08",
+        "FR-C09",
+        "FR-D00",
+        "FR-D01",
+        "FR-D02",
+        "FR-D03",
+        "FR-D04",
+        "FR-D05",
+        "FR-D06",
+        "FR-D07",
+        "FR-E00",
+        "FR-E01",
+        "FR-E02",
+        "FR-E03",
+        "FR-E04",
+        "FR-E05",
+        "FR-E06",
+        "FR-E07",
+        "FR-E08",
+        "FR-F00",
+        "FR-F01",
+        "FR-F02",
+        "FR-F03",
+        "FR-F04",
+        "FR-F05",
+        "FR-F06",
+        "FR-F07",
+        "FR-F08",
+        "FR-F09",
+        "FR-G00",
+        "FR-G01",
+        "FR-G02",
+        "FR-G03",
+        "FR-G04",
+        "FR-G05",
+        "FR-G06",
+        "FR-H00",
+        "FR-H01",
+        "FR-H02",
+        "FR-H03",
+        "FR-I00",
+        "FR-I01",
+        "FR-I02",
+        "FR-J00",
+        "FR-J01",
+        "FR-J02",
+        "FR-J03",
+        "FR-J04",
+        "FR-J05",
+        "FR-J06",
+        "FR-J07",
+        "FR-J08",
+        "FR-J09",
+        "FR-J10",
+        "FR-J11",
+        "FR-J12",
+        "FR-J13",
+        "FR-J14",
+        "FR-J15",
+        "FR-J16",
+        "FR-J17",
+        "FR-J18",
+        "FR-K00",
+        "FR-K01",
+        "FR-K02",
+        "FR-K03",
+        "FR-K04",
+        "FR-K05",
+        "FR-K06",
+        "FR-K07",
+        "FR-K08",
+        "FR-K09",
+        "FR-K10",
+        "FR-K11",
+        "FR-K12",
+        "FR-K13",
+        "FR-K14",
+        "FR-K15",
+        "FR-K16",
+        "FR-K17",
+        "FR-K18",
+        "FR-K19",
+        "FR-L00",
+        "FR-L01",
+        "FR-L02",
+        "FR-L03",
+        "FR-L04",
+        "FR-L05",
+        "FR-L06",
+        "FR-L07",
+        "FR-L08",
+        "FR-L09",
+        "FR-L10",
+        "FR-L11",
+        "FR-L12",
+        "FR-L13",
+        "FR-L14",
+        "FR-L15",
+        "FR-L16",
+        "FR-L17",
+        "FR-L18",
+        "FR-M00",
+        "FR-M01",
+        "FR-M02",
+        "FR-M03",
+        "FR-M04",
+        "NFR-001",
+        "NFR-002",
+        "NFR-003",
+        "NFR-004",
+        "NFR-005",
+        "NFR-006",
+        "NFR-007",
+        "NFR-008",
+        "NFR-009",
+        "NFR-010",
+        "NFR-011",
+        "NFR-012",
+        "NFR-013",
+        "NFR-014",
+        "NFR-015",
+        "NFR-016",
+        "NFR-017",
+        "NFR-018",
+        "NFR-019",
+        "NFR-020"
+      ]
+    },
+    {
+      "file": "docs/21-v0.2.0-transcript-revision-plan.md",
+      "sha256": "0a49c76a3af5c8b85e09b82163bbd35336bbc14fb9eb150b20e5c4740c8b419a",
+      "lines": 705,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/22-v0.3-automated-correction.md",
+      "sha256": "1605d453a53760ec14a14f94be0f5401b3030a772af4d5cdaf2e0c51a30250d2",
+      "lines": 601,
+      "historical": false,
+      "local_links": 1,
+      "requirements": [
+        "FR-K03",
+        "FR-K18",
+        "NFR-015"
+      ]
+    },
+    {
+      "file": "docs/23-v0.4-translation-contract.md",
+      "sha256": "dd825a4e3ad56421ba1f504d1a7760ac059def7574d71b63c174b85ccb561a6a",
+      "lines": 328,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/24-v0.4-timed-event-semantics.md",
+      "sha256": "067b0572602da99c6eb0e51837a4b115e1afb0f8bb0098ccbb7e160d914c7175",
+      "lines": 47,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/25-warning-error-catalog.md",
+      "sha256": "b5e93842c27d5c4e0a3fa198dd99ceae0a8ee382e0523199779f5c1985c05059",
+      "lines": 243,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/26-local-web-gui-contract.md",
+      "sha256": "6ed11c84bded09aea88c9734d9dd8910648c3c1aa4306fabc94ec55e47adf111",
+      "lines": 736,
+      "historical": false,
+      "local_links": 8,
+      "requirements": []
+    },
+    {
+      "file": "docs/27-gui-34a-verification.md",
+      "sha256": "d602e64526748589af813d4b40fcfdb62d5ee3fc38f1d20522b4bbf10b7688d7",
+      "lines": 115,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/28-integrated-gui-preview.md",
+      "sha256": "301c8b5c548e297071634c1bf05892907b407d5c05b4265dee2efdb9c862d65b",
+      "lines": 124,
+      "historical": true,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/29-guided-workflow-and-prototype.md",
+      "sha256": "c5fdac29e01ab1e42d419c4aef4b14e4a2c2a1325e0004972c5f22258f041754",
+      "lines": 129,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/30-queue-progress-and-eta.md",
+      "sha256": "7f71f06600349aafdfd0d36ef40a3dba4a3c0af31a94a9a6bd747534e0c0ad23",
+      "lines": 92,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/31-artist-review-package.md",
+      "sha256": "b6ee38cc2f93d53311307cd89fb9af9809a83658ddb95d7f3f96f25048cc361c",
+      "lines": 58,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/32-runtime-log-notes.md",
+      "sha256": "f11110d9c6b76f9d1d40e38f47e53560e67960b65d1de7fef552ddc5979b5e4f",
+      "lines": 65,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/99-roadmap-v2.md",
+      "sha256": "c545000985a7df300bd87788a73d35a3062f7989a2d59ad8e28cc9c2930e7dd0",
+      "lines": 89,
+      "historical": false,
+      "local_links": 4,
+      "requirements": [
+        "FR-A05"
+      ]
+    },
+    {
+      "file": "docs/AMD_EXPERIMENTAL.md",
+      "sha256": "078f0775d84377cc056c8ec02df8e94b01300c37de10c058969e143436a78afb",
+      "lines": 96,
+      "historical": false,
+      "local_links": 7,
+      "requirements": []
+    },
+    {
+      "file": "docs/ARCHITECTURE_AND_CODING_RULES.md",
+      "sha256": "ae1a2a12744113db685ca255f27222433aa8645762977c1b5c81a7e9091b2595",
+      "lines": 307,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/DISTRIBUTION_PLAN.md",
+      "sha256": "5731407378ea431e2aa045fea9d6eed699f161881d7fed0443f053e9df59f664",
+      "lines": 46,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/DOCUMENTATION_AUDIT.md",
+      "sha256": "a39c779fe5be712483f47a1927db4ab341e38f2181889ac25c5f76d2af307d90",
+      "lines": 37,
+      "historical": false,
+      "local_links": 0,
+      "requirements": [
+        "FR-A05"
+      ]
+    },
+    {
+      "file": "docs/GITHUB_ACTIONS.md",
+      "sha256": "388380b803b47bc9111c69f8e3d651344fe66cab08aac596edc611be277b6baa",
+      "lines": 145,
+      "historical": false,
+      "local_links": 15,
+      "requirements": []
+    },
+    {
+      "file": "docs/HARDWARE.md",
+      "sha256": "af481f6b473743c4965085fa6f29b64dc3fcdbd78b0504c9b9324492c860ea16",
+      "lines": 60,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "docs/INSTALLER_SIZE.md",
+      "sha256": "517007f607e76ec4828f1d28711154addc995e61ec91312f633583b4686d2f27",
+      "lines": 40,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/NATIVE_WINDOWS_APP.md",
+      "sha256": "ea5334d2e47d970d1d8c34c9709d2b034ea6afe67c3d58f1fb19929aa9e4c3a2",
+      "lines": 134,
+      "historical": false,
+      "local_links": 10,
+      "requirements": []
+    },
+    {
+      "file": "docs/README.md",
+      "sha256": "11ed58a8568c7c81919c90798388433e53064027bbf765d3d8223519e0dc87cd",
+      "lines": 102,
+      "historical": false,
+      "local_links": 71,
+      "requirements": []
+    },
+    {
+      "file": "docs/SOURCES.md",
+      "sha256": "d6b0a0689cb69711bc9ef7661ab5e98733c3508d1585ff9ad1447ba227e67f97",
+      "lines": 73,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/TESTING_STRATEGY.md",
+      "sha256": "3b71dfa18a5020954950555b84f26e3f1a0061e3810a3ebfa5b6d6dff6764b26",
+      "lines": 464,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "docs/VERSIONING.md",
+      "sha256": "52029976f3180574a168f046edbf14b1f0c9db8a0bbd0cfabf98bd59247073e4",
+      "lines": 43,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0001-wsl2-reference-environment.md",
+      "sha256": "1d0fad69b85ace8244d8c0d4e784f3aa6db0ccc463aed5b63a07a43cd550f991",
+      "lines": 24,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0002-canonical-results-json.md",
+      "sha256": "05b80c638e8e8d7acda70b93a90883ef85e5ad82a61967d04fd5658f67c92410",
+      "lines": 145,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0003-channel-classification.md",
+      "sha256": "fc95131a5858a9b0bcd3bc3c9f82d2b0e46fa92aee7d45dbf520fabc3f8df9c3",
+      "lines": 120,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0004-hashing-and-versioning.md",
+      "sha256": "e057d5395e2aaea958c83bc1c25ccb5a7f749eefa0c1f059a7997eac7760b61d",
+      "lines": 278,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0005-no-audio-repair-in-mvp.md",
+      "sha256": "7b219b79a2f753b065594197cc516ca42edca241d6160356a1e9db9015de1f6b",
+      "lines": 54,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0006-interface-independent-core.md",
+      "sha256": "533e5dac10b25d85579d770485437e15a3d710368d9671f8e021a5c2f8549c9a",
+      "lines": 16,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0007-accurate-preset-asr-model.md",
+      "sha256": "08ca257b915d840841dde69b53c48c18e265949a5f844192ab8136f9295638cb",
+      "lines": 229,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0008-mixed-source-diarization.md",
+      "sha256": "d6d8a01674de7804659b199f1ef37b0871acc4780a5e300d65a8ae47459f13bf",
+      "lines": 111,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0009-long-duration-operational-baseline.md",
+      "sha256": "6939177d53dcafa86a0d9247de0e8d7dbf623f21eac60fed7f98e12333520bd2",
+      "lines": 147,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0010-isolated-wheel-installation.md",
+      "sha256": "be3bc11254fc8b8b17dc1ba93992fd4a43f805b5adfb87fe1acd20b1fd317d60",
+      "lines": 140,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0011-multilingual-alignment-selection.md",
+      "sha256": "27ad4dcfe7c69a83784ea2cd749bbb632474cb630c5c4871e916af699a08a73a",
+      "lines": 55,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0012-explicit-group-contract.md",
+      "sha256": "e0a2193477ec2c4d3621c1077486e2d1b6907dee828f9866d739ef39d5e41840",
+      "lines": 63,
+      "historical": true,
+      "local_links": 1,
+      "requirements": [
+        "FR-B04"
+      ]
+    },
+    {
+      "file": "docs/adr/0013-release-observability-and-speaker-order.md",
+      "sha256": "0570eb42e798d1a426b71d8ac1219160f656797ced4727060d40480eec543d0b",
+      "lines": 53,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0014-dataset-dependent-quality-gates.md",
+      "sha256": "587c51eb3545c285bb21b416ff843193e4380cefba65a06eb0cbf7c9a7cc2ec9",
+      "lines": 72,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0015-input-format-matrix.md",
+      "sha256": "f68502b1fab1257e6f2a7177f4d5ad2484a04b5fcf1143460d46caf32ea22139",
+      "lines": 55,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0016-subtitle-readability-and-correction-boundary.md",
+      "sha256": "c2b0a2797d0c8d2f95cd765b3c00b0cd51df7142a83a994c582c9fe064e2efc0",
+      "lines": 268,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0017-content-aware-directory-discovery.md",
+      "sha256": "b4db1810dc45886263ecbe5eb378426dd3dcd0c4cf8c53e0e3800209991feabf",
+      "lines": 40,
+      "historical": true,
+      "local_links": 0,
+      "requirements": [
+        "FR-A05"
+      ]
+    },
+    {
+      "file": "docs/adr/0018-fast-noisy-audio-acceptance.md",
+      "sha256": "60b30c606bb4f54a911f7a88c5c36304cf1a996c1481b75b81f2f20073514c58",
+      "lines": 69,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0019-fresh-wsl-installation.md",
+      "sha256": "1647ba87e5f6d2919ad99f9e6393c0865b24e22a654782b0b940f0753f727c7a",
+      "lines": 95,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0020-versioned-transcript-revisions.md",
+      "sha256": "7341f8e6bd0b0b88491ce4d4ec40de4b649c365ede36c8b5494ce230b299288b",
+      "lines": 128,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/adr/0021-local-browser-gui.md",
+      "sha256": "849b4e074237d4abda91f795b23d81f7425ef0dedafb2a8f89589d72fdeccbcb",
+      "lines": 77,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-18-gui-dependency-repair.md",
+      "sha256": "2b22615b997394f520f1cc217fb13e967826f4e604144a5405c5606af7b2ff6a",
+      "lines": 90,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-18-gui-launch.md",
+      "sha256": "12d1649ee28c426e62efa61e79623f4b001ec66a0c1b451195c2bceafb4b88cf",
+      "lines": 83,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-18-gui-localization-and-recovery.md",
+      "sha256": "647f9a2d267a211e7411f7e543cd86b95bc9c24da5ea4a755c23b2d6f1db3c04",
+      "lines": 90,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-18-gui-workflow-polish.md",
+      "sha256": "34ab7984347f1532300d6c5f60b0e35009bf7818e4be59e5aba0c07719bac14c",
+      "lines": 89,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-18-guided-workflow.md",
+      "sha256": "9da92043ca8ddd75ead2ddc2f0aab9b1cddb53a0d28d61deac91e6b6e0c55c96",
+      "lines": 125,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-19-artist-review-package.md",
+      "sha256": "63505afdcbdf74bf701cabda56bd451990d8cb1b6b863edc52e0029934b79870",
+      "lines": 32,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-19-gui-review-and-brand-feedback.md",
+      "sha256": "b9b12449cc17744cf0c903f50f3b735e0a622eb3417d5972efc95ad83dd828b0",
+      "lines": 76,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-19-playback-video-progress.md",
+      "sha256": "a121bb52a8aabbb794e8a9a34165f633058e4dbadf26b01f91b568a388d5ffb4",
+      "lines": 78,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-19-review-mix-progress-artist.md",
+      "sha256": "1482f5920cd25d226c23355475fee6f28ad0df98910c1c9779ed9338b49937a6",
+      "lines": 108,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-20-batch-sentences-profiles.md",
+      "sha256": "c01f40b809d60a2f2435df925e41a363197adf98a353022f0d6ff55f59247585",
+      "lines": 98,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-20-package-a-feedback.md",
+      "sha256": "33a1ce486fccd8fdbbe8de8086753251fdc32ea75a88cb80834cee6ba67df569",
+      "lines": 85,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-20-package-a.md",
+      "sha256": "0384aa19a70f2cf448e89f6f5aecfe13dca46033e2c4f02aa28a7b3234a340f7",
+      "lines": 107,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-20-package-sequencing.md",
+      "sha256": "2ff1e7efddee2b0f98fe867be5a305b17d0a2c0595e3b656cf09a225f67e0ae7",
+      "lines": 56,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-20-scope-and-summary-polish.md",
+      "sha256": "c2ac37723047b58bb63024057ac1264cddf37a4c7327b5eb76126c676106458a",
+      "lines": 89,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b-restore-consent-layout.md",
+      "sha256": "363ec32a88de5e1b73b075902c838f7e0e4cfee27c5a80c2073501fe91cf5cf2",
+      "lines": 84,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b-workflow-state-polish.md",
+      "sha256": "f354cdd1e97210f316014a463c3da02231adf5c33993ca9226696265e1e4cb32",
+      "lines": 98,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b5-windows.md",
+      "sha256": "f243ff6719a7ed7dd1cce7e936a54e36b669e709e1751096fa7d24d01b4e58ec",
+      "lines": 45,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b6-credentials.md",
+      "sha256": "635a78fde9f3e881de8bbc7f6443b45a651f1af97fe2ba389ae227bdd3d26a59",
+      "lines": 25,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b7-projects.md",
+      "sha256": "de962b3c3e0dcb5082b919d8c6c312698b80efb1f3d063b99f2169b6f68b30b7",
+      "lines": 32,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b8-media.md",
+      "sha256": "ab23e80d3e135c9ac3543cd53d0d3d207246f70c14ce6ce4299ad90b859aca70",
+      "lines": 31,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b8a-cloud-asr.md",
+      "sha256": "e8b02022187c3606e894fe236a8d611f10e50d7f61313d722e740f50ea3424c3",
+      "lines": 43,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-b9-verification.md",
+      "sha256": "591785a744eead6dbae8cc221e1c9995233e0e4c670a9429541078033f2ee7b4",
+      "lines": 49,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-cloud-chunking.md",
+      "sha256": "bd5a0e5711d4cf768d7bb5a4074fc96c57ec03ee50d3430403be0d3df29f6e34",
+      "lines": 54,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-owner-b-test-handoff.md",
+      "sha256": "15bb5ca273863fd20d7e807819d2e7153ec7d617c886a1cb727884761733f112",
+      "lines": 24,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-package-a-closure.md",
+      "sha256": "46bf61c2a7a6e714af8feacc62055c935f48ccc15a0bd9ad172402f00778957e",
+      "lines": 48,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-package-b-execution.md",
+      "sha256": "dbeae2bd68c60ff3e391d60c2f5bcda2ce2f3d6029491e8d17f2d8bc00831fbf",
+      "lines": 30,
+      "historical": true,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-package-b-plan.md",
+      "sha256": "8872a64e41ab753031e6bb24a3def5747535e83395b168e71d48d461b13eaf35",
+      "lines": 145,
+      "historical": true,
+      "local_links": 7,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-windows-model-setup-nltk.md",
+      "sha256": "c6f226d5c3db499254c134525d18b74e1a1ca4791bbbdd9e497238a16709d508",
+      "lines": 39,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-21-windows-queue-gui-feedback.md",
+      "sha256": "709e2603dded38ee5554accf9a7be6ec2043ce97a7172af8e65b3700c58f451b",
+      "lines": 83,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-b-locations-key-preflight.md",
+      "sha256": "ebc029bdf3af12e968daf3902a0541a0ea1a9986371542f5cc727ec72cbfce60",
+      "lines": 56,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-b-recovery-cloud-timing.md",
+      "sha256": "37758b7498a1b980c0036244da0a095596e9b8016833d8bfb5904b0f8701b6e9",
+      "lines": 139,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-terminology-application.md",
+      "sha256": "007753aab8c290f0ecad97854a16e2dda33414c78f5b1ad4713512bf087fb256",
+      "lines": 54,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-terminology-review.md",
+      "sha256": "8f279f46d65b426543d8158289de84b9d49988c316c57a299af0d379d139de23",
+      "lines": 58,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-user-documentation.md",
+      "sha256": "d93a445e7046e87cb70204669515e7c189b130cdc65c090e680df106e4d35c59",
+      "lines": 76,
+      "historical": true,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-22-windows-startup-refresh.md",
+      "sha256": "758df82c9fa38336b650a03b1015691ce9edbead9faa1183f0e01d94567bb252",
+      "lines": 67,
+      "historical": true,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-23-distribution-execution.md",
+      "sha256": "771ac16e95dae1c045a57044321bfc99423c08f2c5a2169ae114520f1b3844de",
+      "lines": 103,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-23-distribution-plan.md",
+      "sha256": "41ad8d0e1716228e5c68dba41cf58a2426b422543c147ba80e192b6cbfe0d68b",
+      "lines": 56,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-23-installer-location-state.md",
+      "sha256": "ed034a05094ce3663f8ebf31f651a2c14e6cf0410ae8bef95c5f81b9e6bd7926",
+      "lines": 88,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-23-installer-wizard-feedback.md",
+      "sha256": "3c383b6849d85c938e036bfcb5412ddf792ed13ecb14faf202a7a96e5c73fb62",
+      "lines": 84,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-24-installer-lifecycle-startup.md",
+      "sha256": "9ecf94fca7640ad9755753c0f25fe8060e7b208d1f36a9dca9ab9bb3917cdfb9",
+      "lines": 93,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-24-runtime-wizard-autosave.md",
+      "sha256": "3c64f94556de8f4091b1c039008783ce8edd63fa728a9cca6ec9f6a1782c129a",
+      "lines": 96,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-24-session-handoff.md",
+      "sha256": "2dcad88eb1a387245e2c91e1993a8f75d08ff07b72bc23ac1c8f855cbb3b0b9e",
+      "lines": 220,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-24-workspace-uninstall-followup.md",
+      "sha256": "70b3d8978395b49fbe4f652efa2cbe1bf40628b5e14173745d1dcaec45669f63",
+      "lines": 76,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-25-automatic-host-checks.md",
+      "sha256": "5fc7a35e895cb8b5eb696b75db4db59d449818ec68880e10c3c0451a1a1d4dd6",
+      "lines": 59,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-25-installer-copy-table.md",
+      "sha256": "d6b9f2a94d681534239d9e6436c07c78dc7a779d443cd9db39d15a6d5da9af95",
+      "lines": 89,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-25-local-asr-installer.md",
+      "sha256": "6cae31c43aa5c9004a6f5a65ad111c4948d52ed8627218efc0689386d457787f",
+      "lines": 79,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-25-model-preflight-selection.md",
+      "sha256": "cd63af92f27e40775508fb93e01984cc61b3490ac7e4fc6b3ac16f988e3f0f61",
+      "lines": 64,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-actions-costs-plan.md",
+      "sha256": "0642519bc16cd508f950a36cf90ebc8f6a887a987ced586ab0d968fe814740d2",
+      "lines": 21,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-amd-docs-plan.md",
+      "sha256": "abda7e08360bc54ae2a33caa8daa88bdaf375a0a71b702343e21aa20b780156a",
+      "lines": 45,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-install-preflight.md",
+      "sha256": "1f582aef57bb0de434550ef540bac8944c65c34fea8136173b64eaffdc430950",
+      "lines": 69,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-installer-reviewed-copy.md",
+      "sha256": "93f706390e56b0b5490f0bd96cf3dec7e52148e1c7aa18840ca5b40bd0188103",
+      "lines": 72,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-native-windows-app.md",
+      "sha256": "5915df64940a2ba424b8b0d8b03995252862eee6a0a11c23b36227389dc0288f",
+      "lines": 98,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-release-readiness.md",
+      "sha256": "7335b9666d534dfbc752402903dfd831f3bc6691afbb69ccc2c41615d96a5749",
+      "lines": 72,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-snap-amd.md",
+      "sha256": "b084dae01c6532a48e479fda7f3764e01b7ac3d81d2d5aac2d9ac79ce44f954a",
+      "lines": 70,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-26-window-personalization.md",
+      "sha256": "e064ec30d50c60ff02685bcb046b53b701602325b3c33a54af711d3bfb16cd6f",
+      "lines": 79,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/checkpoints/2026-11-27-nvidia-docs-audit.md",
+      "sha256": "592697f8d288a95f4ebf8a080b81d271bb107bba2caf6c4837b0b27f14a0e244",
+      "lines": 40,
+      "historical": true,
+      "local_links": 0,
+      "requirements": [
+        "FR-A05"
+      ]
+    },
+    {
+      "file": "docs/gui/README.md",
+      "sha256": "547c44afd214cdd0a12b500663a3d5c3ab64d5b0ea8bcfbed5238d4107028d7d",
+      "lines": 44,
+      "historical": false,
+      "local_links": 15,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/cli.md",
+      "sha256": "cccf61400577c3c218d565e5355065bde38752ca4ef97382d3c24cb2bea07ae4",
+      "lines": 59,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/dictionaries.md",
+      "sha256": "6e418b4ffef7ef089905ca6813d75e4738e1b71f50860cb26356c2df233a1308",
+      "lines": 30,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/installation.md",
+      "sha256": "35e4418122b1af91bb7e33ef18264a6ffa9c38ea195f711bce91c9435757519d",
+      "lines": 241,
+      "historical": false,
+      "local_links": 12,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/optional-correction.md",
+      "sha256": "675d57a748d878282b3a84979e79e40e4d2211f391737fc58dc875adc8bd3e81",
+      "lines": 28,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/optional-translation.md",
+      "sha256": "8b04eceba91362046cd2e1820a137ded1150e1044aca6ca5a5965a4d57de0451",
+      "lines": 26,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/outputs.md",
+      "sha256": "2d41c0856405c25ab3722cbb376c0732e84d8315519ac040b0854c88a8e04777",
+      "lines": 29,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/README.md",
+      "sha256": "b296c9a97f169be29120036509dc43fbe8964bbc0a685a28e4b47b698de3500f",
+      "lines": 47,
+      "historical": false,
+      "local_links": 15,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/cli.md",
+      "sha256": "df7551862b630f8b91d629dbcbf08a5e61deed498baddb2d5d30ba9046d8db25",
+      "lines": 61,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/dictionaries.md",
+      "sha256": "1f37dcff1b4926f4f1b9246f2eac1ac47825cd3d657e51835037cb1c2ba03579",
+      "lines": 30,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/installation.md",
+      "sha256": "25147e729d021b543d795d0dc40341d24e74b6a884a78ce33bf5f26e74300490",
+      "lines": 256,
+      "historical": false,
+      "local_links": 12,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/optional-correction.md",
+      "sha256": "098778a08b5cc3599bf2e22d3c9d6d338838a710aaa64699db640ad5d558b378",
+      "lines": 28,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/optional-translation.md",
+      "sha256": "159221ac6e2d320c0bc52be56f8c359fe02b3a79eff99875aba241c83e70cb22",
+      "lines": 26,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/outputs.md",
+      "sha256": "b0b121c004d5ceb141de4af40a7cea507cb74c47a98c1f557a80703679d343fc",
+      "lines": 29,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/saved-work.md",
+      "sha256": "60523af21f42cb2ac635627425ae80545ae677ae1762f37f78495a824be37891",
+      "lines": 58,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/settings.md",
+      "sha256": "6ff6392389c73a9d0673c16e7f1a0127dfb931cfbe5d978670df35961a34177d",
+      "lines": 53,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/source-review.md",
+      "sha256": "bb2a5f72ee010ada022456a7d0fd0444abf029477930ce3413e72e7f21b3e61e",
+      "lines": 41,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/transcribe.md",
+      "sha256": "9ae162e68b8bc99f0d81483fde8e76d3fd18e1f5a56d5c556729bbe8903aa433",
+      "lines": 57,
+      "historical": false,
+      "local_links": 5,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/translation-review.md",
+      "sha256": "0c78be0e6a7a7b7f02457268a76856dcfb6eb2f3470dcc0222cbaae340c90d44",
+      "lines": 33,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/troubleshooting.md",
+      "sha256": "420f1a9c5f6fcf50d9dcf3a96c7fda1300c064e72aca6ffd0d4c65359e48eeb5",
+      "lines": 49,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/ubuntu-upgrade.md",
+      "sha256": "383cb8371f158a567f843afc086076a757f4ffec4830fae2915e2fa5270a784a",
+      "lines": 16,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/pl/windows-native.md",
+      "sha256": "2a33ea2a1d473aab732675e54217308119b14f0c37e8026d3294f9eaec759795",
+      "lines": 70,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/saved-work.md",
+      "sha256": "092eabaefd31268fb0d7f1394675ae1fad0edd90e292884fcc4ea005eb00b02b",
+      "lines": 58,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/settings.md",
+      "sha256": "75bdc88607b52cb8c7f5efa6974a827f22afcb65813e0a5da95771875cae29db",
+      "lines": 53,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/source-review.md",
+      "sha256": "a309091f7e73aec9e70f69065cf38c1e7235ab460e8d6df4ce3eaebfffe383e2",
+      "lines": 41,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/transcribe.md",
+      "sha256": "204b1c3c509742c31d3b931566f21e24beca82b142a52e78c90d9df958e73837",
+      "lines": 57,
+      "historical": false,
+      "local_links": 5,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/translation-review.md",
+      "sha256": "7f68bfcf0b01ed9a80722b21d3ad3cb5281abbcdd3a87eda683b6c8a67c05a24",
+      "lines": 33,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/troubleshooting.md",
+      "sha256": "f427abc1d212415feea35f83d98581106baf0fd351af5bc07131aa119f53e759",
+      "lines": 49,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/ubuntu-upgrade.md",
+      "sha256": "d231623c4ba0b2e57df8547241c87695f7496d1d40f2a05ffac9a2a49b5d5fc2",
+      "lines": 16,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "docs/gui/windows-native.md",
+      "sha256": "6e6f5593b199b3e2e5210567569d016b37aa0a9deaac4cd0bff6ee01b88215aa",
+      "lines": 69,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "docs/installer-copy-review/README.md",
+      "sha256": "3faac9af4e1c07515c067bd7adae55650378cffea24bf4336229413bf6d9a7fd",
+      "lines": 79,
+      "historical": true,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "docs/ui-language/README.md",
+      "sha256": "166efa9cb7bf9129cd0cab251bd62dd42a3457a9aefce6e12c4da4da634081c4",
+      "lines": 47,
+      "historical": true,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "examples/batch-layout.md",
+      "sha256": "42164c165df55100562e18c6ea4bda935e372a1ec8daa83cef3ea38c008a3a1c",
+      "lines": 45,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "examples/html-player/README.md",
+      "sha256": "481bf5e0ef8833ede278d79adc59fae01606bd804894902876235dc3128b1d7d",
+      "lines": 24,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "installer/README.md",
+      "sha256": "f3b335c3d0905ecd1ccd68c305eb7d2cd1963cd2b64c45a47d1ce490396d22be",
+      "lines": 86,
+      "historical": false,
+      "local_links": 6,
+      "requirements": []
+    },
+    {
+      "file": "releases/README.md",
+      "sha256": "d8fbd9ab79937c0676266beb7c1097f895c3cc43893ee29f49059d3f24dbef8b",
+      "lines": 10,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "schemas/README.md",
+      "sha256": "114ca6ee19f6cdf5c3c8cf7911d1b2f5b465f5080c640a183dd2c8b5056f7556",
+      "lines": 17,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "schemas/ewp-review.schema.md",
+      "sha256": "ca0af259eabac41b9d42405012ddf8d445eac4fc032f15104c21ef9f0f860883",
+      "lines": 290,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/cli.md",
+      "sha256": "cccf61400577c3c218d565e5355065bde38752ca4ef97382d3c24cb2bea07ae4",
+      "lines": 59,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/dictionaries.md",
+      "sha256": "6e418b4ffef7ef089905ca6813d75e4738e1b71f50860cb26356c2df233a1308",
+      "lines": 30,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/index.md",
+      "sha256": "547c44afd214cdd0a12b500663a3d5c3ab64d5b0ea8bcfbed5238d4107028d7d",
+      "lines": 44,
+      "historical": false,
+      "local_links": 15,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/installation.md",
+      "sha256": "35e4418122b1af91bb7e33ef18264a6ffa9c38ea195f711bce91c9435757519d",
+      "lines": 241,
+      "historical": false,
+      "local_links": 12,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/optional-correction.md",
+      "sha256": "675d57a748d878282b3a84979e79e40e4d2211f391737fc58dc875adc8bd3e81",
+      "lines": 28,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/optional-translation.md",
+      "sha256": "8b04eceba91362046cd2e1820a137ded1150e1044aca6ca5a5965a4d57de0451",
+      "lines": 26,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/outputs.md",
+      "sha256": "2d41c0856405c25ab3722cbb376c0732e84d8315519ac040b0854c88a8e04777",
+      "lines": 29,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/cli.md",
+      "sha256": "df7551862b630f8b91d629dbcbf08a5e61deed498baddb2d5d30ba9046d8db25",
+      "lines": 61,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/dictionaries.md",
+      "sha256": "1f37dcff1b4926f4f1b9246f2eac1ac47825cd3d657e51835037cb1c2ba03579",
+      "lines": 30,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/index.md",
+      "sha256": "b296c9a97f169be29120036509dc43fbe8964bbc0a685a28e4b47b698de3500f",
+      "lines": 47,
+      "historical": false,
+      "local_links": 15,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/installation.md",
+      "sha256": "25147e729d021b543d795d0dc40341d24e74b6a884a78ce33bf5f26e74300490",
+      "lines": 256,
+      "historical": false,
+      "local_links": 12,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/optional-correction.md",
+      "sha256": "098778a08b5cc3599bf2e22d3c9d6d338838a710aaa64699db640ad5d558b378",
+      "lines": 28,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/optional-translation.md",
+      "sha256": "159221ac6e2d320c0bc52be56f8c359fe02b3a79eff99875aba241c83e70cb22",
+      "lines": 26,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/outputs.md",
+      "sha256": "b0b121c004d5ceb141de4af40a7cea507cb74c47a98c1f557a80703679d343fc",
+      "lines": 29,
+      "historical": false,
+      "local_links": 0,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/saved-work.md",
+      "sha256": "60523af21f42cb2ac635627425ae80545ae677ae1762f37f78495a824be37891",
+      "lines": 58,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/settings.md",
+      "sha256": "6ff6392389c73a9d0673c16e7f1a0127dfb931cfbe5d978670df35961a34177d",
+      "lines": 53,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/source-review.md",
+      "sha256": "bb2a5f72ee010ada022456a7d0fd0444abf029477930ce3413e72e7f21b3e61e",
+      "lines": 41,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/transcribe.md",
+      "sha256": "9ae162e68b8bc99f0d81483fde8e76d3fd18e1f5a56d5c556729bbe8903aa433",
+      "lines": 57,
+      "historical": false,
+      "local_links": 5,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/translation-review.md",
+      "sha256": "0c78be0e6a7a7b7f02457268a76856dcfb6eb2f3470dcc0222cbaae340c90d44",
+      "lines": 33,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/troubleshooting.md",
+      "sha256": "420f1a9c5f6fcf50d9dcf3a96c7fda1300c064e72aca6ffd0d4c65359e48eeb5",
+      "lines": 49,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/ubuntu-upgrade.md",
+      "sha256": "383cb8371f158a567f843afc086076a757f4ffec4830fae2915e2fa5270a784a",
+      "lines": 16,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/pl/windows-native.md",
+      "sha256": "2a33ea2a1d473aab732675e54217308119b14f0c37e8026d3294f9eaec759795",
+      "lines": 70,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/saved-work.md",
+      "sha256": "092eabaefd31268fb0d7f1394675ae1fad0edd90e292884fcc4ea005eb00b02b",
+      "lines": 58,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/settings.md",
+      "sha256": "75bdc88607b52cb8c7f5efa6974a827f22afcb65813e0a5da95771875cae29db",
+      "lines": 53,
+      "historical": false,
+      "local_links": 3,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/source-review.md",
+      "sha256": "a309091f7e73aec9e70f69065cf38c1e7235ab460e8d6df4ce3eaebfffe383e2",
+      "lines": 41,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/transcribe.md",
+      "sha256": "204b1c3c509742c31d3b931566f21e24beca82b142a52e78c90d9df958e73837",
+      "lines": 57,
+      "historical": false,
+      "local_links": 5,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/translation-review.md",
+      "sha256": "7f68bfcf0b01ed9a80722b21d3ad3cb5281abbcdd3a87eda683b6c8a67c05a24",
+      "lines": 33,
+      "historical": false,
+      "local_links": 1,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/troubleshooting.md",
+      "sha256": "f427abc1d212415feea35f83d98581106baf0fd351af5bc07131aa119f53e759",
+      "lines": 49,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/ubuntu-upgrade.md",
+      "sha256": "d231623c4ba0b2e57df8547241c87695f7496d1d40f2a05ffac9a2a49b5d5fc2",
+      "lines": 16,
+      "historical": false,
+      "local_links": 2,
+      "requirements": []
+    },
+    {
+      "file": "src/ewp_transcripts/web_assets/guides/windows-native.md",
+      "sha256": "6e6f5593b199b3e2e5210567569d016b37aa0a9deaac4cd0bff6ee01b88215aa",
+      "lines": 69,
+      "historical": false,
+      "local_links": 4,
+      "requirements": []
+    }
+  ],
+  "scope": "All repository Markdown (maintained and historical), local file/anchor links and normative ID coverage. External URL health is not exhaustively probed.",
+  "baseline_source": "b762505",
+  "historical_snapshot_inventory": "archive/project-status/inventory.json",
+  "frozen_archive_links_retained": 9,
+  "maintained_link_errors": 0,
+  "original_requirements_preserved": 148,
+  "new_gpu_requirements": 5
+}

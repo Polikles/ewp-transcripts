@@ -2,7 +2,7 @@
 
 ## 1. Architectural style
 
-The application core is a domain library. The CLI and planned local browser GUI/web service
+The application core is a domain library. The CLI, delivered local browser GUI/web service and native Windows host
 are adapters. Integrations with FFmpeg, WhisperX, pyannote, and the filesystem are
 infrastructure ports. ADR-0021 and `26-local-web-gui-contract.md` define the web-adapter
 boundary without changing the application core.
@@ -185,5 +185,5 @@ when editorial text changes.
 - `TranscriptResolver` verifies revision/base compatibility and produces
   `EffectiveTranscript`;
 - exporters consume effective text/timing and never call ASR/diarization backends;
-- CLI and future GUI/LLM adapters invoke application services rather than implementing
+- CLI and delivered GUI/LLM adapters invoke application services rather than implementing
   correction or alignment logic themselves.

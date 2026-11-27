@@ -15,7 +15,7 @@ Operational clean-machine instructions and verification checklists are maintaine
 - stable WhisperX release, not a prerelease;
 - local `pyannote/speaker-diarization-community-1` model.
 
-Ubuntu 26.04 LTS exists, but 24.04 remains the baseline to reduce risk from newly introduced compatibility issues. Support for 26.04 may be added after the full installation matrix passes.
+Ubuntu24.04 and26.04 are maintained current WSL targets, with recorded qualification in checkpoints. The list above records the initial baseline. For current GPU/driver/VRAM limits use [HARDWARE.md](HARDWARE.md); do not infer bare-metal GPU qualification from a WSL or model-free VM pass.
 
 ## 2. CUDA rules in WSL
 

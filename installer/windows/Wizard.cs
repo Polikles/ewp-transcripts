@@ -483,7 +483,7 @@ sealed partial class Wizard : Window
     string GB(long bytes) => (bytes / 1e9).ToString(bytes is > 0 and < 1_000_000_000 ? "0.###" : "0.#", CultureInfo.GetCultureInfo(Pl ? "pl-PL" : "en-US"));
     string? ModelSpaceProblem()
     {
-        if (!GpuReady) return T("A working NVIDIA or AMD driver is required for local models. AMD support is experimental. Update your drivers and go back to the computer check, or clear the local-model option.", "Modele lokalne wymagają działającego sterownika NVIDIA lub AMD. Obsługa AMD jest eksperymentalna. Zaktualizuj sterownik i wróć do testu komputera albo odznacz \"modele lokalne\".");
+        if (!GpuReady) return LocalGpuProblem;
         try
         {
             string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache/huggingface/hub");
@@ -495,7 +495,8 @@ sealed partial class Wizard : Window
         catch { return T("Cannot check model-cache disk space.", "Nie można sprawdzić miejsca na dysku cache modeli."); }
         return null;
     }
-    bool GpuReady => host is JsonElement value && value.GetProperty("checks").EnumerateArray().Any(c => c.GetProperty("code").GetString() == "gpu" && c.GetProperty("status").GetString() == "pass");
+    bool GpuReady => host is JsonElement value && value.GetProperty("checks").EnumerateArray().Any(c => c.GetProperty("code").GetString() == "gpu" &&
+        (c.TryGetProperty("context", out var context) && context.TryGetProperty("local_supported", out var supported) ? supported.ValueKind == JsonValueKind.True : c.GetProperty("status").GetString() == "pass"));
     void EnterCredential(bool hf)
     {
         var dialog = new CredentialDialog(this, hf, Pl);
@@ -589,6 +590,13 @@ sealed partial class Wizard : Window
             var grid = new Grid { Margin = new Thickness(0, 5, 0, 5) }; grid.ColumnDefinitions.Add(new ColumnDefinition()); grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
             var description = new StackPanel { Margin = new Thickness(0, 0, 14, 0) };
             description.Children.Add(new TextBlock { Text = HostText(row), TextWrapping = TextWrapping.Wrap });
+            if (code == "gpu" && row.TryGetProperty("context", out var gpuContext) && gpuContext.TryGetProperty("compatibility", out var gpuCompatibility) && gpuCompatibility.GetString() != "amd_experimental")
+            {
+                var note = Copy(NvidiaCompatibilityText(gpuContext), muted: true);
+                note.Margin = new Thickness(0, 4, 0, 0);
+                if (status == "warning") note.Foreground = GpuReady ? ColorBrush("#8A5800") : Error;
+                description.Children.Add(note);
+            }
             if (code == "platform" && status == "warning")
             {
                 var note = Copy(T("Compatibility on older or unrecognized Windows versions is not guaranteed.", "Nie gwarantujemy działania na starszych lub nierozpoznanych wersjach Windows."), muted: true);

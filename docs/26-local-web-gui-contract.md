@@ -1,10 +1,16 @@
 # Local browser GUI contract
 
+Current scope2026-11-27: the common frontend is delivered in browser mode and native WPF/WebView2
+Windows. Docker and whole-block following are removed from selected delivery. Later dated sections
+record increments, not new acceptance gates. Use [current roadmap](99-roadmap-v2.md),
+[native lifecycle](NATIVE_WINDOWS_APP.md) and [hardware policy](HARDWARE.md). Optional word/phrase
+highlighting and other retained refinements are AFTER public release; GTX1070/telemetry cancelled.
+
 ## 1. Scope
 
-The graphical interface is one local web application served by EWP Transcriber and opened
-in a normal browser. The same frontend assets, versioned API contract, application services,
-and persisted artifacts MUST be used on WSL2, bare-metal Ubuntu, and the future Docker image.
+The graphical interface is one local web application served locally by EWP Transcriber and opened
+in a browser or embedded in the owned native Windows window. The same frontend assets, versioned API contract, application services,
+and persisted artifacts MUST be used on native Windows, WSL2 and supported Ubuntu environments. Docker is outside selected scope; any separately authorized future package must reuse the core.
 Environment-specific launchers, filesystem roots, and Docker mounts MAY differ; behavior and
 appearance MUST NOT fork by deployment environment.
 
@@ -33,8 +39,8 @@ application and API versions:
 
 - WSL2 runs the service inside Linux and opens it from a Windows browser;
 - bare-metal Ubuntu runs the same service and assets locally;
-- the future Docker image runs the same service and assets with explicitly mounted input,
-  project, and output directories.
+- native Windows embeds the same service/assets in an owned WPF/WebView2 window;
+- hypothetical future Docker packaging is outside current delivery, not a required acceptance gate.
 
 The server binds to loopback by default. The initial GUI MUST NOT offer an unauthenticated
 remote-listen shortcut. Any later non-loopback mode requires a separate threat model,
@@ -83,8 +89,8 @@ The GUI MUST eventually expose the same supported pipeline as the application co
 
 Planning controls SHOULD expose language and speaker count per selected file. Values inferred
 or supplied by the GUI rather than explicitly chosen by the operator MUST be labeled as
-automatic. A later auto-discovery option may use only ephemeral within-job speaker features,
-as constrained by the roadmap; it must not create cross-recording identities.
+automatic. Existing automatic diarization/count behavior remains available; additional speaker-count research
+is removed from selected scope. It must not create cross-recording biometric identities.
 
 The interface MUST clearly distinguish canonical ASR output, automated non-final candidates,
 manually verified revisions, and final/manual translations. Translation from an unreviewed
@@ -100,22 +106,20 @@ automatically. Credentials stay at the server boundary. A short readiness check 
 missing credentials, unreachable providers,
 and unavailable exact models before bounded per-chunk retries. Successful candidates remain
 non-final and SHOULD hand off directly into candidate-backed manual review.
-Any later punctuation-check or basic-editorial correction mode MUST be separately selectable,
-off by default, and identified in prompt/provenance evidence. The GUI MUST warn before execution
-that either mode may increase API usage and unsupported changes; output remains a non-final
-candidate requiring full manual review. These modes must not silently broaden the default lexical
-correction contract.
+Additional standalone LLM punctuation/editorial modes are removed from selected scope. Existing
+faithful transcription repair remains; it must not become paraphrasing, summarization or style polishing.
 The loopback GUI MAY accept a provider key into server-process memory for one run. Such a field
 MUST be password-masked, cleared immediately after submission, protected by the same origin and
 CSRF boundary, excluded from browser storage/logs/artifacts/configuration, and erased when the
-server closes. Persistence across restarts requires a separately designed OS credential store;
-plaintext project or settings files are prohibited.
+server closes. Deliberate OS credential save/read/delete is implemented; failure retains a
+session-only option with no plaintext fallback. Workspaces/profiles never contain keys or upload
+consent. Loading a saved key during an explicit connection check is not audio-upload consent.
 Small tested model presets MAY show approximate separately labeled input/output cost evidence,
 but MUST retain exact manual-ID entry. Mutable model availability and pricing MUST be fetched
 only after an explicit external-request action, labeled with its disclosure, and never inferred
-from stale bundled values. Searchable full-catalog browsing and saved favorites are later UI work.
+from stale bundled values. Searchable full-catalog browsing and favorites are outside selected scope.
 LM Studio controls SHOULD offer the same explicit readiness check and may prefill the exact model
-when the backend advertises one unambiguous loaded model. Any later backend model-load control must
+when the backend advertises one unambiguous loaded model. A backend model-load control is outside selected scope; if separately authorized it must
 use an explicit operator action and capability detection; discovery or selection must not silently
 load, unload, or replace a local model.
 
@@ -221,7 +225,8 @@ auto-save because its referenced paths cannot be validated, but MUST still allow
 deletion of that workspace JSON without touching any transcript or workflow artifact.
 An API key entered through the GUI is scoped to the active GUI server process rather than one
 browser. Browsers connected to that process share the in-memory credential. It MUST NOT be
-included in workspace state, project files, or browser storage, and stopping the server erases it.
+included in workspace state, project files or browser storage. Stopping erases the session copy;
+an explicitly saved OS-store entry remains until deliberately removed.
 This is an intentional single-user or single-organization pipeline boundary. Multi-user accounts,
 tenant isolation, and per-user credentials are outside the current roadmap.
 Open-review identity remains incomplete until its exact artifact hashes are included.
@@ -276,8 +281,8 @@ the active source, then load or prepare that item's own exact draft. Preview sav
 edits before validating the saved draft; Apply and export remain explicit separate actions.
 
 Where source media is available, the GUI SHOULD provide synchronized playback, seeking from
-a transcript unit, active-unit highlighting, keyboard operation, and independently persistent
-follow-playback and light/dark preferences. Minor source timing inaccuracies are evidence for
+a transcript unit, keyboard operation and persistent light/dark preferences. Optional word/phrase
+highlighting is after public release; whole-block automatic following is removed. Minor source timing inaccuracies are evidence for
 later timing work, not permission for the GUI to silently alter canonical timing.
 
 ## 7. Jobs, diagnostics, and recovery
@@ -299,7 +304,7 @@ The GUI MUST preserve the CLI privacy boundary and consent model:
   classification and explicit scoped consent;
 - audio is never sent to correction or translation providers;
 - credentials are accepted as password-like session input or inherited from the server
-  process environment;
+  process environment, with deliberate optional OS-store save/read/delete and no plaintext fallback;
 - credentials MUST NOT enter URLs, browser history, local storage, logs, artifacts, job
   records, or rendered exception details;
 - strict-offline mode blocks all provider calls regardless of UI state;
@@ -489,7 +494,10 @@ polls; no extra requests. Machine timing history never enters portable profiles.
 an explicit local selector for both single media and mixed previews, retaining native audio controls.
 
 
-## Owner acceptance and documentation sequence (2026-11-20)
+## Historical owner acceptance and documentation sequence (2026-11-20)
+
+This is a dated stage record. Current acceptance/sequencing is in WORK_STATUS and the roadmap;
+its old pending/manual gates do not reopen completed work.
 
 The owner accepts current GUI/workflow changes with the summary/navigation polish in the current
 checkpoint. Full profile exchange and the latest full-restart recovery are not owner-tested;
@@ -501,7 +509,7 @@ Finish the selected functional work before generating one editable complete ENâ€
 all labels/messages, errors, statuses, hints, tooltips, numbered guide copy and dynamic templates.
 Owner correction/approval precedes full Polish manuals; documentation screenshots additionally
 wait for custom icons/final GUI. Artist waiting has no deadline and does not block development.
-The sent artist ZIP/demo remains unchanged. Native Windows is planned as a separate target.
+The sent artist ZIP/demo remains unchanged. At this dated stage native Windows was planned; it was subsequently delivered in0.25.0.
 See the roadmap's retained/recovered inventory; research benchmarks and presets are optional.
 
 Inspect and Dry-run display language * and speaker-count ** as selected processing values, with

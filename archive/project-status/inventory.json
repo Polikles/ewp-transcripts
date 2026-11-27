@@ -1,0 +1,48 @@
+{
+  "source_commit": "b7625054cf50fa62833606de21b669ef0875ae70",
+  "snapshots": [
+    {
+      "original": "AGENTS.md",
+      "snapshot": "archive/project-status/2026-11-27-AGENTS.txt",
+      "sha256": "c183ce020a3a38a7b978e0d226d2cae0d974344df3fa5c95dd62c845f8791fcd",
+      "bytes": 36451
+    },
+    {
+      "original": "WORK_POLICY.md",
+      "snapshot": "archive/project-status/2026-11-27-WORK_POLICY.txt",
+      "sha256": "e8092e6add83fe7ac68db457b058a88ee9d68f16625c581b2cff31feb92169be",
+      "bytes": 28179
+    },
+    {
+      "original": "WORK_STATUS.md",
+      "snapshot": "archive/project-status/2026-11-27-WORK_STATUS.txt",
+      "sha256": "17afa21609cf5a0136f6aae27c101dd1a0f700abce3daa87b1306b88e6b8f4f2",
+      "bytes": 130750
+    },
+    {
+      "original": "TODO.md",
+      "snapshot": "archive/project-status/2026-11-27-TODO.txt",
+      "sha256": "44bb3539133fef618664304965ffdc6097719760dc9798aa259aa809508e8b86",
+      "bytes": 69276
+    },
+    {
+      "original": "docs/99-roadmap-v2.md",
+      "snapshot": "archive/project-status/2026-11-27-99-roadmap-v2.txt",
+      "sha256": "7410da1a1bba86353694a9827102970d40606897a4310717ed9c27a4d7a0c6dc",
+      "bytes": 105094
+    },
+    {
+      "original": "docs/00-development-handoff.md",
+      "snapshot": "archive/project-status/2026-11-27-development-handoff.txt",
+      "sha256": "af3e9256666c7186cb49e4e4f246a09ca17a93607b68943440b05044775aa38e",
+      "bytes": 8973
+    },
+    {
+      "original": "docs/DISTRIBUTION_PLAN.md",
+      "snapshot": "archive/project-status/2026-11-27-DISTRIBUTION_PLAN.txt",
+      "sha256": "9a9b94580758fd80951031464c9cad83398b2a2a2891acdf4ce9dee7ba70cf51",
+      "bytes": 11832
+    }
+  ],
+  "original_bytes_preserved": true
+}

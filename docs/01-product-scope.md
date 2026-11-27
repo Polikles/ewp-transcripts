@@ -1,11 +1,13 @@
 # Product Scope
 
-Current owner scope (2026-11-20): build a practical workflow tool for the owner's podcast and
-similar recording work. Broad transcription research, corpus-wide model/hardware benchmarking
-and a universal dictionary are optional nice-to-have, not required completion gates. Native
-Windows is a retained planned convenience target. See the authoritative
-[roadmap scope](99-roadmap-v2.md#owner-scope-and-current-status--2026-11-20); older MVP milestone
-boundaries below describe their historical increments.
+Current scope2026-11-27 is the delivered native Windows/browser transcript workflow: local or
+optional cloud ASR, manual/assisted correction/translation, dictionaries, verified exports, durable
+work and managed lifecycle. Use [current roadmap](99-roadmap-v2.md) for selected post-release work.
+Signing/release planning follows the current GPU/docs audit. Historical increment boundaries below
+retain their original milestone context; they do not make delivered GUI/Windows work planned again.
+Hardware guidance is [12GB+ compatible NVIDIA, with exact library/driver limits](HARDWARE.md);
+smaller compatible cards are untested/unguaranteed and should use cloud ASR. GTX1070 tests and
+further EXE slimming are cancelled. Broad research/extra presets/artist work are not release gates.
 
 ## 1. Purpose
 
@@ -51,20 +53,15 @@ The MVP includes:
 - working files stored in the WSL filesystem;
 - `inspect`, `dry-run`, `transcribe`, `export`, `doctor`, and `clean` operations.
 
-## 4. Outside the MVP scope (potentially in later versions)
+## 4. Historical v0.1 exclusions and current dispositions
 
-- interactive audio-track selection for video with multiple audio streams (single-audio-stream
-  video ingestion is implemented in the current GUI increment);
-- biometric identification of people from their voices (after extracting enough samples from previously analyzed recordings);
-- automatic audio repair based on diagnostic warnings;
-- automatic denoising, normalization, or audio repair;
-- LLM-based transcript correction;
-- GUI transcript editing;
-- colored or burned-in subtitles;
-- parallel jobs on one GPU;
-- dockerized version of the app;
-- presets to run the app on lower-tier PCs [including CPU-only transcripts];
-- adding other language versions of the program (default is English).
+- Multi-stream audio selection, assisted correction, GUI editing, PL/EN interface and platform-
+  specific colored YTT export were subsequently delivered; preserve their current contracts.
+- Voice biometrics/cloning, clock-drift correction, parallel GPU jobs and Docker remain outside
+  selected delivery. Additional interface languages are not scheduled; source language defaults PL.
+- Advanced audio repair/channel handling, non-speech authoring and extra subtitle formats remain
+  optional AFTER public release. Existing diagnostics never silently modify the source.
+- Hardware presets/research are optional; GTX1070 tests/collectors/legacy adaptation are cancelled.
 
 ## 5. Input assumptions
 

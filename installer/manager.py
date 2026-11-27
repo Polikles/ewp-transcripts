@@ -837,6 +837,138 @@ def amd_display_adapters() -> list[dict[str, str]]:
         return []
 
 
+NVIDIA_COMPUTE = {"7.0", "7.5", "8.0", "8.6", "8.9", "9.0", "10.0", "12.0"}
+NVIDIA_DRIVER = {"Windows": "572.61", "WSL": "572.61", "Linux": "570.124.06"}
+RECOMMENDED_VRAM_BYTES = 12_000_000_000
+
+
+def nvidia_devices() -> list[dict[str, Any]]:
+    """Query the driver, without importing ML or treating its CUDA banner as a toolkit."""
+    import csv
+
+    gpu = shutil.which("nvidia-smi")
+    if not gpu:
+        return []
+    for fields in (
+        "index,uuid,name,driver_version,compute_cap,memory.total",
+        "name,driver_version",
+    ):
+        try:
+            result = subprocess.run(
+                [gpu, "--query-gpu=" + fields, "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            if result.returncode != 0:
+                continue
+            devices = []
+            for row in csv.reader(result.stdout.splitlines(), skipinitialspace=True):
+                row = [value.strip() for value in row]
+                if len(row) == 6:
+                    try:
+                        memory = float(row[5])
+                        memory_bytes = int(memory * 1024**2) if 0 < memory < 10**7 else None
+                    except (ValueError, OverflowError):
+                        memory_bytes = None
+                    devices.append(
+                        {
+                            "name": row[2],
+                            "driver": row[3],
+                            "index": row[0],
+                            "uuid": row[1],
+                            "compute_capability": row[4],
+                            "vram_bytes": memory_bytes,
+                        }
+                    )
+                elif len(row) == 2:
+                    devices.append({"name": row[0], "driver": row[1]})
+            if devices:
+                return devices
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    return []
+
+
+def nvidia_compatibility(devices: list[dict[str, Any]], system: str) -> dict[str, Any]:
+    """Classify the default/explicit driver device; never add multiple cards' VRAM."""
+    import re
+
+    context: dict[str, Any] = {
+        "cuda_runtime": "12.8.90",
+        "minimum_compute_capability": "7.0",
+        "minimum_driver": NVIDIA_DRIVER.get(system, "572.61"),
+        "driver_platform": system,
+        "recommended_vram_bytes": RECOMMENDED_VRAM_BYTES,
+        "compatibility": "unknown",
+        "local_supported": False,
+    }
+    if not devices:
+        context["compatibility"] = "no_nvidia"
+        return context
+    visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+    if visible is None:
+        # Without a stable device-order contract, do not certify a heterogeneous CUDA ordinal.
+        eligible = devices if len(devices) == 1 else []
+        if os.environ.get("CUDA_DEVICE_ORDER") == "PCI_BUS_ID":
+            eligible = [d for d in devices if d.get("index") == "0"]
+    else:
+        first = visible.split(",", 1)[0].strip()
+        if first in {"", "-1"}:
+            context["compatibility"] = "cuda_disabled"
+            return context
+        eligible = [
+            d
+            for d in devices
+            if first
+            and (
+                d.get("index") == first
+                or str(d.get("uuid", "")).startswith(first)
+                and first.startswith("GPU-")
+            )
+        ]
+        if (
+            first.isdigit()
+            and len(devices) > 1
+            and os.environ.get("CUDA_DEVICE_ORDER") != "PCI_BUS_ID"
+        ):
+            eligible = []
+    if len(eligible) != 1:
+        context["compatibility"] = "selection_unknown" if visible != "" else "cuda_disabled"
+        return context
+    device = eligible[0]
+    context["selected_device"] = device
+    capability = str(device.get("compute_capability", ""))
+    try:
+        major, minor = map(int, capability.split("."))
+        capability = f"{major}.{minor}"
+    except (TypeError, ValueError):
+        return context
+    if (major, minor) < (7, 0):
+        context["compatibility"] = "unsupported_architecture"
+        return context
+    if capability not in NVIDIA_COMPUTE:
+        return context
+    driver = str(device.get("driver", ""))
+    if not re.fullmatch(r"\d+(?:\.\d+){1,2}", driver):
+        return context
+    found = tuple(map(int, driver.split(".")))
+    floor = tuple(map(int, NVIDIA_DRIVER.get(system, "572.61").split(".")))
+    if (*found, *([0] * (3 - len(found)))) < (*floor, *([0] * (3 - len(floor)))):
+        context["compatibility"] = "driver_too_old"
+        return context
+    context["local_supported"] = True
+    memory = device.get("vram_bytes")
+    context["compatibility"] = (
+        "supported"
+        if isinstance(memory, int) and memory >= RECOMMENDED_VRAM_BYTES
+        else "low_vram"
+        if isinstance(memory, int) and memory > 0
+        else "memory_unknown"
+    )
+    return context
+
+
 def host_report(root: Path, local: bool) -> dict[str, Any]:
     system = platform.system()
     checks: list[dict[str, Any]] = []
@@ -919,31 +1051,27 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
         additional_bytes=required,
         reserve_bytes=0 if owner else 5_000_000_000,
     )
-    devices: list[dict[str, str]] = []
-    gpu = shutil.which("nvidia-smi")
-    if gpu:
-        try:
-            result = subprocess.run(
-                [gpu, "--query-gpu=name,driver_version", "--format=csv,noheader"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            )
-            if result.returncode == 0:
-                import csv
-
-                devices = [
-                    {"name": row[0].strip(), "driver": row[1].strip()}
-                    for row in csv.reader(result.stdout.splitlines())
-                    if len(row) >= 2
-                ]
-        except (OSError, subprocess.TimeoutExpired):
-            pass
+    devices = nvidia_devices()
+    driver_system = (
+        "WSL" if system == "Linux" and "microsoft" in platform.release().lower() else system
+    )
+    compatibility = nvidia_compatibility(devices, driver_system)
     amd_devices = amd_display_adapters()
     selected_accelerator = "amd" if amd_devices and not devices else "nvidia"
+    if (load_state(root) or {}).get("local_accelerator") == "amd" and amd_devices:
+        selected_accelerator = "amd"
+    if selected_accelerator == "amd":
+        compatibility = {"compatibility": "amd_experimental", "local_supported": True}
+    gpu_status = (
+        "pass"
+        if compatibility["compatibility"] in {"supported", "amd_experimental"}
+        else "warning"
+        if devices or amd_devices or not local
+        else "fail"
+    )
     check(
         "gpu",
-        "pass" if devices or amd_devices else ("fail" if local else "warning"),
+        gpu_status,
         "AMD ROCm (experimental); CPU alignment/diarization"
         if selected_accelerator == "amd"
         else "NVIDIA driver visible"
@@ -952,6 +1080,7 @@ def host_report(root: Path, local: bool) -> dict[str, Any]:
         devices=[*devices, *amd_devices],
         amd_devices=amd_devices,
         accelerator=selected_accelerator,
+        **compatibility,
     )
     if system == "Linux":
         missing = [name for name in ("ffmpeg", "ffprobe") if not shutil.which(name)]
@@ -1416,6 +1545,11 @@ def install(
         )
     if check_host and not report["ready"]:
         raise InstallError("Resolve failed host checks before installation")
+    if check_host and local and model_codes != [] and not gpu_context.get("local_supported", True):
+        raise InstallError(
+            "Local ASR is unavailable for this GPU/driver configuration. "
+            "Use cloud ASR or resolve the reported NVIDIA compatibility check."
+        )
     hf_checked = False
     if local and model_codes != []:
         with zipfile.ZipFile(bundle) as archive:

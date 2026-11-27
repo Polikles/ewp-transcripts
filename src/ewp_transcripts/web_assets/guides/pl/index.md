@@ -1,6 +1,6 @@
 # Instrukcja użytkownika
 
-Instrukcja opisuje bieżący interfejs wersji 0.23.0. Język interfejsu wybiera się osobno od języka nagrania. Wszystkie rozdziały są dołączone do programu i otwierają się bez internetu. Numeracja instrukcji odpowiada krokom widocznym u góry poszczególnych etapów. Podczas czytania pozostaw otwartą kartę programu.
+Instrukcja opisuje bieżący interfejs wersji 0.26.2. Język interfejsu wybiera się osobno od języka nagrania. Wszystkie rozdziały są dołączone do programu i otwierają się bez internetu. Numeracja instrukcji odpowiada krokom widocznym u góry poszczególnych etapów. Podczas czytania pozostaw otwartą kartę programu.
 
 ## Zacznij tutaj
 
@@ -24,20 +24,24 @@ Najkrótsza lokalna ścieżka to Transkrypcja → Weryfikacja i eksport źródł
 
 ## Zalecany sprzęt
 
-Do lokalnej transkrypcji zalecamy jako punkt wyjścia nowszą kartę **NVIDIA RTX z 12 GB VRAM lub więcej**,
-**32 GB RAM**, wielordzeniowy procesor x64 i dysk SSD. Konfiguracja odniesienia sprawdzona w pracy
-programu to **RTX 3090 z 24 GB VRAM**. Rekomendacja nie oznacza przetestowania każdej takiej karty;
-**8 GB VRAM nie jest jeszcze potwierdzonym minimum**. Znaczenie ma również architektura: obecne
-pakiety PyTorch 2.8/CUDA 12.8 nie obsługują Pascal, w tym GTX 1070. Przyszłe testy GTX 1070/32 GB/i5-10400F
-zaczną się od zgodności środowiska, potem zmierzą zapas VRAM i wydajność. Na instalację przeznacz 25 GB,
-a na dodatkowe modele, nagrania i wyniki osobne miejsce. ASR w chmurze i praca z gotowymi wynikami
-nie wymagają lokalnej karty NVIDIA. AMD Windows pozostaje eksperymentalne; wyrównanie i rozpoznawanie
-mówców działa na CPU. [Szczegóły sprzętowe](https://github.com/Polikles/ewp-transcripts/blob/main/docs/HARDWARE.md).
+Do w pełni lokalnej transkrypcji zalecamy zgodną **kartę NVIDIA z co najmniej 12 GB VRAM**, **32 GB RAM**
+i dysk SSD. Sprawdzone odniesienie: **RTX 3090/24 GB**.12 GB to wymaganie orientacyjne. Na mniejszych
+konfiguracjach program może działać, ale nie były one testowane i nie gwarantujemy działania;
+**poniżej 12 GB VRAM zalecamy ASR w chmurze**.
+Przypięte biblioteki CUDA 12.8 Update 1 wymagają obsługiwanej architektury z Compute Capability 7.0+
+(Volta; typowe GeForce: Turing/RTX20xx/GTX 16xx lub nowsze). Przyjęta wersja sterownika to co najmniej
+Windows/WSL 572.61 albo natywny Linux 570.124.06. Maxwell/Pascal, w tym GTX 1070, nie obsługuje tego lokalnego
+silnika. Osobny CUDA Toolkit nie jest wymagany. Test komputera wyjaśnia brak zgodności karty lub
+sterownika, a przy zgodnej karcie z mniej niż 12 GB ostrzega o prawdopodobnym braku działania,
+nieprzetestowaniu i braku gwarancji. Wybór lokalny przy małej pamięci pozostaje dobrowolny.
+Instalacja chmurowa lub aktualizacja samego programu nadal jest dostępna. Przeznacz 25 GB oraz
+miejsce na dodatkowe modele/nagrania/wyniki. AMD jest eksperymentalne, z wyrównaniem i mówcami na CPU.
+[Szczegółowa zgodność](https://github.com/Polikles/ewp-transcripts/blob/main/docs/HARDWARE.md).
 
 ## Prywatność i zakres obsługi
 
 Lokalna transkrypcja GPU korzysta z modeli pobranych jawnie podczas przygotowania. Opcjonalne ASR OpenRouter wysyła audio, a korekta i tłumaczenie przez API wysyłają tekst. Sprawdzanie połączenia i odświeżanie cen nie wysyłają nagrań. Każda propozycja wymaga ręcznego sprawdzenia. Zapisy pracy i profile nie zawierają kluczy ani zgód na wysłanie danych i ręczne zatwierdzenie.
 
-To lokalne narzędzie dla jednego użytkownika do podkastów i podobnych nagrań. Serwer nasłuchuje wyłącznie lokalnie; nie jest publiczną usługą dla wielu użytkowników. Testy odniesienia wykonano na RTX 3090 z 24 GB VRAM. Cel 8 GB VRAM wymaga zgodnej architektury i bibliotek; nie jest potwierdzonym minimum. Można wybrać EN, ale do ostatnich testów chmurowych nie dostarczono reprezentatywnego nagrania EN. Program nie gwarantuje dokładności rozpoznania dla żadnego języka ani modelu.
+To lokalne narzędzie dla jednego użytkownika do podkastów i podobnych nagrań. Serwer nasłuchuje wyłącznie lokalnie; nie jest publiczną usługą dla wielu użytkowników. Testy odniesienia wykonano na RTX 3090 z 24 GB VRAM. Mniejsze zgodne konfiguracje mogą działać, ale nie były testowane i nie gwarantujemy działania; poniżej12 GB VRAM zalecamy ASR w chmurze. Można wybrać EN, ale do ostatnich testów chmurowych nie dostarczono reprezentatywnego nagrania EN. Program nie gwarantuje dokładności rozpoznania dla żadnego języka ani modelu.
 
 Instrukcja tekstowa obejmuje obecny proces pracy. Zrzuty ekranu i końcowe ikony powstaną osobno; nie są wymagane do korzystania z tych instrukcji.

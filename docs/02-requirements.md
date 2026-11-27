@@ -146,9 +146,9 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-K18** Benchmark reports MUST measure lexical quality, harmful changes to already-correct text, locally derived change precision/recall, unsupported/stylistic changes, speaker preservation, audit completeness, latency, request/token volume, cost when applicable, and failure/retry outcomes. Provider-annotation precision/recall MUST be reported only for providers that emit such annotations.
 - **FR-K19** Every automated correction artifact and CLI outcome MUST be described as a non-final review candidate. Manual acceptance MUST verify wording, speaker attribution, punctuation, quotation marks, and sentence boundaries before the artifact is treated as final publication text or benchmark gold.
 
-### L. Local browser GUI (planned)
+### L. Shared GUI (implemented; native Windows and browser)
 
-- **FR-L00** The GUI MUST be one local browser application with the same bundled frontend, versioned API, application services, and artifact contracts on WSL2, bare-metal Ubuntu, and the future Docker image.
+- **FR-L00** The GUI MUST be one local browser application with the same bundled frontend, versioned API, application services, and artifact contracts on native Windows, WSL2 and supported Ubuntu environments. A Docker distribution is outside selected scope; any separately authorized future packaging MUST reuse that frontend/core.
 - **FR-L01** The web adapter MUST call application services directly and MUST NOT invoke CLI subprocesses or maintain alternate transcript, revision, translation, or dictionary models.
 - **FR-L02** The service MUST bind to loopback by default. Non-loopback or multi-user deployment requires a separate security contract and MUST NOT be enabled implicitly.
 - **FR-L03** The primary media workflow MUST use server-visible user-space paths. The GUI MUST reject symlinks and documented operating-system directories; optional picker search roots optimize lookup but do not define path authority.
@@ -163,10 +163,18 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **FR-L12** Provider credentials MUST NOT be stored in URLs, browser history, local storage, logs, artifacts, or job records. Provider operations MUST preserve endpoint classification, explicit scoped consent, and strict-offline enforcement.
 - **FR-L13** The packaged GUI MUST use bundled assets and MUST NOT require runtime CDNs, telemetry, remote fonts, or externally hosted scripts/styles.
 - **FR-L14** The GUI MUST provide version, license/warranty, source-code, and issue-tracker information.
-- **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, highlighting, keyboard operation, and user-controlled follow-playback and theme settings.
+- **FR-L15** When media is available, transcript review SHOULD support synchronized playback, seeking, keyboard operation and theme settings. Optional word/phrase highlighting remains post-release; whole-block automatic following is removed from selected scope.
 - **FR-L16** The frontend and backend MUST reject incompatible API versions rather than continuing with partial behavior.
 - **FR-L17** The local server MUST validate browser host/origin, protect state-changing requests against cross-site request forgery, escape untrusted content, use a restrictive content-security policy, and serve only validated artifacts.
 - **FR-L18** Planning SHOULD expose per-file language and speaker-count controls and MUST label values chosen by configuration or automatic inference as automatic rather than as explicit operator choices.
+
+### M. Managed hardware preflight and cloud fallback
+
+- **FR-M00** Install/Update host checks MUST distinguish the pinned NVIDIA architecture/driver compatibility boundary from VRAM capacity. Maxwell/Pascal are unsupported by the current local pipeline; unknown metadata MUST NOT be certified as supported.
+- **FR-M01** Compatible GPUs below the approximate12GB VRAM recommendation MUST receive an explicit probable-failure/untested/no-guarantee warning and cloud-ASR recommendation. A deliberate local choice MAY remain; memory from separate GPUs MUST NOT be summed.
+- **FR-M02** Unsupported/unverified local hardware MUST NOT prevent cloud-only installation or app-only maintenance. Newly requested local preparation MUST fail before model/download mutations when compatibility is not established.
+- **FR-M03** Preflight MUST use driver metadata without loading speech models. Runtime doctor and physical inference qualification remain separate; system CUDA Toolkit installation MUST NOT be implied when packages supply the runtime.
+- **FR-M04** Existing AMD experimental detection/acknowledgement, CPU alignment/diarization and explicit diagnostic boundaries MUST remain intact. New NVIDIA policy MUST NOT silently replace the AMD profile or model/runtime pins.
 
 ## 2. Non-functional requirements
 
@@ -191,7 +199,7 @@ The words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are normative.
 - **NFR-014 Revision extensibility:** the manual revision core must be reusable by future LLM and GUI adapters without introducing another corrected transcript model.
 - **NFR-015 Correction determinism:** identical selected input, chunk configuration, prompt, and deterministic provider responses MUST produce identical chunk ownership, alignment classification, and audit content apart from allocated identity and creation time.
 - **NFR-016 Correction privacy:** no transcript content or credential may cross a provider boundary until endpoint classification and applicable consent have succeeded.
-- **NFR-017 GUI deployment parity:** automated acceptance MUST run the same frontend/API behavior against WSL2-compatible and native Linux service configurations; Docker later MUST reuse that application rather than fork it.
+- **NFR-017 GUI deployment parity:** automated acceptance MUST run the same frontend/API behavior against WSL2-compatible and native Linux service configurations; Docker is outside selected scope; if separately authorized later, it MUST reuse that application rather than fork it.
 - **NFR-018 GUI accessibility:** the interface MUST support keyboard navigation, visible focus, semantic labels, sufficient contrast, browser zoom, and status communication that does not depend on color alone.
 - **NFR-019 GUI offline operation:** all local GUI workflows MUST remain functional without network access once explicitly selected models and application assets are installed.
 - **NFR-020 GUI security:** filesystem exposure, browser-origin controls, credential handling, and rendered untrusted text MUST be covered by automated negative tests before GPU or provider workflows are exposed.

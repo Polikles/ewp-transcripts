@@ -30,8 +30,8 @@ zastąpienia ostatniego zapisu pustym stanem.
 
 Wyniki kolejki są zapisywane również po zamknięciu przeglądarki. Niedokończone zadania wracają
 do stanu oczekującego i wymagają jawnego uruchomienia. Zamknięcie karty nadal pozostawia serwer
-włączony; po zakończeniu pracy zatrzymaj go przez Ctrl+C. Natywny interfejs Windows jest
-zaplanowany po odbiorze instalatora.
+włączony; po zakończeniu pracy zatrzymaj go przez Ctrl+C. Zarządzana instalacja Windows ma własne okno: zamknięcie zapisuje stan i szkice oraz zatrzymuje
+własny serwer. Aktywna praca pozwala wybrać czekanie lub zatrzymanie; błąd zapisu pozostawia okno otwarte.
 
 ## 3. Wczytaj zapisaną pracę
 

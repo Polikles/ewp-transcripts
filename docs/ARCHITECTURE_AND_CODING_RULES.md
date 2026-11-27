@@ -7,8 +7,8 @@ The MVP is a modular monolith with explicit internal boundaries. The design opti
 - maintainability by a small team or single maintainer;
 - deterministic local execution;
 - testability without loading GPU models;
-- a future GUI using the same application API;
-- future Docker packaging without rewriting the core;
+- CLI and delivered browser/native Windows GUI using the same application API;
+- deployment-independent core (Docker is outside selected scope);
 - replaceable external ML engines.
 
 It does not optimize for microservices, distributed execution, or multiple independently released packages.
@@ -17,9 +17,7 @@ It does not optimize for microservices, distributed execution, or multiple indep
 
 ### Interface layer
 
-Current interface: CLI.
-
-Future interface: GUI.
+Current interfaces: CLI and the shared local GUI, embedded in WPF/WebView2 on managed Windows.
 
 Responsibilities:
 
@@ -78,7 +76,7 @@ Forbidden dependencies:
 - CLI importing WhisperX or calling FFmpeg directly;
 - engine adapters writing final output files;
 - storage parsing raw WhisperX results;
-- future GUI invoking CLI commands as subprocesses;
+- GUI invoking CLI commands as subprocesses;
 - module-level model loading.
 
 ## 4. Canonical data flow
@@ -243,7 +241,7 @@ Breaking changes require explicit documentation and versioning.
 
 ## 14. GUI readiness
 
-The future GUI should only require:
+The delivered GUI uses these existing boundaries:
 
 - adding a `gui/` package;
 - creating request objects for `application.py`;
@@ -253,7 +251,7 @@ The future GUI should only require:
 
 GUI readiness does not require adding GUI abstractions to the MVP. It requires keeping terminal presentation out of the application and pipeline layers.
 
-## 15. Docker readiness
+## 15. Historical Docker extension guidance (not selected work)
 
 The future Docker image should be able to configure:
 
@@ -275,7 +273,7 @@ Prefer the smallest module structure that preserves the boundaries above. Add a 
 ## 17. Transcript revision boundary (implemented for v0.2.0)
 
 Transcript revision follows the same interface-independent rules as transcription. CLI,
-future GUI, and future LLM adapters call application services; none may implement their
+GUI, and LLM adapters call application services; none may implement their
 own correction model or token alignment.
 
 Persisted data flow becomes:

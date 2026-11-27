@@ -1,0 +1,1471 @@
+# Current next actions — 2026-11-26
+
+Current product: **0.26.1 internal preview**. LEFT/RIGHT Snap is owner-accepted; themed blank
+startup/closing, hardware guidance and compressed installer are delivered with native qualification. Managed installation/update/repair/removal, native
+Windows interface, Personalization, durable closing and actual Windows Snap recovery are delivered.
+Windows AMD ASR is implemented and visibly **experimental**, with CPU alignment/diarization and no
+physical AMD inference qualification. See [AMD scope](AMD_EXPERIMENTAL.md) and
+[0.26.0 evidence](checkpoints/2026-11-26-snap-amd-evidence.json).
+
+This section is the current execution sequence. Earlier dated status paragraphs and detailed
+proposals below retain history; they do not reopen completed work or override the owner dispositions.
+Backlog is maintained in this document; TODO holds the immediate queue, not a competing roadmap.
+
+| Order / lane | Remaining action and completion boundary |
+| --- | --- |
+| 1 — release preparation | Check final EN/PL docs, notices/credits/licenses, metadata and compatibility wording against actual contents. Keep approved wording and original legal texts. |
+| 2 — artifacts and mandatory signing | Prepare final source/version/notes/artifacts and installer storage in `releases/`. Signing is REQUIRED before the first public release; its procedure and all private keys/credentials remain entirely outside Git. Current internal test builds are unsigned. No certificate purchase is authorized here. |
+| 3 — first public release | Publish the deliberate signed versioned tag/release/assets, then verify real downloads/checksums and matching Windows/Ubuntu bootstrap URLs. Preserve immutable earlier deliveries. |
+| Later hardware — non-blocking | When the owner obtains GTX1070/8GB,32GB RAM,i5-10400F: establish runtime/kernel compatibility first, then measure default/optional models and stages, sampled VRAM/RAM peaks, timings and headroom. PyTorch2.8/cu128 does not support Pascal; no8GB baseline is established. Optional collector scripts are queued in TODO. |
+| Parallel — artwork | Artist has no availability date; icons and later screenshots do not block our work or release. Preserve sent archives. |
+
+Physical AMD inference/performance testing remains unavailable and non-blocking; keep the
+experimental warning. **Local Scribe v2/MAI is removed from the plan**, because usable public weights
+are absent. Existing cloud choices are unaffected. **Ollama and all other optional enhancements
+are AFTER the first public release**, without an assigned implementation date.
+
+Later optional backlog: Ollama/further local engines; word/phrase playback highlighting; alignment/
+timing refinements; instruction review with less-technical users; non-speech authoring; advanced
+channels/crosstalk/surround; audio repair/comparison; extra subtitle formats. Research benchmarks,
+public/private corpora, universal dictionaries, hardware presets and accurate ETA studies remain
+outside required delivery. Full portable-profile exchange retains provisional acceptance; browser
+zoom200% is optional/unchecked. None of these become a new release gate.
+
+Removed/outside selected scope: Docker, bilingual HTML, extra editorial/LLM punctuation modes,
+speaker-count research, full model catalog/favorites/loading management, manual timing overrides,
+alternate translation chunking, owned input snapshots, whole-block audio following and unselected
+scheduling/automatic-maintenance programs. Historical sections describing them are not current tasks.
+
+Latest qualification: [release-readiness checkpoint](checkpoints/2026-11-26-release-readiness.md)
+and [size audit](INSTALLER_SIZE.md); earlier [plan reconciliation](checkpoints/2026-11-26-amd-docs-plan.md)
+is retained as history.
+The current product correction may use the documented standard public CI; no paid/model campaign
+or public release is part of it. Private signing instructions and keys are excluded from Git.
+
+Earlier roadmap entries follow.
+
+# Window/personalization follow-up — 2026-11-26
+
+Owner broadly accepted0.25.0 and requested four focused corrections.0.25.1 delivers window geometry,
+shared Personalization/native title-bar modes, centered contrasting shutdown progress and compact
+LEFT-sidebar source audio with its additional-options menu. Native45885593097, local/browser
+checks and verified delivery pass; see window-personalization checkpoint/evidence. Next is focused
+owner review, then AMD marked(experimental), remaining release work and first public release.
+No physical AMD/GPU/provider requalification or public publication is implied by these UI checks.
+
+Earlier roadmap entries follow.
+
+Owner sequence2026-11-26: desktop0.25.0 has NOT yet been owner-tested. Document Actions/costs now;
+owner interface test → any fixes → implement AMD support marked (experimental), without physical
+AMD hardware qualification → remaining release tasks → first public release. AMD work is the next
+stage after interface feedback, not merely a permanently deferred question. No AMD or public release
+execution before that boundary. See docs/GITHUB_ACTIONS.md and opening TODO/status.
+
+Owner native Windows application stage2026-11-26:0.25.0 implementation/agent qualification delivered.
+Own WPF/WebView2 window retains reviewed interface; console-free backend/worker lifetime, focus,
+durable close, restart and maintenance coordination pass native Windows tests. See native-windows-app
+checkpoint/evidence and opening TODO. Next is focused owner desktop feedback; existing inference
+acceptance stays closed. AMD research/experimental adapter and first public release follow desktop
+review. No public release/signing or new paid/model campaign in this stage.
+
+Owner follow-up2026-11-26: close existing-installation preflight and25GB wording as0.24.4,
+with automated checks only and no new manual gate. Native Windows application interface/lifetime
+is next after delivery. AMD research and first public release remain after that interface.
+See opening TODO and install-preflight checkpoint. Preserve previous accepted copy/models/tests.
+
+Owner follow-up 2026-11-26: returned installer text corrections activate integration and a new
+manual copy/layout review build (0.24.3); compare values, never require Decyzja. See opening TODO
+and installer-reviewed-copy checkpoint. Keep original AGPL/vendor licenses and technical English.
+AFTER native Windows interface: research AMD acceleration adapter feasibility for ASR/alignment/
+diarization, Windows runtimes and packaging; no AMD card available, so any unqualified adapter
+must be labelled experimental. No AMD implementation or downloads in the current copy task.
+First public release and .exe placement in repository releases/ follow native interface completion.
+
+Owner request 2026-11-25: complete installer copy table now delivered in XLSX/CSV with stable IDs,
+full composed messages and project/vendor notices separated. See installer-copy-table checkpoint
+and docs/installer-copy-review/README.md. Next: returned owner wording → approved EN/PL integration
+and affected offline help. Native Windows interface/lifetime follows installer copy closure.
+No product changes or new functional/manual/model/provider tests for this inventory task.
+
+Owner follow-up2026-11-25 closes functional installer retesting after automatic required host
+checks (0.24.2): automated verification only, no further manual-test gate. Next planned stage is
+full installer EN/PL copy consolidation/owner wording review and audit of user-facing notices,
+then affected help updates. Native Windows app interface/lifetime follows installer closure.
+See opening TODO/status and automatic-host-checks checkpoint; do not execute the broad next
+stage merely to answer the owner's plan question. Prior mixed local ASR and removal passes kept.
+
+Owner follow-up2026-11-25 activates local model parity work: add compatible optional Whisper
+v3/v3-turbo, verify other exact providers public local weights, installer/credentials/locale polish.
+See opening TODO/checkpoint; supersedes deferred-only restriction immediately below.
+
+# Post-0.1 Roadmap
+
+Owner follow-up2026-11-24: later investigate local implementations of ASR models offered through
+OpenRouter, aiming for equivalent local/cloud features subject to runtime/hardware/licensing
+feasibility. This is a deferred TODO, not permission for new models, downloads or paid tests now.
+
+The filename is retained for compatibility with existing links. The roadmap now tracks
+planned work after the `0.1.x` internal release candidates rather than implying that all
+items belong to one monolithic "Version 2" release.
+
+## Owner scope and current status — 2026-11-20
+
+This section is authoritative over older milestone plans and historical acceptance wording below.
+Build a practical workflow tool for the owner's podcast and similar recording work. A general-purpose
+transcription research platform, universal dictionaries and broad model/hardware evaluation are not
+required deliverables. Existing regression, security, lineage and packaging checks remain required;
+research metrics and optional presets do not block completion or release readiness.
+
+### Active installer/startup follow-up — 2026-11-24
+
+Owner confirms0.22.2 installation, desktop startup and one successful transcription. New feedback
+supersedes the handoff wait.0.23.0 addresses installer operation/model/progress/report/registration/
+removal behavior and automatic startup autosave/recovery. Native Windows app interface follows
+installer closure, with explicit lifetime/active-work handling; do not implement that shell now.
+See opening TODO and the installer-lifecycle-startup checkpoint. Prior app passes remain closed.
+
+### Current session boundary — 2026-11-24
+
+Owner is reviewing installer **0.22.2**, not yet approved, and will send feedback in a new session.
+[Current local handoff](checkpoints/2026-11-24-session-handoff.md) is the resume point.0.22.2 source
+d51b106/native run45238109373 passes agent gates and19 visual previews; actual owner managed
+Windows installation/UAC/models remain separate. Next: feedback fixes → completed installer GUI →
+installer EN/PL review and native lifecycle acceptance → affected docs/release preparation.
+No product work is requested during this handoff. Earlier app terminology/manual/artist work is
+complete; no new full workflow/paid benchmark gate. Public bootstrap/signing remain pending.
+
+### Installer usability correction — 2026-11-23
+
+Owner rejected the0.22.0 GUI before installation. 0.22.1 is implemented/agent-verified using the opening TODO
+and [feedback checkpoint](checkpoints/2026-11-23-installer-wizard-feedback.md); native screenshots and navigation/credential/disk gates PASS. Owner GUI review comes before
+actual installation.0.22.0 stays immutable;
+actual owner native installation remains untested. Prior application workflow remains accepted.
+
+### Managed distribution implementation — 2026-11-23
+
+0.21.0 establishes the accepted workflow/version baseline;0.22.0 implements the
+[distribution plan](DISTRIBUTION_PLAN.md): shared owned installation, verified activation,
+update/rollback, exact optional model/key removal, Windows/Ubuntu no-checkout terminal packages
+and a styled standalone Windows wizard with host tests/HF terms/token/optional OR OS-store save,
+shortcut and registered GUI uninstall. EN/PL instructions and focused native checklist are ready.
+Real Ubuntu26.04 VM install/update/GUI/rollback/reinstall/uninstall checks passed, without models
+or paid calls. Native Windows CI startup and owner Windows11x64 installation acceptance are
+separate; public release/online bootstrap activation and optional signing follow native acceptance.
+See [execution checkpoint](checkpoints/2026-11-23-distribution-execution.md). Prior GUI/manual
+acceptance stays closed; artist feedback/screenshots remain parallel/non-blocking.
+
+### Current documentation stage — 2026-11-22
+
+Owner passes Windows checklist 1–5 and accepts the resulting interface/terminology. Task 10 and
+the focused regression gate are closed. EN user-manual audit/update, complete PL manuals and
+bilingual offline help are delivered. A NEW updated artist reference (`ewp-gui-artist-review-2026-11-22.zip`) is available in workspace deliveries; its final offline checks pass. Preserve the original sent
+ZIP. Screenshots await final artwork and do not block text documentation. Windows 11 x64 is now
+owner-tested; retain provisional full-profile-exchange qualification. Earlier pending-approval and
+planned-Windows notes below are historical, not new gates. See the [documentation checkpoint](checkpoints/2026-11-22-user-documentation.md).
+
+### Owner acceptance of the recent GUI
+
+Current Windows startup follow-up: owner accepts the UI generally but reported null-href startup,
+About Loading and stale running jobs. [Checkpoint](checkpoints/2026-11-22-windows-startup-refresh.md)
+records the reproduced language-query/exact-link regression and fixed early polling, plus modal
+Escape, language-icon placement and subtitle. Use the [targeted Windows retest](../Instructions/GUI_WINDOWS_REFRESH_RETEST.md).
+Retain earlier wording/ASR passes; docs and the new artist package remain after interface approval.
+
+Current terminology application (2026-11-22): owner returned the workbook and requests an updated
+interface for approval.106 reviewed rows (18 EN /105 PL edits) are integrated with stable-ID
+[reference and notes](ui-language/README.md). Use [focused approval](../Instructions/GUI_TERMINOLOGY_APPROVAL.md).
+Full EN documentation review, complete PL manuals and a NEW artist package follow that approval;
+do not start them prematurely. Originals and the already-sent artist archive remain unchanged.
+
+Latest instruction (2026-11-22): all focused checks pass apart from the final duplicate-new-save
+name correction; that fix and shorter right-side key feedback need automatic verification only,
+with no further owner retest. Then move directly to task10 local editable ID/EN/PL review. Apply
+owner corrections (EN may change too), commit the approved table, obtain interface approval, review
+and update EN docs, prepare full PL user docs, then create a NEW updated artist package. This later
+package refresh is authorized; preserve the original sent ZIP now. No additional manual platform
+gate blocks the explicitly requested terminology handoff; retain precise previous qualifications.
+
+| Previous summary item | Current status |
+|---|---|
+| 1: recent GUI fixes | Accepted with the small summary/navigation fixes in the current checkpoint; full user-profile import/export was not tested by the owner and is provisionally accepted as implemented. |
+| 2: complete workflow | Owner passed the complete focused package A retest on 2026-11-21, including restart recovery. Keep native Windows/full profile exchange as separate B checks. |
+| 3: browser/platform presentation | Owner accepts browsers and the palette. Actual browser zoom at 200% was not explicitly performed/understood; retain as an optional unchecked layout check, not a new blocking gate. |
+| 4: precise progress/ETA calibration | Removed as a required task by owner. Progress primarily communicates continued activity; keep existing approximate percentage, elapsed timer and optional ETA without a new accuracy study. |
+| 5: terminology/docs | Wait for feature completion, then export every UI label/message as editable EN–PL pairs, including errors, states, hints and dynamic templates. Owner correction/approval comes next, then full Polish documentation. Screenshots wait for final custom GUI/icons. |
+| 6: artist | Waiting for supplied icons/feedback, no deadline. Original ZIP remains unchanged; a new updated package follows approved interface copy and EN/PL docs per latest owner request. |
+| 10/11/12/14: benchmarks/research | Nice-to-have outside required project scope: private-corpus expansion/comparisons, translation quality suites, public datasets/universal dictionary research, automated model benchmark matrices. |
+| 13: hardware presets | Nice-to-have. Document owner-tested RTX 3090 and an expectation of >=8 GB VRAM on other NVIDIA machines, explicitly unqualified and without a guarantee. |
+| Native Windows (previous item 21) | Retained planned convenience work. WSL acceptance does not qualify native Windows; native support is package B task 5, before OS credentials task 6. |
+
+Current A owner test: the owner passed the entire focused retest on 2026-11-21 and accepts A.
+The sole final source-review action layout adjustment is accepted without a new owner retest:
+remove redundant preparation, merge controls into two rows and rename Restore saved draft.
+See [the closure checkpoint](checkpoints/2026-11-21-package-a-closure.md). Retain all earlier
+WSL cancellation/recovery/cleanup/download/player success evidence.
+
+Windows owner acceptance follow-up: step-4 NLTK/regex preparation failure is corrected via an
+isolated language-data child, preserving import security and pins. [Checkpoint](checkpoints/2026-11-21-windows-model-setup-nltk.md).
+Owner confirms native model preparation/install/GUI/doctor now pass; native workflow acceptance continues with the feedback fixes below.
+
+### Current saved-location and pre-start key follow-up — 2026-11-22
+
+Owner now confirms output-folder save/load, cloud ASR after key activation, subtitle exports and
+workflow status. Follow [the new checkpoint](checkpoints/2026-11-22-b-locations-key-preflight.md)
+for automatic last-directory/catalog recall, name-prefixed compatible save files, simplified key
+dialog and missing/rejected key blocking before any queue worker/media preparation. Earlier
+failed/cancelled native recovery was not repeated because old files are gone; automated evidence
+remains. Use the focused update-only checklist; no new paid pilot or reinstall. B full acceptance
+and task10 ordering remain unchanged. Cumulative spend stays USD0.0291461230985028369.
+
+### Previous recovery and provider timing feedback — 2026-11-22
+
+Owner confirms favicon, API check, mixed local/cloud queue and restored upload-consent blocking.
+Follow [the new checkpoint](checkpoints/2026-11-22-b-recovery-cloud-timing.md) for pending-media v3
+save/restart/deduplication, failed/cancelled snapshot outcomes, saved-name identity/list-refresh race,
+visible catalog path, full-viewport artwork and empty key-input action. The original Whisper error
+reproduced when Together returned no word times; corrected routing/tail checks pass. Scribe samples
+and the failing tail pass, but its original native incident is not reproduced. Diagnostic cumulative
+cloud spend is USD0.0291461230985028369 within the original USD2; no further paid requalification.
+Use the [update-only checklist](../Instructions/GUI_UPDATE_TEST_CHECKLIST.md); no reinstalls.
+
+Task10 format is confirmed: stable field/message ID + editable EN and PL, allowing owner changes
+to both languages. Draft stays locally on the VM for review; after correction/application, commit
+the approved table as the maintained translation reference. Do this after functional freeze/B
+acceptance; manuals follow approval. The artist ZIP remains unchanged and blocks no current work.
+
+### Current restored-consent and layout follow-up
+
+Owner confirms native SRT/VTT-only progress, translation candidate status/generation lock and
+correction/translation disclosure blocking. The remaining unchecked-consent incident really used
+OpenRouter Whisper Large, so restored cloud starts need a fresh exact-queue confirmation at both
+browser and server boundaries. See [current checkpoint](checkpoints/2026-11-21-b-restore-consent-layout.md)
+and [update-only checklist](../Instructions/GUI_UPDATE_TEST_CHECKLIST.md). No paid requalification
+or model reinstall is required. Wider B native/WSL acceptance remains pending; A stays accepted.
+Fresh-install/reinstall tests wait for the uninstall-script and later GUI-installer milestones,
+with a [separate deferred qualification plan](../Instructions/INSTALLER_QUALIFICATION_PLAN.md).
+
+### Latest B native workflow feedback
+
+Owner now confirms local ASR, source subtitle export and cloud ASR work on native Windows.
+The [workflow/state polish checkpoint](checkpoints/2026-11-21-b-workflow-state-polish.md) addresses
+remaining status, consent/credentials, action layout/copy and audio-disconnect traceback feedback.
+These fixes pass 1031 tests, 17 integrations, full/focused Chromium and actual restart/recovery.
+Focused owner native retest and remaining full native/WSL B acceptance are next. Keep A closed;
+do not rerun paid qualification.
+Task10 and final manuals still wait for feature freeze/B acceptance and terminology approval.
+
+### Current B owner feedback and later Windows distribution
+
+Owner confirms native installation/GUI/doctor pass; queue/workflow is not accepted yet. Follow
+[Windows queue/GUI feedback](checkpoints/2026-11-21-windows-queue-gui-feedback.md) and the opening
+TODO for persistence/diagnostics, simplified selection/planning and cloud pricing estimates. Those
+fixes pass 1008 tests, 17 FFmpeg integrations, full/focused Chromium and restart recovery; owner
+native queue/revision/export retest remains next. Uninstall/installers below remain deferred.
+Later task 12 now explicitly includes an uninstall script with optional model removal, followed
+by a standalone graphical EXE installer, desktop shortcut, Add/Remove Programs entry and matching
+graphical uninstaller. These are deferred, not part of the current fixes. Preserve recordings,
+publications and unrelated/shared caches during future uninstall design.
+
+### B8a owner follow-up delivered — automatic large-request splitting
+
+The owner requires recordings above the per-request upload limit to split automatically and
+merge into one result. This supersedes the initial single-request mixed-audio restriction.
+See [the completed chunking checkpoint](checkpoints/2026-11-21-cloud-chunking.md): bounded complete
+requests, shared timed context for speaker continuity, original timeline/text, explicit uncertain
+speaker review and overlap-aware costs. Keep A closed; B acceptance/task-10 gates unchanged.
+
+### Accepted package sequence — A accepted, B agent delivery complete
+
+Execution update 2026-11-21: owner explicitly authorizes B5–B9 to completion, returning only for
+concrete missing information/blockers. Earlier planning-only statements below are historical.
+Follow [the active B execution checkpoint](checkpoints/2026-11-21-package-b-execution.md).
+B5–B9 agent implementation/checks are complete; native Windows/full owner WSL qualification
+remains the B acceptance gate. See [B9 evidence](checkpoints/2026-11-21-b9-verification.md) and
+[owner checklist](../Instructions/GUI_PACKAGE_B_TEST_CHECKLIST.md). Live PL cloud qualification
+passed all four models and Scribe/MAI mixed cases at USD 0.0095832333762821113 total; owner waives
+EN live qualification because no sample is present. HD06 MP4 is PL, not EN.
+
+A1–A4 and their feedback fixes are implemented, automatically verified and owner accepted.
+The final no-retest action-layout adjustment passed ordinary checks; A is closed. B agent delivery
+is complete; the next gate is the owner native Windows/full WSL workflow test. Original task numbers remain, with cloud ASR inserted as 8a before task 9;
+terminology approval remains task 10.
+
+| Package / task | Work and completion boundary |
+|---|---|
+| A1 | Latest restart recovery of queue, saved source/translation reviews and export state; preserve previously accepted behavior. |
+| A2 | Safe cancellation of waiting/running work; honest requested/cancelled status, no incomplete final publication, retry from the beginning. |
+| A3 | Immutable workdir creation time, failed/cancelled/successful-retained reason and preview/filter explicit cleanup, protecting references/final artifacts. |
+| A4 | GUI downloads of verified existing export versions, without ASR reruns. |
+| A acceptance gate | Passed 2026-11-21: entire focused retest accepted. Final source-review layout adjustment needs no new owner retest. B preparation follows closure. |
+| B5 | Native Windows dependencies, audio/model setup, paths, CLI/GUI launch using the same application/frontend as WSL. |
+| B6 | Opt-in OS credential storage with read/delete and session-only fallback; secrets never enter profiles, exports or logs. |
+| B7 | Recent projects/sessions, named media/output roots, saved-result directory scanning and optional profile export without embedded dictionaries. |
+| B8 | Audio-stream choice, remaining native picker conveniences, content-aware media discovery and explicit identities for same-name inputs. |
+| B8a | Optional OpenRouter ASR after 8/before 9: four selected models, one shared API key. Owner permits short supplied PL/EN functional samples, USD 2 total live-test budget including retries. See the linked B plan for exact IDs and scope. |
+| B9 / acceptance gate | Complete package regression and the concrete full native-Windows + WSL workflow checklist; owner runs the full workflow, fixes/retests pass, then freeze chosen functionality. |
+| 10 | Complete: stable-ID EN–PL file returned, corrections integrated and resulting interface accepted (checklist1–5 PASS). |
+| 11 | EN audit/update and full PL manuals prepared/verified, with fifteen chapters per language and offline help. New artist-reference ZIP delivered; screenshots wait for final icons. |
+| 12 | Managed lifecycle and Windows/Ubuntu packages delivered, followed by owner installer feedback, native Windows app and experimental AMD through0.26.0. First public release/download activation remains; use the current action table above. |
+| Parallel, non-blocking | Integrate supplied artist icons/feedback when available, no deadline. Do not change the sent ZIP/demo. Documentation screenshots wait for final custom GUI/icons. |
+
+The sequence is serial within each package. A test checklist is delivered against concrete reviewed
+behavior after implementation; package A's checklist is now passed by the owner. Do not reopen
+that gate when preparing B. Full profile transfer, provisionally accepted as currently
+implemented, can be checked while preparing/testing native Windows rather than blocking A.
+
+B5 test arrangement confirmed 2026-11-21: Windows 11 x64; agent implements/checks on the Linux
+VM and pushes to GitHub, owner pulls and executes native-Windows/full-workflow tests.
+A is closed; B implementation/VM verification is delivered and the owner acceptance checklist is next.
+
+B execution detail and accepted cloud decisions are in the
+[2026-11-21 planning checkpoint](checkpoints/2026-11-21-package-b-plan.md). Owner selects OpenRouter
+with one key for ASR/correction/translation and an ASR dropdown containing `openai/whisper-large-v3`,
+`openai/whisper-large-v3-turbo`, `elevenlabs/scribe-v2`, `microsoft/mai-transcribe-2`. Short supplied
+podcast/English samples (PL two speakers, EN one) may be used in B8a under **USD 2 total**, including
+retries across models. Test canonical structure, timing/speaker mapping and downstream workflow;
+no full-corpus/accuracy benchmark. This explicit permission supersedes earlier pending-cloud-choice
+wording. Authorized short PL live checks are now complete at the cost recorded above; EN live
+qualification is explicitly waived by the owner. No corpus/accuracy campaign or further calls are
+scheduled. Preserve these results rather than rerunning a passed pilot after context reset.
+
+### Final classification of the recovered inventory
+
+Old R/E identifiers are retained only to reconcile earlier discussions; the package sequence above
+is the execution plan. Rows excluded or declined here must not reappear from historical text as
+new completion requirements.
+
+| Earlier ID | Owner disposition |
+|---|---|
+| R01, R03 | B7: project/session conveniences and optional dictionary-free profile export. |
+| R02, R08 | B8: stream/file-picker and content-aware media selection. |
+| R04 | B8a: cloud ASR, explicitly inserted between 8 and 9. |
+| R05, R06 | Removed: additional LLM punctuation/editorial modes and speaker-count research. Existing correction/auto-count functions remain available. |
+| R07, R09, R10 | Nice-to-have: advanced channels/crosstalk/surround, audio repair/comparison and additional subtitle formats. |
+| R11 | Non-speech authoring/styling is nice-to-have; bilingual HTML is removed. Existing timed-event foundation/HTML export are delivered and remain unchanged. |
+| R12 | B5: native Windows. |
+| R13 | Later task 12 retains installer/distribution preparation. Docker and unrelated broad deployment qualification are outside selected scope. |
+| R14 | Selected: cleanup in A3 and same-name aliases in B8. Unselected scheduling/automatic-maintenance programs are not package obligations. |
+| R15 | Artist/icon/creator-credit work waits independently without a deadline; public-site publication is not scheduled by this plan. |
+| E01, E02, E06, E09 | Selected: A2 cancellation, A4 verified downloads, B6 OS credential storage, A3 workdir metadata/cleanup. |
+| E03, E04 | Outside project scope: searchable full model catalog, favorites and local model-loading management. |
+| E05 | Nice-to-have: Ollama; no current expansion of local-model usage. |
+| E07 | Outside scope: manual timing overrides; dedicated subtitle editors already provide this. |
+| E08, E10 | Unnecessary/removed: alternate translation chunking and owned input snapshots. |
+| E11, E12 | Nice-to-have: alignment/timing refinements and less-technical instruction review. |
+| E13 | Whole-block audio following is removed. Only optional word/phrase-level highlighting is retained as nice-to-have. |
+
+### Nice-to-have, outside required delivery
+
+- Ollama/further local-model expansion, word/phrase playback highlighting, alignment refinements
+  and optional instruction review with less-technical readers.
+- Non-speech authoring, advanced channels/crosstalk/surround, audio repair/comparison and additional
+  subtitle formats. Existing supported media/export functions are not removed.
+- Earlier optional research: private gold/reference expansion, comparative correction/review-time
+  studies, separate PL→EN / EN→PL translation-quality suites, public datasets/universal dictionary
+  studies, automated model × quantization × prompt × chunking benchmarks and hardware presets.
+- Optional research quality-trend reports. No accurate percentage/ETA calibration campaign.
+
+Nice-to-have means no current delivery gate, schedule or implementation authorization. Historical
+benchmark procedures below apply only if separately chosen in the future; accepted evidence remains.
+
+## Milestone history and detailed proposals
+
+
+1. **v0.2.0 manual transcript revisions** — promoted from backlog into the next MVP
+   increment and specified normatively in
+   [`13-transcript-revisions.md`](13-transcript-revisions.md), ADR-0020, and
+   [`21-v0.2.0-transcript-revision-plan.md`](21-v0.2.0-transcript-revision-plan.md).
+2. Retain the completed 24-episode corrected corpus privately, outside this repository,
+   until every included episode is public and redistribution is appropriate.
+3. **v0.3 automated transcript correction — implemented** using local/cloud API models, configurable
+   chunking, read-only overlap, the same revision engine, benchmarking against the
+   private corpus, and manual revision of model output. v0.3 also includes the scoped
+   fresh-install/verification script and README onboarding work in section 14.
+4. **v0.4 manual and automated translation**, with a structured translation artifact,
+   corrected transcript as the normal source, an explicit raw/dirty source option, and
+   optional manual revision of automated output.
+5. **v0.4 platform transcript exports**, including YouTube srv3 YTT
+   and an embeddable synchronized HTML transcript fragment, with the compatibility,
+   accessibility, security, and raw/revised/translated-source tests in sections 11-12.
+6. **v0.4 optional project-scoped dictionaries**, conditional on benchmark evidence;
+   later public-corpus work may also propose a separate optional general Polish resource,
+   but neither kind is inherited or enabled silently.
+7. After functional requirements and private-corpus validation, run separately licensed
+   public-corpus WER and diarization benchmarks described in section 9.
+8. Remaining audio, discovery, benchmark, subtitle, distribution, and operations work
+   based on observed value and risk.
+9. **GUI workflow queues — active work:** extend the implemented transcription queue into
+   correction, review/export, and translation queues. The GUI reuses application services and
+   does not implement a parallel pipeline.
+
+Current GUI execution priority (2026-11-20): [batch plans, sentence-aware reviews and portable
+profiles](checkpoints/2026-11-20-batch-sentences-profiles.md). The current application work includes
+all selected episode planning/staging, metadata fallback disclosure, sentence-aware sections, playback
+speed parity, optional calibrated ETA and portable preferences/workspaces/dictionaries. The artist
+package has already been sent by the owner and MUST remain unchanged. Artist feedback/custom-icon
+integration follow later. Full Polish documentation remains after terminology approval.
+
+Previous GUI execution priority (2026-11-19): complete the
+[mixed playback / bounded review / live progress delivery](checkpoints/2026-11-19-review-mix-progress-artist.md)
+and its offline [artist reference package](31-artist-review-package.md). The owner has confirmed
+real MP4 transcription and reported the current GUI issues. Default playback now mixes all
+synchronized sources; filenames follow original word provenance. Word limits also bound one-speaker
+reviews without changing canonical timing. Language help closes with outside-click/Escape.
+
+The [progress/ETA implementation](30-queue-progress-and-eta.md) uses real optional phase events,
+a monotonic elapsed heartbeat and bounded local successful timing history. First-run weights are
+explicitly approximate; unknown/slow ETA has a fallback, and 100% follows real publication/cleanup.
+Precise target-hardware accuracy calibration is no longer required by the owner; finer native callbacks remain optional.
+The artist ZIP is local-only, uses synthetic data and contains no transcription backend. Integrating
+the future custom icon set follows the artist's delivery. Full Polish documentation still follows
+owner terminology acceptance. See TODO.md for current acceptance and remaining work.
+
+Cross-cutting observability is implemented in
+[`25-warning-error-catalog.md`](25-warning-error-catalog.md): domain warnings, expected
+application errors, direct policy warnings, command wrappers, and framework-generated usage
+failures print stable codes. The catalogue records meaning, likely causes, safety implications,
+and operator action, while automated coverage rejects undocumented emitted codes.
+
+The earlier small production pilot requirement is superseded operationally by the larger
+manual-review corpus used to build correction ground truth. Existing accepted v0.1
+validation evidence remains valid.
+
+The 24-episode audio and corrected-transcript corpus is complete and is the private
+reference benchmark for future ASR model, preset, correction, and translation
+comparisons. It must not be committed while any included episode is non-public. Once all
+episodes are public, publication in this repository requires a separate licensing,
+privacy, size, and repository-distribution review; public availability alone does not
+implicitly authorize committing the corpus.
+
+The retained private package includes canonical results and raw exports, editable review
+files, immutable revision and audit artifacts, and revised TXT/SRT/VTT/segments exports.
+Future benchmark tooling must treat the accepted revisions as gold without requiring the
+corpus itself to live in this repository.
+
+Within each compatible base-result lineage, the highest revision number is the accepted
+gold transcript. Lower revisions remain immutable historical/intermediate states rather
+than being discarded. Benchmark manifests must resolve this by exact base-result hash
+and revision number, never modification time or filename order alone. They should expose
+at least two correction tasks when an intermediate revision exists:
+
+- raw canonical result -> latest accepted gold, measuring complete ASR correction;
+- earlier revision -> latest accepted gold, measuring incremental cleanup of text that
+  has already received human review.
+
+Earlier revisions are useful benchmark inputs but are not alternate gold references.
+Evaluation must also measure harmful changes to text that was already correct.
+
+## 1. Manual transcript correction — promoted to v0.2.0
+
+The following is no longer an unscheduled roadmap idea. It is the implemented v0.2.0 contract:
+
+- immutable canonical `results.json`;
+- versioned full-snapshot revision artifacts linked by base-result SHA-256;
+- `EWP-REVIEW 1` human-readable manual correction format;
+- stable canonical word anchors and corrected speaker attribution;
+- batch `revise prepare` and batch `revise apply`;
+- `revise preview` and `apply --no-apply` equivalence;
+- external-editor `revise edit`, with successful editor close applying automatically
+  unless `--no-apply` is used;
+- deterministic anchored token alignment for substitutions, punctuation, sentence
+  boundaries, merge/split, insertion, deletion, repetition preservation, and speaker
+  reassignment;
+- no normal manual timestamp editing;
+- runtime `EffectiveTranscript` shared by raw and revised export;
+- revision-aware TXT/SRT/VTT/segments regeneration without source audio or ML models;
+- mandatory provenance/statistics and optional/reconstructable detailed audit.
+
+Detailed design belongs in docs 13/21 rather than this roadmap.
+
+## 2. Automated transcript correction — implemented in v0.3.0
+
+Automated correction follows manual correction so model performance can be measured
+against manually verified ground truth.
+
+Requirements:
+
+- local API endpoints and explicit cloud API endpoints;
+- cloud use is explicit opt-in and requires privacy warnings/documentation;
+- no audio is sent to the correction model;
+- the LLM receives relevant transcript blocks plus word/speaker/timing metadata needed as
+  context, not the complete canonical processing/configuration payload;
+- corrected LLM output is passed through the same alignment and `RevisionEngine` used by
+  manual review;
+- the implemented default prompt corrects only obvious ASR lexical errors and high-confidence
+  proper-name spelling; punctuation, capitalization, and sentence boundaries remain manual;
+- preserve the speaker's actual wording, repetitions, self-corrections, fillers,
+  malformed sentences, grammatical mistakes, and stylistic quirks; never paraphrase,
+  polish prose, or silently repair how the person spoke;
+- require corrected editable text from the provider; the local revision engine derives
+  exact source spans, before/after text, deterministic categories, and the authoritative
+  audit. Optional provider change annotations remain advisory evidence;
+- model/prompt/config provenance is persisted without secrets;
+- LLM revisions may be direct siblings of manual gold for benchmark comparison;
+- a model revision may later have a manual child revision, with parent provenance but a
+  complete standalone child snapshot.
+
+A later experiment may add two independent, default-off GUI modes: **check also punctuation**
+and **try basic editorial fixes**. They require separately versioned prompt contracts and
+evaluation because punctuation repair changes sentenceization, while editorial repair crosses
+the default boundary that preserves spoken grammar and style. Both controls must warn that they
+may increase API token usage and unsupported edits, and neither may remove mandatory manual review.
+
+Benchmarking must cover local and cloud providers separately and report at least lexical
+accuracy against manual gold, locally derived change precision/recall, unsupported or stylistic
+changes, speaker-attribution preservation, audit completeness, latency, request/token
+volume, estimated or actual cost, and failure/retry behavior. Provider-annotation precision
+is reported separately only where annotations exist. A reviewer must be able to
+prepare, manually correct, apply, audit, and export an LLM-produced revision through the
+same workflow used for manual revisions.
+
+Later benchmark automation should use supported backend APIs to load and, where available,
+unload models,
+wait for exact model readiness, run an explicit model x quantization x prompt x chunking
+matrix, collect timing/resource/failure evidence, and unload cleanly without continuous
+operator supervision. The observed LM Studio 0.4.21 server advertises native model
+listing/loading and download-status endpoints in addition to its OpenAI-compatible
+inference API; an unload mechanism must be verified against the selected backend/version
+before automation relies on it. Other backends require separate adapters.
+Every run identity and report must distinguish exact model identifier, quantization,
+backend/version, prompt ID and content hash, output mode, chunk settings, context window,
+sampling parameters, and hardware. Automation must retain bounded retries, private resume
+state, sanitized logs, and the manual final-acceptance gate. It must never initiate paid
+cloud runs or broaden API consent without separate explicit authorization.
+
+Provider integration also requires deterministic mocked tests, secret-safe
+configuration, timeout/rate-limit/retry handling, resumable failure-isolated batches,
+and the consent/privacy contract in `11-security-and-privacy.md`.
+
+The OpenRouter adapter and offline safety tests are implemented. A paid cloud pilot remains
+an operator gate requiring an environment-only key, exact live model-slug confirmation,
+explicit `--allow-cloud`, scoped consent, and separate authorization. Planned candidates
+remain Qwen 2.5 72B Instruct and the exact currently available DeepSeek V3-family slug;
+neither may be silently replaced when the catalog changes.
+Gemini 2.5 Flash (`google/gemini-2.5-flash` when confirmed by the live catalog) is also a
+cloud candidate. Its reasoning budget must be explicit and reported; the first comparable
+baseline disables thinking, while enabled reasoning is a separate cost/quality experiment.
+
+### Configurable chunking
+
+Chunking is required for flexibility across local and cloud models and must not assume a
+large context window.
+
+Future configuration must expose at least:
+
+- target chunk size;
+- maximum chunk size;
+- read-only context overlap;
+- CLI/request overrides through the normal configuration precedence system.
+
+Exact defaults are deferred until automated-correction benchmarks. Overlap is context
+only: every editable source range belongs to exactly one chunk, preventing conflicting
+corrections in adjacent requests.
+
+## 3. Optional dictionaries — project-scoped work planned for v0.4
+
+Dictionary support remains conditional on benchmark evidence and is not part of v0.2.0.
+
+Project dictionaries, if implemented:
+
+- users may create/select multiple small named dictionaries scoped to a project, for
+  example `podcast`,
+  `training`, or `history_lectures`;
+- selected terminology may be provided to correction/translation LLMs as context only
+  after explicit project/job selection;
+- no dictionary is inherited automatically across projects;
+- dictionary use is optional, and its identity and content hash must be included in
+  provenance where it affects automated output;
+- ASR vocabulary biasing is not enabled by default because an irrelevant dictionary may
+  reduce recognition quality.
+
+Dictionary entries may be supplied manually or proposed by analyzing accepted revision
+audits for frequent and consistent corrections, including proper names and canonical
+forms such as `OpenAI` versus `Open AI`. Automatically discovered items are candidates
+only: a user must approve them before they affect correction or translation. Benchmarks
+must compare no-dictionary and selected-dictionary runs and detect harmful replacements.
+Initial private-corpus candidates include phrase-aware normalization of recurring
+`nabiało`/`nabiał` ASR forms to spoken `na biało`, plus the project email's spoken and
+written forms (for example `małpaetyka` and `kontakt@etykawpetli.pl`). These examples must
+remain project-scoped; they are not safe global replacements. Dictionaries should also
+support explicitly approved equivalent aliases for correction and scoring, for example
+the Latinized `Csikszentmihalyi` and diacritic `Csíkszentmihályi`. Equivalence must not be
+implemented through global accent folding because Polish diacritics are lexically
+meaningful.
+The course name `AIDEAS` and its ASR/model variants such as `Ideas` or `IDEAS` are another
+initial project-specific candidate: a merely plausible capitalization repair is not a
+substitute for the approved canonical name.
+
+The correction benchmark must test two dictionary hypotheses explicitly:
+
+- whether the same LLM with an approved project dictionary is materially closer to manual
+  gold than the identical model/prompt without one, especially for recurring proper names
+  and project spelling conventions;
+- whether manual review starting from an LLM candidate reduces reviewer time and accepted
+  edit count relative to starting from raw ASR, both without and with dictionary context.
+
+The planned production pipeline uses Gemini 2.5 Flash for the Polish automated-review candidate;
+evaluated local models did not improve ASR error rate. Its project-scoped dictionary is
+explicit hashed context. The required stage order is:
+
+```text
+transcript -> Gemini-assisted Polish review -> manual Polish review -> export
+           -> translation (manual or LLM-assisted)
+```
+
+Translation normally consumes the accepted Polish revision. Translating an unaccepted
+Gemini candidate remains an explicit supported option, but the CLI must warn and the
+translation artifact must retain the exact revision with verification
+`automated_candidate`, never `manually_verified`.
+Correction and translation dictionaries remain distinct versioned artifacts even where
+approved project identifiers overlap.
+
+Use a four-branch matrix—raw ASR, LLM only, dictionary-assisted LLM, and manual gold—and
+record lexical error, harmful/style changes, reviewer corrections, and review time. A
+dictionary is accepted only if gains are not offset by confident harmful replacements.
+
+After all functional requirements and the private benchmark are complete, BIGOS may also
+be evaluated as a candidate source for an optional general Polish dictionary. Such a
+resource must live in a separate repository catalog from project dictionaries, be
+versioned and disabled by default, and require explicit selection. Dataset license and
+redistribution terms must be reviewed before committing derived entries. Training or
+dictionary-extraction partitions must be disjoint from held-out evaluation partitions;
+the same examples cannot both teach the dictionary and inflate its reported WER result.
+The no-dictionary baseline remains mandatory.
+This post-functional work is an explicit retained TODO: measure ASR error rates on the listed
+public Polish datasets first, then derive and manually review a separately versioned general
+dictionary from dataset ASR/reference differences. It must not inherit project decisions or
+reuse its extraction/evaluation examples across training and held-out benchmark partitions.
+
+The next private correction benchmark is deliberately deferred rather than part of the
+immediate v0.3 acceptance path. Manual-gold errata recorded in
+`22-v0.3-automated-correction.md` will be published as later immutable revisions when the
+translation pipeline is tested. At that point the private benchmark also expands with
+manually approved translation examples, its exact-hash manifests are rebuilt, and both
+correction and translation baselines are rerun. The current full-corpus correction run
+remains the baseline for implementation decisions until that scheduled expansion.
+
+## 4. Manual translation pipeline — implemented v0.4 slice
+
+Translation is a separate pipeline, not a branch inside transcript correction, although
+it reuses common versioning, batch, editor, provenance, audit, and future GUI
+infrastructure. The manual-first prepare/preview/apply/audit/export slice is implemented
+and structurally validated on the private 24-file English corpus. That evidence does not
+measure translation accuracy because the approved English text permits artistic freedom.
+
+The future translation source can be:
+
+```text
+--source raw
+```
+
+for an intentionally dirty/raw canonical translation, or a selected corrected revision.
+The latest manually verified compatible revision is the ideal and normal production
+source. Raw canonical text and non-final automated-correction revisions remain explicit
+experimental/comparison inputs; the pipeline must never silently present either as
+manually verified.
+
+Translation requirements:
+
+- the initial supported language pair is Polish and English in both directions. The
+  primary production path is Polish podcast audio/transcript to English; the same
+  pipeline also translates English materials to Polish rather than maintaining a second
+  direction-specific implementation;
+- source units are sentence-level after sentenceization of the selected transcript;
+- translation mapping is sentence-to-sentence, not word-to-word;
+- source sentence timing is retained for target subtitle planning;
+- translated word count/order is free to differ from the source language;
+- manual translation is implemented first and becomes benchmark ground truth;
+- target-language text can itself be manually revised;
+- one structured immutable translation artifact becomes the source for target TXT, SRT,
+  VTT, and future HTML exports;
+- the artifact records exactly which raw result or transcript revision was translated;
+- the implemented translation JSON Schema validates complete immutable snapshots and
+  exact source lineage.
+
+Translation is source-faithful by default: preserve meaning, intent, tone, level of
+formality, technical specificity, repetitions, hedges, emphasis, and speaker character as
+far as idiomatic target-language expression permits. Do not summarize, add facts,
+silently omit difficult content, censor, or turn spoken language into polished prose.
+Literal word order is not required where it would sound unnatural or change meaning.
+
+Style guidance is explicit, optional, and recorded in artifact/provider provenance. The
+initial contract uses two independent controls rather than conflating register with
+subject matter:
+
+- `register = "preserve" | "formal" | "informal"`;
+- `discourse = "preserve" | "academic" | "general"`.
+
+Both default to `preserve`. `formal` and `informal` guide address forms, contractions,
+and equivalent register choices; `academic` and `general` guide terminology and expected
+reader background. These controls must not authorize factual changes, paraphrased
+arguments, invented definitions, deletion of spoken uncertainty, or altered speaker
+attribution. Unsupported combinations or language directions fail before provider use.
+Benchmarks keep each exact style configuration separate and compare the preserve/preserve
+baseline first.
+
+## 5. Automated translation — implemented compatibility slice
+
+After manual translation establishes ground truth:
+
+- local LM Studio and OpenRouter cloud translation providers are implemented for the GUI; expand
+  CLI provider parity only with a separately qualified operator workflow and benchmark evidence;
+- benchmark local instruction models as first-class translation candidates rather than
+  assuming correction-pipeline rankings transfer to translation. Translation quality may
+  differ materially because a verified source removes many ASR/proper-name ambiguities
+  that harmed dictionary-free correction;
+- retain provider/model/prompt/config provenance;
+- use configurable chunks/context appropriate to the model;
+- preserve sentence-level source mapping and source time spans;
+- allow manual revision of automated translations;
+- benchmark automated output against manual translations separately from transcript
+  correction quality.
+
+Both manual and automated translation must support a later manual revision pass, exact
+source/parent lineage, batch resume and failure isolation, and deterministic regeneration
+of every translated export. Evaluation must keep translation quality separate from
+upstream ASR/correction quality.
+
+Useful benchmark paths include:
+
+```text
+raw PL -> automated translation -> compare with EN gold
+manual corrected PL -> automated translation -> compare with EN gold
+raw PL -> automated correction -> automated translation -> compare with EN gold
+latest manually verified PL -> local-model translation -> compare with EN gold
+latest manually verified PL -> cloud-model translation -> compare with EN gold
+manual corrected EN -> automated translation -> compare with PL gold
+```
+
+The principal model comparison holds source, sentenceization, style guidance, prompt,
+and scoring constant and varies only provider/model configuration. Reports distinguish
+local from cloud execution and include translation quality, unsupported meaning changes,
+terminology/name handling, sentence-lineage preservation, latency, resource use, request
+volume, and cost where applicable. Dictionary-assisted translation is a later separate
+branch rather than part of the initial no-dictionary baseline.
+
+Initial reference local-model candidates are:
+
+- Qwen 2.5 32B Instruct Q4;
+- Bielik 11B Q8;
+- Llama 3.3 8B Q8;
+- MADLAD-400;
+- NLLB-200.
+
+These are benchmark candidates, not validated compatibility, quality, licensing, memory,
+or packaging claims. Exact model artifact, revision, quantization, backend, prompt, and
+hardware must be recorded. General instruction models and translation-specialized models
+may require different provider adapters and request contracts while producing the same
+validated translation artifact.
+
+Current conclusion: local LLM translation is usable as an explicitly non-final candidate,
+but is not recommended for publication-quality translation because observed output is too
+mechanical and still needs full human semantic and convention review. The completed Bielik
+gate tested compatibility and workflow behavior, not comparative quality; broad sweeps over
+models and generation settings are intentionally out of scope for the functional gate.
+
+Optional post-functional work may revisit local translation quality only after the remaining
+functional requirements are complete and a scalable semantic-comparison method avoids manual
+review of entire corpora for every model/configuration. Until then, do not schedule wide local
+model sweeps or infer a ranking from the single-model compatibility pilot.
+
+Polish-to-English and English-to-Polish are separate benchmark suites. They use separate
+manually approved gold translations, aggregate metrics, qualitative review, failure
+analysis, and rankings; results must not be averaged into one bidirectional score that
+hides direction-specific weaknesses. The primary production acceptance gate is `pl -> en`.
+The reverse `en -> pl` suite independently qualifies the same pipeline for English source
+materials.
+
+## 6. Content-aware directory discovery
+
+- Replace the directory extension allowlist with a bounded ffprobe-based candidate
+  classifier so any FFmpeg-decodable audio can be included without treating documents,
+  cover art, and other ordinary siblings as failed transcription jobs.
+- Preserve the current rules for symlinks, recursion, natural ordering, and direct-file
+  errors, and emit a structured skip reason for non-audio files.
+- Avoid probing each accepted source twice by carrying trusted probe data into inspection.
+
+## 7. Audio repair
+
+- problem-type classification;
+- denoising;
+- loudness normalization;
+- clipping repair where feasible;
+- dereverberation;
+- creation of a new working file without modifying the source;
+- separate SHA-256 for the processed variant;
+- `off`, `ask`, and `auto` modes;
+- comparison of original and repaired audio.
+
+## 8. Transcript comparison
+
+- transcribe original and repaired audio;
+- compare confidence and agreement automatically;
+- difference report;
+- select the better result or a controlled hybrid;
+- preserve both canonical results.
+
+## 9. Presets and benchmark
+
+- `balanced`;
+- `low-vram`;
+- optional `cpu-only`;
+- optional Apple Silicon preset after a compatible application build exists;
+- automatic batch-size selection;
+- bundled or explicitly downloaded licensed audio samples;
+- benchmark of speed, VRAM, WER, timestamps, and diarization;
+- repeatable wall-clock, real-time-factor, per-stage duration, peak process RAM, and
+  sampled peak VRAM measurements for every preset comparison;
+- retain raw measurement provenance so later hardware and dependency baselines can be
+  compared without relying on terminal summaries;
+- HTML/JSON report;
+- hardware comparison.
+
+These names are roadmap targets, not current compatibility or quality claims. Preset
+acceptance requires complete transcription and correction benchmarks on its stated
+hardware. No preset below the GTX 1070 target is planned.
+
+### Low-VRAM local correction target
+
+The lowest planned GPU tier will be physically validated on a PC with an NVIDIA GTX 1070
+in addition to later testing on the reference RTX 3090. Candidate instruction models and
+quantizations are:
+
+- Bielik 3.0 11B Instruct: IQ4_XS or Q3_K_L;
+- Qwen 2.5 7B Instruct: Q5_K_M or Q6_K;
+- Llama 3.1 8B Instruct: Q5_K_M;
+- Gemma 2 9B Instruct: Q4_K_M.
+
+Final membership depends on measured load success, memory headroom, throughput, correction
+quality, faithful-speech behavior, and complete-job stability. Merely loading a model does
+not qualify it.
+
+Initial reference-workstation evidence for the quality-first local tier: Qwen 2.5 14B
+Instruct Q8_0 loaded in LM Studio with a 32K context and used approximately 18.5 GB VRAM
+on the 24 GB RTX 3090. Bielik 3.0 11B Instruct will compare Q8_0 against F16 with CPU
+offload. These observations are configuration-specific baselines, not guarantees for
+other systems.
+
+### Optional CPU-only correction target
+
+The CPU-only preset targets a recommended minimum of 16 GB system RAM. Candidates are:
+
+- Bielik 3.0 11B Instruct: Q5_K_M or Q6_K;
+- Qwen 2.5 14B Instruct: Q4_K_M;
+- Mistral NeMo 12B Instruct: Q4_K_M.
+
+Benchmark reports must include CPU model, usable RAM, thread settings, latency, throughput,
+peak process RAM, correction quality, and whether swapping occurred. The 16 GB figure is a
+planned validation floor, not an accepted requirement until those runs pass. The planned
+physical CPU-only validation machine has 32 GB RAM; operation below 16 GB is out of scope.
+
+### Optional Apple Silicon correction target
+
+Apple Silicon support is deferred until all functional requirements are complete and a
+separate compatible transcriber build has been prepared. The planned minimum is 16 GB
+unified memory. Candidates are:
+
+- Bielik 3.0 11B Instruct: Q5_K_M, Q4_K_M, or MLX 4-bit;
+- Qwen 2.5 14B Instruct: Q4_K_M or MLX 4-bit;
+- Mistral NeMo 12B Instruct: Q4_K_M;
+- Qwen 2.5 7B Instruct: Q8;
+- Llama 3.1 8B Instruct: Q8.
+
+Because no local Mac is available, validation may use explicitly rented Apple hardware
+from MacinCloud and/or Scaleway. This is infrastructure access, not permission to send the
+private corpus to an unrelated LLM API. Tests should cover the native CLI first and the GUI
+when available, and record the exact Apple chip, unified memory, OS, runtime/backend,
+quantization, cost, and benchmark provenance.
+
+The expanded manual correction corpus should also become the reference source for lexical
+correction benchmarks. Separate timestamp and diarization ground truth is still required
+for timestamp/DER/JER evaluation.
+
+### Public-dataset validation after functional completion
+
+After all functional requirements pass and private-corpus evaluation is complete, add a
+reproducible public-dataset matrix comparing supported ASR models, presets, correction
+paths, and optional dictionaries. Candidate lexical/recording corpora are:
+
+- BIGOS, for Polish WER evaluation and possible general-dictionary candidate extraction;
+- Google FLEURS, for multilingual recordings and references;
+- Mozilla Common Voice;
+- Multilingual LibriSpeech.
+
+Candidate diarization corpora are:
+
+- VoxConverse;
+- AMI Meeting Corpus.
+
+### Ephemeral speaker auto-discovery research — later
+
+Research options for within-job speaker discovery when the operator does not know whether a
+meeting contains, for example, three or four speakers. Evaluate whether the existing
+`speaker_count = auto` diarization behavior is sufficient or needs a clearer explicit
+auto-discovery mode, confidence reporting, lower/upper bounds, or alternative clustering.
+Candidate work should compare diarization embeddings and within-recording clustering against
+fixed-count operation on held-out meeting material, including overlap and short-speaker cases.
+
+Any speaker “fingerprint” in this feature means an ephemeral representation used only to
+cluster segments inside the current job. It MUST NOT create a general identity database,
+label a real person across recordings, or be written as reusable biometric identity data.
+Artifacts may retain ordinary anonymous `speaker_NNN` assignments and audit parameters, but
+the temporary embeddings/fingerprints are discarded when the job finishes.
+
+Extend the browser review editor with safe block splitting/merging so a word or sentence can
+be reassigned to the correct speaker without moving unrelated text. Revision-scoped speaker
+display-name editing and revision-local speaker addition are externally qualified for recordings
+whose canonical result lacks useful names, misses a speaker, or combines multiple speakers on
+one source channel. Unused local speakers can be removed, while text-assigned speakers require
+reassignment or merging before removal.
+
+The editor-recovery/comfort slice is externally qualified: it saves a dirty mutable draft before
+each structural block-edit operation, offers explicit bounded Undo and Redo for the current
+editor history, and groups controls by workflow. The left group presents **Prepare** then
+**Preview**. The right group presents **Save** and **Restore**, then **Undo** and **Redo**, with
+the destructive **Clear** control in the lower-right. Undo/Redo affects only the mutable review
+draft, keeps protected anchors/lineage intact, and still requires an explicit save plus preview
+before immutable application.
+
+Every dataset requires a pinned version/configuration, source and license record,
+download/preparation hashes, official split preservation, normalization declaration,
+language/subset selection, and a report of exclusions. WER/CER comparisons must not mix
+dictionary-training material into their held-out test split. Diarization experiments must
+report DER/JER methodology, collar and overlap policy, speaker-count assumptions, and the
+exact pyannote/segmentation settings. Results should be presented as a table alongside
+the private real-podcast benchmark, not merged into one opaque score.
+
+An optional later real-world tier may add a small number of long-form public YouTube
+podcast discussions with three or more speakers. Inclusion requires a separate license,
+terms, privacy, and redistribution review plus manually verified references. URLs or
+public availability alone do not authorize committing media or transcripts. This tier is
+supplementary and does not replace controlled WER or diarization corpora.
+
+## 10. Advanced channel handling — later, release unassigned
+
+This remains on the later roadmap without an assigned release and is not on the current
+critical path.
+
+- detect and remove duplicates caused by crosstalk;
+- compare channel transcripts with timestamps;
+- preserve legitimate single-word and rhetorical repetitions;
+- support more than two channels with explicit topology rather than treating channel
+  count as speaker count;
+- for isolated speaker channels, split selected channels, expose the channel/speaker map
+  and warning, transcribe separately, and merge chronological timelines;
+- for general multichannel and cinematic 5.1/7.1 audio, use a layout-aware program
+  downmix plus diarization and clearly report the transformation;
+- automatically use that fallback only for a recognized channel layout; require a
+  dedicated explicit `program-mix` topology choice for missing or unsupported layouts,
+  and do not overload output-versioning `--force`;
+- never silently use one channel as a complete transcription of 3+ channel media.
+
+## 11. Subtitles
+
+Two conservative TTML pilots were accepted with correct timing, language, turn labels, and
+diacritics, but YouTube ignored wrapping, centering, and colors. The active implementation
+therefore targets YouTube's srv3 YTT XML based on an owner-supplied accepted example. It
+remains opt-in because it is platform-specific. Its first upload centered cues and
+preserved text/timing but flattened `<br/>` line elements. The owner-supplied corrected
+template instead uses literal in-paragraph newlines and near-white `#FEFEFE`; the renderer
+now matches that structure byte-for-byte. The final unlisted upload passed two-line
+wrapping, distinct speaker colors, centering, timing, turn labels, and Polish diacritics.
+The profile is qualified for the tested real Polish two-speaker case and stays opt-in as a
+platform-specific export.
+
+- add a deterministic `.ytt` export using YouTube's srv3 timed-text XML profile;
+- use UTF-8 XML with `<timedtext format="3">` and millisecond `t`/`d` timing;
+- map exactly one already-planned canonical subtitle cue to one `<p>`; YTT rendering
+  must not introduce another cue segmentation pass;
+- give every spoken cue a deterministic numeric speaker pen derived from stable speaker order;
+- print the visible speaker name only on the first cue of a continuous speaker turn while
+  retaining that speaker's style on every continuation cue;
+- keep speaker colors in renderer configuration, never transcript data. The initial
+  ordered fallback palette uses the normal/default foreground for the first stable
+  speaker, blue for the second, yellow for the third, then distinct green, magenta, and
+  cyan entries for additional speakers. Exact color values and palette exhaustion rules
+  require an unlisted YouTube smoke test and remain configurable;
+- allow a separate italic pen for structured non-speech cues, but do not infer
+  non-speech semantics or italics from transcript punctuation or text;
+- use the tested srv3 centered window and bottom-center position records without adding
+  unrelated generated-format attributes;
+- serialize with a real XML serializer, escape text and attributes, reject invalid XML
+  instead of emitting it, and test parsing, namespaces, language, cue cardinality,
+  timing, pen references, line breaks, escaping, and deterministic bytes;
+- manually validate upload acceptance, Polish diacritics, timing, labels, and speaker
+  colors on YouTube before treating the profile as qualified;
+- styled WebVTT;
+- ASS/SSA;
+- burned-in subtitles;
+- platform presets;
+- visual preview.
+
+Before non-speech-aware YTT or HTML rendering is implemented, design and version an
+additive canonical JSON schema update that records the semantic `kind` of a timed event.
+The initial vocabulary must at least accommodate `speech`, `music`, `laugh`, `cough`,
+and `note`, while defining whether the field belongs on segments/cues or a distinct event
+structure and how older results default to speech. This is semantic transcript data;
+presentation choices such as colors, labels, brackets, and italics remain renderer
+configuration. Schema documentation, migration/compatibility behavior, fixtures, and
+raw/revised export tests are required before enabling the field in production output.
+
+Implemented foundation: canonical schema `1.1` places the closed kind vocabulary on timed
+segments; schema `1.0` omissions default to `speech`. Effective raw/revised projection, derived
+segment JSON `1.1`, and subtitle cue planning preserve kind without changing current SRT/VTT
+presentation. See `24-v0.4-timed-event-semantics.md`. Explicit non-speech authoring and
+renderer styling remain separate later slices.
+
+## 12. Platform transcript delivery and HTML — planned for v0.4
+
+Implemented foundation: raw and manually revised `--format html` exports now emit the
+specified escaped, deterministic fragment with sentence-level native buttons, explicit
+speaker turns, BCP 47 language, and integer timing/speaker/kind metadata. Immutable
+translation artifacts use the same contract with target language/text and inherited unit
+timing. No CSS, JavaScript, inline styles, or event handlers are emitted. The consuming
+mock player is implemented separately with native audio, site-owned CSS/JavaScript,
+click/keyboard seeking, current-sentence following, accessible focus, reduced-motion,
+light/dark presentation, and readable unenhanced markup. A manual real-media browser check
+passed Firefox/LibreWolf but exposed Chromium-family clicks restarting at zero. The retry
+waits for metadata and seek completion and adds explicit theme/auto-follow controls. A
+second Chromium retry isolated the remaining failure to the basic Python static server;
+the example now includes a single-range `206 Partial Content` server. The final retry
+passed Chrome and Brave seeking; Firefox and LibreWolf, theme/auto-follow controls, and the
+no-script fallback also passed. The HTML delivery slice is accepted. Occasional minor
+acoustic spill across sentence boundaries is inherited from word alignment and deferred
+to alignment-quality work; renderers must not hide it with heuristic timestamp shifts.
+
+- qualify SRT and WebVTT behavior on YouTube, Spotify, Apple Podcasts, and selected web
+  audio/video players; record account- or host-dependent limitations;
+- publish multiple Podcasting 2.0 transcript links where appropriate, including a
+  readable transcript and a timed caption resource;
+- build an accessible synchronized HTML transcript from the selected effective transcript
+  or suitable derived timed data, with sentence-level seeking, current-sentence
+  highlighting, and keyboard controls;
+- add HTML as an explicit generated export (`transcriber export --format html`), with a
+  UTF-8 embeddable fragment—not a standalone document—that requires no transcription
+  rerun. Its root is `<section class="ewp-transcript">` with a valid BCP 47 `lang`;
+- represent speaker turns explicitly. Every cue retains integer `data-start-ms` and
+  `data-end-ms` values, and stable machine-readable speaker identity uses `speaker_id`,
+  never the display name;
+- keep visible speaker names as escaped presentation text shown once per turn, retain
+  logical reading order, and make the fragment useful with CSS and JavaScript disabled;
+- emit transcript text as escaped plain text: no trusted transcript markup, inline style,
+  embedded CSS, inline JavaScript, or event-handler attributes;
+- apply light/dark mode, accessible contrast, branding, active-cue state, and speaker
+  colors only in consuming-site CSS. Seeking, highlighting, and auto-scroll belong to
+  consuming JavaScript rather than the generated fragment;
+- define export presets for conservative platform interchange and web-native playback;
+- design translated/bilingual HTML after the translation artifact contract exists.
+
+Acceptance includes a separate self-contained mock/placeholder site that embeds the
+generated fragment alongside a real HTML audio player and supplies its own CSS/JavaScript.
+Playback highlights or follows the active cue, and activating a transcript sentence seeks
+the player to that sentence's start time. Renderer tests must cover the exact root and
+language contract, explicit turn grouping, stable speaker IDs, integer timestamps,
+escaping/untrusted text, absence of CSS/JavaScript/inline styles, deterministic output,
+and raw/revised/translated sources. Mock-site tests additionally cover keyboard operation,
+accessible seeking, light/dark presentation, and behavior with enhancement disabled.
+
+The reviewed `ewp_transcripts_agent_pack` contracts are compatible with this direction
+after these scope decisions: implementation is scheduled for v0.4, HTML output is
+fragment-only, YTT is specifically a YouTube srv3 profile, and RSS transcript
+material is publishing policy rather than a required exporter. Its examples are design
+inputs, not accepted golden files; repository terminology, current cue generation, schema
+versioning, and exporter architecture remain authoritative during implementation.
+
+## 13. GUI
+
+GUI remains deliberately late in the roadmap so the application/domain contracts are
+stable first. ADR-0021 selects one self-contained local browser application shared by WSL2,
+bare-metal Ubuntu, and the future Docker image. The normative workflow, path, privacy,
+security, accessibility, and implementation-slice contract is in
+[`26-local-web-gui-contract.md`](26-local-web-gui-contract.md).
+
+### Active GUI acceptance tasks (2026-09-17)
+
+The following operator findings are tracked as separate vertical slices. Complete and manually
+qualify one task at a time; later tasks must not be folded into an unrelated fix.
+
+1. **GUI-01 — WSL browser launch — WSL pass through GUI-36:** restore automatic opening of the host default browser when
+   `gui` runs without `--no-open-browser`, while retaining an actionable failure path and the explicit
+   opt-out. Acceptance: one WSL launch opens `http://127.0.0.1:<port>/` without a copied URL.
+2. **GUI-02 — Resume from existing canonical results — WSL pass:** every workflow-stage queue can add one or
+    more previously completed `*_results.json` files using the browser's native file-selection
+    dialog, copies only the explicitly selected JSON to GUI-owned loopback storage, validates its
+    canonical contract, and resumes only the selected item. Once a shared output root is known, the
+    validated source is promoted to durable content-addressed storage as specified by GUI-37. It is
+    never sent to a network service.
+3. **GUI-03 — Review-control layout — WSL pass:** eliminate the Restore saved review / Undo / Redo overlap
+   at supported viewport widths. Acceptance: all controls are independently visible and clickable.
+4. **GUI-04 — Per-item correction skip — WSL pass:** selected correction-queue items can be explicitly
+   skipped, update only those queue records, and visibly show the blue skipped correction state.
+5. **GUI-05 — Password-manager compatibility — WSL/Bitwarden pass:** remove markup and interaction patterns that cause
+   Bitwarden to disable itself, without storing credentials in browser state or reducing form
+   accessibility.
+6. **GUI-06 — Correction-operation feedback — WSL pass:** Generate correction candidate has the same local
+   **Working…** then **Done!** feedback as Apply, Save, and Preview.
+7. **GUI-07 — Consent-gated batch correction — WSL/provider pass:** selected correction items are processed once,
+   sequentially, and failure-isolated; completed items are disabled, later selected items continue
+   after a failure, and each job retains its own consent/provenance. Add per-item dictionary
+   selection only after the basic batch path is qualified.
+8. **GUI-08 — Stage-focused progress display — WSL pass:** every stage queue displays the complete color-coded
+   workflow progression, while its own stage is visually prominent and other stages are subdued
+   without losing state or non-color labels.
+9. **GUI-09 — Semantic-review handoff — WSL pass:** Open candidate in semantic review smoothly scrolls to the
+   semantic-review section after loading its exact candidate.
+10. **GUI-10 — Semantic queue and manual-translation progress — WSL pass:** semantic review lists eligible
+    candidate and manual-translation reviews; manual LLM skipping and later application/export
+    update the main and stage queues from their durable artifacts or explicit optional-stage state.
+11. **GUI-11 — User-space path policy — WSL pass:** replace launch-time
+    allowed roots with a denylist of operating-system directories and symlink rejection. Remove
+    the obsolete visible root list and all recursive filesystem searches.
+12. **GUI-12 — Native Inspect picker — WSL Chrome/Firefox pass:** replace the
+    custom server filesystem picker for the inspect input with one native audio-file picker. Copy
+    only the explicitly selected source into owned session-local work storage, show Working/Done
+    feedback, and promote it to durable managed storage when staged as specified by GUI-37. An
+    unstaged selection is deleted at GUI shutdown. Do not offer a native directory picker because
+    its browser-controlled all-files warning cannot be suppressed; retain direct output-path entry.
+13. **GUI-13 — Workspace removal and backup location — WSL pass:** permit
+    deletion of one selected saved-workspace JSON without touching workflow artifacts, and accept
+    an optional user-space workspace storage directory so state files can be included in backups.
+    A browser-native selected workspace JSON can be imported into that catalog without a
+    directory-picker warning.
+14. **GUI-14 — Saved-state validation and controls — WSL pass for default/custom storage:** save with empty or custom user-space storage
+    directory; keep the client/server field contracts in sync and align all saved-state buttons.
+15. **GUI-15 — Output-root chooser — WSL pass; portability tracked in GUI-40:** choose the shared Inspect and plan output directory using
+    an operating-system folder dialog without the browser's upload-all-files prompt.
+16. **GUI-16 — Queue readability — WSL pass:** align action buttons in every stage queue; show imported
+    result filenames, with full paths available on hover, instead of temporary path strings.
+17. **GUI-17 — Correction reopening — WSL pass:** reopening skipped correction clears its skip state and
+    re-enables that specific item for correction selection.
+18. **GUI-18 — Review preview handoff — WSL pass:** after Preview, scroll to Apply verified revision.
+19. **GUI-19 — Dictionary version labels — WSL pass:** show an English dictionary's version once, with
+    accurate, distinct versions for each installed edition.
+20. **GUI-20 — Batch translation and semantic handoff — WSL/provider pass:** process every selected eligible item
+    once, save each translation candidate, and open each in semantic review with nonempty targets.
+21. **GUI-21 — Import diagnostics — WSL pass:** show the specific per-item failure in correction and other
+    stage queues when an imported canonical result cannot be used.
+22. **GUI-22 — Bulk translation skip — WSL pass:** selected queue items can skip assisted translation
+    without single-item path fields; all selected statuses update independently.
+23. **GUI-23 — Durable review output — WSL pass:** applied revisions, saved reviews, and exports go to the
+    user's chosen output root, never session-local picker storage; block ambiguous output roots.
+24. **GUI-24 — Clear current state — WSL pass:** an explicit warned confirmation clears the active queue and
+    unsaved form state without deleting saved workspaces or publication artifacts.
+25. **GUI-25 — WSL launch diagnostics and fallback — WSL pass through GUI-36:** reproduce why automatic host-browser
+    opening regressed; use a tested WSL host opener and surface a concise actionable failure
+    rather than silently succeeding when no browser opened.
+26. **GUI-26 — Folder chooser fallback — WSL pass; portability tracked in GUI-40:** handle unavailable Windows interop/desktop dialogs
+    without cancelling the workflow. Prefer a working local OS folder picker, preserve typed
+    paths, and report why a picker could not start; never invoke a browser folder upload.
+27. **GUI-27 — Workspace save with session-picked files — WSL pass for saving, recovery extended in GUI-37–38:** saving a workspace must not fail merely
+    because the form contains a GUI-owned temporary selection path. Default and custom storage
+    directories both work while preserving validation of durable referenced paths and secrets.
+28. **GUI-28 — Transcription table proportions — WSL pass:** keep filename columns readable and arrange
+    completion indicators in 2–3–2 rows inside Job and settings at normal browser widths.
+29. **GUI-29 — Non-destructive import prerequisite — WSL pass after manual output-path entry:** if output root is missing, retain the
+    user's selected canonical files in the browser until a root is chosen and then finish the
+    import without requiring another native file-dialog selection.
+30. **GUI-30 — Versioned canonical import names — WSL pass for S0E02:** accept validated canonical result files
+    whose filename has a legitimate `_results_vNNN.json` suffix, while still rejecting other
+    JSON types; explain any true validation failure precisely.
+31. **GUI-31 — Reliable bulk correction skip — WSL pass:** the first click must update every selected
+    actionable item, even while queue refreshes occur, with a per-item outcome summary.
+32. **GUI-32 — Per-item semantic review identity — WSL pass:** switching or reopening A/B and other
+    episodes must load each exact saved translation draft, preserving their distinct unsaved
+    edits or explicitly asking before discarding them; transient editor-layout changes must
+    not leave the previous episode on screen.
+33. **GUI-33 — Preview translation saves draft — WSL pass:** Preview translation saves dirty target edits
+    first, then validates the just-saved draft; Apply remains an explicit verified action.
+34. **GUI-34 — Integrated GUI preview 0.20.0 — owner qualification pending:**
+    The [integrated preview](28-integrated-gui-preview.md) adds stage navigation, PL/EN, themes,
+    branded local assets, real multi-audio selection, cursor splitting and dynamic speaker colors.
+    Use the consolidated owner plan rather than separate acceptance rounds.
+    The 2026-11-18 pre-GUI launch blocker was traced to running `uv` in the separate
+    waveform project; [diagnosis and retest checkpoint](checkpoints/2026-11-18-gui-launch.md).
+    Launch from the transcription checkout, then collect the actual WSL backend error
+    if transcription still fails. The owner workflow/visual qualification remains pending.
+    The subsequent [dependency/settings checkpoint](checkpoints/2026-11-18-gui-dependency-repair.md)
+    identifies the actual pyannote/TorchCodec FFmpeg ABI failure and implements private native
+    repair, Settings diagnostics, Ubuntu 26.04 acceptance and compact queue columns. VM native
+    decoding and 72 browser cases passed; that checkpoint left the real RTX 3090 retry pending.
+    The owner subsequently passed local-only ASR through source subtitle export on WSL/RTX 3090.
+    [Guided workflow and prototype reconciliation](29-guided-workflow-and-prototype.md) adds
+    per-stage instructions, compact review/queue layout, live speaker profiles, caret/state
+    fixes, growing text fields and the recording-queue/stage/context shell. New usability
+    changes still need the owner retest; provider/zoom/YouTube qualification remains separate.
+    The subsequent [workflow polish checkpoint](checkpoints/2026-11-18-gui-workflow-polish.md)
+    tracks episode inspection/progression, state-aware recording navigation, completed-only
+    cleanup, versioned dictionary management, configured/custom palettes and translation/layout
+    feedback. Keep its owner retest pending. After GUI fixes/tweaks, prepare a frontend-only
+    artist review package for icon design. That package was subsequently delivered and sent; it is now frozen per the owner scope above.
+    The [localization/recovery follow-up](checkpoints/2026-11-18-gui-localization-and-recovery.md)
+    covers the owner’s Polish UI audit, per-recording language, later queue starts and applied
+    translation recovery, plus revised EN/PL review actions. English stays authoritative.
+    At feature completion, produce the complete editable EN–PL string-pair file for owner approval,
+    then prepare full Polish user documentation; this is tracked separately from the artist reference package in TODO.md.
+    **GUI-34a earlier slice:** GUI-34a implements responsive access
+    to existing queues/review controls, retaining the locally scrollable table and existing workflow.
+    Headless model-free browser checks pass; Windows/WSL and actual 200% browser zoom acceptance
+    remain pending. See [GUI-34a verification](27-gui-34a-verification.md). The integrated preview now includes branding, PL/EN, explicit
+    system/light/dark preferences and stage navigation, with owner qualification pending.
+35. **GUI-35 — Provider-batch manual qualification — WSL/provider pass:** after the above
+    fixes, run the authorized two-item correction/translation provider test without duplicate
+    requests and confirm per-item semantic-review targets.
+36. **GUI-36 — Explicit WSL `/init` Windows interop — WSL pass:**
+    Python's direct `powershell.exe`/`cmd.exe` child launch returns `Exec format error` in the
+    operator VM because its transparent binary-format registration is unavailable. Retry the
+    Windows host browser and folder dialog through WSL's `/init` bridge; do not invoke noisy
+    `gio` on WSL, and report the real failure if host launch still does not work.
+37. **GUI-37 — Durable browser-selected queue sources — WSL pass:**
+    validate selected canonical JSON, preserve it content-addressed under the user's output root,
+    and restore its hash-bound queue entry after the GUI/VM restarts. Promote browser-picked audio
+    when staged; leave existing files untouched and never use a session `/tmp` source as the only
+    restorable identity.
+38. **GUI-38 — Checkpoint dirty reviews with workspace save — WSL pass:**
+    explicit Save current work state first persists open dirty transcript/translation drafts to
+    authoritative output files, then saves the non-secret workspace record. A failed draft save
+    must not claim the workspace was saved; restore should reopen the exact saved review.
+39. **GUI-39 — Managed durable-source cleanup — WSL pass:** provide a guarded inventory and cleanup
+    action for `.ewp-gui-sources`. It may delete a copy only after confirming that no active queue
+    or known saved workspace references it and no review/revision lineage still needs it. Copies
+    that fail validation or remain referenced are visible but ineligible for deletion.
+40. **GUI-40 — Cross-deployment output selection — implemented locally, pending bare-metal and
+    container qualification:** keep one browser control and server path contract while adapting
+    the dialog to the deployment: Windows host dialog for WSL; Zenity, KDialog, or Yad for a Linux
+    desktop; direct paths within explicit mounts for headless/Docker. Do not use directory upload,
+    which exposes contents rather than a usable server path. Investigate browser-owned writable
+    handles only as a separate client-managed output architecture, never as a Firefox-compatible
+    path picker for the existing server pipeline.
+41. **GUI-41 — Intentional empty translation units — WSL pass:** an
+    explicit, default-off **Allow empty translation units** confirmation permits intentional
+    omissions while unchecked review remains fail-closed. Translation schema 1.1 and audits retain
+    the source-bound status; preview and Apply bind the same setting; derived exports omit the unit
+    without blank cues or placeholders. Legacy schema 1.0 remains readable.
+42. **GUI-42 — Resolved workflow errors — WSL pass:** clear a queue item's stage error after that
+    same operation succeeds, and do not display legacy error metadata over a stage whose durable
+    artifact proves completion. Acceptance: an initial consent or review failure disappears from
+    every queue after a successful retry.
+43. **GUI-43 — Missing durable-source diagnostic — WSL pass:** when a referenced
+    `.ewp-gui-sources` file was removed externally, identify the missing source instead of returning
+    generic `GUI_REVIEW_REQUEST_INVALID`, stop only the affected item, and tell the operator to
+    add the original canonical result to the queue again.
+44. **GUI-44 — Remove selected queue items — WSL pass:** provide a warned batch action that forgets
+    selected inactive queue items from the current work state without deleting their source,
+    review, revision, candidate, or export artifacts. Queued/running transcription remains
+    protected from removal.
+45. **GUI-45 — Preview-only Apply guidance — WSL pass:** update Apply's
+    disabled tooltip to require only Preview, and have transcript Preview save a dirty draft before
+    validating it just as semantic-translation Preview does.
+46. **GUI-46 — Translation provider default — WSL pass:** make OpenRouter the initial translation-provider choice while
+    preserving explicit provider controls and consent. Switching the known Gemini default to LM
+    Studio resets the model field to the qualified Bielik model rather than retaining an invalid
+    cloud model ID.
+47. **GUI-47 — Versioned-result workflow progress — WSL pass:** discover
+    correction, accepted revision, and original-export artifacts using the canonical result's
+    `_vNNN` identity. Applying and exporting a revision of a versioned imported result must turn
+    the corresponding stages green rather than leaving them pending.
+48. **GUI-48 — Non-color workflow status — WSL pass:** completed
+    workflow circles contain a visible check mark and errors contain a geometrically centered X,
+    in addition to their green/red color, written stage label, and state tooltip.
+49. **GUI-49 — Resilient workspace save after path changes — WSL pass:**
+    changing the shared output directory refreshes the default correction, review, translation,
+    and dictionary roots. Explicit workspace save clears unavailable dormant file fields and omits
+    unavailable inactive queue history with visible counts instead of rejecting all remaining
+    state; invalid and prohibited paths still fail closed.
+50. **GUI-50 — Review-session-aware managed cleanup — WSL pass:** include
+    the latest and per-result hidden review-session pointers in the managed-source reference audit,
+    normalize exact reference paths, and clear browser form fields that name a deliberately deleted
+    managed source. A canonical copy needed by **Restore saved review** must never be selectable.
+51. **GUI-51 — Intentional-omission export provenance — WSL pass:** export
+    provenance v2 records the intentional-empty unit count and states that derived outputs omit
+    those units without placeholders.
+52. **GUI-52 — Managed-inventory action feedback — WSL pass:** Refresh
+    source inventory and cleanup use the same adjacent **Working…**, **Done!**, and error feedback
+    as other GUI actions instead of relying only on the page-level activity indicator.
+53. **GUI-53 — Explicit workspace auto-save — WSL pass:** auto-save remains
+    available after an explicit save/load but defaults off. Its label and help state that enabling
+    it replaces the recovery point after queue changes, which can remove a saved-workspace
+    retention reason from managed-source inventory.
+54. **GUI-54 — Unified saved-workspace catalogs — WSL pass:** the Saved
+    workspaces list combines the private default catalog with the currently selected custom
+    catalog, labels each origin, and routes load, overwrite, delete, import selection, and auto-save
+    to the owning catalog. Equal imported workspace IDs in different catalogs remain distinct.
+55. **GUI-55 — Remove unavailable saved workspaces — WSL pass (owner confirmed):** workspace
+    records whose referenced files no longer exist remain selectable. Restore and auto-save are
+    disabled, while confirmed deletion remains available and removes only the stale workspace JSON.
+
+Planned capabilities:
+
+- file, directory, and group selection;
+- add and qualify optional cloud-based speech-to-text providers for hardware-constrained
+  environments. Local transcription remains the default local-first path, but a cloud adapter
+  may let the application operate as a light orchestration/review/export client when the operator
+  explicitly accepts that media and transcript data leave the machine. It must retain provider,
+  model, endpoint, cost/usage where available, consent, source identity, and failure provenance;
+  produce the same canonical-result contract or fail closed; and receive separate accuracy,
+  timing, privacy, retry, and manual-workflow testing before it is presented as supported.
+- dry-run preview;
+- audio-stream selection;
+- per-file language selection and speaker-count selection, including clearly labeled
+  automatic choices and the later ephemeral auto-discovery research mode;
+- persistent named media/project roots managed through an explicit local configuration or launch
+  workflow, so ordinary use does not require repetitive path flags while browser requests remain
+  unable to grant themselves broader filesystem authority;
+- content-aware input validation and time-of-check/time-of-use protection: retain strict JSON
+  parsing and FFprobe decoding, then compare exact source fingerprints again when a staged job
+  starts. This pre-open fingerprint check is implemented; evaluate an optional owned immutable
+  input snapshot for workflows where files may change during processing, because a check alone
+  cannot eliminate every race before a decoder opens the file. Do not rely on filename extensions
+  or non-portable long-lived locks alone;
+- warning display and job queue;
+- support directory scanning and checkbox selection of recognized canonical JSON results for
+  later correction, review, and translation queues. The first queue presentation slice now
+  derives visible per-item queues from completed GUI transcription records; directory scanning
+  remains required to include independently discovered canonical results. Every workflow stage
+  should expose a compact per-item queue with the same grey/green/red/blue legend, allowing work
+  to resume at any stage;
+- make each stage queue an expandable, visible control surface even when it contains only one
+  item. It must let an operator reopen or restart that specific stage for any queued item rather
+  than relying on whichever document was most recently open. Correction and translation queues
+  must additionally support explicit checkbox bulk selection and **Select all**, while preserving
+  individual dictionaries, consent, provenance, retry bounds, error isolation, and review gates;
+- after the individual optional LLM stages are fully qualified, add explicit batch correction and
+  batch translation operations for compatible queued items. They must preserve the same per-item
+  consent, provenance, bounded retry, resumable state, error isolation, and manual-review gates
+  as individual operations; they must not be implemented as an unbounded loop behind a cosmetic
+  bulk button. Batch correction may start per completed cloud-backed transcription while other
+  transcription jobs continue. Batch translation must list the newest accepted revision for each
+  chosen job, allow a distinct project dictionary per item, disable completed current-version
+  items, and re-enable an item when a newer verified source revision exists;
+- an explicit visible workflow progression: transcription, transcript review (or provisional
+  export), apply and verified export, then optional translation, translation review (or
+  provisional export), apply, and verified translated export;
+- transcript correction and speaker-attribution editing;
+- hide review anchors while retaining the same internal revision mapping;
+- rebalance transcript-review anchors around a target number of visible speaker blocks while
+  preserving revision-safe word boundaries and immutable source mapping; this is an ergonomics
+  improvement, not permission to alter canonical timing or text;
+- preview revision changes without applying them;
+- re-export raw or selected revision without ASR;
+- translation and translated-text revision after those pipelines exist;
+- secure handling of optional API credentials;
+- audio-following review where useful;
+- an About section with application/version information;
+- add maintained project URL and project-website metadata when the public destination is ready;
+- a License section presenting the applicable license and warranty notice;
+- a Source Code section with a direct link to the public project repository:
+  <https://github.com/Polikles/ewp-transcripts>.
+- a manual plain-language review of all bundled and repository instructions with
+  less-technical users after the workflow stabilizes; screenshots are added after that pass.
+- a floating left-side workflow navigator, designed with the eventual podcast branding, that
+  follows the page, identifies the active file, mirrors per-stage status circles, offers direct
+  step navigation, and includes a **Back to transcription queue** action. Exact visual layout is
+  deferred until functional GUI coverage is complete.
+- replace interim CSS spinners and status circles with the approved project icon system during
+  that same branding pass, without making status depend on color or animation alone.
+- after functional GUI coverage, a dedicated frontend pass that aligns appearance with the
+  owner's other projects and adds final responsive light/dark styles;
+- add table-of-contents navigation and collapsible top-level workflow sections as correction,
+  translation, and dictionary functions make the page longer;
+- after GUI function coverage, replace the interim long page with numbered workflow tabs or
+  equivalent routed views for transcription, optional correction, review/export, translation,
+  and semantic review/export; keep dictionary and settings management in separate tabs while
+  preserving state across navigation;
+- add a bounded recent-work browser for saved GUI review sessions, labeled by optional project
+  name plus job/input identity, so recovery does not require remembering an output root; handle
+  expired temporary paths as unavailable entries;
+- replace the remaining custom Browse controls for transcript, result, dictionary, and output
+  paths with qualified native picker handoffs or explicitly documented direct entry; any selected
+  file copy must remain bounded, loopback-only, session-local, and never leave the machine;
+- an explicit light/dark mode switch in that pass; automatic system preference remains an
+  interim behavior rather than the final theme control.
+- add explicit next-step actions after apply/export that carry exact canonical, revision,
+  language, project, and output context into the following workflow; selecting a revision
+  should prefill its canonical source whenever exact lineage resolves it unambiguously;
+- make installed and custom dictionary directories discoverable through project/language/
+  version selectors, while retaining direct user-space path selection;
+- add GUI dictionary proposal, preview, decision editing, versioned publication, and audit
+  views with bundled plain-language workflow documentation;
+- persist non-secret preferences such as common output roots and dictionary locations;
+  application settings must support versioned import/export, with a deliberate option to
+  include or omit custom dictionaries and no secret/API-key export;
+- add explicit Save current work state and Load previous work state actions. A versioned
+  server-side workspace record should restore all non-secret fields, staged artifact paths,
+  terminal queue history, open saved review, and current workflow step after a full
+  workstation/VM restart, while revalidating safe paths and hashes and never persisting
+  credentials or unsaved edits. Terminal history and hash-bound staged jobs are implemented;
+  interrupted GPU work remains intentionally non-resumable;
+- when functional GUI work is complete or nearly complete, qualify one full cross-directory
+  workflow with several inputs and one shared output root: transcription, optional correction,
+  manual verification/export, translation, semantic review, and translated export;
+- after that end-to-end qualification, perform the dedicated GUI visual overhaul so it aligns
+  with the Ethics in the Loop blog and podcast branding;
+- shortly before public release, add an explicit Polish/English interface-language selector
+  alongside the final light/dark toggle and persist both preferences;
+- add consistent accessible information controls for unfamiliar options, beginning with
+  non-loopback endpoints, and link them to the corresponding bundled local documentation;
+- expand bundled help into a designed pipeline guide covering transcription, optional LLM
+  correction, manual verification, export, optional translation, semantic review, and final
+  translated export.
+
+The GUI calls application services directly and MUST NOT execute CLI commands as a
+subprocess or maintain a second revision/translation model.
+
+Implementation begins before Docker with the loopback server and read-only inspect/dry-run
+slice. Docker later packages the already qualified application and provides explicit host
+mounts; it does not receive a separate frontend. Browser uploads, remote listening,
+authentication, and multi-user hosting are not part of the initial GUI.
+
+## 14. Distribution
+
+No internal beta is tagged or published while requirements work continues. The first public
+release is a deliberate checkpoint immediately before Docker-image implementation begins;
+Docker artifacts are not the mechanism used to discover whether the source application is
+releaseable.
+
+- For v0.3, provide a reviewable fresh-install and verification script that installs and
+  verifies prerequisites, the locked application environment, model readiness, and
+  diagnostics while retaining explicit consent for gated model access and avoiding
+  hidden system changes. Updating an existing installation is a separate workflow and
+  must not be silently folded into the fresh-install script.
+- For v0.3, restructure the root README with concise `Prerequisites`, `How to install`,
+  and `How to use` sections. Prerequisites must summarize supported WSL2/bare-metal
+  Ubuntu shapes, required Ubuntu packages, the validated software/hardware stack, a
+  recommended minimum of 20 GB on preferably SSD storage, and the fact that RAM/VRAM
+  requirements remain pending preset validation. Installation must briefly invoke the
+  fresh-install script. Usage must show representative transcription and staged review
+  command syntax and link to the complete `Instructions/` runbook.
+- GPU-enabled Docker image;
+- pinned image versions;
+- local service/API;
+- GUI installer;
+- Ubuntu 26.04 LTS qualification;
+- planned native Windows support as a distinct convenience target; qualify native dependencies,
+  paths, media/model setup, CLI/GUI launch and installation separately from WSL.
+- Canonical repository and issue-tracker URLs are present in package metadata and release
+  surfaces.
+- Add the public project website once its address and deployment are ready.
+
+The fresh instance used for the v0.3 correction benchmarks was installed from the
+v0.2.1-era repository and supplies sufficient installation evidence for the current
+development gate. A redundant manual installation-only rerun is not required for v0.3.
+Full clean-machine validation later passed manually for the current beta line on a fresh Ubuntu 24.04.4
+WSL2 distribution, covering installation, pinned-model setup, transcription, restart-safe
+replay, automated and candidate-backed review, verified export, and local translation
+candidate/audit/review preparation. Automation is designed only after the manual procedure
+and expected evidence have stabilized.
+
+## 15. Operations
+
+- `fail-fast`;
+- explicit per-input aliases/output identities for intentionally processing separate
+  same-stem sources in one batch, without overloading result versions or context-dependent
+  canonical IDs;
+- queue scheduling;
+- automatic cleanup of old work directories;
+- optional research: quality-trend reports between releases.
+
+Before the CLI is declared ready for general users, create a top-level `Instructions/`
+directory containing a concise operator runbook for every shipped command and workflow:
+installation/model preparation, doctor, inspect, dry-run, single/group/batch transcribe,
+revision prepare/preview/apply/audit, raw/revised batch export, cleanup, warnings,
+recovery, privacy, and command-specific `--help` discovery.

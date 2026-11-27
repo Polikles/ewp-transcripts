@@ -1,11 +1,18 @@
 # Dependency Baseline
 
+Current runtime authority is the committed pyproject/uv.lock, [hardware/library policy](HARDWARE.md)
+and [AMD overlay pins](AMD_EXPERIMENTAL.md). Python3.12, torch2.8/cu128, WhisperX3.8.6, NVIDIA CT24.8.1,
+CUDA12.8.90/cuDNN9.10.2.21 remain locked; model revisions are unchanged. Current uv.lock SHA256:
+`c2966075df9ed3ebf375f4ac53033836c9b7d3285ff1190d6f7e281e1b035041`.
+Native Windows and Ubuntu24.04/26.04/WSL have separate documented qualification. Below is the
+historical Phase0 baseline, not a demand to rebuild its old environment or reopen old gates.
+
 The Phase 0 runtime dependency set was verified on **2026-08-02**. Its initially
 promoted application lock had SHA-256
 `c32602b6b9c3cf8edefdb861609029b8a05cd4ae1dd4cb51b4c69d31352a1359`.
 Later schema-validation development tooling added `jsonschema` and its lock-only
-transitive packages without changing the accepted runtime ML versions. The current
-committed `uv.lock` SHA-256 is
+transitive packages without changing the accepted runtime ML versions. At that historical checkpoint the
+committed `uv.lock` SHA-256 was
 `9e2743e7afcca09ef5a934fc1e346cc410293bdd9272b271dfde0d4a22bf18b7`.
 
 ## 1. Environment

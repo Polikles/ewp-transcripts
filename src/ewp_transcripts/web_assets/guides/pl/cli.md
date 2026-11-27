@@ -38,7 +38,7 @@ uv run --locked transcriber benchmark --help
 
 Dla zewnętrznego edytora zachowaj pola techniczne i zmieniaj wyłącznie dozwoloną treść. Najpierw przygotuj dokument, popraw tekst, sprawdź go poleceniem preview, a dopiero potem użyj apply i eksportu. W razie niezgodności źródła przywróć właściwy plik zamiast zmieniać hashe. Dokładne opcje podaje `--help` wybranego podpolecenia.
 
-Komplet zaawansowanych przykładów flag pozostaje w angielskim [runbooku CLI](../../../Instructions/README.md). Ten rozdział opisuje zwykłą obsługę terminala po polsku. Nazwy wykonywalnych poleceń, flag, pól JSON i kody diagnostyczne pozostają oryginalne. Zapisy pracy i profile obsługuj w GUI; nie istnieją domyślane polecenia o nazwach przycisków.
+Komplet zaawansowanych przykładów flag pozostaje w angielskim [runbooku CLI](https://github.com/Polikles/ewp-transcripts/blob/main/Instructions/README.md). Ten rozdział opisuje zwykłą obsługę terminala po polsku. Nazwy wykonywalnych poleceń, flag, pól JSON i kody diagnostyczne pozostają oryginalne. Zapisy pracy i profile obsługuj w GUI; nie istnieją domyślane polecenia o nazwach przycisków.
 
 ## Przykład lokalnej pracy w CLI
 

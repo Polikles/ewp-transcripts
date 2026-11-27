@@ -7,8 +7,8 @@
 | Host | Windows 11 with virtualization enabled |
 | WSL | Current stable WSL, distribution running as WSL2 |
 | Distribution | Ubuntu 24.04 LTS or Ubuntu 26.04 LTS |
-| GPU | NVIDIA CUDA-capable GPU; tested on RTX 3090 (24 GB); expected starting point >=8 GB VRAM, unqualified |
-| Driver | Current Windows NVIDIA driver with WSL support |
+| GPU | Compatible NVIDIA CC7.0+;12GB+ VRAM recommended; tested RTX3090/24GB |
+| Driver | Windows NVIDIA572.61+ with WSL support; CUDA12.8 Update1 project baseline |
 | Python | 3.12 |
 | Package manager | `uv`; dependencies are reproduced from the committed lockfile |
 | Media tools | System FFmpeg/ffprobe; compatible private FFmpeg 7 audio libraries when TorchCodec cannot use the system ABI |
@@ -29,9 +29,10 @@ snapshots, working audio, retained failure artifacts, and archive outputs. The a
 24 GiB reference GPU, but these observations are not minimum hardware guarantees.
 
 Validation was performed on an NVIDIA GeForce RTX 3090 with 24 GB VRAM. Other NVIDIA
-CUDA-capable machines with at least 8 GB VRAM are expected to work, but that is an unqualified
-owner expectation, not a measured minimum or a compatibility/performance guarantee. Memory
-needs depend on the recording and configuration; hardware-preset qualification is optional.
+Smaller compatible GPUs may work, but have not been tested and are not guaranteed. Below12GB
+VRAM use cloud ASR. Pascal/Maxwell cannot run the current local library stack; no GTX1070 tests or
+legacy profile are planned. See [current hardware/library policy](../docs/HARDWARE.md). No separate
+system CUDA Toolkit or Linux display driver inside WSL is required by that policy.
 
 ## Expected paths
 

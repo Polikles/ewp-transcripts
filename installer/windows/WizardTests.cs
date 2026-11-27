@@ -31,7 +31,8 @@ sealed partial class Wizard
         "reviewed EN/PL copy and localized project notices", "newer-installer release links in every maintenance flow", "separate smaller OpenRouter spending footnote", "application-pattern light body",
         "Install detects other roots before checks/downloads", "existing older/same/newer installation guidance", "late appearing installation blocks before operation", "consistent fresh-install 25 GB labels",
         "no installation/model/provider operation; broker transport probe only",
-        "AMD display-adapter warning, acknowledgement and mixed-GPU host result"
+        "AMD display-adapter warning, acknowledgement and mixed-GPU host result",
+        "NVIDIA architecture/driver and low-VRAM notices with cloud-safe/local-choice gates"
     ];
 
     internal async Task SelfTest(string? previewDirectory)
@@ -108,6 +109,7 @@ sealed partial class Wizard
         await TestReviewedCopy(previewDirectory);
         await TestNewInstallPreflight(previewDirectory);
         await TestAmdWarning(previewDirectory);
+        await TestNvidiaCompatibility(previewDirectory);
         var infoButton = Symbols.InfoButton("Token do pobrania pyannote. Kliknij, aby uzyskać pomoc.", () => { });
         var infoWindow = new Window { Owner = this, Content = infoButton, Width = 180, Height = 120 };
         infoWindow.Show(); infoWindow.Activate(); infoButton.Focus(); infoWindow.UpdateLayout();

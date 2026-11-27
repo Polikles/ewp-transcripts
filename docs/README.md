@@ -1,7 +1,7 @@
 # Documentation Index
 
 Start ongoing work with [TODO](../TODO.md), [WORK_STATUS](../WORK_STATUS.md) and the
-[owner scope/current roadmap](99-roadmap-v2.md#current-next-actions--2026-11-26).
+[owner scope/current roadmap](99-roadmap-v2.md).
 Older milestone procedures and checkpoints retain evidence, not competing current priorities.
 
 ## Normative documents
@@ -31,7 +31,7 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 | [22 - v0.3 automated correction](22-v0.3-automated-correction.md) | Provider-neutral correction, consent, chunking, provenance, benchmark, and acceptance contract |
 | [23 - v0.4 translation contract](23-v0.4-translation-contract.md) | Bidirectional manual-first translation artifact, workflow, and benchmarks |
 | [25 - Warning and error catalogue](25-warning-error-catalog.md) | Stable diagnostic meanings, safety implications, and operator actions |
-| [26 - Local browser GUI contract](26-local-web-gui-contract.md) | Portable WSL2/Ubuntu/Docker browser interface, security, workflows, and implementation slices |
+| [26 - Local browser GUI contract](26-local-web-gui-contract.md) | Shared native Windows/browser interface, security, workflows, and implementation slices |
 | [29 - Guided workflow and prototype comparison](29-guided-workflow-and-prototype.md) | Numbered stage guides, review usability and prototype reconciliation |
 | [GUI step instructions](gui/README.md) | Full instructions for every workflow stage and supporting tool |
 | [99 - Post-0.1 roadmap](99-roadmap-v2.md) | Prioritized correction, translation, GUI, audio, benchmark, and distribution backlog |
@@ -41,7 +41,7 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 
 - [Installer size review](INSTALLER_SIZE.md): measured payload inventory, compression and online-bootstrap boundary.
 - [Hardware recommendations](HARDWARE.md): tested NVIDIA reference, practical VRAM/RAM guidance,
-  older-card compatibility and later GTX1070 qualification.
+  exact pinned-library/driver compatibility and cloud guidance for unsupported/low-VRAM cards.
 
 - [AMD acceleration (experimental)](AMD_EXPERIMENTAL.md): implemented Windows ASR adapter,
   CPU alignment/diarization, detection/acknowledgement, pinned dependencies and untested GPU boundary.
@@ -50,8 +50,8 @@ Older milestone procedures and checkpoints retain evidence, not competing curren
 - [EN installation/update/removal](gui/installation.md) and [PL instructions](gui/pl/installation.md).
 - [Version and delivery policy](VERSIONING.md), [distribution plan](DISTRIBUTION_PLAN.md)
   and [GitHub Actions usage/costs](GITHUB_ACTIONS.md).
-- [0.26.0 qualification evidence](checkpoints/2026-11-26-snap-amd-evidence.json) and
-  [remaining action plan/backlog](99-roadmap-v2.md#current-next-actions--2026-11-26).
+- [Current documentation audit](DOCUMENTATION_AUDIT.md) and [0.26.1 qualification](checkpoints/2026-11-26-release-readiness-evidence.json) and
+  [remaining action plan/backlog](99-roadmap-v2.md).
 
 ## Architecture Decision Records
 

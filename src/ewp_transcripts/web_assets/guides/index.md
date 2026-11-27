@@ -1,6 +1,6 @@
 # User manual
 
-This manual describes the current 0.23.0 interface. Choose English or Polish in the application; recording language is a separate setting. Every guide is bundled with the program and opens without internet. The same numbered steps appear at the top of each workflow stage. Keep the application tab open while reading help.
+This manual describes the current 0.26.2 interface. Choose English or Polish in the application; recording language is a separate setting. Every guide is bundled with the program and opens without internet. The same numbered steps appear at the top of each workflow stage. Keep the application tab open while reading help.
 
 ## Start here
 
@@ -24,19 +24,21 @@ The shortest local workflow is Transcribe → Source review & export. Correction
 
 ## Recommended hardware
 
-For local ASR, a practical starting recommendation is a recent **NVIDIA RTX with 12 GB VRAM or more**,
-**32 GB RAM**, a multicore x64 CPU and an SSD. The tested reference is **RTX 3090 /24 GB VRAM**.
-The recommendation is not a qualification of every matching card; **8 GB is not yet a tested minimum**.
-Architecture matters too: current PyTorch 2.8/CUDA 12.8 binaries exclude Pascal, including GTX 1070.
-Later GTX 1070/32 GB/i5-10400F tests must establish a compatible runtime before assessing VRAM headroom.
-Allow 25 GB for initial installation plus extra models/media/outputs. Cloud ASR and result review
-need no local NVIDIA GPU. AMD Windows remains experimental, with CPU alignment/diarization.
-[Hardware detail and qualification](https://github.com/Polikles/ewp-transcripts/blob/main/docs/HARDWARE.md).
+Fully local transcription is recommended with a compatible **NVIDIA GPU and12 GB VRAM or more**,
+**32 GB RAM** and SSD. Reference tested: **RTX 3090/24 GB**.12 GB is approximate guidance; smaller
+configurations may work, but have not been tested or guaranteed. **Cloud ASR is recommended below 12 GB.**
+The locked CUDA 12.8 Update 1 pipeline needs supported Compute Capability 7.0+ hardware (Volta;
+common GeForce Turing/RTX 20xx/GTX 16xx or later), with project driver baseline Windows/WSL 572.61 or
+native Linux 570.124.06. Maxwell/Pascal, including GTX 1070, is unsupported. No separate CUDA Toolkit is
+required. Host checks explain unsupported architecture/driver or low VRAM; low-memory local use
+remains a deliberate unqualified choice. A cloud-only install/app-only update remains available.
+Allow 25 GB plus extra models/media/outputs. AMD is experimental with CPU alignment/diarization.
+[Full hardware/library policy](https://github.com/Polikles/ewp-transcripts/blob/main/docs/HARDWARE.md).
 
 ## Privacy and supported scope
 
 Local GPU transcription uses explicitly downloaded models. Optional OpenRouter ASR uploads audio; optional API correction/translation sends text. Provider checks and price refresh do not upload recordings. A candidate always needs human review. API keys and upload/verification confirmations are excluded from workspaces and profiles.
 
-This is a single-user local tool for podcasts and similar recordings, not a public multi-user web service. It binds to loopback. Reference testing used RTX 3090 with 24 GB VRAM. The 8 GB target remains unvalidated and requires a compatible GPU architecture/runtime. English is selectable; no representative English sample was supplied for the latest cloud qualification. There is no promised recognition accuracy for any language/model.
+This is a single-user local tool for podcasts and similar recordings, not a public multi-user web service. It binds to loopback. Reference testing used RTX 3090 with 24 GB VRAM. Smaller compatible configurations may work but are untested/unguaranteed; cloud ASR is recommended below12 GB. English is selectable; no representative English sample was supplied for the latest cloud qualification. There is no promised recognition accuracy for any language/model.
 
 The text manual is complete for the current user workflow. Screenshots and final icon artwork will follow separately; they are not prerequisites for using these instructions.

@@ -61,6 +61,6 @@ def build_desktop(tools: Path, version: str) -> Path:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tools", type=Path, required=True)
-    parser.add_argument("--version", default="0.26.1")
+    parser.add_argument("--version", default="0.26.2")
     args = parser.parse_args()
     print(build_desktop(args.tools.resolve(), args.version))

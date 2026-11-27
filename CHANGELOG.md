@@ -4,6 +4,19 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+## 0.26.2 — 2026-11-27 (NVIDIA compatibility and documentation reconciliation)
+
+- Check NVIDIA Compute Capability, driver and per-card VRAM against the locked CUDA12.8 Update1
+  library baseline. Explain unsupported/unknown devices and older drivers with cloud-ASR guidance.
+  Warn explicitly for compatible cards below the approximate12GB recommendation without forbidding
+  a deliberate low-memory local choice. Preserve cloud installation and app-only maintenance.
+- State12GB+ VRAM as approximate fully local guidance in README, Settings & About and EN/PL help;
+  smaller configurations may work but are untested/unguaranteed and should use cloud ASR.
+- Reconcile requirements/current docs and archived planning chronology; retain exact historical
+  snapshots. Record owner theme/size acceptance, cancel GTX1070/telemetry and further slimming,
+  and keep signing/first-release planning next with optional enhancements after publication.
+
+
 ## 0.26.1 — 2026-11-26 (themed startup and compact packaging)
 
 - Match the initial native shell, empty WebView and shutdown surface to the saved application
