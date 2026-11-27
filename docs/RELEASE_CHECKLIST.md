@@ -9,7 +9,8 @@ Upcoming implementation must enforce machine-checkable gates; this file is not a
 - Version / source commit / workflow run / platform assets:
 - Owner scope and publish decision:
 - Signing status (early unsigned releases are permitted):
-- Applicable first-release gates and recorded exceptions:
+- Required first-release gates: verified attestations; owner-approved general report AND privacy policy.
+- Gate evidence/approval references (these requirements cannot be silently waived):
 
 ## Before publication
 
@@ -17,19 +18,21 @@ Upcoming implementation must enforce machine-checkable gates; this file is not a
 - [ ] README, EN/PL instructions/offline mirrors and hardware requirements match actual package.
 - [ ] Licenses/notices/dependency and asset attribution match actual package; no project comments
       masquerade as license terms. No unapproved translation/rewrite of original licenses.
+- [ ] FIRST RELEASE: owner has approved the general cybersecurity report AND privacy policy;
+      approval/version/source references recorded. Later releases review changes against that baseline.
+      Private reports are not copied to Git before owner approval. Framework mapping is separate.
 - [ ] Privacy/security description matches changes; open findings and accepted limitations recorded.
-      Private review reports are not copied to Git before owner approval.
 - [ ] Relevant static/unit/integration/dependency/security and native lifecycle checks have evidence.
 - [ ] Full profile export/import/transfer scenario: available Windows/WSL pair, dictionaries/palettes,
       missing media/paths, idempotent import, credential/consent exclusion, paused queue. Record
       exact tested scope or owner-approved exception; do not label unavailable scope PASS.
 - [ ] Actual browser200% zoom: navigation, dialogs, queue, review, LEFT player and focus/scroll.
 - [ ] Native/package manifests, committed payload, versions, final sizes and all hashes verified.
-- [ ] Actual final distributed bytes have verified provenance once REL-01 is implemented; expected
-      repository/workflow/commit/digest checked. Any exception is explicit, never a fabricated pass.
+- [ ] Actual final distributed bytes have verified attestations; expected repository/workflow/
+      commit/digest checked. REL-01 MUST be implemented before first release; no missing pass inferred.
 - [ ] Unsigned/signed status, relevant warnings and verification steps are accurate and visible.
 - [ ] Bootstrap URLs and embedded hashes prepared for this exact immutable public version.
-- [ ] Versioned releases/ metadata and proposed retention/archival meet the accepted storage decision.
+- [ ] Versioned releases/ metadata links to the actual Release assets; retention/archival follows the accepted design.
 - [ ] Owner explicitly approves publication after reviewing the complete candidate/evidence.
 
 ## After publication

@@ -7,13 +7,17 @@ before work. Product0.26.2 and prior owner UI/lifecycle acceptance remain qualif
 Owner plan revision2026-11-27 supersedes the mandatory-signing rule: early public releases MAY BE
 UNSIGNED. Actual signing procedure/private instructions/keys stay outside Git; later free OSS
 signing research may use owner-approved Actions, not a paid certificate commitment.
-NEXT: resolve release gates/storage and prioritize SEC/PRIV/REL/INST tasks. General cybersecurity
-report FIRST local EN OUTSIDE Git; then owner approval before publishing. Applicable frameworks
+NEXT: SEC-01/PRIV-01 general local EN report/policy and REL-01 attestations. Owner confirmed BOTH
+as first-release gates. All six policy answers settled: Release assets/index accepted; quick update
+AFTER first release; Store model-free/cloud-first; shared EXE/Store hardware tiers, including
+compatible6–8 GB/older NVIDIA experimental; publisher/contact approved in SECURITY_REVIEW_PLAN. General cybersecurity
+report FIRST local EN OUTSIDE Git, including DEV VM authentication/permissions/credential lifecycle
+and compromise tradeoffs (no secret values); then owner approval before publishing. Applicable frameworks
 and separate mapping follow the general report. Existing technical docs are not a complete user
-privacy policy. Attestations are prioritized early; current CI permissions were not changed.
-Quick update is planned. Required GH Pages follows first release per latest owner sequencing.
+privacy policy. Required attestations are not yet implemented; current CI permissions unchanged.
+Quick update is planned AFTER first release. Required GH Pages follows first release per latest owner sequencing.
 MSIX/Store is an independent post-release research channel, preserving installed CLI and optional
-model setup. Future proposed Store hardware tiers are not current installer code or qualification.
+model setup. Agreed shared EXE/Store tiers await HWPOL-01; they are not current installer code or qualification.
 Remove highlighting, separate reader tests and benchmark programs old5.12–5.14. Bound audio prep;
 separate poor-audio attempt with one-file repaired/composite export; sound detection experimental.
 Profile transfer/200% zoom are upcoming-release scenarios. Physical AMD/other NVIDIA unavailable,

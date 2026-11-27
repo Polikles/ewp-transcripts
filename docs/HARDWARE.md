@@ -56,5 +56,25 @@ Fresh installation needs 25 GB on the target volume, plus additional models, med
 model cache may be on another volume. Cloud ASR and existing-result review do not require a local
 NVIDIA GPU. Cloud operations still need a key/network and exact explicit upload/text consent.
 Owner accepts the compressed 142 MB self-contained installer; no further slimming or downloader is
-planned. Artist work is non-blocking. Early releases may be unsigned; production attestations and release preparation are planned;
+planned. Artist work is non-blocking. Early releases may be unsigned; verified production attestations
+and approved general security report/privacy policy are required before first release;
 no physical-GPU/provider tests or public release are implied by these recommendations.
+
+## Agreed next hardware policy — EXE and Store
+
+Owner answers2026-11-27 apply this classification to BOTH classic EXE and the future Store/model
+wizard. HWPOL-01 will implement it; the delivered0.26.2 behavior documented above has not changed.
+The Store package initially has no speech models: cloud ASR/optional cloud correction first, then
+an explicit Settings wizard can add local models on qualifying hardware.
+
+| Planned local category | Rule, after checking actual architecture/driver/runtime compatibility |
+| --- | --- |
+| Does not meet requirements | Unsupported architecture/runtime/driver, or less than6 GB dedicated VRAM. Cloud ASR remains available. |
+| Experimental | Any compatible6 to less than8 GB card; compatible older NVIDIA generations such as RTX20xx, even with more VRAM; compatible AMD with8+ GB; compatible NVIDIA RTX30xx or newer with8 to less than12 GB. May or may not work; untested/no guarantee. |
+| Expected to work | Compatible NVIDIA RTX30xx or newer with12 GB or more. Exactly12 GB goes here. Capacity guidance, not physical qualification or an all-model/performance guarantee. |
+| Unverified | Missing/ambiguous device or memory/driver metadata: explain diagnostics/cloud fallback; never fabricate a successful category. |
+
+Unsupported Maxwell/Pascal cannot be made experimental merely by having enough memory: pinned
+libraries still need executable kernels. For AMD, capacity alone does not establish HIP support.
+Use the actual selected GPU, do not sum separate GPUs' memory. A memory warning/experimental
+choice cannot bypass model/driver/runtime checks. No new physical-card test campaign is planned.

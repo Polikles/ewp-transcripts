@@ -9,7 +9,10 @@ The first several public releases may be **unsigned**. The former mandatory pre-
 rule is withdrawn. State unsigned status plainly in download/release instructions. Do not promise
 that Windows trust/reputation prompts disappear or ask users to disable system security.
 
-Prioritize GitHub artifact attestations for production releases early, preferably first release.
+GitHub artifact attestations with successful final-artifact verification are REQUIRED for the first
+public release and subsequent releases. Owner decision2026-11-27 also requires approval of the
+general cybersecurity report AND privacy policy before the first release; framework mapping is
+a later stage, not an extra gate. Quick update is explicitly AFTER first release.
 An attestation links a digest to build identity; it is not Windows Authenticode, a malware verdict,
 or certification. Verification must check the expected repository/workflow/source, not just the
 existence of any attestation. Keep the artifact immutable after checksum/provenance generation.
@@ -35,7 +38,7 @@ No paid certificate, account application or service authorization follows from t
    in upcoming-release scenarios; unavailable GPU/annotated-corpus campaigns remain unscheduled.
 5. Build once from clean reviewed source with pinned tools/dependencies. Verify manifests, packaged
    source, all digests and native startup. Preserve previous published/qualified artifacts.
-6. Generate/verify release attestations once implemented; preserve verification instructions and
+6. Generate/verify release attestations (implementation is required before first release); preserve verification instructions and
    retrievable provenance beyond CI artifact expiry. SBOM/dependency inventory evaluation belongs
    in supply-chain work; never claim an SBOM exists until generated and checked.
 7. Require an explicit owner release decision with a completed per-version checklist. Prepare a
@@ -49,10 +52,10 @@ No paid certificate, account application or service authorization follows from t
 ## Storage decision
 
 The owner wants releases/ in the repository. Current EXE142200142bytes exceeds ordinary Git's
-100 MiB file limit. Proposed design: releases/<version>/ metadata, hashes and links, with actual
+100 MiB file limit. Owner-ACCEPTED design: releases/<version>/ metadata, hashes and links, with actual
 EXE and future approved MSIX/DEB assets in GitHub Releases. GitHub documents a per-release-asset
-limit below2 GiB and no total release size/bandwidth limit. LFS is an alternative needing explicit
-quota/billing review; no LFS setting or budget is enabled by this plan. DEB remains a possible
+limit below2 GiB and no total release size/bandwidth limit. LFS is not selected; no LFS setting or
+budget is enabled. DEB remains a possible
 asset format, not an approved new packaging implementation.
 
 ## Enforcement status
@@ -64,9 +67,11 @@ standard runners,7-day CI artifact retention and zero paid budgets. Evaluate sol
 mechanics; do not assume GitHub's prevent-self-review setting permits the owner to approve their
 own run. Release assets/provenance must outlive the temporary CI artifact retention.
 
-Open decisions: first-release gating of security-report approval/privacy policy, attestations and
-quick update; storage; exact site timing. Latest owner statement places required Pages deployment
-after first release. No public deployment is performed by this document change.
+The six owner decisions are settled: Release assets/index; required verified attestations and
+approved general report/policy; quick update AFTER release; Store initially model-free/cloud-first;
+shared EXE/Store tiers with compatible6–8 GB/older NVIDIA experimental; publisher/contact approved.
+Required Pages deployment remains immediately after first release. This document does not attest,
+approve a report/policy, implement hardware gates or publish anything.
 
 Primary sources checked2026-11-27:
 

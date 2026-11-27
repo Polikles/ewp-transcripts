@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "baseline": "1289414",
+  "scope": "Record six owner policy answers; no implementation/publication",
+  "markdown_documents": 299,
+  "local_links_checked": 562,
+  "maintained_link_errors": 0,
+  "historical_broken_paths_preserved": 9,
+  "requirements_traced": 153,
+  "historical_snapshots_unchanged": 7,
+  "runtime_and_ci_unchanged": true,
+  "application_tests_rerun": false,
+  "product_version": "0.26.2",
+  "portable_files": [
+    {
+      "file": "Plan-projektu-EwP-2026-11-27-v3.txt",
+      "sha256": "276bbca912f269b310157ebe2d6bf9432a7de23dc4ed5bfd2dcc67dfbd474f1c",
+      "bytes": 15677
+    },
+    {
+      "file": "Decyzje-planu-EwP-2026-11-27.txt",
+      "sha256": "1158fc40f935e0511b865e6b1ef46dfb8009e8f88214012d065440aaf19e1162",
+      "bytes": 2006
+    }
+  ],
+  "all_six_owner_decisions_settled": true,
+  "next": "SEC-01/PRIV-01 local EN report/policy and REL-01 required attestations"
+}

@@ -49,6 +49,21 @@ Review layers and trust boundaries:
    inputs, logs/artifacts/provenance, unsigned download threats and future channel isolation.
 9. Operational communication: reports/support attachments, crash traces, security contact,
    vulnerability response, dependency advisories, privacy claims and noncommercial solo maintenance.
+10. Development VM and development tooling: inventory authentication PER CHANNEL, including Git
+    SSH/Deploy Keys, SSH agent/forwarding, PAT/fine-grained PAT, gh/HTTPS credential helpers,
+    GitHub App/OAuth/MCP/connected-service access and CI GITHUB_TOKEN/OIDC where applicable. Determine
+    which identity supplies each function (read repo, push, API, Actions/artifacts, releases/Pages,
+    packages and administration), credential location/ownership, repository versus account scope,
+    read/write/privilege limits, expiry/rotation/revocation and host verification. Do not assume
+    PAT or Deploy Keys merely from a successful push, or equate connector-held credentials with
+    secrets stored on the VM. Mark service/account-side facts that cannot be inspected as unknown.
+    Review VM user/root privileges, filesystem permissions, agent sandbox/approval boundaries,
+    remote access, caches/logs/process environment, backups/snapshots and private corpus/report
+    locations. Assess compromise blast radius, credential theft/abuse, shared-machine and supply-
+    chain risks, developer/assistant/tool data disclosure and least-privilege versus convenience.
+    Read only non-secret configuration, identities and metadata needed for evidence: never print
+    PAT values, private keys, auth headers, credential-store payloads or a wholesale environment
+    dump. Record actual capabilities separately from permissions merely requested by tooling.
 
 Deliver: executive summary; component/data-flow and persistence tables; threat actors/boundaries;
 code/config references; tests actually performed; findings by likelihood/impact/confidence;
@@ -61,9 +76,12 @@ No blanket claim of encryption, safety or absence of uploads based only on tests
 Explain local processing and all optional external calls, what is written where, retention/deletion,
 credentials and consent, installation/update traffic, OS/third-party boundaries, metadata/path privacy,
 user controls, limitations and contact/version/effective date. Determine whose data flows to whom;
-do not equate the app user's controller responsibilities with the project's own role. Obtain owner
-identity/contact privately. Prepare EN first; PL/public links follow review. Confirm first-release
-timing with owner rather than inventing a legal/publication gate in this plan.
+do not equate the app user's controller responsibilities with the project's own role. Owner-approved
+publisher/contact: **Damian Szczęch**, **szczech.dam+transcripts@gmail.com**. Use this supplied address
+for privacy/security correspondence; do not silently rewrite separate licensing-inquiry contacts
+or approved legal text. Determine actual legal roles from evidence, not the contact label alone.
+Prepare EN first; PL/public links follow review. Owner approval of BOTH the general report and
+privacy policy is a confirmed first-public-release gate. Framework mapping is a subsequent stage.
 
 ## SEC-02 — frameworks AFTER the general report
 

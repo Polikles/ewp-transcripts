@@ -28,12 +28,12 @@ AMD Windows ASR remains experimental/physically untested; alignment/diarization 
 
 | Stage / ID | Work / dependency |
 | --- | --- |
-| SEC-01 | General code-grounded security/privacy report, EN, LOCAL OUTSIDE GIT first. Owner approval precedes publication. |
-| SEC-02 | After the general report: applicable-framework research, then separate local EN mapping (ISO 27001/42001, GDPR and selected additional frameworks). |
-| PRIV-01 | Inventory actual privacy behavior; prepare/review a complete user-facing policy. Existing technical docs are not a complete published policy. |
-| REL-01 | Prioritize production artifact attestations early, preferably first release; final-byte provenance and verification, limited permissions, no Windows-signature claim. |
-| INST-01 | Existing-install quick entry: older → Quick update; same → Repair/reinstall; newer → linked newer installer; Other actions always available. Timing and multiple-root selection need agreement. |
-| REL-02 | Decide binary storage/retention. Actual ~142 MB EXE exceeds Git's 100 MiB limit; proposed releases/ index with versioned metadata and GitHub Release assets. Preserve 2–3 versions, decide older archival. |
+| SEC-01 | FIRST-RELEASE GATE: general code-grounded security/privacy report including DEV VM access/authentication/permissions and compromise tradeoffs, EN, LOCAL OUTSIDE GIT first; owner approval required before release/publication. |
+| SEC-02 | After general report: applicability research and separate local EN framework mapping; not an additional first-release gate. |
+| PRIV-01 | FIRST-RELEASE GATE: prepare factual privacy policy, obtain owner approval. Publisher/contact approved; actual processing roles need review. |
+| REL-01 | FIRST-RELEASE GATE: implement and verify final-byte artifact attestations, with limited permissions and no Windows-signature claim. |
+| INST-01 | Existing-install quick entry: older → Quick update; same → Repair/reinstall; newer → linked newer installer; Other actions always available. AFTER first release; safely select target if multiple roots exist. |
+| REL-02 | Implement ACCEPTED GitHub Release assets plus versioned releases/ metadata/links/checksums; no large EXE Git blobs or LFS. Preserve 2–3 versions, decide older archival. |
 | REL-03 | Final version/source/package, changelog and release description, matching docs/hardware/licenses/notices, per-version checklist and owner publication decision. |
 | REL-04 | Deliberate first public release, then actual download/bootstrap/hash/provenance verification. |
 | WEB-01 | Required GitHub Pages site AFTER first release per the owner's final sequencing statement; prepare earlier, link repository/latest installer/versioned Releases and privacy/verification information. |
@@ -55,6 +55,8 @@ Current CI remains its two standard public jobs; zero paid budgets and 7-day art
 | Topic | Retained scope / boundary |
 | --- | --- |
 | STORE-01: MSIX / Microsoft Store | Independent distribution in addition to EXE; solo individual account, Store signing/update delivery, optional local-model wizard and separate cloud/local hardware listing. [Research plan](MSIX_STORE_PLAN.md); no Store publication yet. |
+| HWPOL-01: shared hardware policy | Implement owner-approved EXE AND Store tiers in HARDWARE.md; compatible6–<8 GB/older NVIDIA experimental, no physical qualification claim. |
+| INST-01: quick update | AFTER first release, implement the version-aware entry described above. |
 | Ollama/local API adapters | Retain optional Ollama expansion. LM Studio/OpenRouter already exist. |
 | Alignment/timing | Focused improvements only; no manual timing override editor. |
 | Core CLI directory discovery | FR-A05/ADR-0017: content-based ffprobe discovery, safe non-media skips/probe reuse. Follow with documentation/CLI pipeline review. The installed app must continue to expose CLI usage. |
@@ -88,20 +90,22 @@ Current CI remains its two standard public jobs; zero paid budgets and 7-day art
   chunking, owned input snapshots and unselected scheduling/auto-maintenance.
 - Voice biometrics/cloning datasets, clock-drift correction and distributed/multi-GPU processing.
 
-## Open owner decisions
+## Owner answers — all six decisions settled
 
-1. Accept Release assets plus releases/ metadata instead of actual large EXE Git blobs, or choose LFS
-   with separately reviewed quota/billing consequences. No LFS/billing change has been enabled.
-2. Which first-release gates: general security report approval/privacy policy, attestations,
-   quick-update implementation? The plan prioritizes them but does not invent a gate or waive risk.
-3. Store wording: app without bundled models with cloud ASR available, or genuinely local-ASR-only?
-4. Scope and gaps of proposed Store/model-wizard hardware tiers (6–8 GB, older NVIDIA, unknown devices).
-5. Identity/contact and applicable audience/roles for privacy and security reporting, supplied privately.
+1. Storage ACCEPTED: actual binaries as GitHub Release assets; releases/ metadata/links/checksums.
+2. Verified attestations AND approved general cybersecurity report/privacy policy before first
+   release; quick update AFTER first release. Framework mapping is subsequent, not a new gate.
+3. Store begins model-free/cloud-first (ASR and optional cloud correction), then Settings wizard
+   adds local models on qualifying hardware, with explicit keys/consent/model terms.
+4. Shared hardware categories apply to BOTH EXE and Store/model wizard.
+5. Compatible6–<8 GB and older compatible NVIDIA (e.g. RTX20xx) are experimental: may or may not work.
+   Unsupported kernels/driver/architecture remain unsupported; capacity alone does not fix them.
+6. Publisher/privacy/security contact: Damian Szczęch, szczech.dam+transcripts@gmail.com. Do not
+   silently replace separate licensing contacts or infer legal data-processing roles from this label.
 
-Pages is recorded AFTER first release using the owner's later, more specific statement. If a page
-must exist at the exact first-release instant, move WEB-01 before publication during prioritization.
-The local Polish question list expands these decisions; no product implementation depends on an
-unanswered policy choice being silently guessed.
+Required Pages remains AFTER first release. No new policy answer is needed before starting
+SEC-01/PRIV-01 and REL-01. Those tasks are still pending; this revision does not implement or approve
+them, change current0.26.2 binaries/hardware gates, or publish a release/report/site.
 
 ## Historical identifiers
 

@@ -6,9 +6,11 @@ pre-release signing is withdrawn. Later free OSS/owner-approved Actions signing 
 procedure/private keys outside Git. Follow [release policy](RELEASE_POLICY.md),
 [checklist](RELEASE_CHECKLIST.md) and [revised roadmap](99-roadmap-v2.md).
 
-Prioritize production attestations early. Plan startup Quick update/Repair/reinstall/Download newer
-installer plus Other actions based on detected version. The proposed releases/ metadata plus Release
-assets design awaits owner agreement because current EXE exceeds ordinary Git's100 MiB file limit.
+Verified production attestations and owner approval of the general cybersecurity report AND privacy
+policy are required before first release. Framework mapping follows, without an extra release gate. Plan startup Quick update/Repair/reinstall/Download newer
+installer plus Other actions based on detected version; this quick entry is AFTER first release.
+The owner accepted releases/ metadata/links/checksums plus actual binaries in GitHub Release assets.
+The current EXE exceeds ordinary Git's100 MiB file limit.
 Required GH Pages follows first release under the latest sequencing statement. MSIX/Store is a
 separate [post-release channel research task](MSIX_STORE_PLAN.md), not an EXE replacement. Preserve
 usable installed CLI and review pipeline documentation when discovery/packaging changes.

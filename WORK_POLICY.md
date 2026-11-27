@@ -16,13 +16,15 @@
    legacy-profile/telemetry tests and further/minimal-online installer work.
 7. Early releases may be unsigned; the old mandatory-signing gate is withdrawn. Actual signing
    procedure/private instructions/keys stay outside Git. Later free OSS signing eligibility and
-   owner-approved Actions are planned, without a paid certificate commitment. Attestations early;
+   owner-approved Actions are planned, without a paid certificate commitment. Verified attestations
+   AND approved general report/privacy policy are first-release gates;
    formal per-version RELEASE_POLICY/CHECKLIST. Current standard public CI remains two jobs,
    public guards/7-day retention/zero paid budgets; no new permissions or deployment in plan edits.
 8. General security/privacy report first local EN OUTSIDE Git, owner approval before publication;
-   applicable-framework research/mapping follows. Track the missing complete privacy policy.
-9. Follow revised TODO/roadmap: quick update, required Pages after first release, MSIX/Store later
-   as an independent channel; retain installed CLI. New Store hardware tiers need decisions and
+   applicable-framework research/mapping follows. Complete privacy policy remains pending; approved publisher/contact is in SECURITY_REVIEW_PLAN.
+   All six owner policy decisions are settled. Store starts model-free/cloud-first; assets/index accepted.
+9. Follow revised TODO/roadmap: quick update AFTER first release, required Pages after first release, MSIX/Store later
+   as an independent channel; retain installed CLI. Shared EXE/Store tiers are agreed (compatible6–8 GB/older NVIDIA experimental) and
    must not silently change0.26.2 behavior. Artist only blocks illustrated docs after integration.
 10. Remove playback highlighting, separate reader-test stage and old5.12–5.14 benchmark programs.
     Bound audio preparation; poor-audio mode/one-file export and uncertain sound detection later.

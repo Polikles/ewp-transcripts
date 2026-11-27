@@ -15,9 +15,10 @@ with Microsoft rather than assume approval or submit personal data on the owner'
    documents Store signing/hosting/updates for MSIX, unlike publisher-managed EXE/MSI submissions.
    A directly downloaded standalone MSIX is a separate trust/update path; Store signing is not
    a promise that an arbitrary unsigned sideloaded MSIX installs or auto-updates.
-3. Package the app without requiring models in the initial Store download, subject to clarification
-   of the owner's phrase "local version only": does cloud ASR remain available before model setup?
-   Store listing must separately state cloud-mode and fully local hardware/network/disk requirements.
+3. Owner-confirmed initial Store package has NO speech models: cloud ASR and optional cloud
+   correction are available first, with user-provided keys/consent. A Settings wizard can add local
+   models on qualifying hardware. This does not remove existing review/export functions. Store
+   listing separately states cloud-mode and fully local hardware/network/disk requirements.
 4. Add a Settings-accessible optional local-model wizard: detect capability, explain tiers,
    explicit download/model/terms/token choice, measured progress/retry/cancel, verified revisions,
    diagnostics, repair/removal and safe cache locations. No silent downloads or upload consent.
@@ -33,19 +34,17 @@ with Microsoft rather than assume approval or submit personal data on the owner'
 8. Prototype/build validation, Store certification checklist and user scenarios; release/update
    delivery and version migration tests. No automated Store submission or account creation here.
 
-## Proposed FUTURE model-wizard tiers — not current installer behavior
+## Agreed shared EXE / Store hardware policy — implementation pending
 
-| Owner category | Proposed scope |
-| --- | --- |
-| Does not meet requirements | Too old/unsupported architecture or less than6 GB VRAM. Exact compatible6–8 GB behavior is unresolved. |
-| Experimental | Compatible AMD with8+ GB VRAM; compatible NVIDIA RTX30xx or newer with8 to less than12 GB VRAM. No physical qualification promise. |
-| Expected to work | Compatible NVIDIA RTX30xx or newer with12+ GB VRAM. Exactly12 GB goes here to remove the overlapping boundary. Guidance, not universal guarantee. |
+The owner explicitly applies one classification to BOTH EXE and Store/model wizard. See the
+canonical decision table in [hardware guidance](HARDWARE.md#agreed-next-hardware-policy--exe-and-store).
+Compatible6–<8 GB cards and older compatible NVIDIA (e.g. RTX20xx) are experimental. Exactly12 GB
+RTX30xx+ is in the expected category. AMD remains experimental. Unsupported actual runtime/driver
+or architecture is not rescued by VRAM capacity; cloud mode remains available independently.
 
-All capacity tiers must also intersect actual supported architectures/drivers/runtimes/models.
-8 GB AMD alone is not proof that the HIP backend supports that card. Older NVIDIA generations,
-6–8 GB, missing metadata, multiple cards and whether the same tiers should replace EXE preflight
-need owner decisions. Unknowns must not be fabricated as supported; never sum VRAM across GPUs.
-The current0.26.2 CUDA/CC preflight and12 GB recommendation remain unchanged by this plan.
+HWPOL-01 implements this later; current0.26.2 installer behavior and pin set have not changed.
+No physical qualification is claimed. Unknown metadata and multiple-card selection must retain
+explicit unverified handling; do not sum VRAM or infer support from a model-name substring alone.
 
 ## Deliverables
 

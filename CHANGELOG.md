@@ -4,6 +4,12 @@ All notable changes to EWP-transcripts are documented here.
 
 ## Unreleased
 
+- Confirm owner release decisions: require verified attestations and approved general security
+  report/privacy policy before first release; quick update afterward. Accept Release-assets/index
+  storage, model-free cloud-first Store package, shared planned EXE/Store hardware tiers and publisher
+  contact. Extend security-review scope to development-VM authentication, permissions and credential
+  lifecycle/compromise tradeoffs. This records policy only; runtime, hardware gates and CI are unchanged.
+
 - Revise release policy: permit early unsigned releases, prioritize verifiable artifact provenance,
   formalize per-version documentation/notes/checklist obligations and track large-binary storage.
 - Plan local-English-first owner-approved security/privacy reports, framework applicability and a

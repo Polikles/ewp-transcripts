@@ -11,28 +11,28 @@ the first several public releases may be unsigned. Keep signing instructions/key
 - [x] Check existing privacy documentation: technical requirements/guides exist, but no complete
       maintained user-facing privacy policy was found. Some security prose still needed updating.
 - [x] Check GitHub feasibility: public artifact attestations are available; the ~142 MB EXE exceeds
-      ordinary Git's 100 MiB file limit. Record Release-assets/index proposal; storage decision open.
-- [ ] **SEC-01:** General cybersecurity/privacy review, first in English, LOCAL OUTSIDE GIT.
+      ordinary Git's 100 MiB file limit. Release assets plus versioned releases/ metadata/links/checksums ACCEPTED by owner.
+- [x] Record all six owner decisions: storage accepted; attestations AND approved general report/
+      privacy policy are first-release gates; quick update AFTER release; Store cloud-first without
+      models; shared EXE/Store tiers with compatible6–8 GB/older NVIDIA experimental; contact approved.
+- [ ] **SEC-01 — FIRST-RELEASE GATE:** General cybersecurity/privacy review, first in English, LOCAL OUTSIDE GIT.
       Map actual code/data flows, storage/retention/deletion, media/transcripts, temporary files,
       secrets in memory/OS stores/environment/IPC/network, consent, logs, reports, providers,
       native/browser/CLI, installer/downloads and CI. Findings, threats, tradeoffs and evidence.
       Owner reviews/approves before any report is published under docs/security/.
-- [ ] **SEC-02:** After the general report, research applicable frameworks, then create a separate
-      local EN mapping. Include ISO 27001/42001 and GDPR; assess other candidates, applicability,
-      scope/roles and exclusions first. Do not claim certification or legal compliance.
-- [ ] **PRIV-01:** Draft a complete factual privacy policy from the inventory/review; resolve owner
-      identity/contact and provider roles. Review before publishing/linking it in docs/app/site.
-- [ ] **REL-01:** Implement and verify artifact attestations early, preferably for the first release.
+      Include the DEVELOPMENT VM: PAT versus Deploy Keys/SSH/App/OAuth/MCP per access channel,
+      function/identity/scope/storage/revocation, sandbox/OS boundaries and compromise risks/tradeoffs.
+      No secret values in evidence; distinguish VM-held and connector/service-held credentials.
+- [ ] **PRIV-01 — FIRST-RELEASE GATE:** Draft the factual policy from the inventory/review and obtain
+      owner approval before release/publication. Publisher/contact approved in SECURITY_REVIEW_PLAN;
+      actual processing/provider roles still need evidence. EN first, PL/public links after review.
+- [ ] **REL-01 — FIRST-RELEASE GATE:** Implement AND verify final-artifact attestations before first release.
       Attest actual final distributed bytes, verify repository/workflow/commit/digests, retain
       provenance bundles and verification instructions. No Authenticode/SmartScreen equivalence.
       Add narrowly scoped OIDC/attestation permissions; keep zero paid budgets/public runners.
-- [ ] **INST-01:** Implement startup discovery and quick-update/other-actions entry screen.
-      Older installed version → Quick update; same → Repair/reinstall; newer → linked Download
-      newer installer. Preserve full maintenance actions, safe roots, work and model identities.
-      Resolve first-release timing and multiple-installation selection; no automatic mutation.
-- [ ] **REL-02:** Resolve releases/ storage; retain at least 2–3 downloadable versions, define older
-      archival without silently breaking bootstrap URLs/checksums/provenance. Proposal: GitHub
-      Release assets plus versioned metadata/links/checksums in releases/, rather than large Git blobs.
+- [ ] **REL-02:** Implement ACCEPTED storage: actual binaries in GitHub Release assets; versioned
+      metadata/links/checksums in releases/. Retain at least2–3 downloadable versions and define
+      older archival without breaking bootstrap URLs/checksums/provenance. No LFS needed.
 - [ ] **REL-03:** Choose public version/scope, build and execute the per-version
       [release checklist](docs/RELEASE_CHECKLIST.md), including changelog/release notes and package-
       matched README/instructions/hardware/licenses/notices. Record owner publication approval.
@@ -42,8 +42,10 @@ the first several public releases may be unsigned. Keep signing instructions/key
       versioned Releases, verification, hardware and privacy information. Latest owner sequence:
       immediately AFTER first release; prepare content earlier. Public-site requirement retained.
 
-Whether SEC-01/PRIV-01, attestations and INST-01 are mandatory first-release gates is an explicit
-owner decision, not an invented approval requirement. See roadmap open decisions and local questions.
+Confirmed first-release gates: verified attestations AND owner approval of the general report and
+privacy policy, alongside normal per-version release checks. Quick update is AFTER first release.
+Framework mapping follows the general report and is not an additional first-release gate.
+Next: SEC-01/PRIV-01 review and REL-01 implementation; no new owner policy decision is pending.
 
 ## Every subsequent release
 
@@ -58,12 +60,24 @@ owner decision, not an invented approval requirement. See roadmap open decisions
 
 ## Independent work / post-release backlog
 
+- [ ] **INST-01 — AFTER FIRST RELEASE:** Implement startup discovery and quick-update/other-actions entry screen.
+      Older installed version → Quick update; same → Repair/reinstall; newer → linked Download
+      newer installer. Preserve full maintenance actions, safe roots, work and model identities.
+      Select the target safely when multiple roots exist; no automatic mutation.
+- [ ] **SEC-02:** After the general report, research applicable frameworks and create a separate
+      local EN mapping (ISO27001/42001, GDPR and selected candidates). Owner review before publishing;
+      no claim of certification/legal compliance and no added first-release gate.
 - [ ] Artist assets/feedback → integration → interface regression/owner review → complete illustrated
       EN/PL manuals/screenshots. This is the only current artwork dependency; no release blocker.
 - [ ] **STORE-01:** Research and plan an independent MSIX/Microsoft Store channel for a solo
       individual developer: identity, Microsoft signing, Store-managed updates, model wizard,
       package/state/model paths, executable dependencies, CLI access and EXE↔Store coexistence.
-      Proposed hardware tiers and unresolved 6–8 GB/older-generation cases are in MSIX_STORE_PLAN.
+      Initial Store package has NO speech models: cloud ASR/optional cloud correction first, with
+      a Settings local-model wizard on qualifying hardware. Shared EXE/Store tiers are agreed in HARDWARE.
+- [ ] **HWPOL-01:** Implement the agreed shared EXE/Store/model-wizard classification: unsupported
+      runtime or <6 GB cannot use local; compatible6–<8 GB, older NVIDIA and AMD are experimental;
+      compatible RTX30xx+8–<12 GB experimental,12+ GB expected. Test metadata/boundaries/cloud fallback
+      without claiming physical qualification. This planning task does not modify0.26.2 hardware gates.
 - [ ] Ollama/further local API adapters; existing LM Studio/OpenRouter remain delivered.
 - [ ] Alignment/timing refinements; no manual timing editor.
 - [ ] Core CLI content-aware directory discovery (FR-A05/ADR-0017), followed by a mandatory CLI/

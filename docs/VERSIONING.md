@@ -43,5 +43,6 @@ provider credentials and owner instructions remain outside this repository. Alwa
 signing status accurately. Apply [release policy](RELEASE_POLICY.md) and the
 [per-version checklist](RELEASE_CHECKLIST.md) to EVERY release, including changelog AND release
 description, package-matched README/instructions/hardware/licenses/notices, evidence, final-byte
-hashes/provenance and actual published-download verification. Attestations are prioritized early;
-new automated enforcement is not yet implemented. Preserve original build bytes and provenance.
+hashes/provenance and actual published-download verification. Verified attestations AND approved
+general cybersecurity report/privacy policy are first-release gates. Quick update follows release.
+New automated enforcement is not yet implemented. Preserve original build bytes and provenance.

@@ -1,7 +1,8 @@
 # GitHub Actions: builds, Windows checks and costs
 
 Current owner revision2026-11-27: early releases may be unsigned; mandatory pre-release signing is
-withdrawn. Prioritize production artifact attestations early; see [release policy](RELEASE_POLICY.md).
+withdrawn. Owner answers require verified production attestations before FIRST release, alongside
+owner approval of the general security report/privacy policy; see [release policy](RELEASE_POLICY.md).
 Plan job-scoped OIDC/attestations permissions, pinned Actions, final-byte digest/identity verification
 and retained provenance. Attestations are not Authenticode or a malware guarantee. No workflow,
 permissions, billing, retention, public release or Pages deployment changed in this plan revision.
